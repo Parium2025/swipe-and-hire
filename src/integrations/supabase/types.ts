@@ -151,6 +151,7 @@ export type Database = {
       job_postings: {
         Row: {
           applications_count: number | null
+          benefits: string[] | null
           created_at: string
           description: string | null
           employer_id: string
@@ -174,6 +175,7 @@ export type Database = {
         }
         Insert: {
           applications_count?: number | null
+          benefits?: string[] | null
           created_at?: string
           description?: string | null
           employer_id: string
@@ -197,6 +199,7 @@ export type Database = {
         }
         Update: {
           applications_count?: number | null
+          benefits?: string[] | null
           created_at?: string
           description?: string | null
           employer_id?: string
