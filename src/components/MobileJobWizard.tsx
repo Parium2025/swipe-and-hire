@@ -98,6 +98,7 @@ interface JobFormData {
   salary_max: string;
   employment_type: string;
   salary_type: string;
+  salary_transparency: string;
   positions_count: string;
   work_location_type: string;
   remote_work_possible: string;
@@ -431,6 +432,8 @@ const MobileJobWizard = ({
   const [showEmploymentTypeDropdown, setShowEmploymentTypeDropdown] = useState(false);
   const [salaryTypeSearchTerm, setSalaryTypeSearchTerm] = useState('');
   const [showSalaryTypeDropdown, setShowSalaryTypeDropdown] = useState(false);
+  const [salaryTransparencySearchTerm, setSalaryTransparencySearchTerm] = useState('');
+  const [showSalaryTransparencyDropdown, setShowSalaryTransparencyDropdown] = useState(false);
   const [workLocationSearchTerm, setWorkLocationSearchTerm] = useState('');
   const [showWorkLocationDropdown, setShowWorkLocationDropdown] = useState(false);
   const [remoteWorkSearchTerm, setRemoteWorkSearchTerm] = useState('');
@@ -479,7 +482,7 @@ const MobileJobWizard = ({
     salary_max: selectedTemplate?.salary_max?.toString() || '',
     employment_type: selectedTemplate?.employment_type || '',
     salary_type: '',
-  
+    salary_transparency: '',
     positions_count: '1',
     work_location_type: 'på-plats',
     remote_work_possible: 'nej',
@@ -597,6 +600,7 @@ const MobileJobWizard = ({
           salary_max: '',
           employment_type: '',
           salary_type: '',
+          salary_transparency: '',
           positions_count: '',
           work_schedule: '',
           work_location_type: '',
@@ -1067,6 +1071,7 @@ const MobileJobWizard = ({
         salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
         employment_type: selectedTemplate?.employment_type || prev.employment_type,
         salary_type: selectedTemplate?.salary_type || prev.salary_type,
+        salary_transparency: prev.salary_transparency || '',
         positions_count: selectedTemplate?.positions_count || prev.positions_count || '1',
         work_location_type: selectedTemplate?.work_location_type || prev.work_location_type || 'på-plats',
         remote_work_possible: selectedTemplate?.remote_work_possible || prev.remote_work_possible || 'nej',
@@ -1240,6 +1245,14 @@ const MobileJobWizard = ({
         parts.push(salaryType.label);
       }
     }
+
+    // Add salary transparency if provided (EU directive 2026)
+    if (formData.salary_transparency) {
+      const transparencyOption = salaryTransparencyOptions.find(t => t.value === formData.salary_transparency);
+      if (transparencyOption) {
+        parts.push(`Lönespann: ${transparencyOption.label}`);
+      }
+    }
     
     return parts;
   };
@@ -1311,6 +1324,37 @@ const MobileJobWizard = ({
   const handleSalaryTypeClick = () => {
     setSalaryTypeSearchTerm(''); // Reset search to show all options
     setShowSalaryTypeDropdown(!showSalaryTypeDropdown);
+  };
+
+  // Salary Transparency options (EU directive 2026)
+  const salaryTransparencyOptions = [
+    { value: '10-15', label: '10 000 - 15 000 kr' },
+    { value: '15-20', label: '15 000 - 20 000 kr' },
+    { value: '20-25', label: '20 000 - 25 000 kr' },
+    { value: '25-30', label: '25 000 - 30 000 kr' },
+    { value: '30-40', label: '30 000 - 40 000 kr' },
+    { value: '40-45', label: '40 000 - 45 000 kr' },
+    { value: '50+', label: '50 000+ kr' },
+  ];
+
+  const filteredSalaryTransparencyOptions = salaryTransparencyOptions.filter(option =>
+    option.label.toLowerCase().includes(salaryTransparencySearchTerm.toLowerCase())
+  );
+
+  const handleSalaryTransparencySearch = (value: string) => {
+    setSalaryTransparencySearchTerm(value);
+    setShowSalaryTransparencyDropdown(value.length >= 0);
+  };
+
+  const handleSalaryTransparencySelect = (option: { value: string, label: string }) => {
+    handleInputChange('salary_transparency', option.value);
+    setSalaryTransparencySearchTerm(option.label);
+    setShowSalaryTransparencyDropdown(false);
+  };
+
+  const handleSalaryTransparencyClick = () => {
+    setSalaryTransparencySearchTerm(''); // Reset search to show all options
+    setShowSalaryTransparencyDropdown(!showSalaryTransparencyDropdown);
   };
 
   const handleWorkLocationSearch = (value: string) => {
@@ -1492,6 +1536,7 @@ const MobileJobWizard = ({
         salary_max: '',
         employment_type: '',
         salary_type: '',
+        salary_transparency: '',
         positions_count: '1',
         work_location_type: 'på-plats',
         remote_work_possible: 'nej',
@@ -1536,6 +1581,7 @@ const MobileJobWizard = ({
       salary_max: '',
       employment_type: '',
       salary_type: '',
+      salary_transparency: '',
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
@@ -1856,6 +1902,37 @@ const MobileJobWizard = ({
                             className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026)</Label>
+                  <div className="relative salary-transparency-dropdown">
+                    <Input
+                      value={salaryTransparencySearchTerm || (formData.salary_transparency ? salaryTransparencyOptions.find(t => t.value === formData.salary_transparency)?.label || '' : '')}
+                      onChange={(e) => handleSalaryTransparencySearch(e.target.value)}
+                      onClick={handleSalaryTransparencyClick}
+                      placeholder="Välj lönespann"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                      readOnly
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    
+                    {/* Salary Transparency Dropdown */}
+                    {showSalaryTransparencyDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {filteredSalaryTransparencyOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => handleSalaryTransparencySelect(option)}
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
+                          >
+                            <div className="font-medium">{option.label}</div>
                           </button>
                         ))}
                       </div>
@@ -2605,7 +2682,7 @@ const MobileJobWizard = ({
                                 )}
 
                                {/* Lön */}
-                               {(formData.salary_min || formData.salary_max || formData.salary_type) && (
+                               {(formData.salary_min || formData.salary_max || formData.salary_type || formData.salary_transparency) && (
                                   <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
                                     <h5 className="text-xs font-medium text_white mb-0.5 flex items-center">
                                        <Banknote className="h-2 w-2 mr-1 text-white" />
@@ -3082,7 +3159,7 @@ const MobileJobWizard = ({
                                     )}
 
                                     {/* Lön - samma som mobil */}
-                                    {(formData.salary_min || formData.salary_max || formData.salary_type) && (
+                                    {(formData.salary_min || formData.salary_max || formData.salary_type || formData.salary_transparency) && (
                                       <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                         <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                           <Banknote className="h-3 w-3 mr-1 text-white" />
