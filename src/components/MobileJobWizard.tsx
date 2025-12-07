@@ -3260,7 +3260,7 @@ const MobileJobWizard = ({
                               setImageIsEdited(false);
                               setManualFocus(null);
                             }}
-                            className="p-1.5 rounded-lg text-white/70 transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                            className="p-1.5 rounded-lg text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
                             aria-label="Ta bort bild"
                           >
                             <Trash2 className="w-4 h-4" />
