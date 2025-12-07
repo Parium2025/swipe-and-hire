@@ -1984,9 +1984,15 @@ const MobileJobWizard = ({
                     <div className="flex-1">
                       <Input
                         type="text"
+                        inputMode="numeric"
                         value={formData.work_start_time}
-                        onChange={(e) => handleInputChange('work_start_time', e.target.value)}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+                          handleInputChange('work_start_time', formatted);
+                        }}
                         placeholder="08:00"
+                        maxLength={5}
                         className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                       />
                     </div>
@@ -1994,9 +2000,15 @@ const MobileJobWizard = ({
                     <div className="flex-1">
                       <Input
                         type="text"
+                        inputMode="numeric"
                         value={formData.work_end_time}
-                        onChange={(e) => handleInputChange('work_end_time', e.target.value)}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+                          handleInputChange('work_end_time', formatted);
+                        }}
                         placeholder="17:00"
+                        maxLength={5}
                         className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                       />
                     </div>
