@@ -2970,8 +2970,8 @@ const MobileJobWizard = ({
                     <div className="relative">
                       {/* Monitor screen */}
                       <div className="relative w-[520px] rounded-t-lg bg-black p-2.5 shadow-2xl">
-                        {/* Screen bezel - använder aspect ratio liknande mobil för bättre bildvisning */}
-                        <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                        {/* Screen bezel - realistisk monitorratio */}
+                        <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                           {/* Innehåll med Parium bakgrund */}
                           <div 
                             className="absolute inset-0"
@@ -3130,12 +3130,12 @@ const MobileJobWizard = ({
                             {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
                             {!showDesktopApplicationForm && (
                               <div className="absolute inset-0 z-10">
-                                {/* Job Image - always object-cover like mobile */}
+                                {/* Job Image - object-contain för att visa hela bilden utan hård croppning */}
                                 {jobImageDisplayUrl ? (
                                   <img
                                     src={jobImageDisplayUrl}
                                     alt={`Jobbbild för ${formData.title}`}
-                                    className="absolute inset-0 w-full h-full object-cover select-none"
+                                    className="absolute inset-0 w-full h-full object-contain select-none"
                                     loading="eager"
                                     decoding="async"
                                   />
