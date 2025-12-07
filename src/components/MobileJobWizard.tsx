@@ -3232,13 +3232,25 @@ const MobileJobWizard = ({
                   
                   {jobImageDisplayUrl && (
                     <>
-                      <div className="mt-3 relative">
+                      <div className="mt-3">
                         <img 
                           src={jobImageDisplayUrl} 
                           alt="Job preview" 
                           className="w-full h-48 object-contain rounded-lg"
                         />
+                      </div>
+                      
+                      {/* Bildkontroller - Justera bild + Ta bort */}
+                      <div className="mt-4 space-y-3">
+                        <div className="flex justify-center items-center gap-3">
                           <button
+                            onClick={openImageEditor}
+                            className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
+                          >
+                            Justera bild
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => {
                               handleInputChange('job_image_url', '');
                               setOriginalImageUrl(null);
@@ -3246,20 +3258,10 @@ const MobileJobWizard = ({
                               setImageIsEdited(false);
                               setManualFocus(null);
                             }}
-                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 transition-colors md:hover:bg-red-600"
+                            className="p-2 rounded-lg text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                            aria-label="Ta bort bild"
                           >
-                            <X className="w-4 h-4" />
-                          </button>
-                      </div>
-                      
-                      {/* Bildkontroller */}
-                      <div className="mt-4 space-y-3">
-                        <div className="flex justify-center">
-                          <button
-                            onClick={openImageEditor}
-                            className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
-                          >
-                            Justera bild
+                            <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
                         <p className="text-sm text-white text-center">
