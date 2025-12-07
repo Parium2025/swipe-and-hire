@@ -1905,7 +1905,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Lönetyp</Label>
+                  <Label className="text-white font-medium text-sm">Lönetyp *</Label>
                   <div className="relative salary-type-dropdown">
                     <Input
                       value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
@@ -1967,7 +1967,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Antal personer att rekrytera</Label>
+                  <Label className="text-white font-medium text-sm">Antal personer att rekrytera *</Label>
                   <Input
                     type="number"
                     min="1"
@@ -1979,7 +1979,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid)</Label>
+                  <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
                   <div className="flex gap-3 items-center">
                     <div className="flex-1">
                       <Input
@@ -1990,6 +1990,16 @@ const MobileJobWizard = ({
                           const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
                           const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
                           handleInputChange('work_start_time', formatted);
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !value.includes(':')) {
+                            const padded = value.padStart(2, '0') + ':00';
+                            handleInputChange('work_start_time', padded);
+                          } else if (value && value.includes(':') && value.split(':')[1].length < 2) {
+                            const [hours, mins] = value.split(':');
+                            handleInputChange('work_start_time', `${hours}:${mins.padEnd(2, '0')}`);
+                          }
                         }}
                         placeholder="08:00"
                         maxLength={5}
@@ -2006,6 +2016,16 @@ const MobileJobWizard = ({
                           const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
                           const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
                           handleInputChange('work_end_time', formatted);
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !value.includes(':')) {
+                            const padded = value.padStart(2, '0') + ':00';
+                            handleInputChange('work_end_time', padded);
+                          } else if (value && value.includes(':') && value.split(':')[1].length < 2) {
+                            const [hours, mins] = value.split(':');
+                            handleInputChange('work_end_time', `${hours}:${mins.padEnd(2, '0')}`);
+                          }
                         }}
                         placeholder="17:00"
                         maxLength={5}
