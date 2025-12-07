@@ -1328,13 +1328,25 @@ const MobileJobWizard = ({
 
   // Salary Transparency options (EU directive 2026)
   const salaryTransparencyOptions = [
+    { value: '0-5', label: '0 - 5 000 kr' },
+    { value: '5-10', label: '5 000 - 10 000 kr' },
     { value: '10-15', label: '10 000 - 15 000 kr' },
     { value: '15-20', label: '15 000 - 20 000 kr' },
     { value: '20-25', label: '20 000 - 25 000 kr' },
     { value: '25-30', label: '25 000 - 30 000 kr' },
     { value: '30-40', label: '30 000 - 40 000 kr' },
     { value: '40-45', label: '40 000 - 45 000 kr' },
-    { value: '50+', label: '50 000+ kr' },
+    { value: '45-50', label: '45 000 - 50 000 kr' },
+    { value: '50-55', label: '50 000 - 55 000 kr' },
+    { value: '55-60', label: '55 000 - 60 000 kr' },
+    { value: '60-65', label: '60 000 - 65 000 kr' },
+    { value: '65-70', label: '65 000 - 70 000 kr' },
+    { value: '70-75', label: '70 000 - 75 000 kr' },
+    { value: '75-80', label: '75 000 - 80 000 kr' },
+    { value: '80-85', label: '80 000 - 85 000 kr' },
+    { value: '85-90', label: '85 000 - 90 000 kr' },
+    { value: '90-100', label: '90 000 - 100 000 kr' },
+    { value: '100+', label: '100 000+ kr' },
   ];
 
   const filteredSalaryTransparencyOptions = salaryTransparencyOptions.filter(option =>
