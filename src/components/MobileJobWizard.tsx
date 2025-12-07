@@ -99,6 +99,7 @@ interface JobFormData {
   employment_type: string;
   salary_type: string;
   salary_transparency: string;
+  benefits: string[];
   positions_count: string;
   work_start_time: string;
   work_end_time: string;
@@ -485,6 +486,7 @@ const MobileJobWizard = ({
     employment_type: selectedTemplate?.employment_type || '',
     salary_type: '',
     salary_transparency: '',
+    benefits: [],
     positions_count: '1',
     work_start_time: '',
     work_end_time: '',
@@ -605,6 +607,7 @@ const MobileJobWizard = ({
           employment_type: '',
           salary_type: '',
           salary_transparency: '',
+          benefits: [],
           positions_count: '',
           work_start_time: '',
           work_end_time: '',
@@ -1078,6 +1081,7 @@ const MobileJobWizard = ({
         employment_type: selectedTemplate?.employment_type || prev.employment_type,
         salary_type: selectedTemplate?.salary_type || prev.salary_type,
         salary_transparency: prev.salary_transparency || '',
+        benefits: prev.benefits || [],
         positions_count: selectedTemplate?.positions_count || prev.positions_count || '1',
         work_start_time: prev.work_start_time || '',
         work_end_time: prev.work_end_time || '',
@@ -1596,6 +1600,7 @@ const MobileJobWizard = ({
         employment_type: '',
         salary_type: '',
         salary_transparency: '',
+        benefits: [],
         positions_count: '1',
         work_start_time: '',
         work_end_time: '',
@@ -1643,6 +1648,7 @@ const MobileJobWizard = ({
       employment_type: '',
       salary_type: '',
       salary_transparency: '',
+      benefits: [],
       positions_count: '1',
       work_start_time: '',
       work_end_time: '',
@@ -1711,6 +1717,7 @@ const MobileJobWizard = ({
         employment_type: formData.employment_type || null,
         salary_type: formData.salary_type || null,
         salary_transparency: formData.salary_transparency || null,
+        benefits: formData.benefits.length > 0 ? formData.benefits : null,
         positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
         work_location_type: formData.work_location_type || null,
         remote_work_possible: formData.remote_work_possible || null,
@@ -1912,6 +1919,45 @@ const MobileJobWizard = ({
                 </div>
 
 
+                {/* Förmåner / Benefits */}
+                <div className="space-y-3">
+                  <Label className="text-white font-medium text-sm">Förmåner som erbjuds</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: 'friskvard', label: 'Friskvårdsbidrag' },
+                      { value: 'tjanstepension', label: 'Tjänstepension' },
+                      { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
+                      { value: 'bonus', label: 'Bonus' },
+                      { value: 'tjanstebil', label: 'Tjänstebil' },
+                      { value: 'mobiltelefon', label: 'Mobiltelefon' },
+                      { value: 'utbildning', label: 'Utbildning/kompetensutveckling' },
+                      { value: 'forsakringar', label: 'Försäkringar' },
+                      { value: 'extra-semester', label: 'Extra semesterdagar' },
+                      { value: 'gym', label: 'Gym/träning' },
+                      { value: 'foraldraledithet', label: 'Föräldraledighetstillägg' },
+                      { value: 'lunch', label: 'Lunch/mat' },
+                    ].map((benefit) => (
+                      <label
+                        key={benefit.value}
+                        className="flex items-center gap-2 p-2 rounded-md bg-white/5 hover:bg-white/10 cursor-pointer transition-colors border border-white/10"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.benefits.includes(benefit.value)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData(prev => ({ ...prev, benefits: [...prev.benefits, benefit.value] }));
+                            } else {
+                              setFormData(prev => ({ ...prev, benefits: prev.benefits.filter(b => b !== benefit.value) }));
+                            }
+                          }}
+                          className="rounded border-white/30 bg-white/10 text-primary focus:ring-primary/50"
+                        />
+                        <span className="text-white text-xs">{benefit.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Anställningsform *</Label>
