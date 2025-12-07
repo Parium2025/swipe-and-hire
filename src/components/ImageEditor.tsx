@@ -31,19 +31,19 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [minScale, setMinScale] = useState(0.1);
   const [isSaving, setIsSaving] = useState(false);
-  const [wasReset, setWasReset] = useState(false); // Track if reset was pressed
-  
+  const [hasUserMadeChanges, setHasUserMadeChanges] = useState(false); // Track if user actually edited
+  const initialScaleRef = useRef<number>(1); // Store initial scale to compare
 
   const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
   const CANVAS_HEIGHT = BASE_CANVAS_HEIGHT;
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_HEIGHT * aspectRatio);
   const MAX_SCALE = 3;
 
-  // Reset saving state and wasReset when dialog opens/closes
+  // Reset state when dialog opens/closes
   useEffect(() => {
     if (!isOpen) {
       setIsSaving(false);
-      setWasReset(false);
+      setHasUserMadeChanges(false);
     }
   }, [isOpen]);
 
@@ -76,8 +76,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           setMinScale(Math.min(scaleX, scaleY) * 0.5); // minScale baserat på contain
           
           setScale(initialScale);
+          initialScaleRef.current = initialScale; // Store for comparison
           setPosition({ x: 0, y: 0 });
           setImageLoaded(true);
+          setHasUserMadeChanges(false); // Reset on new image load
           
           // Clean up blob URL
           URL.revokeObjectURL(blobUrl);
@@ -107,8 +109,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           setMinScale(Math.min(scaleX, scaleY) * 0.5);
           
           setScale(initialScale);
+          initialScaleRef.current = initialScale; // Store for comparison
           setPosition({ x: 0, y: 0 });
           setImageLoaded(true);
+          setHasUserMadeChanges(false); // Reset on new image load
         };
         img.src = imageSrc;
       }
@@ -200,7 +204,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const newY = e.clientY - rect.top - dragStart.y;
     
     setPosition({ x: newX, y: newY });
-    setWasReset(false); // User made manual change
+    setHasUserMadeChanges(true); // User made manual change
   };
 
   const handleMouseUp = () => {
@@ -233,7 +237,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const newY = touch.clientY - rect.top - dragStart.y;
     
     setPosition({ x: newX, y: newY });
-    setWasReset(false); // User made manual change
+    setHasUserMadeChanges(true); // User made manual change
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -245,19 +249,19 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const zoomIn = () => {
     if (isSaving) return;
     setScale(prev => Math.min(prev + 0.2, MAX_SCALE));
-    setWasReset(false); // User made manual change
+    setHasUserMadeChanges(true); // User made manual change
   };
 
   const zoomOut = () => {
     if (isSaving) return;
     setScale(prev => Math.max(prev - 0.2, minScale));
-    setWasReset(false); // User made manual change
+    setHasUserMadeChanges(true); // User made manual change
   };
 
   const resetPosition = () => {
     if (isSaving) return;
     setPosition({ x: 0, y: 0 });
-    setWasReset(true); // Mark that reset was pressed
+    setHasUserMadeChanges(false); // Reset means back to original - no changes
     if (imageRef.current) {
       const img = imageRef.current;
       const containerWidth = CANVAS_WIDTH;
@@ -268,6 +272,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       const scaleY = containerHeight / img.height;
       const initialScale = Math.max(scaleX, scaleY);
       setScale(initialScale);
+      initialScaleRef.current = initialScale;
     }
   };
 
@@ -280,15 +285,15 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     
     setIsSaving(true);
     
-    // Om reset trycktes och onRestoreOriginal finns, återställ originalet automatiskt
-    if (wasReset && onRestoreOriginal) {
-      console.log('ImageEditor: Reset was pressed, restoring original...');
+    // Om användaren INTE gjort några ändringar, behåll originalet
+    if (!hasUserMadeChanges && onRestoreOriginal) {
+      console.log('ImageEditor: No changes made, keeping original image...');
       try {
         await onRestoreOriginal();
-        console.log('ImageEditor: Original restored successfully');
+        console.log('ImageEditor: Original kept successfully');
         onClose();
       } catch (error) {
-        console.error('ImageEditor: Restore original failed:', error);
+        console.error('ImageEditor: Keep original failed:', error);
         setIsSaving(false);
       }
       return;
