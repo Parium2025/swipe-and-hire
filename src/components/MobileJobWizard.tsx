@@ -1979,23 +1979,25 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Arbetstider</Label>
+                  <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid)</Label>
                   <div className="flex gap-3 items-center">
                     <div className="flex-1">
                       <Input
-                        type="time"
+                        type="text"
                         value={formData.work_start_time}
                         onChange={(e) => handleInputChange('work_start_time', e.target.value)}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 [&::-webkit-calendar-picker-indicator]:invert"
+                        placeholder="08:00"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                       />
                     </div>
                     <span className="text-white/60 text-sm">–</span>
                     <div className="flex-1">
                       <Input
-                        type="time"
+                        type="text"
                         value={formData.work_end_time}
                         onChange={(e) => handleInputChange('work_end_time', e.target.value)}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 [&::-webkit-calendar-picker-indicator]:invert"
+                        placeholder="17:00"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                       />
                     </div>
                   </div>
