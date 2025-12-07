@@ -2042,20 +2042,17 @@ const MobileJobWizard = ({
                       placeholder="Lägg till egen förmån"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white h-10 text-sm focus:border-white/40 flex-1"
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
+                    <div
                       onClick={() => {
                         if (customBenefitInput.trim()) {
                           setFormData(prev => ({ ...prev, benefits: [...prev.benefits, customBenefitInput.trim()] }));
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="bg-white/10 border border-white/20 text-white/60 hover:border-white/40 h-10 w-10 p-0 flex items-center justify-center transition-all duration-300"
+                      className="bg-white/10 border border-white/20 text-white/60 hover:border-white/40 h-10 w-10 flex items-center justify-center rounded-md cursor-pointer transition-all duration-300"
                     >
                       <Plus className="w-4 h-4" />
-                    </Button>
+                    </div>
                   </div>
                 </div>
 
