@@ -2235,13 +2235,13 @@ const MobileJobWizard = ({
                           
                           {/* Question Type Dropdown */}
                           {showQuestionTypeDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-48 overflow-y-auto">
                               {filteredQuestionTypes.map((type) => (
                                 <button
                                   key={type.value}
                                   type="button"
                                   onClick={() => handleQuestionTypeSelect(type)}
-                                  className="w-full px-3 py-3 text-left hover:bg-white/10 text-white text-base border-b border-white/20 last:border-b-0"
+                                  className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                                 >
                                   <div className="font-medium">{type.label}</div>
                                 </button>
@@ -3039,6 +3039,9 @@ const MobileJobWizard = ({
                                         {/* Tooltip pointing left at company name */}
                                         {showCompanyTooltip && (
                                           <div className="pointer-events-none flex items-center gap-1">
+                                            <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                                              Obs, tryck här!
+                                            </div>
                                             <svg width="16" height="12" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
                                               <defs>
                                                 <marker id="arrowheadLeft_desktop_company" markerWidth="12" markerHeight="12" refX="3" refY="6" orient="auto">
@@ -3047,9 +3050,6 @@ const MobileJobWizard = ({
                                               </defs>
                                               <path d="M38 12 L 2 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadLeft_desktop_company)" />
                                             </svg>
-                                            <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
-                                              Obs, tryck här!
-                                            </div>
                                           </div>
                                         )}
                                       </div>
