@@ -2970,8 +2970,8 @@ const MobileJobWizard = ({
                     <div className="relative">
                       {/* Monitor screen */}
                       <div className="relative w-[520px] rounded-t-lg bg-black p-2.5 shadow-2xl">
-                        {/* Screen bezel - realistisk monitorratio */}
-                        <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                        {/* Screen bezel - 4:3 ratio för mindre croppning men fortfarande realistisk monitor */}
+                        <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                           {/* Innehåll med Parium bakgrund */}
                           <div 
                             className="absolute inset-0"
