@@ -275,7 +275,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] bg-white/5 backdrop-blur-xl border-white/20">
+        <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20">
           <div className="flex items-center justify-center p-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
@@ -287,7 +287,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   if (!company) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] bg-white/5 backdrop-blur-xl border-white/20">
+        <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20">
           <div className="flex flex-col items-center justify-center p-8 text-white">
             <Building2 className="h-16 w-16 mb-4 text-white/50" />
             <p className="text-lg font-medium mb-2">Företagsinformation saknas</p>
@@ -308,7 +308,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-white/5 backdrop-blur-xl border-white/20">
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20">
         <ScrollArea className="max-h-[90vh] [&>div>div]:!overflow-y-scroll [&>div>div]:scrollbar-hide">
           <div className="p-6 text-white">
             <DialogHeader className="mb-6">
