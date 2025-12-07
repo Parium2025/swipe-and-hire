@@ -168,7 +168,9 @@ export type Database = {
           title: string
           updated_at: string
           views_count: number | null
+          work_end_time: string | null
           work_schedule: string | null
+          work_start_time: string | null
         }
         Insert: {
           applications_count?: number | null
@@ -189,7 +191,9 @@ export type Database = {
           title: string
           updated_at?: string
           views_count?: number | null
+          work_end_time?: string | null
           work_schedule?: string | null
+          work_start_time?: string | null
         }
         Update: {
           applications_count?: number | null
@@ -210,7 +214,9 @@ export type Database = {
           title?: string
           updated_at?: string
           views_count?: number | null
+          work_end_time?: string | null
           work_schedule?: string | null
+          work_start_time?: string | null
         }
         Relationships: [
           {
