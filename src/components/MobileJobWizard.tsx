@@ -1925,21 +1925,20 @@ const MobileJobWizard = ({
 
 
                 {/* Förmåner / Benefits */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Förmåner som erbjuds</Label>
-                  <div className="flex gap-2">
-                    <div className="relative benefits-dropdown flex-1">
-                      <div
-                        onClick={() => setShowBenefitsDropdown(!showBenefitsDropdown)}
-                        className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 h-9 cursor-pointer hover:border-white/40 transition-colors"
-                      >
-                        <span className={`text-sm ${formData.benefits.length > 0 ? 'text-white' : 'text-white/60'}`}>
-                          {formData.benefits.length > 0 
-                            ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
-                            : 'Välj förmåner...'}
-                        </span>
-                        <ChevronDown className="h-4 w-4 text-white/60" />
-                      </div>
+                  <div className="relative benefits-dropdown">
+                    <div
+                      onClick={() => setShowBenefitsDropdown(!showBenefitsDropdown)}
+                      className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 h-9 cursor-pointer hover:border-white/40 transition-colors"
+                    >
+                      <span className={`text-sm ${formData.benefits.length > 0 ? 'text-white' : 'text-white/60'}`}>
+                        {formData.benefits.length > 0 
+                          ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
+                          : 'Välj förmåner...'}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-white/60" />
+                    </div>
                     
                     {showBenefitsDropdown && (
                       <div className="absolute top-full left-0 right-0 z-50 bg-white/10 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
@@ -1983,7 +1982,6 @@ const MobileJobWizard = ({
                         ))}
                       </div>
                     )}
-                    </div>
                   </div>
                   
                   {/* Valda förmåner som badges */}
