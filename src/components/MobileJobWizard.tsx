@@ -2969,6 +2969,39 @@ const MobileJobWizard = ({
                   <div className="flex flex-col items-center space-y-4">
                     {/* Desktop monitor frame - professional mockup */}
                     <div className="relative">
+                      {/* Tooltips for desktop - pointing to the screen */}
+                      {showCompanyTooltip && showDesktopApplicationForm && (
+                        <>
+                          {/* Left tooltip */}
+                          <div className="pointer-events-none absolute z-[999] top-24 -left-[120px] flex items-center gap-1">
+                            <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                              Obs, tryck här!
+                            </div>
+                            <svg width="24" height="20" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
+                              <defs>
+                                <marker id="arrowheadRight_desktop" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+                                  <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
+                                </marker>
+                              </defs>
+                              <path d="M2 12 L 38 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadRight_desktop)" />
+                            </svg>
+                          </div>
+                          {/* Right tooltip */}
+                          <div className="pointer-events-none absolute z-[999] top-12 -right-[120px] flex items-center gap-1">
+                            <svg width="24" height="20" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
+                              <defs>
+                                <marker id="arrowheadLeft_desktop" markerWidth="12" markerHeight="12" refX="3" refY="6" orient="auto">
+                                  <polygon points="12 0, 0 6, 12 12" fill="currentColor" />
+                                </marker>
+                              </defs>
+                              <path d="M38 12 L 2 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadLeft_desktop)" />
+                            </svg>
+                            <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                              Obs, tryck här!
+                            </div>
+                          </div>
+                        </>
+                      )}
                       {/* Monitor screen */}
                       <div className="relative w-[520px] rounded-t-lg bg-black p-2.5 shadow-2xl">
                         {/* Screen bezel - 16:10 realistisk modern monitorratio */}
