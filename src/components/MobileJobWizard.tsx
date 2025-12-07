@@ -1466,6 +1466,7 @@ const MobileJobWizard = ({
              formData.description.trim() && 
              formData.employment_type &&
              formData.salary_type &&
+             formData.salary_transparency &&
              parseInt(formData.positions_count) > 0;
     }
     
@@ -1923,7 +1924,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026)</Label>
+                  <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026) *</Label>
                   <div className="relative salary-transparency-dropdown">
                     <Input
                       value={salaryTransparencySearchTerm || (formData.salary_transparency ? salaryTransparencyOptions.find(t => t.value === formData.salary_transparency)?.label || '' : '')}
