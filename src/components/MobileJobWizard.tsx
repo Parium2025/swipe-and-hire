@@ -3041,11 +3041,11 @@ const MobileJobWizard = ({
                                           <div className="pointer-events-none flex items-center gap-1">
                                             <svg width="16" height="12" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
                                               <defs>
-                                                <marker id="arrowheadLeft_desktop_company" markerWidth="12" markerHeight="12" refX="3" refY="6" orient="auto">
-                                                  <polygon points="12 0, 0 6, 12 12" fill="currentColor" />
+                                                <marker id="arrowheadLeft_desktop_company" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+                                                  <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
                                                 </marker>
                                               </defs>
-                                              <path d="M38 12 L 2 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadLeft_desktop_company)" />
+                                              <path d="M2 12 L 38 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerStart="url(#arrowheadLeft_desktop_company)" />
                                             </svg>
                                             <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                                               Obs, tryck här!
