@@ -1930,12 +1930,12 @@ const MobileJobWizard = ({
                   <div className="relative benefits-dropdown">
                     <div
                       onClick={() => setShowBenefitsDropdown(!showBenefitsDropdown)}
-                      className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 h-9 cursor-pointer hover:border-white/40 transition-colors"
+                      className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 h-10 cursor-pointer hover:border-white/40 transition-colors"
                     >
-                      <span className={`text-sm ${formData.benefits.length > 0 ? 'text-white' : 'text-white/60'}`}>
+                      <span className="text-sm text-white">
                         {formData.benefits.length > 0 
                           ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
-                          : 'Välj förmåner...'}
+                          : 'Välj förmåner'}
                       </span>
                       <ChevronDown className="h-4 w-4 text-white/60" />
                     </div>
@@ -2039,8 +2039,8 @@ const MobileJobWizard = ({
                           setCustomBenefitInput('');
                         }
                       }}
-                      placeholder="Lägg till egen förmån..."
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 flex-1 py-0"
+                      placeholder="Lägg till egen förmån"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-10 text-sm focus:border-white/40 flex-1"
                     />
                     <Button
                       type="button"
@@ -2052,7 +2052,7 @@ const MobileJobWizard = ({
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="bg-white/10 border-white/20 text-white/60 hover:bg-white/10 hover:text-white h-9 w-9 p-0 flex items-center justify-center"
+                      className="bg-white/10 border-white/20 text-white/60 hover:bg-white/10 hover:text-white h-10 w-10 p-0 flex items-center justify-center"
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
