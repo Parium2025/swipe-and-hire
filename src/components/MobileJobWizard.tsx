@@ -3232,11 +3232,11 @@ const MobileJobWizard = ({
                   
                   {jobImageDisplayUrl && (
                     <>
-                      <div className="mt-3">
+                      <div className="mt-3 flex justify-center">
                         <img 
                           src={jobImageDisplayUrl} 
                           alt="Job preview" 
-                          className="w-full h-48 object-contain rounded-lg"
+                          className="w-full max-w-md h-48 object-contain rounded-lg"
                         />
                       </div>
                       
