@@ -3243,6 +3243,8 @@ const MobileJobWizard = ({
                       {/* Bildkontroller - Justera bild + Ta bort */}
                       <div className="mt-4 space-y-3">
                         <div className="flex justify-center items-center gap-3">
+                          {/* Invisible spacer to balance trash icon */}
+                          <div className="w-[30px]" aria-hidden="true"></div>
                           <button
                             onClick={openImageEditor}
                             className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
