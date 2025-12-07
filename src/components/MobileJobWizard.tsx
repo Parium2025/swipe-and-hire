@@ -100,6 +100,8 @@ interface JobFormData {
   salary_type: string;
   salary_transparency: string;
   positions_count: string;
+  work_start_time: string;
+  work_end_time: string;
   work_location_type: string;
   remote_work_possible: string;
   workplace_name: string;
@@ -484,6 +486,8 @@ const MobileJobWizard = ({
     salary_type: '',
     salary_transparency: '',
     positions_count: '1',
+    work_start_time: '',
+    work_end_time: '',
     work_location_type: 'på-plats',
     remote_work_possible: 'nej',
     workplace_name: '',
@@ -602,6 +606,8 @@ const MobileJobWizard = ({
           salary_type: '',
           salary_transparency: '',
           positions_count: '',
+          work_start_time: '',
+          work_end_time: '',
           work_schedule: '',
           work_location_type: '',
           remote_work_possible: '',
@@ -1073,6 +1079,8 @@ const MobileJobWizard = ({
         salary_type: selectedTemplate?.salary_type || prev.salary_type,
         salary_transparency: prev.salary_transparency || '',
         positions_count: selectedTemplate?.positions_count || prev.positions_count || '1',
+        work_start_time: prev.work_start_time || '',
+        work_end_time: prev.work_end_time || '',
         work_location_type: selectedTemplate?.work_location_type || prev.work_location_type || 'på-plats',
         remote_work_possible: selectedTemplate?.remote_work_possible || prev.remote_work_possible || 'nej',
         workplace_name: selectedTemplate?.workplace_name || prev.workplace_name || profile?.company_name || '',
@@ -1551,6 +1559,8 @@ const MobileJobWizard = ({
         salary_type: '',
         salary_transparency: '',
         positions_count: '1',
+        work_start_time: '',
+        work_end_time: '',
         work_location_type: 'på-plats',
         remote_work_possible: 'nej',
         workplace_name: '',
@@ -1596,6 +1606,8 @@ const MobileJobWizard = ({
       salary_type: '',
       salary_transparency: '',
       positions_count: '1',
+      work_start_time: '',
+      work_end_time: '',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
       workplace_name: '',
@@ -1964,6 +1976,29 @@ const MobileJobWizard = ({
                     placeholder="1"
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Arbetstider</Label>
+                  <div className="flex gap-3 items-center">
+                    <div className="flex-1">
+                      <Input
+                        type="time"
+                        value={formData.work_start_time}
+                        onChange={(e) => handleInputChange('work_start_time', e.target.value)}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 [&::-webkit-calendar-picker-indicator]:invert"
+                      />
+                    </div>
+                    <span className="text-white/60 text-sm">–</span>
+                    <div className="flex-1">
+                      <Input
+                        type="time"
+                        value={formData.work_end_time}
+                        onChange={(e) => handleInputChange('work_end_time', e.target.value)}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 [&::-webkit-calendar-picker-indicator]:invert"
+                      />
+                    </div>
+                  </div>
                 </div>
 
               </div>
