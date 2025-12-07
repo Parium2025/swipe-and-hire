@@ -1659,6 +1659,7 @@ const MobileJobWizard = ({
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
         salary_type: formData.salary_type || null,
+        salary_transparency: formData.salary_transparency || null,
         positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
         work_location_type: formData.work_location_type || null,
         remote_work_possible: formData.remote_work_possible || null,

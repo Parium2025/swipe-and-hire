@@ -164,6 +164,7 @@ export type Database = {
           requirements: string | null
           salary_max: number | null
           salary_min: number | null
+          salary_transparency: string | null
           title: string
           updated_at: string
           views_count: number | null
@@ -184,6 +185,7 @@ export type Database = {
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          salary_transparency?: string | null
           title: string
           updated_at?: string
           views_count?: number | null
@@ -204,6 +206,7 @@ export type Database = {
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          salary_transparency?: string | null
           title?: string
           updated_at?: string
           views_count?: number | null
