@@ -1721,6 +1721,8 @@ const MobileJobWizard = ({
         workplace_county: workplaceCounty,
         workplace_municipality: workplaceMunicipality,
         work_schedule: formData.work_schedule || null,
+        work_start_time: formData.work_start_time || null,
+        work_end_time: formData.work_end_time || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
         pitch: formData.pitch || null,
