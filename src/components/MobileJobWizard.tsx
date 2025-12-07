@@ -2969,39 +2969,6 @@ const MobileJobWizard = ({
                   <div className="flex flex-col items-center space-y-4">
                     {/* Desktop monitor frame - professional mockup */}
                     <div className="relative">
-                      {/* Tooltips for desktop - X button (right) and company name (left) */}
-                      {showCompanyTooltip && showDesktopApplicationForm && (
-                        <>
-                          {/* Right tooltip - pointing at X button (header row) */}
-                          <div className="pointer-events-none absolute z-[999] top-[52px] -right-[120px] flex items-center gap-1">
-                            <svg width="24" height="20" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
-                              <defs>
-                                <marker id="arrowheadLeft_desktop" markerWidth="12" markerHeight="12" refX="3" refY="6" orient="auto">
-                                  <polygon points="12 0, 0 6, 12 12" fill="currentColor" />
-                                </marker>
-                              </defs>
-                              <path d="M38 12 L 2 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadLeft_desktop)" />
-                            </svg>
-                            <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
-                              Obs, tryck här!
-                            </div>
-                          </div>
-                          {/* Left tooltip - pointing at company name (below header) */}
-                          <div className="pointer-events-none absolute z-[999] top-[90px] -left-[120px] flex items-center gap-1">
-                            <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
-                              Obs, tryck här!
-                            </div>
-                            <svg width="24" height="20" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
-                              <defs>
-                                <marker id="arrowheadRight_desktop" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
-                                  <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
-                                </marker>
-                              </defs>
-                              <path d="M2 12 L 38 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadRight_desktop)" />
-                            </svg>
-                          </div>
-                        </>
-                      )}
                       {/* Monitor screen */}
                       <div className="relative w-[520px] rounded-t-lg bg-black p-2.5 shadow-2xl">
                         {/* Screen bezel - 16:10 realistisk modern monitorratio */}
@@ -3016,39 +2983,75 @@ const MobileJobWizard = ({
                               <div className="flex flex-col h-full">
                                 <div className="flex items-center justify-between px-4 py-2 bg-black/20 border-b border-white/20 flex-shrink-0">
                                   <div className="text-sm font-bold text-white">Ansökningsformulär</div>
-                                  <button 
-                                    onClick={() => setShowDesktopApplicationForm(false)} 
-                                    className="text-sm text-white hover:text-white"
-                                    aria-label="Stäng ansökningsformulär"
-                                  >
-                                    ✕
-                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    {/* Tooltip pointing at X button */}
+                                    {showCompanyTooltip && (
+                                      <div className="pointer-events-none flex items-center gap-1">
+                                        <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                                          Obs, tryck här!
+                                        </div>
+                                        <svg width="16" height="12" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
+                                          <defs>
+                                            <marker id="arrowheadRight_desktop_x" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+                                              <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
+                                            </marker>
+                                          </defs>
+                                          <path d="M2 12 L 38 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadRight_desktop_x)" />
+                                        </svg>
+                                      </div>
+                                    )}
+                                    <button 
+                                      onClick={() => setShowDesktopApplicationForm(false)} 
+                                      className="text-sm text-white hover:text-white"
+                                      aria-label="Stäng ansökningsformulär"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
                                 </div>
 
                                 <div className="px-4 py-3 overflow-y-auto flex-1 custom-scrollbar">
                                   <div className="space-y-2">
                                     {/* Företagsinformation */}
                                     <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                      <div className="flex items-center">
-                                        {profile?.company_logo_url ? (
-                                          <div className="w-5 h-5 rounded-full mr-2 overflow-hidden bg-white/10 flex items-center justify-center">
-                                            <img 
-                                              src={profile.company_logo_url} 
-                                              alt="Företagslogotyp" 
-                                              className="w-full h-full object-contain"
-                                            />
-                                          </div>
-                                        ) : (
-                                          <div className="w-5 h-5 bg-primary/20 rounded-full mr-2 flex items-center justify-center">
-                                            <Building2 className="h-3 w-3 text-primary-foreground" />
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center">
+                                          {profile?.company_logo_url ? (
+                                            <div className="w-5 h-5 rounded-full mr-2 overflow-hidden bg-white/10 flex items-center justify-center">
+                                              <img 
+                                                src={profile.company_logo_url} 
+                                                alt="Företagslogotyp" 
+                                                className="w-full h-full object-contain"
+                                              />
+                                            </div>
+                                          ) : (
+                                            <div className="w-5 h-5 bg-primary/20 rounded-full mr-2 flex items-center justify-center">
+                                              <Building2 className="h-3 w-3 text-primary-foreground" />
+                                            </div>
+                                          )}
+                                          <button 
+                                            onClick={() => setShowCompanyProfile(true)}
+                                            className="text-sm font-bold text-white hover:text-white/70 transition-colors cursor-pointer"
+                                          >
+                                            {profile?.company_name || 'Företagsnamn'}
+                                          </button>
+                                        </div>
+                                        {/* Tooltip pointing left at company name */}
+                                        {showCompanyTooltip && (
+                                          <div className="pointer-events-none flex items-center gap-1">
+                                            <svg width="16" height="12" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
+                                              <defs>
+                                                <marker id="arrowheadLeft_desktop_company" markerWidth="12" markerHeight="12" refX="3" refY="6" orient="auto">
+                                                  <polygon points="12 0, 0 6, 12 12" fill="currentColor" />
+                                                </marker>
+                                              </defs>
+                                              <path d="M38 12 L 2 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadLeft_desktop_company)" />
+                                            </svg>
+                                            <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                                              Obs, tryck här!
+                                            </div>
                                           </div>
                                         )}
-                                        <button 
-                                          onClick={() => setShowCompanyProfile(true)}
-                                          className="text-sm font-bold text-white hover:text-white/70 transition-colors cursor-pointer"
-                                        >
-                                          {profile?.company_name || 'Företagsnamn'}
-                                        </button>
                                       </div>
                                     </div>
 
