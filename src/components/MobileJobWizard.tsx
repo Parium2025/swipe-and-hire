@@ -3081,47 +3081,79 @@ const MobileJobWizard = ({
                                       </div>
                                     )}
 
-                                    {/* Lön */}
-                                    {(formData.salary_min || formData.salary_max) && (
+                                    {/* Lön - samma som mobil */}
+                                    {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                       <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                         <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                           <Banknote className="h-3 w-3 mr-1 text-white" />
                                           Lön
                                         </h5>
-                                        <p className="text-xs text-white/80">
-                                          {formData.salary_min && formData.salary_max 
-                                            ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                                            : formData.salary_min 
-                                              ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
-                                              : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                                          }
-                                        </p>
+                                        <div className="text-xs text-white/80 space-y-0.5">
+                                          {formatSalaryInfo().map((info, index) => (
+                                            <div key={index} className="font-medium">{info}</div>
+                                          ))}
+                                        </div>
                                       </div>
                                     )}
 
-                                    {/* Arbetsplats */}
-                                    {(formData.workplace_city || formData.location) && (
+                                    {/* Arbetsplats - samma som mobil */}
+                                    <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                      <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                        <MapPin className="h-3 w-3 mr-1 text-white" />
+                                        Arbetsplats
+                                      </h5>
+                                      <div className="text-xs text-white/80 space-y-0.5">
+                                        {formData.workplace_name && (
+                                          <div className="font-medium">{formData.workplace_name}</div>
+                                        )}
+                                        {formData.workplace_address && (
+                                          <div>{formData.workplace_address}</div>
+                                        )}
+                                        {(formData.workplace_postal_code || formData.workplace_city) && (
+                                          <div>
+                                            {formData.workplace_postal_code && formData.workplace_city ? (
+                                              <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                            ) : formData.workplace_city ? (
+                                              <div>{formData.workplace_city}</div>
+                                            ) : (
+                                              <div>{formData.workplace_postal_code}</div>
+                                            )}
+                                            <div>{getWorkLocationDisplayText()}</div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* Antal rekryteringar */}
+                                    {formData.positions_count && parseInt(formData.positions_count) > 0 && (
                                       <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                         <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                          <MapPin className="h-3 w-3 mr-1 text-white" />
-                                          Arbetsplats
+                                          <Users className="h-3 w-3 mr-1 text-white" />
+                                          Antal rekryteringar
                                         </h5>
-                                        <p className="text-xs text-white/80">{formData.workplace_city || formData.location}</p>
+                                        <div className="text-xs text-white/80">
+                                          <div className="font-medium">{formatPositionsCount()}</div>
+                                        </div>
                                       </div>
                                     )}
 
-                                    {/* Anställningsform */}
-                                    {formData.employment_type && (
-                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                        <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                          <Clock className="h-3 w-3 mr-1 text-white" />
-                                          Anställningsform
-                                        </h5>
-                                        <p className="text-xs text-white/80">
-                                          {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || formData.employment_type}
-                                        </p>
+                                    {/* Kontakt */}
+                                    <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                      <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                        <Mail className="h-3 w-3 mr-1 text-white" />
+                                        Kontakt
+                                      </h5>
+                                      <div className="text-xs text-white/80">
+                                        {formData.contact_email && (
+                                          <a 
+                                            href={`mailto:${formData.contact_email}`}
+                                            className="text-blue-300 font-medium break-all hover:text-blue-200 underline cursor-pointer"
+                                          >
+                                            {formData.contact_email}
+                                          </a>
+                                        )}
                                       </div>
-                                    )}
+                                    </div>
 
                                     {/* Krav */}
                                     {formData.requirements && (
@@ -3137,6 +3169,32 @@ const MobileJobWizard = ({
                                         </p>
                                       </div>
                                     )}
+
+                                    {/* Följande information samlas automatiskt in */}
+                                    <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                      <p className="text-xs text-white/80 mb-1.5 leading-relaxed">
+                                        Följande information samlas automatiskt in från alla kandidater som har sökt:
+                                      </p>
+                                      <div className="space-y-0.5">
+                                        {[
+                                          'Namn',
+                                          'Efternamn',
+                                          'Ålder',
+                                          'E-post',
+                                          'Telefonnummer',
+                                          'Ort/stad',
+                                          'Presentation',
+                                          'CV',
+                                          'Nuvarande anställningsform',
+                                          'Tillgänglighet',
+                                        ].map((label, idx) => (
+                                          <div key={idx} className="text-xs flex">
+                                            <span className="flex-shrink-0 mr-1 text-white/60">•</span>
+                                            <span className="flex-1 text-white/80 leading-tight">{label}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
 
                                     {/* Ansökningsfrågor */}
                                     {customQuestions.length > 0 && (
