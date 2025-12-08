@@ -1338,7 +1338,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       <Input
                         value={editingQuestion.question_text}
                         onChange={(e) => updateQuestionField('question_text', e.target.value)}
-                        placeholder="T.ex. Ålder, Antal års erfarenhet..."
+                        placeholder="Ålder, Antal års erfarenhet"
                         className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                       />
                     </div>
