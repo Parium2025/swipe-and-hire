@@ -193,6 +193,9 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
   );
 };
 
+// Session storage key for persisting unsaved job form state across tab switches
+const JOB_WIZARD_SESSION_KEY = 'job-wizard-unsaved-state';
+
 const MobileJobWizard = ({
   open, 
   onOpenChange, 
@@ -477,33 +480,90 @@ const MobileJobWizard = ({
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
   const [cachedPostalCodeInfo, setCachedPostalCodeInfo] = useState<{postalCode: string, city: string, municipality: string, county: string} | null>(null);
-  const [formData, setFormData] = useState<JobFormData>({
-    title: jobTitle,
-    description: selectedTemplate?.description || '',
-    requirements: selectedTemplate?.requirements || '',
-    location: selectedTemplate?.location || '',
-    occupation: '',
-    salary_min: selectedTemplate?.salary_min?.toString() || '',
-    salary_max: selectedTemplate?.salary_max?.toString() || '',
-    employment_type: selectedTemplate?.employment_type || '',
-    salary_type: '',
-    salary_transparency: '',
-    benefits: [],
-    positions_count: '1',
-    work_start_time: '',
-    work_end_time: '',
-    work_location_type: 'på-plats',
-    remote_work_possible: 'nej',
-    workplace_name: '',
-    workplace_address: '',
-    workplace_postal_code: '',
-    workplace_city: '',
-    work_schedule: selectedTemplate?.work_schedule || '',
-    contact_email: selectedTemplate?.contact_email || '',
-    application_instructions: selectedTemplate?.application_instructions || '',
-    pitch: '',
-    job_image_url: ''
-  });
+  
+  // Try to restore form data from sessionStorage (for tab switches)
+  const getInitialFormData = useCallback((): JobFormData => {
+    try {
+      const saved = sessionStorage.getItem(JOB_WIZARD_SESSION_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.formData) {
+          return parsed.formData;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to restore job wizard state from sessionStorage');
+    }
+    
+    return {
+      title: jobTitle,
+      description: selectedTemplate?.description || '',
+      requirements: selectedTemplate?.requirements || '',
+      location: selectedTemplate?.location || '',
+      occupation: '',
+      salary_min: selectedTemplate?.salary_min?.toString() || '',
+      salary_max: selectedTemplate?.salary_max?.toString() || '',
+      employment_type: selectedTemplate?.employment_type || '',
+      salary_type: '',
+      salary_transparency: '',
+      benefits: [],
+      positions_count: '1',
+      work_start_time: '',
+      work_end_time: '',
+      work_location_type: 'på-plats',
+      remote_work_possible: 'nej',
+      workplace_name: '',
+      workplace_address: '',
+      workplace_postal_code: '',
+      workplace_city: '',
+      work_schedule: selectedTemplate?.work_schedule || '',
+      contact_email: selectedTemplate?.contact_email || '',
+      application_instructions: selectedTemplate?.application_instructions || '',
+      pitch: '',
+      job_image_url: ''
+    };
+  }, [jobTitle, selectedTemplate]);
+  
+  const [formData, setFormData] = useState<JobFormData>(getInitialFormData);
+  
+  // Save form state to sessionStorage when there are unsaved changes
+  useEffect(() => {
+    if (open && hasUnsavedChanges) {
+      try {
+        sessionStorage.setItem(JOB_WIZARD_SESSION_KEY, JSON.stringify({
+          formData,
+          currentStep,
+          customQuestions
+        }));
+      } catch (e) {
+        console.warn('Failed to save job wizard state to sessionStorage');
+      }
+    }
+  }, [formData, currentStep, customQuestions, hasUnsavedChanges, open]);
+  
+  // Restore step and questions from sessionStorage when opening
+  useEffect(() => {
+    if (open) {
+      try {
+        const saved = sessionStorage.getItem(JOB_WIZARD_SESSION_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.currentStep !== undefined) {
+            setCurrentStep(parsed.currentStep);
+          }
+          if (parsed.customQuestions) {
+            setCustomQuestions(parsed.customQuestions);
+          }
+          if (parsed.formData) {
+            setFormData(parsed.formData);
+            setHasUnsavedChanges(true);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to restore job wizard state from sessionStorage');
+      }
+    }
+  }, [open]);
 
   // Smart text fit for occupation - uses break-words but reduces font-size if it would wrap
   const occupationRef = useSmartTextFit<HTMLDivElement>(formData.occupation || '', { minFontPx: 10 });
@@ -1703,6 +1763,10 @@ const MobileJobWizard = ({
     setHasUnsavedChanges(false);
     setShowUnsavedDialog(false);
     setPendingClose(false);
+    
+    // Clear sessionStorage when user confirms close
+    sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+    
     if (onBack) {
       onBack();
     } else {
@@ -1812,6 +1876,9 @@ const MobileJobWizard = ({
         title: "Jobbannons skapad!",
         description: "Din annons är nu publicerad och synlig för jobbsökare."
       });
+
+      // Clear sessionStorage after successful submission
+      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
 
       handleClose();
       onJobCreated(jobPost);
