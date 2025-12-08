@@ -49,6 +49,7 @@ const CompanyProfile = () => {
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
+  const [originalLogoFile, setOriginalLogoFile] = useState<File | null>(null);
   
   // Industry dropdown states
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
@@ -179,6 +180,9 @@ const CompanyProfile = () => {
     const file = e.target.files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
 
+    // Store original file for future edits
+    setOriginalLogoFile(file);
+    
     const imageUrl = URL.createObjectURL(file);
     setPendingImageSrc(imageUrl);
     setImageEditorOpen(true);
@@ -236,10 +240,18 @@ const CompanyProfile = () => {
   };
 
   const handleEditExistingLogo = async () => {
+    // If we have the original file stored, use that instead of the cropped version
+    if (originalLogoFile) {
+      const blobUrl = URL.createObjectURL(originalLogoFile);
+      setPendingImageSrc(blobUrl);
+      setImageEditorOpen(true);
+      return;
+    }
+    
+    // Fallback: fetch current logo (this happens if page was refreshed after save)
     if (!formData.company_logo_url) return;
     
     try {
-      // Fetch the existing image and convert to blob URL for editor
       const response = await fetch(formData.company_logo_url);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
