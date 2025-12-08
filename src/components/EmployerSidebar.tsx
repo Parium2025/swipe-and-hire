@@ -135,6 +135,12 @@ export function EmployerSidebar() {
 
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
     const fromProfile = (profile as any)?.company_logo_url as string | undefined;
+    // Only use cache if profile hasn't explicitly set logo to empty
+    if (fromProfile === '' || fromProfile === null) {
+      // Profile explicitly has no logo - don't use cache
+      try { sessionStorage.removeItem(LOGO_CACHE_KEY); } catch {}
+      return null;
+    }
     const cached = typeof window !== 'undefined' ? sessionStorage.getItem(LOGO_CACHE_KEY) : null;
     const raw = (typeof fromProfile === 'string' && fromProfile.trim() !== '') ? fromProfile : cached;
     return getPublicLogoUrl(raw);
