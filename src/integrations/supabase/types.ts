@@ -431,6 +431,7 @@ export type Database = {
           birth_date: string | null
           city: string | null
           company_description: string | null
+          company_logo_original_url: string | null
           company_logo_url: string | null
           company_name: string | null
           cover_image_url: string | null
@@ -471,6 +472,7 @@ export type Database = {
           birth_date?: string | null
           city?: string | null
           company_description?: string | null
+          company_logo_original_url?: string | null
           company_logo_url?: string | null
           company_name?: string | null
           cover_image_url?: string | null
@@ -511,6 +513,7 @@ export type Database = {
           birth_date?: string | null
           city?: string | null
           company_description?: string | null
+          company_logo_original_url?: string | null
           company_logo_url?: string | null
           company_name?: string | null
           cover_image_url?: string | null

@@ -79,6 +79,7 @@ const CompanyProfile = () => {
       company_description: profile?.company_description || '',
       employee_count: profile?.employee_count || '',
       company_logo_url: (profile as any)?.company_logo_url || '',
+      company_logo_original_url: (profile as any)?.company_logo_original_url || '',
       social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
     };
   };
@@ -195,28 +196,50 @@ const CompanyProfile = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
+      const timestamp = Date.now();
       const fileExt = 'png';
-      const fileName = `${user.data.user.id}/${Date.now()}-company-logo.${fileExt}`;
-
+      
+      // Upload cropped version
+      const croppedFileName = `${user.data.user.id}/${timestamp}-company-logo.${fileExt}`;
       const { error: uploadError } = await supabase.storage
         .from('company-logos')
-        .upload(fileName, editedBlob);
+        .upload(croppedFileName, editedBlob);
 
       if (uploadError) throw uploadError;
+
+      // Upload original version if we have it
+      let originalUrl = formData.company_logo_original_url;
+      if (originalLogoFile) {
+        const originalFileName = `${user.data.user.id}/${timestamp}-company-logo-original.${fileExt}`;
+        const { error: originalUploadError } = await supabase.storage
+          .from('company-logos')
+          .upload(originalFileName, originalLogoFile);
+
+        if (!originalUploadError) {
+          const { data: { publicUrl: originalPublicUrl } } = supabase.storage
+            .from('company-logos')
+            .getPublicUrl(originalFileName);
+          originalUrl = `${originalPublicUrl}?t=${timestamp}`;
+        }
+      }
 
       // Use public URL for company logos (no expiration)
       const { data: { publicUrl } } = supabase.storage
         .from('company-logos')
-        .getPublicUrl(fileName);
+        .getPublicUrl(croppedFileName);
 
-      const logoUrl = `${publicUrl}?t=${Date.now()}`;
+      const logoUrl = `${publicUrl}?t=${timestamp}`;
       
       // Preload logo in background (non-blocking)
       import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
         preloadSingleFile(logoUrl).catch(() => {});
       }).catch(() => {});
       
-      setFormData(prev => ({ ...prev, company_logo_url: logoUrl }));
+      setFormData(prev => ({ 
+        ...prev, 
+        company_logo_url: logoUrl,
+        company_logo_original_url: originalUrl
+      }));
       setImageEditorOpen(false);
       setPendingImageSrc('');
       
@@ -240,7 +263,7 @@ const CompanyProfile = () => {
   };
 
   const handleEditExistingLogo = async () => {
-    // If we have the original file stored, use that instead of the cropped version
+    // Priority 1: Use stored original file (same session)
     if (originalLogoFile) {
       const blobUrl = URL.createObjectURL(originalLogoFile);
       setPendingImageSrc(blobUrl);
@@ -248,7 +271,21 @@ const CompanyProfile = () => {
       return;
     }
     
-    // Fallback: fetch current logo (this happens if page was refreshed after save)
+    // Priority 2: Use stored original URL from database
+    if (formData.company_logo_original_url) {
+      try {
+        const response = await fetch(formData.company_logo_original_url);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        setPendingImageSrc(blobUrl);
+        setImageEditorOpen(true);
+        return;
+      } catch (error) {
+        console.error('Error loading original logo:', error);
+      }
+    }
+    
+    // Fallback: fetch current cropped logo
     if (!formData.company_logo_url) return;
     
     try {
