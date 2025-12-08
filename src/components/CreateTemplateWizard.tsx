@@ -1227,7 +1227,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                             key={type.value}
                             type="button"
                             onClick={() => handleQuestionTypeSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1567,7 +1567,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                             key={type.value}
                             type="button"
                             onClick={() => handleEmploymentTypeSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1597,7 +1597,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                             key={type.value}
                             type="button"
                             onClick={() => handleSalaryTypeSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1627,7 +1627,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                             key={option.value}
                             type="button"
                             onClick={() => handleSalaryTransparencySelect(option)}
-                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                           >
                             <div className="font-medium">{option.label}</div>
                           </button>
@@ -1731,7 +1731,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                             key={type.value}
                             type="button"
                             onClick={() => handleWorkLocationSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1761,7 +1761,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                             key={type.value}
                             type="button"
                             onClick={() => handleRemoteWorkSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>

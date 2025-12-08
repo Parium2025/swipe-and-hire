@@ -560,12 +560,12 @@ const JobTemplatesOverview = () => {
                   <SelectTrigger className="bg-white/10 border-white/20 text-white">
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
+                  <SelectContent className="bg-slate-900/85 backdrop-blur-xl border-white/20">
                     {EMPLOYMENT_TYPES.map(type => (
                       <SelectItem 
                         key={type.value} 
                         value={type.value}
-                        className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                        className="text-white hover:bg-white/20 focus:bg-white/20"
                       >
                         {type.label}
                       </SelectItem>
