@@ -157,6 +157,7 @@ const SortableQuestionItem = ({
 
 const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateToEdit, onBack }: CreateTemplateWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isReady, setIsReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
@@ -376,7 +377,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       setInitialCustomQuestions([]);
       setHasUnsavedChanges(false);
     } else if (!open) {
-      // Reset when dialog closes
+      // Reset when dialog closes - including isReady
+      setIsReady(false);
       setFormData({
         name: '',
         title: '',
@@ -424,6 +426,17 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       setShowQuestionTypeDropdown(false);
     }
   }, [templateToEdit, open]);
+
+  // Set ready state after initialization is complete
+  useEffect(() => {
+    if (open && !isReady) {
+      // Small delay to ensure all state is set before showing content
+      const timer = requestAnimationFrame(() => {
+        setIsReady(true);
+      });
+      return () => cancelAnimationFrame(timer);
+    }
+  }, [open, isReady]);
 
   // Track unsaved changes
   useEffect(() => {
@@ -1154,7 +1167,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} variant="card" />
-        <div className="flex flex-col max-h-[90vh] relative z-10 overflow-hidden">
+        {/* Only render content when ready to prevent flash */}
+        <div className={`flex flex-col max-h-[90vh] relative z-10 overflow-hidden transition-opacity duration-150 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
           {/* Header */}
           <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
             <DialogHeader className="text-center sm:text-center">
