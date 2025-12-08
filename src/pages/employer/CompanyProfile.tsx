@@ -235,6 +235,26 @@ const CompanyProfile = () => {
     }
   };
 
+  const handleEditExistingLogo = async () => {
+    if (!formData.company_logo_url) return;
+    
+    try {
+      // Fetch the existing image and convert to blob URL for editor
+      const response = await fetch(formData.company_logo_url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      setPendingImageSrc(blobUrl);
+      setImageEditorOpen(true);
+    } catch (error) {
+      console.error('Error loading logo for editing:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ladda bilden för redigering.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleLogoDelete = () => {
     setLogoDeleteDialogOpen(true);
   };
@@ -451,27 +471,45 @@ const CompanyProfile = () => {
           )}
         </div>
 
-        <div className="flex gap-2">
-          <Button 
-            type="button"
-            variant="outline" 
-            size="sm"
-            onClick={() => document.getElementById('logo-upload')?.click()}
-            disabled={isUploadingLogo}
-            className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
-          >
-            {isUploadingLogo ? (
-              <>
-                <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2"></div>
-                Laddar upp...
-              </>
-            ) : (
-              <>
-                <Camera className="h-3 w-3 mr-2" />
-                {formData.company_logo_url ? 'Byt logga' : 'Ladda upp'}
-              </>
-            )}
-          </Button>
+        <div className="flex items-center justify-center gap-2">
+          {/* Invisible spacer for visual balance when trash icon is shown */}
+          {formData.company_logo_url && (
+            <div className="w-9 h-9 invisible" aria-hidden="true" />
+          )}
+          
+          {isUploadingLogo ? (
+            <Button 
+              type="button"
+              variant="outline" 
+              size="sm"
+              disabled
+              className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50"
+            >
+              <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+              Laddar upp...
+            </Button>
+          ) : formData.company_logo_url ? (
+            <Button 
+              type="button"
+              variant="outline" 
+              size="sm"
+              onClick={handleEditExistingLogo}
+              className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+            >
+              Justera bild
+            </Button>
+          ) : (
+            <Button 
+              type="button"
+              variant="outline" 
+              size="sm"
+              onClick={() => document.getElementById('logo-upload')?.click()}
+              className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+            >
+              <Camera className="h-3 w-3 mr-2" />
+              Ladda upp
+            </Button>
+          )}
 
           {formData.company_logo_url && (
             <Button 
@@ -480,9 +518,9 @@ const CompanyProfile = () => {
               size="sm"
               onClick={handleLogoDelete}
               disabled={isUploadingLogo}
-              className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-red-300"
+              className="bg-white/5 backdrop-blur-sm border-white/10 !text-white transition-all duration-300 md:hover:bg-destructive/20 md:hover:border-destructive/40 md:hover:!text-white p-2"
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
