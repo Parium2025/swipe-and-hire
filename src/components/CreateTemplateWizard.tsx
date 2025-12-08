@@ -755,11 +755,15 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
              formData.description.trim() &&
              formData.employment_type &&
              formData.salary_type &&
-             parseInt(formData.positions_count) > 0;
+             formData.salary_transparency &&
+             parseInt(formData.positions_count) > 0 &&
+             formData.work_start_time.trim() &&
+             formData.work_end_time.trim();
     }
     if (currentStep === 2) {
       return (
         !!formData.work_location_type &&
+        !!formData.remote_work_possible &&
         formData.workplace_name.trim() &&
         formData.contact_email.trim()
       );
