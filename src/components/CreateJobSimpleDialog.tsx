@@ -471,7 +471,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                               onClick={() => {
                                 setTemplateMenuOpen(false);
                                 setOpen(false);
-                                setShowTemplateWizard(true);
+                                // Samma delay som för MobileJobWizard för smidig övergång
+                                setTimeout(() => {
+                                  setShowTemplateWizard(true);
+                                }, 150);
                               }}
                               onFocus={(e) => {
                                 const searchInput = e.currentTarget.closest('[role="menu"]')?.querySelector('input');
@@ -519,7 +522,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                         setTemplateToEdit(template);
                                         setTemplateMenuOpen(false);
                                         setOpen(false);
-                                        setShowTemplateWizard(true);
+                                        // Samma delay som för MobileJobWizard för smidig övergång
+                                        setTimeout(() => {
+                                          setShowTemplateWizard(true);
+                                        }, 150);
                                       }}
                                       variant="ghost"
                                       size="sm"
