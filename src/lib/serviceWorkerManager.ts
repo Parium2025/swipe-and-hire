@@ -44,7 +44,7 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
 /**
  * Skicka meddelande till service worker
  */
-const sendMessage = (message: any): Promise<void> => {
+const sendMessage = (message: any, timeoutMs: number = 5000): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (!navigator.serviceWorker.controller) {
       reject(new Error('No service worker controller'));
@@ -53,7 +53,14 @@ const sendMessage = (message: any): Promise<void> => {
 
     const messageChannel = new MessageChannel();
     
+    // Add timeout to prevent hanging forever
+    const timeout = setTimeout(() => {
+      console.warn('Service Worker message timeout, continuing anyway');
+      resolve(); // Resolve instead of reject to not block UI
+    }, timeoutMs);
+    
     messageChannel.port1.onmessage = (event) => {
+      clearTimeout(timeout);
       if (event.data.error) {
         reject(event.data.error);
       } else {

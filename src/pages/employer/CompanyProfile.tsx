@@ -176,9 +176,10 @@ const CompanyProfile = () => {
 
       const logoUrl = `${publicUrl}?t=${Date.now()}`;
       
-      // Förladdda loggan direkt i Service Worker
-      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
-      await preloadSingleFile(logoUrl);
+      // Preload logo in background (non-blocking)
+      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
+        preloadSingleFile(logoUrl).catch(() => {});
+      }).catch(() => {});
       
       setFormData(prev => ({ ...prev, company_logo_url: logoUrl }));
       setImageEditorOpen(false);
