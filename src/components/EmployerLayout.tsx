@@ -148,11 +148,9 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
-      <div className="min-h-screen flex w-full overflow-x-hidden relative">
+      <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
-        <div className="sticky top-0 h-screen flex-shrink-0">
-          <EmployerSidebar />
-        </div>
+        <EmployerSidebar />
         <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
           <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
             <div className="flex items-center gap-2">
