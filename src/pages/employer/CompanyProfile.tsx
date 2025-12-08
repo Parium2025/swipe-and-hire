@@ -609,7 +609,7 @@ const CompanyProfile = () => {
                   value={formData.employee_count}
                   onValueChange={(value) => setFormData({...formData, employee_count: value})}
                 >
-                  <SelectTrigger className="bg-white/5 border-white/10 hover:border-white/50 text-white h-9">
+                  <SelectTrigger className="bg-white/5 border-white/10 hover:border-white/50 text-white h-11">
                     <SelectValue placeholder="Välj antal" className="text-white/90" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 text-white z-50">
