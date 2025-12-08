@@ -85,15 +85,13 @@ interface CreateTemplateWizardProps {
 }
 
 // Sortable Question Item Component
-const SortableQuestionItem = ({ 
-  question, 
-  onEdit, 
-  onDelete 
-}: { 
+interface SortableQuestionItemProps {
   question: JobQuestion;
   onEdit: (question: JobQuestion) => void;
   onDelete: (id: string) => void;
-}) => {
+}
+
+const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionItemProps) => {
   const {
     attributes,
     listeners,
@@ -117,6 +115,7 @@ const SortableQuestionItem = ({
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          {/* Drag handle */}
           <div
             {...attributes}
             {...listeners}
@@ -133,22 +132,20 @@ const SortableQuestionItem = ({
         </div>
         
         <div className="flex items-center space-x-1 ml-1.5 flex-shrink-0">
-          <Button
+          <button
+            type="button"
             onClick={() => onEdit(question)}
-            variant="ghost"
-            size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10 h-6 w-6 p-0"
+            className="p-1.5 text-white hover:bg-white/10 rounded-full transition-all duration-300"
           >
-            <Pencil className="h-3 w-3 text-[hsl(var(--pure-white))]" />
-          </Button>
-          <Button
+            <Pencil className="h-3 w-3" />
+          </button>
+          <button
+            type="button"
             onClick={() => onDelete(question.id!)}
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0"
+            className="p-1.5 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300"
           >
             <Trash2 className="h-3 w-3" />
-          </Button>
+          </button>
         </div>
       </div>
     </div>
@@ -1910,17 +1907,17 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     </div>
 
                     {/* Anpassade frågor */}
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
-                    <Button
-                      onClick={addCustomQuestion}
-                      size="sm"
-                      className="bg-primary hover:bg-primary/90 text-white touch-border-white"
-                    >
-                      Lägg till fråga
-                      <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
-                    </Button>
+                        <Button
+                          onClick={addCustomQuestion}
+                          size="sm"
+                          className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium"
+                        >
+                          Lägg till fråga
+                          <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                        </Button>
                       </div>
                       
                       {customQuestions.length === 0 ? (
@@ -1937,7 +1934,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                             items={customQuestions.map(q => q.id!)}
                             strategy={verticalListSortingStrategy}
                           >
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                               {customQuestions.map((question) => (
                                 <SortableQuestionItem
                                   key={question.id}
