@@ -3086,20 +3086,55 @@ const MobileJobWizard = ({
                                        </div>
                                      )}
                                    </div>
-                                 </div>
+                                  </div>
 
-                                  {/* Antal rekryteringar */}
-                                  {formData.positions_count && parseInt(formData.positions_count) > 0 && (
-                                    <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                      <h5 className="text-xs font-medium text-white mb-0.5 flex items-center whitespace-nowrap">
-                                        <Users className="h-2 w-2 mr-1 text-white" />
-                                        Antal rekryteringar
-                                      </h5>
+                                   {/* Antal rekryteringar */}
+                                   {formData.positions_count && parseInt(formData.positions_count) > 0 && (
+                                     <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                       <h5 className="text-xs font-medium text-white mb-0.5 flex items-center whitespace-nowrap">
+                                         <Users className="h-2 w-2 mr-1 text-white" />
+                                         Antal rekryteringar
+                                       </h5>
+                                        <div className="text-xs text-white leading-relaxed break-words">
+                                          <div className="font-medium">{formatPositionsCount()}</div>
+                                        </div>
+                                     </div>
+                                   )}
+
+                                   {/* Arbetstider */}
+                                   {(formData.work_start_time || formData.work_end_time) && (
+                                     <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                       <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                         <Clock className="h-2 w-2 mr-1 text-white" />
+                                         Arbetstider
+                                       </h5>
                                        <div className="text-xs text-white leading-relaxed break-words">
-                                         <div className="font-medium">{formatPositionsCount()}</div>
+                                         <div className="font-medium">
+                                           {formData.work_start_time && formData.work_end_time 
+                                             ? `${formData.work_start_time} – ${formData.work_end_time}`
+                                             : formData.work_start_time || formData.work_end_time}
+                                         </div>
                                        </div>
-                                    </div>
-                                  )}
+                                     </div>
+                                   )}
+
+                                   {/* Förmåner */}
+                                   {formData.benefits && formData.benefits.length > 0 && (
+                                     <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                       <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                         <Heart className="h-2 w-2 mr-1 text-white" />
+                                         Förmåner
+                                       </h5>
+                                       <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                         {formData.benefits.map((benefit, idx) => (
+                                           <div key={idx} className="flex items-start">
+                                             <span className="flex-shrink-0 mr-1">•</span>
+                                             <span>{benefit}</span>
+                                           </div>
+                                         ))}
+                                       </div>
+                                     </div>
+                                   )}
 
                                  {/* Kontakt */}
                                 <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
@@ -3573,6 +3608,41 @@ const MobileJobWizard = ({
                                         </h5>
                                         <div className="text-xs text-white/80">
                                           <div className="font-medium">{formatPositionsCount()}</div>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Arbetstider */}
+                                    {(formData.work_start_time || formData.work_end_time) && (
+                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                          <Clock className="h-3 w-3 mr-1 text-white" />
+                                          Arbetstider
+                                        </h5>
+                                        <div className="text-xs text-white/80">
+                                          <div className="font-medium">
+                                            {formData.work_start_time && formData.work_end_time 
+                                              ? `${formData.work_start_time} – ${formData.work_end_time}`
+                                              : formData.work_start_time || formData.work_end_time}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Förmåner */}
+                                    {formData.benefits && formData.benefits.length > 0 && (
+                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                          <Heart className="h-3 w-3 mr-1 text-white" />
+                                          Förmåner
+                                        </h5>
+                                        <div className="text-xs text-white/80 space-y-0.5">
+                                          {formData.benefits.map((benefit, idx) => (
+                                            <div key={idx} className="flex items-start">
+                                              <span className="flex-shrink-0 mr-1">•</span>
+                                              <span>{benefit}</span>
+                                            </div>
+                                          ))}
                                         </div>
                                       </div>
                                     )}
