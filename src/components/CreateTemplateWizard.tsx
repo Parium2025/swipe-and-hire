@@ -470,6 +470,38 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     setHasUnsavedChanges(formChanged || questionsChanged);
   }, [formData, customQuestions, initialFormData, initialCustomQuestions, open]);
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Check if click is outside all dropdowns
+      const isInsideDropdown = 
+        target.closest('.employment-type-dropdown') ||
+        target.closest('.salary-type-dropdown') ||
+        target.closest('.salary-transparency-dropdown') ||
+        target.closest('.work-location-dropdown') ||
+        target.closest('.remote-work-dropdown') ||
+        target.closest('.benefits-dropdown') ||
+        target.closest('.occupation-dropdown') ||
+        target.closest('.question-type-dropdown');
+      
+      if (!isInsideDropdown) {
+        closeAllDropdowns();
+        setShowBenefitsDropdown(false);
+        setShowOccupationDropdown(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [open]);
+
   const steps = [
     {
       title: "Mallnamn",
