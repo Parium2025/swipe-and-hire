@@ -157,7 +157,9 @@ const SortableQuestionItem = ({
 
 const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateToEdit, onBack }: CreateTemplateWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  // isReady controls opacity transition - starts false to prevent flash
   const [isReady, setIsReady] = useState(false);
+  const readyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
@@ -296,9 +298,18 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     }
   };
 
-  // Load template data when editing
+  // Load template data when editing OR reset when opening fresh
   useEffect(() => {
+    // Clear any pending ready timer
+    if (readyTimerRef.current) {
+      clearTimeout(readyTimerRef.current);
+      readyTimerRef.current = null;
+    }
+
     if (templateToEdit && open) {
+      // First hide content
+      setIsReady(false);
+      
       const loadedFormData = {
         name: templateToEdit.name || '',
         title: templateToEdit.title || '',
@@ -343,9 +354,17 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         setInitialCustomQuestions([]);
       }
       
+      setCurrentStep(0);
       setHasUnsavedChanges(false);
+      
+      // Show content after state is settled
+      readyTimerRef.current = setTimeout(() => {
+        setIsReady(true);
+      }, 50);
     } else if (open && !templateToEdit) {
-      // New template - set empty initial state
+      // New template - first hide content, then set empty state
+      setIsReady(false);
+      
       const emptyFormData: TemplateFormData = {
         name: '',
         title: '',
@@ -373,11 +392,19 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         pitch: '',
         benefits: []
       };
+      setFormData(emptyFormData);
       setInitialFormData(emptyFormData);
+      setCustomQuestions([]);
       setInitialCustomQuestions([]);
+      setCurrentStep(0);
       setHasUnsavedChanges(false);
+      
+      // Show content after state is settled
+      readyTimerRef.current = setTimeout(() => {
+        setIsReady(true);
+      }, 50);
     } else if (!open) {
-      // Reset when dialog closes - including isReady
+      // Reset when dialog closes
       setIsReady(false);
       setFormData({
         name: '',
@@ -425,18 +452,13 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       setShowOccupationDropdown(false);
       setShowQuestionTypeDropdown(false);
     }
+    
+    return () => {
+      if (readyTimerRef.current) {
+        clearTimeout(readyTimerRef.current);
+      }
+    };
   }, [templateToEdit, open]);
-
-  // Set ready state after initialization is complete
-  useEffect(() => {
-    if (open && !isReady) {
-      // Small delay to ensure all state is set before showing content
-      const timer = requestAnimationFrame(() => {
-        setIsReady(true);
-      });
-      return () => cancelAnimationFrame(timer);
-    }
-  }, [open, isReady]);
 
   // Track unsaved changes
   useEffect(() => {
