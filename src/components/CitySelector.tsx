@@ -207,7 +207,7 @@ const CitySelector = ({
         {showCitySuggestions && filteredCities.length > 0 && (
           <div 
             ref={citySuggestionsRef}
-            className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
           >
             {filteredCities.map((city, index) => (
               <div
@@ -250,7 +250,7 @@ const CitySelector = ({
         {showPostalSuggestions && filteredPostalCodes.length > 0 && (
           <div 
             ref={postalSuggestionsRef}
-            className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
           >
             <div className="px-4 py-2 text-sm text-white/60 border-b border-white/20">
               Postnummer för {cityValue}:
@@ -273,7 +273,7 @@ const CitySelector = ({
         
         {/* Stad-förslag baserat på postnummer */}
         {suggestedCity && (
-          <div className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg">
+          <div className="absolute z-50 w-full mt-1 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-lg shadow-lg">
             <div
               className="px-4 py-2 cursor-pointer transition-colors hover:bg-white/20 text-white"
               onClick={handleCitySuggestionAccept}
