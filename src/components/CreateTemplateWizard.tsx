@@ -1201,7 +1201,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showQuestionTypeDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredQuestionTypes.map((type) => (
                           <button
                             key={type.value}
@@ -1541,7 +1541,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showEmploymentTypeDropdown && (
-                       <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg">
+                       <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg">
                         {filteredEmploymentTypes.map((type) => (
                           <button
                             key={type.value}
@@ -1571,7 +1571,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showSalaryTypeDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredSalaryTypes.map((type) => (
                           <button
                             key={type.value}
@@ -1601,7 +1601,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showSalaryTransparencyDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredSalaryTransparencyOptions.map((option) => (
                           <button
                             key={option.value}
@@ -1705,7 +1705,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showWorkLocationDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredWorkLocationTypes.map((type) => (
                           <button
                             key={type.value}
@@ -1735,7 +1735,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showRemoteWorkDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredRemoteWorkOptions.map((type) => (
                           <button
                             key={type.value}
