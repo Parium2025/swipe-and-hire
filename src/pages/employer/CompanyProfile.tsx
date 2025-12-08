@@ -452,7 +452,7 @@ const CompanyProfile = () => {
       <div className="flex flex-col items-center space-y-4 py-6">
         <div className="relative">
           {formData.company_logo_url ? (
-            <div className="w-32 h-32 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
+            <div className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
               <img 
                 src={formData.company_logo_url} 
                 alt="Företagslogga" 
@@ -460,8 +460,8 @@ const CompanyProfile = () => {
               />
             </div>
           ) : (
-            <div className="w-32 h-32 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center">
-              <div className="text-2xl font-semibold text-white/60">
+            <div className="w-32 h-32 md:w-44 md:h-44 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center">
+              <div className="text-2xl md:text-3xl font-semibold text-white/60">
                 {formData.company_name ? 
                   formData.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) : 
                   'HM'
