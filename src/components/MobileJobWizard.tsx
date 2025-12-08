@@ -1306,9 +1306,23 @@ const MobileJobWizard = ({
     setShowQuestionTypeDropdown(false);
   };
 
+  // Helper function to close all dropdowns
+  const closeAllDropdowns = () => {
+    setShowOccupationDropdown(false);
+    setShowQuestionTypeDropdown(false);
+    setShowEmploymentTypeDropdown(false);
+    setShowSalaryTypeDropdown(false);
+    setShowSalaryTransparencyDropdown(false);
+    setShowBenefitsDropdown(false);
+    setShowWorkLocationDropdown(false);
+    setShowRemoteWorkDropdown(false);
+  };
+
   const handleQuestionTypeClick = () => {
+    const isCurrentlyOpen = showQuestionTypeDropdown;
+    closeAllDropdowns();
     setQuestionTypeSearchTerm(''); // Reset search to show all options
-    setShowQuestionTypeDropdown(!showQuestionTypeDropdown);
+    setShowQuestionTypeDropdown(!isCurrentlyOpen);
   };
 
   const handleEmploymentTypeSearch = (value: string) => {
@@ -1323,8 +1337,10 @@ const MobileJobWizard = ({
   };
 
   const handleEmploymentTypeClick = () => {
+    const isCurrentlyOpen = showEmploymentTypeDropdown;
+    closeAllDropdowns();
     setEmploymentTypeSearchTerm(''); // Reset search to show all options
-    setShowEmploymentTypeDropdown(!showEmploymentTypeDropdown);
+    setShowEmploymentTypeDropdown(!isCurrentlyOpen);
   };
 
   const handleSalaryTypeSearch = (value: string) => {
@@ -1339,8 +1355,10 @@ const MobileJobWizard = ({
   };
 
   const handleSalaryTypeClick = () => {
+    const isCurrentlyOpen = showSalaryTypeDropdown;
+    closeAllDropdowns();
     setSalaryTypeSearchTerm(''); // Reset search to show all options
-    setShowSalaryTypeDropdown(!showSalaryTypeDropdown);
+    setShowSalaryTypeDropdown(!isCurrentlyOpen);
   };
 
   // Salary Transparency options (EU directive 2026)
@@ -1382,8 +1400,10 @@ const MobileJobWizard = ({
   };
 
   const handleSalaryTransparencyClick = () => {
+    const isCurrentlyOpen = showSalaryTransparencyDropdown;
+    closeAllDropdowns();
     setSalaryTransparencySearchTerm(''); // Reset search to show all options
-    setShowSalaryTransparencyDropdown(!showSalaryTransparencyDropdown);
+    setShowSalaryTransparencyDropdown(!isCurrentlyOpen);
   };
 
   const handleWorkLocationSearch = (value: string) => {
@@ -1398,8 +1418,10 @@ const MobileJobWizard = ({
   };
 
   const handleWorkLocationClick = () => {
+    const isCurrentlyOpen = showWorkLocationDropdown;
+    closeAllDropdowns();
     setWorkLocationSearchTerm('');
-    setShowWorkLocationDropdown(!showWorkLocationDropdown);
+    setShowWorkLocationDropdown(!isCurrentlyOpen);
   };
 
   const handleRemoteWorkSearch = (value: string) => {
@@ -1414,8 +1436,10 @@ const MobileJobWizard = ({
   };
 
   const handleRemoteWorkClick = () => {
+    const isCurrentlyOpen = showRemoteWorkDropdown;
+    closeAllDropdowns();
     setRemoteWorkSearchTerm('');
-    setShowRemoteWorkDropdown(!showRemoteWorkDropdown);
+    setShowRemoteWorkDropdown(!isCurrentlyOpen);
   };
 
   const filteredQuestionTypes = questionTypeSearchTerm.length > 0

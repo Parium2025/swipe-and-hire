@@ -554,9 +554,21 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     setShowEmploymentTypeDropdown(false);
   };
 
+  // Helper function to close all dropdowns
+  const closeAllDropdowns = () => {
+    setShowEmploymentTypeDropdown(false);
+    setShowSalaryTypeDropdown(false);
+    setShowSalaryTransparencyDropdown(false);
+    setShowWorkLocationDropdown(false);
+    setShowRemoteWorkDropdown(false);
+    setShowQuestionTypeDropdown(false);
+  };
+
   const handleEmploymentTypeClick = () => {
+    const isCurrentlyOpen = showEmploymentTypeDropdown;
+    closeAllDropdowns();
     setEmploymentTypeSearchTerm('');
-    setShowEmploymentTypeDropdown(!showEmploymentTypeDropdown);
+    setShowEmploymentTypeDropdown(!isCurrentlyOpen);
   };
 
   const handleSalaryTypeSearch = (value: string) => {
@@ -571,8 +583,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   };
 
   const handleSalaryTypeClick = () => {
+    const isCurrentlyOpen = showSalaryTypeDropdown;
+    closeAllDropdowns();
     setSalaryTypeSearchTerm('');
-    setShowSalaryTypeDropdown(!showSalaryTypeDropdown);
+    setShowSalaryTypeDropdown(!isCurrentlyOpen);
   };
 
   const handleWorkLocationSearch = (value: string) => {
@@ -587,8 +601,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   };
 
   const handleWorkLocationClick = () => {
+    const isCurrentlyOpen = showWorkLocationDropdown;
+    closeAllDropdowns();
     setWorkLocationSearchTerm('');
-    setShowWorkLocationDropdown(!showWorkLocationDropdown);
+    setShowWorkLocationDropdown(!isCurrentlyOpen);
   };
 
   const handleRemoteWorkSearch = (value: string) => {
@@ -603,8 +619,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   };
 
   const handleRemoteWorkClick = () => {
+    const isCurrentlyOpen = showRemoteWorkDropdown;
+    closeAllDropdowns();
     setRemoteWorkSearchTerm('');
-    setShowRemoteWorkDropdown(!showRemoteWorkDropdown);
+    setShowRemoteWorkDropdown(!isCurrentlyOpen);
   };
 
   const handleSalaryTransparencySearch = (value: string) => {
@@ -619,8 +637,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   };
 
   const handleSalaryTransparencyClick = () => {
+    const isCurrentlyOpen = showSalaryTransparencyDropdown;
+    closeAllDropdowns();
     setSalaryTransparencySearchTerm('');
-    setShowSalaryTransparencyDropdown(!showSalaryTransparencyDropdown);
+    setShowSalaryTransparencyDropdown(!isCurrentlyOpen);
   };
 
   const handleWorkplacePostalCodeChange = useCallback((postalCode: string) => {
