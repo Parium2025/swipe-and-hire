@@ -1996,7 +1996,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         if (filteredTemplates.length === 0) {
                           return (
                             <div className="text-white text-sm text-center py-8">
-                              Du har inga sparade frågor än
+                              Du har inga sparade frågor.
                             </div>
                           );
                         }
@@ -2120,6 +2120,40 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <p className="text-white font-medium">{formData.occupation || '-'}</p>
                   </div>
                   <div className="border-t border-white/30" />
+                  
+                  <div>
+                    <p className="text-white text-sm mb-1">Anställningstyp</p>
+                    <p className="text-white">{EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '-'}</p>
+                  </div>
+                  <div className="border-t border-white/30" />
+                  
+                  <div>
+                    <p className="text-white text-sm mb-1">Lönetyp</p>
+                    <p className="text-white">{salaryTypes.find(t => t.value === formData.salary_type)?.label || '-'}</p>
+                  </div>
+                  <div className="border-t border-white/30" />
+                  
+                  <div>
+                    <p className="text-white text-sm mb-1">Lönetransparens</p>
+                    <p className="text-white">{salaryTransparencyOptions.find(t => t.value === formData.salary_transparency)?.label || '-'}</p>
+                  </div>
+                  <div className="border-t border-white/30" />
+                  
+                  <div>
+                    <p className="text-white text-sm mb-1">Antal att rekrytera</p>
+                    <p className="text-white">{formData.positions_count || '-'}</p>
+                  </div>
+                  <div className="border-t border-white/30" />
+                  
+                  {formData.benefits && formData.benefits.length > 0 && (
+                    <>
+                      <div>
+                        <p className="text-white text-sm mb-1">Förmåner</p>
+                        <p className="text-white">{formData.benefits.join(', ')}</p>
+                      </div>
+                      <div className="border-t border-white/30" />
+                    </>
+                  )}
                   
                   <div>
                     <p className="text-white text-sm mb-1">Beskrivning</p>
