@@ -54,18 +54,35 @@ const CompanyProfile = () => {
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const [formData, setFormData] = useState({
-    company_name: profile?.company_name || '',
-    org_number: profile?.org_number || '',
-    industry: profile?.industry || '',
-    address: profile?.address || '',
-    website: profile?.website || '',
-    company_description: profile?.company_description || '',
-    employee_count: profile?.employee_count || '',
-    company_logo_url: (profile as any)?.company_logo_url || '',
-    // Use social_media_links from DB (correct field name)
-    social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
-  });
+  // Session storage key for persisting unsaved state across tab switches
+  const SESSION_STORAGE_KEY = 'company-profile-unsaved-state';
+
+  const getInitialFormData = () => {
+    // Try to restore from sessionStorage first (for tab switches)
+    try {
+      const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to restore company profile state from sessionStorage');
+    }
+    
+    return {
+      company_name: profile?.company_name || '',
+      org_number: profile?.org_number || '',
+      industry: profile?.industry || '',
+      address: profile?.address || '',
+      website: profile?.website || '',
+      company_description: profile?.company_description || '',
+      employee_count: profile?.employee_count || '',
+      company_logo_url: (profile as any)?.company_logo_url || '',
+      social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
+    };
+  };
+
+  const [formData, setFormData] = useState(getInitialFormData);
 
   const [newSocialLink, setNewSocialLink] = useState({
     platform: '' as SocialMediaLink['platform'] | '',
@@ -77,7 +94,18 @@ const CompanyProfile = () => {
   // Validation state
   const [orgNumberError, setOrgNumberError] = useState('');
 
-  // Update form data when profile changes
+  // Save unsaved state to sessionStorage when formData changes
+  useEffect(() => {
+    if (hasUnsavedChanges) {
+      try {
+        sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(formData));
+      } catch (e) {
+        console.warn('Failed to save company profile state to sessionStorage');
+      }
+    }
+  }, [formData, hasUnsavedChanges]);
+
+  // Update form data when profile changes (only if no unsaved changes from sessionStorage)
   useEffect(() => {
     if (profile) {
       const values = {
@@ -92,11 +120,14 @@ const CompanyProfile = () => {
         social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
       };
       
-      setFormData(values);
+      // Only reset form if there's no saved session state
+      const savedState = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      if (!savedState) {
+        setFormData(values);
+      }
       setOriginalValues(values);
-      setHasUnsavedChanges(false);
     }
-  }, [profile, setHasUnsavedChanges]);
+  }, [profile]);
 
   const checkForChanges = useCallback(() => {
     if (!originalValues.company_name) return false; // Not loaded yet
@@ -359,6 +390,9 @@ const CompanyProfile = () => {
       setFormData(updatedValues);
       setOriginalValues(updatedValues);
       setHasUnsavedChanges(false);
+      
+      // Clear sessionStorage after successful save
+      sessionStorage.removeItem(SESSION_STORAGE_KEY);
 
       toast({
         title: "Företagsprofil uppdaterad",
