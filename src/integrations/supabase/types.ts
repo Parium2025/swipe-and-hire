@@ -696,6 +696,10 @@ export type Database = {
     }
     Functions: {
       employer_owns_job: { Args: { p_job_id: string }; Returns: boolean }
+      employer_owns_job_for_question: {
+        Args: { p_job_id: string }
+        Returns: boolean
+      }
       get_applicant_profile_image: {
         Args: { p_applicant_id: string; p_employer_id: string }
         Returns: string
