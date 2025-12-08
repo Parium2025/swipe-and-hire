@@ -197,9 +197,9 @@ const CompanyProfile = () => {
       if (!user.data.user) throw new Error('User not authenticated');
 
       const timestamp = Date.now();
-      const fileExt = 'png';
+      const fileExt = 'webp';
       
-      // Upload cropped version
+      // Upload cropped version (WebP format from ImageEditor)
       const croppedFileName = `${user.data.user.id}/${timestamp}-company-logo.${fileExt}`;
       const { error: uploadError } = await supabase.storage
         .from('company-logos')

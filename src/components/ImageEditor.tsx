@@ -34,9 +34,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [hasUserMadeChanges, setHasUserMadeChanges] = useState(false); // Track if user actually edited
   const initialScaleRef = useRef<number>(1); // Store initial scale to compare
 
-  const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
-  const CANVAS_HEIGHT = BASE_CANVAS_HEIGHT;
-  const CANVAS_WIDTH = Math.round(BASE_CANVAS_HEIGHT * aspectRatio);
+  const BASE_CANVAS_SIZE = 640; // Output canvas size in px (optimal for 3x retina)
+  const CANVAS_HEIGHT = BASE_CANVAS_SIZE;
+  const CANVAS_WIDTH = Math.round(BASE_CANVAS_SIZE * aspectRatio);
   const MAX_SCALE = 3;
 
   // Reset state when dialog opens/closes
@@ -304,11 +304,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     console.log('ImageEditor: Starting save process...');
     
     try {
-      // Använd Promise för att vänta på blob-generering
+      // Use WebP format with 95% quality for optimal balance
       const blob = await new Promise<Blob | null>((resolve) => {
         canvasRef.current!.toBlob((result) => {
           resolve(result);
-        }, 'image/png', 1.0);
+        }, 'image/webp', 0.95);
       });
       
       if (blob) {
