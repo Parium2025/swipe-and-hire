@@ -471,10 +471,10 @@ const CompanyProfile = () => {
           )}
         </div>
 
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2 -ml-1">
           {/* Invisible spacer for visual balance when trash icon is shown */}
           {formData.company_logo_url && (
-            <div className="w-9 h-9 invisible" aria-hidden="true" />
+            <div className="w-7 h-9 invisible" aria-hidden="true" />
           )}
           
           {isUploadingLogo ? (
