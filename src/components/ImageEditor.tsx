@@ -245,17 +245,19 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     setIsDragging(false);
   };
 
-  // Zoom functions
+  // Zoom functions - use percentage-based steps for smoother zooming
+  const ZOOM_STEP = 0.1; // 10% per click
+  
   const zoomIn = () => {
     if (isSaving) return;
-    setScale(prev => Math.min(prev + 0.2, MAX_SCALE));
-    setHasUserMadeChanges(true); // User made manual change
+    setScale(prev => Math.min(prev * (1 + ZOOM_STEP), MAX_SCALE));
+    setHasUserMadeChanges(true);
   };
 
   const zoomOut = () => {
     if (isSaving) return;
-    setScale(prev => Math.max(prev - 0.2, minScale));
-    setHasUserMadeChanges(true); // User made manual change
+    setScale(prev => Math.max(prev * (1 - ZOOM_STEP), minScale));
+    setHasUserMadeChanges(true);
   };
 
   const resetPosition = () => {
