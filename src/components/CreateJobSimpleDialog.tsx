@@ -638,8 +638,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           }
         }}
         templateToEdit={templateToEdit}
-        onTemplateCreated={() => {
-          fetchTemplates();
+        onTemplateCreated={async () => {
+          // Invalidate cache first to force fresh fetch
+          queryClient.invalidateQueries({ queryKey: ['job-templates', user?.id] });
+          // Also clear local cache to bypass early return
+          queryClient.removeQueries({ queryKey: ['job-templates', user?.id] });
+          await fetchTemplates();
           setTemplateToEdit(null);
           toast({
             title: templateToEdit ? "Mall uppdaterad!" : "Mall skapad!",
