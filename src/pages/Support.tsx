@@ -164,7 +164,7 @@ const Support = () => {
       </div>
 
       {/* Support Form */}
-      <div className="bg-white/5 border border-white/10 hover:border-white/50 rounded-lg">
+      <div className="bg-white/5 border border-white/10 rounded-lg">
         <div className="px-6 py-4 border-b border-white/10">
           <h3 className="text-lg font-semibold text-white">Skicka ett meddelande</h3>
           <p className="text-sm text-white">Beskriv ditt problem eller din fråga så detaljerat som möjligt</p>
@@ -240,7 +240,7 @@ const Support = () => {
       </div>
 
       {/* Existing Tickets */}
-      <div className="bg-white/5 border border-white/10 hover:border-white/50 rounded-lg">
+      <div className="bg-white/5 border border-white/10 rounded-lg">
         <div className="px-6 py-4 border-b border-white/10">
           <h3 className="text-lg font-semibold text-white">Dina supportärenden</h3>
           <p className="text-sm text-white">Översikt över dina tidigare och pågående supportärenden</p>

@@ -289,7 +289,7 @@ const EmployerProfile = () => {
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Min Profil</h1>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
               <div className="space-y-1.5">
