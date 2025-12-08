@@ -2123,8 +2123,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
           {/* Footer Navigation - exakt samma styling som MobileJobWizard */}
           {!showQuestionForm && (
-            <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
-              {currentStep > 0 ? (
+            <div className={`flex items-center p-4 border-t border-white/20 flex-shrink-0 ${currentStep === 0 ? 'justify-start' : 'justify-between'}`}>
+              {currentStep > 0 && (
                 <Button
                   variant="outline"
                   onClick={prevStep}
@@ -2133,8 +2133,6 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
                 </Button>
-              ) : (
-                <div />
               )}
 
               {isLastStep ? (
