@@ -188,6 +188,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   const [initialCustomQuestions, setInitialCustomQuestions] = useState<JobQuestion[]>([]);
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const workEndTimeRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -1661,6 +1662,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
                           const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
                           handleInputChange('work_start_time', formatted);
+                          // Auto-focus end time when start time is complete
+                          if (formatted.length === 5) {
+                            workEndTimeRef.current?.focus();
+                          }
                         }}
                         onBlur={(e) => {
                           const value = e.target.value;
@@ -1680,6 +1685,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <span className="text-white/60 text-sm">–</span>
                     <div className="flex-1">
                       <Input
+                        ref={workEndTimeRef}
                         type="text"
                         inputMode="numeric"
                         value={formData.work_end_time}
