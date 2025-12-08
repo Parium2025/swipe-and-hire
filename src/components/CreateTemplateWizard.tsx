@@ -2124,15 +2124,18 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
           {/* Footer Navigation - exakt samma styling som MobileJobWizard */}
           {!showQuestionForm && (
             <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
-              <Button
-                variant="outline"
-                onClick={prevStep}
-                disabled={currentStep === 0}
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-all duration-300 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Tillbaka
-              </Button>
+              {currentStep > 0 ? (
+                <Button
+                  variant="outline"
+                  onClick={prevStep}
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-all duration-300 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Tillbaka
+                </Button>
+              ) : (
+                <div />
+              )}
 
               {isLastStep ? (
                 <Button
