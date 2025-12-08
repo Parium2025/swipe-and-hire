@@ -715,6 +715,10 @@ export type Database = {
         }[]
       }
       get_user_organization_id: { Args: { p_user_id: string }; Returns: string }
+      has_applied_to_employer: {
+        Args: { p_applicant_id: string; p_employer_id: string }
+        Returns: boolean
+      }
       is_org_admin: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
