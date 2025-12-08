@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Search, Pencil, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Search, Pencil, Check, CheckCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
@@ -2121,43 +2121,47 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             )}
           </div>
 
-          {/* Footer Navigation */}
+          {/* Footer Navigation - exakt samma styling som MobileJobWizard */}
           {!showQuestionForm && (
-            <div className="flex-shrink-0 p-4 border-t border-white/20 bg-background/10">
-              <div className="flex items-center justify-between gap-2">
-                {currentStep > 0 && (
-                  <Button
-                    onClick={prevStep}
-                    variant="outline"
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 shrink-0 min-w-[120px]"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Tillbaka
-                  </Button>
-                )}
-                
-                {!isLastStep && (
-                  <Button
-                    onClick={nextStep}
-                    disabled={!validateCurrentStep()}
-                    className="bg-primary hover:bg-primary/90 text-white touch-border-white focus:ring-2 focus:ring-white/40 shrink-0 min-w-[120px]"
-                  >
-                    Nästa
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                )}
-                
-                {isLastStep && (
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={loading || !validateCurrentStep()}
-                    className={`bg-primary hover:bg-primary/90 text-white shrink-0 min-w-[120px] ${(!loading && validateCurrentStep()) ? 'touch-border-white' : ''}`}
-                  >
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {templateToEdit ? 'Uppdatera mall' : 'Skapa mall'}
-                  </Button>
-                )}
-              </div>
+            <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
+              <Button
+                variant="outline"
+                onClick={prevStep}
+                disabled={currentStep === 0}
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-all duration-300 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Tillbaka
+              </Button>
+
+              {isLastStep ? (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={loading || !validateCurrentStep()}
+                  className="bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-8 py-2 transition-all duration-300"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sparar...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      {templateToEdit ? 'Uppdatera mall' : 'Skapa mall'}
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={nextStep}
+                  disabled={!validateCurrentStep()}
+                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-all duration-300 focus:outline-none"
+                >
+                  Nästa
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              )}
             </div>
           )}
         </div>
