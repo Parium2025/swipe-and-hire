@@ -785,9 +785,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
              formData.employment_type &&
              formData.salary_type &&
              formData.salary_transparency &&
-             parseInt(formData.positions_count) > 0 &&
-             formData.work_start_time.trim() &&
-             formData.work_end_time.trim();
+             parseInt(formData.positions_count) > 0;
     }
     if (currentStep === 2) {
       return (
@@ -1721,67 +1719,6 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
-                  <div className="flex gap-3 items-center">
-                    <div className="flex-1">
-                      <Input
-                        type="text"
-                        inputMode="numeric"
-                        value={formData.work_start_time}
-                        onChange={(e) => {
-                          const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
-                          const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
-                          handleInputChange('work_start_time', formatted);
-                          // Auto-focus end time when start time is complete
-                          if (formatted.length === 5) {
-                            workEndTimeRef.current?.focus();
-                          }
-                        }}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !value.includes(':')) {
-                            const padded = value.padStart(2, '0') + ':00';
-                            handleInputChange('work_start_time', padded);
-                          } else if (value && value.includes(':') && value.split(':')[1].length < 2) {
-                            const [hours, mins] = value.split(':');
-                            handleInputChange('work_start_time', `${hours}:${mins.padEnd(2, '0')}`);
-                          }
-                        }}
-                        placeholder="08:00"
-                        maxLength={5}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
-                      />
-                    </div>
-                    <span className="text-white/60 text-sm">–</span>
-                    <div className="flex-1">
-                      <Input
-                        ref={workEndTimeRef}
-                        type="text"
-                        inputMode="numeric"
-                        value={formData.work_end_time}
-                        onChange={(e) => {
-                          const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
-                          const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
-                          handleInputChange('work_end_time', formatted);
-                        }}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !value.includes(':')) {
-                            const padded = value.padStart(2, '0') + ':00';
-                            handleInputChange('work_end_time', padded);
-                          } else if (value && value.includes(':') && value.split(':')[1].length < 2) {
-                            const [hours, mins] = value.split(':');
-                            handleInputChange('work_end_time', `${hours}:${mins.padEnd(2, '0')}`);
-                          }
-                        }}
-                        placeholder="17:00"
-                        maxLength={5}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
 
