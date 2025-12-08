@@ -1980,7 +1980,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       <Button
                         onClick={createNewQuestion}
                         size="sm"
-                        className="bg-primary hover:bg-primary/90 text-white touch-border-white"
+                        className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium"
                       >
                         Skapa ny fråga
                         <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -1995,7 +1995,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
                         if (filteredTemplates.length === 0) {
                           return (
-                            <div className="text-white/60 text-sm text-center py-8">
+                            <div className="text-white text-sm text-center py-8">
                               Du har inga sparade frågor än
                             </div>
                           );
@@ -2039,7 +2039,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                         </div>
                                       </button>
                                       <div className="flex items-center gap-1">
-                                        <Button
+                                        <button
+                                          type="button"
                                           onClick={() => {
                                             // Edit template - open it in edit mode
                                             setEditingQuestion({
@@ -2049,13 +2050,12 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                             setShowQuestionTemplates(false);
                                             setShowQuestionForm(true);
                                           }}
-                                          variant="ghost"
-                                          size="sm"
-                                          className="text-primary hover:text-primary hover:bg-primary/15 h-6 w-6 p-0 flex-shrink-0"
+                                          className="p-1.5 text-white hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
                                         >
-                                          <Pencil className="h-3 w-3 text-[hsl(var(--pure-white))]" />
-                                        </Button>
-                                        <Button
+                                          <Pencil className="h-3 w-3" />
+                                        </button>
+                                        <button
+                                          type="button"
                                           onClick={async () => {
                                             if (!template.id) return;
                                             try {
@@ -2078,12 +2078,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                               });
                                             }
                                           }}
-                                          variant="ghost"
-                                          size="sm"
-                                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0 flex-shrink-0"
+                                          className="p-1.5 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
                                         >
                                           <Trash2 className="h-3 w-3" />
-                                        </Button>
+                                        </button>
                                       </div>
                                     </div>
                                   ))}
