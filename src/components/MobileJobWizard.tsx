@@ -1921,8 +1921,10 @@ const MobileJobWizard = ({
       }
 
       toast({
-        title: "Utkast sparat",
-        description: "Annonsen har sparats som utkast. Du hittar den i 'Mina annonser'."
+        title: existingJob?.id ? "Utkast uppdaterat" : "Utkast sparat",
+        description: existingJob?.id 
+          ? "Dina ändringar har sparats." 
+          : "Annonsen har sparats som utkast. Du hittar den i 'Mina annonser'."
       });
 
       // Clear sessionStorage after successful save
