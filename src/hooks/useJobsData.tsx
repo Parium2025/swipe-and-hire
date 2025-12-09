@@ -33,30 +33,70 @@ export interface Recruiter {
   last_name: string;
 }
 
-export const useJobsData = () => {
+interface UseJobsDataOptions {
+  scope?: 'personal' | 'organization';
+}
+
+export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal' }) => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
+  const { scope } = options;
 
+  // For organization scope, we need to fetch jobs from all users in the same organization
   const { data: jobs = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['jobs', profile?.organization_id, user?.id],
+    queryKey: ['jobs', scope, profile?.organization_id, user?.id],
     queryFn: async () => {
       if (!user) return [];
       
-      const query = supabase
-        .from('job_postings')
-        .select(`
-          *,
-          employer_profile:profiles!job_postings_employer_id_fkey (
-            first_name,
-            last_name
-          )
-        `)
-        .eq('employer_id', user.id)
-        .order('created_at', { ascending: false });
+      if (scope === 'organization' && profile?.organization_id) {
+        // Fetch all jobs from users in the same organization
+        // First get all user_ids in the organization
+        const { data: orgUsers, error: orgError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('organization_id', profile.organization_id)
+          .eq('is_active', true);
+        
+        if (orgError) throw orgError;
+        
+        const userIds = orgUsers?.map(u => u.user_id) || [];
+        
+        // If no org users found, fall back to just the current user
+        if (userIds.length === 0) {
+          userIds.push(user.id);
+        }
+        
+        const { data, error } = await supabase
+          .from('job_postings')
+          .select(`
+            *,
+            employer_profile:profiles!job_postings_employer_id_fkey (
+              first_name,
+              last_name
+            )
+          `)
+          .in('employer_id', userIds)
+          .order('created_at', { ascending: false });
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return data || [];
+        if (error) throw error;
+        return data || [];
+      } else {
+        // Personal scope - only current user's jobs
+        const { data, error } = await supabase
+          .from('job_postings')
+          .select(`
+            *,
+            employer_profile:profiles!job_postings_employer_id_fkey (
+              first_name,
+              last_name
+            )
+          `)
+          .eq('employer_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+      }
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -75,7 +115,7 @@ export const useJobsData = () => {
   }), [activeJobsList]);
 
   const invalidateJobs = () => {
-    queryClient.invalidateQueries({ queryKey: ['jobs', profile?.organization_id] });
+    queryClient.invalidateQueries({ queryKey: ['jobs'] });
   };
 
   // Get unique recruiters from jobs

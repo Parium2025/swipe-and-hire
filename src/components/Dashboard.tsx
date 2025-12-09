@@ -16,7 +16,8 @@ import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 
 const Dashboard = memo(() => {
-  const { jobs: allJobs, stats, recruiters, isLoading } = useJobsData();
+  // Dashboard shows organization-wide data (all colleagues' published jobs)
+  const { jobs: allJobs, stats, recruiters, isLoading } = useJobsData({ scope: 'organization' });
   const { profile } = useAuth();
   const navigate = useNavigate();
 
