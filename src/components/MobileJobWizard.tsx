@@ -511,6 +511,8 @@ const MobileJobWizard = ({
       salary_min: selectedTemplate?.salary_min?.toString() || prev.salary_min,
       salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
       salary_type: selectedTemplate?.salary_type || prev.salary_type,
+      salary_transparency: selectedTemplate?.salary_transparency || prev.salary_transparency,
+      benefits: selectedTemplate?.benefits || prev.benefits,
       employment_type: selectedTemplate?.employment_type || prev.employment_type,
       work_location_type: selectedTemplate?.work_location_type || prev.work_location_type,
       remote_work_possible: selectedTemplate?.remote_work_possible || prev.remote_work_possible,
