@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Search, Pencil, Check, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, Search, Pencil, Check, CheckCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
@@ -29,52 +29,17 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
-interface JobQuestion {
-  id?: string;
-  template_id?: string; // Link to template for syncing updates
-  question_text: string;
-  question_type: 'text' | 'yes_no' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range' | 'video';
-  options?: string[];
-  is_required: boolean;
-  order_index: number;
-  min_value?: number;
-  max_value?: number;
-  placeholder_text?: string;
-  usage_count?: number;
-}
-
-interface TemplateFormData {
-  name: string;
-  title: string;
-  description: string;
-  requirements: string;
-  location: string;
-  occupation: string;
-  salary_min: string;
-  salary_max: string;
-  employment_type: string;
-  salary_type: string;
-  salary_transparency: string;
-  positions_count: string;
-  work_location_type: string;
-  remote_work_possible: string;
-  workplace_name: string;
-  workplace_address: string;
-  workplace_postal_code: string;
-  workplace_city: string;
-  work_schedule: string;
-  work_start_time: string;
-  work_end_time: string;
-  contact_email: string;
-  application_instructions: string;
-  pitch: string;
-  benefits: string[];
-}
+// Import shared wizard components and types
+import { SortableQuestionItem } from '@/components/wizard/SortableQuestionItem';
+import { 
+  JobQuestion, 
+  TemplateFormData,
+  createEmptyTemplateFormData,
+  createEmptyQuestion,
+} from '@/types/jobWizard';
 
 interface CreateTemplateWizardProps {
   open: boolean;
@@ -83,74 +48,6 @@ interface CreateTemplateWizardProps {
   templateToEdit?: any;
   onBack?: () => void;
 }
-
-// Sortable Question Item Component
-interface SortableQuestionItemProps {
-  question: JobQuestion;
-  onEdit: (question: JobQuestion) => void;
-  onDelete: (id: string) => void;
-}
-
-const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionItemProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: question.id! });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="bg-white/5 rounded-md p-2 border border-white/20"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          {/* Drag handle */}
-          <div
-            {...attributes}
-            {...listeners}
-            className="text-white hover:text-white cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
-          >
-            <GripVertical className="h-3.5 w-3.5" />
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="text-white font-medium text-sm leading-tight truncate">
-              {question.question_text || 'Ingen frågetext'}
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-1 ml-1.5 flex-shrink-0">
-          <button
-            type="button"
-            onClick={() => onEdit(question)}
-            className="p-1.5 text-white hover:bg-white/10 rounded-full transition-all duration-300"
-          >
-            <Pencil className="h-3 w-3" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(question.id!)}
-            className="p-1.5 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300"
-          >
-            <Trash2 className="h-3 w-3" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateToEdit, onBack }: CreateTemplateWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
