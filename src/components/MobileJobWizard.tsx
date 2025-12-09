@@ -1769,35 +1769,23 @@ const MobileJobWizard = ({
       const jobData = {
         employer_id: user.id,
         title: formData.title || 'Utkast',
-        description: formData.description,
+        description: formData.description || null,
         requirements: formData.requirements || null,
-        location: formData.location,
+        location: formData.workplace_city || formData.location || null,
         occupation: formData.occupation || null,
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
-        salary_type: formData.salary_type || null,
         salary_transparency: formData.salary_transparency || null,
         benefits: formData.benefits.length > 0 ? formData.benefits : null,
-        positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
-        work_location_type: formData.work_location_type || null,
-        remote_work_possible: formData.remote_work_possible || null,
-        workplace_name: formData.workplace_name || null,
-        workplace_address: formData.workplace_address || null,
-        workplace_postal_code: formData.workplace_postal_code || null,
-        workplace_city: formData.workplace_city || null,
-        workplace_county: workplaceCounty,
-        workplace_municipality: workplaceMunicipality,
         work_schedule: formData.work_schedule || null,
         work_start_time: formData.work_start_time || null,
         work_end_time: formData.work_end_time || null,
-        contact_email: formData.contact_email || null,
-        application_instructions: formData.application_instructions || null,
-        pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
-        category,
         is_active: false // Save as draft - not published
       };
+
+      console.log('Saving draft job:', jobData);
 
       const { data: jobPost, error } = await supabase
         .from('job_postings')
