@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -75,6 +76,7 @@ const MobileJobWizard = ({
   onJobCreated,
   onBack
 }: MobileJobWizardProps) => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   
   // Drag and drop sensors
@@ -1847,7 +1849,9 @@ const MobileJobWizard = ({
       }
       
       onJobCreated(jobPost);
-
+      
+      // Navigate to my-jobs instead of dashboard
+      navigate('/my-jobs');
     } catch (error) {
       console.error('Save draft error:', error);
       toast({
