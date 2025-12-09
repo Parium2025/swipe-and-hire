@@ -66,11 +66,24 @@ interface ExistingJob {
   salary_min?: number | null;
   salary_max?: number | null;
   employment_type?: string | null;
+  salary_type?: string | null;
   salary_transparency?: string | null;
   benefits?: string[] | null;
+  positions_count?: number | null;
+  work_location_type?: string | null;
+  remote_work_possible?: string | null;
+  workplace_name?: string | null;
+  workplace_address?: string | null;
+  workplace_postal_code?: string | null;
+  workplace_city?: string | null;
+  workplace_county?: string | null;
+  workplace_municipality?: string | null;
   work_schedule?: string | null;
   work_start_time?: string | null;
   work_end_time?: string | null;
+  contact_email?: string | null;
+  application_instructions?: string | null;
+  pitch?: string | null;
   job_image_url?: string | null;
   is_active?: boolean;
 }
@@ -134,12 +147,25 @@ const MobileJobWizard = ({
           occupation: existingJob.occupation || '',
           salary_min: existingJob.salary_min?.toString() || '',
           salary_max: existingJob.salary_max?.toString() || '',
+          salary_type: existingJob.salary_type || '',
           salary_transparency: existingJob.salary_transparency || '',
           benefits: existingJob.benefits || [],
+          positions_count: existingJob.positions_count?.toString() || '1',
+          work_location_type: existingJob.work_location_type || 'på-plats',
+          remote_work_possible: existingJob.remote_work_possible || 'nej',
+          workplace_name: existingJob.workplace_name || '',
+          workplace_address: existingJob.workplace_address || '',
+          workplace_postal_code: existingJob.workplace_postal_code || '',
+          workplace_city: existingJob.workplace_city || '',
+          workplace_county: existingJob.workplace_county || '',
+          workplace_municipality: existingJob.workplace_municipality || '',
           employment_type: existingJob.employment_type || '',
           work_schedule: existingJob.work_schedule || '',
           work_start_time: existingJob.work_start_time || '',
           work_end_time: existingJob.work_end_time || '',
+          contact_email: existingJob.contact_email || '',
+          application_instructions: existingJob.application_instructions || '',
+          pitch: existingJob.pitch || '',
           job_image_url: existingJob.job_image_url || '',
           location: existingJob.location || '',
         }));
