@@ -177,15 +177,15 @@ const EmployerDashboard = memo(() => {
     }
   };
 
-  // Only count active jobs for dashboard stats (exclude drafts)
+  // Count active jobs for stats, but "Mina annonser" shows all jobs (including drafts)
   const activeJobs = useMemo(() => jobs.filter(j => j.is_active), [jobs]);
   
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Totalt annonser', value: activeJobs.length, loading: false },
+    { icon: Briefcase, title: 'Mina annonser', value: jobs.length, loading: false },
     { icon: TrendingUp, title: 'Aktiva annonser', value: activeJobs.length, loading: false },
     { icon: Eye, title: 'Totala visningar', value: activeJobs.reduce((s, j) => s + j.views_count, 0), loading: false },
     { icon: Users, title: 'Ansökningar', value: activeJobs.reduce((s, j) => s + j.applications_count, 0), loading: false },
-  ], [activeJobs]);
+  ], [jobs, activeJobs]);
 
   // Wait for data before showing content with fade
   if (loading) {
