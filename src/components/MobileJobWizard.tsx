@@ -391,6 +391,7 @@ const MobileJobWizard = ({
   const [showHingePreview, setShowHingePreview] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [previewAnswers, setPreviewAnswers] = useState<Record<string, string>>({});
+  const [desktopPreviewAnswers, setDesktopPreviewAnswers] = useState<Record<string, string>>({});
   const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
   const screenRef = useRef<HTMLDivElement>(null);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
@@ -3196,9 +3197,9 @@ const MobileJobWizard = ({
                                          </div>
                                         
                                          {/* Input förhandsvisning baserat på frågetyp */}
-                                         {question.question_type === 'text' && (
+                                          {question.question_type === 'text' && (
                                            <textarea
-                                             className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none"
+                                             className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40"
                                              placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                              rows={2}
                                            />
@@ -3739,7 +3740,7 @@ const MobileJobWizard = ({
                                               {/* Input förhandsvisning baserat på frågetyp */}
                                               {question.question_type === 'text' && (
                                                 <textarea
-                                                  className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none"
+                                                  className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40"
                                                   placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                   rows={2}
                                                 />
@@ -3750,7 +3751,7 @@ const MobileJobWizard = ({
                                                   <button
                                                     type="button"
                                                     onClick={() =>
-                                                      setPreviewAnswers((prev) => {
+                                                      setDesktopPreviewAnswers((prev) => {
                                                         const key = question.id || `q_${index}`;
                                                         const current = prev[key];
                                                         return {
@@ -3760,7 +3761,7 @@ const MobileJobWizard = ({
                                                       })
                                                     }
                                                     className={
-                                                    (previewAnswers[question.id || `q_${index}`] === 'yes'
+                                                    (desktopPreviewAnswers[question.id || `q_${index}`] === 'yes'
                                                          ? 'bg-secondary/40 border-secondary text-white '
                                                          : 'bg-white/10 border-white/20 text-white ') +
                                                        'border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1'
@@ -3771,7 +3772,7 @@ const MobileJobWizard = ({
                                                   <button
                                                     type="button"
                                                     onClick={() =>
-                                                      setPreviewAnswers((prev) => {
+                                                      setDesktopPreviewAnswers((prev) => {
                                                         const key = question.id || `q_${index}`;
                                                         const current = prev[key];
                                                         return {
@@ -3781,7 +3782,7 @@ const MobileJobWizard = ({
                                                       })
                                                     }
                                                     className={
-                                                    (previewAnswers[question.id || `q_${index}`] === 'no'
+                                                    (desktopPreviewAnswers[question.id || `q_${index}`] === 'no'
                                                          ? 'bg-secondary/40 border-secondary text-white '
                                                          : 'bg-white/10 border-white/20 text-white ') +
                                                        'border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1'
@@ -3797,7 +3798,7 @@ const MobileJobWizard = ({
                                                   <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
                                                   <div className="space-y-1">
                                                     {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
-                                                      const selectedAnswers = previewAnswers[question.id || `q_${index}`];
+                                                      const selectedAnswers = desktopPreviewAnswers[question.id || `q_${index}`];
                                                       const answersArray = typeof selectedAnswers === 'string' 
                                                         ? selectedAnswers.split('|||') 
                                                         : [];
@@ -3808,7 +3809,7 @@ const MobileJobWizard = ({
                                                           key={optIndex}
                                                           type="button"
                                                           onClick={() => {
-                                                            setPreviewAnswers((prev) => {
+                                                            setDesktopPreviewAnswers((prev) => {
                                                               const currentAnswers = prev[question.id || `q_${index}`];
                                                               const answersArray = typeof currentAnswers === 'string'
                                                                 ? currentAnswers.split('|||').filter(a => a)
