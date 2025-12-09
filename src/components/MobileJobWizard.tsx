@@ -3422,22 +3422,39 @@ const MobileJobWizard = ({
                                           <Briefcase className="h-3 w-3 mr-1 text-white" />
                                           Yrke
                                         </h5>
-                                        <p className="text-xs text-white/80">{formData.occupation}</p>
+                                        <p className="text-xs text-white">{formData.occupation}</p>
                                       </div>
                                     )}
 
-                                    {/* Jobbeskrivning */}
+                                    {/* Jobbeskrivning - visa hela som på mobil */}
                                     {formData.description && (
                                       <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                         <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                           <FileText className="h-3 w-3 mr-1 text-white" />
                                           Jobbeskrivning
                                         </h5>
-                                        <p className="text-xs text-white/80 whitespace-pre-wrap">
-                                          {formData.description.length > 150 
-                                            ? formData.description.substring(0, 150) + '...' 
-                                            : formData.description}
-                                        </p>
+                                        <div className="text-xs text-white leading-relaxed break-words">
+                                          {formData.description.split('\n').map((line, index) => {
+                                            const trimmedLine = line.trim();
+                                            const bulletMatch = trimmedLine.match(/^([•\-\*])\s*(.*)$/);
+                                            
+                                            if (bulletMatch) {
+                                              const [, bullet, text] = bulletMatch;
+                                              return (
+                                                <div key={index} className="flex">
+                                                  <span className="flex-shrink-0 mr-1">{bullet}</span>
+                                                  <span className="flex-1 break-words">{text}</span>
+                                                </div>
+                                              );
+                                            }
+                                            
+                                            return trimmedLine ? (
+                                              <div key={index}>{trimmedLine}</div>
+                                            ) : (
+                                              <div key={index} className="h-3"></div>
+                                            );
+                                          })}
+                                        </div>
                                       </div>
                                     )}
 
@@ -3448,7 +3465,7 @@ const MobileJobWizard = ({
                                           <Banknote className="h-3 w-3 mr-1 text-white" />
                                           Lön
                                         </h5>
-                                        <div className="text-xs text-white/80 space-y-0.5">
+                                        <div className="text-xs text-white space-y-0.5">
                                           {formatSalaryInfo().map((info, index) => (
                                             <div key={index} className="font-medium">{info}</div>
                                           ))}
@@ -3463,7 +3480,7 @@ const MobileJobWizard = ({
                                           <Banknote className="h-3 w-3 mr-1 text-white" />
                                           Lönetransparens
                                         </h5>
-                                        <div className="text-xs text-white/80">
+                                        <div className="text-xs text-white">
                                           <div className="font-medium">{formatSalaryTransparency()}</div>
                                         </div>
                                       </div>
@@ -3475,7 +3492,7 @@ const MobileJobWizard = ({
                                         <MapPin className="h-3 w-3 mr-1 text-white" />
                                         Arbetsplats
                                       </h5>
-                                      <div className="text-xs text-white/80 space-y-0.5">
+                                      <div className="text-xs text-white space-y-0.5">
                                         {formData.workplace_name && (
                                           <div className="font-medium">{formData.workplace_name}</div>
                                         )}
@@ -3504,7 +3521,7 @@ const MobileJobWizard = ({
                                           <Users className="h-3 w-3 mr-1 text-white" />
                                           Antal rekryteringar
                                         </h5>
-                                        <div className="text-xs text-white/80">
+                                        <div className="text-xs text-white">
                                           <div className="font-medium">{formatPositionsCount()}</div>
                                         </div>
                                       </div>
@@ -3517,7 +3534,7 @@ const MobileJobWizard = ({
                                           <Clock className="h-3 w-3 mr-1 text-white" />
                                           Arbetstider
                                         </h5>
-                                        <div className="text-xs text-white/80">
+                                        <div className="text-xs text-white">
                                           <div className="font-medium">
                                             {formData.work_start_time && formData.work_end_time 
                                               ? `${formData.work_start_time} – ${formData.work_end_time}`
@@ -3534,7 +3551,7 @@ const MobileJobWizard = ({
                                           <Heart className="h-3 w-3 mr-1 text-white" />
                                           Förmåner
                                         </h5>
-                                        <div className="text-xs text-white/80 space-y-0.5">
+                                        <div className="text-xs text-white space-y-0.5">
                                           {formData.benefits.map((benefit, idx) => (
                                             <div key={idx} className="flex items-start">
                                               <span className="flex-shrink-0 mr-1">•</span>
@@ -3551,7 +3568,7 @@ const MobileJobWizard = ({
                                         <Mail className="h-3 w-3 mr-1 text-white" />
                                         Kontakt
                                       </h5>
-                                      <div className="text-xs text-white/80">
+                                      <div className="text-xs text-white">
                                         {formData.contact_email && (
                                           <a 
                                             href={`mailto:${formData.contact_email}`}
@@ -3563,24 +3580,22 @@ const MobileJobWizard = ({
                                       </div>
                                     </div>
 
-                                    {/* Krav */}
+                                    {/* Krav - visa hela som på mobil */}
                                     {formData.requirements && (
                                       <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                         <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                           <CheckSquare className="h-3 w-3 mr-1 text-white" />
                                           Kvalifikationer
                                         </h5>
-                                        <p className="text-xs text-white/80 whitespace-pre-wrap">
-                                          {formData.requirements.length > 100 
-                                            ? formData.requirements.substring(0, 100) + '...' 
-                                            : formData.requirements}
+                                        <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">
+                                          {formData.requirements}
                                         </p>
                                       </div>
                                     )}
 
                                     {/* Följande information samlas automatiskt in */}
                                     <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                      <p className="text-xs text-white/80 mb-1.5 leading-relaxed">
+                                      <p className="text-xs text-white mb-1.5 leading-relaxed">
                                         Följande information samlas automatiskt in från alla kandidater som har sökt:
                                       </p>
                                       <div className="space-y-0.5">
@@ -3597,32 +3612,122 @@ const MobileJobWizard = ({
                                           'Tillgänglighet',
                                         ].map((label, idx) => (
                                           <div key={idx} className="text-xs flex">
-                                            <span className="flex-shrink-0 mr-1 text-white/60">•</span>
-                                            <span className="flex-1 text-white/80 leading-tight">{label}</span>
+                                            <span className="flex-shrink-0 mr-1 text-white">•</span>
+                                            <span className="flex-1 text-white leading-tight">{label}</span>
                                           </div>
                                         ))}
                                       </div>
                                     </div>
 
-                                    {/* Ansökningsfrågor */}
+                                    {/* Anpassade frågor - visa alla individuellt som på mobil */}
                                     {customQuestions.length > 0 && (
-                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                        <h5 className="text-xs font-medium text-white mb-1 flex items-center">
-                                          <List className="h-3 w-3 mr-1 text-white" />
-                                          Ansökningsfrågor ({customQuestions.length} st)
-                                        </h5>
-                                        <div className="space-y-1">
-                                          {customQuestions.slice(0, 2).map((q, i) => (
-                                            <div key={i} className="flex items-start gap-1 text-xs">
-                                              <span className="text-white/40">{i + 1}.</span>
-                                              <span className="text-white/80">{q.question_text}</span>
-                                              {q.is_required && <span className="text-red-300 text-[10px]">*</span>}
+                                      <div className="space-y-1.5">
+                                        {customQuestions.map((question, index) => {
+                                          const typeLabels: Record<string, string> = {
+                                            number: 'Siffra',
+                                            text: 'Text',
+                                            multiple_choice: 'Flerval',
+                                            yes_no: 'Ja/Nej',
+                                            date: 'Datum',
+                                            file: 'Fil',
+                                            video: 'Video',
+                                          };
+
+                                          return (
+                                            <div key={question.id || index} className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              {/* Frågetext */}
+                                              <div className="mb-1.5">
+                                                <label className="text-xs font-medium text-white block leading-tight">
+                                                  {question.question_text}
+                                                  {question.is_required && <span className="text-red-300 ml-1">*</span>}
+                                                </label>
+                                              </div>
+                                             
+                                              {/* Input förhandsvisning baserat på frågetyp */}
+                                              {question.question_type === 'text' && (
+                                                <textarea
+                                                  className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none"
+                                                  placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                                  rows={2}
+                                                  disabled
+                                                />
+                                              )}
+                                             
+                                              {question.question_type === 'yes_no' && (
+                                                <div className="flex gap-1.5">
+                                                  <button
+                                                    type="button"
+                                                    className="bg-white/10 border-white/20 text-white border rounded-md px-1.5 py-0.5 text-xs font-medium flex-1"
+                                                    disabled
+                                                  >
+                                                    Ja
+                                                  </button>
+                                                  <button
+                                                    type="button"
+                                                    className="bg-white/10 border-white/20 text-white border rounded-md px-1.5 py-0.5 text-xs font-medium flex-1"
+                                                    disabled
+                                                  >
+                                                    Nej
+                                                  </button>
+                                                </div>
+                                              )}
+                                             
+                                              {question.question_type === 'multiple_choice' && (
+                                                <div className="space-y-1">
+                                                  <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
+                                                  <div className="space-y-1">
+                                                    {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
+                                                      <div
+                                                        key={optIndex}
+                                                        className="bg-white/5 border border-white/10 text-white w-full flex items-center gap-2 rounded px-2 py-1"
+                                                      >
+                                                        <div className="w-2 h-2 rounded-sm border border-white/40 flex-shrink-0" />
+                                                        <span className="text-xs text-white">{option}</span>
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                </div>
+                                              )}
+                                             
+                                              {question.question_type === 'number' && (
+                                                <div className="space-y-1.5">
+                                                  <div className="text-center text-sm font-semibold text-white">
+                                                    {question.min_value ?? 0}
+                                                  </div>
+                                                  <input
+                                                    type="range"
+                                                    min={question.min_value ?? 0}
+                                                    max={question.max_value ?? 100}
+                                                    defaultValue={question.min_value ?? 0}
+                                                    className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary"
+                                                    disabled
+                                                  />
+                                                </div>
+                                              )}
+                                             
+                                              {question.question_type === 'date' && (
+                                                <input
+                                                  type="date"
+                                                  className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9"
+                                                  disabled
+                                                />
+                                              )}
+                                             
+                                              {(question.question_type === 'file' || question.question_type === 'video') && (
+                                                <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
+                                                  {question.question_type === 'file' ? (
+                                                    <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                  ) : (
+                                                    <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                  )}
+                                                  <p className="text-sm text-white/60">
+                                                    {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
+                                                  </p>
+                                                </div>
+                                              )}
                                             </div>
-                                          ))}
-                                          {customQuestions.length > 2 && (
-                                            <p className="text-white/50 text-[10px]">+{customQuestions.length - 2} fler frågor</p>
-                                          )}
-                                        </div>
+                                          );
+                                        })}
                                       </div>
                                     )}
                                   </div>
