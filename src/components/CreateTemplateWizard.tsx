@@ -2086,7 +2086,30 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <>
                       <div>
                         <p className="text-white text-sm mb-1">Förmåner</p>
-                        <p className="text-white">{formData.benefits.join(', ')}</p>
+                        <p className="text-white">
+                          {formData.benefits.map(benefitValue => {
+                            const benefitOptions = [
+                              { value: 'friskvard', label: 'Friskvårdsbidrag' },
+                              { value: 'tjanstepension', label: 'Tjänstepension' },
+                              { value: 'kollektivavtal', label: 'Kollektivavtal' },
+                              { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
+                              { value: 'bonus', label: 'Bonus' },
+                              { value: 'tjanstebil', label: 'Tjänstebil' },
+                              { value: 'mobiltelefon', label: 'Mobiltelefon' },
+                              { value: 'utbildning', label: 'Utbildning/kompetensutveckling' },
+                              { value: 'forsakringar', label: 'Försäkringar' },
+                              { value: 'extra-semester', label: 'Extra semesterdagar' },
+                              { value: 'gym', label: 'Gym/träning' },
+                              { value: 'foraldraledithet', label: 'Föräldraledighetstillägg' },
+                              { value: 'lunch', label: 'Lunch/mat' },
+                              { value: 'fri-parkering', label: 'Fri parkering' },
+                              { value: 'personalrabatter', label: 'Personalrabatter' },
+                            ];
+                            const benefit = benefitOptions.find(b => b.value === benefitValue);
+                            // For custom benefits, capitalize first letter
+                            return benefit ? benefit.label : benefitValue.charAt(0).toUpperCase() + benefitValue.slice(1);
+                          }).join(', ')}
+                        </p>
                       </div>
                       <div className="border-t border-white/30" />
                     </>
