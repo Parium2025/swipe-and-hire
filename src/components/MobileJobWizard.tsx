@@ -1853,11 +1853,28 @@ const MobileJobWizard = ({
 
       console.log('Saving draft job:', jobData);
 
-      const { data: jobPost, error } = await supabase
-        .from('job_postings')
-        .insert([jobData])
-        .select()
-        .single();
+      let jobPost;
+      let error;
+
+      // If editing an existing job, update it instead of creating new
+      if (existingJob?.id) {
+        const { data, error: updateError } = await supabase
+          .from('job_postings')
+          .update(jobData)
+          .eq('id', existingJob.id)
+          .select()
+          .single();
+        jobPost = data;
+        error = updateError;
+      } else {
+        const { data, error: insertError } = await supabase
+          .from('job_postings')
+          .insert([jobData])
+          .select()
+          .single();
+        jobPost = data;
+        error = insertError;
+      }
 
       if (error) {
         toast({
@@ -1870,25 +1887,36 @@ const MobileJobWizard = ({
       }
 
       // Save questions to job_questions table if there are any
-      if (customQuestions.length > 0 && jobPost) {
-        const questionData = customQuestions.map(q => ({
-          job_id: jobPost.id,
-          question_text: q.question_text,
-          question_type: q.question_type,
-          options: q.options || null,
-          is_required: q.is_required,
-          order_index: q.order_index,
-          placeholder_text: q.placeholder_text || null,
-          min_value: q.min_value || null,
-          max_value: q.max_value || null
-        }));
+      if (jobPost) {
+        // If editing existing job, delete old questions first
+        if (existingJob?.id) {
+          await supabase
+            .from('job_questions')
+            .delete()
+            .eq('job_id', existingJob.id);
+        }
 
-        const { error: questionsError } = await supabase
-          .from('job_questions')
-          .insert(questionData);
+        // Then insert new questions if any
+        if (customQuestions.length > 0) {
+          const questionData = customQuestions.map(q => ({
+            job_id: jobPost.id,
+            question_text: q.question_text,
+            question_type: q.question_type,
+            options: q.options || null,
+            is_required: q.is_required,
+            order_index: q.order_index,
+            placeholder_text: q.placeholder_text || null,
+            min_value: q.min_value || null,
+            max_value: q.max_value || null
+          }));
 
-        if (questionsError) {
-          console.error('Error saving questions:', questionsError);
+          const { error: questionsError } = await supabase
+            .from('job_questions')
+            .insert(questionData);
+
+          if (questionsError) {
+            console.error('Error saving questions:', questionsError);
+          }
         }
       }
 
@@ -1979,11 +2007,28 @@ const MobileJobWizard = ({
         is_active: true
       };
 
-      const { data: jobPost, error } = await supabase
-        .from('job_postings')
-        .insert([jobData])
-        .select()
-        .single();
+      let jobPost;
+      let error;
+
+      // If editing an existing draft, update it instead of creating new
+      if (existingJob?.id) {
+        const { data, error: updateError } = await supabase
+          .from('job_postings')
+          .update(jobData)
+          .eq('id', existingJob.id)
+          .select()
+          .single();
+        jobPost = data;
+        error = updateError;
+      } else {
+        const { data, error: insertError } = await supabase
+          .from('job_postings')
+          .insert([jobData])
+          .select()
+          .single();
+        jobPost = data;
+        error = insertError;
+      }
 
       if (error) {
         toast({
@@ -1995,25 +2040,36 @@ const MobileJobWizard = ({
       }
 
       // Save questions to job_questions table if there are any
-      if (customQuestions.length > 0 && jobPost) {
-        const questionData = customQuestions.map(q => ({
-          job_id: jobPost.id,
-          question_text: q.question_text,
-          question_type: q.question_type,
-          options: q.options || null,
-          is_required: q.is_required,
-          order_index: q.order_index,
-          placeholder_text: q.placeholder_text || null,
-          min_value: q.min_value || null,
-          max_value: q.max_value || null
-        }));
+      if (jobPost) {
+        // If editing existing job, delete old questions first
+        if (existingJob?.id) {
+          await supabase
+            .from('job_questions')
+            .delete()
+            .eq('job_id', existingJob.id);
+        }
 
-        const { error: questionsError } = await supabase
-          .from('job_questions')
-          .insert(questionData);
+        // Then insert new questions if any
+        if (customQuestions.length > 0) {
+          const questionData = customQuestions.map(q => ({
+            job_id: jobPost.id,
+            question_text: q.question_text,
+            question_type: q.question_type,
+            options: q.options || null,
+            is_required: q.is_required,
+            order_index: q.order_index,
+            placeholder_text: q.placeholder_text || null,
+            min_value: q.min_value || null,
+            max_value: q.max_value || null
+          }));
 
-        if (questionsError) {
-          console.error('Error saving questions:', questionsError);
+          const { error: questionsError } = await supabase
+            .from('job_questions')
+            .insert(questionData);
+
+          if (questionsError) {
+            console.error('Error saving questions:', questionsError);
+          }
         }
       }
 
