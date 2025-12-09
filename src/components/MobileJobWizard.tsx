@@ -1274,8 +1274,29 @@ const MobileJobWizard = ({
   // Format salary transparency for display (shown as separate section)
   const formatSalaryTransparency = () => {
     if (!formData.salary_transparency) return null;
+    
+    // First, try to find exact match in options
     const transparencyOption = salaryTransparencyOptions.find(t => t.value === formData.salary_transparency);
-    return transparencyOption ? transparencyOption.label : null;
+    if (transparencyOption) return transparencyOption.label;
+    
+    // Handle legacy format like "50000-60000" by converting to label
+    const legacyMatch = formData.salary_transparency.match(/^(\d+)-(\d+)$/);
+    if (legacyMatch) {
+      const min = parseInt(legacyMatch[1]);
+      const max = parseInt(legacyMatch[2]);
+      // Check if it's the old format (values > 100 means it's in SEK, not thousands)
+      if (min >= 1000 || max >= 1000) {
+        return `${min.toLocaleString('sv-SE')} - ${max.toLocaleString('sv-SE')} kr`;
+      }
+    }
+    
+    // Handle "100+" format
+    if (formData.salary_transparency === '100+') {
+      return '100 000+ kr';
+    }
+    
+    // Fallback: just display the raw value
+    return formData.salary_transparency;
   };
 
   // Format positions count for display
@@ -3720,7 +3741,6 @@ const MobileJobWizard = ({
                                                   className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none"
                                                   placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                   rows={2}
-                                                  disabled
                                                 />
                                               )}
                                              
@@ -3728,15 +3748,43 @@ const MobileJobWizard = ({
                                                 <div className="flex gap-1.5">
                                                   <button
                                                     type="button"
-                                                    className="bg-white/10 border-white/20 text-white border rounded-md px-1.5 py-0.5 text-xs font-medium flex-1"
-                                                    disabled
+                                                    onClick={() =>
+                                                      setPreviewAnswers((prev) => {
+                                                        const key = question.id || `q_${index}`;
+                                                        const current = prev[key];
+                                                        return {
+                                                          ...prev,
+                                                          [key]: current === 'yes' ? '' : 'yes',
+                                                        };
+                                                      })
+                                                    }
+                                                    className={
+                                                    (previewAnswers[question.id || `q_${index}`] === 'yes'
+                                                         ? 'bg-secondary/40 border-secondary text-white '
+                                                         : 'bg-white/10 border-white/20 text-white ') +
+                                                       'border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1'
+                                                    }
                                                   >
                                                     Ja
                                                   </button>
                                                   <button
                                                     type="button"
-                                                    className="bg-white/10 border-white/20 text-white border rounded-md px-1.5 py-0.5 text-xs font-medium flex-1"
-                                                    disabled
+                                                    onClick={() =>
+                                                      setPreviewAnswers((prev) => {
+                                                        const key = question.id || `q_${index}`;
+                                                        const current = prev[key];
+                                                        return {
+                                                          ...prev,
+                                                          [key]: current === 'no' ? '' : 'no',
+                                                        };
+                                                      })
+                                                    }
+                                                    className={
+                                                    (previewAnswers[question.id || `q_${index}`] === 'no'
+                                                         ? 'bg-secondary/40 border-secondary text-white '
+                                                         : 'bg-white/10 border-white/20 text-white ') +
+                                                       'border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1'
+                                                    }
                                                   >
                                                     Nej
                                                   </button>
@@ -3747,22 +3795,60 @@ const MobileJobWizard = ({
                                                 <div className="space-y-1">
                                                   <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
                                                   <div className="space-y-1">
-                                                    {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                                      <div
-                                                        key={optIndex}
-                                                        className="bg-white/5 border border-white/10 text-white w-full flex items-center gap-2 rounded px-2 py-1"
-                                                      >
-                                                        <div className="w-2 h-2 rounded-sm border border-white/40 flex-shrink-0" />
-                                                        <span className="text-xs text-white">{option}</span>
-                                                      </div>
-                                                    ))}
+                                                    {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
+                                                      const selectedAnswers = previewAnswers[question.id || `q_${index}`];
+                                                      const answersArray = typeof selectedAnswers === 'string' 
+                                                        ? selectedAnswers.split('|||') 
+                                                        : [];
+                                                      const selected = answersArray.includes(option);
+                                                      
+                                                      return (
+                                                        <button
+                                                          key={optIndex}
+                                                          type="button"
+                                                          onClick={() => {
+                                                            setPreviewAnswers((prev) => {
+                                                              const currentAnswers = prev[question.id || `q_${index}`];
+                                                              const answersArray = typeof currentAnswers === 'string'
+                                                                ? currentAnswers.split('|||').filter(a => a)
+                                                                : [];
+                                                              
+                                                              if (answersArray.includes(option)) {
+                                                                const newAnswers = answersArray.filter(a => a !== option);
+                                                                return {
+                                                                  ...prev,
+                                                                  [question.id || `q_${index}`]: newAnswers.join('|||'),
+                                                                };
+                                                              } else {
+                                                                return {
+                                                                  ...prev,
+                                                                  [question.id || `q_${index}`]: [...answersArray, option].join('|||'),
+                                                                };
+                                                              }
+                                                            });
+                                                          }}
+                                                          className={
+                                                            (selected
+                                                              ? 'bg-secondary/40 border-secondary '
+                                                              : 'bg-white/5 border-white/10 ') +
+                                                            'text-white w-full flex items-center gap-2 rounded px-2 py-1 border transition-colors'
+                                                          }
+                                                        >
+                                                          <div className={
+                                                            (selected ? 'bg-secondary border-secondary ' : 'border-white/40 ') +
+                                                            'w-2 h-2 rounded-sm border flex-shrink-0'
+                                                          } />
+                                                          <span className="text-xs text-white">{option}</span>
+                                                        </button>
+                                                      );
+                                                    })}
                                                   </div>
                                                 </div>
                                               )}
                                              
                                               {question.question_type === 'number' && (
                                                 <div className="space-y-1.5">
-                                                  <div className="text-center text-sm font-semibold text-white">
+                                                  <div id={`desktop-number-value-${index}`} className="text-center text-sm font-semibold text-white">
                                                     {question.min_value ?? 0}
                                                   </div>
                                                   <input
@@ -3770,8 +3856,11 @@ const MobileJobWizard = ({
                                                     min={question.min_value ?? 0}
                                                     max={question.max_value ?? 100}
                                                     defaultValue={question.min_value ?? 0}
-                                                    className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary"
-                                                    disabled
+                                                    className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                                                    onChange={(e) => {
+                                                      const valueDisplay = document.getElementById(`desktop-number-value-${index}`);
+                                                      if (valueDisplay) valueDisplay.textContent = e.target.value;
+                                                    }}
                                                   />
                                                 </div>
                                               )}
@@ -3780,7 +3869,6 @@ const MobileJobWizard = ({
                                                 <input
                                                   type="date"
                                                   className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9"
-                                                  disabled
                                                 />
                                               )}
                                              
