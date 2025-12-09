@@ -14,13 +14,19 @@ interface MobileJobCardProps {
   onToggleStatus: (jobId: string, currentStatus: boolean) => void;
   onEdit: (job: JobPosting) => void;
   onDelete: (job: JobPosting) => void;
+  onEditDraft?: (job: JobPosting) => void;
 }
 
-export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEditDraft }: MobileJobCardProps) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/job-details/${job.id}`);
+    // If job is inactive (draft) and onEditDraft is provided, open wizard instead
+    if (!job.is_active && onEditDraft) {
+      onEditDraft(job);
+    } else {
+      navigate(`/job-details/${job.id}`);
+    }
   };
 
   return (

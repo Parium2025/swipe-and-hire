@@ -38,6 +38,7 @@ import {
 import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
+import MobileJobWizard from '@/components/MobileJobWizard';
 
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
@@ -48,6 +49,10 @@ const EmployerDashboard = memo(() => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  
+  // State for editing drafts in wizard
+  const [draftToEdit, setDraftToEdit] = useState<JobPosting | null>(null);
+  const [draftWizardOpen, setDraftWizardOpen] = useState(false);
   
   const {
     searchInput,
@@ -157,6 +162,21 @@ const EmployerDashboard = memo(() => {
     setEditDialogOpen(true);
   };
 
+  // Handle editing draft jobs - open wizard instead of job-details
+  const handleEditDraft = (job: JobPosting) => {
+    setDraftToEdit(job);
+    setDraftWizardOpen(true);
+  };
+
+  // Handle row click - drafts open wizard, active jobs go to details
+  const handleJobRowClick = (job: JobPosting) => {
+    if (!job.is_active) {
+      handleEditDraft(job);
+    } else {
+      navigate(`/job-details/${job.id}`);
+    }
+  };
+
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Totalt annonser', value: jobs.length, loading: false },
     { icon: TrendingUp, title: 'Aktiva annonser', value: jobs.filter(j => j.is_active).length, loading: false },
@@ -244,7 +264,7 @@ const EmployerDashboard = memo(() => {
                       <TableRow 
                         key={job.id}
                         className="border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-colors"
-                        onClick={() => navigate(`/job-details/${job.id}`)}
+                        onClick={() => handleJobRowClick(job as JobPosting)}
                       >
                         <TableCell className="font-medium text-white px-2 py-2">
                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
@@ -350,6 +370,7 @@ const EmployerDashboard = memo(() => {
                           onToggleStatus={toggleJobStatus}
                           onEdit={handleEditJob}
                           onDelete={handleDeleteClick}
+                          onEditDraft={(j) => handleEditDraft(j as JobPosting)}
                         />
                       ))}
                     </div>
@@ -504,6 +525,25 @@ const EmployerDashboard = memo(() => {
         onOpenChange={setEditDialogOpen}
         onJobUpdated={invalidateJobs}
       />
+
+      {/* Draft editing wizard */}
+      {draftToEdit && (
+        <MobileJobWizard
+          open={draftWizardOpen}
+          onOpenChange={(open) => {
+            setDraftWizardOpen(open);
+            if (!open) setDraftToEdit(null);
+          }}
+          jobTitle={draftToEdit.title}
+          selectedTemplate={null}
+          onJobCreated={() => {
+            invalidateJobs();
+            setDraftWizardOpen(false);
+            setDraftToEdit(null);
+          }}
+          existingJob={draftToEdit}
+        />
+      )}
     </div>
   );
 });

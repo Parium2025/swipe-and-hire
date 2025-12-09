@@ -56,6 +56,25 @@ import {
   createEmptyQuestion,
 } from '@/types/jobWizard';
 
+interface ExistingJob {
+  id: string;
+  title: string;
+  description?: string | null;
+  requirements?: string | null;
+  location?: string | null;
+  occupation?: string | null;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  employment_type?: string | null;
+  salary_transparency?: string | null;
+  benefits?: string[] | null;
+  work_schedule?: string | null;
+  work_start_time?: string | null;
+  work_end_time?: string | null;
+  job_image_url?: string | null;
+  is_active?: boolean;
+}
+
 interface MobileJobWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -63,6 +82,7 @@ interface MobileJobWizardProps {
   selectedTemplate: JobTemplate | null;
   onJobCreated: (job: any) => void;
   onBack?: () => void;
+  existingJob?: ExistingJob | null;
 }
 
 // Session storage key for persisting unsaved job form state across tab switches
@@ -74,7 +94,8 @@ const MobileJobWizard = ({
   jobTitle, 
   selectedTemplate, 
   onJobCreated,
-  onBack
+  onBack,
+  existingJob
 }: MobileJobWizardProps) => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
@@ -94,17 +115,60 @@ const MobileJobWizard = ({
     console.log('MobileJobWizard: open changed', open);
   }, [open]);
   
-  // Always start from step 0 and reload template data when opening
+  // Always start from step 0 and reload template/existing job data when opening
   useEffect(() => {
     if (open) {
       setCurrentStep(0); // Always start from beginning
       
-      // Reset form state for fresh template load
+      // Reset form state for fresh load
       setInitialFormData(null);
       setHasUnsavedChanges(false);
       
-      // Force reload template data when opening
-      if (selectedTemplate) {
+      // Load existing job data if editing a draft
+      if (existingJob) {
+        setFormData(prev => ({
+          ...prev,
+          title: existingJob.title || '',
+          description: existingJob.description || '',
+          requirements: existingJob.requirements || '',
+          occupation: existingJob.occupation || '',
+          salary_min: existingJob.salary_min?.toString() || '',
+          salary_max: existingJob.salary_max?.toString() || '',
+          salary_transparency: existingJob.salary_transparency || '',
+          benefits: existingJob.benefits || [],
+          employment_type: existingJob.employment_type || '',
+          work_schedule: existingJob.work_schedule || '',
+          work_start_time: existingJob.work_start_time || '',
+          work_end_time: existingJob.work_end_time || '',
+          job_image_url: existingJob.job_image_url || '',
+          location: existingJob.location || '',
+        }));
+        
+        // Load existing questions for this job
+        const loadExistingQuestions = async () => {
+          const { data: questions } = await supabase
+            .from('job_questions')
+            .select('*')
+            .eq('job_id', existingJob.id)
+            .order('order_index');
+          
+          if (questions && questions.length > 0) {
+            setCustomQuestions(questions.map(q => ({
+              id: q.id,
+              question_text: q.question_text,
+              question_type: q.question_type as JobQuestion['question_type'],
+              options: q.options || [],
+              is_required: q.is_required ?? true,
+              order_index: q.order_index,
+              placeholder_text: q.placeholder_text || '',
+              min_value: q.min_value ?? undefined,
+              max_value: q.max_value ?? undefined,
+            })));
+          }
+        };
+        loadExistingQuestions();
+      } else if (selectedTemplate) {
+        // Force reload template data when opening
         setFormData(prev => ({
           ...prev,
           title: jobTitle,
@@ -170,7 +234,7 @@ const MobileJobWizard = ({
         setCustomQuestions([]);
       }
     }
-  }, [open, selectedTemplate, jobTitle]);
+  }, [open, selectedTemplate, jobTitle, existingJob]);
   
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
