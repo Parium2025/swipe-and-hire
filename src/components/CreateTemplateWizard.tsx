@@ -903,6 +903,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         salary_type: formData.salary_type || null,
+        salary_transparency: formData.salary_transparency || null,
+        benefits: formData.benefits.length > 0 ? formData.benefits : null,
         work_location_type: formData.work_location_type || null,
         remote_work_possible: formData.remote_work_possible || null,
         workplace_name: formData.workplace_name || null,
