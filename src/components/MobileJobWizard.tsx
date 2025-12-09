@@ -1174,7 +1174,7 @@ const MobileJobWizard = ({
     return `(${capitalizedText})`;
   };
 
-  // Format salary information for display
+  // Format salary information for display (without transparency - shown separately)
   const formatSalaryInfo = () => {
     const parts = [];
     
@@ -1196,16 +1196,15 @@ const MobileJobWizard = ({
         parts.push(salaryType.label);
       }
     }
-
-    // Add salary transparency if provided (EU directive 2026)
-    if (formData.salary_transparency) {
-      const transparencyOption = salaryTransparencyOptions.find(t => t.value === formData.salary_transparency);
-      if (transparencyOption) {
-        parts.push(`Lönespann: ${transparencyOption.label}`);
-      }
-    }
     
     return parts;
+  };
+
+  // Format salary transparency for display (shown as separate section)
+  const formatSalaryTransparency = () => {
+    if (!formData.salary_transparency) return null;
+    const transparencyOption = salaryTransparencyOptions.find(t => t.value === formData.salary_transparency);
+    return transparencyOption ? transparencyOption.label : null;
   };
 
   // Format positions count for display
@@ -2918,7 +2917,7 @@ const MobileJobWizard = ({
                                 )}
 
                                {/* Lön */}
-                               {(formData.salary_min || formData.salary_max || formData.salary_type || formData.salary_transparency) && (
+                               {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                   <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
                                     <h5 className="text-xs font-medium text_white mb-0.5 flex items-center">
                                        <Banknote className="h-2 w-2 mr-1 text-white" />
@@ -2929,6 +2928,19 @@ const MobileJobWizard = ({
                                         <div key={index} className="font-medium">{info}</div>
                                       ))}
                                     </div>
+                                 </div>
+                               )}
+
+                               {/* Lönetransparens (EU 2026) */}
+                               {formData.salary_transparency && formatSalaryTransparency() && (
+                                  <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                    <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                       <Banknote className="h-2 w-2 mr-1 text-white" />
+                                       Lönetransparens
+                                     </h5>
+                                     <div className="text-xs text-white leading-relaxed break-words">
+                                       <div className="font-medium">{formatSalaryTransparency()}</div>
+                                     </div>
                                  </div>
                                )}
 
@@ -3430,7 +3442,7 @@ const MobileJobWizard = ({
                                     )}
 
                                     {/* Lön - samma som mobil */}
-                                    {(formData.salary_min || formData.salary_max || formData.salary_type || formData.salary_transparency) && (
+                                    {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                       <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                         <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                           <Banknote className="h-3 w-3 mr-1 text-white" />
@@ -3440,6 +3452,19 @@ const MobileJobWizard = ({
                                           {formatSalaryInfo().map((info, index) => (
                                             <div key={index} className="font-medium">{info}</div>
                                           ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Lönetransparens (EU 2026) - samma som mobil */}
+                                    {formData.salary_transparency && formatSalaryTransparency() && (
+                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                          <Banknote className="h-3 w-3 mr-1 text-white" />
+                                          Lönetransparens
+                                        </h5>
+                                        <div className="text-xs text-white/80">
+                                          <div className="font-medium">{formatSalaryTransparency()}</div>
                                         </div>
                                       </div>
                                     )}
