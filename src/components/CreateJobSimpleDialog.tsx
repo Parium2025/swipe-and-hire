@@ -18,24 +18,7 @@ import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { useIsMobile } from '@/hooks/use-mobile';
-
-interface JobTemplate {
-  id: string;
-  name: string;
-  title: string;
-  description: string;
-  requirements?: string;
-  location: string;
-  employment_type?: string;
-  work_schedule?: string;
-  salary_min?: number;
-  salary_max?: number;
-  contact_email?: string;
-  application_instructions?: string;
-  category?: string;
-  is_default: boolean;
-  questions?: any[];
-}
+import { JobTemplate } from '@/types/jobWizard';
 
 interface CreateJobSimpleDialogProps {
   onJobCreated: (job: JobPosting) => void;
