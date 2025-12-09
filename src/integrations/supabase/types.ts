@@ -150,8 +150,11 @@ export type Database = {
       }
       job_postings: {
         Row: {
+          application_instructions: string | null
           applications_count: number | null
           benefits: string[] | null
+          category: string | null
+          contact_email: string | null
           created_at: string
           description: string | null
           employer_id: string
@@ -162,20 +165,34 @@ export type Database = {
           job_image_url: string | null
           location: string | null
           occupation: string | null
+          pitch: string | null
+          positions_count: number | null
+          remote_work_possible: string | null
           requirements: string | null
           salary_max: number | null
           salary_min: number | null
           salary_transparency: string | null
+          salary_type: string | null
           title: string
           updated_at: string
           views_count: number | null
           work_end_time: string | null
+          work_location_type: string | null
           work_schedule: string | null
           work_start_time: string | null
+          workplace_address: string | null
+          workplace_city: string | null
+          workplace_county: string | null
+          workplace_municipality: string | null
+          workplace_name: string | null
+          workplace_postal_code: string | null
         }
         Insert: {
+          application_instructions?: string | null
           applications_count?: number | null
           benefits?: string[] | null
+          category?: string | null
+          contact_email?: string | null
           created_at?: string
           description?: string | null
           employer_id: string
@@ -186,20 +203,34 @@ export type Database = {
           job_image_url?: string | null
           location?: string | null
           occupation?: string | null
+          pitch?: string | null
+          positions_count?: number | null
+          remote_work_possible?: string | null
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
           salary_transparency?: string | null
+          salary_type?: string | null
           title: string
           updated_at?: string
           views_count?: number | null
           work_end_time?: string | null
+          work_location_type?: string | null
           work_schedule?: string | null
           work_start_time?: string | null
+          workplace_address?: string | null
+          workplace_city?: string | null
+          workplace_county?: string | null
+          workplace_municipality?: string | null
+          workplace_name?: string | null
+          workplace_postal_code?: string | null
         }
         Update: {
+          application_instructions?: string | null
           applications_count?: number | null
           benefits?: string[] | null
+          category?: string | null
+          contact_email?: string | null
           created_at?: string
           description?: string | null
           employer_id?: string
@@ -210,16 +241,27 @@ export type Database = {
           job_image_url?: string | null
           location?: string | null
           occupation?: string | null
+          pitch?: string | null
+          positions_count?: number | null
+          remote_work_possible?: string | null
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
           salary_transparency?: string | null
+          salary_type?: string | null
           title?: string
           updated_at?: string
           views_count?: number | null
           work_end_time?: string | null
+          work_location_type?: string | null
           work_schedule?: string | null
           work_start_time?: string | null
+          workplace_address?: string | null
+          workplace_city?: string | null
+          workplace_county?: string | null
+          workplace_municipality?: string | null
+          workplace_name?: string | null
+          workplace_postal_code?: string | null
         }
         Relationships: [
           {
