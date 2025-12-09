@@ -3202,6 +3202,8 @@ const MobileJobWizard = ({
                                              className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40"
                                              placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                              rows={2}
+                                             value={previewAnswers[question.id || `q_${index}`] || ''}
+                                             onChange={(e) => setPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                            />
                                          )}
                                         
@@ -3312,19 +3314,16 @@ const MobileJobWizard = ({
                                         
                                         {question.question_type === 'number' && (
                                           <div className="space-y-1.5">
-                                            <div className="text-center text-sm font-semibold text-white" id={`number-value-${index}`}>
-                                              {question.min_value ?? 0}
+                                            <div className="text-center text-sm font-semibold text-white">
+                                              {previewAnswers[question.id || `q_${index}`] || question.min_value || 0}
                                             </div>
                                             <input
                                               type="range"
                                               min={question.min_value ?? 0}
                                               max={question.max_value ?? 100}
-                                              defaultValue={question.min_value ?? 0}
+                                              value={previewAnswers[question.id || `q_${index}`] || question.min_value || 0}
                                               className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
-                                              onChange={(e) => {
-                                                const valueDisplay = document.getElementById(`number-value-${index}`);
-                                                if (valueDisplay) valueDisplay.textContent = e.target.value;
-                                              }}
+                                              onChange={(e) => setPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                             />
                                           </div>
                                         )}
@@ -3332,9 +3331,9 @@ const MobileJobWizard = ({
                                         {question.question_type === 'date' && (
                                           <input
                                             type="date"
-                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9"
-                                            placeholder={question.placeholder_text}
-                                            disabled
+                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9 focus:outline-none focus:border-white/40"
+                                            value={previewAnswers[question.id || `q_${index}`] || ''}
+                                            onChange={(e) => setPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                           />
                                         )}
                                         
@@ -3743,6 +3742,8 @@ const MobileJobWizard = ({
                                                   className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40"
                                                   placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                   rows={2}
+                                                  value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
+                                                  onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                 />
                                               )}
                                              
@@ -3851,19 +3852,16 @@ const MobileJobWizard = ({
                                              
                                               {question.question_type === 'number' && (
                                                 <div className="space-y-1.5">
-                                                  <div id={`desktop-number-value-${index}`} className="text-center text-sm font-semibold text-white">
-                                                    {question.min_value ?? 0}
+                                                  <div className="text-center text-sm font-semibold text-white">
+                                                    {desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0}
                                                   </div>
                                                   <input
                                                     type="range"
                                                     min={question.min_value ?? 0}
                                                     max={question.max_value ?? 100}
-                                                    defaultValue={question.min_value ?? 0}
+                                                    value={desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0}
                                                     className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
-                                                    onChange={(e) => {
-                                                      const valueDisplay = document.getElementById(`desktop-number-value-${index}`);
-                                                      if (valueDisplay) valueDisplay.textContent = e.target.value;
-                                                    }}
+                                                    onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                   />
                                                 </div>
                                               )}
@@ -3871,7 +3869,9 @@ const MobileJobWizard = ({
                                               {question.question_type === 'date' && (
                                                 <input
                                                   type="date"
-                                                  className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9"
+                                                  className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9 focus:outline-none focus:border-white/40"
+                                                  value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
+                                                  onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                 />
                                               )}
                                              
