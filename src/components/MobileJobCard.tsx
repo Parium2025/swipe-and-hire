@@ -62,9 +62,9 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
         <div>
           <Badge
             variant={job.is_active ? "default" : "secondary"}
-            className={`text-xs ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
+            className={`text-xs ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}
           >
-            {job.is_active ? 'Aktiv' : 'Inaktiv'}
+            {job.is_active ? 'Aktiv' : 'Utkast'}
           </Badge>
         </div>
 
