@@ -4,7 +4,6 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -29,18 +28,19 @@ export function UnsavedChangesDialog({
 }: UnsavedChangesDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg">
+      <AlertDialogContent className="max-w-md bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden">
         <AlertDialogHeader>
           <AlertDialogTitle>Osparade ändringar</AlertDialogTitle>
           <AlertDialogDescription className="text-white">
             Du har osparade ändringar. Vad vill du göra?
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:justify-center">
+        {/* Custom footer with proper wrapping */}
+        <div className="flex flex-wrap gap-2 justify-center pt-2">
           <AlertDialogCancel 
             onClick={onCancel} 
             disabled={isSaving}
-            className="bg-white/10 border-white/30 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50 m-0"
+            className="bg-white/10 border-white/30 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50 mt-0"
           >
             Avbryt
           </AlertDialogCancel>
@@ -51,7 +51,7 @@ export function UnsavedChangesDialog({
                 onSaveAndLeave();
               }}
               disabled={isSaving}
-              className="bg-green-500/20 text-white border border-green-500/40 md:hover:bg-green-500/30 md:hover:border-green-500/50 md:hover:shadow-lg md:hover:scale-[1.02] transition-all m-0"
+              className="bg-green-500/20 text-white border border-green-500/40 md:hover:bg-green-500/30 md:hover:border-green-500/50 md:hover:shadow-lg md:hover:scale-[1.02] transition-all"
             >
               {isSaving ? (
                 <>
@@ -66,11 +66,11 @@ export function UnsavedChangesDialog({
           <AlertDialogAction 
             onClick={onConfirm} 
             disabled={isSaving}
-            className="bg-red-500/20 text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 md:hover:shadow-lg md:hover:scale-[1.02] transition-all m-0"
+            className="bg-red-500/20 text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 md:hover:shadow-lg md:hover:scale-[1.02] transition-all"
           >
             Lämna utan att spara
           </AlertDialogAction>
-        </AlertDialogFooter>
+        </div>
       </AlertDialogContent>
     </AlertDialog>
   );
