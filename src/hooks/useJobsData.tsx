@@ -64,12 +64,15 @@ export const useJobsData = () => {
   });
 
   // Memoize stats to prevent unnecessary recalculations
+  // Only count active jobs for dashboard stats (exclude drafts)
+  const activeJobsList = useMemo(() => jobs.filter(job => job.is_active), [jobs]);
+  
   const stats = useMemo(() => ({
-    totalJobs: jobs.length,
-    activeJobs: jobs.filter(job => job.is_active).length,
-    totalViews: jobs.reduce((sum, job) => sum + (job.views_count || 0), 0),
-    totalApplications: jobs.reduce((sum, job) => sum + (job.applications_count || 0), 0),
-  }), [jobs]);
+    totalJobs: activeJobsList.length,
+    activeJobs: activeJobsList.length,
+    totalViews: activeJobsList.reduce((sum, job) => sum + (job.views_count || 0), 0),
+    totalApplications: activeJobsList.reduce((sum, job) => sum + (job.applications_count || 0), 0),
+  }), [activeJobsList]);
 
   const invalidateJobs = () => {
     queryClient.invalidateQueries({ queryKey: ['jobs', profile?.organization_id] });
