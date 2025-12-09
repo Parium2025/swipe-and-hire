@@ -92,12 +92,83 @@ const MobileJobWizard = ({
     console.log('MobileJobWizard: open changed', open);
   }, [open]);
   
-  // Always start from step 0 when opening
+  // Always start from step 0 and reload template data when opening
   useEffect(() => {
     if (open) {
       setCurrentStep(0); // Always start from beginning
+      
+      // Reset form state for fresh template load
+      setInitialFormData(null);
+      setHasUnsavedChanges(false);
+      
+      // Force reload template data when opening
+      if (selectedTemplate) {
+        setFormData(prev => ({
+          ...prev,
+          title: jobTitle,
+          description: selectedTemplate.description || '',
+          requirements: selectedTemplate.requirements || '',
+          occupation: selectedTemplate.occupation || '',
+          salary_min: selectedTemplate.salary_min?.toString() || '',
+          salary_max: selectedTemplate.salary_max?.toString() || '',
+          salary_type: selectedTemplate.salary_type || '',
+          salary_transparency: selectedTemplate.salary_transparency || '',
+          benefits: selectedTemplate.benefits || [],
+          employment_type: selectedTemplate.employment_type || '',
+          work_location_type: selectedTemplate.work_location_type || 'på-plats',
+          remote_work_possible: selectedTemplate.remote_work_possible || 'nej',
+          workplace_name: selectedTemplate.workplace_name || '',
+          workplace_address: selectedTemplate.workplace_address || '',
+          positions_count: selectedTemplate.positions_count || '',
+          work_schedule: selectedTemplate.work_schedule || '',
+          contact_email: selectedTemplate.contact_email || '',
+          application_instructions: selectedTemplate.application_instructions || '',
+          pitch: selectedTemplate.pitch || '',
+        }));
+        
+        // Load template questions if available
+        if (selectedTemplate.questions && Array.isArray(selectedTemplate.questions)) {
+          const parsedQuestions = selectedTemplate.questions.map((q: any, index: number) => ({
+            id: q.id || `template-q-${index}`,
+            question_text: q.question_text || '',
+            question_type: q.question_type || 'text',
+            options: q.options || [],
+            is_required: q.is_required !== false,
+            order_index: q.order_index ?? index,
+            placeholder_text: q.placeholder_text || '',
+            min_value: q.min_value,
+            max_value: q.max_value,
+          }));
+          setCustomQuestions(parsedQuestions);
+        }
+      } else {
+        // No template - reset to empty form
+        setFormData(prev => ({
+          ...prev,
+          title: jobTitle,
+          description: '',
+          requirements: '',
+          occupation: '',
+          salary_min: '',
+          salary_max: '',
+          salary_type: '',
+          salary_transparency: '',
+          benefits: [],
+          employment_type: '',
+          work_location_type: 'på-plats',
+          remote_work_possible: 'nej',
+          workplace_name: '',
+          workplace_address: '',
+          positions_count: '',
+          work_schedule: '',
+          contact_email: '',
+          application_instructions: '',
+          pitch: '',
+        }));
+        setCustomQuestions([]);
+      }
     }
-  }, [open]);
+  }, [open, selectedTemplate, jobTitle]);
   
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
