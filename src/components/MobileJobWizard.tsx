@@ -183,6 +183,7 @@ const MobileJobWizard = ({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
   const [initialCustomQuestions, setInitialCustomQuestions] = useState<JobQuestion[]>([]);
   
@@ -1743,6 +1744,131 @@ const MobileJobWizard = ({
   const handleCancelClose = () => {
     setShowUnsavedDialog(false);
     setPendingClose(false);
+  };
+
+  // Save as draft (is_active: false) and close
+  const handleSaveAndLeave = async () => {
+    if (!user) return;
+    
+    setIsSavingDraft(true);
+    
+    try {
+      const category = categorizeJob(formData.title, formData.description, formData.occupation);
+      
+      // Hämta län och kommun från postnummer
+      let workplaceCounty = null;
+      let workplaceMunicipality = null;
+      if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
+        const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
+        if (postalInfo) {
+          workplaceCounty = postalInfo.county || null;
+          workplaceMunicipality = postalInfo.municipality || null;
+        }
+      }
+      
+      const jobData = {
+        employer_id: user.id,
+        title: formData.title || 'Utkast',
+        description: formData.description,
+        requirements: formData.requirements || null,
+        location: formData.location,
+        occupation: formData.occupation || null,
+        salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
+        salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
+        employment_type: formData.employment_type || null,
+        salary_type: formData.salary_type || null,
+        salary_transparency: formData.salary_transparency || null,
+        benefits: formData.benefits.length > 0 ? formData.benefits : null,
+        positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
+        work_location_type: formData.work_location_type || null,
+        remote_work_possible: formData.remote_work_possible || null,
+        workplace_name: formData.workplace_name || null,
+        workplace_address: formData.workplace_address || null,
+        workplace_postal_code: formData.workplace_postal_code || null,
+        workplace_city: formData.workplace_city || null,
+        workplace_county: workplaceCounty,
+        workplace_municipality: workplaceMunicipality,
+        work_schedule: formData.work_schedule || null,
+        work_start_time: formData.work_start_time || null,
+        work_end_time: formData.work_end_time || null,
+        contact_email: formData.contact_email || null,
+        application_instructions: formData.application_instructions || null,
+        pitch: formData.pitch || null,
+        job_image_url: formData.job_image_url || null,
+        category,
+        is_active: false // Save as draft - not published
+      };
+
+      const { data: jobPost, error } = await supabase
+        .from('job_postings')
+        .insert([jobData])
+        .select()
+        .single();
+
+      if (error) {
+        toast({
+          title: "Fel vid sparande",
+          description: error.message,
+          variant: "destructive"
+        });
+        setIsSavingDraft(false);
+        return;
+      }
+
+      // Save questions to job_questions table if there are any
+      if (customQuestions.length > 0 && jobPost) {
+        const questionData = customQuestions.map(q => ({
+          job_id: jobPost.id,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options || null,
+          is_required: q.is_required,
+          order_index: q.order_index,
+          placeholder_text: q.placeholder_text || null,
+          min_value: q.min_value || null,
+          max_value: q.max_value || null
+        }));
+
+        const { error: questionsError } = await supabase
+          .from('job_questions')
+          .insert(questionData);
+
+        if (questionsError) {
+          console.error('Error saving questions:', questionsError);
+        }
+      }
+
+      toast({
+        title: "Utkast sparat",
+        description: "Annonsen har sparats som utkast. Du hittar den i 'Mina annonser'."
+      });
+
+      // Clear sessionStorage after successful save
+      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+
+      // Reset and close
+      setIsSavingDraft(false);
+      setShowUnsavedDialog(false);
+      setPendingClose(false);
+      setHasUnsavedChanges(false);
+      
+      if (onBack) {
+        onBack();
+      } else {
+        onOpenChange(false);
+      }
+      
+      onJobCreated(jobPost);
+
+    } catch (error) {
+      console.error('Save draft error:', error);
+      toast({
+        title: "Ett fel uppstod",
+        description: "Kunde inte spara utkastet.",
+        variant: "destructive"
+      });
+      setIsSavingDraft(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -4115,6 +4241,8 @@ const MobileJobWizard = ({
           onOpenChange={setShowUnsavedDialog}
           onConfirm={handleConfirmClose}
           onCancel={handleCancelClose}
+          onSaveAndLeave={handleSaveAndLeave}
+          isSaving={isSavingDraft}
         />
 
         {/* Company Profile Dialog */}
