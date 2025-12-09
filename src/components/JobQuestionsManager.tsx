@@ -28,6 +28,8 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+// Note: This component uses a slightly different JobQuestion interface
+// with 'description' field and limited question_types for legacy compatibility
 interface JobQuestion {
   id?: string;
   question_text: string;
