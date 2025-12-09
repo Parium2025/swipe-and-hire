@@ -32,6 +32,8 @@ export interface BaseFormData {
   workplace_address: string;
   workplace_postal_code: string;
   workplace_city: string;
+  workplace_county: string;
+  workplace_municipality: string;
   work_schedule: string;
   contact_email: string;
   application_instructions: string;
@@ -209,6 +211,8 @@ export const createEmptyJobFormData = (): JobFormData => ({
   workplace_address: '',
   workplace_postal_code: '',
   workplace_city: '',
+  workplace_county: '',
+  workplace_municipality: '',
   work_schedule: '',
   work_start_time: '',
   work_end_time: '',
@@ -238,6 +242,8 @@ export const createEmptyTemplateFormData = (): TemplateFormData => ({
   workplace_address: '',
   workplace_postal_code: '',
   workplace_city: '',
+  workplace_county: '',
+  workplace_municipality: '',
   work_schedule: '',
   work_start_time: '',
   work_end_time: '',

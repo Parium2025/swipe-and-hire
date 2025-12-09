@@ -527,6 +527,8 @@ const MobileJobWizard = ({
       workplace_address: '',
       workplace_postal_code: '',
       workplace_city: '',
+      workplace_county: '',
+      workplace_municipality: '',
       work_schedule: selectedTemplate?.work_schedule || '',
       contact_email: selectedTemplate?.contact_email || '',
       application_instructions: selectedTemplate?.application_instructions || '',
@@ -693,6 +695,8 @@ const MobileJobWizard = ({
           workplace_address: '',
           workplace_postal_code: '',
           workplace_city: '',
+          workplace_county: '',
+          workplace_municipality: '',
           contact_email: '',
           application_instructions: '',
           pitch: '',
@@ -1166,6 +1170,8 @@ const MobileJobWizard = ({
         workplace_address: selectedTemplate?.workplace_address || prev.workplace_address || '',
         workplace_postal_code: prev.workplace_postal_code || '', // Never from template
         workplace_city: prev.workplace_city || '', // Never from template
+        workplace_county: prev.workplace_county || '',
+        workplace_municipality: prev.workplace_municipality || '',
         work_schedule: selectedTemplate?.work_schedule || prev.work_schedule,
         contact_email: prev.contact_email || selectedTemplate?.contact_email || user?.email || '',
         application_instructions: selectedTemplate?.application_instructions || prev.application_instructions,
@@ -1732,6 +1738,8 @@ const MobileJobWizard = ({
         workplace_address: '',
         workplace_postal_code: '',
         workplace_city: '',
+        workplace_county: '',
+        workplace_municipality: '',
         work_schedule: '',
         contact_email: '',
         application_instructions: '',
@@ -1780,6 +1788,8 @@ const MobileJobWizard = ({
       workplace_address: '',
       workplace_postal_code: '',
       workplace_city: '',
+      workplace_county: '',
+      workplace_municipality: '',
       work_schedule: '',
       contact_email: '',
       application_instructions: '',
@@ -1963,7 +1973,7 @@ const MobileJobWizard = ({
     setLoading(true);
 
     try {
-      // Only include fields that exist in job_postings table
+      // Include all job posting fields
       const jobData = {
         employer_id: user.id,
         title: formData.title,
@@ -1974,11 +1984,24 @@ const MobileJobWizard = ({
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
+        salary_type: formData.salary_type || null,
         salary_transparency: formData.salary_transparency || null,
         benefits: formData.benefits.length > 0 ? formData.benefits : null,
+        positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
+        work_location_type: formData.work_location_type || null,
+        remote_work_possible: formData.remote_work_possible || null,
+        workplace_name: formData.workplace_name || null,
+        workplace_address: formData.workplace_address || null,
+        workplace_postal_code: formData.workplace_postal_code || null,
+        workplace_city: formData.workplace_city || null,
+        workplace_county: formData.workplace_county || null,
+        workplace_municipality: formData.workplace_municipality || null,
         work_schedule: formData.work_schedule || null,
         work_start_time: formData.work_start_time || null,
         work_end_time: formData.work_end_time || null,
+        contact_email: formData.contact_email || null,
+        application_instructions: formData.application_instructions || null,
+        pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         is_active: true
       };
