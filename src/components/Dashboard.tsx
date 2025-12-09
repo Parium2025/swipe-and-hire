@@ -16,9 +16,12 @@ import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 
 const Dashboard = memo(() => {
-  const { jobs, stats, recruiters, isLoading } = useJobsData();
+  const { jobs: allJobs, stats, recruiters, isLoading } = useJobsData();
   const { profile } = useAuth();
   const navigate = useNavigate();
+
+  // Dashboard only shows active jobs - drafts are only in "Mina Annonser"
+  const jobs = useMemo(() => allJobs.filter(job => job.is_active), [allJobs]);
 
   const {
     searchInput,
