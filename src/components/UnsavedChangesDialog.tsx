@@ -51,7 +51,7 @@ export function UnsavedChangesDialog({
                 onSaveAndLeave();
               }}
               disabled={isSaving}
-              className="px-3 py-2 text-sm bg-cyan-500/20 text-white border border-cyan-500/40 md:hover:bg-cyan-500/30 md:hover:border-cyan-500/50 transition-all whitespace-nowrap"
+              className="px-3 py-2 text-sm bg-amber-500/20 text-white border border-amber-500/40 md:hover:bg-amber-500/30 md:hover:border-amber-500/50 transition-all whitespace-nowrap"
             >
               {isSaving ? (
                 <>
