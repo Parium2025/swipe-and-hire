@@ -6,18 +6,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-        // ... keep existing imports
-        import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
-        import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-        import { motion, AnimatePresence } from 'framer-motion';
-        import FileUpload from '@/components/FileUpload';
+// ... keep existing imports
+import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { motion, AnimatePresence } from 'framer-motion';
+import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown, Pencil, Smartphone, Monitor, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, ArrowDown, Pencil, Smartphone, Monitor, Check } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -42,79 +42,18 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
-interface JobQuestion {
-  id?: string;
-  template_id?: string; // Link to template for syncing updates
-  question_text: string;
-  question_type: 'text' | 'yes_no' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range' | 'video';
-  options?: string[];
-  is_required: boolean;
-  order_index: number;
-  min_value?: number;
-  max_value?: number;
-  placeholder_text?: string;
-}
-
-interface JobTemplate {
-  id: string;
-  name: string;
-  title: string;
-  description: string;
-  requirements?: string;
-  location: string;
-  occupation?: string;
-  employment_type?: string;
-  work_schedule?: string;
-  salary_min?: number;
-  salary_max?: number;
-  salary_type?: string;
-  work_location_type?: string;
-  remote_work_possible?: string;
-  workplace_name?: string;
-  workplace_address?: string;
-  workplace_postal_code?: string;
-  workplace_city?: string;
-  positions_count?: string;
-  pitch?: string;
-  contact_email?: string;
-  application_instructions?: string;
-  category?: string;
-  is_default: boolean;
-  questions?: JobQuestion[];
-}
-
-interface JobFormData {
-  title: string;
-  description: string;
-  requirements: string;
-  location: string;
-  occupation: string;
-  salary_min: string;
-  salary_max: string;
-  employment_type: string;
-  salary_type: string;
-  salary_transparency: string;
-  benefits: string[];
-  positions_count: string;
-  work_start_time: string;
-  work_end_time: string;
-  work_location_type: string;
-  remote_work_possible: string;
-  workplace_name: string;
-  workplace_address: string;
-  workplace_postal_code: string;
-  workplace_city: string;
-  work_schedule: string;
-  contact_email: string;
-  application_instructions: string;
-  pitch: string;
-  job_image_url: string;
-}
+// Import shared wizard components and types
+import { SortableQuestionItem } from '@/components/wizard/SortableQuestionItem';
+import { 
+  JobQuestion, 
+  JobFormData,
+  JobTemplate,
+  createEmptyJobFormData,
+  createEmptyQuestion,
+} from '@/types/jobWizard';
 
 interface MobileJobWizardProps {
   open: boolean;
@@ -124,74 +63,6 @@ interface MobileJobWizardProps {
   onJobCreated: (job: any) => void;
   onBack?: () => void;
 }
-
-// Sortable Question Item Component
-interface SortableQuestionItemProps {
-  question: JobQuestion;
-  onEdit: (question: JobQuestion) => void;
-  onDelete: (id: string) => void;
-}
-
-const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionItemProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: question.id! });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="bg-white/5 rounded-md p-2 border border-white/20"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          {/* Drag handle */}
-          <div
-            {...attributes}
-            {...listeners}
-            className="text-white hover:text-white cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
-          >
-            <GripVertical className="h-3.5 w-3.5" />
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="text-white font-medium text-sm leading-tight truncate">
-              {question.question_text || 'Ingen frågetext'}
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-1 ml-1.5 flex-shrink-0">
-          <button
-            type="button"
-            onClick={() => onEdit(question)}
-            className="p-1.5 text-white hover:bg-white/10 rounded-full transition-all duration-300"
-          >
-            <Pencil className="h-3 w-3" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(question.id!)}
-            className="p-1.5 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300"
-          >
-            <Trash2 className="h-3 w-3" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Session storage key for persisting unsaved job form state across tab switches
 const JOB_WIZARD_SESSION_KEY = 'job-wizard-unsaved-state';

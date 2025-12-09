@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2 } from 'lucide-react';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
@@ -34,23 +34,12 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
-interface JobQuestion {
-  id?: string;
-  template_id?: string;
-  question_text: string;
-  question_type: 'text' | 'yes_no' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range' | 'video';
-  options?: string[];
-  is_required: boolean;
-  order_index: number;
-  min_value?: number;
-  max_value?: number;
-  placeholder_text?: string;
-}
+// Import shared wizard components and types
+import { SortableQuestionItem } from '@/components/wizard/SortableQuestionItem';
+import { JobQuestion } from '@/types/jobWizard';
 
 interface JobPosting {
   id: string;
@@ -107,75 +96,6 @@ interface EditJobDialogProps {
   onOpenChange: (open: boolean) => void;
   onJobUpdated: () => void;
 }
-
-// Sortable Question Item Component (samma som i MobileJobWizard)
-interface SortableQuestionItemProps {
-  question: JobQuestion;
-  onEdit: (question: JobQuestion) => void;
-  onDelete: (id: string) => void;
-}
-
-const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionItemProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: question.id! });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="bg-white/5 rounded-md p-2 border border-white/20"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          <div
-            {...attributes}
-            {...listeners}
-            className="text-white/40 hover:text-white/70 cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
-          >
-            <GripVertical className="h-3.5 w-3.5" />
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="text-white font-medium text-sm leading-tight truncate">
-              {question.question_text || 'Ingen frågetext'}
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-1 ml-1.5 flex-shrink-0">
-          <Button
-            onClick={() => onEdit(question)}
-            variant="ghost"
-            size="sm"
-            className="text-white/70 h-6 w-6 p-0 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
-          >
-            <Pencil className="h-3 w-3 text-[hsl(var(--pure-white))]" />
-          </Button>
-          <Button
-            onClick={() => onDelete(question.id!)}
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
