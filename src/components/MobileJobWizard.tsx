@@ -2883,7 +2883,7 @@ const MobileJobWizard = ({
                     {/* iPhone-stil telefonram */}
                     <div className="relative w-full h-full rounded-[2rem] bg-black p-1 shadow-xl">
                       {/* Skärm */}
-                      <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden bg-black">
+                      <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
                         {/* iPhone notch */}
                         <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20 h-1 w-8 rounded-full bg-black border border-gray-800"></div>
 
@@ -2916,7 +2916,8 @@ const MobileJobWizard = ({
 
                              {/* Scrollable content */}
                              <div 
-                               className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
+                               className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1 overscroll-contain"
+                               style={{ background: 'transparent' }}
                                onClick={(e) => {
                                  // Close all dropdowns when clicking anywhere in the scroll area
                                  const dropdowns = e.currentTarget.querySelectorAll('.backdrop-blur-xl.border.border-white\\/20');
@@ -3462,7 +3463,7 @@ const MobileJobWizard = ({
                                   </div>
                                 </div>
 
-                                <div className="px-4 py-3 overflow-y-auto flex-1 custom-scrollbar">
+                                <div className="px-4 py-3 overflow-y-auto flex-1 custom-scrollbar overscroll-contain">
                                   <div className="space-y-2">
                                     {/* Företagsinformation */}
                                     <div className="bg-white/10 rounded-lg p-2 border border-white/20">
@@ -3835,8 +3836,9 @@ const MobileJobWizard = ({
                                                           }
                                                         >
                                                           <div className={
-                                                            (selected ? 'bg-secondary border-secondary ' : 'border-white/40 ') +
-                                                            'w-2 h-2 rounded-sm border flex-shrink-0'
+                                                            selected
+                                                              ? 'w-2 h-2 rounded-sm bg-white flex-shrink-0'
+                                                              : 'w-2 h-2 rounded-sm border border-white/40 flex-shrink-0'
                                                           } />
                                                           <span className="text-xs text-white">{option}</span>
                                                         </button>
