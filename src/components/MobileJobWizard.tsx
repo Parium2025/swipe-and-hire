@@ -3995,7 +3995,6 @@ const MobileJobWizard = ({
                                               <div className="mb-1.5">
                                                 <label className="text-xs font-medium text-white block leading-tight">
                                                   {question.question_text}
-                                                  {question.is_required && <span className="text-red-300 ml-1">*</span>}
                                                 </label>
                                               </div>
                                              
