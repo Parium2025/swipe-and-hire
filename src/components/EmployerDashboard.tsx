@@ -270,12 +270,17 @@ const EmployerDashboard = memo(() => {
                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
                         </TableCell>
                         <TableCell className="px-2 py-2">
-                          <Badge
-                            variant={job.is_active ? "default" : "secondary"}
-                            className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}
-                          >
-                            {job.is_active ? 'Aktiv' : 'Utkast'}
-                          </Badge>
+                          <div className="flex flex-col items-start gap-0.5">
+                            <Badge
+                              variant={job.is_active ? "default" : "secondary"}
+                              className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}
+                            >
+                              {job.is_active ? 'Aktiv' : 'Utkast'}
+                            </Badge>
+                            {!job.is_active && (
+                              <span className="text-[10px] text-amber-300/70 whitespace-nowrap">Klicka för att redigera</span>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="text-center px-2 py-2">
                           <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm">

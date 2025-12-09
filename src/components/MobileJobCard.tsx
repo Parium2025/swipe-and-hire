@@ -59,13 +59,16 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
         </div>
 
         {/* Status Badge */}
-        <div>
+        <div className="flex flex-col items-start gap-0.5">
           <Badge
             variant={job.is_active ? "default" : "secondary"}
             className={`text-xs ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}
           >
             {job.is_active ? 'Aktiv' : 'Utkast'}
           </Badge>
+          {!job.is_active && (
+            <span className="text-[10px] text-amber-300/70">Tryck för att redigera</span>
+          )}
         </div>
 
         {/* Stats + Plats */}
