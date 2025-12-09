@@ -29,9 +29,9 @@ export function UnsavedChangesDialog({
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-lg bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden">
-        <AlertDialogHeader>
-          <AlertDialogTitle>Osparade ändringar</AlertDialogTitle>
-          <AlertDialogDescription className="text-white">
+        <AlertDialogHeader className="text-center">
+          <AlertDialogTitle className="text-center">Osparade ändringar</AlertDialogTitle>
+          <AlertDialogDescription className="text-white text-center">
             Du har osparade ändringar. Vad vill du göra?
           </AlertDialogDescription>
         </AlertDialogHeader>
