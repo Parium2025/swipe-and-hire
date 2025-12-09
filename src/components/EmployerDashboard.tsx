@@ -272,9 +272,9 @@ const EmployerDashboard = memo(() => {
                         <TableCell className="px-2 py-2">
                           <Badge
                             variant={job.is_active ? "default" : "secondary"}
-                            className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
+                            className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}
                           >
-                            {job.is_active ? 'Aktiv' : 'Inaktiv'}
+                            {job.is_active ? 'Aktiv' : 'Utkast'}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center px-2 py-2">
