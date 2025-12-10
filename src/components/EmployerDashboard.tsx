@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
+import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -89,7 +90,47 @@ const EmployerDashboard = memo(() => {
     }
   }, [page]);
 
-  const toggleJobStatus = async (jobId: string, currentStatus: boolean) => {
+  // Validate if a job has all required fields to be activated
+  const isJobComplete = (job: JobPosting): boolean => {
+    const requiredFields = [
+      job.title,
+      job.description,
+      job.salary_type,
+      job.salary_transparency,
+      job.work_start_time,
+      job.work_end_time,
+      job.positions_count,
+      job.location || job.workplace_city,
+    ];
+    
+    return requiredFields.every(field => field !== null && field !== undefined && field !== '');
+  };
+
+  // Get missing fields for tooltip
+  const getMissingFields = (job: JobPosting): string[] => {
+    const missing: string[] = [];
+    if (!job.title) missing.push('Jobbtitel');
+    if (!job.description) missing.push('Jobbeskrivning');
+    if (!job.salary_type) missing.push('Lönetyp');
+    if (!job.salary_transparency) missing.push('Lönetransparens');
+    if (!job.work_start_time || !job.work_end_time) missing.push('Arbetstider');
+    if (!job.positions_count) missing.push('Antal tjänster');
+    if (!job.location && !job.workplace_city) missing.push('Plats');
+    return missing;
+  };
+
+  const toggleJobStatus = async (jobId: string, currentStatus: boolean, job: JobPosting) => {
+    // If trying to activate, check if job is complete
+    if (!currentStatus && !isJobComplete(job)) {
+      const missing = getMissingFields(job);
+      toast({
+        title: "Kan inte aktivera annons",
+        description: `Följande fält saknas: ${missing.join(', ')}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('job_postings')
@@ -324,9 +365,10 @@ const EmployerDashboard = memo(() => {
                           <div className="flex items-center justify-center gap-1.5">
                             <Switch
                               checked={job.is_active}
-                              onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
+                              onCheckedChange={() => toggleJobStatus(job.id, job.is_active, job as JobPosting)}
                               onClick={(e) => e.stopPropagation()}
-                              className="scale-[0.8]"
+                              disabled={!job.is_active && !isJobComplete(job as JobPosting)}
+                              className={`scale-[0.8] ${!job.is_active && !isJobComplete(job as JobPosting) ? 'opacity-50 cursor-not-allowed' : ''}`}
                             />
                             <Button 
                               variant="outlineNeutral" 
