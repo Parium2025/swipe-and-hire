@@ -2296,7 +2296,7 @@ const MobileJobWizard = ({
                           >
                             <div className={`w-4 h-4 rounded border ${formData.benefits.includes(benefit.value) ? 'bg-white border-white' : 'border-white/30 bg-white/10'} flex items-center justify-center`}>
                               {formData.benefits.includes(benefit.value) && (
-                                <Check className="w-3 h-3 text-primary" />
+                                <Heart className="w-3 h-3 text-primary" />
                               )}
                             </div>
                             <span>{benefit.label}</span>
