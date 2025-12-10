@@ -359,7 +359,7 @@ const EmployerDashboard = memo(() => {
             </div>
             
             {/* Desktop Pagination */}
-            {totalPages > 1 && (
+            {totalPages >= 1 && (
               <Pagination className="mt-4">
                 <PaginationContent>
                   <PaginationItem>
@@ -485,7 +485,7 @@ const EmployerDashboard = memo(() => {
                   </ScrollArea>
                 </div>
 
-                {totalPages > 1 && (
+                {totalPages >= 1 && (
                   <Pagination className="mt-3">
                     <PaginationContent>
                       <PaginationItem>
