@@ -1700,14 +1700,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                   {/* Step 3: Ansökningsfrågor */}
                   {currentStep === 2 && (
-                    <div className="space-y-6 max-w-2xl mx-auto w-full">
+                    <div className="space-y-3 max-w-2xl mx-auto w-full">
                       {!showQuestionForm && !showQuestionTemplates ? (
                         <>
                           <h3 className="text-white text-sm font-medium text-center">
                             Dessa frågor fylls automatiskt från jobbsökarens profil
                           </h3>
 
-                          <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                          <div className="bg-white/5 rounded-lg p-3 border border-white/20">
                             <div className="text-white text-sm space-y-1">
                               <p>• Namn och efternamn</p>
                               <p>• Ålder</p>
@@ -1721,13 +1721,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             </div>
                           </div>
 
-                          <div className="space-y-4">
+                          <div className="space-y-3">
                             <div className="flex items-center justify-between">
                               <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
                               <Button
                                 onClick={addCustomQuestion}
                                 size="sm"
-                                className="bg-primary hover:bg-primary/90 text-white touch-border-white"
+                                className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium"
                               >
                                 Lägg till fråga
                                 <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -2594,32 +2594,42 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         
                         {jobImageDisplayUrl && (
                           <>
-                            <div className="mt-3 relative">
+                            <div className="mt-3 flex justify-center">
                               <img 
                                 src={jobImageDisplayUrl} 
                                 alt="Job preview" 
-                                className="w-full h-48 object-contain rounded-lg"
+                                className="w-full max-w-md h-48 object-contain rounded-lg"
                               />
-                              <button
-                                onClick={() => {
-                                  handleInputChange('job_image_url', '');
-                                  setOriginalImageUrl(null);
-                                  setJobImageDisplayUrl(null);
-                                  setManualFocus(null);
-                                }}
-                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
                             </div>
                             
+                            {/* Bildkontroller - Justera bild + Ta bort */}
                             <div className="mt-4 space-y-3">
-                              <Button
-                                onClick={openImageEditor}
-                                className="w-full bg-transparent border border-white/40 text-white hover:bg-white/10"
-                              >
-                                Redigera bild
-                              </Button>
+                              <div className="flex justify-center items-center gap-3">
+                                {/* Invisible spacer to balance trash icon */}
+                                <div className="w-[30px]" aria-hidden="true"></div>
+                                <button
+                                  onClick={openImageEditor}
+                                  className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
+                                >
+                                  Justera bild
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleInputChange('job_image_url', '');
+                                    setOriginalImageUrl(null);
+                                    setJobImageDisplayUrl(null);
+                                    setManualFocus(null);
+                                  }}
+                                  className="p-1.5 rounded-lg text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                                  aria-label="Ta bort bild"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <p className="text-sm text-white text-center">
+                                Klicka för att zooma, panorera och justera bilden
+                              </p>
                             </div>
                           </>
                         )}
@@ -2635,7 +2645,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               <Button
                 onClick={handleBack}
                 disabled={currentStep === 0}
-                className="bg-transparent border border-white/40 text-white px-4 py-2 hover:bg-white/10 md:hover:bg-white/10 disabled:opacity-50 disabled:border-white/20 transition-all duration-300 [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white"
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-all duration-300 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
@@ -2660,7 +2670,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 <Button
                   onClick={handleNext}
                   disabled={!canProceed()}
-                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 disabled:opacity-50 touch-border-white transition-all duration-300"
+                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-all duration-300 focus:outline-none"
                 >
                   Nästa
                   <ArrowRight className="h-4 w-4 ml-2" />
