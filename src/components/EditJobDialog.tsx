@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
@@ -129,6 +130,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
   const [manualFocus, setManualFocus] = useState<number | null>(null);
   const [cachedPostalCodeInfo, setCachedPostalCodeInfo] = useState<{postalCode: string, city: string, municipality: string, county: string} | null>(null);
+  const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
+  const [showDesktopApplicationForm, setShowDesktopApplicationForm] = useState(false);
   
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -2093,10 +2096,55 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                   {/* Step 4: Förhandsvisning */}
                   {currentStep === 3 && (
-                    <div className="space-y-6 max-w-2xl mx-auto w-full">
+                    <div className="space-y-6 max-w-4xl mx-auto w-full">
+                      {/* Preview Mode Toggle - iOS Style like ProfilePreview */}
                       <div className="flex flex-col items-center space-y-4">
-                        <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)</h3>
+                        <div className="relative inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
+                          {/* Sliding background */}
+                          <motion.div
+                            className="absolute top-1 bottom-1 bg-white/20 rounded-md"
+                            initial={false}
+                            animate={{
+                              left: previewMode === 'mobile' ? '4px' : '50%',
+                              width: previewMode === 'mobile' ? 'calc(50% - 4px)' : 'calc(50% - 4px)',
+                            }}
+                            transition={{
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 30,
+                            }}
+                          />
+                          
+                          {/* Buttons */}
+                          <button
+                            type="button"
+                            onClick={() => setPreviewMode('mobile')}
+                            className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
+                          >
+                            <Smartphone className="h-3.5 w-3.5" />
+                            Mobilvy
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPreviewMode('desktop')}
+                            className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
+                          >
+                            <Monitor className="h-3.5 w-3.5" />
+                            Datorvy
+                          </button>
+                        </div>
                         
+                        <h3 className="text-white font-medium text-center text-sm">
+                          {previewMode === 'mobile' 
+                            ? 'Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)'
+                            : 'Så kommer annonsen att se ut på dator för jobbsökare. (Testa att trycka på datorns skärm)'
+                          }
+                        </h3>
+                      </div>
+
+                      {/* Mobile Preview */}
+                      {previewMode === 'mobile' && (
+                      <div className="flex flex-col items-center space-y-4">
                         <div className="relative flex items-center justify-center gap-4 scale-90 sm:scale-100">
                           <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
@@ -2561,7 +2609,205 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           </section>
                         </div>
                       </div>
+                      )}
 
+                      {/* Desktop Preview - Monitor mockup like MobileJobWizard */}
+                      {previewMode === 'desktop' && (
+                        <div className="flex flex-col items-center space-y-4">
+                          {/* Desktop monitor frame */}
+                          <div className="relative">
+                            {/* Monitor screen */}
+                            <div className="relative w-[520px] rounded-t-lg bg-black p-2.5 shadow-2xl">
+                              {/* Screen bezel */}
+                              <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                                {/* Content with Parium background */}
+                                <div 
+                                  className="absolute inset-0"
+                                  style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
+                                >
+                                  {/* Application Form View (when clicked) */}
+                                  {showDesktopApplicationForm && (
+                                    <div className="flex flex-col h-full">
+                                      <div className="flex items-center justify-between px-4 py-2 bg-black/20 border-b border-white/20 flex-shrink-0">
+                                        <div className="text-sm font-bold text-white">Ansökningsformulär</div>
+                                        <div className="flex items-center gap-2">
+                                          {/* Tooltip pointing at X button */}
+                                          {showCompanyTooltip && (
+                                            <div className="pointer-events-none flex items-center gap-1">
+                                              <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                                                Obs, tryck här!
+                                              </div>
+                                              <svg width="16" height="12" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
+                                                <defs>
+                                                  <marker id="arrowheadRight_desktop_x_edit" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+                                                    <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
+                                                  </marker>
+                                                </defs>
+                                                <path d="M2 12 L 38 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadRight_desktop_x_edit)" />
+                                              </svg>
+                                            </div>
+                                          )}
+                                          <button 
+                                            onClick={() => setShowDesktopApplicationForm(false)} 
+                                            className="text-sm text-white hover:text-white"
+                                            aria-label="Stäng ansökningsformulär"
+                                          >
+                                            ✕
+                                          </button>
+                                        </div>
+                                      </div>
+
+                                      <div className="px-4 py-3 overflow-y-auto flex-1 custom-scrollbar overscroll-contain">
+                                        <div className="space-y-2">
+                                          {/* Company info */}
+                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                            <div className="flex items-center justify-between">
+                                              <div className="flex items-center">
+                                                {profile?.company_logo_url ? (
+                                                  <div className="w-5 h-5 rounded-full mr-2 overflow-hidden bg-white/10 flex items-center justify-center">
+                                                    <img 
+                                                      src={profile.company_logo_url} 
+                                                      alt="Företagslogotyp" 
+                                                      className="w-full h-full object-contain"
+                                                    />
+                                                  </div>
+                                                ) : (
+                                                  <div className="w-5 h-5 bg-primary/20 rounded-full mr-2 flex items-center justify-center">
+                                                    <Building2 className="h-3 w-3 text-primary-foreground" />
+                                                  </div>
+                                                )}
+                                                <button 
+                                                  onClick={() => setShowCompanyProfile(true)}
+                                                  className="text-sm font-bold text-white hover:text-primary transition-colors cursor-pointer"
+                                                >
+                                                  {profile?.company_name || 'Företagsnamn'}
+                                                </button>
+                                              </div>
+                                              {/* Tooltip pointing at company name */}
+                                              {showCompanyTooltip && (
+                                                <div className="pointer-events-none flex items-center gap-1">
+                                                  <svg width="16" height="12" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
+                                                    <defs>
+                                                      <marker id="arrowheadLeft_desktop_edit" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+                                                        <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
+                                                      </marker>
+                                                    </defs>
+                                                    <path d="M38 12 L 2 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadLeft_desktop_edit)" />
+                                                  </svg>
+                                                  <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                                                    Obs, tryck här!
+                                                  </div>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+
+                                          {/* Job title */}
+                                          {formData.occupation && (
+                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                                <Briefcase className="h-3 w-3 mr-1 text-white" />
+                                                Yrke
+                                              </h5>
+                                              <div className="text-sm text-white font-medium">{formData.occupation}</div>
+                                            </div>
+                                          )}
+
+                                          {/* Description */}
+                                          {formData.description && (
+                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
+                                              <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words max-h-20 overflow-y-auto">
+                                                {formData.description.length > 200 
+                                                  ? formData.description.substring(0, 200) + '...' 
+                                                  : formData.description
+                                                }
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {/* Salary */}
+                                          {(formData.salary_min || formData.salary_max || formData.salary_type) && (
+                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                                <Banknote className="h-3 w-3 mr-1 text-white" />
+                                                Lön
+                                              </h5>
+                                              <div className="text-xs text-white leading-relaxed space-y-0.5">
+                                                {formatSalaryInfo().map((info, index) => (
+                                                  <div key={index} className="font-medium">{info}</div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {/* Location */}
+                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                            <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                              <MapPin className="h-3 w-3 mr-1 text-white" />
+                                              Arbetsplats
+                                            </h5>
+                                            <div className="text-xs text-white leading-relaxed space-y-0.5">
+                                              {formData.workplace_name && <div className="font-medium">{formData.workplace_name}</div>}
+                                              {formData.workplace_city && <div>{formData.workplace_city}</div>}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Job card view (when form is closed) */}
+                                  {!showDesktopApplicationForm && (
+                                    <div className="absolute inset-0 z-10">
+                                      {jobImageDisplayUrl ? (
+                                        <img
+                                          src={jobImageDisplayUrl}
+                                          alt={`Jobbbild för ${formData.title}`}
+                                          className="absolute inset-0 w-full h-full object-cover select-none"
+                                          loading="eager"
+                                          decoding="async"
+                                        />
+                                      ) : null}
+                                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                                      <div 
+                                        className="absolute inset-0 flex flex-col items-center justify-center p-6 text-white text-center cursor-pointer"
+                                        onClick={() => setShowDesktopApplicationForm(true)}
+                                      >
+                                        <button 
+                                          onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
+                                          className="text-sm text-white font-medium mb-2 hover:text-primary transition-colors cursor-pointer"
+                                        >
+                                          {profile?.company_name || 'Företag'}
+                                        </button>
+                                        <h3 className="text-xl text-white font-bold leading-tight mb-2">{formData.title || 'Jobbtitel'}</h3>
+                                        <div className="text-sm text-white">
+                                          {formData.workplace_city || formData.location || 'Plats'}
+                                        </div>
+                                      </div>
+                                      <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
+                                        <button aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
+                                          <X className="h-4 w-4 text-white" />
+                                        </button>
+                                        <button aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
+                                          <Bookmark className="h-4 w-4 text-white" />
+                                        </button>
+                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
+                                          <Heart className="h-4 w-4 text-white fill-white" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Monitor stand */}
+                            <div className="w-20 h-8 bg-gradient-to-b from-gray-700 to-gray-800 mx-auto rounded-b-lg" />
+                            <div className="w-32 h-2 bg-gradient-to-b from-gray-600 to-gray-700 mx-auto rounded-b-lg" />
+                          </div>
+                        </div>
+                      )}
                       <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                         <div className="text-white font-medium text-sm sm:text-base mb-2">Jobbild (valfritt)</div>
                         <p className="text-white text-xs sm:text-sm mb-3">
