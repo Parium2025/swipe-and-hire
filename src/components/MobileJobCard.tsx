@@ -160,7 +160,12 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onEdit(job);
+              // For drafts, use onEditDraft to open the wizard
+              if (!job.is_active && onEditDraft) {
+                onEditDraft(job);
+              } else {
+                onEdit(job);
+              }
             }}
             className="flex-1 h-11 bg-transparent border-white/20 text-white !hover:bg-blue-500/20 !hover:border-blue-500/40 hover:!text-white text-sm"
           >

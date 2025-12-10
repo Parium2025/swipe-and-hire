@@ -394,7 +394,12 @@ const EmployerDashboard = memo(() => {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleEditJob(job as any);
+                                // For drafts, use handleEditDraft to open the wizard
+                                if (!job.is_active) {
+                                  handleEditDraft(job as JobPosting);
+                                } else {
+                                  handleEditJob(job as any);
+                                }
                               }}
                               className="h-7 w-7 p-0 bg-transparent border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/40 [&_svg]:text-white md:hover:[&_svg]:text-white"
                             >
