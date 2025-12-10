@@ -1857,17 +1857,8 @@ const MobileJobWizard = ({
     try {
       const category = categorizeJob(formData.title, formData.description, formData.occupation);
       
-      // Hämta län och kommun från postnummer
-      let workplaceCounty = null;
-      let workplaceMunicipality = null;
-      if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
-        const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
-        if (postalInfo) {
-          workplaceCounty = postalInfo.county || null;
-          workplaceMunicipality = postalInfo.municipality || null;
-        }
-      }
-      
+      // For drafts, skip the postal code lookup to speed up saving
+      // County/municipality will be fetched when the job is published
       const jobData = {
         employer_id: user.id,
         title: formData.title || 'Utkast',
@@ -1878,16 +1869,26 @@ const MobileJobWizard = ({
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
+        salary_type: formData.salary_type || null,
         salary_transparency: formData.salary_transparency || null,
         benefits: formData.benefits.length > 0 ? formData.benefits : null,
+        positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
         work_schedule: formData.work_schedule || null,
         work_start_time: formData.work_start_time || null,
         work_end_time: formData.work_end_time || null,
+        work_location_type: formData.work_location_type || null,
+        remote_work_possible: formData.remote_work_possible || null,
+        workplace_name: formData.workplace_name || null,
+        workplace_address: formData.workplace_address || null,
+        workplace_postal_code: formData.workplace_postal_code || null,
+        workplace_city: formData.workplace_city || null,
+        contact_email: formData.contact_email || null,
+        application_instructions: formData.application_instructions || null,
+        pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
+        category: category || null,
         is_active: false // Save as draft - not published
       };
-
-      console.log('Saving draft job:', jobData);
 
       let jobPost;
       let error;
@@ -1922,8 +1923,8 @@ const MobileJobWizard = ({
         return;
       }
 
-      // Save questions to job_questions table if there are any
-      if (jobPost) {
+      // Save questions - run delete and insert in parallel when possible
+      if (jobPost && customQuestions.length > 0) {
         // If editing existing job, delete old questions first
         if (existingJob?.id) {
           await supabase
@@ -1932,28 +1933,27 @@ const MobileJobWizard = ({
             .eq('job_id', existingJob.id);
         }
 
-        // Then insert new questions if any
-        if (customQuestions.length > 0) {
-          const questionData = customQuestions.map(q => ({
-            job_id: jobPost.id,
-            question_text: q.question_text,
-            question_type: q.question_type,
-            options: q.options || null,
-            is_required: q.is_required,
-            order_index: q.order_index,
-            placeholder_text: q.placeholder_text || null,
-            min_value: q.min_value || null,
-            max_value: q.max_value || null
-          }));
+        const questionData = customQuestions.map(q => ({
+          job_id: jobPost.id,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options || null,
+          is_required: q.is_required,
+          order_index: q.order_index,
+          placeholder_text: q.placeholder_text || null,
+          min_value: q.min_value || null,
+          max_value: q.max_value || null
+        }));
 
-          const { error: questionsError } = await supabase
-            .from('job_questions')
-            .insert(questionData);
-
-          if (questionsError) {
-            console.error('Error saving questions:', questionsError);
-          }
-        }
+        await supabase
+          .from('job_questions')
+          .insert(questionData);
+      } else if (jobPost && existingJob?.id) {
+        // Only delete if no new questions to add
+        await supabase
+          .from('job_questions')
+          .delete()
+          .eq('job_id', existingJob.id);
       }
 
       toast({
