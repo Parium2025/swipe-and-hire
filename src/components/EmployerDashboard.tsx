@@ -360,98 +360,35 @@ const EmployerDashboard = memo(() => {
             
             {/* Desktop Pagination */}
             {totalPages >= 1 && (
-              <Pagination className="mt-4">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage(p => Math.max(1, p - 1));
-                      }}
-                      className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-
-                  {page > 2 && (
-                    <>
-                      <PaginationItem>
-                        <PaginationLink
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPage(1);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          1
-                        </PaginationLink>
-                      </PaginationItem>
-                      {page > 3 && <PaginationEllipsis />}
-                    </>
-                  )}
-
-                  {page > 1 && (
-                    <PaginationItem>
-                      <PaginationLink
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setPage(page - 1);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        {page - 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  )}
-
-                  <PaginationItem>
-                    <PaginationLink isActive>
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-
-                  {page < totalPages && (
-                    <PaginationItem>
-                      <PaginationLink
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setPage(page + 1);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        {page + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  )}
-
-                  {page < totalPages - 1 && (
-                    <>
-                      {page < totalPages - 2 && <PaginationEllipsis />}
-                      <PaginationItem>
-                        <PaginationLink
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPage(totalPages);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          {totalPages}
-                        </PaginationLink>
-                      </PaginationItem>
-                    </>
-                  )}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage(p => Math.min(totalPages, p + 1));
-                      }}
-                      className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-                <span className="ml-4 text-sm text-white/60">Sida {page} av {totalPages}</span>
-              </Pagination>
+              <div className="flex items-center justify-center gap-2 mt-4 text-xs text-white/60">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className={`hover:text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  « Föreg
+                </button>
+                
+                {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(n => (
+                  <button
+                    key={n}
+                    onClick={() => setPage(n)}
+                    className={`px-1 transition-colors ${page === n ? 'text-white font-medium' : 'hover:text-white cursor-pointer'}`}
+                  >
+                    {n}
+                  </button>
+                ))}
+                
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className={`hover:text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  Nästa »
+                </button>
+                
+                <span className="ml-2">Sida {page} av {totalPages}</span>
+              </div>
             )}
           </div>
 
@@ -486,98 +423,35 @@ const EmployerDashboard = memo(() => {
                 </div>
 
                 {totalPages >= 1 && (
-                  <Pagination className="mt-3">
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPage(p => Math.max(1, p - 1));
-                          }}
-                          className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                        />
-                      </PaginationItem>
-
-                      {page > 2 && (
-                        <>
-                          <PaginationItem>
-                            <PaginationLink
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setPage(1);
-                              }}
-                              className="cursor-pointer"
-                            >
-                              1
-                            </PaginationLink>
-                          </PaginationItem>
-                          {page > 3 && <PaginationEllipsis />}
-                        </>
-                      )}
-
-                      {page > 1 && (
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setPage(page - 1);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            {page - 1}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )}
-
-                      <PaginationItem>
-                        <PaginationLink isActive>
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-
-                      {page < totalPages && (
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setPage(page + 1);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            {page + 1}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )}
-
-                      {page < totalPages - 1 && (
-                        <>
-                          {page < totalPages - 2 && <PaginationEllipsis />}
-                          <PaginationItem>
-                            <PaginationLink
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setPage(totalPages);
-                              }}
-                              className="cursor-pointer"
-                            >
-                              {totalPages}
-                            </PaginationLink>
-                          </PaginationItem>
-                        </>
-                      )}
-
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPage(p => Math.min(totalPages, p + 1));
-                          }}
-                          className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                    <span className="ml-4 text-sm text-white/60">Sida {page} av {totalPages}</span>
-                  </Pagination>
+                  <div className="flex items-center justify-center gap-2 mt-3 text-xs text-white/60">
+                    <button
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className={`hover:text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      « Föreg
+                    </button>
+                    
+                    {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(n => (
+                      <button
+                        key={n}
+                        onClick={() => setPage(n)}
+                        className={`px-1 transition-colors ${page === n ? 'text-white font-medium' : 'hover:text-white cursor-pointer'}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                    
+                    <button
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      className={`hover:text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      Nästa »
+                    </button>
+                    
+                    <span className="ml-2">Sida {page} av {totalPages}</span>
+                  </div>
                 )}
               </>
             )}
