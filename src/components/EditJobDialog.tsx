@@ -1331,81 +1331,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         />
                       </div>
 
-{/* Kravprofil borttagen för att matcha MobileJobWizard */}
-
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Anställningsform *</Label>
-                        <div className="relative employment-type-dropdown">
-                          <Input
-                            value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
-                            onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
-                            onClick={handleEmploymentTypeClick}
-                            placeholder="Välj anställningsform"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
-                            readOnly
-                          />
-                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
-                          
-                          {showEmploymentTypeDropdown && (
-                             <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg">
-                              {filteredEmploymentTypes.map((type) => (
-                                <button
-                                  key={type.value}
-                                  type="button"
-                                  onClick={() => handleEmploymentTypeSelect(type)}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                                >
-                                  <div className="font-medium">{type.label}</div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Lönetyp</Label>
-                        <div className="relative salary-type-dropdown">
-                          <Input
-                            value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
-                            onChange={(e) => handleSalaryTypeSearch(e.target.value)}
-                            onClick={handleSalaryTypeClick}
-                            placeholder="Välj lönetyp"
-                             className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
-                            readOnly
-                          />
-                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
-                          
-                          {showSalaryTypeDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
-                              {filteredSalaryTypes.map((type) => (
-                                <button
-                                  key={type.value}
-                                  type="button"
-                                  onClick={() => handleSalaryTypeSelect(type)}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
-                                >
-                                  <div className="font-medium">{type.label}</div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Antal rekryteringar *</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          value={formData.positions_count}
-                          onChange={(e) => handleInputChange('positions_count', e.target.value)}
-                          placeholder="1"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
-                        />
-                      </div>
-
-                      {/* Förmåner / Benefits */}
+{/* Förmåner / Benefits - FIRST after description to match MobileJobWizard */}
                       <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Förmåner som erbjuds</Label>
                         <div className="relative benefits-dropdown">
@@ -1472,9 +1398,97 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             })}
                           </div>
                         )}
+
+                        {/* Custom benefit input - matching MobileJobWizard */}
+                        <div className="flex gap-2">
+                          <Input
+                            type="text"
+                            value={customBenefitInput}
+                            onChange={(e) => setCustomBenefitInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && customBenefitInput.trim()) {
+                                e.preventDefault();
+                                setFormData(prev => ({ ...prev, benefits: [...prev.benefits, customBenefitInput.trim()] }));
+                                setCustomBenefitInput('');
+                              }
+                            }}
+                            placeholder="Lägg till egen förmån"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 text-sm focus:border-white/40 flex-1"
+                          />
+                          <div
+                            onClick={() => {
+                              if (customBenefitInput.trim()) {
+                                setFormData(prev => ({ ...prev, benefits: [...prev.benefits, customBenefitInput.trim()] }));
+                                setCustomBenefitInput('');
+                              }
+                            }}
+                            className="bg-white/10 border border-white/20 text-white/60 hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-md cursor-pointer transition-all duration-300"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Lönetransparens */}
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium text-sm">Anställningsform *</Label>
+                        <div className="relative employment-type-dropdown">
+                          <Input
+                            value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
+                            onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
+                            onClick={handleEmploymentTypeClick}
+                            placeholder="Välj anställningsform"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                            readOnly
+                          />
+                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                          
+                          {showEmploymentTypeDropdown && (
+                             <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg">
+                              {filteredEmploymentTypes.map((type) => (
+                                <button
+                                  key={type.value}
+                                  type="button"
+                                  onClick={() => handleEmploymentTypeSelect(type)}
+                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                >
+                                  <div className="font-medium">{type.label}</div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium text-sm">Lönetyp *</Label>
+                        <div className="relative salary-type-dropdown">
+                          <Input
+                            value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
+                            onChange={(e) => handleSalaryTypeSearch(e.target.value)}
+                            onClick={handleSalaryTypeClick}
+                            placeholder="Välj lönetyp"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                            readOnly
+                          />
+                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                          
+                          {showSalaryTypeDropdown && (
+                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                              {filteredSalaryTypes.map((type) => (
+                                <button
+                                  key={type.value}
+                                  type="button"
+                                  onClick={() => handleSalaryTypeSelect(type)}
+                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                >
+                                  <div className="font-medium">{type.label}</div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
                       <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026) *</Label>
                         <div className="relative salary-transparency-dropdown">
@@ -1483,7 +1497,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             onChange={(e) => handleSalaryTransparencySearch(e.target.value)}
                             onClick={handleSalaryTransparencyClick}
                             placeholder="Välj lönespann"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                             readOnly
                           />
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1505,7 +1519,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         </div>
                       </div>
 
-                      {/* Arbetstider */}
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium text-sm">Antal personer att rekrytera *</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={formData.positions_count}
+                          onChange={(e) => handleInputChange('positions_count', e.target.value)}
+                          placeholder="1"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                        />
+                      </div>
+
                       <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
                         <div className="flex gap-3 items-center">
@@ -1523,17 +1548,21 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 }
                               }}
                               onBlur={(e) => {
-                                const val = e.target.value.replace(/\D/g, '');
-                                if (val.length > 0) {
-                                  const padded = val.padStart(2, '0').slice(0, 2);
-                                  handleInputChange('work_start_time', `${padded}:00`);
+                                const value = e.target.value;
+                                if (value && !value.includes(':')) {
+                                  const padded = value.padStart(2, '0') + ':00';
+                                  handleInputChange('work_start_time', padded);
+                                } else if (value && value.includes(':') && value.split(':')[1].length < 2) {
+                                  const [hours, mins] = value.split(':');
+                                  handleInputChange('work_start_time', `${hours}:${mins.padEnd(2, '0')}`);
                                 }
                               }}
                               placeholder="08:00"
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 text-center"
+                              maxLength={5}
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                             />
                           </div>
-                          <span className="text-white/60">–</span>
+                          <span className="text-white/60 text-sm">–</span>
                           <div className="flex-1">
                             <Input
                               ref={workEndTimeRef}
@@ -1546,14 +1575,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 handleInputChange('work_end_time', formatted);
                               }}
                               onBlur={(e) => {
-                                const val = e.target.value.replace(/\D/g, '');
-                                if (val.length > 0) {
-                                  const padded = val.padStart(2, '0').slice(0, 2);
-                                  handleInputChange('work_end_time', `${padded}:00`);
+                                const value = e.target.value;
+                                if (value && !value.includes(':')) {
+                                  const padded = value.padStart(2, '0') + ':00';
+                                  handleInputChange('work_end_time', padded);
+                                } else if (value && value.includes(':') && value.split(':')[1].length < 2) {
+                                  const [hours, mins] = value.split(':');
+                                  handleInputChange('work_end_time', `${hours}:${mins.padEnd(2, '0')}`);
                                 }
                               }}
                               placeholder="17:00"
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 text-center"
+                              maxLength={5}
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                             />
                           </div>
                         </div>
