@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, Search, Pencil, Check, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, Search, Pencil, Heart, CheckCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
@@ -1461,7 +1461,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           >
                             <div className={`w-4 h-4 rounded border ${formData.benefits.includes(benefit.value) ? 'bg-white border-white' : 'border-white/30 bg-white/10'} flex items-center justify-center`}>
                               {formData.benefits.includes(benefit.value) && (
-                                <Check className="w-3 h-3 text-primary" />
+                                <Heart className="w-3 h-3 text-primary" />
                               )}
                             </div>
                             <span>{benefit.label}</span>
