@@ -363,6 +363,19 @@ const EmployerDashboard = memo(() => {
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex items-center justify-center gap-1.5">
+                            {!job.is_active && !isJobComplete(job as JobPosting) && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Info size={14} className="text-amber-400 cursor-help" onClick={(e) => e.stopPropagation()} />
+                                  </TooltipTrigger>
+                                  <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
+                                    <p className="text-xs font-medium mb-1">Saknade fält:</p>
+                                    <p className="text-xs text-white/80">{getMissingFields(job as JobPosting).join(', ')}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
                             <Switch
                               checked={job.is_active}
                               onCheckedChange={() => toggleJobStatus(job.id, job.is_active, job as JobPosting)}
