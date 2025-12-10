@@ -864,6 +864,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       if (showSalaryTypeDropdown && !(event.target as Element).closest('.salary-type-dropdown')) {
         setShowSalaryTypeDropdown(false);
       }
+      if (showSalaryTransparencyDropdown && !(event.target as Element).closest('.salary-transparency-dropdown')) {
+        setShowSalaryTransparencyDropdown(false);
+      }
+      if (showBenefitsDropdown && !(event.target as Element).closest('.benefits-dropdown')) {
+        setShowBenefitsDropdown(false);
+      }
       if (showWorkLocationDropdown && !(event.target as Element).closest('.work-location-dropdown')) {
         setShowWorkLocationDropdown(false);
       }
@@ -877,7 +883,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showOccupationDropdown, showEmploymentTypeDropdown, showSalaryTypeDropdown, showWorkLocationDropdown, showRemoteWorkDropdown, showQuestionTypeDropdown]);
+  }, [showOccupationDropdown, showEmploymentTypeDropdown, showSalaryTypeDropdown, showSalaryTransparencyDropdown, showBenefitsDropdown, showWorkLocationDropdown, showRemoteWorkDropdown, showQuestionTypeDropdown]);
 
   // Question management functions
   const addCustomQuestion = () => {
