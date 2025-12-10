@@ -239,14 +239,14 @@ const EmployerDashboard = memo(() => {
               <Table className="table-fixed w-full">
                 <TableHeader>
                   <TableRow className="border-white/20 hover:bg-transparent">
-                    <TableHead className="text-white font-semibold text-xs px-1.5 w-[22%]">Titel</TableHead>
-                    <TableHead className="text-white font-semibold text-xs px-1.5 w-[8%]">Status</TableHead>
-                    <TableHead className="text-white font-semibold text-xs text-center px-1 w-[7%]">Visn.</TableHead>
-                    <TableHead className="text-white font-semibold text-xs text-center px-1 w-[7%]">Ansök.</TableHead>
-                    <TableHead className="text-white font-semibold text-xs px-1.5 w-[14%]">Plats</TableHead>
-                    <TableHead className="text-white font-semibold text-xs px-1.5 w-[14%]">Rekryterare</TableHead>
-                    <TableHead className="text-white font-semibold text-xs px-1.5 w-[12%]">Skapad</TableHead>
-                    <TableHead className="text-white font-semibold text-xs px-1 w-[16%]">Åtgärder</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-2 w-[24%]">Titel</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-2 w-[9%]">Status</TableHead>
+                    <TableHead className="text-white font-semibold text-xs text-center px-1.5 w-[6%]">Visn.</TableHead>
+                    <TableHead className="text-white font-semibold text-xs text-center px-1.5 w-[6%]">Ansök.</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-2 w-[13%]">Plats</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-2 w-[13%]">Rekryterare</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-2 w-[12%]">Skapad</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-2 w-[17%]">Åtgärder</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -273,10 +273,10 @@ const EmployerDashboard = memo(() => {
                         }`}
                         onClick={() => handleJobRowClick(job as JobPosting)}
                       >
-                        <TableCell className="font-medium text-white px-1.5 py-2">
+                        <TableCell className="font-medium text-white px-2 py-2.5">
                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
                         </TableCell>
-                        <TableCell className="px-1.5 py-2">
+                        <TableCell className="px-2 py-2.5">
                           <div className="flex flex-col items-start gap-0.5">
                             <Badge
                               variant={job.is_active ? "default" : "secondary"}
@@ -289,23 +289,23 @@ const EmployerDashboard = memo(() => {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center px-1 py-2">
+                        <TableCell className="text-center px-1.5 py-2.5">
                           <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs px-1.5">
                             {job.views_count || 0}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-center px-1 py-2">
+                        <TableCell className="text-center px-1.5 py-2.5">
                           <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs px-1.5">
                             {job.applications_count || 0}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-white px-1.5 py-2">
+                        <TableCell className="text-white px-2 py-2.5">
                           <div className="flex items-center gap-1 text-xs">
-                            <MapPin size={10} className="flex-shrink-0" />
+                            <MapPin size={11} className="flex-shrink-0" />
                             <TruncatedText text={job.location} className="truncate" />
                           </div>
                         </TableCell>
-                        <TableCell className="text-white px-1.5 py-2">
+                        <TableCell className="text-white px-2 py-2.5">
                           <TruncatedText 
                             text={job.employer_profile?.first_name && job.employer_profile?.last_name
                               ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
@@ -313,19 +313,19 @@ const EmployerDashboard = memo(() => {
                             className="text-xs truncate block"
                           />
                         </TableCell>
-                        <TableCell className="text-white px-1.5 py-2">
+                        <TableCell className="text-white px-2 py-2.5">
                           <div className="flex items-center gap-1 text-xs whitespace-nowrap">
-                            <Calendar size={10} />
+                            <Calendar size={11} />
                             {formatDateShortSv(job.created_at)}
                           </div>
                         </TableCell>
-                        <TableCell className="px-1 py-2">
-                          <div className="flex items-center gap-0.5">
+                        <TableCell className="px-2 py-2.5">
+                          <div className="flex items-center gap-1">
                             <Switch
                               checked={job.is_active}
                               onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
                               onClick={(e) => e.stopPropagation()}
-                              className="scale-[0.65]"
+                              className="scale-[0.7]"
                             />
                             <Button 
                               variant="outlineNeutral" 
@@ -334,9 +334,9 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleEditJob(job as any);
                               }}
-                              className="h-5 w-5 p-0 bg-transparent border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/40 [&_svg]:text-white md:hover:[&_svg]:text-white"
+                              className="h-6 w-6 p-0 bg-transparent border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/40 [&_svg]:text-white md:hover:[&_svg]:text-white"
                             >
-                              <Edit size={10} />
+                              <Edit size={12} />
                             </Button>
                             <Button 
                               variant="outlineNeutral" 
@@ -345,9 +345,9 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleDeleteClick(job as any);
                               }}
-                              className="h-5 w-5 p-0 bg-transparent border-white/20 text-white !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white"
+                              className="h-6 w-6 p-0 bg-transparent border-white/20 text-white !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white"
                             >
-                              <Trash2 size={10} />
+                              <Trash2 size={12} />
                             </Button>
                           </div>
                         </TableCell>
