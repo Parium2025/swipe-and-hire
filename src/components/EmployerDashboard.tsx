@@ -235,18 +235,18 @@ const EmployerDashboard = memo(() => {
         <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
           {/* Desktop: Table view */}
           <div className="hidden md:block">
-            <div className="overflow-x-auto -mx-2">
-              <Table>
+            <div className="w-full">
+              <Table className="table-fixed w-full">
                 <TableHeader>
                   <TableRow className="border-white/20 hover:bg-transparent">
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[28%]">Titel</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[10%]">Status</TableHead>
-                    <TableHead className="text-white font-semibold text-sm text-center px-2 w-[8%]">Visningar</TableHead>
-                    <TableHead className="text-white font-semibold text-sm text-center px-2 w-[8%]">Ansökningar</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[12%]">Plats</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[12%]">Rekryterare</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[10%]">Skapad</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[12%]">Åtgärder</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-1.5 w-[22%]">Titel</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-1.5 w-[8%]">Status</TableHead>
+                    <TableHead className="text-white font-semibold text-xs text-center px-1 w-[7%]">Visn.</TableHead>
+                    <TableHead className="text-white font-semibold text-xs text-center px-1 w-[7%]">Ansök.</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-1.5 w-[14%]">Plats</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-1.5 w-[14%]">Rekryterare</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-1.5 w-[12%]">Skapad</TableHead>
+                    <TableHead className="text-white font-semibold text-xs px-1 w-[16%]">Åtgärder</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -273,59 +273,59 @@ const EmployerDashboard = memo(() => {
                         }`}
                         onClick={() => handleJobRowClick(job as JobPosting)}
                       >
-                        <TableCell className="font-medium text-white px-2 py-2">
+                        <TableCell className="font-medium text-white px-1.5 py-2">
                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
                         </TableCell>
-                        <TableCell className="px-2 py-2">
+                        <TableCell className="px-1.5 py-2">
                           <div className="flex flex-col items-start gap-0.5">
                             <Badge
                               variant={job.is_active ? "default" : "secondary"}
-                              className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30"}`}
+                              className={`text-xs whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30"}`}
                             >
                               {job.is_active ? 'Aktiv' : 'Utkast'}
                             </Badge>
                             {!job.is_active && (
-                              <span className="text-[10px] text-amber-300/70 whitespace-nowrap">Klicka för att redigera</span>
+                              <span className="text-[9px] text-amber-300/70 whitespace-nowrap">Redigera</span>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center px-2 py-2">
-                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm">
+                        <TableCell className="text-center px-1 py-2">
+                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs px-1.5">
                             {job.views_count || 0}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-center px-2 py-2">
-                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm">
+                        <TableCell className="text-center px-1 py-2">
+                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs px-1.5">
                             {job.applications_count || 0}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-white px-2 py-2">
-                          <div className="flex items-center gap-1 text-sm">
-                            <MapPin size={12} className="flex-shrink-0" />
-                            <TruncatedText text={job.location} className="truncate max-w-[100px]" />
+                        <TableCell className="text-white px-1.5 py-2">
+                          <div className="flex items-center gap-1 text-xs">
+                            <MapPin size={10} className="flex-shrink-0" />
+                            <TruncatedText text={job.location} className="truncate" />
                           </div>
                         </TableCell>
-                        <TableCell className="text-white px-2 py-2">
+                        <TableCell className="text-white px-1.5 py-2">
                           <TruncatedText 
                             text={job.employer_profile?.first_name && job.employer_profile?.last_name
                               ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
                               : '-'}
-                            className="text-sm truncate max-w-[110px] block"
+                            className="text-xs truncate block"
                           />
                         </TableCell>
-                        <TableCell className="text-white px-2 py-2">
-                          <div className="flex items-center gap-1 text-sm whitespace-nowrap min-w-[110px]">
-                            <Calendar size={12} />
+                        <TableCell className="text-white px-1.5 py-2">
+                          <div className="flex items-center gap-1 text-xs whitespace-nowrap">
+                            <Calendar size={10} />
                             {formatDateShortSv(job.created_at)}
                           </div>
                         </TableCell>
-                        <TableCell className="px-2 py-2">
+                        <TableCell className="px-1 py-2">
                           <div className="flex items-center gap-0.5">
                             <Switch
                               checked={job.is_active}
                               onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
                               onClick={(e) => e.stopPropagation()}
-                              className="scale-75"
+                              className="scale-[0.65]"
                             />
                             <Button 
                               variant="outlineNeutral" 
@@ -334,9 +334,9 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleEditJob(job as any);
                               }}
-                              className="h-6 px-1.5 bg-transparent border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/40 [&_svg]:text-white md:hover:[&_svg]:text-white text-[10px]"
+                              className="h-5 w-5 p-0 bg-transparent border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/40 [&_svg]:text-white md:hover:[&_svg]:text-white"
                             >
-                              <Edit size={12} />
+                              <Edit size={10} />
                             </Button>
                             <Button 
                               variant="outlineNeutral" 
@@ -345,9 +345,9 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleDeleteClick(job as any);
                               }}
-                              className="h-6 px-1.5 bg-transparent border-white/20 text-white !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white text-[10px]"
+                              className="h-5 w-5 p-0 bg-transparent border-white/20 text-white !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white"
                             >
-                              <Trash2 size={12} />
+                              <Trash2 size={10} />
                             </Button>
                           </div>
                         </TableCell>
