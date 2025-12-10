@@ -69,6 +69,9 @@ const EmployerDashboard = memo(() => {
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
   
+  // Check if there are any drafts
+  const hasDrafts = useMemo(() => jobs.some(job => !job.is_active), [jobs]);
+  
   const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / pageSize));
   const pageJobs = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -210,6 +213,7 @@ const EmployerDashboard = memo(() => {
         sortBy={sortBy}
         onSortChange={setSortBy}
         companyName={profile?.company_name || 'företaget'}
+        hasDrafts={hasDrafts}
       />
 
       {/* Result indicator */}
