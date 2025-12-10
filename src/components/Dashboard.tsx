@@ -90,13 +90,13 @@ const Dashboard = memo(() => {
             <Table className="w-full table-fixed">
               <TableHeader>
                 <TableRow className="border-white/20 hover:bg-transparent">
-                  <TableHead className="text-white font-semibold text-sm px-2 w-[26%]">Titel</TableHead>
-                  <TableHead className="text-white font-semibold text-sm px-2 w-[10%]">Status</TableHead>
+                  <TableHead className="text-white font-semibold text-sm text-center px-2 w-[26%]">Titel</TableHead>
+                  <TableHead className="text-white font-semibold text-sm text-center px-2 w-[10%]">Status</TableHead>
                   <TableHead className="text-white font-semibold text-sm text-center px-1 w-[9%]">Visningar</TableHead>
                   <TableHead className="text-white font-semibold text-sm text-center px-1 w-[11%]">Ansökningar</TableHead>
-                  <TableHead className="text-white font-semibold text-sm px-2 w-[15%]">Plats</TableHead>
-                  <TableHead className="text-white font-semibold text-sm px-2 w-[16%]">Rekryterare</TableHead>
-                  <TableHead className="text-white font-semibold text-sm px-2 w-[13%]">Skapad</TableHead>
+                  <TableHead className="text-white font-semibold text-sm text-center px-2 w-[15%]">Plats</TableHead>
+                  <TableHead className="text-white font-semibold text-sm text-center px-2 w-[16%]">Rekryterare</TableHead>
+                  <TableHead className="text-white font-semibold text-sm text-center px-2 w-[13%]">Skapad</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -119,16 +119,18 @@ const Dashboard = memo(() => {
                       className="border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-colors"
                       onClick={() => navigate(`/job-details/${job.id}`)}
                     >
-                      <TableCell className="font-medium text-white px-3 py-3">
+                      <TableCell className="font-medium text-white text-center px-2 py-3">
                         <JobTitleCell title={job.title} employmentType={job.employment_type} />
                       </TableCell>
-                      <TableCell className="px-3 py-3">
-                        <Badge 
-                          variant={job.is_active ? "default" : "secondary"}
-                          className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
-                        >
-                          {job.is_active ? 'Aktiv' : 'Inaktiv'}
-                        </Badge>
+                      <TableCell className="text-center px-2 py-3">
+                        <div className="flex justify-center">
+                          <Badge 
+                            variant={job.is_active ? "default" : "secondary"}
+                            className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
+                          >
+                            {job.is_active ? 'Aktiv' : 'Inaktiv'}
+                          </Badge>
+                        </div>
                       </TableCell>
                       <TableCell className="text-center px-2 py-3">
                         <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm">
@@ -140,13 +142,13 @@ const Dashboard = memo(() => {
                           {job.applications_count || 0}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-white px-3 py-3">
-                        <div className="flex items-center gap-1.5 text-sm">
+                      <TableCell className="text-white text-center px-2 py-3">
+                        <div className="flex items-center justify-center gap-1.5 text-sm">
                           <MapPin size={14} className="flex-shrink-0" />
                           <TruncatedText text={job.location} className="truncate max-w-[120px]" />
                         </div>
                       </TableCell>
-                      <TableCell className="text-white px-3 py-3">
+                      <TableCell className="text-white text-center px-2 py-3">
                         <TruncatedText 
                           text={job.employer_profile?.first_name && job.employer_profile?.last_name
                             ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
@@ -154,8 +156,8 @@ const Dashboard = memo(() => {
                           className="text-sm truncate max-w-[130px] block"
                         />
                       </TableCell>
-                      <TableCell className="text-white px-3 py-3">
-                        <div className="flex items-center gap-1.5 text-sm whitespace-nowrap">
+                      <TableCell className="text-white text-center px-2 py-3">
+                        <div className="flex items-center justify-center gap-1.5 text-sm whitespace-nowrap">
                           <Calendar size={14} />
                           {formatDateShortSv(job.created_at)}
                         </div>
