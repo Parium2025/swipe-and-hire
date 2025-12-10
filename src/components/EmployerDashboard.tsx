@@ -239,7 +239,7 @@ const EmployerDashboard = memo(() => {
               <Table className="w-full table-fixed">
                 <TableHeader>
                   <TableRow className="border-white/20 hover:bg-transparent">
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[22%]">Titel</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-2 w-[22%]">Titel</TableHead>
                     <TableHead className="text-white font-semibold text-sm text-center px-2 w-[9%]">Status</TableHead>
                     <TableHead className="text-white font-semibold text-sm text-center px-1 w-[8%]">Visningar</TableHead>
                     <TableHead className="text-white font-semibold text-sm text-center px-1 w-[10%]">Ansökningar</TableHead>
@@ -273,7 +273,7 @@ const EmployerDashboard = memo(() => {
                         }`}
                         onClick={() => handleJobRowClick(job as JobPosting)}
                       >
-                        <TableCell className="font-medium text-white px-3 py-3">
+                        <TableCell className="font-medium text-white text-center px-2 py-3">
                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
