@@ -360,13 +360,13 @@ const EmployerDashboard = memo(() => {
             
             {/* Desktop Pagination */}
             {totalPages >= 1 && (
-              <div className="flex items-center justify-center gap-4 mt-4 text-xs">
+              <div className="flex items-center justify-center gap-6 mt-4 text-xs">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className={`flex items-center gap-1 text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
+                  className={`flex items-center gap-1.5 text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                 >
-                  <span className="text-sm -mt-px">‹</span>
+                  <span>‹</span>
                   <span>Föreg</span>
                 </button>
                 
@@ -383,10 +383,10 @@ const EmployerDashboard = memo(() => {
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className={`flex items-center gap-1 text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
+                  className={`flex items-center gap-1.5 text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                 >
                   <span>Nästa</span>
-                  <span className="text-sm -mt-px">›</span>
+                  <span>›</span>
                 </button>
               </div>
             )}
@@ -423,13 +423,13 @@ const EmployerDashboard = memo(() => {
                 </div>
 
                 {totalPages >= 1 && (
-                  <div className="flex items-center justify-center gap-4 mt-3 text-xs">
+                  <div className="flex items-center justify-center gap-6 mt-3 text-xs">
                     <button
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className={`flex items-center gap-1 text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
+                      className={`flex items-center gap-1.5 text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                     >
-                      <span className="text-sm -mt-px">‹</span>
+                      <span>‹</span>
                       <span>Föreg</span>
                     </button>
                     
@@ -446,10 +446,10 @@ const EmployerDashboard = memo(() => {
                     <button
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      className={`flex items-center gap-1 text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
+                      className={`flex items-center gap-1.5 text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                     >
                       <span>Nästa</span>
-                      <span className="text-sm -mt-px">›</span>
+                      <span>›</span>
                     </button>
                   </div>
                 )}
