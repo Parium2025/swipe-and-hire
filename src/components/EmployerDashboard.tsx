@@ -288,9 +288,6 @@ const EmployerDashboard = memo(() => {
                             >
                               {job.is_active ? 'Aktiv' : 'Utkast'}
                             </Badge>
-                            {!job.is_active && (
-                              <span className="text-[10px] text-amber-300/70 whitespace-nowrap">Klicka för att redigera</span>
-                            )}
                           </div>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
