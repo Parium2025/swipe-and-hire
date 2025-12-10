@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState, useRef, useEffect } from 'react';
 
-type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc';
+type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'drafts-first';
 
 export interface Recruiter {
   id: string;
@@ -57,6 +57,7 @@ export const JobSearchBar = ({
     oldest: 'Äldst först',
     'title-asc': 'Titel A-Ö',
     'title-desc': 'Titel Ö-A',
+    'drafts-first': 'Utkast först',
   };
 
   return (
@@ -133,6 +134,10 @@ export const JobSearchBar = ({
             <DropdownMenuSeparator className="bg-white/20" />
             <DropdownMenuItem onClick={() => onSortChange('title-desc')}>
               {sortLabels['title-desc']}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-white/20" />
+            <DropdownMenuItem onClick={() => onSortChange('drafts-first')}>
+              {sortLabels['drafts-first']}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -234,6 +239,13 @@ export const JobSearchBar = ({
                     className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
                   >
                     {sortLabels['title-desc']}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('drafts-first')}
+                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                  >
+                    {sortLabels['drafts-first']}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -348,6 +360,13 @@ export const JobSearchBar = ({
                   className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
                 >
                   {sortLabels['title-desc']}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/20" />
+                <DropdownMenuItem 
+                  onClick={() => onSortChange('drafts-first')}
+                  className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                >
+                  {sortLabels['drafts-first']}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

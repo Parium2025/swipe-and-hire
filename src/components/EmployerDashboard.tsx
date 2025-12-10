@@ -65,7 +65,7 @@ const EmployerDashboard = memo(() => {
   
   // Pagination state for mobile
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 20;
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
   
@@ -263,7 +263,7 @@ const EmployerDashboard = memo(() => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredAndSortedJobs.map((job) => (
+                    pageJobs.map((job) => (
                       <TableRow 
                         key={job.id}
                         className={`border-white/10 cursor-pointer transition-colors ${
@@ -357,6 +357,101 @@ const EmployerDashboard = memo(() => {
                 </TableBody>
               </Table>
             </div>
+            
+            {/* Desktop Pagination */}
+            {totalPages > 1 && (
+              <Pagination className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(p => Math.max(1, p - 1));
+                      }}
+                      className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+
+                  {page > 2 && (
+                    <>
+                      <PaginationItem>
+                        <PaginationLink
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPage(1);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          1
+                        </PaginationLink>
+                      </PaginationItem>
+                      {page > 3 && <PaginationEllipsis />}
+                    </>
+                  )}
+
+                  {page > 1 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setPage(page - 1);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        {page - 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  <PaginationItem>
+                    <PaginationLink isActive>
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+
+                  {page < totalPages && (
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setPage(page + 1);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        {page + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  {page < totalPages - 1 && (
+                    <>
+                      {page < totalPages - 2 && <PaginationEllipsis />}
+                      <PaginationItem>
+                        <PaginationLink
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPage(totalPages);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {totalPages}
+                        </PaginationLink>
+                      </PaginationItem>
+                    </>
+                  )}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(p => Math.min(totalPages, p + 1));
+                      }}
+                      className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
           </div>
 
           {/* Mobile: Card view */}
