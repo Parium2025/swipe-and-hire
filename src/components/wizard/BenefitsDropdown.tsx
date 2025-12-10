@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, X, Check, Plus } from 'lucide-react';
+import { ChevronDown, X, Heart, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BENEFITS_OPTIONS, getBenefitLabel } from '@/types/jobWizard';
@@ -98,10 +98,14 @@ export const BenefitsDropdown = ({
                   onClick={() => toggleBenefit(option.value)}
                   className="w-full px-3 py-2 text-left text-sm transition-all duration-300 hover:bg-white/20 flex items-center justify-between"
                 >
-                  <span className="text-white/80">{option.label}</span>
-                  {selectedBenefits.includes(option.value) && (
-                    <Check className="h-4 w-4 text-green-400" />
-                  )}
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded border ${selectedBenefits.includes(option.value) ? 'bg-white border-white' : 'border-white/30 bg-white/10'} flex items-center justify-center`}>
+                      {selectedBenefits.includes(option.value) && (
+                        <Heart className="w-3 h-3 text-primary" />
+                      )}
+                    </div>
+                    <span className="text-white/80">{option.label}</span>
+                  </div>
                 </button>
               ))}
             </div>
