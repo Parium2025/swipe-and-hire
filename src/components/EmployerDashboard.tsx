@@ -364,14 +364,14 @@ const EmployerDashboard = memo(() => {
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex items-center justify-center gap-1.5">
                             {!job.is_active && !isJobComplete(job as JobPosting) ? (
-                              <TooltipProvider>
+                              <TooltipProvider delayDuration={0}>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <div onClick={(e) => e.stopPropagation()}>
                                       <Switch
                                         checked={job.is_active}
                                         disabled
-                                        className="scale-[0.8] cursor-help [&>span]:bg-amber-500 opacity-100"
+                                        className="scale-[0.8] cursor-pointer [&>span]:bg-amber-500 opacity-100"
                                       />
                                     </div>
                                   </TooltipTrigger>
