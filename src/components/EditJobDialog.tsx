@@ -56,12 +56,18 @@ interface JobPosting {
   application_instructions?: string;
   occupation?: string;
   salary_type?: string;
+  salary_transparency?: string;
+  benefits?: string[];
+  work_start_time?: string;
+  work_end_time?: string;
   work_location_type?: string;
   remote_work_possible?: string;
   workplace_name?: string;
   workplace_address?: string;
   workplace_postal_code?: string;
   workplace_city?: string;
+  workplace_county?: string;
+  workplace_municipality?: string;
   pitch?: string;
   job_image_url?: string;
 }
@@ -76,13 +82,19 @@ interface JobFormData {
   salary_max: string;
   employment_type: string;
   salary_type: string;
+  salary_transparency: string;
+  benefits: string[];
   positions_count: string;
+  work_start_time: string;
+  work_end_time: string;
   work_location_type: string;
   remote_work_possible: string;
   workplace_name: string;
   workplace_address: string;
   workplace_postal_code: string;
   workplace_city: string;
+  workplace_county: string;
+  workplace_municipality: string;
   work_schedule: string;
   contact_email: string;
   application_instructions: string;
@@ -132,6 +144,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [showEmploymentTypeDropdown, setShowEmploymentTypeDropdown] = useState(false);
   const [salaryTypeSearchTerm, setSalaryTypeSearchTerm] = useState('');
   const [showSalaryTypeDropdown, setShowSalaryTypeDropdown] = useState(false);
+  const [salaryTransparencySearchTerm, setSalaryTransparencySearchTerm] = useState('');
+  const [showSalaryTransparencyDropdown, setShowSalaryTransparencyDropdown] = useState(false);
+  const [showBenefitsDropdown, setShowBenefitsDropdown] = useState(false);
+  const [customBenefitInput, setCustomBenefitInput] = useState('');
   const [workLocationSearchTerm, setWorkLocationSearchTerm] = useState('');
   const [showWorkLocationDropdown, setShowWorkLocationDropdown] = useState(false);
   const [remoteWorkSearchTerm, setRemoteWorkSearchTerm] = useState('');
@@ -141,6 +157,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const occupationRef = useRef<HTMLDivElement>(null);
+  const workEndTimeRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
@@ -152,13 +169,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     salary_max: '',
     employment_type: '',
     salary_type: '',
+    salary_transparency: '',
+    benefits: [],
     positions_count: '1',
+    work_start_time: '',
+    work_end_time: '',
     work_location_type: '',
     remote_work_possible: '',
     workplace_name: '',
     workplace_address: '',
     workplace_postal_code: '',
     workplace_city: '',
+    workplace_county: '',
+    workplace_municipality: '',
     work_schedule: '',
     contact_email: '',
     application_instructions: '',
@@ -211,6 +234,46 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     { value: 'fast', label: 'Fast månads- vecko- eller timlön' },
     { value: 'rorlig', label: 'Rörlig ackord- eller provisionslön' },
     { value: 'fast-rorlig', label: 'Fast och rörlig lön' }
+  ];
+
+  const salaryTransparencyOptions = [
+    { value: '0-5000', label: '0 - 5 000 kr' },
+    { value: '5000-10000', label: '5 000 - 10 000 kr' },
+    { value: '10000-15000', label: '10 000 - 15 000 kr' },
+    { value: '15000-20000', label: '15 000 - 20 000 kr' },
+    { value: '20000-25000', label: '20 000 - 25 000 kr' },
+    { value: '25000-30000', label: '25 000 - 30 000 kr' },
+    { value: '30000-40000', label: '30 000 - 40 000 kr' },
+    { value: '40000-45000', label: '40 000 - 45 000 kr' },
+    { value: '45000-50000', label: '45 000 - 50 000 kr' },
+    { value: '50000-55000', label: '50 000 - 55 000 kr' },
+    { value: '55000-60000', label: '55 000 - 60 000 kr' },
+    { value: '60000-65000', label: '60 000 - 65 000 kr' },
+    { value: '65000-70000', label: '65 000 - 70 000 kr' },
+    { value: '70000-75000', label: '70 000 - 75 000 kr' },
+    { value: '75000-80000', label: '75 000 - 80 000 kr' },
+    { value: '80000-85000', label: '80 000 - 85 000 kr' },
+    { value: '85000-90000', label: '85 000 - 90 000 kr' },
+    { value: '90000-100000', label: '90 000 - 100 000 kr' },
+    { value: '100000+', label: '100 000+ kr' },
+  ];
+
+  const benefitOptions = [
+    { value: 'friskvard', label: 'Friskvårdsbidrag' },
+    { value: 'tjanstepension', label: 'Tjänstepension' },
+    { value: 'kollektivavtal', label: 'Kollektivavtal' },
+    { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
+    { value: 'bonus', label: 'Bonus' },
+    { value: 'tjanstebil', label: 'Tjänstebil' },
+    { value: 'mobiltelefon', label: 'Mobiltelefon' },
+    { value: 'utbildning', label: 'Utbildning/kompetensutveckling' },
+    { value: 'forsakringar', label: 'Försäkringar' },
+    { value: 'extra-semester', label: 'Extra semesterdagar' },
+    { value: 'gym', label: 'Gym/träning' },
+    { value: 'foraldraledithet', label: 'Föräldraledighetstillägg' },
+    { value: 'lunch', label: 'Lunch/mat' },
+    { value: 'fri-parkering', label: 'Fri parkering' },
+    { value: 'personalrabatter', label: 'Personalrabatter' },
   ];
 
   const workLocationTypes = [
@@ -552,13 +615,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         salary_max: job.salary_max?.toString() || '',
         employment_type: normalizeEmploymentType(job.employment_type || ''),
         salary_type: job.salary_type || '',
+        salary_transparency: job.salary_transparency || '',
+        benefits: job.benefits || [],
         positions_count: (job.positions_count ?? 1).toString(),
+        work_start_time: job.work_start_time || '',
+        work_end_time: job.work_end_time || '',
         work_location_type: job.work_location_type || '',
         remote_work_possible: job.remote_work_possible || '',
         workplace_name: job.workplace_name || '',
         workplace_address: job.workplace_address || '',
         workplace_postal_code: job.workplace_postal_code || '',
         workplace_city: job.workplace_city || '',
+        workplace_county: job.workplace_county || '',
+        workplace_municipality: job.workplace_municipality || '',
         work_schedule: job.work_schedule || '',
         contact_email: job.contact_email || '',
         application_instructions: job.application_instructions || '',
@@ -652,6 +721,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const filteredSalaryTypes = salaryTypes.filter(t =>
     t.label.toLowerCase().includes(salaryTypeSearchTerm.toLowerCase())
   );
+  const filteredSalaryTransparencyOptions = salaryTransparencyOptions.filter(t =>
+    t.label.toLowerCase().includes(salaryTransparencySearchTerm.toLowerCase())
+  );
   const filteredWorkLocationTypes = workLocationTypes.filter(t =>
     t.label.toLowerCase().includes(workLocationSearchTerm.toLowerCase())
   );
@@ -692,6 +764,22 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const handleSalaryTypeClick = () => {
     setShowSalaryTypeDropdown(!showSalaryTypeDropdown);
     setSalaryTypeSearchTerm('');
+  };
+
+  const handleSalaryTransparencySearch = (value: string) => {
+    setSalaryTransparencySearchTerm(value);
+    setShowSalaryTransparencyDropdown(value.length >= 0);
+  };
+
+  const handleSalaryTransparencySelect = (option: { value: string, label: string }) => {
+    handleInputChange('salary_transparency', option.value);
+    setSalaryTransparencySearchTerm(option.label);
+    setShowSalaryTransparencyDropdown(false);
+  };
+
+  const handleSalaryTransparencyClick = () => {
+    setShowSalaryTransparencyDropdown(!showSalaryTransparencyDropdown);
+    setSalaryTransparencySearchTerm('');
   };
 
   const handleWorkLocationSearch = (value: string) => {
@@ -1305,6 +1393,160 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           placeholder="1"
                           className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                         />
+                      </div>
+
+                      {/* Förmåner / Benefits */}
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium text-sm">Förmåner som erbjuds</Label>
+                        <div className="relative benefits-dropdown">
+                          <div
+                            onClick={() => setShowBenefitsDropdown(!showBenefitsDropdown)}
+                            className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 h-11 cursor-pointer hover:border-white/40 transition-colors"
+                          >
+                            <span className="text-sm text-white">
+                              {formData.benefits.length > 0 
+                                ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
+                                : 'Välj förmåner'}
+                            </span>
+                            <ChevronDown className="h-4 w-4 text-white/60" />
+                          </div>
+                          
+                          {showBenefitsDropdown && (
+                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                              {benefitOptions.map((benefit) => (
+                                <button
+                                  key={benefit.value}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (formData.benefits.includes(benefit.value)) {
+                                      setFormData(prev => ({ ...prev, benefits: prev.benefits.filter(b => b !== benefit.value) }));
+                                    } else {
+                                      setFormData(prev => ({ ...prev, benefits: [...prev.benefits, benefit.value] }));
+                                    }
+                                  }}
+                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 flex items-center gap-2"
+                                >
+                                  <div className={`w-4 h-4 rounded border ${formData.benefits.includes(benefit.value) ? 'bg-white border-white' : 'border-white/30 bg-white/10'} flex items-center justify-center`}>
+                                    {formData.benefits.includes(benefit.value) && (
+                                      <Heart className="w-3 h-3 text-primary" />
+                                    )}
+                                  </div>
+                                  <span>{benefit.label}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {formData.benefits.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {formData.benefits.map((benefitValue) => {
+                              const benefit = benefitOptions.find(b => b.value === benefitValue);
+                              const label = benefit ? benefit.label : benefitValue;
+                              return (
+                                <span
+                                  key={benefitValue}
+                                  className="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-white text-xs rounded-full border border-primary/30"
+                                >
+                                  {label}
+                                  <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, benefits: prev.benefits.filter(b => b !== benefitValue) }))}
+                                    className="hover:text-white/60"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Lönetransparens */}
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026) *</Label>
+                        <div className="relative salary-transparency-dropdown">
+                          <Input
+                            value={salaryTransparencySearchTerm || (formData.salary_transparency ? salaryTransparencyOptions.find(t => t.value === formData.salary_transparency)?.label || '' : '')}
+                            onChange={(e) => handleSalaryTransparencySearch(e.target.value)}
+                            onClick={handleSalaryTransparencyClick}
+                            placeholder="Välj lönespann"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                            readOnly
+                          />
+                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                          
+                          {showSalaryTransparencyDropdown && (
+                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                              {filteredSalaryTransparencyOptions.map((option) => (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  onClick={() => handleSalaryTransparencySelect(option)}
+                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                >
+                                  <div className="font-medium">{option.label}</div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Arbetstider */}
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
+                        <div className="flex gap-3 items-center">
+                          <div className="flex-1">
+                            <Input
+                              type="text"
+                              inputMode="numeric"
+                              value={formData.work_start_time}
+                              onChange={(e) => {
+                                const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+                                handleInputChange('work_start_time', formatted);
+                                if (formatted.length === 5) {
+                                  workEndTimeRef.current?.focus();
+                                }
+                              }}
+                              onBlur={(e) => {
+                                const val = e.target.value.replace(/\D/g, '');
+                                if (val.length > 0) {
+                                  const padded = val.padStart(2, '0').slice(0, 2);
+                                  handleInputChange('work_start_time', `${padded}:00`);
+                                }
+                              }}
+                              placeholder="08:00"
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 text-center"
+                            />
+                          </div>
+                          <span className="text-white/60">–</span>
+                          <div className="flex-1">
+                            <Input
+                              ref={workEndTimeRef}
+                              type="text"
+                              inputMode="numeric"
+                              value={formData.work_end_time}
+                              onChange={(e) => {
+                                const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+                                handleInputChange('work_end_time', formatted);
+                              }}
+                              onBlur={(e) => {
+                                const val = e.target.value.replace(/\D/g, '');
+                                if (val.length > 0) {
+                                  const padded = val.padStart(2, '0').slice(0, 2);
+                                  handleInputChange('work_end_time', `${padded}:00`);
+                                }
+                              }}
+                              placeholder="17:00"
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 text-center"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
