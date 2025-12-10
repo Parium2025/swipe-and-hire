@@ -240,13 +240,13 @@ const EmployerDashboard = memo(() => {
                 <TableHeader>
                   <TableRow className="border-white/20 hover:bg-transparent">
                     <TableHead className="text-white font-semibold text-sm px-2 w-[22%]">Titel</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[10%]">Status</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-2 w-[9%]">Status</TableHead>
                     <TableHead className="text-white font-semibold text-sm text-center px-1 w-[8%]">Visningar</TableHead>
                     <TableHead className="text-white font-semibold text-sm text-center px-1 w-[10%]">Ansökningar</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[14%]">Plats</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[14%]">Rekryterare</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-2 w-[12%]">Plats</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-2 w-[13%]">Rekryterare</TableHead>
                     <TableHead className="text-white font-semibold text-sm px-2 w-[12%]">Skapad</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[10%]">Åtgärder</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-2 w-[14%]">Åtgärder</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -299,18 +299,18 @@ const EmployerDashboard = memo(() => {
                             {job.applications_count || 0}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-white px-3 py-3">
-                          <div className="flex items-center gap-1.5 text-sm">
-                            <MapPin size={14} className="flex-shrink-0" />
-                            <TruncatedText text={job.location} className="truncate max-w-[120px]" />
+                        <TableCell className="text-white px-2 py-3">
+                          <div className="flex items-center gap-1 text-sm">
+                            <MapPin size={12} className="flex-shrink-0" />
+                            <TruncatedText text={job.location} className="truncate max-w-[90px]" />
                           </div>
                         </TableCell>
-                        <TableCell className="text-white px-3 py-3">
+                        <TableCell className="text-white px-2 py-3">
                           <TruncatedText 
                             text={job.employer_profile?.first_name && job.employer_profile?.last_name
                               ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
                               : '-'}
-                            className="text-sm truncate max-w-[130px] block"
+                            className="text-sm truncate max-w-[100px] block"
                           />
                         </TableCell>
                         <TableCell className="text-white px-3 py-3">
