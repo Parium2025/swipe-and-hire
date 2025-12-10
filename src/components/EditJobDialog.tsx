@@ -124,6 +124,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [pendingClose, setPendingClose] = useState(false);
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
   const [initialCustomQuestions, setInitialCustomQuestions] = useState<JobQuestion[]>([]);
+  const [isSavingAndLeaving, setIsSavingAndLeaving] = useState(false);
   
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
@@ -606,6 +607,23 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const handleCancelClose = () => {
     setShowUnsavedDialog(false);
     setPendingClose(false);
+  };
+
+  const handleSaveAndLeave = async () => {
+    if (!user || !job) return;
+    
+    setIsSavingAndLeaving(true);
+    try {
+      await handleSubmit();
+      setShowUnsavedDialog(false);
+      setPendingClose(false);
+      setHasUnsavedChanges(false);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving:', error);
+    } finally {
+      setIsSavingAndLeaving(false);
+    }
   };
 
   const handleInputChange = (field: keyof JobFormData, value: string) => {
@@ -2373,6 +2391,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         onOpenChange={setShowUnsavedDialog}
         onConfirm={handleConfirmClose}
         onCancel={handleCancelClose}
+        onSaveAndLeave={handleSaveAndLeave}
+        isSaving={isSavingAndLeaving}
       />
 
       {showCompanyProfile && profile && (
