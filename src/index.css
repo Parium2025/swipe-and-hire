@@ -818,6 +818,31 @@ All colors MUST be HSL.
     display: none;
   }
 
+  /* Synlig horisontell scrollbar för tabeller */
+  .table-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.4) transparent;
+  }
+  
+  .table-scroll::-webkit-scrollbar {
+    height: 6px;
+    background: transparent;
+  }
+  
+  .table-scroll::-webkit-scrollbar-track {
+    background: hsl(var(--primary) / 0.1);
+    border-radius: 3px;
+  }
+  
+  .table-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.4);
+    border-radius: 3px;
+  }
+  
+  .table-scroll::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.6);
+  }
+
   /* Lås scroll på auth och fixa iOS viewport-gap */
   html.auth-locked, body.auth-locked,
   html.auth-lock, body.auth-lock {
