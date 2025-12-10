@@ -818,29 +818,33 @@ All colors MUST be HSL.
     display: none;
   }
 
-  /* Synlig horisontell scrollbar för tabeller */
+  /* Synlig horisontell scrollbar för tabeller - med !important för att överskrida globala regler */
   .table-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--primary) / 0.4) transparent;
+    scrollbar-width: thin !important;
+    scrollbar-color: hsl(var(--primary) / 0.5) hsl(var(--primary) / 0.1) !important;
+    -ms-overflow-style: auto !important;
+    overflow-x: auto !important;
   }
   
   .table-scroll::-webkit-scrollbar {
-    height: 6px;
-    background: transparent;
+    height: 8px !important;
+    background: hsl(var(--primary) / 0.1) !important;
+    display: block !important;
   }
   
   .table-scroll::-webkit-scrollbar-track {
-    background: hsl(var(--primary) / 0.1);
-    border-radius: 3px;
+    background: hsl(var(--primary) / 0.1) !important;
+    border-radius: 4px !important;
   }
   
   .table-scroll::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.4);
-    border-radius: 3px;
+    background: hsl(var(--primary) / 0.5) !important;
+    border-radius: 4px !important;
+    min-width: 40px !important;
   }
   
   .table-scroll::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary) / 0.6);
+    background: hsl(var(--primary) / 0.7) !important;
   }
 
   /* Lås scroll på auth och fixa iOS viewport-gap */
