@@ -11,14 +11,31 @@ import { formatDateShortSv } from '@/lib/date';
 
 interface MobileJobCardProps {
   job: JobPosting;
-  onToggleStatus: (jobId: string, currentStatus: boolean) => void;
+  onToggleStatus: (jobId: string, currentStatus: boolean, job: JobPosting) => void;
   onEdit: (job: JobPosting) => void;
   onDelete: (job: JobPosting) => void;
   onEditDraft?: (job: JobPosting) => void;
 }
 
+// Validate if a job has all required fields to be activated
+const isJobComplete = (job: JobPosting): boolean => {
+  const requiredFields = [
+    job.title,
+    job.description,
+    (job as any).salary_type,
+    (job as any).salary_transparency,
+    (job as any).work_start_time,
+    (job as any).work_end_time,
+    (job as any).positions_count,
+    job.location || (job as any).workplace_city,
+  ];
+  
+  return requiredFields.every(field => field !== null && field !== undefined && field !== '');
+};
+
 export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEditDraft }: MobileJobCardProps) => {
   const navigate = useNavigate();
+  const jobIsComplete = isJobComplete(job);
 
   const handleCardClick = () => {
     // If job is inactive (draft) and onEditDraft is provided, open wizard instead
@@ -52,9 +69,10 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
           </div>
           <Switch
             checked={job.is_active}
-            onCheckedChange={() => onToggleStatus(job.id, job.is_active)}
+            onCheckedChange={() => onToggleStatus(job.id, job.is_active, job)}
             onClick={(e) => e.stopPropagation()}
-            className="flex-shrink-0"
+            disabled={!job.is_active && !jobIsComplete}
+            className={`flex-shrink-0 ${!job.is_active && !jobIsComplete ? 'opacity-50 cursor-not-allowed' : ''}`}
           />
         </div>
 
