@@ -2579,12 +2579,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           <>
                                             <button 
                                               onClick={() => setShowCompanyProfile(true)}
-                                              className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left`}
+                                              className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
                                             >
                                               {profile?.company_name || 'Företag'}
                                             </button>
-                                            <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1`}>{getDisplayTitle()}</h3>
-                                            <div className={`${textSizes.meta} text-white`}>
+                                            <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-2`}>{getDisplayTitle()}</h3>
+                                            <div className={`${textSizes.meta} text-white line-clamp-1`}>
                                               {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
                                             </div>
                                           </>
@@ -2776,12 +2776,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       >
                                         <button 
                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                          className="text-sm text-white font-medium mb-2 hover:text-primary transition-colors cursor-pointer"
+                                          className="text-sm text-white font-medium mb-2 hover:text-primary transition-colors cursor-pointer line-clamp-1"
                                         >
                                           {profile?.company_name || 'Företag'}
                                         </button>
-                                        <h3 className="text-xl text-white font-bold leading-tight mb-2">{formData.title || 'Jobbtitel'}</h3>
-                                        <div className="text-sm text-white">
+                                        <h3 className="text-xl text-white font-bold leading-tight mb-2 line-clamp-2">{formData.title || 'Jobbtitel'}</h3>
+                                        <div className="text-sm text-white line-clamp-1">
                                           {formData.workplace_city || formData.location || 'Plats'}
                                         </div>
                                       </div>
