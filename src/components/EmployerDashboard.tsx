@@ -360,20 +360,20 @@ const EmployerDashboard = memo(() => {
             
             {/* Desktop Pagination */}
             {totalPages >= 1 && (
-              <div className="flex items-center justify-center gap-2 mt-4 text-xs text-white/60">
+              <div className="flex items-center justify-center gap-2 mt-4 text-xs">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className={`hover:text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                 >
-                  « Föreg
+                  ‹ Föreg
                 </button>
                 
                 {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(n => (
                   <button
                     key={n}
                     onClick={() => setPage(n)}
-                    className={`px-1 transition-colors ${page === n ? 'text-white font-medium' : 'hover:text-white cursor-pointer'}`}
+                    className={`px-1 text-white/60 transition-colors ${page === n ? 'text-white font-medium' : 'hover:text-white cursor-pointer'}`}
                   >
                     {n}
                   </button>
@@ -382,12 +382,12 @@ const EmployerDashboard = memo(() => {
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className={`hover:text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                 >
-                  Nästa »
+                  Nästa ›
                 </button>
                 
-                <span className="ml-2">Sida {page} av {totalPages}</span>
+                <span className="ml-2 text-white">Sida {page} av {totalPages}</span>
               </div>
             )}
           </div>
@@ -423,20 +423,20 @@ const EmployerDashboard = memo(() => {
                 </div>
 
                 {totalPages >= 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-3 text-xs text-white/60">
+                  <div className="flex items-center justify-center gap-2 mt-3 text-xs">
                     <button
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className={`hover:text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                      className={`text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                     >
-                      « Föreg
+                      ‹ Föreg
                     </button>
                     
                     {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map(n => (
                       <button
                         key={n}
                         onClick={() => setPage(n)}
-                        className={`px-1 transition-colors ${page === n ? 'text-white font-medium' : 'hover:text-white cursor-pointer'}`}
+                        className={`px-1 text-white/60 transition-colors ${page === n ? 'text-white font-medium' : 'hover:text-white cursor-pointer'}`}
                       >
                         {n}
                       </button>
@@ -445,12 +445,12 @@ const EmployerDashboard = memo(() => {
                     <button
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      className={`hover:text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                      className={`text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                     >
-                      Nästa »
+                      Nästa ›
                     </button>
                     
-                    <span className="ml-2">Sida {page} av {totalPages}</span>
+                    <span className="ml-2 text-white">Sida {page} av {totalPages}</span>
                   </div>
                 )}
               </>
