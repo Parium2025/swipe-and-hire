@@ -116,9 +116,9 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
   if (!shouldShowTooltip) {
     // Render plain text without tooltip
     return (
-      <span ref={textRef} className={className}>
+      <div ref={textRef as React.RefObject<HTMLDivElement>} className={className}>
         {children || text}
-      </span>
+      </div>
     );
   }
 
@@ -127,14 +127,14 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
     <TooltipProvider delayDuration={0}>
       <Tooltip open={!supportsHover ? isOpen : undefined} onOpenChange={!supportsHover ? setIsOpen : undefined}>
         <TooltipTrigger asChild>
-          <span
-            ref={textRef}
+          <div
+            ref={textRef as React.RefObject<HTMLDivElement>}
             className={`${className ?? ""} cursor-pointer pointer-events-auto`}
             onClick={!supportsHover && isTouch ? handleTap : undefined}
             onTouchStart={!supportsHover ? () => setIsOpen(true) : undefined}
           >
             {children || text}
-          </span>
+          </div>
         </TooltipTrigger>
         <TooltipContent
           side="top"
