@@ -360,7 +360,7 @@ const EmployerDashboard = memo(() => {
             </div>
             
             {/* Desktop Pagination */}
-            {totalPages >= 1 && (
+            {totalPages > 1 && (
               <div className="flex items-center justify-center gap-6 mt-4 text-xs">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -423,7 +423,7 @@ const EmployerDashboard = memo(() => {
                   </ScrollArea>
                 </div>
 
-                {totalPages >= 1 && (
+                {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-6 mt-3 text-xs">
                     <button
                       onClick={() => setPage(p => Math.max(1, p - 1))}
