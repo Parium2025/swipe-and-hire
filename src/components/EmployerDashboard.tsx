@@ -450,6 +450,7 @@ const EmployerDashboard = memo(() => {
                     />
                   </PaginationItem>
                 </PaginationContent>
+                <span className="ml-4 text-sm text-white/60">Sida {page} av {totalPages}</span>
               </Pagination>
             )}
           </div>
@@ -575,6 +576,7 @@ const EmployerDashboard = memo(() => {
                         />
                       </PaginationItem>
                     </PaginationContent>
+                    <span className="ml-4 text-sm text-white/60">Sida {page} av {totalPages}</span>
                   </Pagination>
                 )}
               </>
