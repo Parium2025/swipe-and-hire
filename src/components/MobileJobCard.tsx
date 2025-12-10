@@ -82,14 +82,14 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
             )}
           </div>
           {!job.is_active && !jobIsComplete ? (
-            <TooltipProvider>
+            <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div onClick={(e) => e.stopPropagation()}>
                     <Switch
                       checked={job.is_active}
                       disabled
-                      className="flex-shrink-0 cursor-help [&>span]:bg-amber-500 opacity-100"
+                      className="flex-shrink-0 cursor-pointer [&>span]:bg-amber-500 opacity-100"
                     />
                   </div>
                 </TooltipTrigger>
