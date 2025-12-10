@@ -366,7 +366,7 @@ const EmployerDashboard = memo(() => {
                   disabled={page === 1}
                   className={`flex items-center gap-1.5 text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                 >
-                  <span className="text-base leading-none">‹</span>
+                  <span className="text-lg leading-none">‹</span>
                   <span>Föreg</span>
                 </button>
                 
@@ -386,7 +386,7 @@ const EmployerDashboard = memo(() => {
                   className={`flex items-center gap-1.5 text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                 >
                   <span>Nästa</span>
-                  <span className="text-base leading-none">›</span>
+                  <span className="text-lg leading-none">›</span>
                 </button>
               </div>
             )}
@@ -429,7 +429,7 @@ const EmployerDashboard = memo(() => {
                       disabled={page === 1}
                       className={`flex items-center gap-1.5 text-white transition-colors ${page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                     >
-                      <span className="text-base leading-none">‹</span>
+                      <span className="text-lg leading-none">‹</span>
                       <span>Föreg</span>
                     </button>
                     
@@ -449,7 +449,7 @@ const EmployerDashboard = memo(() => {
                       className={`flex items-center gap-1.5 text-white transition-colors ${page === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:opacity-70'}`}
                     >
                       <span>Nästa</span>
-                      <span className="text-base leading-none">›</span>
+                      <span className="text-lg leading-none">›</span>
                     </button>
                   </div>
                 )}
