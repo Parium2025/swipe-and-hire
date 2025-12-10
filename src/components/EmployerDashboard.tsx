@@ -386,8 +386,6 @@ const EmployerDashboard = memo(() => {
                 >
                   Nästa <span className="leading-none">›</span>
                 </button>
-                
-                <span className="ml-2 text-white">Sida {page} av {totalPages}</span>
               </div>
             )}
           </div>
@@ -449,8 +447,6 @@ const EmployerDashboard = memo(() => {
                     >
                       Nästa <span className="leading-none">›</span>
                     </button>
-                    
-                    <span className="ml-2 text-white">Sida {page} av {totalPages}</span>
                   </div>
                 )}
               </>
