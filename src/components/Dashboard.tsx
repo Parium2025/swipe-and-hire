@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase, Users, Eye, TrendingUp, MapPin, Calendar } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
@@ -14,6 +14,15 @@ import { formatDateShortSv } from '@/lib/date';
 import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const Dashboard = memo(() => {
   // Dashboard shows organization-wide data (all colleagues' published jobs)
@@ -34,6 +43,34 @@ const Dashboard = memo(() => {
     setSelectedRecruiterId,
     filteredAndSortedJobs,
   } = useJobFiltering(jobs);
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  const listTopRef = useRef<HTMLDivElement>(null);
+  const didMountRef = useRef(false);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / pageSize));
+  const pageJobs = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredAndSortedJobs.slice(start, start + pageSize);
+  }, [filteredAndSortedJobs, page]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, sortBy, selectedRecruiterId]);
+
+  // Scroll to top when page changes (but not on initial mount)
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (listTopRef.current) {
+      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [page]);
 
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Totalt annonser', value: stats.totalJobs, loading: false },
@@ -87,6 +124,7 @@ const Dashboard = memo(() => {
           
           {/* Desktop: Table view */}
           <div className="hidden md:block w-full">
+            <div ref={listTopRef} />
             <Table className="w-full table-fixed">
               <TableHeader>
                 <TableRow className="border-white/20 hover:bg-transparent">
@@ -102,7 +140,7 @@ const Dashboard = memo(() => {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-white/60 py-8 text-sm">
+                    <TableCell colSpan={7} className="text-center text-white/60 py-8 text-sm">
                       Laddar...
                     </TableCell>
                   </TableRow>
@@ -113,7 +151,7 @@ const Dashboard = memo(() => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredAndSortedJobs.map((job) => (
+                  pageJobs.map((job) => (
                     <TableRow 
                       key={job.id}
                       className="border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-colors"
@@ -167,6 +205,102 @@ const Dashboard = memo(() => {
                 )}
               </TableBody>
             </Table>
+            
+            {/* Desktop Pagination */}
+            {totalPages > 1 && (
+              <Pagination className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(p => Math.max(1, p - 1));
+                      }}
+                      className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+
+                  {page > 2 && (
+                    <>
+                      <PaginationItem>
+                        <PaginationLink
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPage(1);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          1
+                        </PaginationLink>
+                      </PaginationItem>
+                      {page > 3 && <PaginationEllipsis />}
+                    </>
+                  )}
+
+                  {page > 1 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setPage(page - 1);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        {page - 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  <PaginationItem>
+                    <PaginationLink isActive>
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+
+                  {page < totalPages && (
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setPage(page + 1);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        {page + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  {page < totalPages - 1 && (
+                    <>
+                      {page < totalPages - 2 && <PaginationEllipsis />}
+                      <PaginationItem>
+                        <PaginationLink
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPage(totalPages);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {totalPages}
+                        </PaginationLink>
+                      </PaginationItem>
+                    </>
+                  )}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(p => Math.min(totalPages, p + 1));
+                      }}
+                      className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+                <span className="ml-4 text-sm text-white/60">Sida {page} av {totalPages}</span>
+              </Pagination>
+            )}
           </div>
 
           {/* Mobile: Card list view */}
@@ -180,18 +314,116 @@ const Dashboard = memo(() => {
                 {searchTerm ? 'Inga annonser matchar din sökning' : 'Inga jobbannonser än. Skapa din första annons!'}
               </div>
             ) : (
-              <div className="rounded-none bg-transparent ring-0 shadow-none">
-                <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]">
-                  <div className="space-y-2 px-2 py-2 pb-24">
-                    {filteredAndSortedJobs.map((job) => (
-                      <ReadOnlyMobileJobCard
-                        key={job.id}
-                        job={job as any}
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
+              <>
+                <div className="rounded-none bg-transparent ring-0 shadow-none">
+                  <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]">
+                    <div className="space-y-2 px-2 py-2 pb-24">
+                      {pageJobs.map((job) => (
+                        <ReadOnlyMobileJobCard
+                          key={job.id}
+                          job={job as any}
+                        />
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+
+                {/* Mobile Pagination */}
+                {totalPages > 1 && (
+                  <Pagination className="mt-3">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPage(p => Math.max(1, p - 1));
+                          }}
+                          className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+
+                      {page > 2 && (
+                        <>
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setPage(1);
+                              }}
+                              className="cursor-pointer"
+                            >
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
+                          {page > 3 && <PaginationEllipsis />}
+                        </>
+                      )}
+
+                      {page > 1 && (
+                        <PaginationItem>
+                          <PaginationLink
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setPage(page - 1);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            {page - 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )}
+
+                      <PaginationItem>
+                        <PaginationLink isActive>
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+
+                      {page < totalPages && (
+                        <PaginationItem>
+                          <PaginationLink
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setPage(page + 1);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            {page + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )}
+
+                      {page < totalPages - 1 && (
+                        <>
+                          {page < totalPages - 2 && <PaginationEllipsis />}
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setPage(totalPages);
+                              }}
+                              className="cursor-pointer"
+                            >
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>
+                        </>
+                      )}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPage(p => Math.min(totalPages, p + 1));
+                          }}
+                          className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                    <span className="ml-4 text-sm text-white/60">Sida {page} av {totalPages}</span>
+                  </Pagination>
+                )}
+              </>
             )}
           </div>
 
