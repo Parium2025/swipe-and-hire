@@ -318,7 +318,7 @@ const EmployerDashboard = memo(() => {
                         }`}
                         onClick={() => handleJobRowClick(job as JobPosting)}
                       >
-                        <TableCell className="font-medium text-white text-center px-2 py-3 max-w-[200px]">
+                        <TableCell className="font-medium text-white text-center px-2 py-3 overflow-hidden">
                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
