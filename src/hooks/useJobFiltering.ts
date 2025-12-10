@@ -34,7 +34,7 @@ export interface FilterableJob {
   };
 }
 
-type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'drafts-first';
+type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'drafts-only';
 
 export const useJobFiltering = (jobs: FilterableJob[]) => {
   const [searchInput, setSearchInput] = useState('');
@@ -108,14 +108,11 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
         return result.sort((a, b) => 
           b.title.localeCompare(a.title, 'sv')
         );
-      case 'drafts-first':
-        return result.sort((a, b) => {
-          // Drafts (is_active = false) first, then by newest
-          if (a.is_active === b.is_active) {
-            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-          }
-          return a.is_active ? 1 : -1;
-        });
+      case 'drafts-only':
+        // Filter to only show drafts (is_active = false), sorted by newest
+        return result
+          .filter(job => !job.is_active)
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       case 'newest':
       default:
         return result.sort((a, b) => 
