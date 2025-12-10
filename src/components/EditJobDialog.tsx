@@ -2586,7 +2586,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             </button>
                                             <Tooltip>
                                               <TooltipTrigger asChild>
-                                                <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-2 cursor-default`}>{getDisplayTitle()}</h3>
+                                                <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-4 cursor-default`}>{getDisplayTitle()}</h3>
                                               </TooltipTrigger>
                                               <TooltipContent side="top" className="max-w-[300px]">
                                                 <p>{getDisplayTitle()}</p>
@@ -2790,7 +2790,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         </button>
                                         <Tooltip>
                                           <TooltipTrigger asChild>
-                                            <h3 className="text-xl text-white font-bold leading-tight mb-2 line-clamp-2 cursor-default">{formData.title || 'Jobbtitel'}</h3>
+                                            <h3 className="text-xl text-white font-bold leading-tight mb-2 line-clamp-4 cursor-default">{formData.title || 'Jobbtitel'}</h3>
                                           </TooltipTrigger>
                                           <TooltipContent side="top" className="max-w-[300px]">
                                             <p>{formData.title || 'Jobbtitel'}</p>

@@ -3656,7 +3656,7 @@ const MobileJobWizard = ({
                     </button>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-2 cursor-default`}>{getDisplayTitle()}</h3>
+                        <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-4 cursor-default`}>{getDisplayTitle()}</h3>
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-[300px]">
                         <p>{getDisplayTitle()}</p>
@@ -4202,7 +4202,7 @@ const MobileJobWizard = ({
                                   {/* Job title */}
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <h3 className="text-xl font-bold text-white leading-tight mb-1 line-clamp-2 cursor-default">
+                                      <h3 className="text-xl font-bold text-white leading-tight mb-1 line-clamp-4 cursor-default">
                                         {formData.title || 'Jobbtitel'}
                                       </h3>
                                     </TooltipTrigger>
