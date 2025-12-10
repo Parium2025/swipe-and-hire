@@ -272,8 +272,8 @@ const EmployerDashboard = memo(() => {
                         key={job.id}
                         className={`border-white/10 cursor-pointer transition-colors ${
                           job.is_active 
-                            ? "hover:bg-white/5 hover:border-white/50" 
-                            : "hover:bg-amber-500/10 hover:border-amber-500/30"
+                            ? "hover:bg-white/5" 
+                            : "hover:bg-amber-500/10"
                         }`}
                         onClick={() => handleJobRowClick(job as JobPosting)}
                       >
