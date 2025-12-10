@@ -235,18 +235,18 @@ const EmployerDashboard = memo(() => {
         <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
           {/* Desktop: Table view */}
           <div className="hidden md:block">
-            <div className="w-full">
-              <Table className="w-full table-fixed">
+            <div className="overflow-x-auto">
+              <Table className="min-w-[1000px]">
                 <TableHeader>
                   <TableRow className="border-white/20 hover:bg-transparent">
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[24%]">Titel</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[9%]">Status</TableHead>
-                    <TableHead className="text-white font-semibold text-sm text-center px-1 w-[7%]">Visn.</TableHead>
-                    <TableHead className="text-white font-semibold text-sm text-center px-1 w-[7%]">Ansök.</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[13%]">Plats</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[13%]">Rekryterare</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[11%]">Skapad</TableHead>
-                    <TableHead className="text-white font-semibold text-sm px-2 w-[16%]">Åtgärder</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-3">Titel</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-3">Status</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-2">Visningar</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-2">Ansökningar</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-3">Plats</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-3">Rekryterare</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-3">Skapad</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-3">Åtgärder</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
