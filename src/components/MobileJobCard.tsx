@@ -4,7 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Eye, Users, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
+import { Eye, Users, MapPin, Calendar, Edit, Trash2, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { formatDateShortSv } from '@/lib/date';
@@ -31,6 +32,19 @@ const isJobComplete = (job: JobPosting): boolean => {
   ];
   
   return requiredFields.every(field => field !== null && field !== undefined && field !== '');
+};
+
+// Get missing fields for tooltip
+const getMissingFields = (job: JobPosting): string[] => {
+  const missing: string[] = [];
+  if (!job.title) missing.push('Jobbtitel');
+  if (!job.description) missing.push('Jobbeskrivning');
+  if (!(job as any).salary_type) missing.push('Lönetyp');
+  if (!(job as any).salary_transparency) missing.push('Lönetransparens');
+  if (!(job as any).work_start_time || !(job as any).work_end_time) missing.push('Arbetstider');
+  if (!(job as any).positions_count) missing.push('Antal tjänster');
+  if (!job.location && !(job as any).workplace_city) missing.push('Plats');
+  return missing;
 };
 
 export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEditDraft }: MobileJobCardProps) => {
@@ -67,13 +81,28 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
               </Badge>
             )}
           </div>
-          <Switch
-            checked={job.is_active}
-            onCheckedChange={() => onToggleStatus(job.id, job.is_active, job)}
-            onClick={(e) => e.stopPropagation()}
-            disabled={!job.is_active && !jobIsComplete}
-            className={`flex-shrink-0 ${!job.is_active && !jobIsComplete ? 'opacity-50 cursor-not-allowed' : ''}`}
-          />
+          <div className="flex items-center gap-1.5">
+            {!job.is_active && !jobIsComplete && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info size={14} className="text-amber-400 cursor-help" onClick={(e) => e.stopPropagation()} />
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
+                    <p className="text-xs font-medium mb-1">Saknade fält:</p>
+                    <p className="text-xs text-white/80">{getMissingFields(job).join(', ')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            <Switch
+              checked={job.is_active}
+              onCheckedChange={() => onToggleStatus(job.id, job.is_active, job)}
+              onClick={(e) => e.stopPropagation()}
+              disabled={!job.is_active && !jobIsComplete}
+              className={`flex-shrink-0 ${!job.is_active && !jobIsComplete ? 'opacity-50 cursor-not-allowed' : ''}`}
+            />
+          </div>
         </div>
 
         {/* Status Badge */}
