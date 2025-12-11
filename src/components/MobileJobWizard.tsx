@@ -597,7 +597,7 @@ const MobileJobWizard = ({
           }
           if (parsed.formData) {
             setFormData(parsed.formData);
-            setHasUnsavedChanges(true);
+            // Sätt INTE hasUnsavedChanges här - det hanteras av jämförelse-useEffect
           }
         }
       } catch (e) {
@@ -1745,6 +1745,10 @@ const MobileJobWizard = ({
       setCachedPostalCodeInfo(null);
       setInitialFormData(null);
       setHasUnsavedChanges(false);
+      
+      // Clear sessionStorage when closing without changes
+      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+      
       // Om onBack finns, använd den för att gå tillbaka till mallvalet
       // Annars stäng helt (default beteende)
       if (onBack) {
