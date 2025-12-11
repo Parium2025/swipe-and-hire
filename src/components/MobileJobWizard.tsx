@@ -3661,7 +3661,7 @@ const MobileJobWizard = ({
                     >
                       {getDisplayTitle()}
                     </TruncatedTitle>
-                    <div className={`${textSizes.meta} text-white line-clamp-1`}>
+                    <div className={`${textSizes.meta} text-white`}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
                     </div>
                   </>
@@ -4207,7 +4207,7 @@ const MobileJobWizard = ({
                                   </TruncatedTitle>
                                   
                                   {/* Meta line: employment type • location */}
-                                  <div className="text-sm text-white line-clamp-1">
+                                  <div className="text-sm text-white">
                                     {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
                                   </div>
                                 </div>
