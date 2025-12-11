@@ -113,11 +113,10 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
     !supportsHover && isTouch && (alwaysShowTooltip === true || isTruncated);
   const shouldShowTooltip = showTooltipDesktop || showTooltipTouch;
 
-  // Explicit styles for word breaking that work reliably
+  // Explicit styles for word breaking that preserve word integrity
   const wordBreakStyles: React.CSSProperties = {
-    wordBreak: 'break-all',
-    overflowWrap: 'anywhere',
-    hyphens: 'auto',
+    wordBreak: 'break-word',
+    overflowWrap: 'break-word',
   };
 
   // If not showing tooltip, render simple element
