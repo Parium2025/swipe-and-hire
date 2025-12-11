@@ -556,52 +556,37 @@ const MobileJobWizard = ({
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
   const [cachedPostalCodeInfo, setCachedPostalCodeInfo] = useState<{postalCode: string, city: string, municipality: string, county: string} | null>(null);
   
-  // Try to restore form data from sessionStorage (for tab switches)
-  const getInitialFormData = useCallback((): JobFormData => {
-    try {
-      const saved = sessionStorage.getItem(JOB_WIZARD_SESSION_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.formData) {
-          return parsed.formData;
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to restore job wizard state from sessionStorage');
-    }
-    
-    return {
-      title: jobTitle,
-      description: selectedTemplate?.description || '',
-      requirements: selectedTemplate?.requirements || '',
-      location: selectedTemplate?.location || '',
-      occupation: '',
-      salary_min: selectedTemplate?.salary_min?.toString() || '',
-      salary_max: selectedTemplate?.salary_max?.toString() || '',
-      employment_type: selectedTemplate?.employment_type || '',
-      salary_type: '',
-      salary_transparency: '',
-      benefits: [],
-      positions_count: '1',
-      work_start_time: '',
-      work_end_time: '',
-      work_location_type: 'på-plats',
-      remote_work_possible: 'nej',
-      workplace_name: '',
-      workplace_address: '',
-      workplace_postal_code: '',
-      workplace_city: '',
-      workplace_county: '',
-      workplace_municipality: '',
-      work_schedule: selectedTemplate?.work_schedule || '',
-      contact_email: selectedTemplate?.contact_email || '',
-      application_instructions: selectedTemplate?.application_instructions || '',
-      pitch: '',
-      job_image_url: ''
-    };
-  }, [jobTitle, selectedTemplate]);
-  
-  const [formData, setFormData] = useState<JobFormData>(getInitialFormData);
+  // NOTE: formData initial state is always empty - actual state is loaded 
+  // in the open useEffect at the top. This prevents sessionStorage race conditions.
+  const [formData, setFormData] = useState<JobFormData>({
+    title: '',
+    description: '',
+    requirements: '',
+    location: '',
+    occupation: '',
+    salary_min: '',
+    salary_max: '',
+    employment_type: '',
+    salary_type: '',
+    salary_transparency: '',
+    benefits: [],
+    positions_count: '1',
+    work_start_time: '',
+    work_end_time: '',
+    work_location_type: 'på-plats',
+    remote_work_possible: 'nej',
+    workplace_name: '',
+    workplace_address: '',
+    workplace_postal_code: '',
+    workplace_city: '',
+    workplace_county: '',
+    workplace_municipality: '',
+    work_schedule: '',
+    contact_email: '',
+    application_instructions: '',
+    pitch: '',
+    job_image_url: ''
+  });
   
   // Save form state to sessionStorage when there are unsaved changes
   useEffect(() => {
@@ -685,32 +670,9 @@ const MobileJobWizard = ({
     }
   };
   
-  // Update form data when jobTitle or selectedTemplate changes
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      title: jobTitle,
-      description: selectedTemplate?.description || prev.description,
-      requirements: selectedTemplate?.requirements || prev.requirements,
-      // Never auto-fill location from template - user must always set it manually
-      occupation: selectedTemplate?.occupation || prev.occupation,
-      salary_min: selectedTemplate?.salary_min?.toString() || prev.salary_min,
-      salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
-      salary_type: selectedTemplate?.salary_type || prev.salary_type,
-      salary_transparency: selectedTemplate?.salary_transparency || prev.salary_transparency,
-      benefits: selectedTemplate?.benefits || prev.benefits,
-      employment_type: selectedTemplate?.employment_type || prev.employment_type,
-      work_location_type: selectedTemplate?.work_location_type || prev.work_location_type,
-      remote_work_possible: selectedTemplate?.remote_work_possible || prev.remote_work_possible,
-      workplace_name: selectedTemplate?.workplace_name || prev.workplace_name,
-      workplace_address: selectedTemplate?.workplace_address || prev.workplace_address,
-      positions_count: selectedTemplate?.positions_count || prev.positions_count,
-      work_schedule: selectedTemplate?.work_schedule || prev.work_schedule,
-      contact_email: selectedTemplate?.contact_email || prev.contact_email,
-      application_instructions: selectedTemplate?.application_instructions || prev.application_instructions,
-      pitch: selectedTemplate?.pitch || prev.pitch,
-    }));
-  }, [jobTitle, selectedTemplate]);
+  // NOTE: Removed the useEffect that updated formData based on jobTitle/selectedTemplate
+  // as it caused race conditions. All form data is now loaded ONLY in the 'open' useEffect
+  // at the top of the component, which sets both formData AND initialFormData together.
   
   // NOTE: initialFormData and initialCustomQuestions are now set DIRECTLY 
   // in the loading useEffect above to avoid race conditions with async data loading
