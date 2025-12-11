@@ -140,12 +140,12 @@ const MobileJobWizard = ({
       
       // Reset form state for fresh load
       setInitialFormData(null);
+      setInitialCustomQuestions([]);
       setHasUnsavedChanges(false);
       
       // Load existing job data if editing a draft
       if (existingJob) {
-        setFormData(prev => ({
-          ...prev,
+        const loadedFormData: JobFormData = {
           title: existingJob.title || '',
           description: existingJob.description || '',
           requirements: existingJob.requirements || '',
@@ -173,9 +173,10 @@ const MobileJobWizard = ({
           pitch: existingJob.pitch || '',
           job_image_url: existingJob.job_image_url || '',
           location: existingJob.location || '',
-        }));
+        };
+        setFormData(loadedFormData);
         
-        // Load existing questions for this job
+        // Load existing questions for this job and set both states together
         const loadExistingQuestions = async () => {
           const { data: questions } = await supabase
             .from('job_questions')
@@ -183,25 +184,31 @@ const MobileJobWizard = ({
             .eq('job_id', existingJob.id)
             .order('order_index');
           
-          if (questions && questions.length > 0) {
-            setCustomQuestions(questions.map(q => ({
-              id: q.id,
-              question_text: q.question_text,
-              question_type: q.question_type as JobQuestion['question_type'],
-              options: q.options || [],
-              is_required: q.is_required ?? true,
-              order_index: q.order_index,
-              placeholder_text: q.placeholder_text || '',
-              min_value: q.min_value ?? undefined,
-              max_value: q.max_value ?? undefined,
-            })));
-          }
+          const loadedQuestions = questions && questions.length > 0 
+            ? questions.map(q => ({
+                id: q.id,
+                question_text: q.question_text,
+                question_type: q.question_type as JobQuestion['question_type'],
+                options: q.options || [],
+                is_required: q.is_required ?? true,
+                order_index: q.order_index,
+                placeholder_text: q.placeholder_text || '',
+                min_value: q.min_value ?? undefined,
+                max_value: q.max_value ?? undefined,
+              }))
+            : [];
+          
+          // Set BOTH customQuestions AND initialCustomQuestions to same value
+          setCustomQuestions(loadedQuestions);
+          setInitialCustomQuestions(loadedQuestions);
+          // Set initialFormData AFTER questions are loaded to avoid race condition
+          setInitialFormData(loadedFormData);
+          setHasUnsavedChanges(false);
         };
         loadExistingQuestions();
       } else if (selectedTemplate) {
         // Force reload template data when opening
-        setFormData(prev => ({
-          ...prev,
+        const templateFormData: JobFormData = {
           title: jobTitle,
           description: selectedTemplate.description || '',
           requirements: selectedTemplate.requirements || '',
@@ -216,16 +223,26 @@ const MobileJobWizard = ({
           remote_work_possible: selectedTemplate.remote_work_possible || 'nej',
           workplace_name: selectedTemplate.workplace_name || '',
           workplace_address: selectedTemplate.workplace_address || '',
+          workplace_postal_code: selectedTemplate.workplace_postal_code || '',
+          workplace_city: selectedTemplate.workplace_city || '',
+          workplace_county: (selectedTemplate as any).workplace_county || '',
+          workplace_municipality: (selectedTemplate as any).workplace_municipality || '',
           positions_count: selectedTemplate.positions_count || '',
           work_schedule: selectedTemplate.work_schedule || '',
           contact_email: selectedTemplate.contact_email || '',
           application_instructions: selectedTemplate.application_instructions || '',
           pitch: selectedTemplate.pitch || '',
-        }));
+          location: selectedTemplate.location || '',
+          job_image_url: '',
+          work_start_time: '',
+          work_end_time: '',
+        };
+        setFormData(templateFormData);
         
         // Load template questions if available
+        let templateQuestions: JobQuestion[] = [];
         if (selectedTemplate.questions && Array.isArray(selectedTemplate.questions)) {
-          const parsedQuestions = selectedTemplate.questions.map((q: any, index: number) => ({
+          templateQuestions = selectedTemplate.questions.map((q: any, index: number) => ({
             id: q.id || `template-q-${index}`,
             question_text: q.question_text || '',
             question_type: q.question_type || 'text',
@@ -236,12 +253,15 @@ const MobileJobWizard = ({
             min_value: q.min_value,
             max_value: q.max_value,
           }));
-          setCustomQuestions(parsedQuestions);
         }
+        setCustomQuestions(templateQuestions);
+        // Set BOTH initial states to same values
+        setInitialFormData(templateFormData);
+        setInitialCustomQuestions(templateQuestions);
+        setHasUnsavedChanges(false);
       } else {
         // No template - reset to empty form
-        setFormData(prev => ({
-          ...prev,
+        const emptyFormData: JobFormData = {
           title: jobTitle,
           description: '',
           requirements: '',
@@ -256,13 +276,26 @@ const MobileJobWizard = ({
           remote_work_possible: 'nej',
           workplace_name: '',
           workplace_address: '',
+          workplace_postal_code: '',
+          workplace_city: '',
+          workplace_county: '',
+          workplace_municipality: '',
           positions_count: '',
           work_schedule: '',
           contact_email: '',
           application_instructions: '',
           pitch: '',
-        }));
+          location: '',
+          job_image_url: '',
+          work_start_time: '',
+          work_end_time: '',
+        };
+        setFormData(emptyFormData);
         setCustomQuestions([]);
+        // Set BOTH initial states to same values
+        setInitialFormData(emptyFormData);
+        setInitialCustomQuestions([]);
+        setHasUnsavedChanges(false);
       }
     }
   }, [open, selectedTemplate, jobTitle, existingJob]);
@@ -698,16 +731,9 @@ const MobileJobWizard = ({
     }));
   }, [jobTitle, selectedTemplate]);
   
-  // Set initial form data for unsaved changes tracking
-  useEffect(() => {
-    if (open && !initialFormData) {
-      // Spara aktuell formData som utgångspunkt för jämförelse
-      // hasUnsavedChanges startar som false - ändringar detekteras automatiskt
-      setInitialFormData({ ...formData });
-      setInitialCustomQuestions([...customQuestions]);
-      setHasUnsavedChanges(false);
-    }
-  }, [open, formData, initialFormData, customQuestions]);
+  // NOTE: initialFormData and initialCustomQuestions are now set DIRECTLY 
+  // in the loading useEffect above to avoid race conditions with async data loading
+  
   
   // Track form changes
   useEffect(() => {
