@@ -212,13 +212,13 @@ const EmployerDashboard = memo(() => {
     // First reset wizard state completely by unmounting
     setDraftToEdit(null);
     setDraftWizardOpen(false);
+    setWizardKey(prev => prev + 1);
     
-    // Then open with fresh state in next frame
-    requestAnimationFrame(() => {
-      setWizardKey(prev => prev + 1);
+    // Use setTimeout to ensure React has time to unmount the component
+    setTimeout(() => {
       setDraftToEdit(job);
       setDraftWizardOpen(true);
-    });
+    }, 50);
   };
 
   // Handle row click - drafts open wizard, active jobs go to details
