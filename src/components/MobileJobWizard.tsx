@@ -30,7 +30,7 @@ import { Slider } from '@/components/ui/slider';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
-import { ConflictWarningDialog } from '@/components/ConflictWarningDialog';
+
 import useSmartTextFit from '@/hooks/useSmartTextFit';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import {
@@ -89,7 +89,7 @@ interface ExistingJob {
   pitch?: string | null;
   job_image_url?: string | null;
   is_active?: boolean;
-  updated_at?: string; // For optimistic locking
+  
 }
 
 interface MobileJobWizardProps {
@@ -177,11 +177,6 @@ const MobileJobWizard = ({
           location: existingJob.location || '',
         };
         setFormData(loadedFormData);
-        
-        // Store the updated_at timestamp for optimistic locking
-        if (existingJob.updated_at) {
-          setLoadedUpdatedAt(existingJob.updated_at);
-        }
         
         // Load existing questions for this job and set both states together
         const loadExistingQuestions = async () => {
@@ -324,11 +319,6 @@ const MobileJobWizard = ({
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
   const [initialCustomQuestions, setInitialCustomQuestions] = useState<JobQuestion[]>([]);
   
-  // Optimistic locking - track the updated_at timestamp when we loaded the job
-  const [loadedUpdatedAt, setLoadedUpdatedAt] = useState<string | null>(null);
-  const [showConflictDialog, setShowConflictDialog] = useState(false);
-  const [conflictInfo, setConflictInfo] = useState<{ modifiedBy?: string; modifiedAt?: string }>({});
-  const [pendingSaveAction, setPendingSaveAction] = useState<'publish' | 'draft' | null>(null);
   
   // Company profile dialog
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
@@ -1770,55 +1760,9 @@ const MobileJobWizard = ({
     setPendingClose(false);
   };
 
-  // Helper function to check for conflicts before saving
-  const checkForConflicts = async (): Promise<boolean> => {
-    if (!existingJob?.id || !loadedUpdatedAt) return false; // No conflict possible for new jobs
-    
-    // Fetch current state from database
-    const { data: currentJob, error } = await supabase
-      .from('job_postings')
-      .select('updated_at, employer_id')
-      .eq('id', existingJob.id)
-      .maybeSingle();
-    
-    if (error || !currentJob) return false;
-    
-    // Compare timestamps
-    if (currentJob.updated_at !== loadedUpdatedAt) {
-      console.log('[Conflict] Detected: loaded at', loadedUpdatedAt, 'current:', currentJob.updated_at);
-      
-      // Fetch employer info for conflict message
-      const { data: employerProfile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('user_id', currentJob.employer_id)
-        .maybeSingle();
-      
-      setConflictInfo({
-        modifiedBy: employerProfile ? `${employerProfile.first_name} ${employerProfile.last_name}` : 'Någon annan',
-        modifiedAt: currentJob.updated_at
-      });
-      
-      return true; // Conflict detected
-    }
-    
-    return false; // No conflict
-  };
-
   // Save as draft (is_active: false) and close
   const handleSaveAndLeave = async () => {
     if (!user) return;
-    
-    // Check for conflicts if editing existing job
-    if (existingJob?.id && loadedUpdatedAt) {
-      const hasConflict = await checkForConflicts();
-      if (hasConflict) {
-        setPendingSaveAction('draft');
-        setShowConflictDialog(true);
-        return;
-      }
-    }
-    
     await performSaveAsDraft();
   };
   
@@ -1970,17 +1914,6 @@ const MobileJobWizard = ({
 
   const handleSubmit = async () => {
     if (!user || !validateCurrentStep() || loading) return;
-
-    // Check for conflicts if editing existing job
-    if (existingJob?.id && loadedUpdatedAt) {
-      const hasConflict = await checkForConflicts();
-      if (hasConflict) {
-        setPendingSaveAction('publish');
-        setShowConflictDialog(true);
-        return;
-      }
-    }
-
     await performPublish();
   };
   
@@ -2118,96 +2051,6 @@ const MobileJobWizard = ({
       // Ensure loading is reset even if error occurs
       setTimeout(() => setLoading(false), 100);
     }
-  };
-  
-  // Handle conflict resolution - reload the job with latest data
-  const handleConflictReload = async () => {
-    if (!existingJob?.id) return;
-    
-    // Fetch latest job data from database
-    const { data: latestJob, error } = await supabase
-      .from('job_postings')
-      .select('*')
-      .eq('id', existingJob.id)
-      .maybeSingle();
-    
-    if (error || !latestJob) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda den senaste versionen.",
-        variant: "destructive"
-      });
-      setShowConflictDialog(false);
-      return;
-    }
-    
-    // Reload form data with latest values
-    const reloadedFormData: JobFormData = {
-      title: latestJob.title || '',
-      description: latestJob.description || '',
-      requirements: latestJob.requirements || '',
-      occupation: latestJob.occupation || '',
-      salary_min: latestJob.salary_min?.toString() || '',
-      salary_max: latestJob.salary_max?.toString() || '',
-      salary_type: latestJob.salary_type || '',
-      salary_transparency: latestJob.salary_transparency || '',
-      benefits: latestJob.benefits || [],
-      positions_count: latestJob.positions_count?.toString() || '1',
-      work_location_type: latestJob.work_location_type || 'på-plats',
-      remote_work_possible: latestJob.remote_work_possible || 'nej',
-      workplace_name: latestJob.workplace_name || '',
-      workplace_address: latestJob.workplace_address || '',
-      workplace_postal_code: latestJob.workplace_postal_code || '',
-      workplace_city: latestJob.workplace_city || '',
-      workplace_county: latestJob.workplace_county || '',
-      workplace_municipality: latestJob.workplace_municipality || '',
-      employment_type: latestJob.employment_type || '',
-      work_schedule: latestJob.work_schedule || '',
-      work_start_time: latestJob.work_start_time || '',
-      work_end_time: latestJob.work_end_time || '',
-      contact_email: latestJob.contact_email || '',
-      application_instructions: latestJob.application_instructions || '',
-      pitch: latestJob.pitch || '',
-      job_image_url: latestJob.job_image_url || '',
-      location: latestJob.location || '',
-    };
-    
-    setFormData(reloadedFormData);
-    setInitialFormData(reloadedFormData);
-    setLoadedUpdatedAt(latestJob.updated_at);
-    setHasUnsavedChanges(false);
-    setShowConflictDialog(false);
-    setPendingSaveAction(null);
-    
-    toast({
-      title: "Data uppdaterad",
-      description: "Formuläret har laddats om med de senaste ändringarna."
-    });
-  };
-  
-  // Handle conflict resolution - overwrite with current changes
-  const handleConflictOverwrite = async () => {
-    setShowConflictDialog(false);
-    
-    // Update loadedUpdatedAt to skip conflict check
-    const { data: currentJob } = await supabase
-      .from('job_postings')
-      .select('updated_at')
-      .eq('id', existingJob?.id)
-      .maybeSingle();
-    
-    if (currentJob) {
-      setLoadedUpdatedAt(currentJob.updated_at);
-    }
-    
-    // Proceed with the pending save action
-    if (pendingSaveAction === 'draft') {
-      await performSaveAsDraft();
-    } else if (pendingSaveAction === 'publish') {
-      await performPublish();
-    }
-    
-    setPendingSaveAction(null);
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -4502,15 +4345,6 @@ const MobileJobWizard = ({
           isSaving={isSavingDraft}
         />
 
-        {/* Conflict Warning Dialog - for optimistic locking */}
-        <ConflictWarningDialog
-          open={showConflictDialog}
-          onOpenChange={setShowConflictDialog}
-          onReload={handleConflictReload}
-          onOverwrite={handleConflictOverwrite}
-          modifiedBy={conflictInfo.modifiedBy}
-          modifiedAt={conflictInfo.modifiedAt}
-        />
 
         {/* Company Profile Dialog */}
         {user?.id && (
