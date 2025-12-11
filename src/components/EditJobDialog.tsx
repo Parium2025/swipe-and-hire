@@ -2910,6 +2910,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 {/* Invisible spacer to balance trash icon */}
                                 <div className="w-[30px]" aria-hidden="true"></div>
                                 <button
+                                  type="button"
                                   onClick={openImageEditor}
                                   className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
                                 >
@@ -2995,6 +2996,60 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
           open={showCompanyProfile}
           onOpenChange={setShowCompanyProfile}
           companyId={profile?.user_id || ''}
+        />
+      )}
+
+      {/* Image Editor for job images */}
+      {editingImageUrl && (
+        <ImageEditor
+          isOpen={showImageEditor}
+          onClose={() => {
+            setShowImageEditor(false);
+            setEditingImageUrl(null);
+          }}
+          imageSrc={editingImageUrl}
+          onSave={async (blob) => {
+            try {
+              if (!user) return;
+              const file = new File([blob], `job-image-${Date.now()}.webp`, { type: 'image/webp' });
+              const filePath = `${user.id}/job-${Date.now()}.webp`;
+              
+              const { error: uploadError } = await supabase.storage
+                .from('job-images')
+                .upload(filePath, file);
+              
+              if (uploadError) throw uploadError;
+              
+              const { data: { publicUrl } } = supabase.storage
+                .from('job-images')
+                .getPublicUrl(filePath);
+              
+              handleInputChange('job_image_url', filePath);
+              setJobImageDisplayUrl(publicUrl);
+              setOriginalImageUrl(publicUrl);
+              setShowImageEditor(false);
+              setEditingImageUrl(null);
+              
+              toast({
+                title: "Bild justerad",
+                description: "Bilden har sparats",
+              });
+            } catch (error) {
+              console.error('Error saving edited image:', error);
+              toast({
+                title: "Kunde inte spara bild",
+                description: "Försök igen",
+                variant: "destructive",
+              });
+            }
+          }}
+          onRestoreOriginal={() => {
+            if (originalImageUrl) {
+              setJobImageDisplayUrl(originalImageUrl);
+            }
+          }}
+          isCircular={false}
+          aspectRatio={16 / 9}
         />
       )}
     </>
