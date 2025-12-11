@@ -1774,6 +1774,10 @@ const MobileJobWizard = ({
       setCachedPostalCodeInfo(null);
       setInitialFormData(null);
       setHasUnsavedChanges(false);
+      // Reset dropdown search terms
+      setEmploymentTypeSearchTerm('');
+      setSalaryTypeSearchTerm('');
+      setSalaryTransparencySearchTerm('');
       
       // Clear sessionStorage when closing without changes
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
@@ -1830,6 +1834,10 @@ const MobileJobWizard = ({
     setHasUnsavedChanges(false);
     setShowUnsavedDialog(false);
     setPendingClose(false);
+    // Reset dropdown search terms
+    setEmploymentTypeSearchTerm('');
+    setSalaryTypeSearchTerm('');
+    setSalaryTransparencySearchTerm('');
     
     // Clear sessionStorage when user confirms close
     sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
