@@ -67,24 +67,25 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
         const naturalHeight = Math.ceil(clone.scrollHeight);
         element.parentElement?.removeChild(clone);
         const currentHeight = Math.ceil(element.clientHeight);
-        truncated = naturalHeight > currentHeight + 1;
+        // Only consider truncated if natural height is significantly larger (more than 2px difference)
+        truncated = naturalHeight > currentHeight + 2;
       } else {
+        // For non-clamped elements, check if text actually overflows
+        // Using a threshold of 2px to avoid false positives from rounding
         truncated =
-          Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||
-          Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth);
+          Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) + 2 ||
+          Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth) + 2;
       }
 
       setIsTruncated(truncated);
     };
 
-    // Run immediately and schedule a few short re-checks
-    checkTruncation();
-    const raf = requestAnimationFrame(checkTruncation);
-    const timeouts = [
-      setTimeout(checkTruncation, 50),
-      setTimeout(checkTruncation, 150),
-      setTimeout(checkTruncation, 300),
-    ];
+    // Reset truncation state first
+    setIsTruncated(false);
+
+    // Run after a short delay to ensure proper rendering
+    const initialTimeout = setTimeout(checkTruncation, 100);
+    const secondTimeout = setTimeout(checkTruncation, 300);
 
     // Also check on resize of the element
     const resizeObserver = new ResizeObserver(() => {
@@ -96,8 +97,8 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
     }
 
     return () => {
-      cancelAnimationFrame(raf);
-      timeouts.forEach(clearTimeout);
+      clearTimeout(initialTimeout);
+      clearTimeout(secondTimeout);
       resizeObserver.disconnect();
     };
   }, [text]);
