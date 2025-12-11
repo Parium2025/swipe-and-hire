@@ -619,26 +619,15 @@ const MobileJobWizard = ({
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Load user profile for company info
+  // Load user profile and question templates when opening
   useEffect(() => {
     if (user && open) {
       fetchProfile();
       fetchQuestionTemplates();
-      // Load questions from template - works for all templates, not just default
-      if (selectedTemplate?.questions && Array.isArray(selectedTemplate.questions)) {
-        try {
-          const templateQuestions = selectedTemplate.questions as any[];
-          setCustomQuestions(templateQuestions.map((q: any, index: number) => ({
-            ...q,
-            id: `temp_${Date.now()}_${index}`,
-            order_index: index
-          })));
-        } catch (error) {
-          console.error('Error loading template questions:', error);
-        }
-      }
+      // NOTE: Template questions are now loaded ONLY in the main 'open' useEffect at the top
+      // to avoid race conditions with initialCustomQuestions causing false "unsaved changes"
     }
-  }, [user, open, selectedTemplate]);
+  }, [user, open]);
   
   const fetchQuestionTemplates = async () => {
     if (!user) return;
@@ -2057,11 +2046,15 @@ const MobileJobWizard = ({
         description: "Din annons är nu publicerad och synlig för jobbsökare."
       });
 
-      // Clear sessionStorage after successful submission
+      // Clear sessionStorage and reset unsaved state BEFORE calling handleClose
+      // This prevents the unsaved changes dialog from appearing
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+      setHasUnsavedChanges(false);
+      setInitialFormData(null);
+      setInitialCustomQuestions([]);
 
-      handleClose();
       onJobCreated(jobPost);
+      onOpenChange(false); // Close dialog directly instead of handleClose to avoid race condition
 
     } catch (error) {
       console.error('Submit error:', error);
