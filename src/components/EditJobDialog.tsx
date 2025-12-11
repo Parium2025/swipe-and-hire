@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -1526,24 +1526,42 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                       <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Antal personer att rekrytera *</Label>
-                        <Input
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          min="1"
-                          value={formData.positions_count}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/[^0-9]/g, '');
-                            const numValue = parseInt(value) || 1;
-                            handleInputChange('positions_count', numValue < 1 ? '1' : value || '1');
-                          }}
-                          onBlur={(e) => {
-                            const numValue = parseInt(e.target.value) || 1;
-                            handleInputChange('positions_count', Math.max(1, numValue).toString());
-                          }}
-                          placeholder="1"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
-                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
+                            className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={formData.positions_count || '1'}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9]/g, '');
+                              if (value === '') {
+                                handleInputChange('positions_count', '1');
+                              } else {
+                                const numValue = parseInt(value) || 1;
+                                handleInputChange('positions_count', Math.max(1, numValue).toString());
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const numValue = parseInt(e.target.value) || 1;
+                              handleInputChange('positions_count', Math.max(1, numValue).toString());
+                            }}
+                            className="bg-white/10 border-white/20 text-white text-center h-9 text-sm focus:border-white/40 flex-1"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
+                            className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="space-y-2">
