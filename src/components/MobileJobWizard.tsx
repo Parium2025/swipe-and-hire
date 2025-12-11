@@ -698,56 +698,19 @@ const MobileJobWizard = ({
   // Set initial form data for unsaved changes tracking
   useEffect(() => {
     if (open && !initialFormData) {
-      // Om vi öppnar med en template, sätt ett tomt initialFormData
-      // så att template-data räknas som en ändring
-      if (selectedTemplate) {
-        setInitialFormData({
-          title: '',
-          description: '',
-          requirements: '',
-          location: '',
-          occupation: '',
-          salary_min: '',
-          salary_max: '',
-          employment_type: '',
-          salary_type: '',
-          salary_transparency: '',
-          benefits: [],
-          positions_count: '',
-          work_start_time: '',
-          work_end_time: '',
-          work_schedule: '',
-          work_location_type: '',
-          remote_work_possible: '',
-          workplace_name: '',
-          workplace_address: '',
-          workplace_postal_code: '',
-          workplace_city: '',
-          workplace_county: '',
-          workplace_municipality: '',
-          contact_email: '',
-          application_instructions: '',
-          pitch: '',
-          job_image_url: ''
-        });
-        setInitialCustomQuestions([]);
-        setHasUnsavedChanges(true); // Markera som ändrad från start
-      } else {
-        // Ingen template vald, använd aktuell formData som start men räkna titel som förändring
-        setInitialFormData({ ...formData, title: '' });
-        setInitialCustomQuestions([]);
-        setHasUnsavedChanges(true);
-      }
+      // Spara aktuell formData som utgångspunkt för jämförelse
+      // hasUnsavedChanges startar som false - ändringar detekteras automatiskt
+      setInitialFormData({ ...formData });
+      setInitialCustomQuestions([...customQuestions]);
+      setHasUnsavedChanges(false);
     }
-  }, [open, selectedTemplate, formData, initialFormData]);
+  }, [open, formData, initialFormData, customQuestions]);
   
   // Track form changes
   useEffect(() => {
     if (!initialFormData || !open) return;
     
-    const formChanged = Object.keys(formData).some(key => {
-      return formData[key as keyof JobFormData] !== initialFormData[key as keyof JobFormData];
-    });
+    const formChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
     const questionsChanged = JSON.stringify(customQuestions) !== JSON.stringify(initialCustomQuestions);
     
     setHasUnsavedChanges(formChanged || questionsChanged);
