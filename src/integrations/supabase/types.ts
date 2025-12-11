@@ -162,6 +162,7 @@ export type Database = {
           expires_at: string | null
           id: string
           is_active: boolean | null
+          job_image_desktop_url: string | null
           job_image_url: string | null
           location: string | null
           occupation: string | null
@@ -200,6 +201,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
+          job_image_desktop_url?: string | null
           job_image_url?: string | null
           location?: string | null
           occupation?: string | null
@@ -238,6 +240,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
+          job_image_desktop_url?: string | null
           job_image_url?: string | null
           location?: string | null
           occupation?: string | null
