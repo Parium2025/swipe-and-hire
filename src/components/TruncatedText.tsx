@@ -135,10 +135,11 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
 
   // Wrap in tooltip when needed
   return (
-    <TooltipProvider delayDuration={200} skipDelayDuration={100}>
+    <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
       <Tooltip 
         open={!supportsHover ? isOpen : undefined} 
         onOpenChange={!supportsHover ? setIsOpen : undefined}
+        disableHoverableContent={false}
       >
         <TooltipTrigger asChild>
           <div
