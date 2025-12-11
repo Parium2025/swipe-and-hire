@@ -572,6 +572,7 @@ const MobileJobWizard = ({
   const [manualFocus, setManualFocus] = useState<number | null>(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
+  const [editingImageType, setEditingImageType] = useState<'mobile' | 'desktop'>('mobile');
   const [cachedPostalCodeInfo, setCachedPostalCodeInfo] = useState<{postalCode: string, city: string, municipality: string, county: string} | null>(null);
   
   // NOTE: formData initial state is always empty - actual state is loaded 
@@ -768,7 +769,7 @@ const MobileJobWizard = ({
   }, [currentStep, open]);
 
   const handleImageEdit = async (editedImageBlob: Blob): Promise<void> => {
-    console.log('MobileJobWizard handleImageEdit: Received blob, size:', editedImageBlob.size);
+    console.log('MobileJobWizard handleImageEdit: Received blob, size:', editedImageBlob.size, 'type:', editingImageType);
     try {
       const user = await supabase.auth.getUser();
       if (!user.data.user) {
@@ -777,7 +778,7 @@ const MobileJobWizard = ({
 
       // Skapa ett unikt filnamn för den redigerade bilden
       const fileExt = 'png'; // ImageEditor sparar alltid som PNG
-      const fileName = `${user.data.user.id}/${Date.now()}-edited-job-image.${fileExt}`;
+      const fileName = `${user.data.user.id}/${Date.now()}-edited-${editingImageType}-job-image.${fileExt}`;
 
       console.log('MobileJobWizard handleImageEdit: Uploading to path:', fileName);
 
@@ -805,13 +806,20 @@ const MobileJobWizard = ({
         preloadSingleFile(publicUrl).catch(e => console.log('Preload error (non-blocking):', e));
       });
 
-      // Uppdatera med storage path (fileName) istället för blob URL
-      handleInputChange('job_image_url', fileName);
-      setJobImageDisplayUrl(publicUrl);
-      setImageIsEdited(true); // Mark that image has been edited/cropped
-      setImageTimestamp(Date.now()); // Force cache refresh for all img elements
-      // Behåll originalImageUrl oförändrad så vi alltid kan fortsätta redigera från originalet
-      setManualFocus(null);
+      // Update the correct image based on which one is being edited
+      if (editingImageType === 'desktop') {
+        handleInputChange('job_image_desktop_url', fileName);
+        setJobImageDesktopDisplayUrl(publicUrl);
+        setDesktopImageIsEdited(true);
+        // Keep originalDesktopImageUrl unchanged for restore functionality
+      } else {
+        handleInputChange('job_image_url', fileName);
+        setJobImageDisplayUrl(publicUrl);
+        setImageIsEdited(true);
+        setImageTimestamp(Date.now());
+        setManualFocus(null);
+        // Keep originalImageUrl unchanged for restore functionality
+      }
       
       setShowImageEditor(false);
       setEditingImageUrl(null);
@@ -820,7 +828,7 @@ const MobileJobWizard = ({
       
       toast({
         title: "Bild justerad",
-        description: "Din bild har justerats och sparats framgångsrikt",
+        description: editingImageType === 'desktop' ? "Datorbilden har sparats" : "Mobilbilden har sparats",
       });
       
       console.log('MobileJobWizard handleImageEdit: Function complete');
@@ -837,19 +845,25 @@ const MobileJobWizard = ({
 
   // Återställ till originalbilden (ingen croppning)
   const handleRestoreOriginal = async () => {
-    if (!originalImageUrl || !originalStoragePath) {
-      console.log('No original image URL or storage path to restore');
-      return;
+    if (editingImageType === 'desktop') {
+      if (!originalDesktopImageUrl || !originalDesktopStoragePath) {
+        console.log('No original desktop image to restore');
+        return;
+      }
+      setJobImageDesktopDisplayUrl(originalDesktopImageUrl);
+      handleInputChange('job_image_desktop_url', originalDesktopStoragePath);
+      setDesktopImageIsEdited(false);
+    } else {
+      if (!originalImageUrl || !originalStoragePath) {
+        console.log('No original image URL or storage path to restore');
+        return;
+      }
+      setJobImageDisplayUrl(originalImageUrl);
+      handleInputChange('job_image_url', originalStoragePath);
+      setImageIsEdited(false);
+      setManualFocus(null);
+      setImageTimestamp(Date.now());
     }
-    
-    console.log('Restoring to original image:', originalImageUrl, 'with storage path:', originalStoragePath);
-    
-    // Återställ BÅDE visnings-URL OCH storage path till originalet
-    setJobImageDisplayUrl(originalImageUrl);
-    handleInputChange('job_image_url', originalStoragePath);
-    setImageIsEdited(false); // Reset - now showing original
-    setManualFocus(null);
-    setImageTimestamp(Date.now()); // Force cache refresh
     
     toast({
       title: "Bild återställd",
@@ -878,9 +892,37 @@ const MobileJobWizard = ({
       }
       console.log('Opening image editor with:', urlToEdit);
       setEditingImageUrl(urlToEdit);
+      setEditingImageType('mobile');
       setShowImageEditor(true);
     } catch (e) {
       console.error('Failed to open editor', e);
+    }
+  };
+
+  // Öppna editor för datorbild - alltid använd display URL
+  const openDesktopImageEditor = async () => {
+    try {
+      // Use display URL for editing (originalDesktopImageUrl might be a storage path)
+      const source = jobImageDesktopDisplayUrl || originalDesktopImageUrl;
+      if (!source) {
+        console.log('No desktop image URL available');
+        return;
+      }
+
+      let urlToEdit = source;
+      if (!source.startsWith('http') && !source.startsWith('blob:') && !source.startsWith('data:')) {
+        // Get public URL from storage
+        const { data: { publicUrl } } = supabase.storage
+          .from('job-images')
+          .getPublicUrl(source);
+        if (publicUrl) urlToEdit = publicUrl;
+      }
+      console.log('Opening desktop image editor with:', urlToEdit);
+      setEditingImageUrl(urlToEdit);
+      setEditingImageType('desktop');
+      setShowImageEditor(true);
+    } catch (e) {
+      console.error('Failed to open desktop editor', e);
     }
   };
 
@@ -4168,10 +4210,10 @@ const MobileJobWizard = ({
                             {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
                             {!showDesktopApplicationForm && (
                               <div className="absolute inset-0 z-10">
-                                {/* Job Image - use desktop image if available, otherwise fallback to mobile */}
-                                {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) ? (
+                                {/* Job Image - ONLY use desktop image, no fallback */}
+                                {jobImageDesktopDisplayUrl ? (
                                   <img
-                                    src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
+                                    src={jobImageDesktopDisplayUrl}
                                     alt={`Jobbbild för ${formData.title}`}
                                     className="absolute inset-0 w-full h-full object-cover select-none"
                                     loading="eager"
@@ -4355,14 +4397,7 @@ const MobileJobWizard = ({
                             <div className="w-[30px]" aria-hidden="true"></div>
                             <button
                               type="button"
-                              onClick={() => {
-                                // Open image editor for desktop image
-                                const source = originalDesktopImageUrl || formData.job_image_desktop_url || jobImageDesktopDisplayUrl;
-                                if (source) {
-                                  setEditingImageUrl(source);
-                                  setShowImageEditor(true);
-                                }
-                              }}
+                              onClick={openDesktopImageEditor}
                               className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
                             >
                               Justera bild
