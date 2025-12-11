@@ -129,7 +129,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [isScrolledTop, setIsScrolledTop] = useState(true);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
+  const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
+  const [originalDesktopImageUrl, setOriginalDesktopImageUrl] = useState<string | null>(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
   const [manualFocus, setManualFocus] = useState<number | null>(null);
@@ -532,7 +534,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   };
 
-  // Load job image if exists - use public URL from job-images bucket
+  // Load job image if exists - use public URL from job-images bucket (mobile)
   useEffect(() => {
     const loadJobImage = async () => {
       if (job?.job_image_url && open) {
@@ -558,6 +560,32 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     
     loadJobImage();
   }, [job?.job_image_url, open]);
+
+  // Load desktop job image if exists
+  useEffect(() => {
+    const loadDesktopJobImage = async () => {
+      const desktopUrl = (job as any)?.job_image_desktop_url;
+      if (desktopUrl && open) {
+        // If it's a storage path (not a full URL), get public URL
+        if (!desktopUrl.startsWith('http')) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('job-images')
+            .getPublicUrl(desktopUrl);
+          if (publicUrl) {
+            setJobImageDesktopDisplayUrl(publicUrl);
+            setOriginalDesktopImageUrl(desktopUrl);
+            return;
+          }
+        }
+        
+        // Otherwise use URL as-is
+        setJobImageDesktopDisplayUrl(desktopUrl);
+        setOriginalDesktopImageUrl(desktopUrl);
+      }
+    };
+    
+    loadDesktopJobImage();
+  }, [(job as any)?.job_image_desktop_url, open]);
 
   // Preload image when user reaches step 2 (jobbild section) to make preview faster
   useEffect(() => {
@@ -2815,9 +2843,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   {/* Job card view (when form is closed) */}
                                   {!showDesktopApplicationForm && (
                                     <div className="absolute inset-0 z-10">
-                                      {jobImageDisplayUrl ? (
+                                      {/* Use desktop image if available, otherwise fallback to mobile */}
+                                      {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) ? (
                                         <img
-                                          src={jobImageDisplayUrl}
+                                          src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
                                           alt={`Jobbbild för ${formData.title}`}
                                           className="absolute inset-0 w-full h-full object-cover select-none"
                                           loading="eager"
@@ -2868,12 +2897,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           </div>
                         </div>
                       )}
-                      <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
-                        <div className="text-white font-medium text-sm sm:text-base mb-2">Jobbild (valfritt)</div>
-                        <p className="text-white text-xs sm:text-sm mb-3">
-                          Ladda upp en bild som representerar jobbet eller arbetsplatsen
-                        </p>
-                        
+                      {/* Image upload section - separate for mobile and desktop */}
+                      <div className="space-y-4">
+                        {/* Mobile image section */}
+                        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Smartphone className="h-4 w-4 text-white" />
+                            <span className="text-white font-medium text-sm sm:text-base">Mobilbild (valfritt)</span>
+                          </div>
+                          <p className="text-white text-xs sm:text-sm mb-3">
+                            Bild som visas i mobilförhandsvisningen
+                          </p>
+                          
                           {!jobImageDisplayUrl && (
                             <FileUpload
                               mediaType="job-image"
@@ -2881,14 +2916,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 handleInputChange('job_image_url', storagePath);
                                 setOriginalImageUrl(storagePath);
                                 
-                                // Get public URL for instant display
                                 const { data: { publicUrl } } = supabase.storage
                                   .from('job-images')
                                   .getPublicUrl(storagePath);
                                   
                                 if (publicUrl) {
                                   setJobImageDisplayUrl(publicUrl);
-                                  // Preload image in Service Worker
                                   const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
                                   await preloadSingleFile(publicUrl);
                                 }
@@ -2897,49 +2930,121 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               maxFileSize={5 * 1024 * 1024}
                             />
                           )}
-                        
-                        {jobImageDisplayUrl && (
-                          <>
-                            <div className="mt-3 flex justify-center">
-                              <img 
-                                src={jobImageDisplayUrl} 
-                                alt="Job preview" 
-                                className="w-full max-w-md h-48 object-contain rounded-lg"
-                              />
-                            </div>
-                            
-                            {/* Bildkontroller - Justera bild + Ta bort */}
-                            <div className="mt-4 space-y-3">
-                              <div className="flex justify-center items-center gap-3">
-                                {/* Invisible spacer to balance trash icon */}
-                                <div className="w-[30px]" aria-hidden="true"></div>
-                                <button
-                                  type="button"
-                                  onClick={openImageEditor}
-                                  className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
-                                >
-                                  Justera bild
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    handleInputChange('job_image_url', '');
-                                    setOriginalImageUrl(null);
-                                    setJobImageDisplayUrl(null);
-                                    setManualFocus(null);
-                                  }}
-                                  className="p-1.5 rounded-lg text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
-                                  aria-label="Ta bort bild"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                          
+                          {jobImageDisplayUrl && (
+                            <>
+                              <div className="mt-3 flex justify-center">
+                                <img 
+                                  src={jobImageDisplayUrl} 
+                                  alt="Mobilbild förhandsvisning" 
+                                  className="w-full max-w-md h-48 object-contain rounded-lg"
+                                />
                               </div>
-                              <p className="text-sm text-white text-center">
-                                Klicka för att zooma, panorera och justera bilden
-                              </p>
-                            </div>
-                          </>
-                        )}
+                              
+                              <div className="mt-4 space-y-3">
+                                <div className="flex justify-center items-center gap-3">
+                                  <div className="w-[30px]" aria-hidden="true"></div>
+                                  <button
+                                    type="button"
+                                    onClick={openImageEditor}
+                                    className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
+                                  >
+                                    Justera bild
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleInputChange('job_image_url', '');
+                                      setOriginalImageUrl(null);
+                                      setJobImageDisplayUrl(null);
+                                      setManualFocus(null);
+                                    }}
+                                    className="p-1.5 rounded-lg text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                                    aria-label="Ta bort mobilbild"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Desktop image section */}
+                        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Monitor className="h-4 w-4 text-white" />
+                            <span className="text-white font-medium text-sm sm:text-base">Datorbild (valfritt)</span>
+                          </div>
+                          <p className="text-white text-xs sm:text-sm mb-3">
+                            Separat bild för dator/tablet. Om ingen laddas upp används mobilbilden.
+                          </p>
+                          
+                          {!jobImageDesktopDisplayUrl && (
+                            <FileUpload
+                              mediaType="job-image"
+                              onFileUploaded={async (storagePath, fileName) => {
+                                handleInputChange('job_image_desktop_url', storagePath);
+                                setOriginalDesktopImageUrl(storagePath);
+                                
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('job-images')
+                                  .getPublicUrl(storagePath);
+                                  
+                                if (publicUrl) {
+                                  setJobImageDesktopDisplayUrl(publicUrl);
+                                  const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+                                  await preloadSingleFile(publicUrl);
+                                }
+                              }}
+                              acceptedFileTypes={['image/*']}
+                              maxFileSize={5 * 1024 * 1024}
+                            />
+                          )}
+                          
+                          {jobImageDesktopDisplayUrl && (
+                            <>
+                              <div className="mt-3 flex justify-center">
+                                <img 
+                                  src={jobImageDesktopDisplayUrl} 
+                                  alt="Datorbild förhandsvisning" 
+                                  className="w-full max-w-md h-48 object-contain rounded-lg"
+                                />
+                              </div>
+                              
+                              <div className="mt-4 space-y-3">
+                                <div className="flex justify-center items-center gap-3">
+                                  <div className="w-[30px]" aria-hidden="true"></div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const source = originalDesktopImageUrl || formData.job_image_desktop_url || jobImageDesktopDisplayUrl;
+                                      if (source) {
+                                        setEditingImageUrl(source);
+                                        setShowImageEditor(true);
+                                      }
+                                    }}
+                                    className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
+                                  >
+                                    Justera bild
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleInputChange('job_image_desktop_url', '');
+                                      setOriginalDesktopImageUrl(null);
+                                      setJobImageDesktopDisplayUrl(null);
+                                    }}
+                                    className="p-1.5 rounded-lg text-white transition-all duration-200 hover:bg-red-500/20 hover:text-red-400"
+                                    aria-label="Ta bort datorbild"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
