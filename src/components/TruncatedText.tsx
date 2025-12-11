@@ -113,41 +113,39 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
     !supportsHover && isTouch && (alwaysShowTooltip === true || isTruncated);
   const shouldShowTooltip = showTooltipDesktop || showTooltipTouch;
 
-  // Always render the same element to keep ref stable
-  const textElement = (
-    <div
-      ref={textRef}
-      className={`${className ?? ""} ${shouldShowTooltip ? 'cursor-pointer' : ''}`}
-      style={{ pointerEvents: 'auto' }}
-      onClick={!supportsHover && isTouch && shouldShowTooltip ? handleTap : undefined}
-      onTouchStart={!supportsHover && shouldShowTooltip ? () => setIsOpen(true) : undefined}
-    >
-      {children || text}
-    </div>
-  );
-
-  // If not showing tooltip, just return the element without wrapper
+  // If not showing tooltip, render simple element
   if (!shouldShowTooltip) {
-    return textElement;
+    return (
+      <div
+        ref={textRef}
+        className={className}
+      >
+        {children || text}
+      </div>
+    );
   }
 
   // Wrap in tooltip when needed
   return (
-    <TooltipProvider delayDuration={100} skipDelayDuration={0}>
+    <TooltipProvider delayDuration={200} skipDelayDuration={100}>
       <Tooltip 
         open={!supportsHover ? isOpen : undefined} 
         onOpenChange={!supportsHover ? setIsOpen : undefined}
       >
         <TooltipTrigger asChild>
-          {textElement}
+          <div
+            ref={textRef}
+            className={`${className ?? ""} cursor-pointer`}
+          >
+            {children || text}
+          </div>
         </TooltipTrigger>
         <TooltipContent
           side="top"
+          sideOffset={8}
           avoidCollisions={true}
-          collisionPadding={10}
-          onWheel={(e) => e.stopPropagation()}
-          onPointerDownOutside={(e) => e.preventDefault()}
-          className="max-w-md max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 text-white shadow-xl z-[99999]"
+          collisionPadding={16}
+          className="max-w-md max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 text-white shadow-xl z-[99999] pointer-events-auto"
         >
           <p className="text-sm leading-relaxed break-words">{text}</p>
         </TooltipContent>

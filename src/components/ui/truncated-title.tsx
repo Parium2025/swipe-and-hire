@@ -109,42 +109,40 @@ export function TruncatedTitle({
     if (!supportsHover && isTouch) setIsOpen((o) => !o);
   };
 
-  // Always render the same h3 element to keep ref stable
-  const titleElement = (
-    <h3
-      ref={ref}
-      className={`${className} ${isTruncated ? 'cursor-pointer' : ''}`}
-      style={{ pointerEvents: 'auto' }}
-      onClick={!supportsHover && isTouch && isTruncated ? handleTap : undefined}
-      onTouchStart={!supportsHover && isTruncated ? () => setIsOpen(true) : undefined}
-    >
-      {children}
-    </h3>
-  );
-
   // If not truncated, just return the element without tooltip wrapper
   if (!isTruncated) {
-    return titleElement;
+    return (
+      <h3
+        ref={ref}
+        className={className}
+      >
+        {children}
+      </h3>
+    );
   }
 
   // Wrap in tooltip when truncated
   return (
-    <TooltipProvider delayDuration={100} skipDelayDuration={0}>
+    <TooltipProvider delayDuration={200} skipDelayDuration={100}>
       <Tooltip 
         open={!supportsHover ? isOpen : undefined} 
         onOpenChange={!supportsHover ? setIsOpen : undefined}
       >
         <TooltipTrigger asChild>
-          {titleElement}
+          <h3
+            ref={ref}
+            className={`${className} cursor-pointer`}
+            onClick={!supportsHover && isTouch ? handleTap : undefined}
+          >
+            {children}
+          </h3>
         </TooltipTrigger>
         <TooltipContent
           side="top"
           sideOffset={8}
           avoidCollisions={true}
-          collisionPadding={10}
-          onWheel={(e) => e.stopPropagation()}
-          onPointerDownOutside={(e) => e.preventDefault()}
-          className="z-[99999] max-w-[300px] max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 shadow-xl p-3"
+          collisionPadding={16}
+          className="z-[99999] max-w-[300px] max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 shadow-xl p-3 pointer-events-auto"
         >
           <p className="text-sm text-white leading-relaxed break-words">{fullText}</p>
         </TooltipContent>
