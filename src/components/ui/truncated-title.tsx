@@ -5,7 +5,6 @@ interface TruncatedTitleProps {
   children: ReactNode;
   fullText: string;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
 }
 
 /**
@@ -16,9 +15,8 @@ export function TruncatedTitle({
   children, 
   fullText, 
   className = "", 
-  as: Component = "h3" 
 }: TruncatedTitleProps) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLHeadingElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
 
   useEffect(() => {
@@ -31,7 +29,8 @@ export function TruncatedTitle({
       setIsTruncated(truncated);
     };
 
-    checkTruncation();
+    // Initial check with slight delay to ensure rendering is complete
+    const timer = setTimeout(checkTruncation, 100);
     
     // Re-check on resize
     const resizeObserver = new ResizeObserver(() => {
@@ -42,13 +41,16 @@ export function TruncatedTitle({
       resizeObserver.observe(ref.current);
     }
 
-    return () => resizeObserver.disconnect();
+    return () => {
+      clearTimeout(timer);
+      resizeObserver.disconnect();
+    };
   }, [fullText, children]);
 
-  const element = React.createElement(
-    Component,
-    { ref, className },
-    children
+  const element = (
+    <h3 ref={ref} className={className}>
+      {children}
+    </h3>
   );
 
   if (!isTruncated) {
@@ -60,8 +62,8 @@ export function TruncatedTitle({
       <TooltipTrigger asChild>
         {element}
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[300px]">
-        <p>{fullText}</p>
+      <TooltipContent side="top" className="max-w-[300px] bg-slate-900/95 border-white/20 text-white">
+        <p className="text-sm">{fullText}</p>
       </TooltipContent>
     </Tooltip>
   );
