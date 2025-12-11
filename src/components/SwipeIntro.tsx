@@ -148,7 +148,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             {/* Skärm */}
             <div className="relative w-full h-full rounded-[1.4rem] overflow-hidden bg-transparent">
               {/* iPhone notch */}
-              <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black border border-gray-800"></div>
+              <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-10 h-0.5 w-6 rounded-full bg-black border border-gray-800"></div>
 
               {/* Innehåll med industriell kontorsbakgrund - preloaded och cachad */}
               <div 
