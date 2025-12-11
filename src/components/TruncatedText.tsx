@@ -124,12 +124,16 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
 
   // Wrap in tooltip
   return (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip open={!supportsHover ? isOpen : undefined} onOpenChange={!supportsHover ? setIsOpen : undefined}>
+    <TooltipProvider delayDuration={100} skipDelayDuration={0}>
+      <Tooltip 
+        open={!supportsHover ? isOpen : undefined} 
+        onOpenChange={!supportsHover ? setIsOpen : undefined}
+      >
         <TooltipTrigger asChild>
           <div
             ref={textRef as React.RefObject<HTMLDivElement>}
-            className={`${className ?? ""} cursor-pointer pointer-events-auto`}
+            className={`${className ?? ""} cursor-pointer`}
+            style={{ pointerEvents: 'auto' }}
             onClick={!supportsHover && isTouch ? handleTap : undefined}
             onTouchStart={!supportsHover ? () => setIsOpen(true) : undefined}
           >
@@ -138,7 +142,10 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
         </TooltipTrigger>
         <TooltipContent
           side="top"
+          avoidCollisions={true}
+          collisionPadding={10}
           onWheel={(e) => e.stopPropagation()}
+          onPointerDownOutside={(e) => e.preventDefault()}
           className="max-w-md max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 text-white shadow-xl z-[99999]"
         >
           <p className="text-sm leading-relaxed break-words">{text}</p>

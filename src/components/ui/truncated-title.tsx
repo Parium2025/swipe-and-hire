@@ -124,12 +124,16 @@ export function TruncatedTitle({
   }
 
   return (
-    <TooltipProvider delayDuration={200}>
-      <Tooltip open={!supportsHover ? isOpen : undefined} onOpenChange={!supportsHover ? setIsOpen : undefined}>
+    <TooltipProvider delayDuration={100} skipDelayDuration={0}>
+      <Tooltip 
+        open={!supportsHover ? isOpen : undefined} 
+        onOpenChange={!supportsHover ? setIsOpen : undefined}
+      >
         <TooltipTrigger asChild>
           <h3
             ref={ref}
-            className={`${className} cursor-pointer pointer-events-auto`}
+            className={`${className} cursor-pointer`}
+            style={{ pointerEvents: 'auto' }}
             onClick={!supportsHover && isTouch ? handleTap : undefined}
             onTouchStart={!supportsHover ? () => setIsOpen(true) : undefined}
           >
@@ -139,8 +143,10 @@ export function TruncatedTitle({
         <TooltipContent
           side="top"
           sideOffset={8}
-          avoidCollisions={false}
+          avoidCollisions={true}
+          collisionPadding={10}
           onWheel={(e) => e.stopPropagation()}
+          onPointerDownOutside={(e) => e.preventDefault()}
           className="z-[99999] max-w-[300px] max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 shadow-xl p-3"
         >
           <p className="text-sm text-white leading-relaxed break-words">{fullText}</p>
