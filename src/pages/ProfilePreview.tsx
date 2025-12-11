@@ -908,7 +908,7 @@ export default function ProfilePreview() {
               {/* Skärm */}
               <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-black">
                 {/* iPhone notch */}
-                <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-1.5 w-10 rounded-full bg-black border border-gray-800"></div>
+                <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-10 h-1.5 w-10 rounded-full bg-black border border-gray-800"></div>
 
                 {/* Innehåll med Parium bakgrund */}
                 <div 
