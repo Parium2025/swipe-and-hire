@@ -4187,7 +4187,7 @@ const MobileJobWizard = ({
                                 
                                 {/* Content - clickable to show form */}
                                 <div 
-                                  className="absolute inset-0 flex flex-col items-center justify-center p-4 text-white text-center cursor-pointer"
+                                  className="absolute inset-0 flex flex-col items-center justify-center p-4 pb-16 text-white text-center cursor-pointer"
                                   onClick={() => setShowDesktopApplicationForm(true)}
                                 >
                                   {/* Company name at top */}
@@ -4201,7 +4201,7 @@ const MobileJobWizard = ({
                                   {/* Job title */}
                                   <TruncatedTitle 
                                     fullText={formData.title || 'Jobbtitel'} 
-                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-4 cursor-default"
+                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-3 cursor-default"
                                   >
                                     {formData.title || 'Jobbtitel'}
                                   </TruncatedTitle>
