@@ -2018,7 +2018,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   setShowQuestionTemplates(false);
                                                   setShowQuestionForm(true);
                                                 }}
-                                                className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 flex-shrink-0"
+                                                className="p-1.5 text-white hover:text-white/70 hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
                                               >
                                                 <Pencil className="h-3.5 w-3.5" />
                                               </button>
@@ -2046,7 +2046,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     });
                                                   }
                                                 }}
-                                                className="p-1.5 text-white/70 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200 flex-shrink-0"
+                                                className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
                                               >
                                                 <Trash2 className="h-3.5 w-3.5" />
                                               </button>
@@ -2201,7 +2201,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       <button
                                         type="button"
                                         onClick={() => removeOption(index)}
-                                        className="p-1.5 text-white/70 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200 flex-shrink-0"
+                                        className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
                                       >
                                         <Trash2 className="h-3.5 w-3.5" />
                                       </button>
@@ -2210,7 +2210,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   <button
                                     type="button"
                                     onClick={addOption}
-                                    className="flex items-center gap-1 text-sm text-white/60 hover:text-white transition-colors pt-1"
+                                    className="flex items-center gap-1 text-sm text-white hover:text-white/70 transition-all duration-300 pt-1"
                                   >
                                     <Plus className="h-3.5 w-3.5" />
                                     <span>Lägg till alternativ</span>
@@ -2231,7 +2231,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               <Button
                                 onClick={saveCustomQuestion}
                                 disabled={!editingQuestion?.question_text?.trim()}
-                                className="bg-primary hover:bg-primary/90 text-white touch-border-white-thick"
+                                className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-all duration-300 focus:outline-none"
                               >
                                 Spara fråga
                               </Button>

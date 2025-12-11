@@ -1331,19 +1331,19 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                             <button
                               type="button"
                               onClick={() => removeOption(index)}
-                              className="p-1.5 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300"
+                              className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300"
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           </div>
                         ))}
                         <button
                           type="button"
                           onClick={addOption}
-                          className="bg-white/10 border border-white/20 text-white hover:border-white/40 px-3 py-2 rounded-md text-sm flex items-center gap-1 transition-all duration-300"
+                          className="flex items-center gap-1 text-sm text-white hover:text-white/70 transition-all duration-300 pt-1"
                         >
-                          Lägg till alternativ
-                          <Plus className="h-4 w-4 text-white" />
+                          <Plus className="h-3.5 w-3.5" />
+                          <span>Lägg till alternativ</span>
                         </button>
                       </div>
                     </div>
@@ -1362,7 +1362,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={saveCustomQuestion}
                     disabled={!editingQuestion.question_text?.trim()}
-                    className="bg-primary hover:bg-primary/90 text-white touch-border-white-thick"
+                    className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-all duration-300 focus:outline-none"
                   >
                     Spara fråga
                   </Button>

@@ -49,18 +49,18 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
           </div>
         </div>
         
-        <div className="flex items-center gap-0.5 flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-0.5 flex-shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
           <button
             type="button"
             onClick={() => onEdit(question)}
-            className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200"
+            className="p-1.5 text-white hover:text-white/70 hover:bg-white/10 rounded-full transition-all duration-300"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={() => onDelete(question.id!)}
-            className="p-1.5 text-white/70 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200"
+            className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
