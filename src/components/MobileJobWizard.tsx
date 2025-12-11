@@ -117,6 +117,7 @@ const MobileJobWizard = ({
 }: MobileJobWizardProps) => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
+  const [isInitializing, setIsInitializing] = useState(true);
   
   // Drag and drop sensors
   const sensors = useSensors(
@@ -133,10 +134,11 @@ const MobileJobWizard = ({
     console.log('MobileJobWizard: open changed', open);
   }, [open]);
   
-  // Reset currentStep when dialog closes to prevent flash of wrong step on reopen
+  // Reset state when dialog closes to prevent flash of wrong step on reopen
   useEffect(() => {
     if (!open) {
       setCurrentStep(0);
+      setIsInitializing(true); // Mark as needing initialization on next open
     }
   }, [open]);
   
@@ -144,6 +146,7 @@ const MobileJobWizard = ({
   useEffect(() => {
     if (open) {
       setCurrentStep(0); // Always start from beginning
+      setIsInitializing(false); // Initialization complete
       
       // Clear sessionStorage to prevent false unsaved changes detection
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
@@ -2062,7 +2065,8 @@ const MobileJobWizard = ({
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
-  const isLastStep = currentStep === steps.length - 1;
+  // Guard against flash: during initialization, never show as last step
+  const isLastStep = !isInitializing && currentStep === steps.length - 1;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
