@@ -26,7 +26,11 @@ import {
 
 const Dashboard = memo(() => {
   // Dashboard shows organization-wide data (all colleagues' published jobs)
-  const { jobs: allJobs, stats, recruiters, isLoading } = useJobsData({ scope: 'organization' });
+  // Enable realtime updates so new jobs from colleagues appear automatically
+  const { jobs: allJobs, stats, recruiters, isLoading } = useJobsData({ 
+    scope: 'organization',
+    enableRealtime: true 
+  });
   const { profile } = useAuth();
   const navigate = useNavigate();
 
