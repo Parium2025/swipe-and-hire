@@ -345,7 +345,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white transition-all duration-150 text-sm h-[44px]"
+                  className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/70 transition-all duration-150 text-sm h-[44px] font-normal"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
@@ -383,7 +383,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10"
                         title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
                       >
-                        <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words">
+                        <span className={`text-left flex-1 px-1 text-sm whitespace-normal break-words font-normal ${!selectedTemplate ? 'text-white/70' : 'text-white'}`}>
                           {selectedTemplate?.name || 'Ingen mall (valfritt)'}
                         </span>
                         <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white ml-2 transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
