@@ -135,6 +135,9 @@ const MobileJobWizard = ({
     if (open) {
       setCurrentStep(0); // Always start from beginning
       
+      // Clear sessionStorage to prevent false unsaved changes detection
+      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+      
       // Reset form state for fresh load
       setInitialFormData(null);
       setHasUnsavedChanges(false);
