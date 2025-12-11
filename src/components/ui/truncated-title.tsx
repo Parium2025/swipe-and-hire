@@ -1,9 +1,5 @@
 import React, { useRef, useState, useEffect, ReactNode } from "react";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TruncatedTitleProps {
@@ -15,7 +11,6 @@ interface TruncatedTitleProps {
 /**
  * Renders text with automatic tooltip on hover - only when text is actually truncated.
  * Uses line-clamp detection to determine if tooltip should show.
- * Uses HoverCard instead of Tooltip for scrollable content support.
  */
 export function TruncatedTitle({ 
   children, 
@@ -24,60 +19,135 @@ export function TruncatedTitle({
 }: TruncatedTitleProps) {
   const ref = useRef<HTMLHeadingElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [supportsHover, setSupportsHover] = useState(false);
+
+  useEffect(() => {
+    setIsTouch(typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "matchMedia" in window) {
+      const mqHover = window.matchMedia("(hover: hover)");
+      const mqFine = window.matchMedia("(pointer: fine)");
+      const update = () => setSupportsHover(mqHover.matches || mqFine.matches);
+      update();
+      mqHover.addEventListener?.("change", update);
+      mqFine.addEventListener?.("change", update);
+      return () => {
+        mqHover.removeEventListener?.("change", update);
+        mqFine.removeEventListener?.("change", update);
+      };
+    } else {
+      setSupportsHover(false);
+    }
+  }, []);
 
   useEffect(() => {
     const checkTruncation = () => {
-      const el = ref.current;
-      if (!el) return;
-      
-      // Check if content overflows (scrollHeight > clientHeight means truncated)
-      const truncated = el.scrollHeight > el.clientHeight + 2;
+      const element = ref.current;
+      if (!element) return;
+
+      // Robust detection including multi-line clamp (-webkit-line-clamp)
+      const styles = window.getComputedStyle(element);
+      const webkitLineClamp = (styles.getPropertyValue("-webkit-line-clamp") || "").trim();
+      const hasClamp = webkitLineClamp !== "" && webkitLineClamp !== "none";
+
+      let truncated = false;
+      if (hasClamp) {
+        // Measure natural height without clamp by cloning the element offscreen
+        const clone = element.cloneNode(true) as HTMLElement;
+        clone.style.position = "absolute";
+        clone.style.visibility = "hidden";
+        clone.style.pointerEvents = "none";
+        // @ts-ignore - vendor property
+        clone.style.webkitLineClamp = "unset";
+        clone.style.display = "block";
+        clone.style.maxHeight = "none";
+        clone.style.overflow = "visible";
+        clone.style.width = `${element.clientWidth}px`;
+        element.parentElement?.appendChild(clone);
+        const naturalHeight = Math.ceil(clone.scrollHeight);
+        element.parentElement?.removeChild(clone);
+        const currentHeight = Math.ceil(element.clientHeight);
+        truncated = naturalHeight > currentHeight + 1;
+      } else {
+        truncated =
+          Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||
+          Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth);
+      }
+
       setIsTruncated(truncated);
     };
 
-    // Initial check with slight delay to ensure rendering is complete
-    const timer = setTimeout(checkTruncation, 100);
-    const timer2 = setTimeout(checkTruncation, 300);
-    const timer3 = setTimeout(checkTruncation, 500);
-    
-    // Re-check on resize
+    // Run immediately and schedule a few short re-checks
+    checkTruncation();
+    const raf = requestAnimationFrame(checkTruncation);
+    const timeouts = [
+      setTimeout(checkTruncation, 50),
+      setTimeout(checkTruncation, 150),
+      setTimeout(checkTruncation, 300),
+    ];
+
+    // Also check on resize of the element
     const resizeObserver = new ResizeObserver(() => {
       setTimeout(checkTruncation, 50);
     });
-    
+
     if (ref.current) {
       resizeObserver.observe(ref.current);
     }
 
     return () => {
-      clearTimeout(timer);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
+      cancelAnimationFrame(raf);
+      timeouts.forEach(clearTimeout);
       resizeObserver.disconnect();
     };
   }, [fullText, children]);
 
-  // Always wrap in HoverCard but only show content when truncated
+  const handleTap = () => {
+    if (!supportsHover && isTouch) setIsOpen((o) => !o);
+  };
+
+  // Determine whether to show tooltip
+  const showTooltipDesktop = supportsHover && isTruncated;
+  const showTooltipTouch = !supportsHover && isTouch && isTruncated;
+  const shouldShowTooltip = showTooltipDesktop || showTooltipTouch;
+
+  if (!shouldShowTooltip) {
+    return (
+      <h3 ref={ref} className={className}>
+        {children}
+      </h3>
+    );
+  }
+
   return (
-    <HoverCard openDelay={200} closeDelay={300}>
-      <HoverCardTrigger asChild>
-        <h3 ref={ref} className={className}>
-          {children}
-        </h3>
-      </HoverCardTrigger>
-      {isTruncated && (
-        <HoverCardContent 
-          side="top" 
+    <TooltipProvider delayDuration={200}>
+      <Tooltip open={!supportsHover ? isOpen : undefined} onOpenChange={!supportsHover ? setIsOpen : undefined}>
+        <TooltipTrigger asChild>
+          <h3
+            ref={ref}
+            className={`${className} cursor-pointer pointer-events-auto`}
+            onClick={!supportsHover && isTouch ? handleTap : undefined}
+            onTouchStart={!supportsHover ? () => setIsOpen(true) : undefined}
+          >
+            {children}
+          </h3>
+        </TooltipTrigger>
+        <TooltipContent
+          side="top"
           sideOffset={8}
           avoidCollisions={false}
-          className="z-[9999] max-w-[300px] p-0 pointer-events-auto bg-slate-900/95 border-white/20"
+          className="z-[99999] max-w-[300px] p-0 bg-slate-900/95 border-white/20 shadow-xl"
         >
-          <ScrollArea className="max-h-[200px] p-3">
-            <p className="text-sm text-white">{fullText}</p>
+          <ScrollArea className="max-h-[200px]">
+            <p className="text-sm text-white leading-relaxed break-words p-3">{fullText}</p>
           </ScrollArea>
-        </HoverCardContent>
-      )}
-    </HoverCard>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
