@@ -36,6 +36,8 @@ export function TruncatedTitle({
 
     // Initial check with slight delay to ensure rendering is complete
     const timer = setTimeout(checkTruncation, 100);
+    const timer2 = setTimeout(checkTruncation, 300);
+    const timer3 = setTimeout(checkTruncation, 500);
     
     // Re-check on resize
     const resizeObserver = new ResizeObserver(() => {
@@ -48,33 +50,30 @@ export function TruncatedTitle({
 
     return () => {
       clearTimeout(timer);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
       resizeObserver.disconnect();
     };
   }, [fullText, children]);
 
-  const element = (
-    <h3 ref={ref} className={className}>
-      {children}
-    </h3>
-  );
-
-  if (!isTruncated) {
-    return element;
-  }
-
+  // Always wrap in HoverCard but only show content when truncated
   return (
     <HoverCard openDelay={200} closeDelay={300}>
       <HoverCardTrigger asChild>
-        {element}
+        <h3 ref={ref} className={className}>
+          {children}
+        </h3>
       </HoverCardTrigger>
-      <HoverCardContent 
-        side="top" 
-        sideOffset={8}
-        avoidCollisions={false}
-        className="z-[9999] max-w-[300px] max-h-[200px] overflow-y-auto pointer-events-auto bg-slate-900/95 border-white/20 text-white p-3"
-      >
-        <p className="text-sm">{fullText}</p>
-      </HoverCardContent>
+      {isTruncated && (
+        <HoverCardContent 
+          side="top" 
+          sideOffset={8}
+          avoidCollisions={false}
+          className="z-[9999] max-w-[300px] max-h-[200px] overflow-y-auto pointer-events-auto bg-slate-900/95 border-white/20 text-white p-3"
+        >
+          <p className="text-sm">{fullText}</p>
+        </HoverCardContent>
+      )}
     </HoverCard>
   );
 }
