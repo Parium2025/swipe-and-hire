@@ -29,17 +29,17 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-white/5 rounded-md p-2 border border-white/20"
+      className="bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group"
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           {/* Drag handle */}
           <div
             {...attributes}
             {...listeners}
-            className="text-white hover:text-white cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
+            className="text-white/40 hover:text-white/70 cursor-grab active:cursor-grabbing touch-none flex-shrink-0 transition-colors"
           >
-            <GripVertical className="h-3.5 w-3.5" />
+            <GripVertical className="h-4 w-4" />
           </div>
           
           <div className="flex-1 min-w-0">
@@ -49,20 +49,20 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
           </div>
         </div>
         
-        <div className="flex items-center space-x-1 ml-1.5 flex-shrink-0">
+        <div className="flex items-center gap-0.5 flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
           <button
             type="button"
             onClick={() => onEdit(question)}
-            className="p-1.5 text-white hover:bg-white/10 rounded-full transition-all duration-300"
+            className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200"
           >
-            <Pencil className="h-3 w-3" />
+            <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={() => onDelete(question.id!)}
-            className="p-1.5 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300"
+            className="p-1.5 text-white/70 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200"
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
