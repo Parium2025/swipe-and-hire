@@ -618,29 +618,10 @@ const MobileJobWizard = ({
     }
   }, [formData, currentStep, customQuestions, hasUnsavedChanges, open]);
   
-  // Restore step and questions from sessionStorage when opening
-  useEffect(() => {
-    if (open) {
-      try {
-        const saved = sessionStorage.getItem(JOB_WIZARD_SESSION_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed.currentStep !== undefined) {
-            setCurrentStep(parsed.currentStep);
-          }
-          if (parsed.customQuestions) {
-            setCustomQuestions(parsed.customQuestions);
-          }
-          if (parsed.formData) {
-            setFormData(parsed.formData);
-            // Sätt INTE hasUnsavedChanges här - det hanteras av jämförelse-useEffect
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to restore job wizard state from sessionStorage');
-      }
-    }
-  }, [open]);
+  // NOTE: Removed sessionStorage restoration useEffect as it caused race conditions
+  // with the initialization useEffect at the top. The init useEffect handles all
+  // state loading from existingJob or selectedTemplate, and clears sessionStorage
+  // to prevent false "unsaved changes" detection when opening a fresh wizard.
 
   // Smart text fit for occupation - uses break-words but reduces font-size if it would wrap
   const occupationRef = useSmartTextFit<HTMLDivElement>(formData.occupation || '', { minFontPx: 10 });
