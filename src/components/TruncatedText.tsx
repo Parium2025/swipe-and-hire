@@ -133,6 +133,14 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
     );
   }
 
+  // Stop propagation to prevent parent onClick from firing when interacting with tooltip
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!supportsHover && isTouch) {
+      handleTap();
+    }
+  };
+
   // Wrap in tooltip when needed
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
@@ -144,9 +152,10 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
         <TooltipTrigger asChild>
           <div
             ref={textRef}
-            className={`${className ?? ""} cursor-pointer`}
+            className={`${className ?? ""} cursor-pointer pointer-events-auto`}
             style={wordBreakStyles}
-            onClick={!supportsHover && isTouch ? handleTap : undefined}
+            onClick={handleClick}
+            onMouseDown={(e) => e.stopPropagation()}
           >
             {children || text}
           </div>
@@ -157,6 +166,8 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
           avoidCollisions={false}
           className="z-[999999] max-w-[320px] max-h-[300px] overflow-y-auto overscroll-contain bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg"
           onPointerDownOutside={(e) => e.preventDefault()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
         >
           <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{text}</p>
         </TooltipContent>
