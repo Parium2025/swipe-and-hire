@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { motion, AnimatePresence } from 'framer-motion';
 import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
@@ -3654,14 +3655,12 @@ const MobileJobWizard = ({
                     >
                       {profile?.company_name || 'Företag'}
                     </button>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-4 cursor-default`}>{getDisplayTitle()}</h3>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[300px]">
-                        <p>{getDisplayTitle()}</p>
-                      </TooltipContent>
-                    </Tooltip>
+                    <TruncatedTitle 
+                      fullText={getDisplayTitle()} 
+                      className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-4 cursor-default`}
+                    >
+                      {getDisplayTitle()}
+                    </TruncatedTitle>
                     <div className={`${textSizes.meta} text-white line-clamp-1`}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
                     </div>
@@ -4200,16 +4199,12 @@ const MobileJobWizard = ({
                                   </button>
                                   
                                   {/* Job title */}
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <h3 className="text-xl font-bold text-white leading-tight mb-1 line-clamp-4 cursor-default">
-                                        {formData.title || 'Jobbtitel'}
-                                      </h3>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top" className="max-w-[300px]">
-                                      <p>{formData.title || 'Jobbtitel'}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
+                                  <TruncatedTitle 
+                                    fullText={formData.title || 'Jobbtitel'} 
+                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-4 cursor-default"
+                                  >
+                                    {formData.title || 'Jobbtitel'}
+                                  </TruncatedTitle>
                                   
                                   {/* Meta line: employment type • location */}
                                   <div className="text-sm text-white line-clamp-1">
