@@ -106,62 +106,50 @@ export function TruncatedTitle({
     };
   }, [fullText, children]);
 
-  const handleTap = () => {
-    if (!supportsHover && isTouch) setIsOpen((o) => !o);
-  };
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!supportsHover && isTouch) {
-      handleTap();
-    }
-  };
-
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
   };
 
-  // Always render the same base element with ref attached
-  const baseElement = (
-    <h3
-      ref={ref}
-      className={`${className}${isTruncated ? ' cursor-pointer pointer-events-auto' : ''}`}
-      style={wordBreakStyles}
-      onClick={isTruncated ? handleClick : undefined}
-      onMouseDown={isTruncated ? (e) => e.stopPropagation() : undefined}
-    >
-      {children}
-    </h3>
-  );
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!supportsHover && isTouch && isTruncated) {
+      setIsOpen((o) => !o);
+    }
+  };
 
-  // If not truncated, just return the element without tooltip wrapper
-  if (!isTruncated) {
-    return baseElement;
-  }
-
-  // Wrap in tooltip when truncated
+  // Always render with tooltip structure to keep DOM stable for ref measurement
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
       <Tooltip 
-        open={!supportsHover ? isOpen : undefined} 
-        onOpenChange={!supportsHover ? setIsOpen : undefined}
+        open={isTruncated ? (!supportsHover ? isOpen : undefined) : false} 
+        onOpenChange={isTruncated && !supportsHover ? setIsOpen : undefined}
         disableHoverableContent={false}
       >
         <TooltipTrigger asChild>
-          {baseElement}
+          <h3
+            ref={ref}
+            className={`${className}${isTruncated ? ' cursor-pointer pointer-events-auto' : ''}`}
+            style={wordBreakStyles}
+            onClick={isTruncated ? handleClick : undefined}
+            onMouseDown={isTruncated ? (e) => e.stopPropagation() : undefined}
+          >
+            {children}
+          </h3>
         </TooltipTrigger>
-        <TooltipContent
-          side="top"
-          sideOffset={8}
-          avoidCollisions={false}
-          className="z-[999999] max-w-[320px] max-h-[300px] overflow-y-auto overscroll-contain bg-slate-900/95 border border-white/20 shadow-2xl p-3 pointer-events-auto rounded-lg"
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onMouseDown={(e) => e.stopPropagation()}
-          onWheel={(e) => e.stopPropagation()}
-        >
-          <p className="text-sm text-white leading-relaxed break-words whitespace-pre-wrap">{fullText}</p>
-        </TooltipContent>
+        {isTruncated && (
+          <TooltipContent
+            side="top"
+            sideOffset={8}
+            avoidCollisions={false}
+            className="z-[999999] max-w-[320px] max-h-[300px] overflow-y-auto overscroll-contain bg-slate-900/95 border border-white/20 shadow-2xl p-3 pointer-events-auto rounded-lg"
+            onPointerDownOutside={(e) => e.preventDefault()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onWheel={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm text-white leading-relaxed break-words whitespace-pre-wrap">{fullText}</p>
+          </TooltipContent>
+        )}
       </Tooltip>
     </TooltipProvider>
   );
