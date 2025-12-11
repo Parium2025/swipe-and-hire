@@ -54,6 +54,7 @@ const EmployerDashboard = memo(() => {
   // State for editing drafts in wizard
   const [draftToEdit, setDraftToEdit] = useState<JobPosting | null>(null);
   const [draftWizardOpen, setDraftWizardOpen] = useState(false);
+  const [wizardKey, setWizardKey] = useState(0);
   
   const {
     searchInput,
@@ -587,16 +588,22 @@ const EmployerDashboard = memo(() => {
       {/* Draft editing wizard */}
       {draftToEdit && (
         <MobileJobWizard
+          key={`wizard-${wizardKey}`}
           open={draftWizardOpen}
           onOpenChange={(open) => {
             setDraftWizardOpen(open);
-            if (!open) setDraftToEdit(null);
+            if (!open) {
+              // Increment key immediately when closing to force fresh component on next open
+              setWizardKey(prev => prev + 1);
+              setDraftToEdit(null);
+            }
           }}
           jobTitle={draftToEdit.title}
           selectedTemplate={null}
           onJobCreated={() => {
             invalidateJobs();
             setDraftWizardOpen(false);
+            setWizardKey(prev => prev + 1);
             setDraftToEdit(null);
           }}
           existingJob={draftToEdit}
