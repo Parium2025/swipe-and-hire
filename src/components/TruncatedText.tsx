@@ -5,14 +5,13 @@ interface TruncatedTextProps {
   text: string;
   className?: string;
   children?: React.ReactNode;
-  alwaysShowTooltip?: boolean | 'desktop-only';
 }
 
 /**
  * Component that automatically detects if text is truncated and shows
  * a tooltip with the full text on hover
  */
-export function TruncatedText({ text, className, children, alwaysShowTooltip }: TruncatedTextProps) {
+export function TruncatedText({ text, className, children }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
@@ -107,11 +106,9 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
     if (!supportsHover && isTouch) setIsOpen((o) => !o);
   };
 
-  // Determine whether to show tooltip based on environment and props
-  const showTooltipDesktop =
-    supportsHover && (alwaysShowTooltip === true || alwaysShowTooltip === 'desktop-only' || isTruncated);
-  const showTooltipTouch =
-    !supportsHover && isTouch && (alwaysShowTooltip === true || isTruncated);
+  // Show tooltip only when text is actually truncated
+  const showTooltipDesktop = supportsHover && isTruncated;
+  const showTooltipTouch = !supportsHover && isTouch && isTruncated;
   const shouldShowTooltip = showTooltipDesktop || showTooltipTouch;
 
   // Explicit styles for word breaking that preserve word integrity
