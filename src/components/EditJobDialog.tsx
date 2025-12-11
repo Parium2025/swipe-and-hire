@@ -2833,7 +2833,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         </button>
                                         <TruncatedTitle 
                                           fullText={formData.title || 'Jobbtitel'} 
-                                          className="text-xl text-white font-bold leading-tight mb-2 line-clamp-5 cursor-default"
+                                          className="text-xl text-white font-bold leading-tight mb-2 line-clamp-3 cursor-default"
                                         >
                                           {formData.title || 'Jobbtitel'}
                                         </TruncatedTitle>
