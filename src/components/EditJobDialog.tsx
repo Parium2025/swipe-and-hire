@@ -2007,7 +2007,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                 {template.question_text}
                                               </div>
                                             </button>
-                                            <div className="flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center gap-0.5 transition-opacity">
                                               <button
                                                 type="button"
                                                 onClick={() => {
