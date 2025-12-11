@@ -135,7 +135,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
 
   // Wrap in tooltip when needed
   return (
-    <TooltipProvider delayDuration={200} skipDelayDuration={100}>
+    <TooltipProvider delayDuration={100} skipDelayDuration={50}>
       <Tooltip 
         open={!supportsHover ? isOpen : undefined} 
         onOpenChange={!supportsHover ? setIsOpen : undefined}
@@ -145,18 +145,21 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
             ref={textRef}
             className={`${className ?? ""} cursor-pointer`}
             style={wordBreakStyles}
+            onClick={!supportsHover && isTouch ? handleTap : undefined}
           >
             {children || text}
           </div>
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          sideOffset={8}
+          align="center"
+          sideOffset={12}
           avoidCollisions={true}
-          collisionPadding={16}
-          className="max-w-md max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 text-white shadow-xl z-[99999] pointer-events-auto"
+          collisionPadding={20}
+          sticky="always"
+          className="z-[999999] max-w-[320px] max-h-[250px] overflow-y-auto bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg"
         >
-          <p className="text-sm leading-relaxed break-words">{text}</p>
+          <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{text}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

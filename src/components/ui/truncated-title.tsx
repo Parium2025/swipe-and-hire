@@ -131,7 +131,7 @@ export function TruncatedTitle({
 
   // Wrap in tooltip when truncated
   return (
-    <TooltipProvider delayDuration={200} skipDelayDuration={100}>
+    <TooltipProvider delayDuration={100} skipDelayDuration={50}>
       <Tooltip 
         open={!supportsHover ? isOpen : undefined} 
         onOpenChange={!supportsHover ? setIsOpen : undefined}
@@ -148,12 +148,14 @@ export function TruncatedTitle({
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          sideOffset={8}
+          align="center"
+          sideOffset={12}
           avoidCollisions={true}
-          collisionPadding={16}
-          className="z-[99999] max-w-[300px] max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 shadow-xl p-3 pointer-events-auto"
+          collisionPadding={20}
+          sticky="always"
+          className="z-[999999] max-w-[320px] max-h-[250px] overflow-y-auto bg-slate-900/95 border border-white/20 shadow-2xl p-3 pointer-events-auto rounded-lg"
         >
-          <p className="text-sm text-white leading-relaxed break-words">{fullText}</p>
+          <p className="text-sm text-white leading-relaxed break-words whitespace-pre-wrap">{fullText}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
