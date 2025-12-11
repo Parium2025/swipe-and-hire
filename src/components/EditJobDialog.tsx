@@ -134,6 +134,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [originalDesktopImageUrl, setOriginalDesktopImageUrl] = useState<string | null>(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
+  const [editingImageType, setEditingImageType] = useState<'mobile' | 'desktop'>('mobile');
   const [manualFocus, setManualFocus] = useState<number | null>(null);
   const [cachedPostalCodeInfo, setCachedPostalCodeInfo] = useState<{postalCode: string, city: string, municipality: string, county: string} | null>(null);
   const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
@@ -443,9 +444,32 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         if (publicUrl) urlToEdit = publicUrl;
       }
       setEditingImageUrl(urlToEdit);
+      setEditingImageType('mobile');
       setShowImageEditor(true);
     } catch (e) {
       console.error('Failed to open editor', e);
+    }
+  };
+
+  const openDesktopImageEditor = async () => {
+    try {
+      // Always use the display URL for editing (originalDesktopImageUrl might be a storage path)
+      const source = jobImageDesktopDisplayUrl || originalDesktopImageUrl || formData.job_image_desktop_url;
+      if (!source) return;
+
+      let urlToEdit = source;
+      if (!source.startsWith('http')) {
+        // Use public URL from job-images bucket (no expiration)
+        const { data: { publicUrl } } = supabase.storage
+          .from('job-images')
+          .getPublicUrl(source);
+        if (publicUrl) urlToEdit = publicUrl;
+      }
+      setEditingImageUrl(urlToEdit);
+      setEditingImageType('desktop');
+      setShowImageEditor(true);
+    } catch (e) {
+      console.error('Failed to open desktop editor', e);
     }
   };
 
@@ -2843,10 +2867,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   {/* Job card view (when form is closed) */}
                                   {!showDesktopApplicationForm && (
                                     <div className="absolute inset-0 z-10">
-                                      {/* Use desktop image if available, otherwise fallback to mobile */}
-                                      {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) ? (
+                                      {/* ONLY use desktop image, no fallback */}
+                                      {jobImageDesktopDisplayUrl ? (
                                         <img
-                                          src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
+                                          src={jobImageDesktopDisplayUrl}
                                           alt={`Jobbbild för ${formData.title}`}
                                           className="absolute inset-0 w-full h-full object-cover select-none"
                                           loading="eager"
@@ -3017,13 +3041,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   <div className="w-[30px]" aria-hidden="true"></div>
                                   <button
                                     type="button"
-                                    onClick={() => {
-                                      const source = originalDesktopImageUrl || formData.job_image_desktop_url || jobImageDesktopDisplayUrl;
-                                      if (source) {
-                                        setEditingImageUrl(source);
-                                        setShowImageEditor(true);
-                                      }
-                                    }}
+                                    onClick={openDesktopImageEditor}
                                     className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
                                   >
                                     Justera bild
@@ -3121,7 +3139,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             try {
               if (!user) return;
               const file = new File([blob], `job-image-${Date.now()}.webp`, { type: 'image/webp' });
-              const filePath = `${user.id}/job-${Date.now()}.webp`;
+              const filePath = `${user.id}/job-${editingImageType}-${Date.now()}.webp`;
               
               const { error: uploadError } = await supabase.storage
                 .from('job-images')
@@ -3133,15 +3151,23 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 .from('job-images')
                 .getPublicUrl(filePath);
               
-              handleInputChange('job_image_url', filePath);
-              setJobImageDisplayUrl(publicUrl);
-              setOriginalImageUrl(publicUrl);
+              // Update the correct image based on which one is being edited
+              if (editingImageType === 'desktop') {
+                handleInputChange('job_image_desktop_url', filePath);
+                setJobImageDesktopDisplayUrl(publicUrl);
+                // Keep original URL for restore functionality
+              } else {
+                handleInputChange('job_image_url', filePath);
+                setJobImageDisplayUrl(publicUrl);
+                // Keep original URL for restore functionality
+              }
+              
               setShowImageEditor(false);
               setEditingImageUrl(null);
               
               toast({
                 title: "Bild justerad",
-                description: "Bilden har sparats",
+                description: editingImageType === 'desktop' ? "Datorbilden har sparats" : "Mobilbilden har sparats",
               });
             } catch (error) {
               console.error('Error saving edited image:', error);
@@ -3153,8 +3179,25 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             }
           }}
           onRestoreOriginal={() => {
-            if (originalImageUrl) {
-              setJobImageDisplayUrl(originalImageUrl);
+            if (editingImageType === 'desktop' && originalDesktopImageUrl) {
+              // For desktop, get public URL if it's a storage path
+              if (!originalDesktopImageUrl.startsWith('http')) {
+                const { data: { publicUrl } } = supabase.storage
+                  .from('job-images')
+                  .getPublicUrl(originalDesktopImageUrl);
+                if (publicUrl) setJobImageDesktopDisplayUrl(publicUrl);
+              } else {
+                setJobImageDesktopDisplayUrl(originalDesktopImageUrl);
+              }
+            } else if (originalImageUrl) {
+              if (!originalImageUrl.startsWith('http')) {
+                const { data: { publicUrl } } = supabase.storage
+                  .from('job-images')
+                  .getPublicUrl(originalImageUrl);
+                if (publicUrl) setJobImageDisplayUrl(publicUrl);
+              } else {
+                setJobImageDisplayUrl(originalImageUrl);
+              }
             }
           }}
           isCircular={false}
