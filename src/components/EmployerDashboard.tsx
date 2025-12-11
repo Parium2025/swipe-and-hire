@@ -54,7 +54,6 @@ const EmployerDashboard = memo(() => {
   // State for editing drafts in wizard
   const [draftToEdit, setDraftToEdit] = useState<JobPosting | null>(null);
   const [draftWizardOpen, setDraftWizardOpen] = useState(false);
-  const [wizardKey, setWizardKey] = useState(0);
   
   const {
     searchInput,
@@ -209,16 +208,8 @@ const EmployerDashboard = memo(() => {
 
   // Handle editing draft jobs - open wizard instead of job-details
   const handleEditDraft = (job: JobPosting) => {
-    // First reset wizard state completely by unmounting
-    setDraftToEdit(null);
-    setDraftWizardOpen(false);
-    setWizardKey(prev => prev + 1);
-    
-    // Use setTimeout to ensure React has time to unmount the component
-    setTimeout(() => {
-      setDraftToEdit(job);
-      setDraftWizardOpen(true);
-    }, 50);
+    setDraftToEdit(job);
+    setDraftWizardOpen(true);
   };
 
   // Handle row click - drafts open wizard, active jobs go to details
@@ -596,13 +587,10 @@ const EmployerDashboard = memo(() => {
       {/* Draft editing wizard */}
       {draftToEdit && (
         <MobileJobWizard
-          key={`wizard-${wizardKey}`}
           open={draftWizardOpen}
           onOpenChange={(open) => {
             setDraftWizardOpen(open);
             if (!open) {
-              // Increment key immediately when closing to force fresh component on next open
-              setWizardKey(prev => prev + 1);
               setDraftToEdit(null);
             }
           }}
@@ -611,7 +599,6 @@ const EmployerDashboard = memo(() => {
           onJobCreated={() => {
             invalidateJobs();
             setDraftWizardOpen(false);
-            setWizardKey(prev => prev + 1);
             setDraftToEdit(null);
           }}
           existingJob={draftToEdit}

@@ -48,7 +48,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const titleRef = useRef<HTMLInputElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
-  const [wizardKey, setWizardKey] = useState(0);
   const hasPrefetched = useRef(false);
 
   // Warmup with hard hide via CSS to prevent any flash on iOS
@@ -599,17 +598,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       </Dialog>
 
       <MobileJobWizard
-        key={`wizard-${wizardKey}`}
         open={showDetailDialog}
         onOpenChange={(isOpen) => {
           setShowDetailDialog(isOpen);
-          if (!isOpen) {
-            // Increment key immediately when closing to force fresh component on next open
-            setWizardKey(prev => prev + 1);
-            if (!isNavigatingBack.current) {
-              setJobTitle('');
-              setSelectedTemplate(null);
-            }
+          if (!isOpen && !isNavigatingBack.current) {
+            setJobTitle('');
+            setSelectedTemplate(null);
           }
         }}
         jobTitle={jobTitle}
