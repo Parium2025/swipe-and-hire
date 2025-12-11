@@ -899,13 +899,13 @@ const MobileJobWizard = ({
     }
   };
 
-  // Öppna editor för datorbild - alltid använd display URL
+  // Öppna editor för datorbild - ALLTID använd originalbildens URL (inte den redigerade versionen)
   const openDesktopImageEditor = async () => {
     try {
-      // Use display URL for editing (originalDesktopImageUrl might be a storage path)
-      const source = jobImageDesktopDisplayUrl || originalDesktopImageUrl;
+      // ALLTID prioritera originalDesktopImageUrl för att redigera från originalet - precis som mobile
+      const source = originalDesktopImageUrl;
       if (!source) {
-        console.log('No desktop image URL available');
+        console.log('No original desktop image URL available');
         return;
       }
 
@@ -917,7 +917,7 @@ const MobileJobWizard = ({
           .getPublicUrl(source);
         if (publicUrl) urlToEdit = publicUrl;
       }
-      console.log('Opening desktop image editor with:', urlToEdit);
+      console.log('Opening desktop image editor with ORIGINAL:', urlToEdit);
       setEditingImageUrl(urlToEdit);
       setEditingImageType('desktop');
       setShowImageEditor(true);

@@ -453,9 +453,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
   const openDesktopImageEditor = async () => {
     try {
-      // Always use the display URL for editing (originalDesktopImageUrl might be a storage path)
-      const source = jobImageDesktopDisplayUrl || originalDesktopImageUrl || formData.job_image_desktop_url;
-      if (!source) return;
+      // ALLTID prioritera originalDesktopImageUrl för att redigera från originalet - precis som mobile
+      const source = originalDesktopImageUrl;
+      if (!source) {
+        console.log('No original desktop image URL available');
+        return;
+      }
 
       let urlToEdit = source;
       if (!source.startsWith('http')) {
@@ -465,6 +468,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
           .getPublicUrl(source);
         if (publicUrl) urlToEdit = publicUrl;
       }
+      console.log('Opening desktop image editor with ORIGINAL:', urlToEdit);
       setEditingImageUrl(urlToEdit);
       setEditingImageType('desktop');
       setShowImageEditor(true);
