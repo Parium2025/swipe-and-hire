@@ -854,6 +854,36 @@ All colors MUST be HSL.
     background: hsl(var(--primary) / 0.7) !important;
   }
 
+  /* Blå scrollbar för alternativlistor i jobfrågor */
+  .options-scroll {
+    scrollbar-width: thin !important;
+    scrollbar-color: hsl(var(--secondary)) hsl(var(--secondary) / 0.2) !important;
+    -ms-overflow-style: auto !important;
+    overflow-y: auto !important;
+    max-height: 120px;
+  }
+  
+  .options-scroll::-webkit-scrollbar {
+    width: 6px !important;
+    background: hsl(var(--secondary) / 0.2) !important;
+    border-radius: 3px !important;
+  }
+  
+  .options-scroll::-webkit-scrollbar-track {
+    background: hsl(var(--secondary) / 0.2) !important;
+    border-radius: 3px !important;
+  }
+  
+  .options-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--secondary)) !important;
+    border-radius: 3px !important;
+    min-height: 20px !important;
+  }
+  
+  .options-scroll::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--secondary) / 0.8) !important;
+  }
+
   /* Lås scroll på auth och fixa iOS viewport-gap */
   html.auth-locked, body.auth-locked,
   html.auth-lock, body.auth-lock {

@@ -2490,7 +2490,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   )}
                                                   
                                                   {question.question_type === 'multiple_choice' && (
-                                                    <div className="space-y-1.5">
+                                                    <div className="space-y-1.5 options-scroll">
                                                       {(question.options || []).map((option: string, optionIndex: number) => (
                                                         <button
                                                           key={optionIndex}
@@ -2500,13 +2500,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                              const parent = e.currentTarget.parentElement;
                                                              const buttons = parent?.querySelectorAll('button');
                                                              buttons?.forEach(btn => {
-                                                               btn.classList.remove('bg-secondary/40', 'border-secondary');
-                                                               btn.classList.add('bg-white/10', 'border-white/20');
+                                                               btn.classList.remove('bg-white', 'border-secondary');
+                                                               btn.classList.add('bg-white/90', 'border-white');
                                                              });
-                                                             e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
-                                                             e.currentTarget.classList.add('bg-secondary/40', 'border-secondary');
+                                                             e.currentTarget.classList.remove('bg-white/90', 'border-white');
+                                                             e.currentTarget.classList.add('bg-white', 'border-secondary');
                                                           }}
-                                                          className="w-full bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white text-left transition-colors"
+                                                          className="w-full bg-white/90 border border-white rounded-md px-2 py-1 text-xs text-slate-900 text-left transition-colors hover:bg-white"
                                                         >
                                                           {option}
                                                         </button>
