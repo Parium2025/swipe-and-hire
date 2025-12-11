@@ -118,8 +118,18 @@ const MobileJobWizard = ({
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
-  // Key that changes each time dialog opens - forces complete remount with fresh state
   const [dialogInstanceKey, setDialogInstanceKey] = useState(0);
+  
+  // CRITICAL: Sync reset currentStep when dialog transitions from closed to open
+  // This happens SYNCHRONOUSLY during render, before any useEffect
+  const prevOpenRef = useRef(open);
+  if (open && !prevOpenRef.current) {
+    // Dialog just opened - force step to 0 immediately during render
+    if (currentStep !== 0) {
+      setCurrentStep(0);
+    }
+  }
+  prevOpenRef.current = open;
   
   // Drag and drop sensors
   const sensors = useSensors(
@@ -140,17 +150,16 @@ const MobileJobWizard = ({
   useEffect(() => {
     if (!open) {
       setCurrentStep(0);
-      setIsInitializing(true); // Mark as needing initialization on next open
+      setIsInitializing(true);
     }
   }, [open]);
   
   // Always start from step 0 and reload template/existing job data when opening
   useEffect(() => {
     if (open) {
-      // Increment key to force fresh component state on each open
       setDialogInstanceKey(prev => prev + 1);
-      setCurrentStep(0); // Always start from beginning
-      setIsInitializing(false); // Initialization complete
+      setCurrentStep(0);
+      setIsInitializing(false);
       
       // Clear sessionStorage to prevent false unsaved changes detection
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
