@@ -138,7 +138,8 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className="max-w-md bg-popover text-popover-foreground border border-border shadow-md z-50"
+          onWheel={(e) => e.stopPropagation()}
+          className="max-w-md max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 text-white shadow-xl z-[99999]"
         >
           <p className="text-sm leading-relaxed break-words">{text}</p>
         </TooltipContent>
