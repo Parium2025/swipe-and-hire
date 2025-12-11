@@ -345,7 +345,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/70 transition-all duration-150 text-sm h-[44px] font-normal"
+                  className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white transition-all duration-150 text-sm h-[44px] font-normal"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
