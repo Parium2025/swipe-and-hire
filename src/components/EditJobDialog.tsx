@@ -103,6 +103,7 @@ interface JobFormData {
   application_instructions: string;
   pitch: string;
   job_image_url: string;
+  job_image_desktop_url: string;
 }
 
 interface EditJobDialogProps {
@@ -192,7 +193,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     contact_email: '',
     application_instructions: '',
     pitch: '',
-    job_image_url: ''
+    job_image_url: '',
+    job_image_desktop_url: ''
   });
 
   const { user } = useAuth();
@@ -641,7 +643,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         contact_email: job.contact_email || '',
         application_instructions: job.application_instructions || '',
         pitch: job.pitch || '',
-        job_image_url: job.job_image_url || ''
+        job_image_url: job.job_image_url || '',
+        job_image_desktop_url: (job as any).job_image_desktop_url || ''
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
@@ -1171,7 +1174,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
         pitch: formData.pitch || null,
-        job_image_url: formData.job_image_url || null
+        job_image_url: formData.job_image_url || null,
+        job_image_desktop_url: formData.job_image_desktop_url || null
       };
 
       const { error } = await supabase
