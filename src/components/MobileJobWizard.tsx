@@ -4284,8 +4284,8 @@ const MobileJobWizard = ({
             )}
           </div>
 
-          {/* Navigation */}
-          {!showQuestionTemplates && !showQuestionForm && (
+          {/* Navigation - Hide during initialization to prevent button flash */}
+          {!showQuestionTemplates && !showQuestionForm && !isInitializing && (
             <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
               <Button
                 variant="outline"
