@@ -140,11 +140,10 @@ export function TruncatedTitle({
           side="top"
           sideOffset={8}
           avoidCollisions={false}
-          className="z-[99999] max-w-[300px] p-0 bg-slate-900/95 border-white/20 shadow-xl"
+          onWheel={(e) => e.stopPropagation()}
+          className="z-[99999] max-w-[300px] max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 shadow-xl p-3"
         >
-          <ScrollArea className="max-h-[200px]">
-            <p className="text-sm text-white leading-relaxed break-words p-3">{fullText}</p>
-          </ScrollArea>
+          <p className="text-sm text-white leading-relaxed break-words">{fullText}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
