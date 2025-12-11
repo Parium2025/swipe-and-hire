@@ -1931,7 +1931,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                   {templates.map((template) => (
                                     <div
                                       key={template.id}
-                                      className="w-full bg-white/5 rounded-md p-2 border border-white/20 flex items-center justify-between gap-2"
+                                      className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 flex items-center justify-between gap-2 transition-all duration-200 group"
                                     >
                                       <button
                                         onClick={() => useQuestionTemplate(template)}
@@ -1953,9 +1953,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                             setShowQuestionTemplates(false);
                                             setShowQuestionForm(true);
                                           }}
-                                          className="p-1.5 text-white hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                          className="p-1.5 text-white hover:text-white/70 hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
                                         >
-                                          <Pencil className="h-3 w-3" />
+                                          <Pencil className="h-3.5 w-3.5" />
                                         </button>
                                         <button
                                           type="button"
@@ -1981,9 +1981,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                               });
                                             }
                                           }}
-                                          className="p-1.5 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                          className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
                                         >
-                                          <Trash2 className="h-3 w-3" />
+                                          <Trash2 className="h-3.5 w-3.5" />
                                         </button>
                                       </div>
                                     </div>
@@ -2112,8 +2112,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             )}
           </div>
 
-          {/* Footer Navigation - exakt samma styling som MobileJobWizard */}
-          {!showQuestionForm && (
+          {/* Footer Navigation - Hide when in question form or template selection */}
+          {!showQuestionForm && !showQuestionTemplates && (
             <div className={`flex items-center p-4 border-t border-white/20 flex-shrink-0 ${currentStep === 0 ? 'justify-center' : 'justify-between'}`}>
               {currentStep > 0 && (
                 <Button
