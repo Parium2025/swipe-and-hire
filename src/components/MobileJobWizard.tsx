@@ -3609,7 +3609,7 @@ const MobileJobWizard = ({
                     </button>
                     <TruncatedTitle 
                       fullText={getDisplayTitle()} 
-                      className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-5 break-all cursor-default`}
+                      className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-5 break-all w-full max-w-full cursor-default`}
                     >
                       {getDisplayTitle()}
                     </TruncatedTitle>
@@ -4153,7 +4153,7 @@ const MobileJobWizard = ({
                                   {/* Job title */}
                                   <TruncatedTitle 
                                     fullText={formData.title || 'Jobbtitel'} 
-                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-3 break-all cursor-default"
+                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-3 break-all w-full max-w-full cursor-default"
                                   >
                                     {formData.title || 'Jobbtitel'}
                                   </TruncatedTitle>
