@@ -109,6 +109,14 @@ export function TruncatedTitle({
     if (!supportsHover && isTouch) setIsOpen((o) => !o);
   };
 
+  // Stop propagation to prevent parent onClick from firing when interacting with tooltip
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!supportsHover && isTouch) {
+      handleTap();
+    }
+  };
+
   // Explicit styles for word breaking that work reliably
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-all',
@@ -140,9 +148,10 @@ export function TruncatedTitle({
         <TooltipTrigger asChild>
           <h3
             ref={ref}
-            className={`${className} cursor-pointer`}
+            className={`${className} cursor-pointer pointer-events-auto`}
             style={wordBreakStyles}
-            onClick={!supportsHover && isTouch ? handleTap : undefined}
+            onClick={handleClick}
+            onMouseDown={(e) => e.stopPropagation()}
           >
             {children}
           </h3>
@@ -153,6 +162,8 @@ export function TruncatedTitle({
           avoidCollisions={false}
           className="z-[999999] max-w-[320px] max-h-[300px] overflow-y-auto overscroll-contain bg-slate-900/95 border border-white/20 shadow-2xl p-3 pointer-events-auto rounded-lg"
           onPointerDownOutside={(e) => e.preventDefault()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
         >
           <p className="text-sm text-white leading-relaxed break-words whitespace-pre-wrap">{fullText}</p>
         </TooltipContent>
