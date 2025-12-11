@@ -1527,10 +1527,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Antal personer att rekrytera *</Label>
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           min="1"
                           value={formData.positions_count}
-                          onChange={(e) => handleInputChange('positions_count', e.target.value)}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            const numValue = parseInt(value) || 1;
+                            handleInputChange('positions_count', numValue < 1 ? '1' : value || '1');
+                          }}
+                          onBlur={(e) => {
+                            const numValue = parseInt(e.target.value) || 1;
+                            handleInputChange('positions_count', Math.max(1, numValue).toString());
+                          }}
                           placeholder="1"
                           className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                         />
