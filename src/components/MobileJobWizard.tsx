@@ -3698,6 +3698,7 @@ const MobileJobWizard = ({
                     <TruncatedText 
                       text={getDisplayTitle()} 
                       className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-5 w-full max-w-full cursor-pointer`}
+                      alwaysShowTooltip="desktop-only"
                     />
                     <div className={`${textSizes.meta} text-white`}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
@@ -4240,6 +4241,7 @@ const MobileJobWizard = ({
                                   <TruncatedText 
                                     text={formData.title || 'Jobbtitel'} 
                                     className="text-xl font-bold text-white leading-tight mb-1 line-clamp-3 w-full max-w-full cursor-pointer"
+                                    alwaysShowTooltip="desktop-only"
                                   />
                                   
                                   {/* Meta line: employment type • location */}

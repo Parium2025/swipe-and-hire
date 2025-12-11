@@ -173,11 +173,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
     if (questionType === 'video') {
       return 'Video filer (MP4, MOV, AVI)';
     }
-    // Check if only images are accepted
-    const onlyImages = acceptedFileTypes.length === 1 && acceptedFileTypes[0] === 'image/*';
-    if (onlyImages) {
-      return 'Bilder';
-    }
     return 'PDF, Word dokument, bilder och videor';
   };
 

@@ -5,14 +5,14 @@ interface TruncatedTextProps {
   text: string;
   className?: string;
   children?: React.ReactNode;
-  alwaysShowTooltip?: boolean | "desktop-only";
+  alwaysShowTooltip?: boolean | 'desktop-only';
 }
 
 /**
  * Component that automatically detects if text is truncated and shows
- * a tooltip with the full text on hover - ONLY when actually truncated
+ * a tooltip with the full text on hover
  */
-export function TruncatedText({ text, className, children, alwaysShowTooltip = false }: TruncatedTextProps) {
+export function TruncatedText({ text, className, children, alwaysShowTooltip }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
@@ -45,50 +45,48 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip = f
       const element = textRef.current;
       if (!element) return;
 
-      // Get computed styles
+      // Robust detection including multi-line clamp (-webkit-line-clamp)
       const styles = window.getComputedStyle(element);
       const webkitLineClamp = (styles.getPropertyValue("-webkit-line-clamp") || "").trim();
       const hasClamp = webkitLineClamp !== "" && webkitLineClamp !== "none";
 
       let truncated = false;
-
       if (hasClamp) {
-        // For line-clamp: clone element to measure natural height
+        // Measure natural height without clamp by cloning the element offscreen
         const clone = element.cloneNode(true) as HTMLElement;
-        clone.style.cssText = `
-          position: absolute;
-          visibility: hidden;
-          pointer-events: none;
-          -webkit-line-clamp: unset;
-          display: block;
-          max-height: none;
-          overflow: visible;
-          width: ${element.clientWidth}px;
-        `;
-        document.body.appendChild(clone);
-        const naturalHeight = clone.scrollHeight;
-        document.body.removeChild(clone);
-        const currentHeight = element.clientHeight;
-        // Need significant difference (more than 4px) to be considered truncated
-        truncated = naturalHeight > currentHeight + 4;
+        clone.style.position = "absolute";
+        clone.style.visibility = "hidden";
+        clone.style.pointerEvents = "none";
+        // @ts-ignore - vendor property
+        clone.style.webkitLineClamp = "unset";
+        clone.style.display = "block";
+        clone.style.maxHeight = "none";
+        clone.style.overflow = "visible";
+        clone.style.width = `${element.clientWidth}px`;
+        element.parentElement?.appendChild(clone);
+        const naturalHeight = Math.ceil(clone.scrollHeight);
+        element.parentElement?.removeChild(clone);
+        const currentHeight = Math.ceil(element.clientHeight);
+        truncated = naturalHeight > currentHeight + 1;
       } else {
-        // For non-clamped: check if content overflows
-        // Text must overflow by at least 4px to be considered truncated
         truncated =
-          element.scrollHeight > element.clientHeight + 4 ||
-          element.scrollWidth > element.clientWidth + 4;
+          Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||
+          Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth);
       }
 
       setIsTruncated(truncated);
     };
 
-    // Start with false
-    setIsTruncated(false);
+    // Run immediately and schedule a few short re-checks
+    checkTruncation();
+    const raf = requestAnimationFrame(checkTruncation);
+    const timeouts = [
+      setTimeout(checkTruncation, 50),
+      setTimeout(checkTruncation, 150),
+      setTimeout(checkTruncation, 300),
+    ];
 
-    // Check after render is complete
-    const timeoutId = setTimeout(checkTruncation, 150);
-
-    // Also observe resize
+    // Also check on resize of the element
     const resizeObserver = new ResizeObserver(() => {
       setTimeout(checkTruncation, 50);
     });
@@ -98,7 +96,8 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip = f
     }
 
     return () => {
-      clearTimeout(timeoutId);
+      cancelAnimationFrame(raf);
+      timeouts.forEach(clearTimeout);
       resizeObserver.disconnect();
     };
   }, [text]);
@@ -107,6 +106,33 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip = f
     if (!supportsHover && isTouch) setIsOpen((o) => !o);
   };
 
+  // Determine whether to show tooltip based on environment and props
+  const showTooltipDesktop =
+    supportsHover && (alwaysShowTooltip === true || alwaysShowTooltip === 'desktop-only' || isTruncated);
+  const showTooltipTouch =
+    !supportsHover && isTouch && (alwaysShowTooltip === true || isTruncated);
+  const shouldShowTooltip = showTooltipDesktop || showTooltipTouch;
+
+  // Explicit styles for word breaking that preserve word integrity
+  const wordBreakStyles: React.CSSProperties = {
+    wordBreak: 'break-word',
+    overflowWrap: 'break-word',
+  };
+
+  // If not showing tooltip, render simple element
+  if (!shouldShowTooltip) {
+    return (
+      <div
+        ref={textRef}
+        className={className}
+        style={wordBreakStyles}
+      >
+        {children || text}
+      </div>
+    );
+  }
+
+  // Stop propagation to prevent parent onClick from firing when interacting with tooltip
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!supportsHover && isTouch) {
@@ -114,23 +140,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip = f
     }
   };
 
-  const wordBreakStyles: React.CSSProperties = {
-    wordBreak: 'break-word',
-    overflowWrap: 'break-word',
-  };
-
-  // Determine if we should show tooltip
-  const shouldShowTooltipDesktop = alwaysShowTooltip === true || alwaysShowTooltip === "desktop-only";
-  const showTooltip = isTruncated || (supportsHover && shouldShowTooltipDesktop);
-
-  if (!showTooltip) {
-    return (
-      <div ref={textRef} className={className} style={wordBreakStyles}>
-        {children || text}
-      </div>
-    );
-  }
-
+  // Wrap in tooltip when needed
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
       <Tooltip 
