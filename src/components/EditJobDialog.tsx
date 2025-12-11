@@ -2953,31 +2953,29 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 Tillbaka
               </Button>
 
-              {isLastStep ? (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  className="bg-green-600 hover:bg-green-700 md:hover:bg-green-700 text-white px-8 py-2 transition-all duration-300"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Sparar...
-                    </>
-                  ) : (
-                    'Spara ändringar'
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleNext}
-                  disabled={!canProceed()}
-                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-all duration-300 focus:outline-none"
-                >
-                  Nästa
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              )}
+              {/* Both buttons are always rendered but only one is visible - eliminates render delay */}
+              <Button
+                onClick={handleSubmit}
+                disabled={loading}
+                className={`bg-green-600 hover:bg-green-700 md:hover:bg-green-700 text-white px-8 py-2 transition-all duration-300 ${isLastStep ? '' : 'hidden'}`}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Sparar...
+                  </>
+                ) : (
+                  'Spara ändringar'
+                )}
+              </Button>
+              <Button
+                onClick={handleNext}
+                disabled={!canProceed()}
+                className={`bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-all duration-300 focus:outline-none ${isLastStep ? 'hidden' : ''}`}
+              >
+                Nästa
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
             </div>
           </div>
         </DialogContent>
