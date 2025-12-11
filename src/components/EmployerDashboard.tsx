@@ -209,10 +209,16 @@ const EmployerDashboard = memo(() => {
 
   // Handle editing draft jobs - open wizard instead of job-details
   const handleEditDraft = (job: JobPosting) => {
-    // Increment key BEFORE opening to force fresh component with correct state
-    setWizardKey(prev => prev + 1);
-    setDraftToEdit(job);
-    setDraftWizardOpen(true);
+    // First reset wizard state completely by unmounting
+    setDraftToEdit(null);
+    setDraftWizardOpen(false);
+    
+    // Then open with fresh state in next frame
+    requestAnimationFrame(() => {
+      setWizardKey(prev => prev + 1);
+      setDraftToEdit(job);
+      setDraftWizardOpen(true);
+    });
   };
 
   // Handle row click - drafts open wizard, active jobs go to details
