@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor } from 'lucide-react';
@@ -2584,14 +2585,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             >
                                               {profile?.company_name || 'Företag'}
                                             </button>
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-4 cursor-default`}>{getDisplayTitle()}</h3>
-                                              </TooltipTrigger>
-                                              <TooltipContent side="top" className="max-w-[300px]">
-                                                <p>{getDisplayTitle()}</p>
-                                              </TooltipContent>
-                                            </Tooltip>
+                                            <TruncatedTitle 
+                                              fullText={getDisplayTitle()} 
+                                              className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-4 cursor-default`}
+                                            >
+                                              {getDisplayTitle()}
+                                            </TruncatedTitle>
                                             <div className={`${textSizes.meta} text-white line-clamp-1`}>
                                               {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
                                             </div>
@@ -2788,14 +2787,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         >
                                           {profile?.company_name || 'Företag'}
                                         </button>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <h3 className="text-xl text-white font-bold leading-tight mb-2 line-clamp-4 cursor-default">{formData.title || 'Jobbtitel'}</h3>
-                                          </TooltipTrigger>
-                                          <TooltipContent side="top" className="max-w-[300px]">
-                                            <p>{formData.title || 'Jobbtitel'}</p>
-                                          </TooltipContent>
-                                        </Tooltip>
+                                        <TruncatedTitle 
+                                          fullText={formData.title || 'Jobbtitel'} 
+                                          className="text-xl text-white font-bold leading-tight mb-2 line-clamp-4 cursor-default"
+                                        >
+                                          {formData.title || 'Jobbtitel'}
+                                        </TruncatedTitle>
                                         <div className="text-sm text-white line-clamp-1">
                                           {formData.workplace_city || formData.location || 'Plats'}
                                         </div>
