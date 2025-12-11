@@ -2973,6 +2973,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           {!jobImageDisplayUrl && (
                             <FileUpload
                               mediaType="job-image"
+                              uploadType="image"
                               onFileUploaded={async (storagePath, fileName) => {
                                 handleInputChange('job_image_url', storagePath);
                                 setOriginalImageUrl(storagePath);
@@ -3044,6 +3045,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           {!jobImageDesktopDisplayUrl && (
                             <FileUpload
                               mediaType="job-image"
+                              uploadType="image"
                               onFileUploaded={async (storagePath, fileName) => {
                                 handleInputChange('job_image_desktop_url', storagePath);
                                 setOriginalDesktopImageUrl(storagePath);

@@ -19,6 +19,7 @@ interface FileUploadProps {
   maxFileSize?: number;
   questionType?: string;
   mediaType?: MediaType; // Används för att bestämma bucket via mediaManager
+  uploadType?: 'image' | 'video' | 'document' | 'all'; // Typ av uppladdning för att visa rätt text
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -28,7 +29,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
   acceptedFileTypes = ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   maxFileSize = 10 * 1024 * 1024, // 10MB default
   questionType,
-  mediaType = 'cv' // Default till CV för job-applications bucket
+  mediaType = 'cv', // Default till CV för job-applications bucket
+  uploadType = 'all' // Default visar alla filtyper
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -170,8 +172,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const getAcceptedTypesText = () => {
-    if (questionType === 'video') {
-      return 'Video filer (MP4, MOV, AVI)';
+    if (questionType === 'video' || uploadType === 'video') {
+      return 'Video (MP4, MOV, AVI)';
+    }
+    if (uploadType === 'image') {
+      return 'Bilder';
+    }
+    if (uploadType === 'document') {
+      return 'PDF, Word dokument';
     }
     return 'PDF, Word dokument, bilder och videor';
   };
