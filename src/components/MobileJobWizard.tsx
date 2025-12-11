@@ -4173,7 +4173,7 @@ const MobileJobWizard = ({
                                   {/* Job title */}
                                   <TruncatedText 
                                     text={formData.title || 'Jobbtitel'} 
-                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-5 w-full max-w-full cursor-pointer"
+                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-3 w-full max-w-full cursor-pointer"
                                     alwaysShowTooltip="desktop-only"
                                   />
                                   
