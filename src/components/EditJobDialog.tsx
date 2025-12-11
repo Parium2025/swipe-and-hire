@@ -139,6 +139,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [cachedPostalCodeInfo, setCachedPostalCodeInfo] = useState<{postalCode: string, city: string, municipality: string, county: string} | null>(null);
   const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [showDesktopApplicationForm, setShowDesktopApplicationForm] = useState(false);
+  const [previewAnswers, setPreviewAnswers] = useState<Record<string, string>>({});
   
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -2640,27 +2641,54 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   )}
                                                   
                                                   {question.question_type === 'multiple_choice' && (
-                                                    <div className="space-y-1.5 options-scroll">
-                                                      {(question.options || []).map((option: string, optionIndex: number) => (
-                                                        <button
-                                                          key={optionIndex}
-                                                          type="button"
-                                                          onClick={(e) => {
-                                                            e.preventDefault();
-                                                             const parent = e.currentTarget.parentElement;
-                                                             const buttons = parent?.querySelectorAll('button');
-                                                             buttons?.forEach(btn => {
-                                                               btn.classList.remove('bg-white', 'border-secondary');
-                                                               btn.classList.add('bg-white/90', 'border-white');
-                                                             });
-                                                             e.currentTarget.classList.remove('bg-white/90', 'border-white');
-                                                             e.currentTarget.classList.add('bg-white', 'border-secondary');
-                                                          }}
-                                                          className="w-full bg-white/90 border border-white rounded-md px-2 py-1 text-xs text-slate-900 text-left transition-colors hover:bg-white"
-                                                        >
-                                                          {option}
-                                                        </button>
-                                                      ))}
+                                                    <div className="space-y-1.5">
+                                                      {(question.options || []).map((option: string, optionIndex: number) => {
+                                                        const questionKey = question.id || `q_${optionIndex}`;
+                                                        const selectedAnswers = previewAnswers[questionKey];
+                                                        const answersArray = typeof selectedAnswers === 'string' 
+                                                          ? selectedAnswers.split('|||') 
+                                                          : [];
+                                                        const selected = answersArray.includes(option);
+                                                        
+                                                        return (
+                                                          <button
+                                                            key={optionIndex}
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                              e.preventDefault();
+                                                              setPreviewAnswers((prev) => {
+                                                                const currentAnswers = prev[questionKey];
+                                                                const answersArray = typeof currentAnswers === 'string'
+                                                                  ? currentAnswers.split('|||').filter(a => a)
+                                                                  : [];
+                                                                
+                                                                const newAnswers = answersArray.includes(option)
+                                                                  ? answersArray.filter(a => a !== option)
+                                                                  : [...answersArray, option];
+                                                                
+                                                                return {
+                                                                  ...prev,
+                                                                  [questionKey]: newAnswers.join('|||'),
+                                                                };
+                                                              });
+                                                            }}
+                                                            className={`w-full flex items-center gap-2 p-1.5 rounded-lg border transition-all ${
+                                                              selected
+                                                                ? 'bg-white/15 border-white/40'
+                                                                : 'bg-white/10 border-white/20 hover:bg-white/15'
+                                                            }`}
+                                                          >
+                                                            <div className={`w-2.5 h-2.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                                              selected ? 'border-white' : 'border-white/40'
+                                                            }`}>
+                                                              {selected && (
+                                                                <div className="w-1 h-1 rounded-full bg-white" />
+                                                              )}
+                                                            </div>
+                                                            <span className="text-xs text-white text-left flex-1">{option}</span>
+                                                          </button>
+                                                        );
+                                                      })}
                                                     </div>
                                                   )}
                                                   

@@ -128,25 +128,39 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
         );
 
       case 'multiple_choice':
+        const selectedOptions = Array.isArray(currentAnswer) ? currentAnswer : [];
         return (
-          <RadioGroup
-            value={currentAnswer || ''}
-            onValueChange={(value) => handleAnswerChange(questionId, value)}
-            className="space-y-3"
-          >
-            {question.options?.map((option, index) => (
-              <div key={index} className="flex items-center space-x-3 p-4 rounded-lg bg-white/10 border border-white/20">
-                <RadioGroupItem 
-                  value={option} 
-                  id={`${questionId}-${index}`} 
-                  className="text-white border-white/40"
-                />
-                <Label htmlFor={`${questionId}-${index}`} className="text-white text-lg cursor-pointer flex-1">
-                  {option}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
+          <div className="space-y-3">
+            {question.options?.map((option, index) => {
+              const isSelected = selectedOptions.includes(option);
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => {
+                    const newSelected = isSelected
+                      ? selectedOptions.filter((o: string) => o !== option)
+                      : [...selectedOptions, option];
+                    handleAnswerChange(questionId, newSelected);
+                  }}
+                  className={`w-full flex items-center gap-4 p-4 rounded-lg border transition-all ${
+                    isSelected
+                      ? 'bg-white/15 border-white/40'
+                      : 'bg-white/10 border-white/20 hover:bg-white/15'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                    isSelected ? 'border-white' : 'border-white/40'
+                  }`}>
+                    {isSelected && (
+                      <div className="w-3 h-3 rounded-full bg-white" />
+                    )}
+                  </div>
+                  <span className="text-white text-lg text-left flex-1">{option}</span>
+                </button>
+              );
+            })}
+          </div>
         );
 
       case 'number':
