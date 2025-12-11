@@ -2081,14 +2081,16 @@ const MobileJobWizard = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
-      // When dialog closes, immediately reset to step 0 so next open shows correct state
+      // When dialog closes, immediately reset to step 0 and increment key to force fresh render
       if (!isOpen) {
         setCurrentStep(0);
         setIsInitializing(true);
+        setDialogInstanceKey(prev => prev + 1);
       }
       onOpenChange(isOpen);
     }}>
       <DialogContent 
+        key={`wizard-${dialogInstanceKey}`}
         className="parium-panel max-w-none w-[min(92vw,400px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-200"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
