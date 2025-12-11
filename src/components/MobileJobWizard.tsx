@@ -120,13 +120,16 @@ const MobileJobWizard = ({
   const [isInitializing, setIsInitializing] = useState(true);
   const [dialogInstanceKey, setDialogInstanceKey] = useState(0);
   
-  // CRITICAL: Sync reset currentStep when dialog transitions from closed to open
+  // CRITICAL: Sync reset state when dialog transitions from closed to open
   // This happens SYNCHRONOUSLY during render, before any useEffect
   const prevOpenRef = useRef(open);
   if (open && !prevOpenRef.current) {
-    // Dialog just opened - force step to 0 immediately during render
+    // Dialog just opened - force step to 0 and set initializing immediately during render
     if (currentStep !== 0) {
       setCurrentStep(0);
+    }
+    if (!isInitializing) {
+      setIsInitializing(true);
     }
   }
   prevOpenRef.current = open;
