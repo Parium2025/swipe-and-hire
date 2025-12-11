@@ -982,6 +982,34 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             variant: "destructive",
           });
         }
+      } else {
+        // Question exists but has no template - save it as a new template
+        try {
+          const { data, error } = await supabase
+            .from('job_question_templates')
+            .insert({
+              employer_id: user.id,
+              question_text: filteredQuestion.question_text,
+              question_type: filteredQuestion.question_type,
+              options: filteredQuestion.options,
+              placeholder_text: filteredQuestion.placeholder_text
+            })
+            .select()
+            .single();
+          
+          if (error) throw error;
+          
+          // Link the question to its new template
+          if (data) {
+            setCustomQuestions(prev => 
+              prev.map(q => q.id === filteredQuestion.id ? { ...q, template_id: data.id } : q)
+            );
+          }
+          
+          await fetchQuestionTemplates();
+        } catch (error) {
+          console.error('Error saving question as template:', error);
+        }
       }
     } else {
       // Add new question
