@@ -1088,60 +1088,31 @@ const MobileJobWizard = ({
     });
   };
 
-  // Update form data when props change - preserve existing values
+  // NOTE: REMOVED the old useEffect that updated formData based on jobTitle/selectedTemplate
+  // as it caused race conditions with initialFormData. All form data initialization is now
+  // handled ONLY in the main 'open' useEffect at the top of the component (lines 134-301).
+  // This ensures formData and initialFormData are always set together, preventing false
+  // "unsaved changes" detection.
+  
+  // Auto-fill workplace name and contact email from profile/user when they become available
+  // This only runs for new fields that weren't set during initialization
   useEffect(() => {
-    // Initiera titel från jobTitle ENDAST om fältet är tomt (skriven text ska inte överskrivas)
-    if (jobTitle && !formData.title) {
-      setFormData(prev => ({ ...prev, title: jobTitle }));
-    }
+    if (!open) return; // Only run when wizard is open
     
-    // Only reset form if it's completely empty or when a template is selected
-    const isFormEmpty = !formData.title && !formData.occupation;
-    const shouldUpdateFromTemplate = selectedTemplate && 
-      (formData.title !== selectedTemplate.title || formData.description !== selectedTemplate.description);
-    
-    if (isFormEmpty || shouldUpdateFromTemplate) {
-      setFormData(prev => ({
-        title: (!prev.title || prev.title === selectedTemplate?.title ? (jobTitle || selectedTemplate?.title || prev.title) : prev.title),
-        description: selectedTemplate?.description || prev.description,
-        requirements: selectedTemplate?.requirements || prev.requirements,
-        location: prev.location, // Never override location from template
-        occupation: selectedTemplate?.occupation || prev.occupation,
-        salary_min: selectedTemplate?.salary_min?.toString() || prev.salary_min,
-        salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
-        employment_type: selectedTemplate?.employment_type || prev.employment_type,
-        salary_type: selectedTemplate?.salary_type || prev.salary_type,
-        salary_transparency: prev.salary_transparency || '',
-        benefits: prev.benefits || [],
-        positions_count: selectedTemplate?.positions_count || prev.positions_count || '1',
-        work_start_time: prev.work_start_time || '',
-        work_end_time: prev.work_end_time || '',
-        work_location_type: selectedTemplate?.work_location_type || prev.work_location_type || 'på-plats',
-        remote_work_possible: selectedTemplate?.remote_work_possible || prev.remote_work_possible || 'nej',
-        workplace_name: selectedTemplate?.workplace_name || prev.workplace_name || profile?.company_name || '',
-        workplace_address: selectedTemplate?.workplace_address || prev.workplace_address || '',
-        workplace_postal_code: prev.workplace_postal_code || '', // Never from template
-        workplace_city: prev.workplace_city || '', // Never from template
-        workplace_county: prev.workplace_county || '',
-        workplace_municipality: prev.workplace_municipality || '',
-        work_schedule: selectedTemplate?.work_schedule || prev.work_schedule,
-        contact_email: prev.contact_email || selectedTemplate?.contact_email || user?.email || '',
-        application_instructions: selectedTemplate?.application_instructions || prev.application_instructions,
-        pitch: selectedTemplate?.pitch || prev.pitch || '',
-        job_image_url: prev.job_image_url || ''
-      }));
-      
-      // Never auto-fill city from template - user must set location manually each time
-    }
-    
-    // Update workplace name and contact email if they're empty but we have new data
+    // Update workplace name if it's empty and we have company name
     if (!formData.workplace_name && profile?.company_name) {
       setFormData(prev => ({ ...prev, workplace_name: profile.company_name }));
+      // Also update initialFormData to prevent false "unsaved changes"
+      setInitialFormData(prev => prev ? { ...prev, workplace_name: profile.company_name } : null);
     }
+    
+    // Update contact email if it's empty and we have user email
     if (!formData.contact_email && user?.email) {
       setFormData(prev => ({ ...prev, contact_email: user.email }));
+      // Also update initialFormData to prevent false "unsaved changes"
+      setInitialFormData(prev => prev ? { ...prev, contact_email: user.email } : null);
     }
-  }, [jobTitle, selectedTemplate, profile?.company_name, user?.email]);
+  }, [open, profile?.company_name, user?.email, formData.workplace_name, formData.contact_email]);
 
   const steps = [
     {
