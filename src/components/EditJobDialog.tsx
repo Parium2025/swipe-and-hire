@@ -2591,7 +2591,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             >
                                               {getDisplayTitle()}
                                             </TruncatedTitle>
-                                            <div className={`${textSizes.meta} text-white line-clamp-1`}>
+                                            <div className={`${textSizes.meta} text-white`}>
                                               {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
                                             </div>
                                           </>
@@ -2793,8 +2793,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         >
                                           {formData.title || 'Jobbtitel'}
                                         </TruncatedTitle>
-                                        <div className="text-sm text-white line-clamp-1">
-                                          {formData.workplace_city || formData.location || 'Plats'}
+                                        <div className="text-sm text-white">
+                                          {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
                                         </div>
                                       </div>
                                       <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
