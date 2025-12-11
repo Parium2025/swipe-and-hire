@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -357,6 +357,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     } else {
       return `${count} personer`;
     }
+  };
+
+  const formatSalaryTransparency = () => {
+    if (!formData.salary_transparency) return '';
+    // If it's in the format "X-Y", return as range
+    if (formData.salary_transparency.includes('-')) {
+      return `${formData.salary_transparency.replace('-', ' – ')} kr/mån`;
+    }
+    // If it's "100+" or similar
+    if (formData.salary_transparency.includes('+')) {
+      return `${formData.salary_transparency} kr/mån`;
+    }
+    return `${formData.salary_transparency} kr/mån`;
   };
 
   const getEmailTextSize = (email: string) => {
@@ -2846,21 +2859,24 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             </div>
                                           </div>
 
-                                          {/* Job title */}
+                                          {/* Yrke */}
                                           {formData.occupation && (
                                             <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                                 <Briefcase className="h-3 w-3 mr-1 text-white" />
                                                 Yrke
                                               </h5>
-                                              <div className="text-sm text-white font-medium">{formData.occupation}</div>
+                                              <p className="text-xs text-white">{formData.occupation}</p>
                                             </div>
                                           )}
 
-                                          {/* Description */}
+                                          {/* Jobbeskrivning */}
                                           {formData.description && (
                                             <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                                <FileText className="h-3 w-3 mr-1 text-white" />
+                                                Jobbeskrivning
+                                              </h5>
                                               <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words max-h-20 overflow-y-auto">
                                                 {formData.description.length > 200 
                                                   ? formData.description.substring(0, 200) + '...' 
@@ -2870,10 +2886,23 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             </div>
                                           )}
 
-                                          {/* Salary */}
+                                          {/* Anställningsform */}
+                                          {formData.employment_type && (
+                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                                <Briefcase className="h-3 w-3 mr-1 text-white" />
+                                                Anställningsform
+                                              </h5>
+                                              <div className="text-xs text-white font-medium">
+                                                {getEmploymentTypeLabel(formData.employment_type)}
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {/* Lön */}
                                           {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                             <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                                 <Banknote className="h-3 w-3 mr-1 text-white" />
                                                 Lön
                                               </h5>
@@ -2885,17 +2914,102 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             </div>
                                           )}
 
-                                          {/* Location */}
+                                          {/* Lönetransparens */}
+                                          {formData.salary_transparency && formatSalaryTransparency() && (
+                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                                <Banknote className="h-3 w-3 mr-1 text-white" />
+                                                Lönetransparens
+                                              </h5>
+                                              <div className="text-xs text-white font-medium">{formatSalaryTransparency()}</div>
+                                            </div>
+                                          )}
+
+                                          {/* Arbetsplats */}
                                           <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                            <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                            <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                               <MapPin className="h-3 w-3 mr-1 text-white" />
                                               Arbetsplats
                                             </h5>
                                             <div className="text-xs text-white leading-relaxed space-y-0.5">
                                               {formData.workplace_name && <div className="font-medium">{formData.workplace_name}</div>}
-                                              {formData.workplace_city && <div>{formData.workplace_city}</div>}
+                                              {formData.workplace_address && <div>{formData.workplace_address}</div>}
+                                              {(formData.workplace_postal_code || formData.workplace_city) && (
+                                                <div>
+                                                  {formData.workplace_postal_code && formData.workplace_city ? (
+                                                    <>{formData.workplace_postal_code} {formData.workplace_city}</>
+                                                  ) : formData.workplace_city ? (
+                                                    formData.workplace_city
+                                                  ) : (
+                                                    formData.workplace_postal_code
+                                                  )}
+                                                </div>
+                                              )}
+                                              <div>{getWorkLocationDisplayText()}</div>
                                             </div>
                                           </div>
+
+                                          {/* Antal rekryteringar */}
+                                          {formData.positions_count && parseInt(formData.positions_count) > 0 && (
+                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                                <Users className="h-3 w-3 mr-1 text-white" />
+                                                Antal rekryteringar
+                                              </h5>
+                                              <div className="text-xs text-white font-medium">{formatPositionsCount()}</div>
+                                            </div>
+                                          )}
+
+                                          {/* Arbetstider */}
+                                          {(formData.work_start_time || formData.work_end_time) && (
+                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                                <Clock className="h-3 w-3 mr-1 text-white" />
+                                                Arbetstider
+                                              </h5>
+                                              <div className="text-xs text-white font-medium">
+                                                {formData.work_start_time && formData.work_end_time 
+                                                  ? `${formData.work_start_time} – ${formData.work_end_time}`
+                                                  : formData.work_start_time || formData.work_end_time}
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {/* Förmåner */}
+                                          {formData.benefits && formData.benefits.length > 0 && (
+                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                                <Heart className="h-3 w-3 mr-1 text-white" />
+                                                Förmåner
+                                              </h5>
+                                              <div className="text-xs text-white space-y-0.5">
+                                                {formData.benefits.map((benefit, idx) => (
+                                                  <div key={idx} className="flex items-start">
+                                                    <span className="flex-shrink-0 mr-1">•</span>
+                                                    <span>{benefit}</span>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {/* Kontakt */}
+                                          {formData.contact_email && (
+                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                                <Mail className="h-3 w-3 mr-1 text-white" />
+                                                Kontakt
+                                              </h5>
+                                              <div className="text-xs text-white">
+                                                <a 
+                                                  href={`mailto:${formData.contact_email}`}
+                                                  className="text-blue-300 font-medium break-all hover:text-blue-200 underline cursor-pointer"
+                                                >
+                                                  {formData.contact_email}
+                                                </a>
+                                              </div>
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
                                     </div>
