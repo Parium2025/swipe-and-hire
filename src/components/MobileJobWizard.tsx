@@ -118,21 +118,6 @@ const MobileJobWizard = ({
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [dialogInstanceKey, setDialogInstanceKey] = useState(0);
-  
-  // Track if we've completed at least one render cycle after opening
-  const hasCompletedFirstRender = useRef(false);
-  const prevOpenRef = useRef(open);
-  
-  // When dialog opens, mark that we need a full render cycle
-  if (open && !prevOpenRef.current) {
-    hasCompletedFirstRender.current = false;
-  }
-  prevOpenRef.current = open;
-  
-  // CRITICAL: isLastStep is NEVER true until we've completed first render cycle
-  // This prevents the green button flash completely
-  const safeCurrentStep = hasCompletedFirstRender.current ? currentStep : 0;
   
   // Drag and drop sensors
   const sensors = useSensors(
@@ -145,11 +130,8 @@ const MobileJobWizard = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  useEffect(() => {
-    console.log('MobileJobWizard: open changed', open);
-  }, [open]);
   
-  // Reset state when dialog closes to prevent flash of wrong step on reopen
+  // Reset state when dialog closes
   useEffect(() => {
     if (!open) {
       setCurrentStep(0);
@@ -157,14 +139,11 @@ const MobileJobWizard = ({
     }
   }, [open]);
   
-  // Always start from step 0 and reload template/existing job data when opening
+  // Start from step 0 when opening
   useEffect(() => {
     if (open) {
-      setDialogInstanceKey(prev => prev + 1);
       setCurrentStep(0);
       setIsInitializing(false);
-      // Mark that first render cycle is complete - safe to show real step now
-      hasCompletedFirstRender.current = true;
       
       // Clear sessionStorage to prevent false unsaved changes detection
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
@@ -2084,9 +2063,8 @@ const MobileJobWizard = ({
     }
   };
 
-  const progress = ((safeCurrentStep + 1) / steps.length) * 100;
-  // Guard against flash: use safeCurrentStep which is always 0 until first render completes
-  const isLastStep = !isInitializing && safeCurrentStep === steps.length - 1;
+  const progress = ((currentStep + 1) / steps.length) * 100;
+  const isLastStep = !isInitializing && currentStep === steps.length - 1;
 
   // Don't render Dialog until initialization is complete to prevent button flash
   if (open && isInitializing) {
@@ -2095,16 +2073,13 @@ const MobileJobWizard = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
-      // When dialog closes, immediately reset to step 0 and increment key to force fresh render
       if (!isOpen) {
         setCurrentStep(0);
         setIsInitializing(true);
-        setDialogInstanceKey(prev => prev + 1);
       }
       onOpenChange(isOpen);
     }}>
       <DialogContent 
-        key={`wizard-${dialogInstanceKey}`}
         className="parium-panel max-w-none w-[min(92vw,400px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-200"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
