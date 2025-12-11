@@ -304,7 +304,11 @@ const EmployerDashboard = memo(() => {
                   ) : filteredAndSortedJobs.length === 0 ? (
                     <TableRow className="hover:bg-transparent">
                       <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-sm">
-                        {searchTerm.trim() ? 'Inga annonser matchar din sökning' : 'Inga jobbannonser än. Skapa din första annons!'}
+                        {searchTerm.trim() 
+                          ? 'Inga annonser matchar din sökning' 
+                          : sortBy === 'drafts-only' 
+                            ? 'Inga utkast finns.' 
+                            : 'Inga jobbannonser än. Skapa din första annons!'}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -467,7 +471,11 @@ const EmployerDashboard = memo(() => {
               </div>
             ) : filteredAndSortedJobs.length === 0 ? (
               <div className="text-center text-white py-8 font-medium text-sm">
-                {searchTerm.trim() ? 'Inga annonser matchar din sökning' : 'Inga jobbannonser än. Skapa din första annons!'}
+                {searchTerm.trim() 
+                  ? 'Inga annonser matchar din sökning' 
+                  : sortBy === 'drafts-only' 
+                    ? 'Inga utkast finns.' 
+                    : 'Inga jobbannonser än. Skapa din första annons!'}
               </div>
             ) : (
               <>
