@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
 export interface JobPosting {
   id: string;
@@ -46,12 +46,13 @@ export interface Recruiter {
 
 interface UseJobsDataOptions {
   scope?: 'personal' | 'organization';
+  enableRealtime?: boolean;
 }
 
-export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal' }) => {
+export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: false }) => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
-  const { scope } = options;
+  const { scope, enableRealtime = false } = options;
 
   // For organization scope, we need to fetch jobs from all users in the same organization
   const { data: jobs = [], isLoading, error, refetch } = useQuery({
@@ -113,6 +114,39 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal' })
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
+
+  // Real-time subscription for job_postings changes
+  useEffect(() => {
+    if (!enableRealtime || !user) return;
+
+    console.log('[Realtime] Setting up job_postings subscription');
+    
+    const channel = supabase
+      .channel('job-postings-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'job_postings'
+        },
+        (payload) => {
+          console.log('[Realtime] Job posting change detected:', payload.eventType, payload);
+          
+          // Invalidate and refetch jobs when any change occurs
+          // This ensures we get the employer_profile join data as well
+          queryClient.invalidateQueries({ queryKey: ['jobs'] });
+        }
+      )
+      .subscribe((status) => {
+        console.log('[Realtime] Subscription status:', status);
+      });
+
+    return () => {
+      console.log('[Realtime] Cleaning up subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [enableRealtime, user, queryClient]);
 
   // Memoize stats to prevent unnecessary recalculations
   // Only count active jobs for dashboard stats (exclude drafts)
