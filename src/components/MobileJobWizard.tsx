@@ -12,6 +12,7 @@ import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
+import { TruncatedText } from '@/components/TruncatedText';
 import { motion, AnimatePresence } from 'framer-motion';
 import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
@@ -3607,12 +3608,11 @@ const MobileJobWizard = ({
                     >
                       {profile?.company_name || 'Företag'}
                     </button>
-                    <TruncatedTitle 
-                      fullText={getDisplayTitle()} 
-                      className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-5 break-all w-full max-w-full cursor-default`}
-                    >
-                      {getDisplayTitle()}
-                    </TruncatedTitle>
+                    <TruncatedText 
+                      text={getDisplayTitle()} 
+                      className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-5 break-all w-full max-w-full cursor-pointer`}
+                      alwaysShowTooltip="desktop-only"
+                    />
                     <div className={`${textSizes.meta} text-white`}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
                     </div>
@@ -4151,12 +4151,11 @@ const MobileJobWizard = ({
                                   </button>
                                   
                                   {/* Job title */}
-                                  <TruncatedTitle 
-                                    fullText={formData.title || 'Jobbtitel'} 
-                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-5 break-all w-full max-w-full cursor-default"
-                                  >
-                                    {formData.title || 'Jobbtitel'}
-                                  </TruncatedTitle>
+                                  <TruncatedText 
+                                    text={formData.title || 'Jobbtitel'} 
+                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-5 break-all w-full max-w-full cursor-pointer"
+                                    alwaysShowTooltip="desktop-only"
+                                  />
                                   
                                   {/* Meta line: employment type • location */}
                                   <div className="text-sm text-white">
