@@ -109,12 +109,20 @@ export function TruncatedTitle({
     if (!supportsHover && isTouch) setIsOpen((o) => !o);
   };
 
+  // Explicit styles for word breaking that work reliably
+  const wordBreakStyles: React.CSSProperties = {
+    wordBreak: 'break-all',
+    overflowWrap: 'anywhere',
+    hyphens: 'auto',
+  };
+
   // If not truncated, just return the element without tooltip wrapper
   if (!isTruncated) {
     return (
       <h3
         ref={ref}
         className={className}
+        style={wordBreakStyles}
       >
         {children}
       </h3>
@@ -132,6 +140,7 @@ export function TruncatedTitle({
           <h3
             ref={ref}
             className={`${className} cursor-pointer`}
+            style={wordBreakStyles}
             onClick={!supportsHover && isTouch ? handleTap : undefined}
           >
             {children}
