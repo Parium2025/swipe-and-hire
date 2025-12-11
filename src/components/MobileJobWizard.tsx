@@ -4331,6 +4331,7 @@ const MobileJobWizard = ({
                     {!jobImageDisplayUrl && (
                       <FileUpload
                         mediaType="job-image"
+                        uploadType="image"
                         onFileUploaded={async (storagePath, fileName) => {
                           handleInputChange('job_image_url', storagePath);
                           setOriginalStoragePath(storagePath);
@@ -4397,6 +4398,7 @@ const MobileJobWizard = ({
                     {!jobImageDesktopDisplayUrl && (
                       <FileUpload
                         mediaType="job-image"
+                        uploadType="image"
                         onFileUploaded={async (storagePath, fileName) => {
                           handleInputChange('job_image_desktop_url', storagePath);
                           setOriginalDesktopStoragePath(storagePath);
