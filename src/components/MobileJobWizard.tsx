@@ -4261,6 +4261,7 @@ const MobileJobWizard = ({
                           {/* Invisible spacer to balance trash icon */}
                           <div className="w-[30px]" aria-hidden="true"></div>
                           <button
+                            type="button"
                             onClick={openImageEditor}
                             className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
                           >
@@ -4350,7 +4351,7 @@ const MobileJobWizard = ({
             onSave={handleImageEdit}
             onRestoreOriginal={handleRestoreOriginal}
             isCircular={false}
-            aspectRatio={1/2} // Telefonens skärmyta (w/h) för perfekt matchning
+            aspectRatio={16/9}
           />
         )}
 
