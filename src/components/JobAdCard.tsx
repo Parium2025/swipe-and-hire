@@ -43,7 +43,7 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
           }`}
         >
           {/* Notch/status */}
-          <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-10 h-0.5 w-6 rounded-full bg-black/60 border border-white/10"></div>
+          <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black/60 border border-white/10"></div>
 
           {/* Bakgrundsbild */}
           {!noBackground && (
