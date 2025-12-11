@@ -2778,18 +2778,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       ) : null}
                                       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                                       <div 
-                                        className="absolute inset-0 flex flex-col items-center justify-center p-6 text-white text-center cursor-pointer"
+                                        className="absolute inset-0 flex flex-col items-center justify-center p-6 pb-16 text-white text-center cursor-pointer"
                                         onClick={() => setShowDesktopApplicationForm(true)}
                                       >
                                         <button 
                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                          className="text-sm text-white font-medium mb-2 hover:text-primary transition-colors cursor-pointer line-clamp-1"
+                                          className="text-sm text-white font-medium mb-2 hover:text-white/70 transition-colors cursor-pointer line-clamp-1"
                                         >
                                           {profile?.company_name || 'Företag'}
                                         </button>
                                         <TruncatedTitle 
                                           fullText={formData.title || 'Jobbtitel'} 
-                                          className="text-xl text-white font-bold leading-tight mb-2 line-clamp-4 cursor-default"
+                                          className="text-xl text-white font-bold leading-tight mb-2 line-clamp-3 cursor-default"
                                         >
                                           {formData.title || 'Jobbtitel'}
                                         </TruncatedTitle>
