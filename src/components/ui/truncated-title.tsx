@@ -131,10 +131,11 @@ export function TruncatedTitle({
 
   // Wrap in tooltip when truncated
   return (
-    <TooltipProvider delayDuration={200} skipDelayDuration={100}>
+    <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
       <Tooltip 
         open={!supportsHover ? isOpen : undefined} 
         onOpenChange={!supportsHover ? setIsOpen : undefined}
+        disableHoverableContent={false}
       >
         <TooltipTrigger asChild>
           <h3
