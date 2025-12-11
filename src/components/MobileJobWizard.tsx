@@ -133,6 +133,13 @@ const MobileJobWizard = ({
     console.log('MobileJobWizard: open changed', open);
   }, [open]);
   
+  // Reset currentStep when dialog closes to prevent flash of wrong step on reopen
+  useEffect(() => {
+    if (!open) {
+      setCurrentStep(0);
+    }
+  }, [open]);
+  
   // Always start from step 0 and reload template/existing job data when opening
   useEffect(() => {
     if (open) {
