@@ -1997,7 +1997,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         {templates.map((template) => (
                                            <div
                                             key={template.id}
-                                            className="w-full bg-white/5 rounded-md p-2 border border-white/20 flex items-center justify-between gap-2"
+                                            className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 flex items-center justify-between gap-2 transition-all duration-200 group"
                                           >
                                             <button
                                               onClick={() => useQuestionTemplate(template)}
@@ -2007,10 +2007,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                 {template.question_text}
                                               </div>
                                             </button>
-                                            <div className="flex items-center gap-1">
-                                              <Button
+                                            <div className="flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                                              <button
+                                                type="button"
                                                 onClick={() => {
-                                                  // Edit template - open it in edit mode
                                                   setEditingQuestion({
                                                     ...(template as JobQuestion),
                                                     template_id: (template as any).id
@@ -2018,13 +2018,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   setShowQuestionTemplates(false);
                                                   setShowQuestionForm(true);
                                                 }}
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-primary hover:text-primary hover:bg-primary/15 h-6 w-6 p-0 flex-shrink-0"
+                                                className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 flex-shrink-0"
                                               >
-                                                <Pencil className="h-3 w-3 text-[hsl(var(--pure-white))]" />
-                                              </Button>
-                                              <Button
+                                                <Pencil className="h-3.5 w-3.5" />
+                                              </button>
+                                              <button
+                                                type="button"
                                                 onClick={async () => {
                                                   if (!(template as any).id) return;
                                                   try {
@@ -2047,12 +2046,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     });
                                                   }
                                                 }}
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0 flex-shrink-0"
+                                                className="p-1.5 text-white/70 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200 flex-shrink-0"
                                               >
-                                                <Trash2 className="h-3 w-3" />
-                                              </Button>
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                              </button>
                                             </div>
                                           </div>
                                         ))}
@@ -2100,15 +2097,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                                 
                                 {showQuestionTypeDropdown && (
-                                  <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                                  <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-48 overflow-y-auto">
                                     {filteredQuestionTypes.map((type) => (
                                       <button
                                         key={type.value}
                                         type="button"
                                         onClick={() => handleQuestionTypeSelect(type)}
-                                        className="w-full px-3 py-3 text-left hover:bg-white/20 text-white text-base border-b border-white/10 last:border-b-0 transition-colors"
+                                        className="w-full px-3 py-2 text-left hover:bg-white/15 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                                       >
-                                        <div className="font-medium">{type.label}</div>
+                                        <span className="font-medium">{type.label}</span>
                                       </button>
                                     ))}
                                   </div>
@@ -2191,35 +2188,33 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                             {editingQuestion?.question_type === 'multiple_choice' && (
                               <div className="space-y-2">
-                                <Label className="text-white font-medium">Svarsalternativ</Label>
-                                <div className="space-y-2">
+                                <Label className="text-white font-medium text-sm">Svarsalternativ</Label>
+                                <div className="space-y-1.5">
                                   {(editingQuestion.options || []).map((option, index) => (
-                                    <div key={index} className="flex items-center space-x-2">
+                                    <div key={index} className="flex items-center gap-2">
                                       <Input
                                         value={option}
                                         onChange={(e) => updateOption(index, e.target.value)}
                                         placeholder={`Alternativ ${index + 1}`}
-                                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-8 text-sm flex-1"
                                       />
-                                      <Button
+                                      <button
+                                        type="button"
                                         onClick={() => removeOption(index)}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                        className="p-1.5 text-white/70 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200 flex-shrink-0"
                                       >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </button>
                                     </div>
                                   ))}
-                                  <Button
+                                  <button
+                                    type="button"
                                     onClick={addOption}
-                                    variant="outline"
-                                    size="sm"
-                                    className="border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
+                                    className="flex items-center gap-1 text-sm text-white/60 hover:text-white transition-colors pt-1"
                                   >
-                                    Lägg till alternativ
-                                    <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
-                                  </Button>
+                                    <Plus className="h-3.5 w-3.5" />
+                                    <span>Lägg till alternativ</span>
+                                  </button>
                                 </div>
                               </div>
                             )}

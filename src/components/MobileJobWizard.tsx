@@ -2871,7 +2871,7 @@ const MobileJobWizard = ({
                                   {templates.map((template) => (
                                     <div
                                       key={template.id}
-                                      className="w-full bg-white/5 rounded-md p-2 border border-white/20 flex items-center justify-between gap-2"
+                                      className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 flex items-center justify-between gap-2 transition-all duration-200 group"
                                     >
                                       <button
                                         onClick={() => useQuestionTemplate(template)}
@@ -2881,11 +2881,10 @@ const MobileJobWizard = ({
                                           {template.question_text}
                                         </div>
                                       </button>
-                                      <div className="flex items-center gap-1">
+                                      <div className="flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
                                         <button
                                           type="button"
                                           onClick={() => {
-                                            // Edit template - open it in edit mode
                                             setEditingQuestion({
                                               ...template,
                                               template_id: template.id
@@ -2893,9 +2892,9 @@ const MobileJobWizard = ({
                                             setShowQuestionTemplates(false);
                                             setShowQuestionForm(true);
                                           }}
-                                          className="p-1.5 text-white hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                          className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 flex-shrink-0"
                                         >
-                                          <Pencil className="h-3 w-3" />
+                                          <Pencil className="h-3.5 w-3.5" />
                                         </button>
                                         <button
                                           type="button"
@@ -2921,9 +2920,9 @@ const MobileJobWizard = ({
                                               });
                                             }
                                           }}
-                                          className="p-1.5 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                          className="p-1.5 text-white/70 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200 flex-shrink-0"
                                         >
-                                          <Trash2 className="h-3 w-3" />
+                                          <Trash2 className="h-3.5 w-3.5" />
                                         </button>
                                       </div>
                                     </div>
@@ -2975,15 +2974,15 @@ const MobileJobWizard = ({
                           
                           {/* Question Type Dropdown */}
                           {showQuestionTypeDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-48 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-48 overflow-y-auto">
                               {filteredQuestionTypes.map((type) => (
                                 <button
                                   key={type.value}
                                   type="button"
                                   onClick={() => handleQuestionTypeSelect(type)}
-                                  className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
+                                  className="w-full px-3 py-2 text-left hover:bg-white/15 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                                 >
-                                  <div className="font-medium">{type.label}</div>
+                                  <span className="font-medium">{type.label}</span>
                                 </button>
                               ))}
                             </div>
@@ -3067,36 +3066,35 @@ const MobileJobWizard = ({
                         </div>
                       )}
 
-                      {/* Multiple Choice Options */}
                       {editingQuestion?.question_type === 'multiple_choice' && (
                         <div className="space-y-2">
-                          <Label className="text-white font-medium">Svarsalternativ</Label>
-                          <div className="space-y-2">
+                          <Label className="text-white font-medium text-sm">Svarsalternativ</Label>
+                          <div className="space-y-1.5">
                             {(editingQuestion.options || []).map((option, index) => (
-                              <div key={index} className="flex items-center space-x-2">
+                              <div key={index} className="flex items-center gap-2">
                                 <Input
                                   value={option}
                                   onChange={(e) => updateOption(index, e.target.value)}
                                   placeholder={`Alternativ ${index + 1}`}
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-8 text-sm flex-1"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => removeOption(index)}
-                                  className="p-2 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300"
+                                  className="p-1.5 text-white/70 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-200 flex-shrink-0"
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Trash2 className="h-3.5 w-3.5" />
                                 </button>
                               </div>
                             ))}
-                            <Button
+                            <button
+                              type="button"
                               onClick={addOption}
-                              size="sm"
-                              className="border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white active:scale-95 active:bg-white/20 active:duration-75"
+                              className="flex items-center gap-1 text-sm text-white/60 hover:text-white transition-colors pt-1"
                             >
-                              Lägg till alternativ
-                              <Plus className="h-4 w-4 ml-1" />
-                            </Button>
+                              <Plus className="h-3.5 w-3.5" />
+                              <span>Lägg till alternativ</span>
+                            </button>
                           </div>
                         </div>
                       )}
