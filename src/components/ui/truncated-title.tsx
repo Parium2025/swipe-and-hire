@@ -62,7 +62,7 @@ export function TruncatedTitle({
       <TooltipTrigger asChild>
         {element}
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[300px] bg-slate-900/95 border-white/20 text-white">
+      <TooltipContent side="top" className="max-w-[300px] max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 text-white">
         <p className="text-sm">{fullText}</p>
       </TooltipContent>
     </Tooltip>
