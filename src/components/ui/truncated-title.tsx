@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect, ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TruncatedTitleProps {
   children: ReactNode;
@@ -21,7 +20,7 @@ export function TruncatedTitle({
   const [isTruncated, setIsTruncated] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [supportsHover, setSupportsHover] = useState(false);
+  const [supportsHover, setSupportsHover] = useState(true);
 
   useEffect(() => {
     setIsTouch(typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0));
@@ -40,7 +39,7 @@ export function TruncatedTitle({
         mqFine.removeEventListener?.("change", update);
       };
     } else {
-      setSupportsHover(false);
+      setSupportsHover(true);
     }
   }, []);
 
@@ -110,19 +109,25 @@ export function TruncatedTitle({
     if (!supportsHover && isTouch) setIsOpen((o) => !o);
   };
 
-  // Determine whether to show tooltip
-  const showTooltipDesktop = supportsHover && isTruncated;
-  const showTooltipTouch = !supportsHover && isTouch && isTruncated;
-  const shouldShowTooltip = showTooltipDesktop || showTooltipTouch;
+  // Always render the same h3 element to keep ref stable
+  const titleElement = (
+    <h3
+      ref={ref}
+      className={`${className} ${isTruncated ? 'cursor-pointer' : ''}`}
+      style={{ pointerEvents: 'auto' }}
+      onClick={!supportsHover && isTouch && isTruncated ? handleTap : undefined}
+      onTouchStart={!supportsHover && isTruncated ? () => setIsOpen(true) : undefined}
+    >
+      {children}
+    </h3>
+  );
 
-  if (!shouldShowTooltip) {
-    return (
-      <h3 ref={ref} className={className}>
-        {children}
-      </h3>
-    );
+  // If not truncated, just return the element without tooltip wrapper
+  if (!isTruncated) {
+    return titleElement;
   }
 
+  // Wrap in tooltip when truncated
   return (
     <TooltipProvider delayDuration={100} skipDelayDuration={0}>
       <Tooltip 
@@ -130,15 +135,7 @@ export function TruncatedTitle({
         onOpenChange={!supportsHover ? setIsOpen : undefined}
       >
         <TooltipTrigger asChild>
-          <h3
-            ref={ref}
-            className={`${className} cursor-pointer`}
-            style={{ pointerEvents: 'auto' }}
-            onClick={!supportsHover && isTouch ? handleTap : undefined}
-            onTouchStart={!supportsHover ? () => setIsOpen(true) : undefined}
-          >
-            {children}
-          </h3>
+          {titleElement}
         </TooltipTrigger>
         <TooltipContent
           side="top"

@@ -13,11 +13,11 @@ interface TruncatedTextProps {
  * a tooltip with the full text on hover
  */
 export function TruncatedText({ text, className, children, alwaysShowTooltip }: TruncatedTextProps) {
-  const textRef = useRef<HTMLSpanElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [supportsHover, setSupportsHover] = useState(false);
+  const [supportsHover, setSupportsHover] = useState(true);
 
   useEffect(() => {
     setIsTouch(typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0));
@@ -36,7 +36,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
         mqFine.removeEventListener?.("change", update);
       };
     } else {
-      setSupportsHover(false);
+      setSupportsHover(true);
     }
   }, []);
 
@@ -113,16 +113,25 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
     !supportsHover && isTouch && (alwaysShowTooltip === true || isTruncated);
   const shouldShowTooltip = showTooltipDesktop || showTooltipTouch;
 
+  // Always render the same element to keep ref stable
+  const textElement = (
+    <div
+      ref={textRef}
+      className={`${className ?? ""} ${shouldShowTooltip ? 'cursor-pointer' : ''}`}
+      style={{ pointerEvents: 'auto' }}
+      onClick={!supportsHover && isTouch && shouldShowTooltip ? handleTap : undefined}
+      onTouchStart={!supportsHover && shouldShowTooltip ? () => setIsOpen(true) : undefined}
+    >
+      {children || text}
+    </div>
+  );
+
+  // If not showing tooltip, just return the element without wrapper
   if (!shouldShowTooltip) {
-    // Render plain text without tooltip
-    return (
-      <div ref={textRef as React.RefObject<HTMLDivElement>} className={className}>
-        {children || text}
-      </div>
-    );
+    return textElement;
   }
 
-  // Wrap in tooltip
+  // Wrap in tooltip when needed
   return (
     <TooltipProvider delayDuration={100} skipDelayDuration={0}>
       <Tooltip 
@@ -130,15 +139,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
         onOpenChange={!supportsHover ? setIsOpen : undefined}
       >
         <TooltipTrigger asChild>
-          <div
-            ref={textRef as React.RefObject<HTMLDivElement>}
-            className={`${className ?? ""} cursor-pointer`}
-            style={{ pointerEvents: 'auto' }}
-            onClick={!supportsHover && isTouch ? handleTap : undefined}
-            onTouchStart={!supportsHover ? () => setIsOpen(true) : undefined}
-          >
-            {children || text}
-          </div>
+          {textElement}
         </TooltipTrigger>
         <TooltipContent
           side="top"
