@@ -69,6 +69,8 @@ export function TruncatedTitle({
       </HoverCardTrigger>
       <HoverCardContent 
         side="top" 
+        sideOffset={8}
+        avoidCollisions={false}
         className="z-[9999] max-w-[300px] max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 text-white p-3"
       >
         <p className="text-sm">{fullText}</p>
