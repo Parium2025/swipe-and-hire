@@ -3247,7 +3247,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               )}
             </div>
 
-            {/* Footer Navigation */}
+            {/* Footer Navigation - Hide when in question form or template selection */}
+            {!showQuestionTemplates && !showQuestionForm && (
             <div className="p-4 border-t border-white/20 flex-shrink-0 flex justify-between gap-3">
               <Button
                 onClick={handleBack}
@@ -3282,6 +3283,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
