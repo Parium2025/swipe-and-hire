@@ -1,5 +1,9 @@
 import React, { useRef, useState, useEffect, ReactNode } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface TruncatedTitleProps {
   children: ReactNode;
@@ -10,6 +14,7 @@ interface TruncatedTitleProps {
 /**
  * Renders text with automatic tooltip on hover - only when text is actually truncated.
  * Uses line-clamp detection to determine if tooltip should show.
+ * Uses HoverCard instead of Tooltip for scrollable content support.
  */
 export function TruncatedTitle({ 
   children, 
@@ -58,14 +63,17 @@ export function TruncatedTitle({
   }
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
+    <HoverCard openDelay={200} closeDelay={300}>
+      <HoverCardTrigger asChild>
         {element}
-      </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[300px] max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 text-white">
+      </HoverCardTrigger>
+      <HoverCardContent 
+        side="top" 
+        className="max-w-[300px] max-h-[200px] overflow-y-auto bg-slate-900/95 border-white/20 text-white p-3"
+      >
         <p className="text-sm">{fullText}</p>
-      </TooltipContent>
-    </Tooltip>
+      </HoverCardContent>
+    </HoverCard>
   );
 }
 
