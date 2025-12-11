@@ -4,6 +4,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TruncatedTitleProps {
   children: ReactNode;
@@ -69,9 +70,11 @@ export function TruncatedTitle({
           side="top" 
           sideOffset={8}
           avoidCollisions={false}
-          className="z-[9999] max-w-[300px] max-h-[200px] overflow-y-auto pointer-events-auto bg-slate-900/95 border-white/20 text-white p-3"
+          className="z-[9999] max-w-[300px] p-0 pointer-events-auto bg-slate-900/95 border-white/20"
         >
-          <p className="text-sm">{fullText}</p>
+          <ScrollArea className="max-h-[200px] p-3">
+            <p className="text-sm text-white">{fullText}</p>
+          </ScrollArea>
         </HoverCardContent>
       )}
     </HoverCard>
