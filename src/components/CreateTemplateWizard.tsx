@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, Search, Pencil, Heart, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Search, Pencil, Heart, CheckCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
@@ -1618,14 +1618,42 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Antal personer att rekrytera *</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={formData.positions_count}
-                    onChange={(e) => handleInputChange('positions_count', e.target.value)}
-                    placeholder="1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
-                  />
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={formData.positions_count || '1'}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, '');
+                        if (value === '') {
+                          handleInputChange('positions_count', '1');
+                        } else {
+                          const numValue = parseInt(value) || 1;
+                          handleInputChange('positions_count', Math.max(1, numValue).toString());
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const numValue = parseInt(e.target.value) || 1;
+                        handleInputChange('positions_count', Math.max(1, numValue).toString());
+                      }}
+                      className="bg-white/10 border-white/20 text-white h-9 text-sm focus:border-white/40 flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
+                      className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
+                      className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
 
               </div>
