@@ -3520,7 +3520,7 @@ const MobileJobWizard = ({
                                         {question.question_type === 'multiple_choice' && (
                                           <div className="space-y-1">
                                             <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
-                                            <div className="space-y-1">
+                                            <div className="space-y-1 options-scroll">
                                               {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
                                                 const selectedAnswers = previewAnswers[question.id || `q_${index}`];
                                                 const answersArray = typeof selectedAnswers === 'string' 
@@ -3551,23 +3551,23 @@ const MobileJobWizard = ({
                                                     }}
                                                      className={
                                                        (selected
-                                                         ? 'bg-secondary/40 border border-secondary text-white '
-                                                         : 'bg-white/5 border border-white/10 text-white ') +
-                                                        'w-full flex items-center gap-2 rounded px-2 py-1 transition-colors cursor-pointer'
+                                                         ? 'bg-white border border-white text-slate-900 '
+                                                         : 'bg-white/90 border border-white text-slate-900 ') +
+                                                        'w-full flex items-center gap-2 rounded px-2 py-1 transition-colors cursor-pointer hover:bg-white'
                                                       }
                                                   >
                                                      <div className={
                                                        selected
-                                                         ? 'w-2 h-2 rounded-sm bg-white flex-shrink-0 flex items-center justify-center'
-                                                         : 'w-2 h-2 rounded-sm border border-white/40 flex-shrink-0'
+                                                         ? 'w-2 h-2 rounded-sm bg-secondary flex-shrink-0 flex items-center justify-center'
+                                                         : 'w-2 h-2 rounded-sm border border-slate-400 flex-shrink-0'
                                                      }>
                                                        {selected && (
-                                                         <svg className="w-1.5 h-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                         <svg className="w-1.5 h-1.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                                          </svg>
                                                        )}
                                                     </div>
-                                                     <span className="text-xs text-white/90">{option}</span>
+                                                     <span className="text-xs text-slate-900">{option}</span>
                                                   </button>
                                                 );
                                               })}
@@ -4064,7 +4064,7 @@ const MobileJobWizard = ({
                                               {question.question_type === 'multiple_choice' && (
                                                 <div className="space-y-1">
                                                   <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
-                                                  <div className="space-y-1">
+                                                  <div className="space-y-1 options-scroll">
                                                     {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
                                                       const selectedAnswers = desktopPreviewAnswers[question.id || `q_${index}`];
                                                       const answersArray = typeof selectedAnswers === 'string' 
@@ -4099,17 +4099,17 @@ const MobileJobWizard = ({
                                                           }}
                                                           className={
                                                             (selected
-                                                              ? 'bg-secondary/40 border-secondary '
-                                                              : 'bg-white/5 border-white/10 ') +
-                                                            'text-white w-full flex items-center gap-2 rounded px-2 py-1 border transition-colors'
+                                                              ? 'bg-white border-white '
+                                                              : 'bg-white/90 border-white ') +
+                                                            'text-slate-900 w-full flex items-center gap-2 rounded px-2 py-1 border transition-colors hover:bg-white'
                                                           }
                                                         >
                                                           <div className={
                                                             selected
-                                                              ? 'w-2 h-2 rounded-sm bg-white flex-shrink-0'
-                                                              : 'w-2 h-2 rounded-sm border border-white/40 flex-shrink-0'
+                                                              ? 'w-2 h-2 rounded-sm bg-secondary flex-shrink-0'
+                                                              : 'w-2 h-2 rounded-sm border border-slate-400 flex-shrink-0'
                                                           } />
-                                                          <span className="text-xs text-white">{option}</span>
+                                                          <span className="text-xs text-slate-900">{option}</span>
                                                         </button>
                                                       );
                                                     })}
