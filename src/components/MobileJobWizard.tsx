@@ -120,30 +120,19 @@ const MobileJobWizard = ({
   const [isInitializing, setIsInitializing] = useState(true);
   const [dialogInstanceKey, setDialogInstanceKey] = useState(0);
   
-  // CRITICAL: Sync reset state when dialog transitions from closed to open
-  // This happens SYNCHRONOUSLY during render, before any useEffect
+  // Track if we've completed at least one render cycle after opening
+  const hasCompletedFirstRender = useRef(false);
   const prevOpenRef = useRef(open);
   
-  // DEBUG: Log current state on every render
-  console.log('MobileJobWizard RENDER:', { 
-    open, 
-    prevOpen: prevOpenRef.current, 
-    currentStep, 
-    isInitializing,
-    isLastStep: !isInitializing && currentStep === 3
-  });
-  
+  // When dialog opens, mark that we need a full render cycle
   if (open && !prevOpenRef.current) {
-    console.log('MobileJobWizard: SYNC RESET TRIGGERED');
-    // Dialog just opened - force step to 0 and set initializing immediately during render
-    if (currentStep !== 0) {
-      setCurrentStep(0);
-    }
-    if (!isInitializing) {
-      setIsInitializing(true);
-    }
+    hasCompletedFirstRender.current = false;
   }
   prevOpenRef.current = open;
+  
+  // CRITICAL: isLastStep is NEVER true until we've completed first render cycle
+  // This prevents the green button flash completely
+  const safeCurrentStep = hasCompletedFirstRender.current ? currentStep : 0;
   
   // Drag and drop sensors
   const sensors = useSensors(
@@ -174,6 +163,8 @@ const MobileJobWizard = ({
       setDialogInstanceKey(prev => prev + 1);
       setCurrentStep(0);
       setIsInitializing(false);
+      // Mark that first render cycle is complete - safe to show real step now
+      hasCompletedFirstRender.current = true;
       
       // Clear sessionStorage to prevent false unsaved changes detection
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
@@ -2093,9 +2084,9 @@ const MobileJobWizard = ({
     }
   };
 
-  const progress = ((currentStep + 1) / steps.length) * 100;
-  // Guard against flash: during initialization, never show as last step
-  const isLastStep = !isInitializing && currentStep === steps.length - 1;
+  const progress = ((safeCurrentStep + 1) / steps.length) * 100;
+  // Guard against flash: use safeCurrentStep which is always 0 until first render completes
+  const isLastStep = !isInitializing && safeCurrentStep === steps.length - 1;
 
   // Don't render Dialog until initialization is complete to prevent button flash
   if (open && isInitializing) {
