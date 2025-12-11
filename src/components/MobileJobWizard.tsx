@@ -1652,7 +1652,8 @@ const MobileJobWizard = ({
       setPendingClose(true);
       setShowUnsavedDialog(true);
     } else {
-      // Reset everything completely
+      // Reset everything completely - set isInitializing FIRST to prevent button flash
+      setIsInitializing(true);
       setCurrentStep(0);
       setFormData({
         title: '',
@@ -1710,7 +1711,8 @@ const MobileJobWizard = ({
   };
 
   const handleConfirmClose = () => {
-    // Reset everything completely and close
+    // Reset everything completely and close - set isInitializing FIRST to prevent button flash
+    setIsInitializing(true);
     setCurrentStep(0);
     setFormData({
       title: '',
