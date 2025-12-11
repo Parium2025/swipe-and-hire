@@ -114,6 +114,7 @@ interface EditJobDialogProps {
 
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
@@ -448,6 +449,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   useEffect(() => {
     if (open) {
       setCurrentStep(0);
+      setIsInitializing(false);
+    } else {
+      setIsInitializing(true);
     }
   }, [open]);
 
@@ -1218,7 +1222,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
-  const isLastStep = currentStep === steps.length - 1;
+  // Guard against flash: during initialization, never show as last step
+  const isLastStep = !isInitializing && currentStep === steps.length - 1;
+  
+  // Don't render Dialog content until initialization is complete
+  if (open && isInitializing) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="parium-panel max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden">
+          <AnimatedBackground showBubbles={false} variant="card" />
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <>
