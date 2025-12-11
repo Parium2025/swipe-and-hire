@@ -118,6 +118,8 @@ const MobileJobWizard = ({
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
+  // Key that changes each time dialog opens - forces complete remount with fresh state
+  const [dialogInstanceKey, setDialogInstanceKey] = useState(0);
   
   // Drag and drop sensors
   const sensors = useSensors(
@@ -145,6 +147,8 @@ const MobileJobWizard = ({
   // Always start from step 0 and reload template/existing job data when opening
   useEffect(() => {
     if (open) {
+      // Increment key to force fresh component state on each open
+      setDialogInstanceKey(prev => prev + 1);
       setCurrentStep(0); // Always start from beginning
       setIsInitializing(false); // Initialization complete
       
@@ -2069,6 +2073,11 @@ const MobileJobWizard = ({
   const progress = ((currentStep + 1) / steps.length) * 100;
   // Guard against flash: during initialization, never show as last step
   const isLastStep = !isInitializing && currentStep === steps.length - 1;
+
+  // Don't render Dialog until initialization is complete to prevent button flash
+  if (open && isInitializing) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
