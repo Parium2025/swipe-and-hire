@@ -117,11 +117,10 @@ export function TruncatedTitle({
     }
   };
 
-  // Explicit styles for word breaking that work reliably
+  // Explicit styles for word breaking that preserve word integrity
   const wordBreakStyles: React.CSSProperties = {
-    wordBreak: 'break-all',
-    overflowWrap: 'anywhere',
-    hyphens: 'auto',
+    wordBreak: 'break-word',
+    overflowWrap: 'break-word',
   };
 
   // If not truncated, just return the element without tooltip wrapper
