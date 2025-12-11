@@ -1527,13 +1527,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Antal personer att rekrytera *</Label>
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
-                            className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors"
-                          >
-                            <Minus className="h-4 w-4" />
-                          </button>
                           <Input
                             type="text"
                             inputMode="numeric"
@@ -1552,8 +1545,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               const numValue = parseInt(e.target.value) || 1;
                               handleInputChange('positions_count', Math.max(1, numValue).toString());
                             }}
-                            className="bg-white/10 border-white/20 text-white text-center h-9 text-sm focus:border-white/40 flex-1"
+                            className="bg-white/10 border-white/20 text-white h-9 text-sm focus:border-white/40 flex-1"
                           />
+                          <button
+                            type="button"
+                            onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
+                            className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
