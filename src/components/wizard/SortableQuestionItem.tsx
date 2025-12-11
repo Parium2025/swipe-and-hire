@@ -49,7 +49,7 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
           </div>
         </div>
         
-        <div className="flex items-center gap-0.5 flex-shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-0.5 flex-shrink-0 transition-opacity">
           <button
             type="button"
             onClick={() => onEdit(question)}
