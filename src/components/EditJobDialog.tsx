@@ -2587,7 +2587,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             </button>
                                             <TruncatedTitle 
                                               fullText={getDisplayTitle()} 
-                                              className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-4 cursor-default`}
+                                              className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-5 cursor-default`}
                                             >
                                               {getDisplayTitle()}
                                             </TruncatedTitle>
