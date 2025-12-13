@@ -824,9 +824,23 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     setShowEmploymentTypeDropdown(false);
   };
 
+  // Helper function to close all dropdowns - ensures only one dropdown open at a time
+  const closeAllDropdowns = () => {
+    setShowOccupationDropdown(false);
+    setShowEmploymentTypeDropdown(false);
+    setShowSalaryTypeDropdown(false);
+    setShowSalaryTransparencyDropdown(false);
+    setShowBenefitsDropdown(false);
+    setShowWorkLocationDropdown(false);
+    setShowRemoteWorkDropdown(false);
+    setShowQuestionTypeDropdown(false);
+  };
+
   const handleEmploymentTypeClick = () => {
-    setShowEmploymentTypeDropdown(!showEmploymentTypeDropdown);
+    const isCurrentlyOpen = showEmploymentTypeDropdown;
+    closeAllDropdowns();
     setEmploymentTypeSearchTerm('');
+    setShowEmploymentTypeDropdown(!isCurrentlyOpen);
   };
 
   const handleSalaryTypeSearch = (value: string) => {
@@ -841,8 +855,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   const handleSalaryTypeClick = () => {
-    setShowSalaryTypeDropdown(!showSalaryTypeDropdown);
+    const isCurrentlyOpen = showSalaryTypeDropdown;
+    closeAllDropdowns();
     setSalaryTypeSearchTerm('');
+    setShowSalaryTypeDropdown(!isCurrentlyOpen);
   };
 
   const handleSalaryTransparencySearch = (value: string) => {
@@ -857,8 +873,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   const handleSalaryTransparencyClick = () => {
-    setShowSalaryTransparencyDropdown(!showSalaryTransparencyDropdown);
+    const isCurrentlyOpen = showSalaryTransparencyDropdown;
+    closeAllDropdowns();
     setSalaryTransparencySearchTerm('');
+    setShowSalaryTransparencyDropdown(!isCurrentlyOpen);
+  };
+
+  const handleBenefitsClick = () => {
+    const isCurrentlyOpen = showBenefitsDropdown;
+    closeAllDropdowns();
+    setShowBenefitsDropdown(!isCurrentlyOpen);
   };
 
   const handleWorkLocationSearch = (value: string) => {
@@ -882,8 +906,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   const handleWorkLocationClick = () => {
-    setShowWorkLocationDropdown(!showWorkLocationDropdown);
+    const isCurrentlyOpen = showWorkLocationDropdown;
+    closeAllDropdowns();
     setWorkLocationSearchTerm('');
+    setShowWorkLocationDropdown(!isCurrentlyOpen);
   };
 
   const handleRemoteWorkSearch = (value: string) => {
@@ -898,8 +924,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   const handleRemoteWorkClick = () => {
-    setShowRemoteWorkDropdown(!showRemoteWorkDropdown);
+    const isCurrentlyOpen = showRemoteWorkDropdown;
+    closeAllDropdowns();
     setRemoteWorkSearchTerm('');
+    setShowRemoteWorkDropdown(!isCurrentlyOpen);
   };
 
   const handleQuestionTypeSearch = (value: string) => {
@@ -914,8 +942,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   const handleQuestionTypeClick = () => {
-    setShowQuestionTypeDropdown(!showQuestionTypeDropdown);
+    const isCurrentlyOpen = showQuestionTypeDropdown;
+    closeAllDropdowns();
     setQuestionTypeSearchTerm('');
+    setShowQuestionTypeDropdown(!isCurrentlyOpen);
   };
 
   const handleWorkplacePostalCodeChange = (value: string) => {
@@ -1472,7 +1502,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <Label className="text-white font-medium text-sm">Förmåner som erbjuds</Label>
                         <div className="relative benefits-dropdown">
                           <div
-                            onClick={() => setShowBenefitsDropdown(!showBenefitsDropdown)}
+                            onClick={handleBenefitsClick}
                             className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 h-11 cursor-pointer hover:border-white/40 transition-colors"
                           >
                             <span className="text-sm text-white">
