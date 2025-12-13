@@ -3,9 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { preloadImages } from "@/lib/serviceWorkerManager";
-import { supabase } from "@/integrations/supabase/client";
-import { getMediaUrl } from "@/lib/mediaManager";
-import { 
+import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -53,18 +51,19 @@ const businessItems = [
 export function AppSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
+  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(preloadedAvatarUrl ?? null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  // Använd preloadedVideoUrl från AuthProvider (sessionStorage-cachad precis som arbetsgivarsidan)
+  const [videoUrl, setVideoUrl] = useState<string | null>(preloadedVideoUrl ?? null);
   const [coverUrl, setCoverUrl] = useState<string | null>(preloadedCoverUrl ?? null);
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   
-  // Håll avatar/cover i synk med preloadern även om de uppdateras efter mount
+  // Håll avatar/cover/video i synk med preloadern även om de uppdateras efter mount
   useEffect(() => {
     setAvatarUrl(preloadedAvatarUrl ?? null);
   }, [preloadedAvatarUrl]);
@@ -72,6 +71,11 @@ export function AppSidebar() {
   useEffect(() => {
     setCoverUrl(preloadedCoverUrl ?? null);
   }, [preloadedCoverUrl]);
+  
+  useEffect(() => {
+    setVideoUrl(preloadedVideoUrl ?? null);
+  }, [preloadedVideoUrl]);
+  
   const hasVideo = !!profile?.video_url;
 
   const isAdmin = user?.email === 'fredrikandits@hotmail.com';
@@ -101,21 +105,7 @@ export function AppSidebar() {
     return () => window.removeEventListener('unsaved-cancel', handleUnsavedCancel);
   }, [isMobile, setOpenMobile, setOpen]);
 
-  // Hämta endast videons signed URL här – avatar/cover kommer från Auth-preloadern
-  useEffect(() => {
-    const loadVideo = async () => {
-      if (!profile?.video_url) return;
-
-      try {
-        const videoResult = await getMediaUrl(profile.video_url, 'profile-video', 86400);
-        setVideoUrl(videoResult);
-      } catch (error) {
-        console.error('Failed to load sidebar profile video:', error);
-      }
-    };
-
-    loadVideo();
-  }, [profile?.video_url]);
+  // Video-URL hämtas nu från AuthProvider (sessionStorage-cachad) - ingen egen fetch behövs
 
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {
