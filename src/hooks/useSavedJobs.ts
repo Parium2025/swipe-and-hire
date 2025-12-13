@@ -8,33 +8,58 @@ export const useSavedJobs = () => {
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch saved job IDs on mount
-  useEffect(() => {
+  const fetchSavedJobs = useCallback(async () => {
     if (!user) {
       setSavedJobIds(new Set());
       setIsLoading(false);
       return;
     }
 
-    const fetchSavedJobs = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('saved_jobs')
-          .select('job_id')
-          .eq('user_id', user.id);
+    try {
+      const { data, error } = await supabase
+        .from('saved_jobs')
+        .select('job_id')
+        .eq('user_id', user.id);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        setSavedJobIds(new Set(data?.map(item => item.job_id) || []));
-      } catch (err) {
-        console.error('Error fetching saved jobs:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSavedJobs();
+      setSavedJobIds(new Set(data?.map(item => item.job_id) || []));
+    } catch (err) {
+      console.error('Error fetching saved jobs:', err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [user]);
+
+  // Fetch saved job IDs on mount
+  useEffect(() => {
+    fetchSavedJobs();
+  }, [fetchSavedJobs]);
+
+  // Realtime-prenumeration för sparade jobb-uppdateringar
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`saved-jobs-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'saved_jobs',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          fetchSavedJobs();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchSavedJobs]);
 
   const toggleSaveJob = useCallback(async (jobId: string) => {
     if (!user) {
