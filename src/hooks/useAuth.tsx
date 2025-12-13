@@ -70,6 +70,7 @@ const EMPLOYER_MY_JOBS_CACHE_KEY = 'parium_employer_my_jobs';
 const EMPLOYER_ACTIVE_JOBS_CACHE_KEY = 'parium_employer_active_jobs';
 const EMPLOYER_TOTAL_VIEWS_CACHE_KEY = 'parium_employer_total_views';
 const EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY = 'parium_employer_total_applications';
+const EMPLOYER_CANDIDATES_CACHE_KEY = 'parium_employer_candidates';
 const COMPANY_LOGO_CACHE_KEY = 'parium_company_logo_url';
 
 interface AuthContextType {
@@ -95,6 +96,7 @@ interface AuthContextType {
   preloadedEmployerActiveJobs: number;
   preloadedEmployerTotalViews: number;
   preloadedEmployerTotalApplications: number;
+  preloadedEmployerCandidates: number;
   refreshSidebarCounts: () => Promise<void>;
   refreshEmployerStats: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
@@ -217,6 +219,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       return typeof window !== 'undefined' ? sessionStorage.getItem(COMPANY_LOGO_CACHE_KEY) : null;
     } catch { return null; }
+  });
+  const [preloadedEmployerCandidates, setPreloadedEmployerCandidates] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_CANDIDATES_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
   });
   const isManualSignOutRef = useRef(false);
   const isInitializingRef = useRef(true);
@@ -1287,6 +1295,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const totalApplications = activeJobs.reduce((sum, j) => sum + (j.applications_count || 0), 0);
       setPreloadedEmployerTotalApplications(totalApplications);
       try { sessionStorage.setItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, String(totalApplications)); } catch {}
+      
+      // Hämta antal unika kandidater (baserat på job_applications)
+      const jobIds = myJobs.map(j => j.id);
+      if (jobIds.length > 0) {
+        const { count } = await supabase
+          .from('job_applications')
+          .select('id', { count: 'exact', head: true })
+          .in('job_id', jobIds);
+        
+        const candidatesCount = count || 0;
+        setPreloadedEmployerCandidates(candidatesCount);
+        try { sessionStorage.setItem(EMPLOYER_CANDIDATES_CACHE_KEY, String(candidatesCount)); } catch {}
+      } else {
+        setPreloadedEmployerCandidates(0);
+        try { sessionStorage.setItem(EMPLOYER_CANDIDATES_CACHE_KEY, '0'); } catch {}
+      }
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
     }
@@ -1362,6 +1386,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedEmployerActiveJobs,
     preloadedEmployerTotalViews,
     preloadedEmployerTotalApplications,
+    preloadedEmployerCandidates,
     refreshSidebarCounts,
     refreshEmployerStats,
     signUp,
