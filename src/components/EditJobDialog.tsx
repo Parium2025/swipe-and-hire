@@ -392,16 +392,21 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     return formatCity(city);
   };
 
-  const getMetaLine = (employment?: string, city?: string) => {
+  // Build meta line: "Deltid • Saltsjö-Boo, Stockholms län"
+  const getMetaLine = (employment?: string, city?: string, county?: string) => {
     const emp = getEmploymentTypeLabel(employment);
-    const c = formatCityWithMainCity(city || '');
-    return [emp, c].filter(Boolean).join(' • ');
+    // Include county if available
+    let locationPart = formatCityWithMainCity(city || '');
+    if (county && county.trim()) {
+      locationPart = locationPart ? `${locationPart}, ${county}` : county;
+    }
+    return [emp, locationPart].filter(Boolean).join(' • ');
   };
 
   const getSmartTextSizes = () => {
     const companyName = profile?.company_name || 'Företag';
     const jobTitle = getDisplayTitle();
-    const metaLine = getMetaLine(formData.employment_type, formData.workplace_city || formData.location);
+    const metaLine = getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county);
 
     const companyLength = companyName.length;
     const titleLength = jobTitle.length;
@@ -873,6 +878,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     handleInputChange('work_location_type', type.value);
     setWorkLocationSearchTerm(type.label);
     setShowWorkLocationDropdown(false);
+    
+    // Auto-set remote_work_possible to 'delvis' when selecting hemarbete or distans
+    if (type.value === 'hemarbete' || type.value === 'distans') {
+      handleInputChange('remote_work_possible', 'delvis');
+      setRemoteWorkSearchTerm('Delvis');
+    }
   };
 
   const handleWorkLocationClick = () => {
@@ -2475,12 +2486,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             )}
                                             {(formData.workplace_postal_code || formData.workplace_city) && (
                                               <div>
-                                                {formData.workplace_city && cachedPostalCodeInfo?.county ? (
-                                                  <div>{formData.workplace_city}, {cachedPostalCodeInfo.county}</div>
-                                                ) : formData.workplace_postal_code && formData.workplace_city ? (
-                                                  <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                                {formData.workplace_postal_code && formData.workplace_city ? (
+                                                  <>
+                                                    <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                                    {(formData.workplace_county || cachedPostalCodeInfo?.county) && (
+                                                      <div>{formData.workplace_county || cachedPostalCodeInfo?.county}</div>
+                                                    )}
+                                                  </>
                                                 ) : formData.workplace_city ? (
-                                                  <div>{formData.workplace_city}</div>
+                                                  <>
+                                                    <div>{formData.workplace_city}</div>
+                                                    {(formData.workplace_county || cachedPostalCodeInfo?.county) && (
+                                                      <div>{formData.workplace_county || cachedPostalCodeInfo?.county}</div>
+                                                    )}
+                                                  </>
                                                 ) : (
                                                   <div>{formData.workplace_postal_code}</div>
                                                 )}
@@ -2766,7 +2785,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               {getDisplayTitle()}
                                             </TruncatedTitle>
                                             <div className={`${textSizes.meta} text-white`}>
-                                              {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+                                              {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                             </div>
                                           </>
                                         );
@@ -2961,11 +2980,21 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               {(formData.workplace_postal_code || formData.workplace_city) && (
                                                 <div>
                                                   {formData.workplace_postal_code && formData.workplace_city ? (
-                                                    <>{formData.workplace_postal_code} {formData.workplace_city}</>
+                                                    <>
+                                                      <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                                      {(formData.workplace_county || cachedPostalCodeInfo?.county) && (
+                                                        <div>{formData.workplace_county || cachedPostalCodeInfo?.county}</div>
+                                                      )}
+                                                    </>
                                                   ) : formData.workplace_city ? (
-                                                    formData.workplace_city
+                                                    <>
+                                                      <div>{formData.workplace_city}</div>
+                                                      {(formData.workplace_county || cachedPostalCodeInfo?.county) && (
+                                                        <div>{formData.workplace_county || cachedPostalCodeInfo?.county}</div>
+                                                      )}
+                                                    </>
                                                   ) : (
-                                                    formData.workplace_postal_code
+                                                    <div>{formData.workplace_postal_code}</div>
                                                   )}
                                                 </div>
                                               )}
@@ -3070,7 +3099,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           {formData.title || 'Jobbtitel'}
                                         </TruncatedTitle>
                                         <div className="text-sm text-white">
-                                          {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+                                          {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                         </div>
                                       </div>
                                       <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">

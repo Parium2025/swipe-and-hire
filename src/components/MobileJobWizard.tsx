@@ -378,11 +378,15 @@ const MobileJobWizard = ({
       .join(' ');
   };
 
-  // Build meta line: "Deltid • Tyresö"
-  const getMetaLine = (employment?: string, city?: string) => {
+  // Build meta line: "Deltid • Saltsjö-Boo, Stockholms län"
+  const getMetaLine = (employment?: string, city?: string, county?: string) => {
     const emp = getEmploymentTypeLabel(employment);
-    const c = formatCityWithMainCity(city || '');
-    return [emp, c].filter(Boolean).join(' • ');
+    // Include county if available
+    let locationPart = formatCity(city || '');
+    if (county && county.trim()) {
+      locationPart = locationPart ? `${locationPart}, ${county}` : county;
+    }
+    return [emp, locationPart].filter(Boolean).join(' • ');
   };
 
   // Smart location formatting with main city
@@ -468,7 +472,7 @@ const MobileJobWizard = ({
   const getSmartTextSizes = () => {
     const companyName = profile?.company_name || 'Företag';
     const jobTitle = getDisplayTitle();
-    const metaLine = getMetaLine(formData.employment_type, formData.workplace_city || formData.location);
+    const metaLine = getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county);
 
     // Calculate optimal sizes based on content length and visual balance
     const companyLength = companyName.length;
@@ -1539,6 +1543,12 @@ const MobileJobWizard = ({
     handleInputChange('work_location_type', type.value);
     setWorkLocationSearchTerm(type.label);
     setShowWorkLocationDropdown(false);
+    
+    // Auto-set remote_work_possible to 'delvis' when selecting hemarbete or distans
+    if (type.value === 'hemarbete' || type.value === 'distans') {
+      handleInputChange('remote_work_possible', 'delvis');
+      setRemoteWorkSearchTerm('Delvis');
+    }
   };
 
   const handleWorkLocationClick = () => {
@@ -3389,9 +3399,15 @@ const MobileJobWizard = ({
                                      {(formData.workplace_postal_code || formData.workplace_city) && (
                                        <div>
                                          {formData.workplace_postal_code && formData.workplace_city ? (
-                                           <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                           <>
+                                             <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                             {formData.workplace_county && <div>{formData.workplace_county}</div>}
+                                           </>
                                          ) : formData.workplace_city ? (
-                                           <div>{formData.workplace_city}</div>
+                                           <>
+                                             <div>{formData.workplace_city}</div>
+                                             {formData.workplace_county && <div>{formData.workplace_county}</div>}
+                                           </>
                                          ) : (
                                            <div>{formData.workplace_postal_code}</div>
                                          )}
@@ -3720,7 +3736,7 @@ const MobileJobWizard = ({
                       alwaysShowTooltip="desktop-only"
                     />
                     <div className={`${textSizes.meta} text-white`}>
-                      {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+                      {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                     </div>
                   </>
                 );
@@ -3925,9 +3941,15 @@ const MobileJobWizard = ({
                                         {(formData.workplace_postal_code || formData.workplace_city) && (
                                           <div>
                                             {formData.workplace_postal_code && formData.workplace_city ? (
-                                              <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                              <>
+                                                <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                                {formData.workplace_county && <div>{formData.workplace_county}</div>}
+                                              </>
                                             ) : formData.workplace_city ? (
-                                              <div>{formData.workplace_city}</div>
+                                              <>
+                                                <div>{formData.workplace_city}</div>
+                                                {formData.workplace_county && <div>{formData.workplace_county}</div>}
+                                              </>
                                             ) : (
                                               <div>{formData.workplace_postal_code}</div>
                                             )}
@@ -4263,9 +4285,9 @@ const MobileJobWizard = ({
                                     alwaysShowTooltip="desktop-only"
                                   />
                                   
-                                  {/* Meta line: employment type • location */}
+                                  {/* Meta line: employment type • location, county */}
                                   <div className="text-sm text-white">
-                                    {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+                                    {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                   </div>
                                 </div>
                                 

@@ -568,6 +568,12 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     handleInputChange('work_location_type', type.value);
     setWorkLocationSearchTerm(type.label);
     setShowWorkLocationDropdown(false);
+    
+    // Auto-set remote_work_possible to 'delvis' when selecting hemarbete or distans
+    if (type.value === 'hemarbete' || type.value === 'distans') {
+      handleInputChange('remote_work_possible', 'delvis');
+      setRemoteWorkSearchTerm('Delvis');
+    }
   };
 
   const handleWorkLocationClick = () => {
