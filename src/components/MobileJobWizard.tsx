@@ -3643,13 +3643,9 @@ const MobileJobWizard = ({
                                                       : 'bg-white/10 border-white/20 hover:bg-white/15'
                                                   }`}
                                                 >
-                                                  <div className={`w-2 h-2 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                                                  <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center flex-shrink-0 ${
                                                     selected ? 'border-secondary bg-secondary' : 'border-white/40'
-                                                  }`}>
-                                                    {selected && (
-                                                      <div className="w-1 h-1 rounded-full bg-white" />
-                                                    )}
-                                                  </div>
+                                                  }`} />
                                                   <span className="text-xs text-white text-left flex-1">{option}</span>
                                                 </button>
                                               );
@@ -3667,7 +3663,7 @@ const MobileJobWizard = ({
                                               min={question.min_value ?? 0}
                                               max={question.max_value ?? 100}
                                               value={previewAnswers[question.id || `q_${index}`] || question.min_value || 0}
-                                              className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                                              className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-white/20 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-track]:bg-white/20 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-progress]:bg-white"
                                               onChange={(e) => setPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                             />
                                           </div>
@@ -4191,8 +4187,8 @@ const MobileJobWizard = ({
                                                         >
                                                           <div className={
                                                             selected
-                                                              ? 'w-2 h-2 rounded-full border border-secondary bg-secondary flex-shrink-0'
-                                                              : 'w-2 h-2 rounded-full border border-white/40 flex-shrink-0'
+                                                              ? 'w-1.5 h-1.5 rounded-full border border-secondary bg-secondary flex-shrink-0'
+                                                              : 'w-1.5 h-1.5 rounded-full border border-white/40 flex-shrink-0'
                                                           } />
                                                           <span className="text-xs text-white">{option}</span>
                                                         </button>
@@ -4212,7 +4208,7 @@ const MobileJobWizard = ({
                                                     min={question.min_value ?? 0}
                                                     max={question.max_value ?? 100}
                                                     value={desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0}
-                                                    className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                                                    className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-white/20 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-track]:bg-white/20 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-progress]:bg-white"
                                                     onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                   />
                                                 </div>

@@ -2692,13 +2692,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                                 : 'bg-white/10 border-white/20 hover:bg-white/15'
                                                             }`}
                                                           >
-                                                            <div className={`w-2 h-2 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                                                            <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center flex-shrink-0 ${
                                                               selected ? 'border-secondary bg-secondary' : 'border-white/40'
-                                                            }`}>
-                                                              {selected && (
-                                                                <div className="w-1 h-1 rounded-full bg-white" />
-                                                              )}
-                                                            </div>
+                                                            }`} />
                                                             <span className="text-xs text-white text-left flex-1">{option}</span>
                                                           </button>
                                                         );
@@ -2716,7 +2712,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                         min={question.min_value ?? 0}
                                                         max={question.max_value ?? 100}
                                                         defaultValue={question.min_value ?? 0}
-                                                        className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary"
+                                                        className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-white/20 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-track]:bg-white/20 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-progress]:bg-white"
                                                       />
                                                     </div>
                                                   )}
