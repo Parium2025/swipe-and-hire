@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
           await resend.emails.send({
             from: "Parium <noreply@parium.se>",
             to: [email],
-            subject: `⏰ Din annons "${job.title}" utgår snart!`,
+            subject: `Din annons "${job.title}" utgår snart!`,
             html: `<!DOCTYPE html>
 <html>
 <head>
@@ -107,8 +107,8 @@ const handler = async (req: Request): Promise<Response> => {
     
     <!-- Header -->
     <div style="background-color: #1a237e; padding: 40px 30px; text-align: center;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 28px;">⏰ Din annons utgår snart!</h1>
-      <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Agera nu för att fortsätta rekrytera</p>
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Din annons utgår snart!</h1>
+      <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Lägg upp en ny annons för att fortsätta rekrytera</p>
     </div>
     
     <!-- Content -->
@@ -123,16 +123,16 @@ const handler = async (req: Request): Promise<Response> => {
       
       <p style="color: #333333; margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; text-align: left;">
         När annonsen har utgått kommer den inte längre att synas för jobbsökare. 
-        Om du fortfarande letar efter kandidater rekommenderar vi att du skapar en ny annons från dina sparade mallar.
+        Om du fortfarande letar efter kandidater rekommenderar vi att du skapar en ny annons.
       </p>
       
       <!-- Info box -->
       <div style="margin: 30px 0; padding: 20px; background-color: #e3f2fd; border-radius: 8px; border-left: 4px solid #1a237e;">
         <p style="color: #1a237e; font-size: 16px; font-weight: bold; margin: 0 0 10px 0;">
-          💡 Tips!
+          Tips!
         </p>
         <p style="color: #333333; font-size: 14px; margin: 0; line-height: 1.5;">
-          Med dina jobbmallar kan du skapa en ny annons på under 30 sekunder. 
+          Med dina jobbmallar kan du skapa en ny annons på under 60 sekunder. 
           All information är redan sparad - du behöver bara klicka "Skapa ny annons" och välja din mall.
         </p>
       </div>
