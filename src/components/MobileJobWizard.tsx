@@ -701,9 +701,11 @@ const MobileJobWizard = ({
     setHasUnsavedChanges(formChanged || questionsChanged);
   }, [formData, customQuestions, initialFormData, initialCustomQuestions, open]);
 
-  // Show company tooltip only on step 4 (visible and persistent while on this step)
+  // Show company tooltip only once when first reaching step 4, then keep it visible
   useEffect(() => {
-    setShowCompanyTooltip(currentStep === 3 && open);
+    if (currentStep === 3 && open && !showCompanyTooltip) {
+      setShowCompanyTooltip(true);
+    }
   }, [currentStep, open]);
 
   // Resolve signed URL for uploaded job image preview (mobile)
@@ -757,19 +759,7 @@ const MobileJobWizard = ({
     return () => { cancelled = true; };
   }, [jobImageDisplayUrl, manualFocus]);
 
-  // Show company tooltip when reaching preview step (step 3)
-  useEffect(() => {
-    if (currentStep === 3 && open) {
-      // Small delay to let the preview render first
-      const timer = setTimeout(() => {
-        setShowCompanyTooltip(true);
-        setIsScrolledTop(true);
-      }, 300);
-      return () => clearTimeout(timer);
-    } else {
-      setShowCompanyTooltip(false);
-    }
-  }, [currentStep, open]);
+  // Remove the duplicate tooltip logic - handled by useEffect above
 
   const handleImageEdit = async (editedImageBlob: Blob): Promise<void> => {
     console.log('MobileJobWizard handleImageEdit: Received blob, size:', editedImageBlob.size, 'type:', editingImageType);
