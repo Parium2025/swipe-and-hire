@@ -32,7 +32,7 @@ const Dashboard = memo(() => {
     scope: 'organization',
     enableRealtime: true 
   });
-  const { profile } = useAuth();
+  const { profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
   
   // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
@@ -89,11 +89,11 @@ const Dashboard = memo(() => {
   }, [page]);
 
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Totalt annonser', value: stats.totalJobs, loading: false },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: stats.activeJobs, loading: false },
-    { icon: Eye, title: 'Totala visningar', value: stats.totalViews, loading: false },
-    { icon: Users, title: 'Ansökningar', value: stats.totalApplications, loading: false },
-  ], [stats]);
+    { icon: Briefcase, title: 'Totalt annonser', value: isLoading ? preloadedEmployerActiveJobs : stats.totalJobs, loading: false },
+    { icon: TrendingUp, title: 'Aktiva annonser', value: isLoading ? preloadedEmployerActiveJobs : stats.activeJobs, loading: false },
+    { icon: Eye, title: 'Totala visningar', value: isLoading ? preloadedEmployerTotalViews : stats.totalViews, loading: false },
+    { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : stats.totalApplications, loading: false },
+  ], [stats, isLoading, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
   // Wait for data AND minimum delay before showing content with fade
   if (isLoading || !showContent) {
