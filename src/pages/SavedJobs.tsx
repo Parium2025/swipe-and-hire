@@ -91,13 +91,13 @@ const SavedJobs = () => {
   const queryClient = useQueryClient();
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
-  // Use React Query with staleTime to keep data cached
+  // Use React Query with infinite cache - data stays forever during session
   const { data: savedJobs = [], isLoading, isFetched } = useQuery({
     queryKey: ['saved-jobs', user?.id],
     queryFn: () => fetchSavedJobs(user!.id),
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+    staleTime: Infinity, // Data never becomes stale
+    gcTime: Infinity, // Keep in cache forever
   });
 
   const handleRemoveSavedJob = async (savedJobId: string, e: React.MouseEvent) => {
