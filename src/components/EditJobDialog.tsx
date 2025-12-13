@@ -2296,18 +2296,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           </button>
                         </div>
                         
-                        <h3 className="text-white font-medium text-center text-sm">
+                        <h3 
+                          className="text-white font-medium text-center text-sm cursor-pointer hover:text-white/80 transition-colors underline underline-offset-2"
+                          onClick={() => previewMode === 'mobile' ? setShowApplicationForm(true) : setShowDesktopApplicationForm(true)}
+                        >
                           {previewMode === 'mobile' 
-                            ? 'Så kommer ansökningsformuläret att se ut på mobil.'
-                            : 'Så kommer annonsen att se ut på dator för jobbsökare.'
+                            ? 'Testa att trycka här eller på mobilens skärm'
+                            : 'Testa att trycka här eller på datorns skärm'
                           }
                         </h3>
-                        <p className="text-white/70 text-center text-xs">
-                          {previewMode === 'mobile' 
-                            ? 'OBS: Testa att trycka på mobilens skärm'
-                            : 'OBS: Testa att trycka på datorns skärm'
-                          }
-                        </p>
                       </div>
 
                       {/* Mobile Preview */}
