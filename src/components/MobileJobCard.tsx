@@ -8,7 +8,7 @@ import { Eye, Users, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import type { JobPosting } from '@/hooks/useJobsData';
-import { formatDateShortSv } from '@/lib/date';
+import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
 
 interface MobileJobCardProps {
   job: JobPosting;
@@ -47,10 +47,9 @@ const getMissingFields = (job: JobPosting): string[] => {
   return missing;
 };
 
-// Check if job has expired (expires_at is in the past)
+// Check if job has expired (using effective expiration date)
 const isJobExpired = (job: JobPosting): boolean => {
-  if (!job.expires_at) return false;
-  return new Date(job.expires_at) < new Date();
+  return isJobExpiredCheck(job.created_at, job.expires_at);
 };
 
 export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEditDraft }: MobileJobCardProps) => {
@@ -190,11 +189,23 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
               Skapad: {formatDateShortSv(job.created_at)}
             </span>
           </div>
-          {job.expires_at && (
-            <span className={`text-[10px] ${jobIsExpired ? 'text-red-400' : 'text-white/50'}`}>
-              Utgår: {formatDateShortSv(job.expires_at)}
-            </span>
-          )}
+          {(() => {
+            const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
+            return (
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className={`text-[10px] cursor-help ${timeInfo.isExpired ? 'text-red-400' : 'text-white/50'}`}>
+                      {timeInfo.isExpired ? 'Utgången' : timeInfo.text}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
+                    <p className="text-xs">Utgår: {formatExpirationDateTime(job.created_at, job.expires_at)}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            );
+          })()}
         </div>
 
         {/* Action Buttons */}

@@ -16,7 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
 import { MobileJobCard } from '@/components/MobileJobCard';
-import { formatDateShortSv } from '@/lib/date';
+import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -119,10 +119,9 @@ const EmployerDashboard = memo(() => {
     return missing;
   };
 
-  // Check if job has expired (expires_at is in the past)
+  // Check if job has expired (using effective expiration date)
   const isJobExpired = (job: JobPosting): boolean => {
-    if (!job.expires_at) return false;
-    return new Date(job.expires_at) < new Date();
+    return isJobExpiredCheck(job.created_at, job.expires_at);
   };
 
   const toggleJobStatus = async (jobId: string, currentStatus: boolean, job: JobPosting) => {
@@ -381,11 +380,23 @@ const EmployerDashboard = memo(() => {
                               <Calendar size={14} />
                               {formatDateShortSv(job.created_at)}
                             </div>
-                            {(job as JobPosting).expires_at && (
-                              <span className={`text-[10px] ${isJobExpired(job as JobPosting) ? 'text-red-400' : 'text-white/50'}`}>
-                                Utgår {formatDateShortSv((job as JobPosting).expires_at!)}
-                              </span>
-                            )}
+                            {(() => {
+                              const timeInfo = getTimeRemaining(job.created_at, (job as JobPosting).expires_at);
+                              return (
+                                <TooltipProvider delayDuration={0}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className={`text-[10px] cursor-help ${timeInfo.isExpired ? 'text-red-400' : 'text-white/50'}`}>
+                                        {timeInfo.isExpired ? 'Utgången' : timeInfo.text}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
+                                      <p className="text-xs">Utgår: {formatExpirationDateTime(job.created_at, (job as JobPosting).expires_at)}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              );
+                            })()}
                           </div>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
