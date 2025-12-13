@@ -488,15 +488,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                 <div className="flex items-center justify-between w-full gap-3">
                                   <button
                                     onClick={() => handleTemplateSelect(template.id, template.name)}
-                                    className="flex flex-col flex-1 text-left hover:opacity-80 transition-opacity"
+                                    className="flex items-center flex-1 text-left hover:opacity-80 transition-opacity"
                                   >
-                                    <div className="flex items-center justify-between">
-                                      <span className="font-medium text-white">{template.name}</span>
-                                      {template.is_default && (
-                                        <span className="text-sm text-blue-400 ml-2">Standard</span>
-                                      )}
-                                    </div>
-                                    <span className="text-sm text-white mt-1 break-words line-clamp-2 sm:line-clamp-none">{template.title}</span>
+                                    <span className="font-medium text-white">{template.name}</span>
+                                    {template.is_default && (
+                                      <span className="text-sm text-blue-400 ml-2">Standard</span>
+                                    )}
                                   </button>
                                   <div className="flex gap-1 flex-shrink-0">
                                     <Button
