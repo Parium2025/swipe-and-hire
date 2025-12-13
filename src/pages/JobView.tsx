@@ -417,7 +417,7 @@ const JobView = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate('/search-jobs')}
+          onClick={() => navigate(-1)}
           className="text-white hover:bg-white/10 backdrop-blur-sm"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
