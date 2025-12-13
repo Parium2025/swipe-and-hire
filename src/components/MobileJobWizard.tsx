@@ -3181,10 +3181,16 @@ const MobileJobWizard = ({
                   
                   <h3 className="text-white font-medium text-center text-sm">
                     {previewMode === 'mobile' 
-                      ? 'Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)'
-                      : 'Så kommer annonsen att se ut på dator för jobbsökare. (Testa att trycka på datorns skärm)'
+                      ? 'Så kommer ansökningsformuläret att se ut på mobil.'
+                      : 'Så kommer annonsen att se ut på dator för jobbsökare.'
                     }
                   </h3>
+                  <p className="text-white/70 text-center text-xs">
+                    {previewMode === 'mobile' 
+                      ? 'OBS: Testa att trycka på mobilens skärm'
+                      : 'OBS: Testa att trycka på datorns skärm'
+                    }
+                  </p>
                 </div>
 
                 {/* Mobile Preview */}
