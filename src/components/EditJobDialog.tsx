@@ -2702,20 +2702,31 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     </div>
                                                   )}
                                                   
-                                                  {question.question_type === 'number' && (
-                                                     <div className="space-y-1.5">
-                                                       <div className="text-center text-xs font-semibold text-white">
-                                                        {question.min_value ?? 0}
+                                                  {question.question_type === 'number' && (() => {
+                                                    const minVal = question.min_value ?? 0;
+                                                    const maxVal = question.max_value ?? 100;
+                                                    const currentVal = Number(previewAnswers[question.id || `q_${index}`] || minVal);
+                                                    const percentage = ((currentVal - minVal) / (maxVal - minVal)) * 100;
+                                                    
+                                                    return (
+                                                      <div className="space-y-1.5">
+                                                        <div className="text-center text-xs font-semibold text-white">
+                                                          {currentVal}
+                                                        </div>
+                                                        <input
+                                                          type="range"
+                                                          min={minVal}
+                                                          max={maxVal}
+                                                          value={currentVal}
+                                                          className="w-full h-1 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
+                                                          style={{
+                                                            background: `linear-gradient(to right, white ${percentage}%, rgba(255,255,255,0.3) ${percentage}%)`
+                                                          }}
+                                                          onChange={(e) => setPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
+                                                        />
                                                       </div>
-                                                      <input
-                                                        type="range"
-                                                        min={question.min_value ?? 0}
-                                                        max={question.max_value ?? 100}
-                                                        defaultValue={question.min_value ?? 0}
-                                                        className="w-full h-1 bg-transparent rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-white/30 [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:mt-[-3px] [&::-moz-range-track]:bg-white/30 [&::-moz-range-track]:h-1 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
-                                                      />
-                                                    </div>
-                                                  )}
+                                                    );
+                                                  })()}
                                                   
                                                   {question.question_type === 'date' && (
                                                     <input
