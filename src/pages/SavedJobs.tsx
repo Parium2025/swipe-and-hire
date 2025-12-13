@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, MapPin, Building2, Briefcase, Clock, Trash2 } from 'lucide-react';
+import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SavedJob {
@@ -23,6 +23,7 @@ interface SavedJob {
     job_image_url: string | null;
     is_active: boolean;
     created_at: string;
+    expires_at: string | null;
     profiles: {
       company_name: string | null;
       first_name: string | null;
@@ -40,6 +41,15 @@ const getEmploymentTypeLabel = (type: string | null): string => {
     freelance: 'Frilans',
   };
   return type ? labels[type] || type : '';
+};
+
+const getDaysRemaining = (expiresAt: string | null): number | null => {
+  if (!expiresAt) return null;
+  const now = new Date();
+  const expires = new Date(expiresAt);
+  const diffTime = expires.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays > 0 ? diffDays : 0;
 };
 
 const SavedJobs = () => {
@@ -75,6 +85,7 @@ const SavedJobs = () => {
             job_image_url,
             is_active,
             created_at,
+            expires_at,
             profiles (
               company_name,
               first_name,
@@ -122,7 +133,11 @@ const SavedJobs = () => {
     }
   };
 
-  const handleJobClick = (jobId: string) => {
+  const handleJobClick = (jobId: string, isActive: boolean) => {
+    if (!isActive) {
+      toast.info('Det här jobbet är inte längre tillgängligt');
+      return;
+    }
     navigate(`/job-view/${jobId}`);
   };
 
@@ -193,38 +208,51 @@ const SavedJobs = () => {
             if (!job) return null;
 
             const isRemoving = removingIds.has(savedJob.id);
+            const isExpired = !job.is_active;
+            const daysRemaining = getDaysRemaining(job.expires_at);
+            const showCountdown = job.is_active && daysRemaining !== null && daysRemaining <= 7;
 
             return (
               <Card
                 key={savedJob.id}
-                className={`bg-white/5 border-white/10 hover:border-white/30 transition-all cursor-pointer ${
+                className={`border-white/10 transition-all cursor-pointer ${
                   isRemoving ? 'opacity-50' : ''
+                } ${
+                  isExpired 
+                    ? 'bg-white/[0.02] opacity-60 hover:opacity-80' 
+                    : 'bg-white/5 hover:border-white/30'
                 }`}
-                onClick={() => handleJobClick(job.id)}
+                onClick={() => handleJobClick(job.id, job.is_active)}
               >
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
                       {/* Title and status */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-semibold text-white truncate">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <h3 className={`text-lg font-semibold truncate ${isExpired ? 'text-white/60' : 'text-white'}`}>
                           {job.title}
                         </h3>
-                        {!job.is_active && (
+                        {isExpired && (
                           <Badge variant="secondary" className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
                             Utgången
+                          </Badge>
+                        )}
+                        {showCountdown && (
+                          <Badge variant="secondary" className="bg-secondary/20 text-secondary border-secondary/30 text-xs">
+                            <Timer className="h-3 w-3 mr-1" />
+                            {daysRemaining === 1 ? '1 dag kvar' : `${daysRemaining} dagar kvar`}
                           </Badge>
                         )}
                       </div>
 
                       {/* Company */}
-                      <div className="flex items-center gap-2 text-white mb-2">
+                      <div className={`flex items-center gap-2 mb-2 ${isExpired ? 'text-white/40' : 'text-white'}`}>
                         <Building2 className="h-4 w-4 flex-shrink-0" />
                         <span className="truncate">{getCompanyName(job)}</span>
                       </div>
 
                       {/* Location and type */}
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-white">
+                      <div className={`flex flex-wrap items-center gap-3 text-sm ${isExpired ? 'text-white/40' : 'text-white'}`}>
                         {getLocation(job) && (
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3.5 w-3.5" />
