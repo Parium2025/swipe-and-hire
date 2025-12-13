@@ -1168,7 +1168,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       >
         <AnimatedBackground showBubbles={false} variant="card" />
         {/* Content container */}
-        <div className="flex flex-col max-h-[90vh] relative z-10 overflow-hidden">
+        <div className="flex flex-col h-full max-h-[90vh] relative z-10 overflow-hidden">
           {/* Header */}
           <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
             <DialogHeader className="text-center sm:text-center">
