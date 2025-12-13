@@ -119,7 +119,23 @@ const EmployerDashboard = memo(() => {
     return missing;
   };
 
+  // Check if job has expired (expires_at is in the past)
+  const isJobExpired = (job: JobPosting): boolean => {
+    if (!job.expires_at) return false;
+    return new Date(job.expires_at) < new Date();
+  };
+
   const toggleJobStatus = async (jobId: string, currentStatus: boolean, job: JobPosting) => {
+    // If trying to activate, check if job has expired
+    if (!currentStatus && isJobExpired(job)) {
+      toast({
+        title: "Kan inte aktivera annons",
+        description: "Annonsens 14 dagar har gått ut. Vänligen skapa en ny annons från dina mallar.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // If trying to activate, check if job is complete
     if (!currentStatus && !isJobComplete(job)) {
       const missing = getMissingFields(job);
@@ -367,7 +383,27 @@ const EmployerDashboard = memo(() => {
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex items-center justify-center gap-1.5">
-                            {!job.is_active && !isJobComplete(job as JobPosting) ? (
+                            {/* Expired job - red switch with tooltip */}
+                            {isJobExpired(job as JobPosting) ? (
+                              <TooltipProvider delayDuration={0}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                      <Switch
+                                        checked={false}
+                                        disabled
+                                        className="scale-[0.8] cursor-pointer [&>span]:bg-red-500 opacity-100"
+                                      />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
+                                    <p className="text-xs font-medium mb-1 text-red-400">Annonsens tid har gått ut</p>
+                                    <p className="text-xs text-white/80">Dina 14 dagar har passerat. Skapa en ny annons från dina mallar för att fortsätta rekrytera.</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ) : !job.is_active && !isJobComplete(job as JobPosting) ? (
+                              /* Incomplete draft - amber switch with tooltip */
                               <TooltipProvider delayDuration={0}>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
@@ -386,6 +422,7 @@ const EmployerDashboard = memo(() => {
                                 </Tooltip>
                               </TooltipProvider>
                             ) : (
+                              /* Normal switch */
                               <Switch
                                 checked={job.is_active}
                                 onCheckedChange={() => toggleJobStatus(job.id, job.is_active, job as JobPosting)}
