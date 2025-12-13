@@ -376,9 +376,16 @@ const EmployerDashboard = memo(() => {
                           />
                         </TableCell>
                         <TableCell className="text-white text-center px-2 py-3">
-                          <div className="flex items-center justify-center gap-1.5 text-sm whitespace-nowrap">
-                            <Calendar size={14} />
-                            {formatDateShortSv(job.created_at)}
+                          <div className="flex flex-col items-center gap-0.5">
+                            <div className="flex items-center justify-center gap-1.5 text-sm whitespace-nowrap">
+                              <Calendar size={14} />
+                              {formatDateShortSv(job.created_at)}
+                            </div>
+                            {(job as JobPosting).expires_at && (
+                              <span className={`text-[10px] ${isJobExpired(job as JobPosting) ? 'text-red-400' : 'text-white/50'}`}>
+                                Utgår {formatDateShortSv((job as JobPosting).expires_at!)}
+                              </span>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">

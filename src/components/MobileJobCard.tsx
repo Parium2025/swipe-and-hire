@@ -176,18 +176,25 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
         </div>
 
         {/* Rekryterare + Datum */}
-        <div className="flex items-center gap-1 text-xs text-white">
-          <span>
-            {job.employer_profile?.first_name && job.employer_profile?.last_name && (
-              <>
-                {job.employer_profile.first_name} {job.employer_profile.last_name} • {' '}
-              </>
-            )}
-          </span>
-          <Calendar className="h-3 w-3" />
-          <span>
-            Skapad: {formatDateShortSv(job.created_at)}
-          </span>
+        <div className="flex flex-col gap-0.5 text-xs text-white">
+          <div className="flex items-center gap-1">
+            <span>
+              {job.employer_profile?.first_name && job.employer_profile?.last_name && (
+                <>
+                  {job.employer_profile.first_name} {job.employer_profile.last_name} • {' '}
+                </>
+              )}
+            </span>
+            <Calendar className="h-3 w-3" />
+            <span>
+              Skapad: {formatDateShortSv(job.created_at)}
+            </span>
+          </div>
+          {job.expires_at && (
+            <span className={`text-[10px] ${jobIsExpired ? 'text-red-400' : 'text-white/50'}`}>
+              Utgår: {formatDateShortSv(job.expires_at)}
+            </span>
+          )}
         </div>
 
         {/* Action Buttons */}
