@@ -195,12 +195,12 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className={`text-[10px] cursor-help ${timeInfo.isExpired ? 'text-red-400' : 'text-white/50'}`}>
-                      {timeInfo.isExpired ? 'Utgången' : timeInfo.text}
+                    <span className={`text-[10px] cursor-pointer ${timeInfo.isExpired ? 'text-red-400' : 'text-white'}`}>
+                      Utgår: {timeInfo.isExpired ? 'Utgången' : timeInfo.text}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
-                    <p className="text-xs">Utgår: {formatExpirationDateTime(job.created_at, job.expires_at)}</p>
+                    <p className="text-xs">{formatExpirationDateTime(job.created_at, job.expires_at)}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
