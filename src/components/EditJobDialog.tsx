@@ -2712,7 +2712,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                         min={question.min_value ?? 0}
                                                         max={question.max_value ?? 100}
                                                         defaultValue={question.min_value ?? 0}
-                                                        className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-white/20 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-track]:bg-white/20 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-progress]:bg-white"
+                                                        className="w-full h-1 bg-transparent rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-white/30 [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:mt-[-3px] [&::-moz-range-track]:bg-white/30 [&::-moz-range-track]:h-1 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
                                                       />
                                                     </div>
                                                   )}
