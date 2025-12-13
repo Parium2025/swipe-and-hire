@@ -63,6 +63,8 @@ const COVER_CACHE_KEY = 'parium_cover_url';
 const VIDEO_CACHE_KEY = 'parium_video_url';
 const TOTAL_JOBS_CACHE_KEY = 'parium_total_jobs';
 const SAVED_JOBS_CACHE_KEY = 'parium_saved_jobs';
+const UNIQUE_COMPANIES_CACHE_KEY = 'parium_unique_companies';
+const NEW_THIS_WEEK_CACHE_KEY = 'parium_new_this_week';
 
 interface AuthContextType {
   user: User | null;
@@ -76,9 +78,11 @@ interface AuthContextType {
   preloadedAvatarUrl: string | null;
   preloadedCoverUrl: string | null;
   preloadedVideoUrl: string | null;
-  /** Förladdade räknare för sidebar */
+  /** Förladdade räknare för sidebar och stats */
   preloadedTotalJobs: number;
   preloadedSavedJobs: number;
+  preloadedUniqueCompanies: number;
+  preloadedNewThisWeek: number;
   refreshSidebarCounts: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
     role: UserRole; 
@@ -156,6 +160,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [preloadedSavedJobs, setPreloadedSavedJobs] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(SAVED_JOBS_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedUniqueCompanies, setPreloadedUniqueCompanies] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(UNIQUE_COMPANIES_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedNewThisWeek, setPreloadedNewThisWeek] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(NEW_THIS_WEEK_CACHE_KEY) : null;
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
@@ -1139,15 +1155,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Funktion för att uppdatera sidebar-räknare (används av realtime + initial load)
   const refreshSidebarCounts = async () => {
     try {
-      // Hämta antal aktiva jobb
-      const { count: totalJobs } = await supabase
+      // Hämta aktiva jobb med employer_id för unika företag
+      const { data: activeJobs, count: totalJobs } = await supabase
         .from('job_postings')
-        .select('*', { count: 'exact', head: true })
+        .select('employer_id, created_at', { count: 'exact' })
         .eq('is_active', true);
       
       const newTotalJobs = totalJobs || 0;
       setPreloadedTotalJobs(newTotalJobs);
       try { sessionStorage.setItem(TOTAL_JOBS_CACHE_KEY, String(newTotalJobs)); } catch {}
+
+      // Räkna unika företag
+      const uniqueEmployers = new Set(activeJobs?.map(j => j.employer_id) || []);
+      const newUniqueCompanies = uniqueEmployers.size;
+      setPreloadedUniqueCompanies(newUniqueCompanies);
+      try { sessionStorage.setItem(UNIQUE_COMPANIES_CACHE_KEY, String(newUniqueCompanies)); } catch {}
+
+      // Räkna nya denna vecka
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const newThisWeek = activeJobs?.filter(j => new Date(j.created_at) > weekAgo).length || 0;
+      setPreloadedNewThisWeek(newThisWeek);
+      try { sessionStorage.setItem(NEW_THIS_WEEK_CACHE_KEY, String(newThisWeek)); } catch {}
 
       // Hämta antal sparade jobb för användaren
       if (user) {
@@ -1213,6 +1242,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedVideoUrl,
     preloadedTotalJobs,
     preloadedSavedJobs,
+    preloadedUniqueCompanies,
+    preloadedNewThisWeek,
     refreshSidebarCounts,
     signUp,
     signIn,

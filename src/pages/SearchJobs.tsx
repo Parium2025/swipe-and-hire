@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Clock, X, ChevronDown, Check, Search, ArrowUpDown } from 'lucide-react';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
@@ -54,6 +55,7 @@ interface Job {
 const SearchJobs = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek } = useAuth();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const [searchInput, setSearchInput] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
@@ -241,16 +243,17 @@ const SearchJobs = () => {
     return 'Enligt överenskommelse';
   };
 
+  // Använd cachade värden från AuthProvider för omedelbar visning
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Jobb hittade', value: jobs.length, loading: false },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: jobs.filter(j => j.is_active).length, loading: false },
-    { icon: Building, title: 'Unika företag', value: new Set(jobs.map(j => j.company_name)).size, loading: false },
-    { icon: Users, title: 'Nya denna vecka', value: jobs.filter(j => {
+    { icon: Briefcase, title: 'Jobb hittade', value: preloadedTotalJobs || jobs.length, loading: false },
+    { icon: TrendingUp, title: 'Aktiva annonser', value: preloadedTotalJobs || jobs.filter(j => j.is_active).length, loading: false },
+    { icon: Building, title: 'Unika företag', value: preloadedUniqueCompanies || new Set(jobs.map(j => j.company_name)).size, loading: false },
+    { icon: Users, title: 'Nya denna vecka', value: preloadedNewThisWeek || jobs.filter(j => {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return new Date(j.created_at) > weekAgo;
     }).length, loading: false },
-  ], [jobs]);
+  ], [jobs, preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek]);
 
   const sortLabels = {
     newest: 'Nyast först',
