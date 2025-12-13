@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,7 +13,8 @@ import {
   CheckCircle2,
   XCircle,
   Hourglass,
-  Building2
+  Building2,
+  Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -112,7 +113,6 @@ const getEmploymentTypeLabel = (type: string | null) => {
 const MyApplications = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const { data: applications, isLoading, error } = useQuery({
     queryKey: ['my-applications', user?.id],
@@ -164,13 +164,29 @@ const MyApplications = () => {
           <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Mina Ansökningar</h1>
           <p className="text-white">Dina inskickade jobbansökningar</p>
         </div>
+        
+        {/* Spinner */}
+        <div className="flex justify-center mb-6">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+        </div>
+        
+        {/* Skeleton cards */}
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <Card key={i} className="bg-white/5 border-white/10">
               <CardContent className="p-4">
-                <Skeleton className="h-6 w-3/4 bg-white/10 mb-2" />
-                <Skeleton className="h-4 w-1/2 bg-white/10 mb-4" />
-                <Skeleton className="h-4 w-1/4 bg-white/10" />
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <Skeleton className="h-6 w-3/4 bg-white/10 mb-3" />
+                    <Skeleton className="h-4 w-1/2 bg-white/10 mb-3" />
+                    <div className="flex gap-4">
+                      <Skeleton className="h-4 w-24 bg-white/10" />
+                      <Skeleton className="h-4 w-20 bg-white/10" />
+                      <Skeleton className="h-4 w-28 bg-white/10" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-7 w-28 bg-white/10 rounded-full" />
+                </div>
               </CardContent>
             </Card>
           ))}
