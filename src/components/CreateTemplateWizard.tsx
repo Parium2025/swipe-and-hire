@@ -949,6 +949,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     
     setCustomQuestions(prev => [...prev, newQuestion]);
     setShowQuestionTemplates(false);
+    setQuestionSearchTerm('');
     
     // Increment usage count
     try {
@@ -1918,7 +1919,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         if (filteredTemplates.length === 0) {
                           return (
                             <div className="text-white text-sm text-center py-8">
-                              Du har inga sparade frågor.
+                              {questionSearchTerm.trim() 
+                                ? 'Hittar inte frågan du söker.' 
+                                : 'Du har inga sparade frågor än'}
                             </div>
                           );
                         }
