@@ -2815,17 +2815,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           <>
                                             <button 
                                               onClick={() => setShowCompanyProfile(true)}
-                                              className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
+                                              className={`${textSizes.company} text-[#FFFFFF] font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left line-clamp-1`}
                                             >
                                               {profile?.company_name || 'Företag'}
                                             </button>
                                             <TruncatedTitle 
                                               fullText={getDisplayTitle()} 
-                                              className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-5 cursor-default`}
+                                              className={`${textSizes.title} text-[#FFFFFF] font-bold leading-tight mb-1 line-clamp-5 cursor-default`}
                                             >
                                               {getDisplayTitle()}
                                             </TruncatedTitle>
-                                            <div className={`${textSizes.meta} text-white`}>
+                                            <div className={`${textSizes.meta} text-[#FFFFFF]`}>
                                               {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                             </div>
                                           </>
@@ -3123,17 +3123,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       >
                                         <button 
                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                          className="text-sm text-white font-medium mb-2 hover:text-white/70 transition-colors cursor-pointer line-clamp-1"
+                                          className="text-sm text-[#FFFFFF] font-medium mb-2 hover:text-white/70 transition-colors cursor-pointer line-clamp-1"
                                         >
                                           {profile?.company_name || 'Företag'}
                                         </button>
                                         <TruncatedTitle 
                                           fullText={formData.title || 'Jobbtitel'} 
-                                          className="text-xl text-white font-bold leading-tight mb-2 line-clamp-3 cursor-default"
+                                          className="text-xl text-[#FFFFFF] font-bold leading-tight mb-2 line-clamp-3 cursor-default"
                                         >
                                           {formData.title || 'Jobbtitel'}
                                         </TruncatedTitle>
-                                        <div className="text-sm text-white">
+                                        <div className="text-sm text-[#FFFFFF]">
                                           {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                         </div>
                                       </div>
