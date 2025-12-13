@@ -24,6 +24,7 @@ import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelecto
 import LocationSearchInput from '@/components/LocationSearchInput';
 import { useQuery } from '@tanstack/react-query';
 import { preloadImages } from '@/lib/serviceWorkerManager';
+import { useSavedJobs } from '@/hooks/useSavedJobs';
 
 interface Job {
   id: string;
@@ -53,6 +54,7 @@ interface Job {
 const SearchJobs = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const [searchInput, setSearchInput] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
   const [selectedPostalCode, setSelectedPostalCode] = useState('');
@@ -722,13 +724,17 @@ const SearchJobs = () => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="h-8 w-8 p-0 bg-white/5 border-white/20 transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
+                              className={`h-8 w-8 p-0 border-white/20 transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white ${
+                                isJobSaved(job.id) 
+                                  ? 'bg-red-500/20 border-red-500/40 md:hover:bg-red-500/30' 
+                                  : 'bg-white/5'
+                              }`}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toast({ title: "Sparad!", description: "Jobbet har sparats till dina favoriter" });
+                                toggleSaveJob(job.id);
                               }}
                             >
-                              <Heart className="h-3 w-3" />
+                              <Heart className={`h-3 w-3 ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
                             </Button>
                           </div>
                         </TableCell>
