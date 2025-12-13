@@ -165,10 +165,10 @@ const SearchJobs = () => {
         applications_count: job.applications_count || 0,
       }));
     },
-    staleTime: 30 * 60 * 1000, // Cache for 30 minutes - länge cache för bilder
-    gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour - behåll bildurls längre
+    staleTime: 0, // Hämta i bakgrunden vid återbesök
+    gcTime: Infinity, // Behåll cache permanent under sessionen
     refetchOnWindowFocus: false, // Lägg inte om bilder när man kommer tillbaka
-    refetchOnMount: false, // Använd cache när möjligt
+    refetchOnMount: 'always', // Uppdatera i bakgrunden vid navigation
   });
 
   // Förladdda alla jobbbilder via Service Worker för persistent cache
