@@ -655,7 +655,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       // Small delay to let the preview render first
       const timer = setTimeout(() => {
         setShowCompanyTooltip(true);
-        setShowApplicationForm(false);
         setIsScrolledTop(true);
       }, 300);
       return () => clearTimeout(timer);
