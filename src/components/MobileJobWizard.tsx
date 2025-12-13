@@ -3746,16 +3746,16 @@ const MobileJobWizard = ({
                   <>
                     <button 
                       onClick={() => setShowCompanyProfile(true)}
-                      className={`${textSizes.company} text-[#FFFFFF] font-medium mb-1 hover:text-white/70 transition-colors cursor-pointer text-left line-clamp-1`}
+                      className={`${textSizes.company} text-white font-medium mb-1 hover:text-white/70 transition-colors cursor-pointer text-left line-clamp-1`}
                     >
                       {profile?.company_name || 'Företag'}
                     </button>
                     <TruncatedText 
                       text={getDisplayTitle()} 
-                      className={`${textSizes.title} text-[#FFFFFF] font-bold leading-tight mb-1 line-clamp-5 w-full max-w-full cursor-pointer`}
+                      className={`${textSizes.title} text-white font-bold leading-tight mb-1 line-clamp-5 w-full max-w-full cursor-pointer`}
                       alwaysShowTooltip="desktop-only"
                     />
-                    <div className={`${textSizes.meta} text-[#FFFFFF]`}>
+                    <div className={`${textSizes.meta} text-white`}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                     </div>
                   </>
@@ -4294,7 +4294,7 @@ const MobileJobWizard = ({
                                   {/* Company name at top */}
                                   <button 
                                     onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                    className="text-sm text-[#FFFFFF] font-medium mb-1 hover:text-white/70 transition-colors cursor-pointer line-clamp-1"
+                                    className="text-sm text-white font-medium mb-1 hover:text-white/70 transition-colors cursor-pointer line-clamp-1"
                                   >
                                     {profile?.company_name || 'Företag'}
                                   </button>
@@ -4302,12 +4302,12 @@ const MobileJobWizard = ({
                                   {/* Job title */}
                                   <TruncatedText 
                                     text={formData.title || 'Jobbtitel'} 
-                                    className="text-xl font-bold text-[#FFFFFF] leading-tight mb-1 line-clamp-3 w-full max-w-full cursor-pointer"
+                                    className="text-xl font-bold text-white leading-tight mb-1 line-clamp-3 w-full max-w-full cursor-pointer"
                                     alwaysShowTooltip="desktop-only"
                                   />
                                   
                                   {/* Meta line: employment type • location, county */}
-                                  <div className="text-sm text-[#FFFFFF]">
+                                  <div className="text-sm text-white">
                                     {getMetaLine(formData.employment_type, formData.workplace_city || formData.location, formData.workplace_county)}
                                   </div>
                                 </div>
