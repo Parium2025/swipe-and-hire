@@ -1979,7 +1979,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               value={questionSearchTerm}
                               onChange={(e) => setQuestionSearchTerm(e.target.value)}
                               placeholder="Sök efter fråga..."
-                              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
+                              className="bg-white/5 border-white/20 text-white placeholder:text-white"
                             />
                           </div>
 
