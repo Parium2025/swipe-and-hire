@@ -32,8 +32,11 @@ import {
 } from "lucide-react";
 
 
+import { Heart } from "lucide-react";
+
 const mainItems = [
   { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
+  { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart },
 ];
 
 const profileItems = [

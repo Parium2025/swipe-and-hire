@@ -26,6 +26,7 @@ import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
 import Billing from '@/pages/Billing';
 import Support from '@/pages/Support';
+import SavedJobs from '@/pages/SavedJobs';
 import SupportAdmin from '@/pages/SupportAdmin';
 import EmployerProfile from '@/pages/employer/EmployerProfile';
 import CompanyProfile from '@/pages/employer/CompanyProfile';
@@ -288,7 +289,7 @@ const Index = () => {
   // isAdmin is now from database via useIsOrgAdmin hook
 
   // Render sidebar layout for profile pages and employer routes
-  const sidebarRoutes = ['/profile', '/profile-preview', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
+  const sidebarRoutes = ['/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute && role !== 'employer') {
@@ -307,6 +308,8 @@ const Index = () => {
           return <Consent />;
         case '/search-jobs':
           return <SearchJobs />;
+        case '/saved-jobs':
+          return <SavedJobs />;
         case '/subscription':
           return <Subscription />;
         case '/billing':
