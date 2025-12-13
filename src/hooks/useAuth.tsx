@@ -61,10 +61,15 @@ interface Profile {
 const AVATAR_CACHE_KEY = 'parium_avatar_url';
 const COVER_CACHE_KEY = 'parium_cover_url';
 const VIDEO_CACHE_KEY = 'parium_video_url';
+// Jobbsökar-stats
 const TOTAL_JOBS_CACHE_KEY = 'parium_total_jobs';
 const SAVED_JOBS_CACHE_KEY = 'parium_saved_jobs';
 const UNIQUE_COMPANIES_CACHE_KEY = 'parium_unique_companies';
 const NEW_THIS_WEEK_CACHE_KEY = 'parium_new_this_week';
+// Arbetsgivar-stats
+const EMPLOYER_MY_JOBS_CACHE_KEY = 'parium_employer_my_jobs';
+const EMPLOYER_VIEWS_CACHE_KEY = 'parium_employer_views';
+const EMPLOYER_APPLICATIONS_CACHE_KEY = 'parium_employer_applications';
 
 interface AuthContextType {
   user: User | null;
@@ -78,11 +83,15 @@ interface AuthContextType {
   preloadedAvatarUrl: string | null;
   preloadedCoverUrl: string | null;
   preloadedVideoUrl: string | null;
-  /** Förladdade räknare för sidebar och stats */
+  /** Förladdade räknare för jobbsökar-stats */
   preloadedTotalJobs: number;
   preloadedSavedJobs: number;
   preloadedUniqueCompanies: number;
   preloadedNewThisWeek: number;
+  /** Förladdade räknare för arbetsgivar-stats */
+  preloadedEmployerMyJobs: number;
+  preloadedEmployerViews: number;
+  preloadedEmployerApplications: number;
   refreshSidebarCounts: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
     role: UserRole; 
@@ -172,6 +181,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [preloadedNewThisWeek, setPreloadedNewThisWeek] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(NEW_THIS_WEEK_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedEmployerMyJobs, setPreloadedEmployerMyJobs] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_MY_JOBS_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedEmployerViews, setPreloadedEmployerViews] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_VIEWS_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedEmployerApplications, setPreloadedEmployerApplications] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_APPLICATIONS_CACHE_KEY) : null;
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
@@ -1178,7 +1205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPreloadedNewThisWeek(newThisWeek);
       try { sessionStorage.setItem(NEW_THIS_WEEK_CACHE_KEY, String(newThisWeek)); } catch {}
 
-      // Hämta antal sparade jobb för användaren
+      // Hämta antal sparade jobb för jobbsökare
       if (user) {
         const { count: savedJobs } = await supabase
           .from('saved_jobs')
@@ -1188,6 +1215,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const newSavedJobs = savedJobs || 0;
         setPreloadedSavedJobs(newSavedJobs);
         try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
+
+        // Hämta arbetsgivarens egna jobb-stats
+        const { data: myJobs } = await supabase
+          .from('job_postings')
+          .select('views_count, applications_count')
+          .eq('employer_id', user.id)
+          .eq('is_active', true);
+        
+        const myJobsCount = myJobs?.length || 0;
+        const myViews = myJobs?.reduce((sum, j) => sum + (j.views_count || 0), 0) || 0;
+        const myApplications = myJobs?.reduce((sum, j) => sum + (j.applications_count || 0), 0) || 0;
+        
+        setPreloadedEmployerMyJobs(myJobsCount);
+        setPreloadedEmployerViews(myViews);
+        setPreloadedEmployerApplications(myApplications);
+        
+        try { sessionStorage.setItem(EMPLOYER_MY_JOBS_CACHE_KEY, String(myJobsCount)); } catch {}
+        try { sessionStorage.setItem(EMPLOYER_VIEWS_CACHE_KEY, String(myViews)); } catch {}
+        try { sessionStorage.setItem(EMPLOYER_APPLICATIONS_CACHE_KEY, String(myApplications)); } catch {}
       }
     } catch (err) {
       console.error('Error refreshing sidebar counts:', err);
@@ -1244,6 +1290,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedSavedJobs,
     preloadedUniqueCompanies,
     preloadedNewThisWeek,
+    preloadedEmployerMyJobs,
+    preloadedEmployerViews,
+    preloadedEmployerApplications,
     refreshSidebarCounts,
     signUp,
     signIn,
