@@ -57,6 +57,11 @@ interface Profile {
   onboarding_completed?: boolean;
 }
 
+// SessionStorage keys för omedelbar visning (som arbetsgivarsidan)
+const AVATAR_CACHE_KEY = 'parium_avatar_url';
+const COVER_CACHE_KEY = 'parium_cover_url';
+const VIDEO_CACHE_KEY = 'parium_video_url';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -68,6 +73,7 @@ interface AuthContextType {
   /** Förladdade signed URLs för snabb sidebar-rendering */
   preloadedAvatarUrl: string | null;
   preloadedCoverUrl: string | null;
+  preloadedVideoUrl: string | null;
   signUp: (email: string, password: string, userData: {
     role: UserRole; 
     first_name: string; 
@@ -119,8 +125,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [authAction, setAuthAction] = useState<'login' | 'logout' | null>(null);
   const [mediaPreloadComplete, setMediaPreloadComplete] = useState(false); // 🎯 Ny state för att tracka media-laddning
-  const [preloadedAvatarUrl, setPreloadedAvatarUrl] = useState<string | null>(null);
-  const [preloadedCoverUrl, setPreloadedCoverUrl] = useState<string | null>(null);
+  // Initialisera från sessionStorage för omedelbar visning (som arbetsgivarsidan)
+  const [preloadedAvatarUrl, setPreloadedAvatarUrl] = useState<string | null>(() => {
+    try {
+      return typeof window !== 'undefined' ? sessionStorage.getItem(AVATAR_CACHE_KEY) : null;
+    } catch { return null; }
+  });
+  const [preloadedCoverUrl, setPreloadedCoverUrl] = useState<string | null>(() => {
+    try {
+      return typeof window !== 'undefined' ? sessionStorage.getItem(COVER_CACHE_KEY) : null;
+    } catch { return null; }
+  });
+  const [preloadedVideoUrl, setPreloadedVideoUrl] = useState<string | null>(() => {
+    try {
+      return typeof window !== 'undefined' ? sessionStorage.getItem(VIDEO_CACHE_KEY) : null;
+    } catch { return null; }
+  });
   const isManualSignOutRef = useRef(false);
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
@@ -190,6 +210,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setMediaPreloadComplete(false);
           setPreloadedAvatarUrl(null);
           setPreloadedCoverUrl(null);
+          setPreloadedVideoUrl(null);
+          // Rensa sessionStorage-cache vid utloggning
+          try {
+            sessionStorage.removeItem(AVATAR_CACHE_KEY);
+            sessionStorage.removeItem(COVER_CACHE_KEY);
+            sessionStorage.removeItem(VIDEO_CACHE_KEY);
+          } catch {}
           try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch {}
           if (event !== 'INITIAL_SESSION') {
             setLoading(false);
@@ -329,20 +356,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             }
             
-            // Sätt URLs för sidebar
+            // Sätt URLs för sidebar + spara i sessionStorage för omedelbar visning
             setPreloadedAvatarUrl(avatarUrl || coverUrl || null);
             setPreloadedCoverUrl(coverUrl || null);
+            
+            // Spara till sessionStorage (som arbetsgivarsidan)
+            try {
+              if (avatarUrl) sessionStorage.setItem(AVATAR_CACHE_KEY, avatarUrl);
+              else sessionStorage.removeItem(AVATAR_CACHE_KEY);
+              if (coverUrl) sessionStorage.setItem(COVER_CACHE_KEY, coverUrl);
+              else sessionStorage.removeItem(COVER_CACHE_KEY);
+            } catch {}
             
             // Markera som klar (släpp inloggning)
             mediaPreloadCompleteRef.current = true;
             setMediaPreloadComplete(true);
             
-            // Video i bakgrunden (blockerar INTE)
+            // Video i bakgrunden (blockerar INTE men cachas för omedelbar visning)
             if (processedProfile.video_url) {
               (async () => {
                 try {
                   const videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
                   if (videoUrl) {
+                    // Spara till state OCH sessionStorage
+                    setPreloadedVideoUrl(videoUrl);
+                    try { sessionStorage.setItem(VIDEO_CACHE_KEY, videoUrl); } catch {}
+                    
                     const { imageCache } = await import('@/lib/imageCache');
                     await imageCache.preloadImages([videoUrl]);
                   }
@@ -355,6 +394,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error('Media preload error:', error);
             setPreloadedAvatarUrl(null);
             setPreloadedCoverUrl(null);
+            setPreloadedVideoUrl(null);
             mediaPreloadCompleteRef.current = true;
             setMediaPreloadComplete(true);
           }
@@ -1088,6 +1128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authAction,
     preloadedAvatarUrl,
     preloadedCoverUrl,
+    preloadedVideoUrl,
     signUp,
     signIn,
     signInWithPhone,
