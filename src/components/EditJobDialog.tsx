@@ -872,10 +872,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     setShowWorkLocationDropdown(false);
     
     // Auto-set remote_work_possible based on work location type
-    if (type.value === 'hemarbete' || type.value === 'distans' || type.value === 'hybridarbete' || type.value === 'utomlandsarbete') {
+    if (type.value === 'hemarbete' || type.value === 'hybridarbete' || type.value === 'utomlands') {
       handleInputChange('remote_work_possible', 'delvis');
       setRemoteWorkSearchTerm('Delvis');
-    } else if (type.value === 'på plats' || type.value === 'fältarbete') {
+    } else if (type.value === 'på-plats' || type.value === 'fältarbete') {
       handleInputChange('remote_work_possible', 'nej');
       setRemoteWorkSearchTerm('Nej');
     }
