@@ -77,6 +77,7 @@ const JobSwipe = () => {
   const [swiping, setSwiping] = useState(false);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [currentJobQuestions, setCurrentJobQuestions] = useState<any[]>([]);
+  const [currentJobImageUrl, setCurrentJobImageUrl] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -93,6 +94,41 @@ const JobSwipe = () => {
       preloadImages(jobImageUrls);
     }
   }, [jobImageUrls]);
+
+  // Load current job image
+  useEffect(() => {
+    const loadCurrentJobImage = async () => {
+      const currentJob = jobs[currentJobIndex];
+      if (!currentJob?.job_image_url) {
+        setCurrentJobImageUrl(null);
+        return;
+      }
+
+      try {
+        // If already a full URL, use as-is
+        if (currentJob.job_image_url.startsWith('http')) {
+          setCurrentJobImageUrl(currentJob.job_image_url);
+          return;
+        }
+
+        // Get public URL from job-images bucket
+        const { data } = supabase.storage
+          .from('job-images')
+          .getPublicUrl(currentJob.job_image_url);
+        
+        if (data?.publicUrl) {
+          setCurrentJobImageUrl(data.publicUrl);
+        } else {
+          setCurrentJobImageUrl(null);
+        }
+      } catch (err) {
+        console.error('Error loading job image:', err);
+        setCurrentJobImageUrl(null);
+      }
+    };
+
+    loadCurrentJobImage();
+  }, [jobs, currentJobIndex]);
 
   const fetchJobs = async () => {
     try {
@@ -284,19 +320,51 @@ const JobSwipe = () => {
           className={`overflow-hidden border-2 transition-all duration-300 ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer`}
           onClick={handleCardClick}
         >
-          <CardContent className="p-3 md:p-6 space-y-3 md:space-y-4">
-            {/* Company info */}
-            <div className="flex items-center gap-2 mb-4">
-              <Building2 className="h-5 w-5 text-muted-foreground" />
-              <span className="font-medium">
-                {currentJob.profiles?.company_name || 
-                 `${currentJob.profiles?.first_name} ${currentJob.profiles?.last_name}` || 
-                 'Företag'}
-              </span>
+          {/* Job Image */}
+          {currentJobImageUrl && (
+            <div className="relative w-full h-48 md:h-56 overflow-hidden">
+              <img
+                src={currentJobImageUrl}
+                alt={`${currentJob.title} hos ${currentJob.profiles?.company_name || 'företaget'}`}
+                className="w-full h-full object-cover"
+                loading="eager"
+                fetchPriority="high"
+              />
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              
+              {/* Title overlay on image */}
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Building2 className="h-4 w-4 text-white/80" />
+                  <span className="text-white/90 text-sm font-medium">
+                    {currentJob.profiles?.company_name || 
+                     `${currentJob.profiles?.first_name} ${currentJob.profiles?.last_name}` || 
+                     'Företag'}
+                  </span>
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">{currentJob.title}</h3>
+              </div>
             </div>
+          )}
 
-            {/* Job title */}
-            <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">{currentJob.title}</h3>
+          <CardContent className={`${currentJobImageUrl ? 'p-3 md:p-4' : 'p-3 md:p-6'} space-y-3 md:space-y-4`}>
+            {/* Company info - only show if no image */}
+            {!currentJobImageUrl && (
+              <div className="flex items-center gap-2 mb-4">
+                <Building2 className="h-5 w-5 text-muted-foreground" />
+                <span className="font-medium">
+                  {currentJob.profiles?.company_name || 
+                   `${currentJob.profiles?.first_name} ${currentJob.profiles?.last_name}` || 
+                   'Företag'}
+                </span>
+              </div>
+            )}
+
+            {/* Job title - only show if no image */}
+            {!currentJobImageUrl && (
+              <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">{currentJob.title}</h3>
+            )}
 
             {/* Location and type */}
             <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
