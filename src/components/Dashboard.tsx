@@ -34,6 +34,15 @@ const Dashboard = memo(() => {
   });
   const { profile } = useAuth();
   const navigate = useNavigate();
+  
+  // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => setShowContent(true), 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
 
   // Dashboard only shows active AND non-expired jobs - drafts and expired jobs are only in "Mina Annonser"
   const jobs = useMemo(() => allJobs.filter(job => 
@@ -86,8 +95,8 @@ const Dashboard = memo(() => {
     { icon: Users, title: 'Ansökningar', value: stats.totalApplications, loading: false },
   ], [stats]);
 
-  // Wait for data before showing content with fade
-  if (isLoading) {
+  // Wait for data AND minimum delay before showing content with fade
+  if (isLoading || !showContent) {
     return (
       <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 opacity-0">
         {/* Invisible placeholder to prevent layout shift */}
