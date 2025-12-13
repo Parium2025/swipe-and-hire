@@ -3663,7 +3663,7 @@ const MobileJobWizard = ({
                                               min={question.min_value ?? 0}
                                               max={question.max_value ?? 100}
                                               value={previewAnswers[question.id || `q_${index}`] || question.min_value || 0}
-                                              className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-white/20 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-track]:bg-white/20 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-progress]:bg-white"
+                                              className="w-full h-1 bg-transparent rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-white/30 [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:mt-[-3px] [&::-moz-range-track]:bg-white/30 [&::-moz-range-track]:h-1 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
                                               onChange={(e) => setPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                             />
                                           </div>
@@ -4208,7 +4208,7 @@ const MobileJobWizard = ({
                                                     min={question.min_value ?? 0}
                                                     max={question.max_value ?? 100}
                                                     value={desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0}
-                                                    className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-white/20 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-track]:bg-white/20 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-progress]:bg-white"
+                                                    className="w-full h-1 bg-transparent rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-white/30 [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:mt-[-3px] [&::-moz-range-track]:bg-white/30 [&::-moz-range-track]:h-1 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
                                                     onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                   />
                                                 </div>
