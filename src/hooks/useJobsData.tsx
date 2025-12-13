@@ -112,8 +112,9 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       }
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0, // Always refetch in background
+    gcTime: Infinity, // Keep in cache permanently during session
+    refetchOnWindowFocus: false,
   });
 
   // Real-time subscription for job_postings changes
