@@ -724,11 +724,7 @@ const SearchJobs = () => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className={`h-8 w-8 p-0 border-white/20 transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white ${
-                                isJobSaved(job.id) 
-                                  ? 'bg-red-500/20 border-red-500/40 md:hover:bg-red-500/30' 
-                                  : 'bg-white/5'
-                              }`}
+                              className="h-8 w-8 p-0 bg-white/5 border-white/20 transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
