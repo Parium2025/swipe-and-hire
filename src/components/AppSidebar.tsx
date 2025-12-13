@@ -2,7 +2,9 @@ import React, { useEffect, useState, memo, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { useSavedJobs } from "@/hooks/useSavedJobs";
 import { preloadImages } from "@/lib/serviceWorkerManager";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
   SidebarContent,
@@ -26,16 +28,9 @@ import {
   Building,
   Crown,
   Settings,
-  Eye
+  Eye,
+  Heart
 } from "lucide-react";
-
-
-import { Heart } from "lucide-react";
-
-const mainItems = [
-  { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
-  { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart },
-];
 
 const profileItems = [
   { title: 'Min Profil', url: '/profile', icon: User },
@@ -55,6 +50,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
+  const { savedCount } = useSavedJobs();
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(preloadedAvatarUrl ?? null);
   // Använd preloadedVideoUrl från AuthProvider (sessionStorage-cachad precis som arbetsgivarsidan)
@@ -62,6 +58,19 @@ export function AppSidebar() {
   const [coverUrl, setCoverUrl] = useState<string | null>(preloadedCoverUrl ?? null);
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [totalActiveJobs, setTotalActiveJobs] = useState<number>(0);
+  
+  // Hämta antal aktiva jobb i systemet
+  useEffect(() => {
+    const fetchJobCount = async () => {
+      const { count } = await supabase
+        .from('job_postings')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true);
+      setTotalActiveJobs(count || 0);
+    };
+    fetchJobCount();
+  }, []);
   
   // Håll avatar/cover/video i synk med preloadern även om de uppdateras efter mount
   useEffect(() => {
@@ -223,7 +232,10 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-               {mainItems.map((item) => (
+               {[
+                 { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: totalActiveJobs },
+                 { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: savedCount },
+               ].map((item) => (
                  <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                       asChild
@@ -240,7 +252,11 @@ export function AppSidebar() {
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="font-medium">{item.title}</span>}
+                      {!collapsed && (
+                        <span className="font-medium">
+                          {item.title} ({item.count})
+                        </span>
+                      )}
                     </button>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
