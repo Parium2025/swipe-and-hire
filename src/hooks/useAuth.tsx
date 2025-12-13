@@ -72,6 +72,8 @@ const EMPLOYER_TOTAL_VIEWS_CACHE_KEY = 'parium_employer_total_views';
 const EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY = 'parium_employer_total_applications';
 const EMPLOYER_CANDIDATES_CACHE_KEY = 'parium_employer_candidates';
 const UNREAD_MESSAGES_CACHE_KEY = 'parium_unread_messages';
+const JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY = 'parium_job_seeker_unread_messages';
+const COMPANY_REVIEWS_COUNT_CACHE_KEY = 'parium_company_reviews_count';
 const COMPANY_LOGO_CACHE_KEY = 'parium_company_logo_url';
 
 interface AuthContextType {
@@ -99,6 +101,8 @@ interface AuthContextType {
   preloadedEmployerTotalApplications: number;
   preloadedEmployerCandidates: number;
   preloadedUnreadMessages: number;
+  preloadedJobSeekerUnreadMessages: number;
+  preloadedCompanyReviewsCount: number;
   refreshSidebarCounts: () => Promise<void>;
   refreshEmployerStats: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
@@ -231,6 +235,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [preloadedUnreadMessages, setPreloadedUnreadMessages] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(UNREAD_MESSAGES_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedJobSeekerUnreadMessages, setPreloadedJobSeekerUnreadMessages] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedCompanyReviewsCount, setPreloadedCompanyReviewsCount] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(COMPANY_REVIEWS_COUNT_CACHE_KEY) : null;
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
@@ -1264,6 +1280,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const newSavedJobs = savedJobs || 0;
         setPreloadedSavedJobs(newSavedJobs);
         try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
+
+        // Hämta antal olästa meddelanden för jobbsökare
+        const { count: jobSeekerUnread } = await supabase
+          .from('messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('recipient_id', user.id)
+          .eq('is_read', false);
+        
+        const jsUnread = jobSeekerUnread || 0;
+        setPreloadedJobSeekerUnreadMessages(jsUnread);
+        try { sessionStorage.setItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY, String(jsUnread)); } catch {}
       }
     } catch (err) {
       console.error('Error refreshing sidebar counts:', err);
@@ -1330,6 +1357,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const unread = unreadCount || 0;
       setPreloadedUnreadMessages(unread);
       try { sessionStorage.setItem(UNREAD_MESSAGES_CACHE_KEY, String(unread)); } catch {}
+
+      // Hämta antal company reviews för denna employer
+      const { count: reviewsCount } = await supabase
+        .from('company_reviews')
+        .select('id', { count: 'exact', head: true })
+        .eq('company_id', user.id);
+      
+      const reviews = reviewsCount || 0;
+      setPreloadedCompanyReviewsCount(reviews);
+      try { sessionStorage.setItem(COMPANY_REVIEWS_COUNT_CACHE_KEY, String(reviews)); } catch {}
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
     }
@@ -1378,12 +1415,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
       .subscribe();
 
-    // Real-time för meddelanden (uppdaterar oläst-badge)
+    // Real-time för meddelanden (uppdaterar oläst-badge för både employer och jobbsökare)
     const messagesChannel = supabase
       .channel(`auth-messages-${user.id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
+        () => {
+          refreshEmployerStats();
+          refreshSidebarCounts();
+        }
+      )
+      .subscribe();
+
+    // Real-time för company reviews (uppdaterar recensionsräknare för arbetsgivare)
+    const reviewsChannel = supabase
+      .channel(`auth-reviews-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'company_reviews', filter: `company_id=eq.${user.id}` },
         () => refreshEmployerStats()
       )
       .subscribe();
@@ -1393,6 +1443,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.removeChannel(savedChannel);
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(reviewsChannel);
     };
   }, [user]);
 
@@ -1418,6 +1469,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedEmployerTotalApplications,
     preloadedEmployerCandidates,
     preloadedUnreadMessages,
+    preloadedJobSeekerUnreadMessages,
+    preloadedCompanyReviewsCount,
     refreshSidebarCounts,
     refreshEmployerStats,
     signUp,

@@ -23,7 +23,7 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import LocationSearchInput from '@/components/LocationSearchInput';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 
@@ -55,6 +55,7 @@ interface Job {
 const SearchJobs = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek } = useAuth();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const [searchInput, setSearchInput] = useState('');
@@ -184,6 +185,25 @@ const SearchJobs = () => {
       preloadImages(jobImageUrls);
     }
   }, [jobImageUrls]);
+
+  // Realtime-prenumeration för live-uppdatering av jobb
+  useEffect(() => {
+    const channel = supabase
+      .channel('search-jobs-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'job_postings' },
+        () => {
+          // Invalidera och hämta ny data när jobb ändras
+          queryClient.invalidateQueries({ queryKey: ['public-jobs'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   // Filter and sort jobs
   const filteredAndSortedJobs = useMemo(() => {

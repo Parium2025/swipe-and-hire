@@ -44,7 +44,7 @@ const businessItems = [
 export function AppSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs } = useAuth();
+  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs, preloadedJobSeekerUnreadMessages } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
@@ -217,8 +217,9 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
                {[
-                 { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: preloadedTotalJobs },
-                 { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: preloadedSavedJobs },
+                 { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: preloadedTotalJobs, showBadge: false },
+                 { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: preloadedSavedJobs, showBadge: false },
+                 { title: 'Meddelanden', url: '/messages', icon: MessageCircle, count: preloadedJobSeekerUnreadMessages, showBadge: preloadedJobSeekerUnreadMessages > 0 },
                ].map((item) => (
                  <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
@@ -235,10 +236,28 @@ export function AppSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
-                      <item.icon className="h-4 w-4" />
+                      <div className="relative">
+                        <item.icon className="h-4 w-4" />
+                        {item.showBadge && (
+                          <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500" />
+                        )}
+                      </div>
                       {!collapsed && (
-                        <span className="font-medium">
-                          {item.title} ({item.count})
+                        <span className="font-medium flex items-center gap-2">
+                          {item.title === 'Meddelanden' ? (
+                            <>
+                              {item.title}
+                              {item.count > 0 && (
+                                <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                  {item.count}
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {item.title} ({item.count})
+                            </>
+                          )}
                         </span>
                       )}
                     </button>
