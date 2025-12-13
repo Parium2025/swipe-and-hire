@@ -1,10 +1,8 @@
-import React, { useEffect, useState, memo, useMemo, useCallback } from "react";
+import React, { useEffect, useState, memo, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { useSavedJobs } from "@/hooks/useSavedJobs";
 import { preloadImages } from "@/lib/serviceWorkerManager";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
   SidebarContent,
@@ -46,11 +44,10 @@ const businessItems = [
 export function AppSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl } = useAuth();
+  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
-  const { savedCount } = useSavedJobs();
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(preloadedAvatarUrl ?? null);
   // Använd preloadedVideoUrl från AuthProvider (sessionStorage-cachad precis som arbetsgivarsidan)
@@ -58,42 +55,6 @@ export function AppSidebar() {
   const [coverUrl, setCoverUrl] = useState<string | null>(preloadedCoverUrl ?? null);
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
-  const [totalActiveJobs, setTotalActiveJobs] = useState<number>(0);
-  
-  // Hämta antal aktiva jobb i systemet
-  const fetchJobCount = useCallback(async () => {
-    const { count } = await supabase
-      .from('job_postings')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_active', true);
-    setTotalActiveJobs(count || 0);
-  }, []);
-
-  useEffect(() => {
-    fetchJobCount();
-  }, [fetchJobCount]);
-
-  // Realtime-prenumeration för jobb-uppdateringar
-  useEffect(() => {
-    const channel = supabase
-      .channel('sidebar-job-count')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'job_postings'
-        },
-        () => {
-          fetchJobCount();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchJobCount]);
   
   // Håll avatar/cover/video i synk med preloadern även om de uppdateras efter mount
   useEffect(() => {
@@ -256,8 +217,8 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
                {[
-                 { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: totalActiveJobs },
-                 { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: savedCount },
+                 { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: preloadedTotalJobs },
+                 { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: preloadedSavedJobs },
                ].map((item) => (
                  <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
