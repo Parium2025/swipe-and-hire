@@ -3639,15 +3639,15 @@ const MobileJobWizard = ({
                                                   }}
                                                   className={`w-full flex items-center gap-2 p-1.5 rounded-lg border transition-all ${
                                                     selected
-                                                      ? 'bg-white/15 border-white/40'
+                                                      ? 'bg-secondary/40 border-secondary'
                                                       : 'bg-white/10 border-white/20 hover:bg-white/15'
                                                   }`}
                                                 >
-                                                  <div className={`w-3 h-3 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                                    selected ? 'border-white' : 'border-white/40'
+                                                  <div className={`w-2 h-2 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                                                    selected ? 'border-secondary bg-secondary' : 'border-white/40'
                                                   }`}>
                                                     {selected && (
-                                                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                                                      <div className="w-1 h-1 rounded-full bg-white" />
                                                     )}
                                                   </div>
                                                   <span className="text-xs text-white text-left flex-1">{option}</span>
@@ -4184,17 +4184,17 @@ const MobileJobWizard = ({
                                                           }}
                                                           className={
                                                             (selected
-                                                              ? 'bg-white border-white '
-                                                              : 'bg-white/90 border-white ') +
-                                                            'text-slate-900 w-full flex items-center gap-2 rounded px-2 py-1 border transition-colors hover:bg-white'
+                                                              ? 'bg-secondary/40 border-secondary '
+                                                              : 'bg-white/10 border-white/20 ') +
+                                                            'text-white w-full flex items-center gap-2 rounded px-2 py-1 border transition-colors hover:bg-white/15'
                                                           }
                                                         >
                                                           <div className={
                                                             selected
-                                                              ? 'w-2 h-2 rounded-sm bg-secondary flex-shrink-0'
-                                                              : 'w-2 h-2 rounded-sm border border-slate-400 flex-shrink-0'
+                                                              ? 'w-2 h-2 rounded-full border border-secondary bg-secondary flex-shrink-0'
+                                                              : 'w-2 h-2 rounded-full border border-white/40 flex-shrink-0'
                                                           } />
-                                                          <span className="text-xs text-slate-900">{option}</span>
+                                                          <span className="text-xs text-white">{option}</span>
                                                         </button>
                                                       );
                                                     })}
