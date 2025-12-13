@@ -10,7 +10,7 @@ import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
-import { formatDateShortSv } from '@/lib/date';
+import { formatDateShortSv, isJobExpiredCheck } from '@/lib/date';
 import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
@@ -34,8 +34,10 @@ const Dashboard = memo(() => {
   const { profile } = useAuth();
   const navigate = useNavigate();
 
-  // Dashboard only shows active jobs - drafts are only in "Mina Annonser"
-  const jobs = useMemo(() => allJobs.filter(job => job.is_active), [allJobs]);
+  // Dashboard only shows active AND non-expired jobs - drafts and expired jobs are only in "Mina Annonser"
+  const jobs = useMemo(() => allJobs.filter(job => 
+    job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)
+  ), [allJobs]);
 
   const {
     searchInput,
