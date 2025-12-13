@@ -27,7 +27,8 @@ import {
   Crown,
   Settings,
   Eye,
-  Heart
+  Heart,
+  FileText
 } from "lucide-react";
 
 const profileItems = [
@@ -219,6 +220,7 @@ export function AppSidebar() {
                {[
                  { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: preloadedTotalJobs, showBadge: false },
                  { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: preloadedSavedJobs, showBadge: false },
+                 { title: 'Mina Ansökningar', url: '/my-applications', icon: FileText, count: null, showBadge: false },
                  { title: 'Meddelanden', url: '/messages', icon: MessageCircle, count: preloadedJobSeekerUnreadMessages, showBadge: preloadedJobSeekerUnreadMessages > 0 },
                ].map((item) => (
                  <SidebarMenuItem key={item.title}>
@@ -253,10 +255,12 @@ export function AppSidebar() {
                                 </span>
                               )}
                             </>
-                          ) : (
+                          ) : item.count !== null ? (
                             <>
                               {item.title} ({item.count})
                             </>
+                          ) : (
+                            item.title
                           )}
                         </span>
                       )}
