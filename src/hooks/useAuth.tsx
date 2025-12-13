@@ -70,6 +70,7 @@ const EMPLOYER_MY_JOBS_CACHE_KEY = 'parium_employer_my_jobs';
 const EMPLOYER_ACTIVE_JOBS_CACHE_KEY = 'parium_employer_active_jobs';
 const EMPLOYER_TOTAL_VIEWS_CACHE_KEY = 'parium_employer_total_views';
 const EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY = 'parium_employer_total_applications';
+const COMPANY_LOGO_CACHE_KEY = 'parium_company_logo_url';
 
 interface AuthContextType {
   user: User | null;
@@ -83,6 +84,7 @@ interface AuthContextType {
   preloadedAvatarUrl: string | null;
   preloadedCoverUrl: string | null;
   preloadedVideoUrl: string | null;
+  preloadedCompanyLogoUrl: string | null;
   /** Förladdade räknare för sidebar och stats (jobbsökare) */
   preloadedTotalJobs: number;
   preloadedSavedJobs: number;
@@ -210,6 +212,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY) : null;
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
+  });
+  const [preloadedCompanyLogoUrl, setPreloadedCompanyLogoUrl] = useState<string | null>(() => {
+    try {
+      return typeof window !== 'undefined' ? sessionStorage.getItem(COMPANY_LOGO_CACHE_KEY) : null;
+    } catch { return null; }
   });
   const isManualSignOutRef = useRef(false);
   const isInitializingRef = useRef(true);
@@ -457,6 +464,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   }
                 } catch (err) {
                   console.warn('Background video preload failed:', err);
+                }
+              })();
+            }
+            
+            // Company logo för employer sidebar (public bucket, ingen signed URL behövs)
+            if ((processedProfile as any).company_logo_url) {
+              const companyLogoUrl = (processedProfile as any).company_logo_url;
+              setPreloadedCompanyLogoUrl(companyLogoUrl);
+              try { sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, companyLogoUrl); } catch {}
+              
+              // Preload logo image
+              (async () => {
+                try {
+                  const { imageCache } = await import('@/lib/imageCache');
+                  await imageCache.preloadImages([companyLogoUrl]);
+                } catch (err) {
+                  console.warn('Company logo preload failed:', err);
                 }
               })();
             }
@@ -1329,6 +1353,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedAvatarUrl,
     preloadedCoverUrl,
     preloadedVideoUrl,
+    preloadedCompanyLogoUrl,
     preloadedTotalJobs,
     preloadedSavedJobs,
     preloadedUniqueCompanies,

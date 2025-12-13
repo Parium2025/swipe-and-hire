@@ -115,7 +115,7 @@ const LOGO_CACHE_KEY = 'parium_company_logo_url';
 export function EmployerSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, signOut, user } = useAuth();
+  const { profile, signOut, user, preloadedCompanyLogoUrl } = useAuth();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const queryClient = useQueryClient();
@@ -134,6 +134,9 @@ export function EmployerSidebar() {
   };
 
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
+    // Prioritera preloaded URL från AuthProvider
+    if (preloadedCompanyLogoUrl) return preloadedCompanyLogoUrl;
+    
     const fromProfile = (profile as any)?.company_logo_url as string | undefined;
     // Only use cache if profile hasn't explicitly set logo to empty
     if (fromProfile === '' || fromProfile === null) {
@@ -161,6 +164,12 @@ export function EmployerSidebar() {
 
   // Keep last known logo; don't reset state unless value actually changes
   useEffect(() => {
+    // Prioritera preloaded URL från AuthProvider
+    if (preloadedCompanyLogoUrl && preloadedCompanyLogoUrl !== companyLogoUrl) {
+      setCompanyLogoUrl(preloadedCompanyLogoUrl);
+      return;
+    }
+    
     const raw = (profile as any)?.company_logo_url;
     if (typeof raw === 'string' && raw.trim() !== '') {
       try {
@@ -184,7 +193,7 @@ export function EmployerSidebar() {
       try { sessionStorage.removeItem(LOGO_CACHE_KEY); } catch {}
     }
     // if undefined, keep previous URL while profile is re-fetching
-  }, [(profile as any)?.company_logo_url]);
+  }, [(profile as any)?.company_logo_url, preloadedCompanyLogoUrl]);
 
   // Listen for unsaved changes cancel event to close sidebar
   useEffect(() => {
