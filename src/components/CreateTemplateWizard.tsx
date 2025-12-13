@@ -623,11 +623,13 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     handleInputChange('workplace_postal_code', postalCode);
   }, []);
 
-  const handleWorkplaceLocationChange = useCallback((location: string) => {
+  const handleWorkplaceLocationChange = useCallback((location: string, postalCode?: string, municipality?: string, county?: string) => {
     setFormData(prev => ({
       ...prev,
       workplace_city: location,
-      location: location
+      location: location,
+      workplace_municipality: municipality || prev.workplace_municipality,
+      workplace_county: county || prev.workplace_county
     }));
   }, []);
 

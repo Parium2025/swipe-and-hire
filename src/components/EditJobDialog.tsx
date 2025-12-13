@@ -931,7 +931,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     setFormData(prev => ({
       ...prev,
       workplace_city: value,
-      location: value // Auto-update main location field from postal code
+      location: value, // Auto-update main location field from postal code
+      workplace_municipality: municipality || prev.workplace_municipality,
+      workplace_county: county || prev.workplace_county
     }));
     
     // Cache postal code info if available
