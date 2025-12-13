@@ -119,9 +119,9 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
           <h3 className="text-base font-bold text-white line-clamp-2 leading-tight">
             {job.title}
           </h3>
-          <div className="flex items-center gap-2 text-sm text-white/80">
-            <Building2 className="h-4 w-4 flex-shrink-0" />
-            <span className="font-medium">{companyName}</span>
+          <div className="flex items-center gap-2 text-sm text-white">
+            <Building2 className="h-4 w-4 flex-shrink-0 text-white" />
+            <span className="font-medium text-white">{companyName}</span>
           </div>
         </div>
 
@@ -148,9 +148,9 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
         )}
 
         {/* Location */}
-        <div className="flex items-center gap-2 text-sm text-white/80">
-          <MapPin className="h-4 w-4 flex-shrink-0" />
-          <span className="truncate">{job.location}</span>
+        <div className="flex items-center gap-2 text-sm text-white">
+          <MapPin className="h-4 w-4 flex-shrink-0 text-white" />
+          <span className="truncate text-white">{job.location}</span>
         </div>
 
         {/* Stats Row with Save Button */}
