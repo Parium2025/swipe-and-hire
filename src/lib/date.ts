@@ -24,8 +24,8 @@ export function getEffectiveExpiresAt(createdAt: string, expiresAt?: string | nu
   if (expiresAt) {
     return new Date(expiresAt);
   }
-  // Default: 14 days from creation
-  return addDays(new Date(createdAt), 14);
+  // Default: 1 day from creation (temporary for testing, change to 14 for production)
+  return addDays(new Date(createdAt), 1);
 }
 
 /**
