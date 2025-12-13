@@ -2096,6 +2096,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <div>
                     <p className="text-white text-sm mb-1">Arbetsplats</p>
                     <p className="text-white">{formData.workplace_name || '-'}</p>
+                    {(formData.workplace_postal_code || formData.workplace_city) && (
+                      <p className="text-white">
+                        {formData.workplace_postal_code && formData.workplace_city 
+                          ? `${formData.workplace_postal_code} ${formData.workplace_city}${formData.workplace_county ? `, ${formData.workplace_county}` : ''}`
+                          : formData.workplace_city 
+                            ? `${formData.workplace_city}${formData.workplace_county ? `, ${formData.workplace_county}` : ''}`
+                            : formData.workplace_postal_code
+                        }
+                      </p>
+                    )}
                   </div>
                   
                   {formData.workplace_address && (

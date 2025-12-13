@@ -2487,19 +2487,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             {(formData.workplace_postal_code || formData.workplace_city) && (
                                               <div>
                                                 {formData.workplace_postal_code && formData.workplace_city ? (
-                                                  <>
-                                                    <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
-                                                    {(formData.workplace_county || cachedPostalCodeInfo?.county) && (
-                                                      <div>{formData.workplace_county || cachedPostalCodeInfo?.county}</div>
-                                                    )}
-                                                  </>
+                                                  <div>
+                                                    {formData.workplace_postal_code} {formData.workplace_city}{(formData.workplace_county || cachedPostalCodeInfo?.county) ? `, ${formData.workplace_county || cachedPostalCodeInfo?.county}` : ''}
+                                                  </div>
                                                 ) : formData.workplace_city ? (
-                                                  <>
-                                                    <div>{formData.workplace_city}</div>
-                                                    {(formData.workplace_county || cachedPostalCodeInfo?.county) && (
-                                                      <div>{formData.workplace_county || cachedPostalCodeInfo?.county}</div>
-                                                    )}
-                                                  </>
+                                                  <div>
+                                                    {formData.workplace_city}{(formData.workplace_county || cachedPostalCodeInfo?.county) ? `, ${formData.workplace_county || cachedPostalCodeInfo?.county}` : ''}
+                                                  </div>
                                                 ) : (
                                                   <div>{formData.workplace_postal_code}</div>
                                                 )}
@@ -2980,19 +2974,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               {(formData.workplace_postal_code || formData.workplace_city) && (
                                                 <div>
                                                   {formData.workplace_postal_code && formData.workplace_city ? (
-                                                    <>
-                                                      <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
-                                                      {(formData.workplace_county || cachedPostalCodeInfo?.county) && (
-                                                        <div>{formData.workplace_county || cachedPostalCodeInfo?.county}</div>
-                                                      )}
-                                                    </>
+                                                    <div>
+                                                      {formData.workplace_postal_code} {formData.workplace_city}{(formData.workplace_county || cachedPostalCodeInfo?.county) ? `, ${formData.workplace_county || cachedPostalCodeInfo?.county}` : ''}
+                                                    </div>
                                                   ) : formData.workplace_city ? (
-                                                    <>
-                                                      <div>{formData.workplace_city}</div>
-                                                      {(formData.workplace_county || cachedPostalCodeInfo?.county) && (
-                                                        <div>{formData.workplace_county || cachedPostalCodeInfo?.county}</div>
-                                                      )}
-                                                    </>
+                                                    <div>
+                                                      {formData.workplace_city}{(formData.workplace_county || cachedPostalCodeInfo?.county) ? `, ${formData.workplace_county || cachedPostalCodeInfo?.county}` : ''}
+                                                    </div>
                                                   ) : (
                                                     <div>{formData.workplace_postal_code}</div>
                                                   )}

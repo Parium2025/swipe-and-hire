@@ -3399,15 +3399,13 @@ const MobileJobWizard = ({
                                      {(formData.workplace_postal_code || formData.workplace_city) && (
                                        <div>
                                          {formData.workplace_postal_code && formData.workplace_city ? (
-                                           <>
-                                             <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
-                                             {formData.workplace_county && <div>{formData.workplace_county}</div>}
-                                           </>
+                                           <div>
+                                             {formData.workplace_postal_code} {formData.workplace_city}{formData.workplace_county ? `, ${formData.workplace_county}` : ''}
+                                           </div>
                                          ) : formData.workplace_city ? (
-                                           <>
-                                             <div>{formData.workplace_city}</div>
-                                             {formData.workplace_county && <div>{formData.workplace_county}</div>}
-                                           </>
+                                           <div>
+                                             {formData.workplace_city}{formData.workplace_county ? `, ${formData.workplace_county}` : ''}
+                                           </div>
                                          ) : (
                                            <div>{formData.workplace_postal_code}</div>
                                          )}
@@ -3941,15 +3939,13 @@ const MobileJobWizard = ({
                                         {(formData.workplace_postal_code || formData.workplace_city) && (
                                           <div>
                                             {formData.workplace_postal_code && formData.workplace_city ? (
-                                              <>
-                                                <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
-                                                {formData.workplace_county && <div>{formData.workplace_county}</div>}
-                                              </>
+                                              <div>
+                                                {formData.workplace_postal_code} {formData.workplace_city}{formData.workplace_county ? `, ${formData.workplace_county}` : ''}
+                                              </div>
                                             ) : formData.workplace_city ? (
-                                              <>
-                                                <div>{formData.workplace_city}</div>
-                                                {formData.workplace_county && <div>{formData.workplace_county}</div>}
-                                              </>
+                                              <div>
+                                                {formData.workplace_city}{formData.workplace_county ? `, ${formData.workplace_county}` : ''}
+                                              </div>
                                             ) : (
                                               <div>{formData.workplace_postal_code}</div>
                                             )}
