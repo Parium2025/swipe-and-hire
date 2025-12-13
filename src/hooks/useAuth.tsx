@@ -61,6 +61,8 @@ interface Profile {
 const AVATAR_CACHE_KEY = 'parium_avatar_url';
 const COVER_CACHE_KEY = 'parium_cover_url';
 const VIDEO_CACHE_KEY = 'parium_video_url';
+const TOTAL_JOBS_CACHE_KEY = 'parium_total_jobs';
+const SAVED_JOBS_CACHE_KEY = 'parium_saved_jobs';
 
 interface AuthContextType {
   user: User | null;
@@ -74,6 +76,10 @@ interface AuthContextType {
   preloadedAvatarUrl: string | null;
   preloadedCoverUrl: string | null;
   preloadedVideoUrl: string | null;
+  /** Förladdade räknare för sidebar */
+  preloadedTotalJobs: number;
+  preloadedSavedJobs: number;
+  refreshSidebarCounts: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
     role: UserRole; 
     first_name: string; 
@@ -140,6 +146,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       return typeof window !== 'undefined' ? sessionStorage.getItem(VIDEO_CACHE_KEY) : null;
     } catch { return null; }
+  });
+  const [preloadedTotalJobs, setPreloadedTotalJobs] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(TOTAL_JOBS_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedSavedJobs, setPreloadedSavedJobs] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(SAVED_JOBS_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
   });
   const isManualSignOutRef = useRef(false);
   const isInitializingRef = useRef(true);
@@ -1118,6 +1136,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
 
+  // Funktion för att uppdatera sidebar-räknare (används av realtime + initial load)
+  const refreshSidebarCounts = async () => {
+    try {
+      // Hämta antal aktiva jobb
+      const { count: totalJobs } = await supabase
+        .from('job_postings')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true);
+      
+      const newTotalJobs = totalJobs || 0;
+      setPreloadedTotalJobs(newTotalJobs);
+      try { sessionStorage.setItem(TOTAL_JOBS_CACHE_KEY, String(newTotalJobs)); } catch {}
+
+      // Hämta antal sparade jobb för användaren
+      if (user) {
+        const { count: savedJobs } = await supabase
+          .from('saved_jobs')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+        
+        const newSavedJobs = savedJobs || 0;
+        setPreloadedSavedJobs(newSavedJobs);
+        try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
+      }
+    } catch (err) {
+      console.error('Error refreshing sidebar counts:', err);
+    }
+  };
+
+  // Ladda räknare vid inloggning
+  useEffect(() => {
+    if (user && !loading) {
+      refreshSidebarCounts();
+    }
+  }, [user, loading]);
+
+  // Realtime-prenumerationer för räknare
+  useEffect(() => {
+    if (!user) return;
+
+    const jobChannel = supabase
+      .channel('auth-job-count')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'job_postings' },
+        () => refreshSidebarCounts()
+      )
+      .subscribe();
+
+    const savedChannel = supabase
+      .channel(`auth-saved-jobs-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
+        () => refreshSidebarCounts()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(jobChannel);
+      supabase.removeChannel(savedChannel);
+    };
+  }, [user]);
+
   const value: AuthContextType = {
     user,
     session,
@@ -1129,6 +1211,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedAvatarUrl,
     preloadedCoverUrl,
     preloadedVideoUrl,
+    preloadedTotalJobs,
+    preloadedSavedJobs,
+    refreshSidebarCounts,
     signUp,
     signIn,
     signInWithPhone,
