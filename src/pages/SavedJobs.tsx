@@ -6,8 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer } from 'lucide-react';
+import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SavedJob {
@@ -154,26 +153,18 @@ const SavedJobs = () => {
            'Företag';
   };
 
-  // Only show skeleton on initial load (when no cached data exists)
-  const showSkeleton = isLoading && !isFetched && savedJobs.length === 0;
+  // Only show loading on initial load (when no cached data exists)
+  const showLoading = isLoading && !isFetched && savedJobs.length === 0;
 
-  if (showSkeleton) {
+  if (showLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 animate-fade-in">
+      <div className="max-w-4xl mx-auto px-3 md:px-6 py-6">
         <div className="text-center mb-8">
           <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Sparade Jobb</h1>
           <p className="text-white">Dina favorit-jobb samlade på ett ställe</p>
         </div>
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="bg-white/5 border-white/10">
-              <CardContent className="p-4">
-                <Skeleton className="h-6 w-3/4 bg-white/10 mb-2" />
-                <Skeleton className="h-4 w-1/2 bg-white/10 mb-2" />
-                <Skeleton className="h-4 w-1/3 bg-white/10" />
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-8 w-8 text-white/50 animate-spin" />
         </div>
       </div>
     );
