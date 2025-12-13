@@ -417,13 +417,7 @@ const JobView = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => {
-            if (window.history.length > 1) {
-              navigate(-1);
-            } else {
-              navigate('/search');
-            }
-          }}
+          onClick={() => navigate('/search-jobs')}
           className="text-white hover:bg-white/10 backdrop-blur-sm"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
