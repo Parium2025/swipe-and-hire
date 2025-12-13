@@ -115,7 +115,7 @@ const LOGO_CACHE_KEY = 'parium_company_logo_url';
 export function EmployerSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, signOut, user, preloadedCompanyLogoUrl } = useAuth();
+  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates } = useAuth();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const queryClient = useQueryClient();
@@ -365,7 +365,14 @@ export function EmployerSidebar() {
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="font-medium">{item.title}</span>}
+                      {!collapsed && (
+                        <span className="font-medium flex-1 text-left">{item.title}</span>
+                      )}
+                      {item.url === '/candidates' && preloadedEmployerCandidates > 0 && !collapsed && (
+                        <span className="bg-secondary text-secondary-foreground text-xs font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                          {preloadedEmployerCandidates}
+                        </span>
+                      )}
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
