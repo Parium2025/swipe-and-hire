@@ -5,10 +5,39 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info } from 'lucide-react';
+import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info, Briefcase, Gift, CalendarClock, Hash } from 'lucide-react';
 import JobApplicationDialog from './JobApplicationDialog';
 import { toast } from '@/hooks/use-toast';
 import { preloadImages } from '@/lib/serviceWorkerManager';
+
+// Map benefit keys to Swedish labels
+const getBenefitLabel = (benefit: string): string => {
+  const labels: Record<string, string> = {
+    forsakringar: 'Försäkringar',
+    fri_fika: 'Fri fika/frukt',
+    utbildning: 'Utbildning',
+    flexibla_arbetstider: 'Flexibla arbetstider',
+    kollektivavtal: 'Kollektivavtal',
+    fri_parkering: 'Fri parkering',
+    personalrabatter: 'Personalrabatter',
+    friskvardsbidrag: 'Friskvårdsbidrag',
+    tjanstepension: 'Tjänstepension',
+    bonus: 'Bonus',
+    hemarbete: 'Möjlighet till hemarbete',
+  };
+  return labels[benefit] || benefit;
+};
+
+// Map salary type to Swedish label
+const getSalaryTypeLabel = (salaryType: string): string => {
+  const labels: Record<string, string> = {
+    monthly: 'Månadslön',
+    hourly: 'Timlön',
+    fixed: 'Fast lön',
+    commission: 'Provision',
+  };
+  return labels[salaryType] || salaryType;
+};
 
 interface JobPosting {
   id: string;
@@ -17,10 +46,20 @@ interface JobPosting {
   location: string;
   salary_min?: number;
   salary_max?: number;
+  salary_type?: string;
+  salary_transparency?: string;
   employment_type?: string;
   work_schedule?: string;
+  work_start_time?: string;
+  work_end_time?: string;
   contact_email?: string;
   application_instructions?: string;
+  pitch?: string;
+  benefits?: string[];
+  positions_count?: number;
+  workplace_city?: string;
+  workplace_county?: string;
+  workplace_address?: string;
   created_at: string;
   employer_id: string;
   job_image_url?: string;
@@ -175,11 +214,14 @@ const JobSwipe = () => {
     }
   };
 
-  const formatSalary = (min?: number, max?: number) => {
+  const formatSalary = (min?: number, max?: number, salaryType?: string) => {
+    const typeLabel = salaryType ? getSalaryTypeLabel(salaryType) : '';
+    const suffix = salaryType === 'hourly' ? 'kr/tim' : 'kr/mån';
+    
     if (!min && !max) return 'Lön enligt överenskommelse';
-    if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} kr/mån`;
-    if (min) return `Från ${min.toLocaleString()} kr/mån`;
-    if (max) return `Upp till ${max.toLocaleString()} kr/mån`;
+    if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} ${suffix}${typeLabel ? ` (${typeLabel})` : ''}`;
+    if (min) return `Från ${min.toLocaleString()} ${suffix}${typeLabel ? ` (${typeLabel})` : ''}`;
+    if (max) return `Upp till ${max.toLocaleString()} ${suffix}${typeLabel ? ` (${typeLabel})` : ''}`;
     return '';
   };
 
@@ -260,36 +302,79 @@ const JobSwipe = () => {
             <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
               <Badge variant="outline" className="flex items-center gap-1">
                 <MapPin className="h-3 w-3" />
-                {currentJob.location}
+                {currentJob.workplace_city && currentJob.workplace_county 
+                  ? `${currentJob.workplace_city}, ${currentJob.workplace_county}`
+                  : currentJob.location}
               </Badge>
               {currentJob.employment_type && (
                 <Badge variant="outline" className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
+                  <Briefcase className="h-3 w-3" />
                   {getEmploymentTypeLabel(currentJob.employment_type)}
+                </Badge>
+              )}
+              {currentJob.positions_count && currentJob.positions_count > 1 && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Hash className="h-3 w-3" />
+                  {currentJob.positions_count} tjänster
                 </Badge>
               )}
             </div>
 
-            {/* Salary */}
+            {/* Salary with transparency */}
             <div className="mb-3 md:mb-4">
               <div className="flex items-center gap-1 md:gap-2 text-base md:text-lg font-semibold text-green-600">
                 <Euro className="h-5 w-5" />
-                {formatSalary(currentJob.salary_min, currentJob.salary_max)}
+                {formatSalary(currentJob.salary_min, currentJob.salary_max, currentJob.salary_type)}
               </div>
-              {currentJob.work_schedule && (
+              {currentJob.salary_transparency && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  Arbetstider: {currentJob.work_schedule}
+                  Lönetransparens: {currentJob.salary_transparency}
                 </p>
               )}
             </div>
 
+            {/* Work hours */}
+            {(currentJob.work_start_time || currentJob.work_end_time) && (
+              <div className="mb-3 md:mb-4">
+                <div className="flex items-center gap-2 text-sm">
+                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Arbetstider:</span>
+                  <span>{currentJob.work_start_time} - {currentJob.work_end_time}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Pitch - short description */}
+            {currentJob.pitch && (
+              <div className="mb-3 md:mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <p className="text-sm md:text-base italic">"{currentJob.pitch}"</p>
+              </div>
+            )}
+
             {/* Description */}
             <div className="mb-3 md:mb-4">
               <h4 className="font-semibold mb-2 text-base md:text-lg">Beskrivning</h4>
-              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                 {currentJob.description}
               </p>
             </div>
+
+            {/* Benefits */}
+            {currentJob.benefits && currentJob.benefits.length > 0 && (
+              <div className="mb-3 md:mb-4">
+                <h4 className="font-semibold mb-2 text-base md:text-lg flex items-center gap-2">
+                  <Gift className="h-4 w-4" />
+                  Förmåner
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {currentJob.benefits.map((benefit, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {getBenefitLabel(benefit)}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Application Instructions */}
             {currentJob.application_instructions && (
