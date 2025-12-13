@@ -133,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
         </p>
         <p style="color: #333333; font-size: 14px; margin: 0; line-height: 1.5;">
           Med dina jobbmallar kan du skapa en ny annons på under 60 sekunder. 
-          All information är redan sparad - du behöver bara klicka "Skapa ny annons" och välja din mall.
+          All information är redan sparad - du behöver bara välja din mall och trycka på "Skapa ny annons" och sedan "Publicera".
         </p>
       </div>
       
@@ -143,7 +143,7 @@ const handler = async (req: Request): Promise<Response> => {
           <td align="center" style="padding: 0;">
             <a href="https://parium.se/my-jobs" 
                style="background-color: #1a237e; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none;">
-              📋 Gå till Mina Annonser
+              Gå till Mina Annonser
             </a>
           </td>
         </tr>
