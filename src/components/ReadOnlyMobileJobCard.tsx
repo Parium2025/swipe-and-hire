@@ -2,9 +2,11 @@ import { memo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users, MapPin, Calendar, Building2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Eye, Users, MapPin, Calendar, Building2, Heart } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { supabase } from '@/integrations/supabase/client';
+import { useSavedJobs } from '@/hooks/useSavedJobs';
 
 interface ReadOnlyMobileJobCardProps {
   job: {
@@ -30,10 +32,17 @@ interface ReadOnlyMobileJobCardProps {
 
 export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
+  const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   // Get company name from either direct property or profiles join
   const companyName = job.company_name || job.profiles?.company_name || 'Okänt företag';
+  const isSaved = isJobSaved(job.id);
+
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleSaveJob(job.id);
+  };
 
   // Load and cache job image using stable public URL
   useEffect(() => {
@@ -144,7 +153,7 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
           <span className="truncate">{job.location}</span>
         </div>
 
-        {/* Stats Row */}
+        {/* Stats Row with Save Button */}
         <div className="flex items-center gap-4 text-xs text-white/60 pt-2 border-t border-white/10">
           <div className="flex items-center gap-1">
             <Eye className="h-3.5 w-3.5" />
@@ -154,7 +163,7 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
             <Users className="h-3.5 w-3.5" />
             <span>{job.applications_count || 0}</span>
           </div>
-          <div className="flex items-center gap-1 ml-auto">
+          <div className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" />
             <span>
               {new Date(job.created_at).toLocaleDateString('sv-SE', { 
@@ -163,6 +172,18 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
               })}
             </span>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSaveClick}
+            className={`ml-auto h-8 w-8 p-0 rounded-full transition-all ${
+              isSaved 
+                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
+                : 'text-white/60 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400' : ''}`} />
+          </Button>
         </div>
       </div>
     </Card>
