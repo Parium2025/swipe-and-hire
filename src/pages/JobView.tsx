@@ -486,17 +486,17 @@ const JobView = () => {
                   <div className="flex items-center gap-2 text-white text-xs md:text-sm uppercase tracking-wider mb-3">
                     {job.employment_type && (
                       <>
-                        <Briefcase className="h-3 w-3" />
-                        <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                        <Briefcase className="h-3 w-3 text-white" />
+                        <span className="text-white">{getEmploymentTypeLabel(job.employment_type)}</span>
                       </>
                     )}
                     {job.employment_type && job.location && (
-                      <span className="text-white/60">·</span>
+                      <span className="text-white">·</span>
                     )}
                     {job.location && (
                       <>
-                        <MapPin className="h-3 w-3" />
-                        <span>{job.location}</span>
+                        <MapPin className="h-3 w-3 text-white" />
+                        <span className="text-white">{job.location}</span>
                       </>
                     )}
                   </div>
@@ -545,22 +545,22 @@ const JobView = () => {
                 </h1>
 
                 <div className="space-y-2">
-                  <div className="flex items-center text-white/90 text-xs">
-                    <MapPin className="h-3.5 w-3.5 mr-1.5 text-white/70" />
-                    <span>{job.location}</span>
+                  <div className="flex items-center text-white text-xs">
+                    <MapPin className="h-3.5 w-3.5 mr-1.5 text-white" />
+                    <span className="text-white">{job.location}</span>
                   </div>
 
                   {job.employment_type && (
-                    <div className="flex items-center text-white/90 text-xs">
-                      <Briefcase className="h-3.5 w-3.5 mr-1.5 text-white/70" />
-                      <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                    <div className="flex items-center text-white text-xs">
+                      <Briefcase className="h-3.5 w-3.5 mr-1.5 text-white" />
+                      <span className="text-white">{getEmploymentTypeLabel(job.employment_type)}</span>
                     </div>
                   )}
 
                   {job.work_schedule && (
-                    <div className="flex items-center text-white/90 text-xs">
-                      <Clock className="h-3.5 w-3.5 mr-1.5 text-white/70" />
-                      <span>{job.work_schedule}</span>
+                    <div className="flex items-center text-white text-xs">
+                      <Clock className="h-3.5 w-3.5 mr-1.5 text-white" />
+                      <span className="text-white">{job.work_schedule}</span>
                     </div>
                     )}
 
@@ -572,16 +572,16 @@ const JobView = () => {
                   )}
 
                   {job.positions_count && job.positions_count > 1 && (
-                    <div className="flex items-center text-white/90 text-xs">
-                      <Hash className="h-3.5 w-3.5 mr-1.5 text-white/70" />
-                      <span>{job.positions_count} tjänster</span>
+                    <div className="flex items-center text-white text-xs">
+                      <Hash className="h-3.5 w-3.5 mr-1.5 text-white" />
+                      <span className="text-white">{job.positions_count} tjänster</span>
                     </div>
                   )}
 
                   {(job.work_start_time || job.work_end_time) && (
-                    <div className="flex items-center text-white/90 text-xs">
-                      <CalendarClock className="h-3.5 w-3.5 mr-1.5 text-white/70" />
-                      <span>Arbetstider: {job.work_start_time} - {job.work_end_time}</span>
+                    <div className="flex items-center text-white text-xs">
+                      <CalendarClock className="h-3.5 w-3.5 mr-1.5 text-white" />
+                      <span className="text-white">Arbetstider: {job.work_start_time} - {job.work_end_time}</span>
                     </div>
                   )}
                 </div>
