@@ -75,6 +75,7 @@ const UNREAD_MESSAGES_CACHE_KEY = 'parium_unread_messages';
 const JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY = 'parium_job_seeker_unread_messages';
 const COMPANY_REVIEWS_COUNT_CACHE_KEY = 'parium_company_reviews_count';
 const COMPANY_LOGO_CACHE_KEY = 'parium_company_logo_url';
+const MY_APPLICATIONS_CACHE_KEY = 'parium_my_applications';
 
 interface AuthContextType {
   user: User | null;
@@ -103,6 +104,7 @@ interface AuthContextType {
   preloadedUnreadMessages: number;
   preloadedJobSeekerUnreadMessages: number;
   preloadedCompanyReviewsCount: number;
+  preloadedMyApplications: number;
   refreshSidebarCounts: () => Promise<void>;
   refreshEmployerStats: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
@@ -247,6 +249,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [preloadedCompanyReviewsCount, setPreloadedCompanyReviewsCount] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(COMPANY_REVIEWS_COUNT_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedMyApplications, setPreloadedMyApplications] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(MY_APPLICATIONS_CACHE_KEY) : null;
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
@@ -1291,6 +1299,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const jsUnread = jobSeekerUnread || 0;
         setPreloadedJobSeekerUnreadMessages(jsUnread);
         try { sessionStorage.setItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY, String(jsUnread)); } catch {}
+
+        // Hämta antal ansökningar för jobbsökare
+        const { count: myApplications } = await supabase
+          .from('job_applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('applicant_id', user.id);
+        
+        const appCount = myApplications || 0;
+        setPreloadedMyApplications(appCount);
+        try { sessionStorage.setItem(MY_APPLICATIONS_CACHE_KEY, String(appCount)); } catch {}
       }
     } catch (err) {
       console.error('Error refreshing sidebar counts:', err);
@@ -1405,13 +1423,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
       .subscribe();
 
-    // Real-time för ansökningar (uppdaterar employer stats)
+    // Real-time för ansökningar (uppdaterar employer stats OCH jobbsökarens räknare)
     const applicationsChannel = supabase
-      .channel('auth-applications-count')
+      .channel(`auth-applications-${user.id}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'job_applications' },
-        () => refreshEmployerStats()
+        { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
+        () => {
+          refreshSidebarCounts();
+          refreshEmployerStats();
+        }
       )
       .subscribe();
 
@@ -1471,6 +1492,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedUnreadMessages,
     preloadedJobSeekerUnreadMessages,
     preloadedCompanyReviewsCount,
+    preloadedMyApplications,
     refreshSidebarCounts,
     refreshEmployerStats,
     signUp,

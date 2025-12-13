@@ -45,7 +45,7 @@ const businessItems = [
 export function AppSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs, preloadedJobSeekerUnreadMessages } = useAuth();
+  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs, preloadedJobSeekerUnreadMessages, preloadedMyApplications } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
@@ -220,7 +220,7 @@ export function AppSidebar() {
                {[
                  { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: preloadedTotalJobs, showBadge: false },
                  { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: preloadedSavedJobs, showBadge: false },
-                 { title: 'Mina Ansökningar', url: '/my-applications', icon: FileText, count: null, showBadge: false },
+                 { title: 'Mina Ansökningar', url: '/my-applications', icon: FileText, count: preloadedMyApplications, showBadge: false },
                  { title: 'Meddelanden', url: '/messages', icon: MessageCircle, count: preloadedJobSeekerUnreadMessages, showBadge: preloadedJobSeekerUnreadMessages > 0 },
                ].map((item) => (
                  <SidebarMenuItem key={item.title}>
@@ -255,12 +255,10 @@ export function AppSidebar() {
                                 </span>
                               )}
                             </>
-                          ) : item.count !== null ? (
-                            <>
-                              {item.title} ({item.count})
-                            </>
                           ) : (
-                            item.title
+                            <>
+                              {item.title} ({item.count ?? 0})
+                            </>
                           )}
                         </span>
                       )}
