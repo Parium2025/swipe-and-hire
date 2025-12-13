@@ -146,7 +146,7 @@ const SavedJobs = () => {
       <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 animate-fade-in">
         <div className="text-center mb-8">
           <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Sparade Jobb</h1>
-          <p className="text-white/70">Dina favorit-jobb samlade på ett ställe</p>
+          <p className="text-white">Dina favorit-jobb samlade på ett ställe</p>
         </div>
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -167,7 +167,7 @@ const SavedJobs = () => {
     <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 animate-fade-in">
       <div className="text-center mb-8">
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Sparade Jobb</h1>
-        <p className="text-white/70">Dina favorit-jobb samlade på ett ställe</p>
+        <p className="text-white">Dina favorit-jobb samlade på ett ställe</p>
       </div>
 
       {savedJobs.length === 0 ? (
@@ -218,13 +218,13 @@ const SavedJobs = () => {
                       </div>
 
                       {/* Company */}
-                      <div className="flex items-center gap-2 text-white/70 mb-2">
+                      <div className="flex items-center gap-2 text-white mb-2">
                         <Building2 className="h-4 w-4 flex-shrink-0" />
                         <span className="truncate">{getCompanyName(job)}</span>
                       </div>
 
                       {/* Location and type */}
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-white/60">
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-white">
                         {getLocation(job) && (
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3.5 w-3.5" />
