@@ -71,6 +71,7 @@ const EMPLOYER_ACTIVE_JOBS_CACHE_KEY = 'parium_employer_active_jobs';
 const EMPLOYER_TOTAL_VIEWS_CACHE_KEY = 'parium_employer_total_views';
 const EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY = 'parium_employer_total_applications';
 const EMPLOYER_CANDIDATES_CACHE_KEY = 'parium_employer_candidates';
+const UNREAD_MESSAGES_CACHE_KEY = 'parium_unread_messages';
 const COMPANY_LOGO_CACHE_KEY = 'parium_company_logo_url';
 
 interface AuthContextType {
@@ -97,6 +98,7 @@ interface AuthContextType {
   preloadedEmployerTotalViews: number;
   preloadedEmployerTotalApplications: number;
   preloadedEmployerCandidates: number;
+  preloadedUnreadMessages: number;
   refreshSidebarCounts: () => Promise<void>;
   refreshEmployerStats: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
@@ -223,6 +225,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [preloadedEmployerCandidates, setPreloadedEmployerCandidates] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_CANDIDATES_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedUnreadMessages, setPreloadedUnreadMessages] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(UNREAD_MESSAGES_CACHE_KEY) : null;
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
@@ -1311,6 +1319,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setPreloadedEmployerCandidates(0);
         try { sessionStorage.setItem(EMPLOYER_CANDIDATES_CACHE_KEY, '0'); } catch {}
       }
+      
+      // Hämta antal olästa meddelanden
+      const { count: unreadCount } = await supabase
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('recipient_id', user.id)
+        .eq('is_read', false);
+      
+      const unread = unreadCount || 0;
+      setPreloadedUnreadMessages(unread);
+      try { sessionStorage.setItem(UNREAD_MESSAGES_CACHE_KEY, String(unread)); } catch {}
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
     }
@@ -1359,10 +1378,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
       .subscribe();
 
+    // Real-time för meddelanden (uppdaterar oläst-badge)
+    const messagesChannel = supabase
+      .channel(`auth-messages-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
+        () => refreshEmployerStats()
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(jobChannel);
       supabase.removeChannel(savedChannel);
       supabase.removeChannel(applicationsChannel);
+      supabase.removeChannel(messagesChannel);
     };
   }, [user]);
 
@@ -1387,6 +1417,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedEmployerTotalViews,
     preloadedEmployerTotalApplications,
     preloadedEmployerCandidates,
+    preloadedUnreadMessages,
     refreshSidebarCounts,
     refreshEmployerStats,
     signUp,
