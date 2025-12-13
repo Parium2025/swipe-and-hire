@@ -57,10 +57,15 @@ const SavedJobs = () => {
   const navigate = useNavigate();
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (user) {
+      // Only show loading skeleton on first load, not on back navigation
+      if (hasInitiallyLoaded) {
+        setIsLoading(false);
+      }
       fetchSavedJobs();
     }
   }, [user]);
@@ -103,6 +108,7 @@ const SavedJobs = () => {
       toast.error('Kunde inte hämta sparade jobb');
     } finally {
       setIsLoading(false);
+      setHasInitiallyLoaded(true);
     }
   };
 
@@ -158,7 +164,7 @@ const SavedJobs = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 animate-fade-in">
+      <div className="max-w-4xl mx-auto px-3 md:px-6 py-6">
         <div className="text-center mb-8">
           <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Sparade Jobb</h1>
           <p className="text-white">Dina favorit-jobb samlade på ett ställe</p>
@@ -179,7 +185,7 @@ const SavedJobs = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 animate-fade-in">
+    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6">
       <div className="text-center mb-8">
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Sparade Jobb</h1>
         <p className="text-white">Dina favorit-jobb samlade på ett ställe</p>
