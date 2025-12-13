@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo, useMemo } from "react";
+import React, { useEffect, useState, memo, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -61,16 +61,39 @@ export function AppSidebar() {
   const [totalActiveJobs, setTotalActiveJobs] = useState<number>(0);
   
   // Hämta antal aktiva jobb i systemet
-  useEffect(() => {
-    const fetchJobCount = async () => {
-      const { count } = await supabase
-        .from('job_postings')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true);
-      setTotalActiveJobs(count || 0);
-    };
-    fetchJobCount();
+  const fetchJobCount = useCallback(async () => {
+    const { count } = await supabase
+      .from('job_postings')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true);
+    setTotalActiveJobs(count || 0);
   }, []);
+
+  useEffect(() => {
+    fetchJobCount();
+  }, [fetchJobCount]);
+
+  // Realtime-prenumeration för jobb-uppdateringar
+  useEffect(() => {
+    const channel = supabase
+      .channel('sidebar-job-count')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_postings'
+        },
+        () => {
+          fetchJobCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchJobCount]);
   
   // Håll avatar/cover/video i synk med preloadern även om de uppdateras efter mount
   useEffect(() => {
