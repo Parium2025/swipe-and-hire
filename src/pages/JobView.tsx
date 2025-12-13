@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase } from 'lucide-react';
+import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
@@ -35,10 +36,20 @@ interface JobPosting {
   location: string;
   salary_min?: number;
   salary_max?: number;
+  salary_type?: string;
+  salary_transparency?: string;
   employment_type?: string;
   work_schedule?: string;
+  work_start_time?: string;
+  work_end_time?: string;
   contact_email?: string;
   application_instructions?: string;
+  pitch?: string;
+  benefits?: string[];
+  positions_count?: number;
+  workplace_city?: string;
+  workplace_county?: string;
+  workplace_address?: string;
   created_at: string;
   employer_id: string;
   job_image_url?: string;
@@ -153,11 +164,41 @@ const JobView = () => {
     }));
   };
 
-  const formatSalary = (min?: number, max?: number) => {
+  // Map benefit keys to Swedish labels
+  const getBenefitLabel = (benefit: string): string => {
+    const labels: Record<string, string> = {
+      forsakringar: 'Försäkringar',
+      fri_fika: 'Fri fika/frukt',
+      utbildning: 'Utbildning',
+      flexibla_arbetstider: 'Flexibla arbetstider',
+      kollektivavtal: 'Kollektivavtal',
+      fri_parkering: 'Fri parkering',
+      personalrabatter: 'Personalrabatter',
+      friskvardsbidrag: 'Friskvårdsbidrag',
+      tjanstepension: 'Tjänstepension',
+      bonus: 'Bonus',
+      hemarbete: 'Möjlighet till hemarbete',
+    };
+    return labels[benefit] || benefit;
+  };
+
+  // Map salary type to Swedish label
+  const getSalaryTypeLabel = (salaryType: string): string => {
+    const labels: Record<string, string> = {
+      monthly: 'Månadslön',
+      hourly: 'Timlön',
+      fixed: 'Fast lön',
+      commission: 'Provision',
+    };
+    return labels[salaryType] || salaryType;
+  };
+
+  const formatSalary = (min?: number, max?: number, salaryType?: string) => {
+    const suffix = salaryType === 'hourly' ? 'kr/tim' : 'kr/mån';
     if (!min && !max) return null;
-    if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} kr/mån`;
-    if (min) return `Från ${min.toLocaleString()} kr/mån`;
-    if (max) return `Upp till ${max.toLocaleString()} kr/mån`;
+    if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} ${suffix}`;
+    if (min) return `Från ${min.toLocaleString()} ${suffix}`;
+    if (max) return `Upp till ${max.toLocaleString()} ${suffix}`;
     return null;
   };
 
@@ -473,12 +514,21 @@ const JobView = () => {
                         <span>{job.work_schedule}</span>
                       </div>
                     )}
-                    {formatSalary(job.salary_min, job.salary_max) && (
+                    {formatSalary(job.salary_min, job.salary_max, job.salary_type) && (
                       <>
                         {job.work_schedule && <span className="text-white/60">·</span>}
                         <div className="flex items-center gap-1.5 text-green-300 font-semibold">
                           <Euro className="h-4 w-4" />
-                          <span>{formatSalary(job.salary_min, job.salary_max)}</span>
+                          <span>{formatSalary(job.salary_min, job.salary_max, job.salary_type)}</span>
+                        </div>
+                      </>
+                    )}
+                    {job.positions_count && job.positions_count > 1 && (
+                      <>
+                        <span className="text-white/60">·</span>
+                        <div className="flex items-center gap-1.5">
+                          <Hash className="h-4 w-4" />
+                          <span>{job.positions_count} tjänster</span>
                         </div>
                       </>
                     )}
@@ -512,18 +562,40 @@ const JobView = () => {
                       <Clock className="h-3.5 w-3.5 mr-1.5 text-white/70" />
                       <span>{job.work_schedule}</span>
                     </div>
-                  )}
+                    )}
 
-                  {formatSalary(job.salary_min, job.salary_max) && (
+                  {formatSalary(job.salary_min, job.salary_max, job.salary_type) && (
                     <div className="flex items-center text-green-300 text-sm font-semibold pt-0.5">
                       <Euro className="h-4 w-4 mr-1.5" />
-                      <span>{formatSalary(job.salary_min, job.salary_max)}</span>
+                      <span>{formatSalary(job.salary_min, job.salary_max, job.salary_type)}</span>
+                    </div>
+                  )}
+
+                  {job.positions_count && job.positions_count > 1 && (
+                    <div className="flex items-center text-white/90 text-xs">
+                      <Hash className="h-3.5 w-3.5 mr-1.5 text-white/70" />
+                      <span>{job.positions_count} tjänster</span>
+                    </div>
+                  )}
+
+                  {(job.work_start_time || job.work_end_time) && (
+                    <div className="flex items-center text-white/90 text-xs">
+                      <CalendarClock className="h-3.5 w-3.5 mr-1.5 text-white/70" />
+                      <span>Arbetstider: {job.work_start_time} - {job.work_end_time}</span>
                     </div>
                   )}
                 </div>
               </div>
             )}
 
+            {/* Pitch - short highlight text */}
+            {job.pitch && (
+              <div className="bg-primary/20 backdrop-blur-sm border border-primary/30 rounded-lg p-4">
+                <p className="text-white text-sm md:text-base italic leading-relaxed">
+                  "{job.pitch}"
+                </p>
+              </div>
+            )}
 
             {/* Description */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
@@ -532,6 +604,23 @@ const JobView = () => {
                 {job.description}
               </p>
             </div>
+
+            {/* Benefits */}
+            {job.benefits && job.benefits.length > 0 && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <h2 className="text-white font-bold text-base md:text-lg mb-3 flex items-center gap-2">
+                  <Gift className="h-4 w-4" />
+                  Förmåner
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {job.benefits.map((benefit, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
+                      {getBenefitLabel(benefit)}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Application instructions if exists */}
             {job.application_instructions && (
