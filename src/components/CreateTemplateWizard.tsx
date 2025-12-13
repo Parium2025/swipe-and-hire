@@ -524,7 +524,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     setShowEmploymentTypeDropdown(false);
   };
 
-  // Helper function to close all dropdowns
+  // Helper function to close all dropdowns - ensures only one dropdown open at a time
   const closeAllDropdowns = () => {
     setShowEmploymentTypeDropdown(false);
     setShowSalaryTypeDropdown(false);
@@ -532,6 +532,14 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     setShowWorkLocationDropdown(false);
     setShowRemoteWorkDropdown(false);
     setShowQuestionTypeDropdown(false);
+    setShowBenefitsDropdown(false);
+    setShowOccupationDropdown(false);
+  };
+
+  const handleBenefitsClick = () => {
+    const isCurrentlyOpen = showBenefitsDropdown;
+    closeAllDropdowns();
+    setShowBenefitsDropdown(!isCurrentlyOpen);
   };
 
   const handleEmploymentTypeClick = () => {
@@ -1472,7 +1480,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Label className="text-white font-medium text-sm">Förmåner som erbjuds</Label>
                   <div className="relative benefits-dropdown">
                     <div
-                      onClick={() => setShowBenefitsDropdown(!showBenefitsDropdown)}
+                      onClick={handleBenefitsClick}
                       className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 h-11 cursor-pointer hover:border-white/40 transition-colors"
                     >
                       <span className="text-sm text-white">
