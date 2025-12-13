@@ -55,6 +55,15 @@ const EmployerDashboard = memo(() => {
   const [draftToEdit, setDraftToEdit] = useState<JobPosting | null>(null);
   const [draftWizardOpen, setDraftWizardOpen] = useState(false);
   
+  // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => setShowContent(true), 150);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+  
   const {
     searchInput,
     setSearchInput,
@@ -246,8 +255,8 @@ const EmployerDashboard = memo(() => {
     { icon: Users, title: 'Ansökningar', value: activeJobs.reduce((s, j) => s + j.applications_count, 0), loading: false },
   ], [jobs, activeJobs]);
 
-  // Wait for data before showing content with fade
-  if (loading) {
+  // Wait for data AND minimum delay before showing content with fade
+  if (loading || !showContent) {
     return (
       <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 opacity-0">
         {/* Invisible placeholder to prevent layout shift */}
