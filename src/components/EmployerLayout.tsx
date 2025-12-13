@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect, memo } from 'react';
+import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import EmployerSidebar from '@/components/EmployerSidebar';
@@ -19,6 +19,22 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
   const { user, profile } = useAuth();
   const { invalidateJobs } = useJobsData();
   const queryClient = useQueryClient();
+  const createJobButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Keyboard shortcut: Cmd+N / Ctrl+N to open "Create New Job" dialog
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // Check for Cmd+N (Mac) or Ctrl+N (Windows/Linux)
+    if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+      e.preventDefault();
+      // Trigger click on the create job button
+      createJobButtonRef.current?.click();
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   // Prefetch applications on mount for instant /candidates load
   useEffect(() => {
@@ -175,6 +191,7 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
                 onJobCreated={() => {
                   invalidateJobs();
                 }}
+                triggerRef={createJobButtonRef}
               />
             </div>
           </header>
