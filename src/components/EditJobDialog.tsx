@@ -1038,6 +1038,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     
     setCustomQuestions(prev => [...prev, newQuestion]);
     setShowQuestionTemplates(false);
+    setQuestionSearchTerm('');
     
     try {
       await supabase
@@ -2002,8 +2003,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                               if (filteredTemplates.length === 0) {
                                 return (
-                                  <div className="text-white/60 text-sm text-center py-8">
-                                    Du har inga sparade frågor än
+                                  <div className="text-white text-sm text-center py-8">
+                                    {questionSearchTerm.trim() 
+                                      ? 'Hittar inte frågan du söker.' 
+                                      : 'Du har inga sparade frågor än'}
                                   </div>
                                 );
                               }
