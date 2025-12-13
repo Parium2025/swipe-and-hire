@@ -47,9 +47,16 @@ const getMissingFields = (job: JobPosting): string[] => {
   return missing;
 };
 
+// Check if job has expired (expires_at is in the past)
+const isJobExpired = (job: JobPosting): boolean => {
+  if (!job.expires_at) return false;
+  return new Date(job.expires_at) < new Date();
+};
+
 export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEditDraft }: MobileJobCardProps) => {
   const navigate = useNavigate();
   const jobIsComplete = isJobComplete(job);
+  const jobIsExpired = isJobExpired(job);
 
   const handleCardClick = () => {
     // If job is inactive (draft) and onEditDraft is provided, open wizard instead
@@ -81,7 +88,27 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
               </Badge>
             )}
           </div>
-          {!job.is_active && !jobIsComplete ? (
+          {/* Expired job - red switch with tooltip */}
+          {jobIsExpired ? (
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Switch
+                      checked={false}
+                      disabled
+                      className="flex-shrink-0 cursor-pointer [&>span]:bg-red-500 opacity-100"
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
+                  <p className="text-xs font-medium mb-1 text-red-400">Annonsens tid har gått ut</p>
+                  <p className="text-xs text-white/80">Dina 14 dagar har passerat. Skapa en ny annons från dina mallar.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : !job.is_active && !jobIsComplete ? (
+            /* Incomplete draft - amber switch with tooltip */
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -100,6 +127,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
               </Tooltip>
             </TooltipProvider>
           ) : (
+            /* Normal switch */
             <Switch
               checked={job.is_active}
               onCheckedChange={() => onToggleStatus(job.id, job.is_active, job)}
@@ -113,11 +141,20 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
         <div className="flex flex-col items-start gap-0.5">
           <Badge
             variant={job.is_active ? "default" : "secondary"}
-            className={`text-xs ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}
+            className={`text-xs ${
+              jobIsExpired 
+                ? "bg-red-500/20 text-red-300 border-red-500/30"
+                : job.is_active 
+                  ? "bg-green-500/20 text-green-300 border-green-500/30" 
+                  : "bg-amber-500/20 text-amber-300 border-amber-500/30"
+            }`}
           >
-            {job.is_active ? 'Aktiv' : 'Utkast'}
+            {jobIsExpired ? 'Utgången' : job.is_active ? 'Aktiv' : 'Utkast'}
           </Badge>
-          {!job.is_active && (
+          {jobIsExpired && (
+            <span className="text-[10px] text-red-300/70">Skapa ny annons</span>
+          )}
+          {!job.is_active && !jobIsExpired && (
             <span className="text-[10px] text-amber-300/70">Tryck för att redigera</span>
           )}
         </div>

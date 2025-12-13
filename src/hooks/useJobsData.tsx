@@ -31,6 +31,7 @@ export interface JobPosting {
   applications_count: number;
   created_at: string;
   updated_at: string;
+  expires_at?: string;
   employer_id: string;
   employer_profile?: {
     first_name: string;
