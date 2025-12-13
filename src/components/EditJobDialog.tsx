@@ -2793,10 +2793,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       })()}
                                     </div>
                                     <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 pointer-events-none">
-                                      <button aria-label="Nej tack" className="w-6 h-6 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
+                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Nej tack" className="w-6 h-6 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
                                         <X className="h-3 w-3 text-white" />
                                       </button>
-                                      <button aria-label="Spara" className="w-6 h-6 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
+                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Spara" className="w-6 h-6 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
                                         <Bookmark className="h-3 w-3 text-white" />
                                       </button>
                                       <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-6 h-6 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
@@ -3098,10 +3098,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         </div>
                                       </div>
                                       <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
-                                        <button aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
+                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Nej tack" className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
                                           <X className="h-4 w-4 text-white" />
                                         </button>
-                                        <button aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
+                                        <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Spara" className="w-8 h-8 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
                                           <Bookmark className="h-4 w-4 text-white" />
                                         </button>
                                         <button onClick={() => setShowDesktopApplicationForm(true)} aria-label="Ansök" className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
