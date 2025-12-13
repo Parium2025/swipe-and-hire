@@ -65,6 +65,11 @@ const TOTAL_JOBS_CACHE_KEY = 'parium_total_jobs';
 const SAVED_JOBS_CACHE_KEY = 'parium_saved_jobs';
 const UNIQUE_COMPANIES_CACHE_KEY = 'parium_unique_companies';
 const NEW_THIS_WEEK_CACHE_KEY = 'parium_new_this_week';
+// Employer stats cache keys
+const EMPLOYER_MY_JOBS_CACHE_KEY = 'parium_employer_my_jobs';
+const EMPLOYER_ACTIVE_JOBS_CACHE_KEY = 'parium_employer_active_jobs';
+const EMPLOYER_TOTAL_VIEWS_CACHE_KEY = 'parium_employer_total_views';
+const EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY = 'parium_employer_total_applications';
 
 interface AuthContextType {
   user: User | null;
@@ -78,12 +83,18 @@ interface AuthContextType {
   preloadedAvatarUrl: string | null;
   preloadedCoverUrl: string | null;
   preloadedVideoUrl: string | null;
-  /** Förladdade räknare för sidebar och stats */
+  /** Förladdade räknare för sidebar och stats (jobbsökare) */
   preloadedTotalJobs: number;
   preloadedSavedJobs: number;
   preloadedUniqueCompanies: number;
   preloadedNewThisWeek: number;
+  /** Förladdade räknare för employer stats */
+  preloadedEmployerMyJobs: number;
+  preloadedEmployerActiveJobs: number;
+  preloadedEmployerTotalViews: number;
+  preloadedEmployerTotalApplications: number;
   refreshSidebarCounts: () => Promise<void>;
+  refreshEmployerStats: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
     role: UserRole; 
     first_name: string; 
@@ -172,6 +183,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [preloadedNewThisWeek, setPreloadedNewThisWeek] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(NEW_THIS_WEEK_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  // Employer stats
+  const [preloadedEmployerMyJobs, setPreloadedEmployerMyJobs] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_MY_JOBS_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedEmployerActiveJobs, setPreloadedEmployerActiveJobs] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedEmployerTotalViews, setPreloadedEmployerTotalViews] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_TOTAL_VIEWS_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedEmployerTotalApplications, setPreloadedEmployerTotalApplications] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY) : null;
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
@@ -1194,10 +1230,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Funktion för att uppdatera employer stats (används av realtime + initial load)
+  const refreshEmployerStats = async () => {
+    if (!user) return;
+    
+    try {
+      // Hämta alla jobb för denna employer
+      const { data: myJobs } = await supabase
+        .from('job_postings')
+        .select('id, is_active, views_count, applications_count')
+        .eq('employer_id', user.id);
+      
+      if (!myJobs) return;
+      
+      // Mina annonser (totalt)
+      const myJobsCount = myJobs.length;
+      setPreloadedEmployerMyJobs(myJobsCount);
+      try { sessionStorage.setItem(EMPLOYER_MY_JOBS_CACHE_KEY, String(myJobsCount)); } catch {}
+      
+      // Aktiva annonser
+      const activeJobs = myJobs.filter(j => j.is_active);
+      const activeCount = activeJobs.length;
+      setPreloadedEmployerActiveJobs(activeCount);
+      try { sessionStorage.setItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY, String(activeCount)); } catch {}
+      
+      // Totala visningar
+      const totalViews = activeJobs.reduce((sum, j) => sum + (j.views_count || 0), 0);
+      setPreloadedEmployerTotalViews(totalViews);
+      try { sessionStorage.setItem(EMPLOYER_TOTAL_VIEWS_CACHE_KEY, String(totalViews)); } catch {}
+      
+      // Totala ansökningar
+      const totalApplications = activeJobs.reduce((sum, j) => sum + (j.applications_count || 0), 0);
+      setPreloadedEmployerTotalApplications(totalApplications);
+      try { sessionStorage.setItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, String(totalApplications)); } catch {}
+    } catch (err) {
+      console.error('Error refreshing employer stats:', err);
+    }
+  };
+
   // Ladda räknare vid inloggning
   useEffect(() => {
     if (user && !loading) {
       refreshSidebarCounts();
+      refreshEmployerStats();
     }
   }, [user, loading]);
 
@@ -1210,7 +1285,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'job_postings' },
-        () => refreshSidebarCounts()
+        () => {
+          refreshSidebarCounts();
+          refreshEmployerStats();
+        }
       )
       .subscribe();
 
@@ -1223,9 +1301,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
       .subscribe();
 
+    // Real-time för ansökningar (uppdaterar employer stats)
+    const applicationsChannel = supabase
+      .channel('auth-applications-count')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'job_applications' },
+        () => refreshEmployerStats()
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(jobChannel);
       supabase.removeChannel(savedChannel);
+      supabase.removeChannel(applicationsChannel);
     };
   }, [user]);
 
@@ -1244,7 +1333,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedSavedJobs,
     preloadedUniqueCompanies,
     preloadedNewThisWeek,
+    preloadedEmployerMyJobs,
+    preloadedEmployerActiveJobs,
+    preloadedEmployerTotalViews,
+    preloadedEmployerTotalApplications,
     refreshSidebarCounts,
+    refreshEmployerStats,
     signUp,
     signIn,
     signInWithPhone,
