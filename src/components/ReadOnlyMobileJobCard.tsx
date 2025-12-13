@@ -176,13 +176,9 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
             variant="ghost"
             size="sm"
             onClick={handleSaveClick}
-            className={`ml-auto h-8 w-8 p-0 rounded-full transition-all ${
-              isSaved 
-                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
-                : 'text-white/60 hover:text-white hover:bg-white/10'
-            }`}
+            className="ml-auto h-8 w-8 p-0 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all"
           >
-            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400' : ''}`} />
+            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : ''}`} />
           </Button>
         </div>
       </div>
