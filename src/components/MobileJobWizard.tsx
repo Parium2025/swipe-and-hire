@@ -2038,11 +2038,12 @@ const MobileJobWizard = ({
 
     try {
       // Include all job posting fields
-      // Set expires_at to 14 days from now for new published jobs
+      // Only set expires_at for NEW jobs, not when updating existing ones
+      const isNewJob = !existingJob?.id;
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 14);
       
-      const jobData = {
+      const jobData: Record<string, any> = {
         employer_id: user.id,
         title: formData.title,
         description: formData.description,
@@ -2072,9 +2073,13 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
-        is_active: true,
-        expires_at: expiresAt.toISOString()
+        is_active: true
       };
+      
+      // Only set expires_at for new jobs - existing jobs keep their original expiration
+      if (isNewJob) {
+        jobData.expires_at = expiresAt.toISOString();
+      }
 
       let jobPost;
       let error;
@@ -2092,7 +2097,7 @@ const MobileJobWizard = ({
       } else {
         const { data, error: insertError } = await supabase
           .from('job_postings')
-          .insert([jobData])
+          .insert([jobData as any])
           .select()
           .single();
         jobPost = data;
