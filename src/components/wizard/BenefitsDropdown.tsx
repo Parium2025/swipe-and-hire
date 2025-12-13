@@ -56,7 +56,7 @@ export const BenefitsDropdown = ({
           {selectedBenefits.map((benefit) => (
             <span
               key={benefit}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-white/10 border border-white/20 rounded-full text-xs text-white"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/5 border border-white/20 rounded-full text-xs text-white backdrop-blur-sm"
             >
               {getBenefitLabel(benefit)}
               <button
