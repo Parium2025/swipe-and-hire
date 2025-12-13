@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -52,65 +53,52 @@ const getDaysRemaining = (expiresAt: string | null): number | null => {
   return diffDays > 0 ? diffDays : 0;
 };
 
+const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
+  const { data, error } = await supabase
+    .from('saved_jobs')
+    .select(`
+      id,
+      job_id,
+      created_at,
+      job_postings (
+        id,
+        title,
+        location,
+        workplace_city,
+        workplace_county,
+        employment_type,
+        job_image_url,
+        is_active,
+        created_at,
+        expires_at,
+        profiles (
+          company_name,
+          first_name,
+          last_name
+        )
+      )
+    `)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data as unknown as SavedJob[]) || [];
+};
+
 const SavedJobs = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+  const queryClient = useQueryClient();
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    if (user) {
-      // Only show loading skeleton on first load, not on back navigation
-      if (hasInitiallyLoaded) {
-        setIsLoading(false);
-      }
-      fetchSavedJobs();
-    }
-  }, [user]);
-
-  const fetchSavedJobs = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('saved_jobs')
-        .select(`
-          id,
-          job_id,
-          created_at,
-          job_postings (
-            id,
-            title,
-            location,
-            workplace_city,
-            workplace_county,
-            employment_type,
-            job_image_url,
-            is_active,
-            created_at,
-            expires_at,
-            profiles (
-              company_name,
-              first_name,
-              last_name
-            )
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setSavedJobs((data as unknown as SavedJob[]) || []);
-    } catch (err) {
-      console.error('Error fetching saved jobs:', err);
-      toast.error('Kunde inte hämta sparade jobb');
-    } finally {
-      setIsLoading(false);
-      setHasInitiallyLoaded(true);
-    }
-  };
+  // Use React Query with staleTime to keep data cached
+  const { data: savedJobs = [], isLoading, isFetched } = useQuery({
+    queryKey: ['saved-jobs', user?.id],
+    queryFn: () => fetchSavedJobs(user!.id),
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+  });
 
   const handleRemoveSavedJob = async (savedJobId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -125,7 +113,10 @@ const SavedJobs = () => {
 
       if (error) throw error;
 
-      setSavedJobs(prev => prev.filter(job => job.id !== savedJobId));
+      // Update cache optimistically
+      queryClient.setQueryData(['saved-jobs', user?.id], (old: SavedJob[] | undefined) => 
+        old?.filter(job => job.id !== savedJobId) || []
+      );
       toast.success('Jobb borttaget från sparade');
     } catch (err) {
       console.error('Error removing saved job:', err);
@@ -162,9 +153,12 @@ const SavedJobs = () => {
            'Företag';
   };
 
-  if (isLoading) {
+  // Only show skeleton on initial load (when no cached data exists)
+  const showSkeleton = isLoading && !isFetched && savedJobs.length === 0;
+
+  if (showSkeleton) {
     return (
-      <div className="max-w-4xl mx-auto px-3 md:px-6 py-6">
+      <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 animate-fade-in">
         <div className="text-center mb-8">
           <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Sparade Jobb</h1>
           <p className="text-white">Dina favorit-jobb samlade på ett ställe</p>
@@ -185,7 +179,7 @@ const SavedJobs = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6">
+    <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 animate-fade-in">
       <div className="text-center mb-8">
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Sparade Jobb</h1>
         <p className="text-white">Dina favorit-jobb samlade på ett ställe</p>
