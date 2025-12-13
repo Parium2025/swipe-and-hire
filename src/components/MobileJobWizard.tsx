@@ -30,6 +30,7 @@ import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
+import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
@@ -733,6 +734,12 @@ const MobileJobWizard = ({
     })();
     return () => { cancelled = true; };
   }, [formData.job_image_desktop_url]);
+
+  // Preloada jobbbilderna för omedelbar visning
+  useImagePreloader(
+    [jobImageDisplayUrl, jobImageDesktopDisplayUrl].filter(Boolean) as string[], 
+    { priority: 'high' }
+  );
 
   // Auto-justera beskärning baserat på bildens aspektförhållande
   useEffect(() => {
