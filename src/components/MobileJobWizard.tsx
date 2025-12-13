@@ -1614,7 +1614,9 @@ const MobileJobWizard = ({
     setFormData(prev => ({
       ...prev,
       workplace_city: location,
-      location: location // Auto-update main location field from postal code
+      location: location, // Auto-update main location field from postal code
+      workplace_municipality: municipality || prev.workplace_municipality,
+      workplace_county: county || prev.workplace_county
     }));
     
     // Cache postal code info if available
