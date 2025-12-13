@@ -2378,13 +2378,13 @@ const MobileJobWizard = ({
                         return (
                           <span
                             key={benefitValue}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-white text-xs rounded-full border border-primary/30"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/5 text-white text-xs rounded-full border border-white/20 backdrop-blur-sm"
                           >
                             {label}
                             <button
                               type="button"
                               onClick={() => setFormData(prev => ({ ...prev, benefits: prev.benefits.filter(b => b !== benefitValue) }))}
-                              className="hover:text-white/60"
+                              className="hover:bg-white/10 rounded-full p-0.5 transition-all duration-300"
                             >
                               <X className="w-3 h-3" />
                             </button>
