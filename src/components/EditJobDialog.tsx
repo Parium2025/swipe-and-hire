@@ -22,6 +22,7 @@ import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
+import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
@@ -648,6 +649,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       };
     }
   }, [jobImageDisplayUrl, currentStep, open]);
+
+  // Preloada jobbbilderna för omedelbar visning
+  useImagePreloader(
+    [jobImageDisplayUrl, jobImageDesktopDisplayUrl].filter(Boolean) as string[], 
+    { priority: 'high' }
+  );
 
   // Show company tooltip only once when first reaching preview step, then keep it visible
   useEffect(() => {
