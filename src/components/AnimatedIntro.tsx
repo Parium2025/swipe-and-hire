@@ -71,7 +71,7 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             ? 'scale-90 opacity-0 translate-y-5' 
             : 'scale-100 opacity-100 translate-y-0'
         }`}>
-          <p className="text-center text-xl lg:text-2xl font-medium leading-tight relative z-10" style={{ color: '#FFFFFF' }}>
+          <p className="text-center text-xl lg:text-2xl font-medium leading-tight relative z-10 text-white">
             Din karriärresa börjar här
           </p>
         </div>
