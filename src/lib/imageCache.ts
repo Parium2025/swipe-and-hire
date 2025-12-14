@@ -14,11 +14,28 @@ class ImageCache {
   private cache = new Map<string, CachedImage>();
   private loading = new Map<string, Promise<CachedImage>>();
   private readonly CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 dagar
+  
+  // Video extensions som inte ska cachas som bilder
+  private readonly VIDEO_EXTENSIONS = ['.mp4', '.mov', '.webm', '.avi', '.mkv', '.m4v'];
+
+  /**
+   * Kontrollera om URL:en pekar på en videofil
+   */
+  private isVideoUrl(url: string): boolean {
+    const lowerUrl = url.toLowerCase();
+    return this.VIDEO_EXTENSIONS.some(ext => lowerUrl.includes(ext));
+  }
 
   /**
    * Ladda och cacha en bild permanent
+   * Hoppar över videofiler för att undvika onödiga fetch-fel
    */
   async loadImage(url: string): Promise<string> {
+    // Hoppa över videofiler - de ska inte cachas som bilder
+    if (this.isVideoUrl(url)) {
+      return url; // Returnera original-URL för videor
+    }
+    
     // Om bilden redan är cachad, returnera direkt
     const cached = this.cache.get(url);
     if (cached) {
@@ -75,20 +92,21 @@ class ImageCache {
 
       this.cache.set(url, cached);
       
-      console.log(`✅ Cached image: ${url.substring(0, 50)}...`);
-      
       return cached;
     } catch (error) {
-      console.error(`Failed to cache image ${url}:`, error);
+      // Tyst fel - logga inte varje misslyckad bild
       throw error;
     }
   }
 
   /**
    * Förladdda flera bilder samtidigt
+   * Filtrerar automatiskt bort videofiler
    */
   async preloadImages(urls: string[]): Promise<void> {
-    const uniqueUrls = [...new Set(urls.filter(url => url && url.trim() !== ''))];
+    const uniqueUrls = [...new Set(urls.filter(url => 
+      url && url.trim() !== '' && !this.isVideoUrl(url)
+    ))];
     
     // Ladda alla bilder parallellt
     await Promise.allSettled(
@@ -98,8 +116,14 @@ class ImageCache {
 
   /**
    * Hämta en cachad bild URL (synkron)
+   * Returnerar null för videofiler
    */
   getCachedUrl(url: string): string | null {
+    // Videor cachas inte
+    if (this.isVideoUrl(url)) {
+      return null;
+    }
+    
     const cached = this.cache.get(url);
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
       return cached.objectUrl;
