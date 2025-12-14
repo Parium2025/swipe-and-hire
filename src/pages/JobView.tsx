@@ -212,7 +212,7 @@ const JobView = () => {
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px] resize-none text-sm focus:outline-none focus:border-white/40"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white min-h-[80px] resize-none text-sm focus:outline-none focus:border-white/40"
           />
         );
 
@@ -666,21 +666,16 @@ const JobView = () => {
                 
                 {jobQuestions.map((question, index) => (
                   <div key={question.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                    <div className="flex items-start space-x-2 mb-3">
-                      <div className="bg-white/20 rounded-full p-1.5">
-                        {getQuestionIcon(question.question_type)}
+                    <div className="mb-3">
+                      <div className="text-[10px] mb-0.5" style={{ color: '#FFFFFF' }}>
+                        Fråga {index + 1} av {jobQuestions.length}
                       </div>
-                      <div className="flex-1">
-                        <div className="text-[10px] mb-0.5" style={{ color: '#FFFFFF' }}>
-                          Fråga {index + 1} av {jobQuestions.length}
-                        </div>
-                        <h3 className="text-sm font-semibold leading-tight" style={{ color: '#FFFFFF' }}>
-                          {question.question_text}
-                          {question.is_required && (
-                            <span className="ml-1" style={{ color: '#FFFFFF' }}>*</span>
-                          )}
-                        </h3>
-                      </div>
+                      <h3 className="text-sm font-semibold leading-tight" style={{ color: '#FFFFFF' }}>
+                        {question.question_text}
+                        {question.is_required && (
+                          <span className="ml-1" style={{ color: '#FFFFFF' }}>*</span>
+                        )}
+                      </h3>
                     </div>
 
                     <div className="space-y-2">
