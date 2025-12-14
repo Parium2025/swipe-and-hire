@@ -166,7 +166,7 @@ const WorkplacePostalCodeSelector = ({
             value={postalCodeValue}
             onChange={handlePostalCodeChange}
             placeholder="XXX XX"
-            className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white/40 h-9 text-sm pl-10 transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
+            className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-9 text-sm pl-10 transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
             maxLength={6}
             autoComplete="off"
             autoCorrect="off"
@@ -174,7 +174,7 @@ const WorkplacePostalCodeSelector = ({
           />
           {isLoading && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <Loader2 className="h-4 w-4 animate-spin text-white/60" />
+              <Loader2 className="h-4 w-4 animate-spin text-white" />
             </div>
           )}
         </div>
@@ -202,7 +202,7 @@ const WorkplacePostalCodeSelector = ({
               ? "Ange ort manuellt"
               : "Fylls i automatiskt"
           }
-          className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white/40 h-9 text-sm transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
+          className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-9 text-sm transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
           readOnly={foundLocation !== null}
           autoComplete="off"
           autoCorrect="off"
@@ -252,7 +252,7 @@ const WorkplacePostalCodeSelector = ({
         <Card className="bg-white/5 backdrop-blur-sm border border-white/10 p-3 col-span-2">
           <div className="flex items-center space-x-2">
             <div className="flex-shrink-0">
-              <Loader2 className="h-4 w-4 animate-spin text-white/60" />
+              <Loader2 className="h-4 w-4 animate-spin text-white" />
             </div>
             <div className="flex-1">
               <p className="text-sm text-white font-medium">
