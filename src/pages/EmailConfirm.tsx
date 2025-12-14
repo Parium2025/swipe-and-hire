@@ -84,10 +84,10 @@ const EmailConfirm = () => {
           {status === 'loading' && (
             <>
               <Loader2 className="h-16 w-16 text-white mx-auto mb-4 animate-spin" />
-              <h2 className="text-2xl font-bold text-white mb-4">
+              <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
                 Bekräftar ditt konto...
               </h2>
-              <p className="text-white mb-6">
+              <p className="text-sm text-white mb-6">
                 Vänta ett ögonblick medan vi aktiverar ditt konto.
               </p>
             </>
@@ -96,10 +96,10 @@ const EmailConfirm = () => {
           {status === 'success' && (
             <>
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-4">
+              <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
                 Nu är kontot bekräftat! 🎉
               </h2>
-              <p className="text-white mb-6">
+              <p className="text-sm text-white mb-6">
                 Ditt konto är nu aktiverat och redo att användas. Du kan logga in och börja använda Parium!
               </p>
               <Button 
@@ -113,10 +113,10 @@ const EmailConfirm = () => {
           
           {status === 'already-confirmed' && (
             <>
-              <h2 className="text-2xl font-bold text-white mb-4">
+              <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
                 Redan aktiverat 🎉
               </h2>
-              <p className="text-white mb-6">
+              <p className="text-sm text-white mb-6">
                 Ditt konto är redan aktiverat och redo att användas.
               </p>
               <Button 
@@ -131,10 +131,10 @@ const EmailConfirm = () => {
           {status === 'error' && (
             <>
               <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-4">
+              <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
                 Ett fel inträffade
               </h2>
-              <p className="text-white mb-6">
+              <p className="text-sm text-white mb-6">
                 {message}
               </p>
               <Button 

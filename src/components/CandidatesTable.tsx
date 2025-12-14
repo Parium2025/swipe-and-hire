@@ -62,7 +62,7 @@ export function CandidatesTable({
           </svg>
         </div>
         <h3 className="text-lg font-semibold text-white mb-2">Inga kandidater än</h3>
-        <p className="text-white max-w-sm">
+        <p className="text-sm text-white max-w-sm">
           När någon söker till dina jobbannonser kommer deras ansökningar att visas här.
         </p>
       </div>
@@ -75,11 +75,11 @@ export function CandidatesTable({
         <Table>
           <TableHeader>
             <TableRow className="border-white/10 hover:bg-white/5 hover:border-white/50">
-              <TableHead className="text-foreground">Kandidat</TableHead>
-              <TableHead className="text-foreground">Tjänst</TableHead>
-              <TableHead className="text-foreground">Status</TableHead>
-              <TableHead className="text-foreground">Ansökt</TableHead>
-              <TableHead className="text-foreground">Senaste aktivitet</TableHead>
+              <TableHead className="text-white">Kandidat</TableHead>
+              <TableHead className="text-white">Tjänst</TableHead>
+              <TableHead className="text-white">Status</TableHead>
+              <TableHead className="text-white">Ansökt</TableHead>
+              <TableHead className="text-white">Senaste aktivitet</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

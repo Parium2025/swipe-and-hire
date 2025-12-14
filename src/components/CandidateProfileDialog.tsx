@@ -65,7 +65,7 @@ export const CandidateProfileDialog = ({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <DialogTitle className="text-2xl text-foreground">
+              <DialogTitle className="text-xl md:text-2xl font-semibold text-white tracking-tight">
                 {application.first_name} {application.last_name}
               </DialogTitle>
               <p className="text-muted-foreground mt-1">{application.job_title}</p>
@@ -79,7 +79,7 @@ export const CandidateProfileDialog = ({
         <div className="space-y-6 mt-6">
           {/* Contact Information */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Kontaktinformation</h3>
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wide">Kontaktinformation</h3>
             <div className="space-y-2">
               {application.email && (
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -108,7 +108,7 @@ export const CandidateProfileDialog = ({
 
           {/* Personal Information */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Personlig information</h3>
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wide">Personlig information</h3>
             <div className="grid grid-cols-2 gap-4">
               {application.age && (
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -124,8 +124,8 @@ export const CandidateProfileDialog = ({
               )}
             </div>
             {application.availability && (
-              <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">Tillgänglighet:</span> {application.availability}
+              <p className="text-sm text-white">
+                <span className="font-medium text-white">Tillgänglighet:</span> {application.availability}
               </p>
             )}
           </div>
@@ -133,20 +133,20 @@ export const CandidateProfileDialog = ({
           {/* Bio */}
           {application.bio && (
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Om kandidaten</h3>
-              <p className="text-muted-foreground whitespace-pre-wrap">{application.bio}</p>
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wide">Om kandidaten</h3>
+              <p className="text-white whitespace-pre-wrap">{application.bio}</p>
             </div>
           )}
 
           {/* Custom Answers */}
           {application.custom_answers && Object.keys(application.custom_answers).length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Ansökningssvar</h3>
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wide">Ansökningssvar</h3>
               <div className="space-y-3">
                 {Object.entries(application.custom_answers).map(([question, answer]) => (
                   <div key={question} className="bg-white/5 p-4 rounded-lg border border-white/10">
-                    <p className="text-sm font-medium text-foreground mb-2">{question}</p>
-                    <p className="text-sm text-muted-foreground">{String(answer)}</p>
+                    <p className="text-sm font-medium text-white mb-2">{question}</p>
+                    <p className="text-sm text-white">{String(answer)}</p>
                   </div>
                 ))}
               </div>
@@ -156,7 +156,7 @@ export const CandidateProfileDialog = ({
           {/* CV & Documents */}
           {application.cv_url && (
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Dokument</h3>
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wide">Dokument</h3>
               <button
                 onClick={async (e) => {
                   e.preventDefault();
@@ -170,7 +170,7 @@ export const CandidateProfileDialog = ({
                     }
                   });
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/50 rounded-lg transition-colors text-foreground cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/50 rounded-lg transition-colors text-white cursor-pointer"
               >
                 <FileText className="h-4 w-4" />
                 Visa CV

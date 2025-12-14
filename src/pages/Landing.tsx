@@ -86,7 +86,7 @@ const Landing = () => {
           <div className="flex flex-col items-start text-left max-w-2xl">
             {/* Hero Content */}
             <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in mb-6 sm:mb-8 md:mb-12">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight tracking-tight text-white">
                 Verktyget som matchar på riktigt
               </h1>
               
@@ -146,7 +146,7 @@ const Landing = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 tracking-tight text-white">
               Varför välja Parium?
             </h2>
             <p className="text-white text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-4">
@@ -179,7 +179,7 @@ const Landing = () => {
                     </div>
                   </div>
                   
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 group-hover:text-secondary transition-colors duration-300">
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 tracking-tight text-white group-hover:text-secondary transition-colors duration-300">
                     {feature.title}
                   </h3>
                   
