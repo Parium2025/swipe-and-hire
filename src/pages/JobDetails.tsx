@@ -185,7 +185,7 @@ const JobDetails = () => {
                     <MoreVertical className="h-3 w-3 md:h-4 md:w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-[hsl(215,100%,12%)] border-white/20">
+                <DropdownMenuContent align="end" className="bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg">
                   <DropdownMenuItem 
                     onClick={() => updateApplicationStatus(application.id, 'reviewing')}
                     className="text-white hover:bg-white/10"

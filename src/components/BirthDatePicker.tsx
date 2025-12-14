@@ -158,7 +158,7 @@ export function BirthDatePicker({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className="w-32 max-h-60 overflow-y-auto bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white"
+                className="w-32 max-h-60 overflow-y-auto bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-50 rounded-md text-white"
                 side="bottom"
                 align="center"
                 sideOffset={6}
@@ -189,7 +189,7 @@ export function BirthDatePicker({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className="w-40 max-h-60 overflow-y-auto bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white"
+                className="w-40 max-h-60 overflow-y-auto bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-50 rounded-md text-white"
                 side="bottom"
                 align="center"
                 sideOffset={6}
