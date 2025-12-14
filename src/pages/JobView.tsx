@@ -312,7 +312,7 @@ const JobView = () => {
               }}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             />
-            <div className="flex justify-between text-xs text-white/60">
+            <div className="flex justify-between text-xs" style={{ color: '#FFFFFF' }}>
               <span>{minVal}</span>
               <span>{maxVal}</span>
             </div>
