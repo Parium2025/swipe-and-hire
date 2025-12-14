@@ -147,7 +147,7 @@ const CompanyReviews = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-lg p-8 text-center">
-          <Building2 className="h-12 w-12 text-white/50 mx-auto mb-4" />
+          <Building2 className="h-12 w-12 text-white mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-white mb-2">
             Företagsinformation saknas
           </h3>

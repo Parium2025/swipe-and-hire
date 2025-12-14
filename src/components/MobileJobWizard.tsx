@@ -2250,7 +2250,7 @@ const MobileJobWizard = ({
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                   />
                 </div>
 
@@ -2262,9 +2262,9 @@ const MobileJobWizard = ({
                       onChange={(e) => handleOccupationSearch(e.target.value)}
                       onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
                       placeholder="t.ex. Mjukvaru- och systemutvecklare"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 focus:border-white/40"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 focus:border-white/40"
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
                     
                     {/* Occupation Dropdown */}
                     {showOccupationDropdown && (
@@ -2311,7 +2311,7 @@ const MobileJobWizard = ({
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                     rows={3}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 p-2 text-sm resize-none leading-tight focus:border-white/40 min-h-[80px] sm:min-h-[200px]"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white p-2 text-sm resize-none leading-tight focus:border-white/40 min-h-[80px] sm:min-h-[200px]"
                   />
                 </div>
 
@@ -2329,7 +2329,7 @@ const MobileJobWizard = ({
                           ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
                           : 'Välj förmåner'}
                       </span>
-                      <ChevronDown className="h-4 w-4 text-white/60" />
+                      <ChevronDown className="h-4 w-4 text-white" />
                     </div>
                     
                     {showBenefitsDropdown && (
@@ -2441,7 +2441,7 @@ const MobileJobWizard = ({
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="bg-white/10 border border-white/20 text-white/60 hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-md cursor-pointer transition-all duration-300"
+                      className="bg-white/10 border border-white/20 text-white hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-md cursor-pointer transition-all duration-300"
                     >
                       <Plus className="w-4 h-4" />
                     </div>
@@ -2459,7 +2459,7 @@ const MobileJobWizard = ({
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showEmploymentTypeDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {/* Employment Type Dropdown */}
                     {showEmploymentTypeDropdown && (
@@ -2490,7 +2490,7 @@ const MobileJobWizard = ({
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showSalaryTypeDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {/* Salary Type Dropdown */}
                     {showSalaryTypeDropdown && (
@@ -2521,7 +2521,7 @@ const MobileJobWizard = ({
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showSalaryTransparencyDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {/* Salary Transparency Dropdown */}
                     {showSalaryTransparencyDropdown && (
@@ -2610,10 +2610,10 @@ const MobileJobWizard = ({
                         }}
                         placeholder="08:00"
                         maxLength={5}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                       />
                     </div>
-                    <span className="text-white/60 text-sm">–</span>
+                    <span className="text-white text-sm">–</span>
                     <div className="flex-1">
                       <Input
                         ref={workEndTimeRef}
@@ -2637,7 +2637,7 @@ const MobileJobWizard = ({
                         }}
                         placeholder="17:00"
                         maxLength={5}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                       />
                     </div>
                   </div>
@@ -2657,10 +2657,10 @@ const MobileJobWizard = ({
                       onChange={(e) => handleWorkLocationSearch(e.target.value)}
                       onClick={handleWorkLocationClick}
                       placeholder="Välj arbetsplats"
-                      className={`bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer ${showWorkLocationDropdown ? 'border-white/50' : ''}`}
+                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showWorkLocationDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {/* Work Location Dropdown */}
                     {showWorkLocationDropdown && (
@@ -2688,10 +2688,10 @@ const MobileJobWizard = ({
                       onChange={(e) => handleRemoteWorkSearch(e.target.value)}
                       onClick={handleRemoteWorkClick}
                       placeholder="Välj alternativ"
-                      className={`bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer ${showRemoteWorkDropdown ? 'border-white/50' : ''}`}
+                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showRemoteWorkDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {/* Remote Work Dropdown */}
                     {showRemoteWorkDropdown && (
@@ -2717,7 +2717,7 @@ const MobileJobWizard = ({
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                     placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                   />
                 </div>
 
@@ -2728,7 +2728,7 @@ const MobileJobWizard = ({
                     value={formData.contact_email}
                     onChange={(e) => handleInputChange('contact_email', e.target.value)}
                     placeholder={user?.email || "kontakt@företag.se"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                   />
                 </div>
 
@@ -2738,7 +2738,7 @@ const MobileJobWizard = ({
                     value={formData.workplace_address}
                     onChange={(e) => handleInputChange('workplace_address', e.target.value)}
                     placeholder="T.ex. Modulvägen 1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                   />
                 </div>
 

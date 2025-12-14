@@ -154,7 +154,7 @@ export function BirthDatePicker({
                   <span>
                     {selectedDate ? selectedDate.getFullYear() : "År"}
                   </span>
-                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-white/60" />
+                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-white" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
@@ -185,7 +185,7 @@ export function BirthDatePicker({
                   <span>
                     {selectedDate ? months[selectedDate.getMonth()].label : "Månad"}
                   </span>
-                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-white/60" />
+                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-white" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
