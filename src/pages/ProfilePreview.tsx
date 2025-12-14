@@ -283,7 +283,7 @@ export default function ProfilePreview() {
             {/* Text direkt under profilbilden - beroende på media */}
             {(data.video_url || data.profile_image_url) && (
               <div className="absolute top-[210px] left-1/2 transform -translate-x-1/2 text-center">
-                <p className="text-sm font-medium" style={{ color: '#FFFFFF' }}>
+                <p className="text-sm font-medium text-white">
                   {data.video_url ? 'Video tillgängligt' : 'Enbart profilbild vald'}
                 </p>
               </div>
@@ -316,8 +316,8 @@ export default function ProfilePreview() {
                 {/* Swipe-indikator */}
                 <div className="flex items-center justify-center mt-3">
                   <div className="bg-white/20 rounded-md px-2 py-1 flex items-center gap-1">
-                    <span className="text-xs" style={{ color: '#FFFFFF' }}>Tryck för mer info</span>
-                    <ArrowRight className="h-3 w-3" style={{ color: '#FFFFFF' }} />
+                    <span className="text-xs text-white">Tryck för mer info</span>
+                    <ArrowRight className="h-3 w-3 text-white" />
                   </div>
                 </div>
               </div>
@@ -407,14 +407,13 @@ export default function ProfilePreview() {
                   {/* Telefon */}
                   {data.phone && (
                     <div>
-                      <p className="text-[11px]" style={{ color: '#FFFFFF' }}>Telefon:</p>
+                      <p className="text-[11px] text-white">Telefon:</p>
                       <button
                         onClick={handlePhoneClick}
-                        className="flex items-center gap-1 transition-colors"
-                        style={{ color: '#FFFFFF' }}
+                        className="flex items-center gap-1 transition-colors text-white"
                       >
-                        <Phone className="h-3 w-3" style={{ color: '#FFFFFF' }} />
-                        <span className="text-[11px]" style={{ color: '#FFFFFF' }}>{data.phone}</span>
+                        <Phone className="h-3 w-3 text-white" />
+                        <span className="text-[11px] text-white">{data.phone}</span>
                       </button>
                     </div>
                   )}
@@ -422,17 +421,16 @@ export default function ProfilePreview() {
                   {/* E-post */}
                   {data.user_id && user?.email && (
                     <div>
-                      <p className="text-xs" style={{ color: '#FFFFFF' }}>E-post:</p>
+                      <p className="text-xs text-white">E-post:</p>
                       <TooltipProvider delayDuration={0}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
                               onClick={handleEmailClick}
-                              className="flex items-center gap-1 min-w-0 w-full transition-colors"
-                              style={{ color: '#FFFFFF' }}
+                              className="flex items-center gap-1 min-w-0 w-full transition-colors text-white"
                             >
-                              <Mail className="h-3 w-3 flex-shrink-0" style={{ color: '#FFFFFF' }} />
-                              <span className="text-xs truncate block flex-1 min-w-0" style={{ color: '#FFFFFF' }}>{user.email}</span>
+                              <Mail className="h-3 w-3 flex-shrink-0 text-white" />
+                              <span className="text-xs truncate block flex-1 min-w-0 text-white">{user.email}</span>
                             </button>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -446,10 +444,10 @@ export default function ProfilePreview() {
                   {/* Postnummer */}
                   {data.postal_code && (
                     <div>
-                      <p className="text-xs" style={{ color: '#FFFFFF' }}>Postnummer:</p>
+                      <p className="text-xs text-white">Postnummer:</p>
                       <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" style={{ color: '#FFFFFF' }} />
-                        <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{data.postal_code}</p>
+                        <MapPin className="h-3 w-3 text-white" />
+                        <p className="text-[11px] text-white">{data.postal_code}</p>
                       </div>
                     </div>
                   )}
@@ -457,10 +455,10 @@ export default function ProfilePreview() {
                   {/* Ort */}
                   {data.location && (
                     <div>
-                      <p className="text-xs" style={{ color: '#FFFFFF' }}>Ort:</p>
-                      <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{data.location}</p>
+                      <p className="text-xs text-white">Ort:</p>
+                      <p className="text-[11px] text-white">{data.location}</p>
                       {profile?.home_location && (
-                        <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{profile.home_location}</p>
+                        <p className="text-[11px] text-white">{profile.home_location}</p>
                       )}
                     </div>
                   )}

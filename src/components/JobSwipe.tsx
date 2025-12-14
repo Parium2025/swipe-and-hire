@@ -468,7 +468,7 @@ const JobSwipe = () => {
                   <Info className="h-4 w-4" />
                   Så här ansöker du
                 </h4>
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                <p className="text-sm md:text-base text-white leading-relaxed">
                   {currentJob.application_instructions}
                 </p>
               </div>

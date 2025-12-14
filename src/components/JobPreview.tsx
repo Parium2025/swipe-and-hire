@@ -179,7 +179,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
               }}
               onChange={(e) => handleAnswerChange(questionId, e.target.value)}
             />
-            <div className="flex justify-between text-sm" style={{ color: '#FFFFFF' }}>
+            <div className="flex justify-between text-sm text-white">
               <span>{minVal}</span>
               <span>{maxVal}</span>
             </div>
@@ -199,16 +199,16 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
       case 'file':
         return (
           <div className="border-2 border-dashed border-white/30 rounded-lg p-6 text-center bg-white/5">
-            <FileText className="h-8 w-8 mx-auto mb-3" style={{ color: '#FFFFFF' }} />
-            <p className="text-base" style={{ color: '#FFFFFF' }}>Välj fil</p>
+            <FileText className="h-8 w-8 mx-auto mb-3 text-white" />
+            <p className="text-base text-white">Välj fil</p>
           </div>
         );
 
       case 'video':
         return (
           <div className="border-2 border-dashed border-white/30 rounded-lg p-6 text-center bg-white/5">
-            <Video className="h-8 w-8 mx-auto mb-3" style={{ color: '#FFFFFF' }} />
-            <p className="text-base" style={{ color: '#FFFFFF' }}>Spela in video</p>
+            <Video className="h-8 w-8 mx-auto mb-3 text-white" />
+            <p className="text-base text-white">Spela in video</p>
           </div>
         );
 
@@ -226,11 +226,11 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
 
   const getQuestionIcon = (type: string) => {
     switch (type) {
-      case 'text': return <FileText className="h-6 w-6" />;
-      case 'yes_no': return <CheckSquare className="h-6 w-6" />;
-      case 'multiple_choice': return <List className="h-6 w-6" />;
-      case 'video': return <Video className="h-6 w-6" />;
-      default: return <FileText className="h-6 w-6" />;
+      case 'text': return <FileText className="h-6 w-6 text-white" />;
+      case 'yes_no': return <CheckSquare className="h-6 w-6 text-white" />;
+      case 'multiple_choice': return <List className="h-6 w-6 text-white" />;
+      case 'video': return <Video className="h-6 w-6 text-white" />;
+      default: return <FileText className="h-6 w-6 text-white" />;
     }
   };
 
@@ -356,13 +356,13 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
                   
                   {/* Question header - without icon */}
                   <div>
-                    <div style={{ color: '#FFFFFF' }} className="text-sm mb-2">
+                    <div className="text-sm mb-2 text-white">
                       Fråga {index + 1} av {jobData.questions.length}
                     </div>
-                    <h3 className="text-xl font-bold leading-tight" style={{ color: '#FFFFFF' }}>
+                    <h3 className="text-xl font-bold leading-tight text-white tracking-tight">
                       {question.question_text}
                       {question.is_required && (
-                        <span className="ml-1" style={{ color: '#FFFFFF' }}>*</span>
+                        <span className="ml-1 text-white">*</span>
                       )}
                     </h3>
                   </div>
