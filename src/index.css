@@ -154,7 +154,7 @@ All colors MUST be HSL.
     --secondary-foreground: 210 40% 98%;
 
     --muted: 215 50% 20%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 0 0% 100%; /* Pure white for consistent Parium typography */
 
     --accent: 215 50% 25%;
     --accent-foreground: 210 40% 98%;
@@ -541,6 +541,16 @@ All colors MUST be HSL.
   /* Muted text - Less prominent information */
   .text-muted-white {
     @apply text-white;
+  }
+
+  /* === DARK MODE OVERRIDES === */
+  /* Override muted-foreground in Parium dark UI for consistent white text */
+  .dark .text-muted-foreground,
+  [data-theme="dark"] .text-muted-foreground,
+  .bg-parium-gradient .text-muted-foreground,
+  .bg-gradient-parium .text-muted-foreground,
+  .min-h-screen:has(.bg-parium-gradient) .text-muted-foreground {
+    color: hsl(0 0% 100%);
   }
   
   /* === BACKGROUND UTILITIES === */
