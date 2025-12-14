@@ -221,6 +221,16 @@ All colors MUST be HSL.
     color: inherit;
   }
 
+  /* GLOBAL: Override all dimmed text-white/XX classes to pure white */
+  [class*="text-white\\/"] {
+    color: rgb(255, 255, 255) !important;
+  }
+
+  /* GLOBAL: Override all dimmed placeholder:text-white/XX classes to pure white */
+  [class*="placeholder\\:text-white\\/"]::placeholder {
+    color: rgb(255, 255, 255) !important;
+  }
+
   /* Mobile fullscreen support - extend under status bar */
   html, body, #root {
     padding: 0 !important;
