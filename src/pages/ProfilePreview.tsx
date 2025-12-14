@@ -725,6 +725,17 @@ export default function ProfilePreview() {
                   </p>
                 </div>
               )}
+              {user?.email && (
+                <div className="flex flex-col items-start gap-0.5">
+                  <p className="text-xs text-white font-medium">E-post:</p>
+                  <p 
+                    className="text-white cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
+                    onClick={handleEmailClick}
+                  >
+                    {user.email}
+                  </p>
+                </div>
+              )}
               {consentedData?.postal_code && (
                 <div className="flex flex-col items-start gap-0.5">
                   <p className="text-xs text-white font-medium">Postnummer:</p>
@@ -738,17 +749,6 @@ export default function ProfilePreview() {
                   {profile?.home_location && (
                     <p className="text-white text-[10px]">{profile.home_location}</p>
                   )}
-                </div>
-              )}
-              {user?.email && (
-                <div className="flex flex-col items-start gap-0.5">
-                  <p className="text-xs text-white font-medium">E-post:</p>
-                  <p 
-                    className="text-white cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
-                    onClick={handleEmailClick}
-                  >
-                    {user.email}
-                  </p>
                 </div>
               )}
             </CardContent>
