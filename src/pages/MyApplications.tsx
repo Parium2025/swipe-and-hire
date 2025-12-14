@@ -161,8 +161,8 @@ const MyApplications = () => {
     return (
       <div className="max-w-4xl mx-auto px-3 md:px-12 animate-fade-in">
         <div className="text-center mb-8">
-          <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Mina Ansökningar</h1>
-          <p className="text-white">Dina inskickade jobbansökningar</p>
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
+          <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
         </div>
         
         {/* Spinner */}
@@ -208,8 +208,8 @@ const MyApplications = () => {
   return (
     <div className="max-w-4xl mx-auto px-3 md:px-12 animate-fade-in">
       <div className="text-center mb-8">
-        <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Mina Ansökningar</h1>
-        <p className="text-white">Dina inskickade jobbansökningar</p>
+        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
+        <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
       </div>
 
       {!applications || applications.length === 0 ? (

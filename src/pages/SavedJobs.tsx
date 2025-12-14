@@ -160,8 +160,8 @@ const SavedJobs = () => {
     return (
       <div className="max-w-4xl mx-auto px-3 md:px-6 py-6">
         <div className="text-center mb-8">
-          <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Sparade Jobb</h1>
-          <p className="text-white">Dina favorit-jobb samlade på ett ställe</p>
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Sparade Jobb</h1>
+          <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>
         </div>
         <div className="flex justify-center py-12">
           <Loader2 className="h-8 w-8 text-white animate-spin" />
@@ -173,8 +173,8 @@ const SavedJobs = () => {
   return (
     <div className="max-w-4xl mx-auto px-3 md:px-6 py-6 animate-fade-in">
       <div className="text-center mb-8">
-        <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">Sparade Jobb</h1>
-        <p className="text-white">Dina favorit-jobb samlade på ett ställe</p>
+        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Sparade Jobb</h1>
+        <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>
       </div>
 
       {savedJobs.length === 0 ? (

@@ -1001,8 +1001,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
           <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
             <FileText className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-2xl font-semibold mb-2 text-white">CV</h2>
-          <p className="text-white">Ladda upp ditt CV för att visa din erfarenhet</p>
+          <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">CV</h2>
+          <p className="text-sm text-white">Ladda upp ditt CV för att visa din erfarenhet</p>
         </div>
 
         <div className="flex flex-col items-center space-y-4">
@@ -1089,7 +1089,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <User className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-semibold mb-2 text-white">Låt oss lära känna dig</h2>
+              <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Låt oss lära känna dig</h2>
             </div>
             
             <div className="space-y-4 max-w-md mx-auto">
@@ -1335,8 +1335,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-semibold mb-2 text-white">Profilbild/Profilvideo</h2>
-              <p className="text-white text-sm">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt</p>
+              <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Profilbild/Profilvideo</h2>
+              <p className="text-sm text-white">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt</p>
             </div>
 
             {/* Profile Image/Video Card - matching structure from Profile.tsx */}
@@ -1581,8 +1581,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Briefcase className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-semibold mb-2 text-white">Din profil</h2>
-              <p className="text-white">Ge en kortare beskrivning om dig själv?</p>
+              <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Din profil</h2>
+              <p className="text-sm text-white">Ge en kortare beskrivning om dig själv?</p>
             </div>
 
             <div className="space-y-4 max-w-md mx-auto">
@@ -1612,7 +1612,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Users className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-semibold mb-2 text-white">Dela din information</h2>
+              <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Dela din information</h2>
             </div>
 
             <div className="max-w-md mx-auto space-y-6">
@@ -1664,7 +1664,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Check className="h-12 w-12 text-white" />
             </div>
             <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-white">Profilen är klar</h2>
+              <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Profilen är klar</h2>
               <p className="text-sm text-white">Är du redo?</p>
             </div>
             <div className="flex flex-col items-center gap-4 pt-8">

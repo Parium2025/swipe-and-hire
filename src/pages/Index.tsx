@@ -65,11 +65,11 @@ const CandidatesContent = () => {
       {/* Main Content */}
       <div className="space-y-4">
         {/* Header */}
-        <div className="text-center">
-          <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">
+        <div className="text-center mb-6">
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
             Alla kandidater ({isLoading ? '...' : stats.total})
           </h1>
-          <p className="text-white">
+          <p className="text-sm text-white mt-1">
             Hantera och granska kandidater som sökt till dina jobbannonser
           </p>
         </div>

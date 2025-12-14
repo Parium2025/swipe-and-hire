@@ -530,8 +530,8 @@ const CompanyProfile = () => {
   return (
     <div className="space-y-8 max-w-4xl mx-auto animate-fade-in">
       <div className="text-center mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Företagslogga</h1>
-        <p className="text-white">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
+        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Företagslogga</h1>
+        <p className="text-sm text-white mt-1">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
       </div>
 
       {/* Företagslogga sektion - Minimalistisk */}

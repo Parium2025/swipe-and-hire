@@ -1281,9 +1281,9 @@ const Profile = () => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 px-4 animate-fade-in">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold text-white mb-2">Min Profil</h1>
-        <p className="text-white text-sm">
+      <div className="text-center mb-6">
+        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Min Profil</h1>
+        <p className="text-sm text-white mt-1">
           Hantera din personliga information
         </p>
       </div>
