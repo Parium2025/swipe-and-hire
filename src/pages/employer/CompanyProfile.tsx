@@ -625,7 +625,7 @@ const CompanyProfile = () => {
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
                   maxLength={11}
-                  className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 [&]:text-white ${orgNumberError ? 'border-red-500/50' : ''}`}
+                  className={`bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 [&]:text-white ${orgNumberError ? 'border-red-500/50' : ''}`}
                 />
                 {orgNumberError && (
                   <p className="text-red-400/80 text-sm mt-1">{orgNumberError}</p>
@@ -643,7 +643,7 @@ const CompanyProfile = () => {
                       <span className="truncate text-left flex-1 px-1 text-white/90">
                         {formData.industry || 'Välj bransch'}
                       </span>
-                      <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2" />
+                      <ChevronDown className="h-4 w-4 flex-shrink-0 text-white ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent 
@@ -751,7 +751,7 @@ const CompanyProfile = () => {
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                   placeholder="Hammarby Backen 89555"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 [&]:text-white"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 [&]:text-white"
                 />
               </div>
 
@@ -762,7 +762,7 @@ const CompanyProfile = () => {
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
                   placeholder="https://din-webbsida.se"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 [&]:text-white"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 [&]:text-white"
                 />
               </div>
             </div>
