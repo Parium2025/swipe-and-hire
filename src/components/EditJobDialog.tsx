@@ -1977,7 +1977,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               }}
                               variant="ghost"
                               size="sm"
-                              className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                              className="text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                             >
                               <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
                             </Button>
@@ -2067,7 +2067,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   setShowQuestionTemplates(false);
                                                   setShowQuestionForm(true);
                                                 }}
-                                                className="p-1.5 text-white hover:text-white/70 hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                                className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
                                               >
                                                 <Pencil className="h-3.5 w-3.5" />
                                               </button>

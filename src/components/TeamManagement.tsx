@@ -236,7 +236,7 @@ const TeamManagement = () => {
               placeholder="E-postadress"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white h-9 text-sm"
             />
           </div>
           <Select value={inviteRole} onValueChange={setInviteRole}>
@@ -264,10 +264,10 @@ const TeamManagement = () => {
       <div className="space-y-3">
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-white/50" />
+            <Loader2 className="h-6 w-6 animate-spin text-white" />
           </div>
         ) : teamMembers.length === 0 ? (
-          <p className="text-center text-white/60 py-4">Inga teammedlemmar ännu.</p>
+          <p className="text-center text-white py-4">Inga teammedlemmar ännu.</p>
         ) : (
           teamMembers.map((member) => (
             <div 

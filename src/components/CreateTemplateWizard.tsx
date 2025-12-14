@@ -1242,10 +1242,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                       onClick={handleQuestionTypeClick}
                       placeholder="Välj frågetyp"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {showQuestionTypeDropdown && (
                       <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
@@ -1271,7 +1271,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       value={editingQuestion.question_text}
                       onChange={(e) => updateQuestionField('question_text', e.target.value)}
                       placeholder="T.ex. Beskriv dina erfarenheter inom..."
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                     />
                   </div>
                 )}
@@ -1283,7 +1283,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       value={editingQuestion.question_text}
                       onChange={(e) => updateQuestionField('question_text', e.target.value)}
                       placeholder="T.ex. Har du körkort?, Kan du arbeta helger?..."
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                     />
                   </div>
                 )}
@@ -1296,7 +1296,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         value={editingQuestion.question_text}
                         onChange={(e) => updateQuestionField('question_text', e.target.value)}
                         placeholder="T.ex. Antal års erfarenhet inom..."
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                       />
                     </div>
                     
@@ -1308,7 +1308,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           value={editingQuestion.min_value ?? ''}
                           onChange={(e) => updateQuestionField('min_value', e.target.value ? parseInt(e.target.value) : undefined)}
                           placeholder="0"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                         />
                       </div>
                       <div className="space-y-2">
@@ -1318,7 +1318,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           value={editingQuestion.max_value ?? ''}
                           onChange={(e) => updateQuestionField('max_value', e.target.value ? parseInt(e.target.value) : undefined)}
                           placeholder="100"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                         />
                       </div>
                     </div>
@@ -1333,7 +1333,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         value={editingQuestion.question_text}
                         onChange={(e) => updateQuestionField('question_text', e.target.value)}
                         placeholder="T.ex. Vilka behörigheter har du?"
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                       />
                     </div>
 
@@ -1346,7 +1346,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                               value={option}
                               onChange={(e) => updateOption(index, e.target.value)}
                               placeholder={`Alternativ ${index + 1}`}
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                             />
                             <button
                               type="button"
@@ -1400,7 +1400,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="t.ex. Standard Lagerarbetare"
-                    className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                   />
                 </div>
               </div>
@@ -1415,7 +1415,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                   />
                 </div>
 
@@ -1427,9 +1427,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onChange={(e) => handleOccupationSearch(e.target.value)}
                       onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
                       placeholder="t.ex. Mjukvaru- och systemutvecklare"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 focus:border-white/40"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 focus:border-white/40"
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
                     
                     {showOccupationDropdown && (
                       <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
@@ -1472,7 +1472,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                     rows={3}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 p-2 text-sm resize-none leading-tight focus:border-white/40 min-h-[80px] sm:min-h-[200px]"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white p-2 text-sm resize-none leading-tight focus:border-white/40 min-h-[80px] sm:min-h-[200px]"
                   />
                 </div>
 
@@ -1489,7 +1489,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
                           : 'Välj förmåner'}
                       </span>
-                      <ChevronDown className="h-4 w-4 text-white/60" />
+                      <ChevronDown className="h-4 w-4 text-white" />
                     </div>
                     
                     {showBenefitsDropdown && (
@@ -1568,7 +1568,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="bg-white/10 border border-white/20 text-white/60 hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-md cursor-pointer transition-all duration-300"
+                      className="bg-white/10 border border-white/20 text-white hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-md cursor-pointer transition-all duration-300"
                     >
                       <Plus className="w-4 h-4" />
                     </div>
@@ -1586,7 +1586,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showEmploymentTypeDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {showEmploymentTypeDropdown && (
                        <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg">
@@ -1616,7 +1616,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showSalaryTypeDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {showSalaryTypeDropdown && (
                       <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
@@ -1646,7 +1646,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showSalaryTransparencyDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {showSalaryTransparencyDropdown && (
                       <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">

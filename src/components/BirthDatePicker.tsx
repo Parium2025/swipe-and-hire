@@ -219,7 +219,7 @@ export function BirthDatePicker({
             month={selectedDate}
             onMonthChange={setSelectedDate}
             initialFocus
-            className="p-0 pointer-events-auto text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/30 [&_.rdp-nav_button:hover]:bg-white/10 [&_.rdp-nav_button:hover]:text-white/70"
+            className="p-0 pointer-events-auto text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/30 [&_.rdp-nav_button:hover]:bg-white/10 [&_.rdp-nav_button:hover]:text-white"
             classNames={{
               day: "h-9 w-9 p-0 font-normal text-white hover:bg-white/20",
               day_selected: "!bg-transparent !border !border-white !outline-none !shadow-none !text-white font-semibold hover:!bg-white/10",

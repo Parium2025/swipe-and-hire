@@ -344,7 +344,7 @@ const JobTemplatesOverview = () => {
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="text-center py-12">
               <h3 className="text-lg font-semibold mb-2 text-white">Inga mallar än</h3>
-              <p className="text-white/70 mb-4">
+              <p className="text-white mb-4">
                 Skapa din första jobbmall för att effektivisera ditt rekryteringsarbete.
               </p>
               <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -372,7 +372,7 @@ const JobTemplatesOverview = () => {
                         </span>
                       )}
                     </div>
-                    <CardDescription className="text-white/70">
+                    <CardDescription className="text-white">
                       {template.title} • {template.location}
                     </CardDescription>
                   </div>
@@ -447,7 +447,7 @@ const JobTemplatesOverview = () => {
             <DialogTitle>
               {editingTemplate ? 'Redigera mall' : 'Skapa ny jobbmall'}
             </DialogTitle>
-            <DialogDescription className="text-white/70">
+            <DialogDescription className="text-white">
               {editingTemplate 
                 ? 'Uppdatera din jobbmall med ny information.'
                 : 'Skapa en återanvändbar mall för framtida jobbannonser.'
@@ -463,7 +463,7 @@ const JobTemplatesOverview = () => {
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 placeholder="t.ex. Lagerarbetare standardmall"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white"
                 required
               />
             </div>
@@ -478,7 +478,7 @@ const JobTemplatesOverview = () => {
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
                   placeholder="t.ex. Lagerarbetare"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white"
                   required
                 />
               </div>
@@ -489,7 +489,7 @@ const JobTemplatesOverview = () => {
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
                   placeholder="t.ex. Stockholm"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white"
                   required
                 />
               </div>
@@ -505,7 +505,7 @@ const JobTemplatesOverview = () => {
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                 placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                 rows={4}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white"
                 required
               />
             </div>
@@ -520,7 +520,7 @@ const JobTemplatesOverview = () => {
                 onChange={(e) => setFormData({...formData, requirements: e.target.value})}
                 placeholder="Beskriv vilka krav och kvalifikationer som krävs..."
                 rows={3}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white"
               />
             </div>
 
@@ -535,7 +535,7 @@ const JobTemplatesOverview = () => {
                   value={formData.salary_min}
                   onChange={(e) => setFormData({...formData, salary_min: e.target.value})}
                   placeholder="25000"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white"
                 />
               </div>
               <div className="space-y-2">
@@ -546,7 +546,7 @@ const JobTemplatesOverview = () => {
                   value={formData.salary_max}
                   onChange={(e) => setFormData({...formData, salary_max: e.target.value})}
                   placeholder="35000"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white"
                 />
               </div>
             </div>
@@ -580,7 +580,7 @@ const JobTemplatesOverview = () => {
                   value={formData.work_schedule}
                   onChange={(e) => setFormData({...formData, work_schedule: e.target.value})}
                   placeholder="t.ex. 08:00-17:00"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white"
                 />
               </div>
             </div>
@@ -595,7 +595,7 @@ const JobTemplatesOverview = () => {
                 value={formData.contact_email}
                 onChange={(e) => setFormData({...formData, contact_email: e.target.value})}
                 placeholder="kontakt@företag.se"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white"
               />
             </div>
 
@@ -609,7 +609,7 @@ const JobTemplatesOverview = () => {
                 onChange={(e) => setFormData({...formData, application_instructions: e.target.value})}
                 placeholder="Hur ska kandidater ansöka?"
                 rows={3}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white"
               />
             </div>
 
