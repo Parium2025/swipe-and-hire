@@ -638,7 +638,7 @@ const CompanyProfile = () => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between h-9 font-normal"
+                      className={`w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between h-9 font-normal ${industryMenuOpen ? 'border-white/50' : ''}`}
                     >
                       <span className="truncate text-left flex-1 px-1 text-white/90">
                         {formData.industry || 'Välj bransch'}
