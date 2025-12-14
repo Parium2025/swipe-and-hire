@@ -3098,6 +3098,118 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               </div>
                                             </div>
                                           )}
+
+                                          {/* Anpassade frågor - individuella kort (Desktop) */}
+                                          {customQuestions.length > 0 && (
+                                            <div className="space-y-1.5">
+                                              {customQuestions.map((question, index) => {
+                                                const typeLabels: Record<string, string> = {
+                                                  number: 'Siffra',
+                                                  text: 'Text',
+                                                  multiple_choice: 'Flerval',
+                                                  yes_no: 'Ja/Nej',
+                                                  date: 'Datum',
+                                                  file: 'Fil',
+                                                  video: 'Video',
+                                                };
+
+                                                return (
+                                                  <div key={question.id || index} className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                                    {/* Frågetext */}
+                                                    <div className="mb-1.5">
+                                                      <label className="text-xs font-medium text-white block leading-tight">
+                                                        {question.question_text}
+                                                      </label>
+                                                    </div>
+                                                   
+                                                    {/* Input förhandsvisning baserat på frågetyp */}
+                                                    {question.question_type === 'text' && (
+                                                      <textarea
+                                                        className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40"
+                                                        placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                                        rows={2}
+                                                        readOnly
+                                                      />
+                                                    )}
+                                                   
+                                                    {question.question_type === 'yes_no' && (
+                                                      <div className="flex gap-1.5">
+                                                        <button
+                                                          type="button"
+                                                          className="bg-white/10 border-white/20 text-white border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1"
+                                                        >
+                                                          Ja
+                                                        </button>
+                                                        <button
+                                                          type="button"
+                                                          className="bg-white/10 border-white/20 text-white border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1"
+                                                        >
+                                                          Nej
+                                                        </button>
+                                                      </div>
+                                                    )}
+                                                   
+                                                    {question.question_type === 'multiple_choice' && (
+                                                      <div className="space-y-1">
+                                                        <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
+                                                        <div className="space-y-1 options-scroll">
+                                                          {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
+                                                            <div
+                                                              key={optIndex}
+                                                              className="text-white w-full flex items-center gap-2 rounded px-2 py-1 border border-white/20 bg-white/10"
+                                                            >
+                                                              <div className="w-1.5 h-1.5 rounded-full border border-white/40 flex-shrink-0" />
+                                                              <span className="text-xs text-white">{option}</span>
+                                                            </div>
+                                                          ))}
+                                                        </div>
+                                                      </div>
+                                                    )}
+                                                   
+                                                    {question.question_type === 'number' && (
+                                                      <div className="space-y-1.5">
+                                                        <div className="text-center text-sm font-semibold text-white">
+                                                          {question.min_value || 0}
+                                                        </div>
+                                                        <input
+                                                          type="range"
+                                                          min={question.min_value ?? 0}
+                                                          max={question.max_value ?? 100}
+                                                          defaultValue={question.min_value ?? 0}
+                                                          className="w-full h-1 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
+                                                          style={{
+                                                            background: `linear-gradient(to right, white 0%, rgba(255,255,255,0.3) 0%)`
+                                                          }}
+                                                          readOnly
+                                                        />
+                                                      </div>
+                                                    )}
+                                                   
+                                                    {question.question_type === 'date' && (
+                                                      <input
+                                                        type="date"
+                                                        className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9 focus:outline-none focus:border-white/40"
+                                                        readOnly
+                                                      />
+                                                    )}
+                                                   
+                                                    {(question.question_type === 'file' || question.question_type === 'video') && (
+                                                      <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
+                                                        {question.question_type === 'file' ? (
+                                                          <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                        ) : (
+                                                          <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                        )}
+                                                        <p className="text-xs text-white/60">
+                                                          {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
+                                                        </p>
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                );
+                                              })}
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
                                     </div>
