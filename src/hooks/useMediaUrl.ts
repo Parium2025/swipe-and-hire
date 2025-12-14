@@ -1,88 +1,110 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { getMediaUrl, type MediaType } from '@/lib/mediaManager';
 import { imageCache } from '@/lib/imageCache';
 
-// In-memory cache för signed URLs (överlever re-renders)
+// In-memory cache för signed URLs (överlever re-renders och tab switches)
 const signedUrlMemoryCache = new Map<string, { url: string; expiresAt: number }>();
+
+// Track pågående laddningar globalt för att undvika duplicerade requests
+const ongoingLoads = new Set<string>();
 
 // LocalStorage cache key
 const getCacheKey = (storagePath: string, mediaType: MediaType) => 
   `media_url_${mediaType}_${storagePath}`;
 
-export function useMediaUrl(storagePath: string | null | undefined, mediaType: MediaType, expiresInSeconds: number = 86400) {
-  // Försök hämta cached blob URL direkt (INSTANT, no flicker)
-  const initialBlobUrl = storagePath ? imageCache.getCachedUrl(storagePath) : null;
+// Hämta cached URL synkront (för initial render utan flicker)
+function getCachedUrlSync(storagePath: string, mediaType: MediaType): string | null {
+  // 1. Kolla blob cache först (snabbast)
+  const blobUrl = imageCache.getCachedUrl(storagePath);
+  if (blobUrl) return blobUrl;
   
-  const [url, setUrl] = useState<string | null>(initialBlobUrl);
-  const [isLoading, setIsLoading] = useState(!initialBlobUrl && !!storagePath);
-  const loadingRef = useRef(false);
+  // 2. Kolla memory cache
+  const cacheKey = getCacheKey(storagePath, mediaType);
+  const memCached = signedUrlMemoryCache.get(cacheKey);
+  const now = Date.now();
+  if (memCached && memCached.expiresAt > now) {
+    return memCached.url;
+  }
+  
+  // 3. Kolla localStorage
+  try {
+    const stored = localStorage.getItem(cacheKey);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.expiresAt > now) {
+        // Uppdatera memory cache
+        signedUrlMemoryCache.set(cacheKey, parsed);
+        return parsed.url;
+      }
+    }
+  } catch (e) {
+    // Ignore cache read errors
+  }
+  
+  return null;
+}
+
+export function useMediaUrl(storagePath: string | null | undefined, mediaType: MediaType, expiresInSeconds: number = 86400) {
+  // Hämta cached URL synkront för initial render (INGEN flicker vid tab switch)
+  const cachedUrl = useMemo(() => {
+    if (!storagePath) return null;
+    return getCachedUrlSync(storagePath, mediaType);
+  }, [storagePath, mediaType]);
+  
+  const [url, setUrl] = useState<string | null>(cachedUrl);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   useEffect(() => {
     if (!storagePath) {
       setUrl(null);
-      setIsLoading(false);
       return;
     }
-
-    // Undvik dubbel-laddning
-    if (loadingRef.current) return;
+    
+    // Om vi redan har cached URL, använd den direkt
+    if (cachedUrl) {
+      setUrl(cachedUrl);
+      
+      // Ladda blob i bakgrunden för ännu snabbare framtida laddning
+      if (!cachedUrl.startsWith('blob:')) {
+        imageCache.loadImage(cachedUrl).catch(() => {});
+      }
+      return;
+    }
 
     const cacheKey = getCacheKey(storagePath, mediaType);
     
-    // 1. Kolla om vi redan har en blob URL i imageCache (SNABBAST)
-    const cachedBlobUrl = imageCache.getCachedUrl(storagePath);
-    if (cachedBlobUrl) {
-      setUrl(cachedBlobUrl);
-      setIsLoading(false);
+    // Undvik dubbla requests för samma resurs globalt
+    if (ongoingLoads.has(cacheKey)) return;
+    
+    // Dubbelkolla cache igen (race condition protection)
+    const blobUrl = imageCache.getCachedUrl(storagePath);
+    if (blobUrl) {
+      setUrl(blobUrl);
       return;
     }
-
-    // 2. Kolla memory cache för signed URL
+    
     const memCached = signedUrlMemoryCache.get(cacheKey);
     const now = Date.now();
     if (memCached && memCached.expiresAt > now) {
-      // Använd signed URL medan blob laddas i bakgrunden
       setUrl(memCached.url);
-      setIsLoading(false);
-      
-      // Ladda blob i bakgrunden för nästa gång
-      imageCache.loadImage(memCached.url).catch(console.error);
+      imageCache.loadImage(memCached.url).catch(() => {});
       return;
     }
 
-    // 3. Kolla localStorage för signed URL
-    try {
-      const stored = localStorage.getItem(cacheKey);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.expiresAt > now) {
-          setUrl(parsed.url);
-          setIsLoading(false);
-          signedUrlMemoryCache.set(cacheKey, parsed);
-          
-          // Ladda blob i bakgrunden
-          imageCache.loadImage(parsed.url).catch(console.error);
-          return;
-        } else {
-          localStorage.removeItem(cacheKey);
-        }
-      }
-    } catch (e) {
-      console.error('Cache read error:', e);
-    }
-
-    // 4. Ingen cache finns, generera ny signed URL
-    loadingRef.current = true;
-    setIsLoading(true);
+    // Ingen cache finns, generera ny signed URL
+    ongoingLoads.add(cacheKey);
 
     (async () => {
       try {
         const signedUrl = await getMediaUrl(storagePath, mediaType, expiresInSeconds);
         
-        if (!signedUrl) {
-          setUrl(null);
-          setIsLoading(false);
-          loadingRef.current = false;
+        if (!signedUrl || !mountedRef.current) {
+          ongoingLoads.delete(cacheKey);
           return;
         }
 
@@ -95,31 +117,31 @@ export function useMediaUrl(storagePath: string | null | undefined, mediaType: M
         try {
           localStorage.setItem(cacheKey, JSON.stringify(cacheData));
         } catch (e) {
-          console.warn('LocalStorage cache failed:', e);
+          // Ignore localStorage errors
         }
 
-        // Visa signed URL direkt (no flicker)
-        setUrl(signedUrl);
-        setIsLoading(false);
+        // Visa signed URL direkt
+        if (mountedRef.current) {
+          setUrl(signedUrl);
+        }
 
         // Ladda blob i bakgrunden för ännu snabbare framtida laddning
         imageCache.loadImage(signedUrl)
           .then(blobUrl => {
-            // Uppdatera till blob URL när den är redo (smooth upgrade)
-            setUrl(blobUrl);
+            if (mountedRef.current) {
+              setUrl(blobUrl);
+            }
           })
-          .catch(console.error);
+          .catch(() => {});
 
       } catch (e) {
         console.error('Failed to get media URL:', e);
-        setUrl(null);
-        setIsLoading(false);
       } finally {
-        loadingRef.current = false;
+        ongoingLoads.delete(cacheKey);
       }
     })();
 
-  }, [storagePath, mediaType, expiresInSeconds]);
+  }, [storagePath, mediaType, expiresInSeconds, cachedUrl]);
 
   return url;
 }
