@@ -713,9 +713,8 @@ const JobView = () => {
                   <h3 className="font-semibold text-sm mb-1.5" style={{ color: '#FFFFFF' }}>Kontakt</h3>
                   <p className="text-[10px] mb-1.5" style={{ color: '#FFFFFF' }}>{job.contact_email}</p>
                   <Button 
-                    variant="outline" 
                     size="sm"
-                    className="w-full border-white/40 text-white hover:bg-white/10 text-xs"
+                    className="w-full bg-green-500 md:hover:bg-green-500/80 text-white text-xs font-semibold transition-all duration-200"
                     onClick={() => {
                       window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
                     }}
