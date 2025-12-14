@@ -2832,7 +2832,7 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="sm"
-                        className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                        className="text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                       >
                         <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
                       </Button>
@@ -2922,7 +2922,7 @@ const MobileJobWizard = ({
                                             setShowQuestionTemplates(false);
                                             setShowQuestionForm(true);
                                           }}
-                                          className="p-1.5 text-white hover:text-white/70 hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                          className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
                                         >
                                           <Pencil className="h-3.5 w-3.5" />
                                         </button>
@@ -2981,7 +2981,7 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="sm"
-                        className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                        className="text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -2997,10 +2997,10 @@ const MobileJobWizard = ({
                             onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                             onClick={handleQuestionTypeClick}
                             placeholder="Välj frågetyp"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40 focus:ring-0 focus:ring-offset-0"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer focus:border-white/40 focus:ring-0 focus:ring-offset-0"
                             readOnly
                           />
-                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                           
                           {/* Question Type Dropdown */}
                           {showQuestionTypeDropdown && (
@@ -3028,7 +3028,7 @@ const MobileJobWizard = ({
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
                             placeholder="T.ex. Beskriv dina erfarenheter inom..."
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                           />
                         </div>
                       )}
@@ -3040,7 +3040,7 @@ const MobileJobWizard = ({
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
                             placeholder="T.ex. Har du körkort?, Kan du arbeta helger?..."
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                           />
                         </div>
                       )}
@@ -3053,7 +3053,7 @@ const MobileJobWizard = ({
                               value={editingQuestion?.question_text || ''}
                               onChange={(e) => updateQuestionField('question_text', e.target.value)}
                               placeholder="T.ex. Antal års erfarenhet inom..."
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                             />
                           </div>
                           
@@ -3066,7 +3066,7 @@ const MobileJobWizard = ({
                                 value={editingQuestion?.min_value ?? ''}
                                 onChange={(e) => updateQuestionField('min_value', e.target.value ? parseInt(e.target.value) : undefined)}
                                 placeholder="0"
-                                className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                               />
                             </div>
                             <div className="space-y-2">
@@ -3076,7 +3076,7 @@ const MobileJobWizard = ({
                                 value={editingQuestion?.max_value ?? ''}
                                 onChange={(e) => updateQuestionField('max_value', e.target.value ? parseInt(e.target.value) : undefined)}
                                 placeholder="100"
-                                className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                               />
                             </div>
                           </div>
@@ -3091,7 +3091,7 @@ const MobileJobWizard = ({
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
                             placeholder="T.ex. Vilka behörigheter har du?"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                           />
                         </div>
                       )}
@@ -3106,7 +3106,7 @@ const MobileJobWizard = ({
                                   value={option}
                                   onChange={(e) => updateOption(index, e.target.value)}
                                   placeholder={`Alternativ ${index + 1}`}
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-8 text-sm flex-1"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white h-8 text-sm flex-1"
                                 />
                                 <button
                                   type="button"
@@ -3182,7 +3182,7 @@ const MobileJobWizard = ({
                     <button
                       type="button"
                       onClick={() => setPreviewMode('mobile')}
-                      className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
+                      className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
                     >
                       <Smartphone className="h-3.5 w-3.5" />
                       Mobilvy
@@ -3190,7 +3190,7 @@ const MobileJobWizard = ({
                     <button
                       type="button"
                       onClick={() => setPreviewMode('desktop')}
-                      className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
+                      className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
                     >
                       <Monitor className="h-3.5 w-3.5" />
                       Datorvy
@@ -3322,7 +3322,7 @@ const MobileJobWizard = ({
                                        onClick={() => {
                                          setShowCompanyProfile(true);
                                        }}
-                                       className="text-xs font-bold text-white hover:text-white/70 transition-colors cursor-pointer whitespace-normal break-words leading-tight"
+                                       className="text-xs font-bold text-white hover:text-white transition-colors cursor-pointer whitespace-normal break-words leading-tight"
                                      >
                                        {profile?.company_name || 'Företagsnamn'}
                                      </button>
@@ -3570,7 +3570,7 @@ const MobileJobWizard = ({
                                          {/* Input förhandsvisning baserat på frågetyp */}
                                           {question.question_type === 'text' && (
                                            <textarea
-                                             className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40"
+                                             className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white resize-none focus:outline-none focus:border-white/40"
                                              placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                              rows={2}
                                              value={previewAnswers[question.id || `q_${index}`] || ''}
@@ -3693,7 +3693,7 @@ const MobileJobWizard = ({
                                         {question.question_type === 'date' && (
                                           <input
                                             type="date"
-                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9 focus:outline-none focus:border-white/40"
+                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-9 focus:outline-none focus:border-white/40"
                                             value={previewAnswers[question.id || `q_${index}`] || ''}
                                             onChange={(e) => setPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                           />
@@ -3702,11 +3702,11 @@ const MobileJobWizard = ({
                                         {(question.question_type === 'file' || question.question_type === 'video') && (
                                           <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
                                             {question.question_type === 'file' ? (
-                                              <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                              <FileText className="h-3 w-3 mx-auto mb-0.5 text-white" />
                                             ) : (
-                                              <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                              <Video className="h-3 w-3 mx-auto mb-0.5 text-white" />
                                             )}
-                                            <p className="text-sm text-white/60">
+                                            <p className="text-sm text-white">
                                               {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
                                             </p>
                                           </div>
@@ -3746,7 +3746,7 @@ const MobileJobWizard = ({
                   <>
                     <button 
                       onClick={() => setShowCompanyProfile(true)}
-                      className={`${textSizes.company} text-white font-medium mb-1 hover:text-white/70 transition-colors cursor-pointer text-left line-clamp-1`}
+                      className={`${textSizes.company} text-white font-medium mb-1 hover:text-white transition-colors cursor-pointer text-left line-clamp-1`}
                     >
                       {profile?.company_name || 'Företag'}
                     </button>
@@ -3850,7 +3850,7 @@ const MobileJobWizard = ({
                                           )}
                                           <button 
                                             onClick={() => setShowCompanyProfile(true)}
-                                            className="text-sm font-bold text-white hover:text-white/70 transition-colors cursor-pointer"
+                                            className="text-sm font-bold text-white hover:text-white transition-colors cursor-pointer"
                                           >
                                             {profile?.company_name || 'Företagsnamn'}
                                           </button>
@@ -4108,7 +4108,7 @@ const MobileJobWizard = ({
                                               {/* Input förhandsvisning baserat på frågetyp */}
                                               {question.question_type === 'text' && (
                                                 <textarea
-                                                  className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40"
+                                                  className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white resize-none focus:outline-none focus:border-white/40"
                                                   placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                   rows={2}
                                                   value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
@@ -4165,7 +4165,7 @@ const MobileJobWizard = ({
                                              
                                               {question.question_type === 'multiple_choice' && (
                                                 <div className="space-y-1">
-                                                  <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
+                                                  <p className="text-[10px] text-white mb-1">Alternativ:</p>
                                                   <div className="space-y-1 options-scroll">
                                                     {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
                                                       const selectedAnswers = desktopPreviewAnswers[question.id || `q_${index}`];
@@ -4241,7 +4241,7 @@ const MobileJobWizard = ({
                                               {question.question_type === 'date' && (
                                                 <input
                                                   type="date"
-                                                  className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9 focus:outline-none focus:border-white/40"
+                                                  className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-9 focus:outline-none focus:border-white/40"
                                                   value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
                                                   onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                 />
@@ -4250,11 +4250,11 @@ const MobileJobWizard = ({
                                               {(question.question_type === 'file' || question.question_type === 'video') && (
                                                 <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
                                                   {question.question_type === 'file' ? (
-                                                    <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                    <FileText className="h-3 w-3 mx-auto mb-0.5 text-white" />
                                                   ) : (
-                                                    <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                    <Video className="h-3 w-3 mx-auto mb-0.5 text-white" />
                                                   )}
-                                                  <p className="text-sm text-white/60">
+                                                  <p className="text-sm text-white">
                                                     {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
                                                   </p>
                                                 </div>
@@ -4294,7 +4294,7 @@ const MobileJobWizard = ({
                                   {/* Company name at top */}
                                   <button 
                                     onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                    className="text-sm text-white font-medium mb-1 hover:text-white/70 transition-colors cursor-pointer line-clamp-1"
+                                    className="text-sm text-white font-medium mb-1 hover:text-white transition-colors cursor-pointer line-clamp-1"
                                   >
                                     {profile?.company_name || 'Företag'}
                                   </button>

@@ -274,7 +274,7 @@ const LocationSearchInput = ({
               {searchInput || "Sök på län eller stad/postnummer"}
             </span>
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-white/60 flex-shrink-0" />
+              <Loader2 className="h-4 w-4 animate-spin text-white flex-shrink-0" />
             ) : searchInput ? (
               <button
                 onClick={(e) => {
@@ -310,7 +310,7 @@ const LocationSearchInput = ({
                 value={dropdownSearch}
                 onChange={(e) => setDropdownSearch(e.target.value)}
                 placeholder="Sök län eller stad/postnummer"
-                className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none text-white placeholder:text-white/60"
+                className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none text-white placeholder:text-white"
               />
             </div>
             <CommandList className="max-h-[300px] overflow-y-auto">
@@ -383,7 +383,7 @@ const LocationSearchInput = ({
                         >
                           <MapPin className="mr-2 h-4 w-4" />
                           <span>{item.municipality}</span>
-                          <span className="ml-auto text-xs text-white/60">{item.county}</span>
+                          <span className="ml-auto text-xs text-white">{item.county}</span>
                         </CommandItem>
                         {index < array.length - 1 && (
                           <div className="h-px bg-white/20 mx-2" />

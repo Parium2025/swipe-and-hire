@@ -330,7 +330,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                   transition-all duration-200
                   ${pageNum === currentPage
                     ? 'bg-white/20 text-white border border-white/40'
-                    : 'bg-white/5 text-white/70 border border-white/20 hover:bg-white/10 hover:text-white'
+                    : 'bg-white/5 text-white border border-white/20 hover:bg-white/10 hover:text-white'
                   }
                 `}
               >

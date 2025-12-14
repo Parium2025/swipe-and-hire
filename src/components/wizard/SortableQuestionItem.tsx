@@ -37,7 +37,7 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
           <div
             {...attributes}
             {...listeners}
-            className="text-white hover:text-white/70 cursor-grab active:cursor-grabbing touch-none flex-shrink-0 transition-colors"
+            className="text-white hover:text-white cursor-grab active:cursor-grabbing touch-none flex-shrink-0 transition-colors"
           >
             <GripVertical className="h-4 w-4" />
           </div>
@@ -53,7 +53,7 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
           <button
             type="button"
             onClick={() => onEdit(question)}
-            className="p-1.5 text-white hover:text-white/70 hover:bg-white/10 rounded-full transition-all duration-300"
+            className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
