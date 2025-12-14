@@ -1405,7 +1405,7 @@ const Profile = () => {
             <div className="space-y-2 text-center">
               <Label 
                 htmlFor="profile-image" 
-                className="text-white cursor-pointer hover:text-white/90 transition-colors text-center text-sm"
+                className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
               >
                 Klicka här för att välja en bild eller video (max 60 sekunder)
               </Label>
@@ -1552,7 +1552,7 @@ const Profile = () => {
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, firstName: firstName.trim() ? undefined : 'Förnamn är obligatoriskt.' }))}
                        aria-invalid={!!errors.firstName}
-                      className={`h-9 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white/40 text-sm ${errors.firstName ? 'border-red-400' : ''}`}
+                      className={`h-9 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white text-sm ${errors.firstName ? 'border-red-400' : ''}`}
                     />
                     {errors.firstName && <p className="text-sm text-red-300">{errors.firstName}</p>}
                   </div>
@@ -1573,7 +1573,7 @@ const Profile = () => {
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, lastName: lastName.trim() ? undefined : 'Efternamn är obligatoriskt.' }))}
                        aria-invalid={!!errors.lastName}
-                      className={`h-9 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white/40 text-sm ${errors.lastName ? 'border-red-400' : ''}`}
+                      className={`h-9 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white text-sm ${errors.lastName ? 'border-red-400' : ''}`}
                     />
                     {errors.lastName && <p className="text-sm text-red-300">{errors.lastName}</p>}
                   </div>
@@ -1617,7 +1617,7 @@ const Profile = () => {
                         }}
                         onBlur={() => setErrors(prev => ({ ...prev, phone: phone.trim() ? (isValidSwedishPhone(phone) ? undefined : 'Ange ett giltigt svenskt nummer (+46 eller 0).') : 'Telefonnummer är obligatoriskt.' }))}
                         aria-invalid={!!errors.phone}
-                        className={`h-9 pl-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white/40 text-sm ${errors.phone ? 'border-red-400' : ''}`}
+                        className={`h-9 pl-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white text-sm ${errors.phone ? 'border-red-400' : ''}`}
                       />
                     </div>
                     {errors.phone && <p className="text-sm text-red-300">{errors.phone}</p>}
@@ -1662,7 +1662,7 @@ const Profile = () => {
                   value={bio}
                   onChange={(e) => handleBioChange(e.target.value)}
                   rows={4}
-                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white/50"
+                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                 />
                 <div className="flex justify-end">
                   <span className="text-sm text-white">
@@ -1867,7 +1867,7 @@ const Profile = () => {
                         <button
                           type="button"
                           onClick={() => setCvOpen(true)}
-                          className="text-white hover:text-white/80 transition-colors"
+                          className="text-white hover:text-white transition-colors"
                           title="Öppna CV"
                         >
                           <ExternalLink className="h-4 w-4" />
@@ -1920,7 +1920,7 @@ const Profile = () => {
                         placeholder="Mitt Företag AB"
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
-                        className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white/50"
+                        className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                       />
                     </div>
 
@@ -1931,7 +1931,7 @@ const Profile = () => {
                         placeholder="556123-4567"
                         value={orgNumber}
                         onChange={(e) => setOrgNumber(e.target.value)}
-                        className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white/50"
+                        className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                       />
                     </div>
                   </div>

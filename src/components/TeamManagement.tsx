@@ -288,11 +288,11 @@ const TeamManagement = () => {
                       : member.email || 'Okänd'}
                   </span>
                   {member.user_id === user?.id && (
-                    <Badge className="bg-white/10 text-white/70 border-white/20 text-xs">Du</Badge>
+                    <Badge className="bg-white/10 text-white border-white/20 text-xs">Du</Badge>
                   )}
                 </div>
                 {member.email && (
-                  <p className="text-sm text-white/60 truncate">{member.email}</p>
+                  <p className="text-sm text-white truncate">{member.email}</p>
                 )}
               </div>
 
@@ -321,7 +321,7 @@ const TeamManagement = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleRemoveMember(member.user_id)}
-                      className="h-8 w-8 text-white/60 hover:text-red-400 hover:bg-red-500/10"
+                      className="h-8 w-8 text-white hover:text-red-400 hover:bg-red-500/10"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -335,8 +335,8 @@ const TeamManagement = () => {
 
       {/* Role Descriptions */}
       <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
-        <p className="text-sm text-white/70 mb-2 font-medium">Rollbeskrivningar:</p>
-        <ul className="text-sm text-white/60 space-y-1">
+        <p className="text-sm text-white mb-2 font-medium">Rollbeskrivningar:</p>
+        <ul className="text-sm text-white space-y-1">
           <li><span className="text-amber-300">Admin</span> - Full åtkomst, kan hantera team och inställningar</li>
           <li><span className="text-blue-300">Rekryterare</span> - Kan skapa annonser och hantera kandidater</li>
           <li><span className="text-gray-300">Läsare</span> - Kan endast se annonser och kandidater</li>

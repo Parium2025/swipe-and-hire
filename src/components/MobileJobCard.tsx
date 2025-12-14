@@ -102,7 +102,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
                 </TooltipTrigger>
                 <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
                   <p className="text-xs font-medium mb-1 text-red-400">Annonsens tid har gått ut</p>
-                  <p className="text-xs text-white/80">Dina 14 dagar har passerat. Skapa en ny annons från dina mallar.</p>
+                  <p className="text-xs text-white">Dina 14 dagar har passerat. Skapa en ny annons från dina mallar.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -121,7 +121,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
                 </TooltipTrigger>
                 <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
                   <p className="text-xs font-medium mb-1">Saknade fält:</p>
-                  <p className="text-xs text-white/80">{getMissingFields(job).join(', ')}</p>
+                  <p className="text-xs text-white">{getMissingFields(job).join(', ')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

@@ -324,7 +324,7 @@ const JobTemplatesOverview = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-white">Jobbmallar</h1>
-          <p className="text-white/90 mt-1">
+          <p className="text-white mt-1">
             Hantera dina återanvändbara jobbmallar
           </p>
         </div>
@@ -408,11 +408,11 @@ const JobTemplatesOverview = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-white/80 mb-4 line-clamp-2">
+                <p className="text-sm text-white mb-4 line-clamp-2">
                   {template.description}
                 </p>
                 
-                <div className="grid grid-cols-2 gap-4 text-sm text-white/70">
+                <div className="grid grid-cols-2 gap-4 text-sm text-white">
                   <div>
                     <span className="font-medium">Lön:</span> {formatSalary(template.salary_min, template.salary_max)}
                   </div>

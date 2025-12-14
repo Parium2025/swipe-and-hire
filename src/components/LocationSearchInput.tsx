@@ -463,11 +463,11 @@ const LocationSearchInput = ({
           <div className="w-4 h-4 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
             <Check className="w-2.5 h-2.5 text-green-400" />
           </div>
-          <p className="text-white/90">
+          <p className="text-white">
             {foundLocation.type === 'postal' ? (
               <>
                 <span className="font-medium">{foundLocation.city}</span>
-                {foundLocation.county && <span className="text-white/70"> ({foundLocation.county})</span>}
+                {foundLocation.county && <span className="text-white"> ({foundLocation.county})</span>}
               </>
             ) : (
               <span className="font-medium">{foundLocation.city}</span>

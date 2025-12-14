@@ -270,7 +270,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
                 <h3 className="text-white font-bold text-xl">
                   {jobData.company_name || 'Företagsnamn'}
                 </h3>
-                <div className="flex items-center text-white/80 text-sm">
+                <div className="flex items-center text-white text-sm">
                   <Users className="h-4 w-4 mr-1" />
                   Klicka för att se företagsprofil
                 </div>
@@ -284,13 +284,13 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
 
             {/* Job details */}
             <div className="space-y-3 mb-6">
-              <div className="flex items-center text-white/90 text-lg">
+              <div className="flex items-center text-white text-lg">
                 <MapPin className="h-5 w-5 mr-3" />
                 <span>{jobData.location}</span>
               </div>
 
               {jobData.employment_type && (
-                <div className="flex items-center text-white/90 text-lg">
+                <div className="flex items-center text-white text-lg">
                   <Clock className="h-5 w-5 mr-3" />
                   <span>{getEmploymentTypeLabel(jobData.employment_type)}</span>
                 </div>
@@ -309,7 +309,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             {/* Description */}
             <div className="bg-white/10 rounded-xl p-6 mb-8">
               <h4 className="text-white font-semibold text-lg mb-3">Beskrivning</h4>
-              <p className="text-white/90 leading-relaxed whitespace-pre-wrap">
+              <p className="text-white leading-relaxed whitespace-pre-wrap">
                 {jobData.description}
               </p>
             </div>
@@ -336,7 +336,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             {/* Scroll hint */}
             {jobData.questions.length > 0 && (
               <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-                <div className="text-white/70 text-sm text-center">
+                <div className="text-white text-sm text-center">
                   <div className="animate-bounce mb-2">↓</div>
                   Scrolla för att se frågorna
                 </div>
@@ -376,7 +376,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
                 {/* Navigation hint */}
                 <div className="text-center mt-8">
                   {index < jobData.questions.length - 1 ? (
-                    <div className="text-white/70 text-sm">
+                    <div className="text-white text-sm">
                       <div className="animate-bounce mb-2">↓</div>
                       Nästa fråga
                     </div>

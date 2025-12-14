@@ -292,10 +292,10 @@ const SupportAdmin = () => {
                     <p className="text-white font-medium text-sm truncate mb-1">
                       {ticket.subject}
                     </p>
-                    <p className="text-white/70 text-sm mb-2">
+                    <p className="text-white text-sm mb-2">
                       {ticket.profiles?.first_name} {ticket.profiles?.last_name}
                     </p>
-                    <p className="text-white/50 text-sm">
+                    <p className="text-white text-sm">
                       {new Date(ticket.created_at).toLocaleString('sv-SE')}
                     </p>
                   </div>
@@ -361,7 +361,7 @@ const SupportAdmin = () => {
                 {/* Ursprungligt meddelande */}
                 <div className="p-4 bg-white/5 rounded-lg">
                   <p className="text-white text-sm font-medium mb-2">Ursprungligt meddelande:</p>
-                  <p className="text-white/90 text-sm whitespace-pre-wrap">
+                  <p className="text-white text-sm whitespace-pre-wrap">
                     {selectedTicket.message}
                   </p>
                 </div>
@@ -387,11 +387,11 @@ const SupportAdmin = () => {
                                 : `${message.profiles?.first_name} ${message.profiles?.last_name}`
                               }
                             </span>
-                            <span className="text-white/50 text-sm">
+                            <span className="text-white text-sm">
                               {new Date(message.created_at).toLocaleString('sv-SE')}
                             </span>
                           </div>
-                          <p className="text-white/90 text-sm whitespace-pre-wrap">
+                          <p className="text-white text-sm whitespace-pre-wrap">
                             {message.message}
                           </p>
                         </div>
@@ -408,7 +408,7 @@ const SupportAdmin = () => {
                       value={replyMessage}
                       onChange={(e) => setReplyMessage(e.target.value)}
                       placeholder="Skriv ditt svar här..."
-                      className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 min-h-24"
+                      className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white min-h-24"
                       rows={4}
                     />
                     <div className="flex gap-2">
