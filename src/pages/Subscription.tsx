@@ -56,9 +56,9 @@ const Subscription = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold text-white">Abonnemang</h1>
-        <p className="text-white">
+      <div className="text-center mb-6">
+        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Abonnemang</h1>
+        <p className="text-sm text-white mt-1">
           Hantera ditt abonnemang och uppgradera din plan
         </p>
       </div>

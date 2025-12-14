@@ -106,8 +106,8 @@ const Dashboard = memo(() => {
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
-      <div className="text-center">
-        <h1 className="text-xl md:text-2xl font-semibold text-white">Dashboard</h1>
+      <div className="text-center mb-6">
+        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Dashboard</h1>
       </div>
 
       <StatsGrid stats={statsCards} />

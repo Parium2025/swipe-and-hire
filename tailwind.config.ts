@@ -20,18 +20,21 @@ export default {
 		},
 		extend: {
 			fontFamily: {
+				// Premium typography: Inter as primary, with optimized fallback stack
 				'sans': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
 			},
 			fontSize: {
-				'xs': ['0.75rem', { lineHeight: '1rem' }],      // 12px
-				'sm': ['0.875rem', { lineHeight: '1.25rem' }],  // 14px - Mobile/Tablet base
-				'base': ['1rem', { lineHeight: '1.5rem' }],     // 16px - Desktop base
-				'lg': ['1.125rem', { lineHeight: '1.75rem' }],  // 18px
-				'xl': ['1.25rem', { lineHeight: '1.75rem' }],   // 20px
-				'2xl': ['1.5rem', { lineHeight: '2rem' }],      // 24px
-				'3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
-				'4xl': ['2.25rem', { lineHeight: '2.5rem' }],   // 36px
-				'5xl': ['3rem', { lineHeight: '1' }],            // 48px
+				// Premium Typography Scale (Spotify/Airbnb-inspired)
+				// Mobile-first with responsive scaling
+				'xs': ['0.75rem', { lineHeight: '1rem', letterSpacing: '0.01em' }],        // 12px - Meta, badges, timestamps
+				'sm': ['0.875rem', { lineHeight: '1.375rem', letterSpacing: '0.005em' }],  // 14px - Body text mobile, labels
+				'base': ['1rem', { lineHeight: '1.5rem', letterSpacing: '0' }],            // 16px - Body text desktop
+				'lg': ['1.125rem', { lineHeight: '1.625rem', letterSpacing: '-0.01em' }],  // 18px - Subheadings
+				'xl': ['1.25rem', { lineHeight: '1.75rem', letterSpacing: '-0.015em' }],   // 20px - Section titles mobile
+				'2xl': ['1.5rem', { lineHeight: '2rem', letterSpacing: '-0.02em' }],       // 24px - Page titles mobile, section titles desktop
+				'3xl': ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '-0.025em' }], // 30px - Page titles desktop
+				'4xl': ['2.25rem', { lineHeight: '2.5rem', letterSpacing: '-0.03em' }],    // 36px - Hero titles
+				'5xl': ['3rem', { lineHeight: '1.1', letterSpacing: '-0.035em' }],         // 48px - Display
 			},
 			colors: {
 				border: 'hsl(var(--border))',

@@ -127,8 +127,8 @@ const Billing = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
       <div className="text-center px-4 mb-6">
-        <h1 className="text-2xl font-semibold text-white mb-1">Betalningar</h1>
-        <p className="text-sm text-white">
+        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Betalningar</h1>
+        <p className="text-sm text-white mt-1">
           Hantera dina betalningsmetoder och se din betalningshistorik
         </p>
       </div>
