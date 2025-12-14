@@ -239,7 +239,7 @@ const MyApplications = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       {/* Job Title */}
-                      <h3 className="text-lg font-semibold text-white truncate group-hover:text-white/90 transition-colors">
+                      <h3 className="text-lg font-semibold text-white truncate group-hover:text-white transition-colors">
                         {job?.title || 'Okänt jobb'}
                       </h3>
 

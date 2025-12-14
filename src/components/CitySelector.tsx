@@ -220,7 +220,7 @@ const CitySelector = ({
                 onClick={() => handleCitySelect(city.name)}
               >
                 <div className="font-medium text-white">{city.name}</div>
-                <div className="text-sm text-white/60">
+                <div className="text-sm text-white">
                   Klicka för att se postnummer
                 </div>
               </div>
@@ -232,7 +232,7 @@ const CitySelector = ({
       {/* Postnummer fält */}
       <div className="relative">
         <Label htmlFor="postalCode" className="text-white">
-          Postnummer <span className="text-sm text-white/70">(valfritt)</span>
+          Postnummer <span className="text-sm text-white">(valfritt)</span>
         </Label>
         <Input
           ref={postalInputRef}
@@ -252,7 +252,7 @@ const CitySelector = ({
             ref={postalSuggestionsRef}
             className="absolute z-50 w-full mt-1 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
           >
-            <div className="px-4 py-2 text-sm text-white/60 border-b border-white/20">
+            <div className="px-4 py-2 text-sm text-white border-b border-white/20">
               Postnummer för {cityValue}:
             </div>
             {filteredPostalCodes.map((postalCode, index) => (
@@ -278,9 +278,9 @@ const CitySelector = ({
               className="px-4 py-2 cursor-pointer transition-colors hover:bg-white/20 text-white"
               onClick={handleCitySuggestionAccept}
             >
-              <div className="text-sm text-white/60">Förslag baserat på postnummer:</div>
+              <div className="text-sm text-white">Förslag baserat på postnummer:</div>
               <div className="font-medium text-white">{suggestedCity}</div>
-              <div className="text-sm text-white/40">Klicka för att välja</div>
+              <div className="text-sm text-white">Klicka för att välja</div>
             </div>
           </div>
         )}

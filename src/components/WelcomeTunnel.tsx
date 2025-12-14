@@ -1453,7 +1453,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <div className="space-y-2 text-center w-full px-4">
                   <Label 
                     htmlFor="profileMedia" 
-                    className="text-white cursor-pointer hover:text-white/90 transition-colors text-center text-sm"
+                    className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
                   >
                     Klicka här för att välja en bild eller video (max 60 sekunder)
                   </Label>
@@ -1590,7 +1590,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Label htmlFor="bio" className="text-white">Frivilligt</Label>
                 <Textarea
                   id="bio"
-                  className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60" 
+                  className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white" 
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   placeholder="Berätta kort om dig själv..."
@@ -1701,7 +1701,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Check className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-xl font-semibold text-white">Profil skapad!</h2>
-            <p className="text-sm text-white/80">
+            <p className="text-sm text-white">
               Välkommen till Parium! Din profil är nu skapad och du kan börja söka jobb.
             </p>
             <img src={phoneWithPariumLogo} alt="Parium på en mobiltelefon" className="max-w-sm mx-auto rounded-xl shadow-lg" />
