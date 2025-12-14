@@ -733,6 +733,9 @@ export default function ProfilePreview() {
                 <div className="flex flex-col items-start gap-0.5">
                   <p className="text-xs text-white font-medium">Ort:</p>
                   <p className="text-white/90 text-[10px]">{consentedData.location}</p>
+                  {profile?.home_location && (
+                    <p className="text-white/90 text-[10px]">{profile.home_location}</p>
+                  )}
                 </div>
               )}
               {user?.email && (
