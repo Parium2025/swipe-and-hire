@@ -323,8 +323,8 @@ const JobTemplatesOverview = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-white">Jobbmallar</h1>
-          <p className="text-white mt-1">
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Jobbmallar</h1>
+          <p className="text-sm text-white mt-1">
             Hantera dina återanvändbara jobbmallar
           </p>
         </div>
