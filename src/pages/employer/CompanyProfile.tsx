@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 
 import {
   AlertDialog,
@@ -70,24 +70,8 @@ const CompanyProfile = () => {
   // Refs for click-outside detection
   const employeeCountRef = useRef<HTMLDivElement>(null);
   const industryRef = useRef<HTMLDivElement>(null);
+  const platformRef = useRef<HTMLDivElement>(null);
   
-  // Close dropdowns on click outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (employeeCountRef.current && !employeeCountRef.current.contains(event.target as Node)) {
-        setEmployeeCountOpen(false);
-      }
-      if (industryRef.current && !industryRef.current.contains(event.target as Node)) {
-        setIndustryMenuOpen(false);
-      }
-    };
-    
-    if (employeeCountOpen || industryMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [employeeCountOpen, industryMenuOpen]);
-
   // Session storage key for persisting unsaved state across tab switches
   const SESSION_STORAGE_KEY = 'company-profile-unsaved-state';
 
@@ -125,6 +109,26 @@ const CompanyProfile = () => {
   });
 
   const [platformMenuOpen, setPlatformMenuOpen] = useState(false);
+
+  // Close dropdowns on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (employeeCountRef.current && !employeeCountRef.current.contains(event.target as Node)) {
+        setEmployeeCountOpen(false);
+      }
+      if (industryRef.current && !industryRef.current.contains(event.target as Node)) {
+        setIndustryMenuOpen(false);
+      }
+      if (platformRef.current && !platformRef.current.contains(event.target as Node)) {
+        setPlatformMenuOpen(false);
+      }
+    };
+    
+    if (employeeCountOpen || industryMenuOpen || platformMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [employeeCountOpen, industryMenuOpen, platformMenuOpen]);
 
   // Validation state
   const [orgNumberError, setOrgNumberError] = useState('');
@@ -885,52 +889,46 @@ const CompanyProfile = () => {
               {/* Add new social media link */}
               <div className="space-y-4 md:space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
-                  <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={`w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white h-9 text-sm justify-between font-normal ${platformMenuOpen ? 'border-white/50' : ''}`}
-                      >
-                        <span className="truncate text-left flex-1 px-1">
-                          {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
-                        </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent 
-                      className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden"
-                      side="top"
-                      align="center"
-                      alignOffset={0}
-                      sideOffset={8}
-                      avoidCollisions={false}
-                      onCloseAutoFocus={(e) => e.preventDefault()}
+                  <div className="relative" ref={platformRef}>
+                    <div
+                      onClick={() => {
+                        setPlatformMenuOpen(!platformMenuOpen);
+                        setIndustryMenuOpen(false);
+                        setEmployeeCountOpen(false);
+                      }}
+                      className={`flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 h-11 cursor-pointer hover:border-white/40 transition-colors ${platformMenuOpen ? 'border-white/50' : ''}`}
                     >
-                      {/* Platform options */}
-                      <div className="p-2">
+                      <span className="text-sm text-white truncate">
+                        {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-white/60 flex-shrink-0" />
+                    </div>
+                    
+                    {platformMenuOpen && (
+                      <div className="absolute bottom-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mb-1 shadow-lg">
                         {SOCIAL_PLATFORMS.map((platform) => {
                           const Icon = platform.icon;
                           return (
-                            <DropdownMenuItem
+                            <button
                               key={platform.value}
-                              onSelect={(e) => e.preventDefault()}
+                              type="button"
                               onClick={() => {
                                 setNewSocialLink(prev => ({ ...prev, platform: platform.value as SocialMediaLink['platform'] }));
                                 setPlatformMenuOpen(false);
                               }}
-                              className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white flex items-center gap-3 transition-colors touch-manipulation rounded-md"
+                              className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors flex items-center gap-3"
                             >
                               <Icon className="h-4 w-4 flex-shrink-0" />
-                              <span className="flex-1">{platform.label}</span>
+                              <span className="flex-1 font-medium">{platform.label}</span>
                               {newSocialLink.platform === platform.value && (
                                 <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                               )}
-                            </DropdownMenuItem>
+                            </button>
                           );
                         })}
                       </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    )}
+                  </div>
 
                   <Input
                     placeholder="Klistra in din sociala medier länk här"
