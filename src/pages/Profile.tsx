@@ -1709,7 +1709,7 @@ const Profile = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
-                            className="w-72 bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white overflow-visible"
+                            className="w-72 bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-50 rounded-md text-white overflow-visible"
                             side="bottom"
                             align="center"
                             alignOffset={0}
@@ -1768,7 +1768,7 @@ const Profile = () => {
                               </Button>
                             </DropdownMenuTrigger>
                              <DropdownMenuContent 
-                               className="w-72 max-h-80 overflow-y-auto bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white"
+                               className="w-72 max-h-80 overflow-y-auto bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-50 rounded-md text-white"
                               side="bottom"
                               align="center"
                               alignOffset={0}
@@ -1818,7 +1818,7 @@ const Profile = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
-                            className="w-72 bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white overflow-visible"
+                            className="w-72 bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg z-50 rounded-md text-white overflow-visible"
                            side="bottom"
                            align="center"
                            alignOffset={0}

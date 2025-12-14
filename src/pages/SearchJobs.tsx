@@ -387,7 +387,7 @@ const SearchJobs = () => {
                       )}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-white/5 backdrop-blur-md border-white/20 text-white max-h-80 overflow-y-auto">
+                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
                     <DropdownMenuItem
                       onClick={() => {
                         setSelectedCategory('all-categories');
@@ -446,7 +446,7 @@ const SearchJobs = () => {
                       <ChevronDown className="h-4 w-4 flex-shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-white/5 backdrop-blur-md border-white/20 text-white max-h-80 overflow-y-auto">
+                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
                     <DropdownMenuItem
                       onClick={() => setSelectedSubcategories([])}
                       className="cursor-pointer hover:bg-white/10 text-white font-medium"
@@ -528,7 +528,7 @@ const SearchJobs = () => {
                           <ChevronDown className="h-4 w-4 flex-shrink-0" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-white/5 backdrop-blur-md border-white/20 text-white max-h-80 overflow-y-auto">
+                      <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
                         <DropdownMenuItem
                           onClick={() => setSelectedEmploymentTypes([])}
                           className="cursor-pointer hover:bg-white/10 text-white font-medium"
@@ -579,7 +579,7 @@ const SearchJobs = () => {
                           <ChevronDown className="h-4 w-4 flex-shrink-0" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20 text-white">
+                      <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[200px] z-[10000] bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white">
                         <DropdownMenuItem 
                           onClick={() => setSortBy('newest')}
                           className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
