@@ -327,7 +327,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                   variant="ghost"
                   size="icon"
                   onClick={handleClose}
-                  className="absolute right-2 top-2 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                  className="absolute right-2 top-2 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -363,7 +363,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
               <div className="space-y-2">
                 <Label htmlFor="job-template" className="text-white">Jobbmall</Label>
                 {loadingTemplates ? (
-                  <div className="flex items-center gap-2 text-sm text-white/70 py-2">
+                  <div className="flex items-center gap-2 text-sm text-white py-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Laddar mallar...
                   </div>
@@ -413,7 +413,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                         >
                           <div className="p-3 border-b border-white/20 sticky top-0 z-20 bg-slate-900">
                             <div className="relative">
-                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/80" />
+                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
                               <Input
                                 ref={(el) => {
                                   if (el && templateMenuOpen) {
@@ -426,7 +426,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                 onKeyDown={(e) => {
                                   e.stopPropagation();
                                 }}
-                                className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                                className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40 rounded-lg"
                                 autoComplete="off"
                                 autoFocus
                               />
@@ -437,7 +437,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                     e.stopPropagation();
                                     setSearchTerm('');
                                   }}
-                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 transition-colors md:hover:text-white"
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white transition-colors md:hover:text-white"
                                   type="button"
                                 >
                                   <X className="h-4 w-4" />
@@ -448,7 +448,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
 
                           {/* Result indicator */}
                           {searchTerm && (
-                            <div className="px-4 py-2 text-sm text-white/90 border-b border-white/20">
+                            <div className="px-4 py-2 text-sm text-white border-b border-white/20">
                               Visar <span className="text-white font-medium">{filteredTemplates.length}</span> av <span className="text-white font-medium">{templates.length}</span> mallar
                             </div>
                           )}
@@ -564,7 +564,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                 }
                               }, 0);
                             }}
-                            className="h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                            className="h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                           >
                             <X className="h-4 w-4" />
                           </Button>

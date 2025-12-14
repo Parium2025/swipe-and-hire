@@ -154,7 +154,7 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
         </div>
 
         {/* Stats Row with Save Button */}
-        <div className="flex items-center gap-4 text-xs text-white/60 pt-2 border-t border-white/10">
+        <div className="flex items-center gap-4 text-xs text-white pt-2 border-t border-white/10">
           <div className="flex items-center gap-1">
             <Eye className="h-3.5 w-3.5" />
             <span>{job.views_count || 0}</span>
@@ -176,7 +176,7 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
             variant="ghost"
             size="sm"
             onClick={handleSaveClick}
-            className="ml-auto h-8 w-8 p-0 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all"
+            className="ml-auto h-8 w-8 p-0 rounded-full text-white hover:text-white hover:bg-white/10 transition-all"
           >
             <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : ''}`} />
           </Button>
