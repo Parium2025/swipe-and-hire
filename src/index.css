@@ -477,6 +477,50 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* === PARIUM TYPOGRAPHY SYSTEM === */
+  /* Use these semantic classes for consistent typography throughout the app */
+  
+  /* Page Titles - Main headings for pages */
+  .text-page-title {
+    @apply text-xl md:text-2xl font-bold text-white leading-tight;
+  }
+  
+  /* Section Titles - Card headers, section headers */
+  .text-section-title {
+    @apply text-base md:text-lg font-bold text-white leading-snug;
+  }
+  
+  /* Subsection Titles - Smaller headings within sections */
+  .text-subsection-title {
+    @apply text-sm md:text-base font-semibold text-white leading-snug;
+  }
+  
+  /* Body Text - Primary content text */
+  .text-body {
+    @apply text-sm md:text-base text-white leading-relaxed;
+  }
+  
+  /* Body Text Small - Secondary content, descriptions */
+  .text-body-sm {
+    @apply text-xs md:text-sm text-white leading-relaxed;
+  }
+  
+  /* Labels - Form labels, field headers */
+  .text-label {
+    @apply text-sm font-medium text-white;
+  }
+  
+  /* Caption - Small helper text, timestamps */
+  .text-caption {
+    @apply text-xs text-white/80;
+  }
+  
+  /* Muted text - Less prominent information */
+  .text-muted-white {
+    @apply text-white/70;
+  }
+  
+  /* === BACKGROUND UTILITIES === */
   .bg-parium-gradient { background: var(--gradient-parium); }
   .bg-gradient-parium { background: var(--gradient-parium); }
   .bg-primary-gradient { background: var(--gradient-primary); }

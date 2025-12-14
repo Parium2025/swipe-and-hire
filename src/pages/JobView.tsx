@@ -324,7 +324,7 @@ const JobView = () => {
               }}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             />
-            <div className="flex justify-between text-xs" style={{ color: '#FFFFFF' }}>
+            <div className="flex justify-between text-xs text-white/80">
               <span>{minVal}</span>
               <span>{maxVal}</span>
             </div>
@@ -344,16 +344,16 @@ const JobView = () => {
       case 'file':
         return (
           <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center bg-white/5">
-            <FileText className="h-6 w-6 mx-auto mb-2" style={{ color: '#FFFFFF' }} />
-            <p className="text-sm" style={{ color: '#FFFFFF' }}>Välj fil</p>
+            <FileText className="h-6 w-6 mx-auto mb-2 text-white" />
+            <p className="text-sm text-white">Välj fil</p>
           </div>
         );
 
       case 'video':
         return (
           <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center bg-white/5">
-            <Video className="h-6 w-6 mx-auto mb-2" style={{ color: '#FFFFFF' }} />
-            <p className="text-sm" style={{ color: '#FFFFFF' }}>Spela in video</p>
+            <Video className="h-6 w-6 mx-auto mb-2 text-white" />
+            <p className="text-sm text-white">Spela in video</p>
           </div>
         );
 
@@ -486,8 +486,8 @@ const JobView = () => {
                `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
                'Företag'}
             </h3>
-              <div className="flex items-center text-[10px] mt-0.5" style={{ color: '#FFFFFF' }}>
-              <Users className="h-2.5 w-2.5 mr-0.5" style={{ color: '#FFFFFF' }} />
+              <div className="flex items-center text-[10px] mt-0.5 text-white/80">
+              <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
               Se företagsprofil
             </div>
           </div>
@@ -635,16 +635,15 @@ const JobView = () => {
 
             {/* Description */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <h2 className="text-white font-bold text-base md:text-lg mb-3">Om tjänsten</h2>
-              <p className="leading-relaxed whitespace-pre-wrap text-sm md:text-base" style={{ color: '#FFFFFF' }}>
+              <h2 className="text-section-title mb-3">Om tjänsten</h2>
+              <p className="text-body whitespace-pre-wrap">
                 {job.description}
               </p>
             </div>
 
-            {/* Benefits */}
             {job.benefits && job.benefits.length > 0 && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <h2 className="text-white font-bold text-base md:text-lg mb-3 flex items-center gap-2">
+                <h2 className="text-section-title mb-3 flex items-center gap-2">
                   <Gift className="h-4 w-4" />
                   Förmåner
                 </h2>
@@ -661,11 +660,11 @@ const JobView = () => {
             {/* Application instructions if exists */}
             {job.application_instructions && (
               <div className="bg-blue-400/20 backdrop-blur-sm border border-blue-300/30 rounded-lg p-4">
-                <h2 className="text-white font-bold text-base md:text-lg mb-3 flex items-center gap-1.5">
+                <h2 className="text-section-title mb-3 flex items-center gap-1.5">
                   <FileText className="h-4 w-4" />
                   Ansökningsinstruktioner
                 </h2>
-                <p className="leading-relaxed whitespace-pre-wrap text-sm md:text-base" style={{ color: '#FFFFFF' }}>
+                <p className="text-body whitespace-pre-wrap">
                   {job.application_instructions}
                 </p>
               </div>
@@ -674,18 +673,18 @@ const JobView = () => {
             {/* Questions */}
             {jobQuestions.length > 0 && (
               <div className="space-y-3">
-                <h2 className="font-bold text-lg" style={{ color: '#FFFFFF' }}>Ansökningsfrågor</h2>
+                <h2 className="text-section-title">Ansökningsfrågor</h2>
                 
                 {jobQuestions.map((question, index) => (
                   <div key={question.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
                     <div className="mb-3">
-                      <div className="text-sm mb-1" style={{ color: '#FFFFFF' }}>
+                      <div className="text-caption mb-1">
                         Fråga {index + 1} av {jobQuestions.length}
                       </div>
-                      <h3 className="text-sm font-semibold leading-tight" style={{ color: '#FFFFFF' }}>
+                      <h3 className="text-subsection-title leading-tight">
                         {question.question_text}
                         {question.is_required && (
-                          <span className="ml-1" style={{ color: '#FFFFFF' }}>*</span>
+                          <span className="ml-1 text-white">*</span>
                         )}
                       </h3>
                     </div>
@@ -701,8 +700,8 @@ const JobView = () => {
             {/* Contact info if exists - after questions */}
             {job.contact_email && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                <h3 className="font-semibold text-sm mb-2" style={{ color: '#FFFFFF' }}>Har du några frågor?</h3>
-                <p className="text-sm mb-3" style={{ color: '#FFFFFF' }}>Kontakt: {job.contact_email}</p>
+                <h3 className="text-subsection-title mb-2">Har du några frågor?</h3>
+                <p className="text-body-sm mb-3">Kontakt: {job.contact_email}</p>
                 <Button 
                   size="sm"
                   className="w-full bg-white/10 border border-white/20 text-white text-sm font-medium md:hover:bg-white/15 transition-all duration-200"
@@ -738,7 +737,7 @@ const JobView = () => {
 
             {/* Job posted date */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-              <p className="text-sm" style={{ color: '#FFFFFF' }}>
+              <p className="text-body-sm">
                 Publicerad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
                   year: 'numeric', 
                   month: 'long', 
