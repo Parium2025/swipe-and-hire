@@ -4,7 +4,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,10 +16,13 @@ import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileTex
 interface JobQuestion {
   id: string;
   question_text: string;
-  question_type: 'yes_no' | 'text' | 'video' | 'multiple_choice';
+  question_type: 'yes_no' | 'text' | 'video' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range';
   options?: string[];
   is_required: boolean;
   order_index: number;
+  min_value?: number;
+  max_value?: number;
+  placeholder_text?: string;
 }
 
 interface JobPosting {
@@ -182,38 +185,46 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
           {/* Custom questions - yes/no */}
           {!isStandardQuestion && question.question_type === 'yes_no' && (
             <div className="flex gap-2">
-              <Button
-                variant={answers[question.id] === 'yes' ? "default" : "outline"}
-                onClick={() => handleAnswerChange(question.id, 'yes')}
-                className="flex-1 bg-white/5 border-white/20 hover:bg-white/10"
-                size="sm"
+              <button
+                type="button"
+                onClick={() => handleAnswerChange(question.id, answers[question.id] === 'yes' ? '' : 'yes')}
+                className={
+                  (answers[question.id] === 'yes'
+                    ? 'bg-secondary/40 border-secondary text-white '
+                    : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
+                  'border rounded-lg px-4 py-2 text-sm transition-colors font-medium flex-1'
+                }
               >
                 Ja
-              </Button>
-              <Button
-                variant={answers[question.id] === 'no' ? "default" : "outline"}
-                onClick={() => handleAnswerChange(question.id, 'no')}
-                className="flex-1 bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/50"
-                size="sm"
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAnswerChange(question.id, answers[question.id] === 'no' ? '' : 'no')}
+                className={
+                  (answers[question.id] === 'no'
+                    ? 'bg-secondary/40 border-secondary text-white '
+                    : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
+                  'border rounded-lg px-4 py-2 text-sm transition-colors font-medium flex-1'
+                }
               >
                 Nej
-              </Button>
+              </button>
             </div>
           )}
 
           {/* Custom questions - text */}
           {!isStandardQuestion && question.question_type === 'text' && (
             <Textarea
-              placeholder="Skriv ditt svar..."
+              placeholder={question.placeholder_text || 'Skriv ditt svar...'}
               value={answers[question.id] || ''}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="min-h-[80px] bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/40"
+              className="min-h-[80px] bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-white/40"
             />
           )}
 
           {/* Custom questions - multiple choice */}
           {!isStandardQuestion && question.question_type === 'multiple_choice' && (
-            <div className="flex flex-wrap gap-2">
+            <div className="space-y-2">
               {(() => {
                 let options = question.options;
                 if (typeof options === 'string') {
@@ -224,55 +235,107 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
                   }
                 }
                 
-                const selectedOptions = Array.isArray(answers[question.id]) 
-                  ? answers[question.id] 
-                  : answers[question.id] 
-                    ? [answers[question.id]] 
+                const currentAnswer = answers[question.id];
+                const selectedAnswers = typeof currentAnswer === 'string' 
+                  ? currentAnswer.split('|||').filter(a => a)
+                  : Array.isArray(currentAnswer) 
+                    ? currentAnswer 
                     : [];
 
-                return Array.isArray(options) && options.map((option, optIndex) => {
-                  const isSelected = selectedOptions.includes(option);
+                return Array.isArray(options) && options.filter(opt => opt.trim() !== '').map((option, optIndex) => {
+                  const isSelected = selectedAnswers.includes(option);
                   return (
-                    <Button
+                    <button
                       key={optIndex}
-                      variant={isSelected ? "default" : "outline"}
+                      type="button"
                       onClick={() => {
-                        const currentSelected = Array.isArray(answers[question.id]) 
-                          ? answers[question.id] 
-                          : answers[question.id] 
-                            ? [answers[question.id]] 
+                        const answersArray = typeof currentAnswer === 'string'
+                          ? currentAnswer.split('|||').filter(a => a)
+                          : Array.isArray(currentAnswer)
+                            ? [...currentAnswer]
                             : [];
                         
-                        let newSelected;
-                        if (isSelected) {
-                          newSelected = currentSelected.filter(item => item !== option);
+                        if (answersArray.includes(option)) {
+                          const newAnswers = answersArray.filter(a => a !== option);
+                          handleAnswerChange(question.id, newAnswers.join('|||'));
                         } else {
-                          newSelected = [...currentSelected, option];
+                          handleAnswerChange(question.id, [...answersArray, option].join('|||'));
                         }
-                        
-                        handleAnswerChange(question.id, newSelected);
                       }}
-                      className="bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/50"
-                      size="sm"
+                      className={
+                        (isSelected
+                          ? 'bg-secondary/40 border-secondary '
+                          : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
+                        'w-full flex items-center gap-3 rounded-lg px-4 py-2.5 border transition-colors'
+                      }
                     >
-                      {option}
-                    </Button>
+                      <div className={
+                        isSelected
+                          ? 'w-2 h-2 rounded-full border border-secondary bg-secondary flex-shrink-0'
+                          : 'w-2 h-2 rounded-full border border-white/40 flex-shrink-0'
+                      } />
+                      <span className="text-sm text-white text-left flex-1">{option}</span>
+                    </button>
                   );
                 });
               })()}
             </div>
           )}
 
+          {/* Custom questions - number (slider) */}
+          {!isStandardQuestion && question.question_type === 'number' && (() => {
+            const minVal = question.min_value ?? 0;
+            const maxVal = question.max_value ?? 100;
+            const currentVal = Number(answers[question.id] || minVal);
+            const percentage = ((currentVal - minVal) / (maxVal - minVal)) * 100;
+            
+            return (
+              <div className="space-y-3">
+                <div className="text-center text-lg font-semibold text-white">
+                  {currentVal}
+                </div>
+                <input
+                  type="range"
+                  min={minVal}
+                  max={maxVal}
+                  value={currentVal}
+                  className="w-full h-2 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full"
+                  style={{
+                    background: `linear-gradient(to right, white ${percentage}%, rgba(255,255,255,0.3) ${percentage}%)`
+                  }}
+                  onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                />
+                <div className="flex justify-between text-xs text-white/60">
+                  <span>{minVal}</span>
+                  <span>{maxVal}</span>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Custom questions - date */}
+          {!isStandardQuestion && question.question_type === 'date' && (
+            <Input
+              type="date"
+              value={answers[question.id] || ''}
+              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+              className="bg-white/10 border-white/20 text-white h-10 text-sm focus:outline-none focus:border-white/40"
+            />
+          )}
+
+          {/* Custom questions - file */}
+          {!isStandardQuestion && question.question_type === 'file' && (
+            <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center bg-white/5">
+              <FileText className="h-6 w-6 text-white/60 mx-auto mb-2" />
+              <p className="text-sm text-white/60">Välj fil</p>
+            </div>
+          )}
+
           {/* Custom questions - video */}
           {!isStandardQuestion && question.question_type === 'video' && (
-            <div className="space-y-2">
-              <Input
-                type="url"
-                placeholder="Videolänk (YouTube, Vimeo, etc.)"
-                value={answers[question.id] || ''}
-                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                className="bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/40"
-              />
+            <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center bg-white/5">
+              <Video className="h-6 w-6 text-white/60 mx-auto mb-2" />
+              <p className="text-sm text-white/60">Spela in video</p>
             </div>
           )}
         </div>
@@ -285,7 +348,10 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
       yes_no: 'Ja/Nej',
       text: 'Text',
       video: 'Video',
-      multiple_choice: 'Flerval'
+      multiple_choice: 'Flerval',
+      number: 'Siffra',
+      date: 'Datum',
+      file: 'Fil'
     };
     return labels[type] || type;
   };
