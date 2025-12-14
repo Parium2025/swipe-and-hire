@@ -309,7 +309,7 @@ export default function ProfilePreview() {
                     <p>{data.age} år</p>
                   )}
                   {data.location && (
-                    <p>Bor i {data.location}, Stockholms län</p>
+                    <p>Bor i {data.location}{profile?.home_location ? `, ${profile.home_location}` : ''}</p>
                   )}
                 </div>
                 
@@ -459,7 +459,9 @@ export default function ProfilePreview() {
                     <div>
                       <p className="text-xs" style={{ color: '#FFFFFF' }}>Ort:</p>
                       <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{data.location}</p>
-                      <p className="text-[11px]" style={{ color: '#FFFFFF' }}>Stockholms län</p>
+                      {profile?.home_location && (
+                        <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{profile.home_location}</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -692,7 +694,7 @@ export default function ProfilePreview() {
                   <p className="text-sm text-white">{consentedData.age} år</p>
                 )}
                 {consentedData?.location && (
-                  <p className="text-sm text-white">Bor i {consentedData.location}, Stockholms län</p>
+                  <p className="text-sm text-white">Bor i {consentedData.location}{profile?.home_location ? `, ${profile.home_location}` : ''}</p>
                 )}
               </div>
             </div>
@@ -716,7 +718,7 @@ export default function ProfilePreview() {
                 <div className="flex flex-col items-start gap-0.5">
                   <p className="text-xs text-white font-medium">Telefon:</p>
                   <p 
-                    className="text-white/90 cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
+                    className="text-white cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
                     onClick={handlePhoneClick}
                   >
                     {consentedData.phone}
@@ -726,15 +728,15 @@ export default function ProfilePreview() {
               {consentedData?.postal_code && (
                 <div className="flex flex-col items-start gap-0.5">
                   <p className="text-xs text-white font-medium">Postnummer:</p>
-                  <p className="text-white/90 text-[10px]">{consentedData.postal_code}</p>
+                  <p className="text-white text-[10px]">{consentedData.postal_code}</p>
                 </div>
               )}
               {consentedData?.location && (
                 <div className="flex flex-col items-start gap-0.5">
                   <p className="text-xs text-white font-medium">Ort:</p>
-                  <p className="text-white/90 text-[10px]">{consentedData.location}</p>
+                  <p className="text-white text-[10px]">{consentedData.location}</p>
                   {profile?.home_location && (
-                    <p className="text-white/90 text-[10px]">{profile.home_location}</p>
+                    <p className="text-white text-[10px]">{profile.home_location}</p>
                   )}
                 </div>
               )}
@@ -742,7 +744,7 @@ export default function ProfilePreview() {
                 <div className="flex flex-col items-start gap-0.5">
                   <p className="text-xs text-white font-medium">E-post:</p>
                   <p 
-                    className="text-white/90 cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
+                    className="text-white cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
                     onClick={handleEmailClick}
                   >
                     {user.email}
@@ -767,21 +769,21 @@ export default function ProfilePreview() {
                 {consentedData?.employment_type && (
                   <div className="flex flex-col items-start gap-0.5">
                     <p className="text-xs text-white font-medium">Anställningsstatus?</p>
-                    <p className="text-white/90 text-[10px]">
+                    <p className="text-white text-[10px]">
                       Svar: {getEmploymentStatusLabel(consentedData.employment_type)}
                     </p>
                   </div>
                 )}
                 {consentedData?.work_schedule && (
                   <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">Arbetstid?</p>
-                    <p className="text-white/90 text-[10px]">Svar: {getWorkingHoursLabel(consentedData.work_schedule)}</p>
+                    <p className="text-xs text-white font-medium">Hur mycket jobbar du idag?</p>
+                    <p className="text-white text-[10px]">Svar: {getWorkingHoursLabel(consentedData.work_schedule)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
                   <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">Tillgänglighet?</p>
-                    <p className="text-white/90 text-[10px]">Svar: {getAvailabilityLabel(consentedData.availability)}</p>
+                    <p className="text-xs text-white font-medium">När kan du börja nytt jobb?</p>
+                    <p className="text-white text-[10px]">Svar: {getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}
               </CardContent>
