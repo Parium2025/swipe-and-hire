@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -3099,6 +3099,45 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               </div>
                                             </div>
                                           )}
+
+                                          {/* Kvalifikationer */}
+                                          {formData.requirements && (
+                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                                <CheckSquare className="h-3 w-3 mr-1 text-white" />
+                                                Kvalifikationer
+                                              </h5>
+                                              <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">
+                                                {formData.requirements}
+                                              </p>
+                                            </div>
+                                          )}
+
+                                          {/* Följande information samlas automatiskt in */}
+                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                            <p className="text-xs text-white mb-1.5 leading-relaxed">
+                                              Följande information samlas automatiskt in från alla kandidater som har sökt:
+                                            </p>
+                                            <div className="space-y-0.5">
+                                              {[
+                                                'Namn',
+                                                'Efternamn',
+                                                'Ålder',
+                                                'E-post',
+                                                'Telefonnummer',
+                                                'Ort/stad',
+                                                'Presentation',
+                                                'CV',
+                                                'Nuvarande anställningsform',
+                                                'Tillgänglighet',
+                                              ].map((label, idx) => (
+                                                <div key={idx} className="text-xs flex">
+                                                  <span className="flex-shrink-0 mr-1 text-white">•</span>
+                                                  <span className="flex-1 text-white leading-tight">{label}</span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
 
                                           {/* Anpassade frågor - individuella kort (Desktop) */}
                                           {customQuestions.length > 0 && (
