@@ -685,55 +685,56 @@ const JobView = () => {
                 ))}
               </div>
             )}
+
+            {/* Contact info if exists - after questions */}
+            {job.contact_email && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                <h3 className="font-semibold text-sm mb-2" style={{ color: '#FFFFFF' }}>Har du några frågor?</h3>
+                <p className="text-sm mb-3" style={{ color: '#FFFFFF' }}>Kontakt: {job.contact_email}</p>
+                <Button 
+                  size="sm"
+                  className="w-full bg-white/10 border border-white/20 text-white text-sm font-medium md:hover:bg-white/15 transition-all duration-200"
+                  onClick={() => {
+                    window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
+                  }}
+                >
+                  Skicka e-post
+                </Button>
+              </div>
+            )}
+
+            {/* Submit application button */}
+            <Button
+              size="lg"
+              className="w-full h-12 bg-green-500 md:hover:bg-green-500/80 text-white text-base font-semibold shadow-lg transition-all duration-200"
+              onClick={handleApplicationSubmit}
+              disabled={applying}
+            >
+              {applying ? (
+                'Skickar...'
+              ) : (
+                <>
+                  <Send className="mr-1.5 h-3.5 w-3.5" />
+                  Skicka ansökan
+                </>
+              )}
+            </Button>
+
+            {/* Job posted date */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+              <p className="text-sm" style={{ color: '#FFFFFF' }}>
+                Publicerad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </p>
+            </div>
           </div>
 
           {/* Right column - Sticky actions */}
           <div className="lg:col-span-1">
             <div className="sticky top-20 space-y-3">
-              {/* Submit application button */}
-              <Button
-                size="lg"
-                className="w-full h-12 bg-green-500 md:hover:bg-green-500/80 text-white text-base font-semibold shadow-lg transition-all duration-200"
-                onClick={handleApplicationSubmit}
-                disabled={applying}
-              >
-                {applying ? (
-                  'Skickar...'
-                ) : (
-                  <>
-                    <Send className="mr-1.5 h-3.5 w-3.5" />
-                    Skicka ansökan
-                  </>
-                )}
-              </Button>
-
-              {/* Job posted date */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                <p className="text-sm" style={{ color: '#FFFFFF' }}>
-                  Publicerad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </p>
-              </div>
-
-              {/* Contact info if exists */}
-              {job.contact_email && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                  <h3 className="font-semibold text-sm mb-2" style={{ color: '#FFFFFF' }}>Har du några frågor?</h3>
-                  <p className="text-sm mb-3" style={{ color: '#FFFFFF' }}>Kontakt: {job.contact_email}</p>
-                  <Button 
-                    size="sm"
-                    className="w-full bg-white/10 border border-white/20 text-white text-sm font-medium md:hover:bg-white/15 transition-all duration-200"
-                    onClick={() => {
-                      window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
-                    }}
-                  >
-                    Skicka e-post
-                  </Button>
-                </div>
-              )}
             </div>
           </div>
         </div>
