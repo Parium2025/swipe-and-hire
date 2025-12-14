@@ -141,6 +141,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [showDesktopApplicationForm, setShowDesktopApplicationForm] = useState(false);
   const [previewAnswers, setPreviewAnswers] = useState<Record<string, string>>({});
+  const [desktopPreviewAnswers, setDesktopPreviewAnswers] = useState<Record<string, string>>({});
   
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -3128,7 +3129,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                         className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40"
                                                         placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                         rows={2}
-                                                        readOnly
+                                                        value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
+                                                        onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                       />
                                                     )}
                                                    
@@ -3136,13 +3138,43 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                       <div className="flex gap-1.5">
                                                         <button
                                                           type="button"
-                                                          className="bg-white/10 border-white/20 text-white border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1"
+                                                          onClick={() =>
+                                                            setDesktopPreviewAnswers((prev) => {
+                                                              const key = question.id || `q_${index}`;
+                                                              const current = prev[key];
+                                                              return {
+                                                                ...prev,
+                                                                [key]: current === 'yes' ? '' : 'yes',
+                                                              };
+                                                            })
+                                                          }
+                                                          className={
+                                                            (desktopPreviewAnswers[question.id || `q_${index}`] === 'yes'
+                                                              ? 'bg-secondary/40 border-secondary text-white '
+                                                              : 'bg-white/10 border-white/20 text-white ') +
+                                                            'border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1'
+                                                          }
                                                         >
                                                           Ja
                                                         </button>
                                                         <button
                                                           type="button"
-                                                          className="bg-white/10 border-white/20 text-white border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1"
+                                                          onClick={() =>
+                                                            setDesktopPreviewAnswers((prev) => {
+                                                              const key = question.id || `q_${index}`;
+                                                              const current = prev[key];
+                                                              return {
+                                                                ...prev,
+                                                                [key]: current === 'no' ? '' : 'no',
+                                                              };
+                                                            })
+                                                          }
+                                                          className={
+                                                            (desktopPreviewAnswers[question.id || `q_${index}`] === 'no'
+                                                              ? 'bg-secondary/40 border-secondary text-white '
+                                                              : 'bg-white/10 border-white/20 text-white ') +
+                                                            'border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1'
+                                                          }
                                                         >
                                                           Nej
                                                         </button>
@@ -3153,15 +3185,54 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                       <div className="space-y-1">
                                                         <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
                                                         <div className="space-y-1 options-scroll">
-                                                          {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                                            <div
-                                                              key={optIndex}
-                                                              className="text-white w-full flex items-center gap-2 rounded px-2 py-1 border border-white/20 bg-white/10"
-                                                            >
-                                                              <div className="w-1.5 h-1.5 rounded-full border border-white/40 flex-shrink-0" />
-                                                              <span className="text-xs text-white">{option}</span>
-                                                            </div>
-                                                          ))}
+                                                          {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
+                                                            const selectedAnswers = desktopPreviewAnswers[question.id || `q_${index}`];
+                                                            const answersArray = typeof selectedAnswers === 'string' 
+                                                              ? selectedAnswers.split('|||') 
+                                                              : [];
+                                                            const selected = answersArray.includes(option);
+                                                            
+                                                            return (
+                                                              <button
+                                                                key={optIndex}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                  setDesktopPreviewAnswers((prev) => {
+                                                                    const currentAnswers = prev[question.id || `q_${index}`];
+                                                                    const answersArray = typeof currentAnswers === 'string'
+                                                                      ? currentAnswers.split('|||').filter(a => a)
+                                                                      : [];
+                                                                    
+                                                                    if (answersArray.includes(option)) {
+                                                                      const newAnswers = answersArray.filter(a => a !== option);
+                                                                      return {
+                                                                        ...prev,
+                                                                        [question.id || `q_${index}`]: newAnswers.join('|||'),
+                                                                      };
+                                                                    } else {
+                                                                      return {
+                                                                        ...prev,
+                                                                        [question.id || `q_${index}`]: [...answersArray, option].join('|||'),
+                                                                      };
+                                                                    }
+                                                                  });
+                                                                }}
+                                                                className={
+                                                                  (selected
+                                                                    ? 'bg-secondary/40 border-secondary '
+                                                                    : 'bg-white/10 border-white/20 ') +
+                                                                  'text-white w-full flex items-center gap-2 rounded px-2 py-1 border transition-colors hover:bg-white/15'
+                                                                }
+                                                              >
+                                                                <div className={
+                                                                  selected
+                                                                    ? 'w-1.5 h-1.5 rounded-full border border-secondary bg-secondary flex-shrink-0'
+                                                                    : 'w-1.5 h-1.5 rounded-full border border-white/40 flex-shrink-0'
+                                                                } />
+                                                                <span className="text-xs text-white">{option}</span>
+                                                              </button>
+                                                            );
+                                                          })}
                                                         </div>
                                                       </div>
                                                     )}
@@ -3169,18 +3240,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     {question.question_type === 'number' && (
                                                       <div className="space-y-1.5">
                                                         <div className="text-center text-sm font-semibold text-white">
-                                                          {question.min_value || 0}
+                                                          {desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0}
                                                         </div>
                                                         <input
                                                           type="range"
                                                           min={question.min_value ?? 0}
                                                           max={question.max_value ?? 100}
-                                                          defaultValue={question.min_value ?? 0}
+                                                          value={desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0}
                                                           className="w-full h-1 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
                                                           style={{
-                                                            background: `linear-gradient(to right, white 0%, rgba(255,255,255,0.3) 0%)`
+                                                            background: `linear-gradient(to right, white ${((Number(desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0) - (question.min_value ?? 0)) / ((question.max_value ?? 100) - (question.min_value ?? 0))) * 100}%, rgba(255,255,255,0.3) ${((Number(desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0) - (question.min_value ?? 0)) / ((question.max_value ?? 100) - (question.min_value ?? 0))) * 100}%)`
                                                           }}
-                                                          readOnly
+                                                          onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                         />
                                                       </div>
                                                     )}
@@ -3189,7 +3260,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                       <input
                                                         type="date"
                                                         className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9 focus:outline-none focus:border-white/40"
-                                                        readOnly
+                                                        value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
+                                                        onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                       />
                                                     )}
                                                    
