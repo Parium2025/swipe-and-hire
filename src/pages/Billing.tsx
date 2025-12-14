@@ -155,7 +155,7 @@ const Billing = () => {
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-white/70">
+                  <p className="text-sm text-white">
                     Upphör {paymentMethod.expiryMonth}/{paymentMethod.expiryYear}
                   </p>
                 </div>
@@ -190,7 +190,7 @@ const Billing = () => {
                       <Calendar className="h-4 w-4 text-white flex-shrink-0" />
                       <div className="min-w-0">
                         <h3 className="font-medium text-white text-sm truncate">{monthData.monthName}</h3>
-                        <p className="text-sm text-white/70">
+                        <p className="text-sm text-white">
                           {monthData.payments.length} betalning{monthData.payments.length !== 1 ? 'ar' : ''}
                         </p>
                       </div>
@@ -200,12 +200,12 @@ const Billing = () => {
                         <p className="font-semibold text-white text-sm">
                           {getTotalForMonth(monthData.payments)} kr
                         </p>
-                        <p className="text-sm text-white/70">Totalt</p>
+                        <p className="text-sm text-white">Totalt</p>
                       </div>
                       {expandedMonths[monthData.month] ? (
-                        <ChevronUp className="h-4 w-4 text-white/70" />
+                        <ChevronUp className="h-4 w-4 text-white" />
                       ) : (
-                        <ChevronDown className="h-4 w-4 text-white/70" />
+                        <ChevronDown className="h-4 w-4 text-white" />
                       )}
                     </div>
                   </div>
@@ -223,7 +223,7 @@ const Billing = () => {
                               {getStatusIcon(payment.status)}
                               <div className="min-w-0">
                                 <p className="font-medium text-white text-sm">{payment.description}</p>
-                                <p className="text-sm text-white/70">
+                                <p className="text-sm text-white">
                                   {formatDate(payment.date)} • {getStatusText(payment.status)}
                                 </p>
                               </div>
@@ -233,7 +233,7 @@ const Billing = () => {
                                 <p className="font-semibold text-white text-sm">
                                   {payment.amount} {payment.currency}
                                 </p>
-                                <p className="text-sm text-white/70">
+                                <p className="text-sm text-white">
                                   #{payment.invoice}
                                 </p>
                               </div>
@@ -241,7 +241,7 @@ const Billing = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 w-7 p-0 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10 [&_svg]:text-white/70 md:hover:[&_svg]:text-white"
+                                  className="h-7 w-7 p-0 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10 [&_svg]:text-white md:hover:[&_svg]:text-white"
                                   title="Visa faktura"
                                 >
                                   <Eye className="h-3 w-3" />
@@ -249,7 +249,7 @@ const Billing = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 w-7 p-0 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10 [&_svg]:text-white/70 md:hover:[&_svg]:text-white"
+                                  className="h-7 w-7 p-0 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10 [&_svg]:text-white md:hover:[&_svg]:text-white"
                                   title="Ladda ner faktura"
                                 >
                                   <Download className="h-3 w-3" />
@@ -268,9 +268,9 @@ const Billing = () => {
 
           {paymentHistory.length === 0 && (
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4 text-center">
-              <CreditCard className="h-10 w-10 text-white/50 mx-auto mb-4" />
+              <CreditCard className="h-10 w-10 text-white mx-auto mb-4" />
               <h3 className="font-medium text-white mb-2 text-sm">Ingen betalningshistorik</h3>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-white">
                 Du har inga betalningar att visa än. När du gör ditt första köp kommer det att visas här.
               </p>
             </div>

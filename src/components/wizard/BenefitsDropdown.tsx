@@ -78,13 +78,13 @@ export const BenefitsDropdown = ({
           onClick={onToggle}
           className="w-full h-11 px-3 py-2 bg-white/5 border border-white/20 rounded-md text-left flex items-center justify-between text-white text-sm transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/30"
         >
-          <span className="text-white/60">
+          <span className="text-white">
             {selectedBenefits.length > 0 
               ? `${selectedBenefits.length} vald${selectedBenefits.length > 1 ? 'a' : ''}`
               : 'Välj förmåner'
             }
           </span>
-          <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`h-4 w-4 text-white transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {isOpen && (
@@ -104,7 +104,7 @@ export const BenefitsDropdown = ({
                         <Heart className="w-3 h-3 text-primary" />
                       )}
                     </div>
-                    <span className="text-white/80">{option.label}</span>
+                    <span className="text-white">{option.label}</span>
                   </div>
                 </button>
               ))}
@@ -118,7 +118,7 @@ export const BenefitsDropdown = ({
                   onChange={(e) => setCustomBenefitInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Lägg till egen förmån"
-                  className="flex-1 h-11 bg-white/10 border-white/20 text-white text-sm placeholder:text-white/40"
+                  className="flex-1 h-11 bg-white/10 border-white/20 text-white text-sm placeholder:text-white"
                   onClick={(e) => e.stopPropagation()}
                 />
                 <button

@@ -164,7 +164,7 @@ const SavedJobs = () => {
           <p className="text-white">Dina favorit-jobb samlade på ett ställe</p>
         </div>
         <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 text-white/50 animate-spin" />
+          <Loader2 className="h-8 w-8 text-white animate-spin" />
         </div>
       </div>
     );
@@ -180,9 +180,9 @@ const SavedJobs = () => {
       {savedJobs.length === 0 ? (
         <Card className="bg-white/5 border-white/10">
           <CardContent className="p-8 text-center">
-            <Heart className="h-12 w-12 text-white/30 mx-auto mb-4" />
+            <Heart className="h-12 w-12 text-white mx-auto mb-4" />
             <h3 className="text-lg font-medium text-white mb-2">Inga sparade jobb än</h3>
-            <p className="text-white/70 mb-4">
+            <p className="text-white mb-4">
               När du hittar intressanta jobb kan du spara dem här för enkel åtkomst
             </p>
             <Button
@@ -221,7 +221,7 @@ const SavedJobs = () => {
                     <div className="flex-1 min-w-0">
                       {/* Title and status */}
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <h3 className={`text-lg font-semibold truncate ${isExpired ? 'text-white/60' : 'text-white'}`}>
+                        <h3 className={`text-lg font-semibold truncate ${isExpired ? 'text-white' : 'text-white'}`}>
                           {job.title}
                         </h3>
                         {isExpired && (
@@ -238,13 +238,13 @@ const SavedJobs = () => {
                       </div>
 
                       {/* Company */}
-                      <div className={`flex items-center gap-2 mb-2 ${isExpired ? 'text-white/40' : 'text-white'}`}>
+                      <div className={`flex items-center gap-2 mb-2 ${isExpired ? 'text-white' : 'text-white'}`}>
                         <Building2 className="h-4 w-4 flex-shrink-0" />
                         <span className="truncate">{getCompanyName(job)}</span>
                       </div>
 
                       {/* Location and type */}
-                      <div className={`flex flex-wrap items-center gap-3 text-sm ${isExpired ? 'text-white/40' : 'text-white'}`}>
+                      <div className={`flex flex-wrap items-center gap-3 text-sm ${isExpired ? 'text-white' : 'text-white'}`}>
                         {getLocation(job) && (
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3.5 w-3.5" />
@@ -270,7 +270,7 @@ const SavedJobs = () => {
                       size="icon"
                       onClick={(e) => handleRemoveSavedJob(savedJob.id, e)}
                       disabled={isRemoving}
-                      className="text-white/50 hover:text-red-400 hover:bg-red-500/10 flex-shrink-0"
+                      className="text-white hover:text-red-400 hover:bg-red-500/10 flex-shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

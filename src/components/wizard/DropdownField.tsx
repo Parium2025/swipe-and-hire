@@ -53,7 +53,7 @@ export const DropdownField = ({
           onClick={onToggle}
           className="w-full h-11 px-3 py-2 bg-white/5 border border-white/20 rounded-md text-left flex items-center justify-between text-white text-sm transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/30"
         >
-          <span className={value ? 'text-white' : 'text-white/60'}>
+          <span className="text-white">
             {displayValue || placeholder}
           </span>
           <div className="flex items-center gap-1">
@@ -66,10 +66,10 @@ export const DropdownField = ({
                 }}
                 className="p-1 hover:bg-white/10 rounded-full transition-all duration-300"
               >
-                <X className="h-3 w-3 text-white/60" />
+                <X className="h-3 w-3 text-white" />
               </button>
             )}
-            <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-4 w-4 text-white transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
           </div>
         </button>
 
@@ -78,12 +78,12 @@ export const DropdownField = ({
             {showSearch && (
               <div className="p-2 border-b border-white/10">
                 <div className="relative">
-                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white" />
                   <Input
                     value={searchTerm}
                     onChange={(e) => onSearchChange(e.target.value)}
                     placeholder="Sök..."
-                    className="pl-7 h-8 bg-white/10 border-white/20 text-white text-sm placeholder:text-white/40"
+                    className="pl-7 h-8 bg-white/10 border-white/20 text-white text-sm placeholder:text-white"
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -100,14 +100,14 @@ export const DropdownField = ({
                     className={`w-full px-3 py-2 text-left text-sm transition-all duration-300 hover:bg-white/20 ${
                       value === option.value 
                         ? 'bg-white/10 text-white' 
-                        : 'text-white/80'
+                        : 'text-white'
                     }`}
                   >
                     {option.label}
                   </button>
                 ))
               ) : (
-                <div className="px-3 py-2 text-white/40 text-sm">
+                <div className="px-3 py-2 text-white text-sm">
                   Inga resultat
                 </div>
               )}

@@ -183,7 +183,7 @@ const Landing = () => {
                     {feature.title}
                   </h3>
                   
-                  <p className="text-white/70 leading-relaxed text-sm sm:text-base">
+                  <p className="text-white leading-relaxed text-sm sm:text-base">
                     {feature.description}
                   </p>
                 </motion.div>
@@ -197,21 +197,21 @@ const Landing = () => {
       <footer className="py-8 sm:py-12 px-4 sm:px-6 md:px-12 lg:px-24 border-t border-white/10">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
-            <div className="text-white/60 text-sm text-center md:text-left">
+            <div className="text-white text-sm text-center md:text-left">
               © 2025 Parium. Alla rättigheter reserverade.
             </div>
             
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 text-sm">
-              <button className="text-white/60 hover:text-white transition-colors min-h-[44px] flex items-center">
+              <button className="text-white hover:text-white transition-colors min-h-[44px] flex items-center">
                 Om oss
               </button>
-              <button className="text-white/60 hover:text-white transition-colors min-h-[44px] flex items-center">
+              <button className="text-white hover:text-white transition-colors min-h-[44px] flex items-center">
                 Kontakt
               </button>
-              <button className="text-white/60 hover:text-white transition-colors min-h-[44px] flex items-center">
+              <button className="text-white hover:text-white transition-colors min-h-[44px] flex items-center">
                 Support
               </button>
-              <button className="text-white/60 hover:text-white transition-colors min-h-[44px] flex items-center">
+              <button className="text-white hover:text-white transition-colors min-h-[44px] flex items-center">
                 Integritetspolicy
               </button>
             </div>

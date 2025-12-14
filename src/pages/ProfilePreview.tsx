@@ -800,7 +800,7 @@ export default function ProfilePreview() {
                   </h3>
                 </CardHeader>
                 <CardContent className="pb-2">
-                  <p className="text-white/90 whitespace-pre-wrap leading-relaxed text-[10px]">
+                  <p className="text-white whitespace-pre-wrap leading-relaxed text-[10px]">
                     {consentedData.bio}
                   </p>
                 </CardContent>
@@ -835,8 +835,8 @@ export default function ProfilePreview() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <FileText className="h-8 w-8 text-white/30 mb-1.5" />
-                  <p className="text-xs text-white/60">Inget CV uppladdat</p>
+                  <FileText className="h-8 w-8 text-white mb-1.5" />
+                  <p className="text-xs text-white">Inget CV uppladdat</p>
                 </div>
               )}
             </CardContent>
@@ -878,14 +878,14 @@ export default function ProfilePreview() {
             {/* Buttons */}
             <button
               onClick={() => setViewMode('mobile')}
-              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
+              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
             >
               <Smartphone className="h-3.5 w-3.5" />
               Mobilvy
             </button>
             <button
               onClick={() => setViewMode('desktop')}
-              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
+              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
             >
               <Monitor className="h-3.5 w-3.5" />
               Datorvy

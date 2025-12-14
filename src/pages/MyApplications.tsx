@@ -214,9 +214,9 @@ const MyApplications = () => {
 
       {!applications || applications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
-          <Briefcase className="h-12 w-12 text-white/40 mb-4" />
+          <Briefcase className="h-12 w-12 text-white mb-4" />
           <p className="text-white text-center mb-2">Inga ansökningar än</p>
-          <p className="text-white/60 text-sm text-center">
+          <p className="text-white text-sm text-center">
             När du söker jobb kommer dina ansökningar att visas här
           </p>
         </div>
@@ -244,7 +244,7 @@ const MyApplications = () => {
                       </h3>
 
                       {/* Company */}
-                      <div className="flex items-center gap-2 mt-1 text-white/80">
+                      <div className="flex items-center gap-2 mt-1 text-white">
                         <Building2 className="h-4 w-4 flex-shrink-0" />
                         <span className="truncate">
                           {company?.company_name || 'Okänt företag'}
@@ -252,7 +252,7 @@ const MyApplications = () => {
                       </div>
 
                       {/* Meta info */}
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-white/60">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-white">
                         {location && (
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3.5 w-3.5" />

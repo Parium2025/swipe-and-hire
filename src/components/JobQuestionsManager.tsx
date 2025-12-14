@@ -99,7 +99,7 @@ const SortableQuestionCard = ({
               {...listeners} 
               className="cursor-grab active:cursor-grabbing pt-1 flex-shrink-0"
             >
-              <GripVertical className="h-5 w-5 text-white/70 hover:text-white" />
+              <GripVertical className="h-5 w-5 text-white hover:text-white" />
             </div>
             
             <div className="flex-1 space-y-2">
@@ -111,7 +111,7 @@ const SortableQuestionCard = ({
                 <div className="flex items-center gap-2 mt-1">
                   <Badge 
                     variant="outline" 
-                    className="text-sm text-white/80 border-white/30 bg-white/5"
+                    className="text-sm text-white border-white/30 bg-white/5"
                   >
                     Typ: {getQuestionTypeLabel(question.question_type)}
                   </Badge>
@@ -119,7 +119,7 @@ const SortableQuestionCard = ({
                     variant={question.is_required ? "default" : "outline"}
                     className={question.is_required 
                       ? "text-sm bg-white/20 text-white border-white/30" 
-                      : "text-sm text-white/60 border-white/20 bg-transparent"
+                      : "text-sm text-white border-white/20 bg-transparent"
                     }
                   >
                     {question.is_required ? 'Obligatorisk' : 'Frivillig'}
@@ -130,10 +130,10 @@ const SortableQuestionCard = ({
               {/* Alternativ för flervalsfrågor */}
               {question.question_type === 'multiple_choice' && question.options && question.options.length > 0 && (
                 <div className="pl-2 border-l-2 border-white/20">
-                  <p className="text-sm text-white/60 mb-1">Alternativ:</p>
+                  <p className="text-sm text-white mb-1">Alternativ:</p>
                   <div className="space-y-1">
                     {question.options.map((option, idx) => (
-                      <p key={idx} className="text-sm text-white/80">
+                      <p key={idx} className="text-sm text-white">
                         • {option || `Alternativ ${idx + 1}`}
                       </p>
                     ))}
@@ -147,7 +147,7 @@ const SortableQuestionCard = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                className="h-8 w-8 text-white hover:text-white hover:bg-white/10"
                 onClick={() => onEdit(index)}
               >
                 <svg className="text-[hsl(var(--pure-white))]" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -479,7 +479,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                 value={questionDraft.question_text}
                 onChange={(e) => setQuestionDraft({ ...questionDraft, question_text: e.target.value })}
                 placeholder="Gillar du äpplen?"
-                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 text-sm"
+                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
               />
             </div>
 

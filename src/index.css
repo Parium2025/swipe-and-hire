@@ -208,6 +208,19 @@ All colors MUST be HSL.
     max-width: 100vw !important;
   }
 
+  /* GLOBAL: All placeholders should be pure white for consistency */
+  input::placeholder,
+  textarea::placeholder,
+  [contenteditable]::placeholder {
+    color: rgb(255, 255, 255) !important;
+    opacity: 1;
+  }
+
+  /* GLOBAL: All icons should be white */
+  svg {
+    color: inherit;
+  }
+
   /* Mobile fullscreen support - extend under status bar */
   html, body, #root {
     padding: 0 !important;
