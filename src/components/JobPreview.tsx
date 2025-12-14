@@ -192,23 +192,23 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             type="date"
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(questionId, e.target.value)}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-lg focus:outline-none focus:border-white/40"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white h-12 text-lg focus:outline-none focus:border-white/40"
           />
         );
 
       case 'file':
         return (
           <div className="border-2 border-dashed border-white/30 rounded-lg p-6 text-center bg-white/5">
-            <FileText className="h-8 w-8 text-white/60 mx-auto mb-3" />
-            <p className="text-base text-white/60">Välj fil</p>
+            <FileText className="h-8 w-8 mx-auto mb-3" style={{ color: '#FFFFFF' }} />
+            <p className="text-base" style={{ color: '#FFFFFF' }}>Välj fil</p>
           </div>
         );
 
       case 'video':
         return (
           <div className="border-2 border-dashed border-white/30 rounded-lg p-6 text-center bg-white/5">
-            <Video className="h-8 w-8 text-white/60 mx-auto mb-3" />
-            <p className="text-base text-white/60">Spela in video</p>
+            <Video className="h-8 w-8 mx-auto mb-3" style={{ color: '#FFFFFF' }} />
+            <p className="text-base" style={{ color: '#FFFFFF' }}>Spela in video</p>
           </div>
         );
 
@@ -217,8 +217,8 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
           <Input
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(questionId, e.target.value)}
-            placeholder={question.placeholder_text || 'Ditt svar...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-lg focus:outline-none focus:border-white/40"
+            placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
+            className="bg-white/10 border-white/20 text-white placeholder:text-white h-12 text-lg focus:outline-none focus:border-white/40"
           />
         );
     }
