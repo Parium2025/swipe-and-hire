@@ -395,7 +395,7 @@ const EmployerDashboard = memo(() => {
                                 <TooltipProvider delayDuration={0}>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <span className={`text-[10px] cursor-pointer ${timeInfo.isExpired ? 'text-red-400' : 'text-white'}`}>
+                                      <span className={`text-xs cursor-pointer ${timeInfo.isExpired ? 'text-red-400' : 'text-white'}`}>
                                         {timeInfo.isExpired ? 'Utgången' : `Utgår: ${timeInfo.text}`}
                                       </span>
                                     </TooltipTrigger>
