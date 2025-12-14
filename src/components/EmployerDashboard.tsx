@@ -296,6 +296,11 @@ const EmployerDashboard = memo(() => {
 
       {/* Jobs Table */}
       <Card className="bg-white/5 backdrop-blur-sm border-0">
+        <CardHeader className="hidden md:block md:p-4">
+              <CardTitle className="text-sm text-white md:text-left">
+                Mina jobbannonser
+              </CardTitle>
+        </CardHeader>
         <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
           {/* Desktop: Table view */}
           <div className="hidden md:block">
