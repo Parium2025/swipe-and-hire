@@ -509,7 +509,7 @@ const AuthTablet = ({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                 />
               </div>
               <div>
@@ -522,7 +522,7 @@ const AuthTablet = ({
                   onPaste={(e) => e.preventDefault()}
                   onCopy={(e) => e.preventDefault()}
                   required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                 />
               </div>
               <Button type="submit" className="w-full text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white" disabled={loading}>
@@ -621,7 +621,7 @@ const AuthTablet = ({
                           inputMode="email"
                           spellCheck={false}
                           autoCapitalize="none"
-                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                         />
                         {/* email suggestions removed for simpler UX */}
                       </div>
@@ -639,11 +639,11 @@ const AuthTablet = ({
                             required
                             name={`password-${role}`}
                             autoComplete={`${role}-current-password`}
-                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                           />
                           <button
                             type="button"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                             onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -774,7 +774,7 @@ const AuthTablet = ({
                                   }
                                 }}
                                 required
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                               />
                             </div>
                              <div>
@@ -790,7 +790,7 @@ const AuthTablet = ({
                                   }
                                 }}
                                 required
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                               />
                             </div>
                          </div>
@@ -811,7 +811,7 @@ const AuthTablet = ({
                              inputMode="email"
                              spellCheck={false}
                              autoCapitalize="none"
-                             className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                             className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                            />
                            {/* email suggestions removed for simpler UX */}
                          </div>
@@ -827,7 +827,7 @@ const AuthTablet = ({
                                     type="tel"
                                     value={jobSeekerData.phone}
                                     onChange={(e) => handlePhoneChange(e.target.value)}
-                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                     placeholder="070-123 45 67"
                                     required
                                   />
@@ -854,7 +854,7 @@ const AuthTablet = ({
                                    value={employerData.companyName}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyName: e.target.value }))}
                                    placeholder="Mitt företag"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                    required
                                  />
                               </div>
@@ -886,12 +886,12 @@ const AuthTablet = ({
                                      {/* Search input */}
                                      <div className="p-3 border-b border-white/20 sticky top-0 bg-transparent">
                                        <div className="relative">
-                                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
                                            <Input
                                             placeholder="Sök bransch..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="pl-10 pr-4 h-10 text-base bg-transparent border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                                            className="pl-10 pr-4 h-10 text-base bg-transparent border-white/20 text-white placeholder:text-white focus:border-white/40 rounded-lg"
                                             autoComplete="off"
                                             autoCapitalize="none"
                                             autoCorrect="off"
@@ -948,7 +948,7 @@ const AuthTablet = ({
                                          SWEDISH_INDUSTRIES.filter(industryOption => 
                                            industryOption.toLowerCase().includes(searchTerm.toLowerCase())
                                          ).length === 0 && (
-                                          <div className="py-4 px-3 text-center text-white/60">
+                                          <div className="py-4 px-3 text-center text-white">
                                             Inga resultat hittades för "{searchTerm}"
                                           </div>
                                         )}
@@ -1014,7 +1014,7 @@ const AuthTablet = ({
                                    value={employerData.address}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, address: e.target.value }))}
                                    placeholder="Ange din adress"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                    autoComplete="off"
                                    required
                                  />
@@ -1030,7 +1030,7 @@ const AuthTablet = ({
                                    value={employerData.website}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, website: e.target.value }))}
                                    placeholder="https://exempel.se"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                    required
                                  />
                               </div>
@@ -1042,7 +1042,7 @@ const AuthTablet = ({
                                   value={employerData.companyDescription}
                                   onChange={(e) => setEmployerData(prev => ({ ...prev, companyDescription: e.target.value }))}
                                   placeholder="Beskriv vad ert företag gör..."
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 resize-none"
+                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white resize-none"
                                   rows={2}
                                 />
                              </div>
@@ -1064,11 +1064,11 @@ const AuthTablet = ({
                             minLength={7}
                             name={`new-password-${role}`}
                             autoComplete={`${role}-new-password`}
-                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                           />
                            <button
                             type="button"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                             onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -1131,11 +1131,11 @@ const AuthTablet = ({
                               required
                               name={`confirm-password-${role}`}
                               autoComplete={`${role}-new-password`}
-                              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                             />
                             <button
                               type="button"
-                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                               onClick={() => setShowPassword(!showPassword)}
                               onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                               onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
