@@ -263,7 +263,7 @@ const ProfileSetup = () => {
                       <SelectTrigger className="bg-background/50 border-white/10 focus:border-primary/50">
                         <SelectValue placeholder="Välj bransch" />
                       </SelectTrigger>
-                      <SelectContent className="bg-card/95 backdrop-blur-sm border-white/10">
+                      <SelectContent className="bg-slate-900/85 backdrop-blur-xl border border-white/20">
                         {SWEDISH_INDUSTRIES.map((ind) => (
                           <SelectItem key={ind} value={ind} className="hover:bg-primary/10">
                             {ind}
@@ -279,7 +279,7 @@ const ProfileSetup = () => {
                       <SelectTrigger className="bg-background/50 border-white/10 focus:border-primary/50">
                         <SelectValue placeholder="Välj antal anställda" />
                       </SelectTrigger>
-                      <SelectContent className="bg-card/95 backdrop-blur-sm border-white/10">
+                      <SelectContent className="bg-slate-900/85 backdrop-blur-xl border border-white/20">
                         {EMPLOYEE_COUNT_OPTIONS.map((count) => (
                           <SelectItem key={count} value={count} className="hover:bg-primary/10">
                             {count}

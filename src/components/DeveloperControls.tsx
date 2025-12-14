@@ -70,7 +70,7 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        className="w-56 bg-background/95 backdrop-blur-sm border-white/20"
+        className="w-56 bg-slate-900/85 backdrop-blur-xl border border-white/20"
         align="end"
       >
         <DropdownMenuLabel className="text-sm font-medium">

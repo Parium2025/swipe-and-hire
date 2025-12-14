@@ -328,7 +328,7 @@ const SupportAdmin = () => {
                       <SelectTrigger className="w-32 h-8 text-sm bg-white/10 border-white/20 hover:border-white/50 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-background border-border">
+                      <SelectContent className="bg-slate-900/85 backdrop-blur-xl border border-white/20">
                         <SelectItem value="open">Öppen</SelectItem>
                         <SelectItem value="in_progress">Pågår</SelectItem>
                         <SelectItem value="closed">Stängd</SelectItem>
