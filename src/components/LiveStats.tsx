@@ -110,7 +110,7 @@ const StatCard = ({
             {count.toLocaleString('sv-SE')}
             <span className="text-secondary">{stat.suffix}</span>
           </div>
-          <div className="text-white/70 text-sm font-medium">
+          <div className="text-white text-sm font-medium">
             {stat.label}
           </div>
         </div>

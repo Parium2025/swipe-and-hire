@@ -188,17 +188,17 @@ const SwipeCard = ({
             <h3 className="text-2xl font-bold text-white mb-1">
               {card.title}
             </h3>
-            <p className="text-white/70 text-lg">
+            <p className="text-white text-lg">
               {card.company}
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 text-white/80">
+            <div className="flex items-center gap-2 text-white">
               <MapPin className="w-4 h-4" />
               <span className="text-sm">{card.location}</span>
             </div>
-            <div className="flex items-center gap-2 text-white/80">
+            <div className="flex items-center gap-2 text-white">
               <Clock className="w-4 h-4" />
               <span className="text-sm">{card.type}</span>
             </div>

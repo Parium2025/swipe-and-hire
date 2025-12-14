@@ -289,9 +289,9 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20">
           <div className="flex flex-col items-center justify-center p-8 text-white">
-            <Building2 className="h-16 w-16 mb-4 text-white/50" />
+            <Building2 className="h-16 w-16 mb-4 text-white" />
             <p className="text-lg font-medium mb-2">Företagsinformation saknas</p>
-            <p className="text-sm text-white/70 text-center">
+            <p className="text-sm text-white text-center">
               Det finns ingen företagsprofil tillgänglig för detta konto.
             </p>
           </div>
@@ -438,7 +438,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="Dela dina erfarenheter av detta företag..."
-                      className="min-h-[100px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50"
+                      className="min-h-[100px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white"
                     />
                   </div>
 

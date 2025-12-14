@@ -157,7 +157,7 @@ const Dashboard = memo(() => {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-white/60 py-8 text-sm">
+                    <TableCell colSpan={7} className="text-center text-white py-8 text-sm">
                       Laddar...
                     </TableCell>
                   </TableRow>
@@ -335,7 +335,7 @@ const Dashboard = memo(() => {
                     />
                   </PaginationItem>
                 </PaginationContent>
-                <span className="ml-4 text-sm text-white/60">Sida {page} av {totalPages}</span>
+                <span className="ml-4 text-sm text-white">Sida {page} av {totalPages}</span>
               </Pagination>
             )}
           </div>
@@ -343,7 +343,7 @@ const Dashboard = memo(() => {
           {/* Mobile: Card list view */}
           <div className="block md:hidden">
             {isLoading ? (
-              <div className="text-center text-white/60 py-8 text-sm">
+              <div className="text-center text-white py-8 text-sm">
                 Laddar...
               </div>
             ) : filteredAndSortedJobs.length === 0 ? (
@@ -457,7 +457,7 @@ const Dashboard = memo(() => {
                         />
                       </PaginationItem>
                     </PaginationContent>
-                    <span className="ml-4 text-sm text-white/60">Sida {page} av {totalPages}</span>
+                    <span className="ml-4 text-sm text-white">Sida {page} av {totalPages}</span>
                   </Pagination>
                 )}
               </>

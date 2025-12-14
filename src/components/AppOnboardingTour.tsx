@@ -235,7 +235,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
                 {currentStep + 1} av {steps.length}
               </Badge>
               
-              <p className="text-white/80 text-sm leading-relaxed mb-4">
+              <p className="text-white text-sm leading-relaxed mb-4">
                 {currentStepData.description}
               </p>
               

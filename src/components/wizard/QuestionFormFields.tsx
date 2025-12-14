@@ -55,7 +55,7 @@ export const QuestionFormFields = ({
           value={question.question_text}
           onChange={(e) => onUpdateField('question_text', e.target.value)}
           placeholder="T.ex. Antal års erfarenhet inom..."
-          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+          className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
         />
       </div>
 
@@ -72,12 +72,12 @@ export const QuestionFormFields = ({
                   value={option}
                   onChange={(e) => onUpdateOption(index, e.target.value)}
                   placeholder={`Alternativ ${index + 1}`}
-                  className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/60 h-8 text-sm"
+                  className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white h-8 text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => onRemoveOption(index)}
-                  className="p-1.5 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300"
+                  className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -86,7 +86,7 @@ export const QuestionFormFields = ({
             <button
               type="button"
               onClick={onAddOption}
-              className="flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-all duration-300"
+              className="flex items-center gap-1.5 text-sm text-white hover:text-white transition-all duration-300"
             >
               <Plus className="h-3.5 w-3.5" />
               Lägg till alternativ
