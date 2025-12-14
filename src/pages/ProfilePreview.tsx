@@ -41,7 +41,7 @@ interface ProfileViewData {
 }
 
 export default function ProfilePreview() {
-  const { profile, user, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
+  const { profile, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl } = useAuth();
   const [consentedData, setConsentedData] = useState<ProfileViewData | null>(null);
   const [maskedData, setMaskedData] = useState<ProfileViewData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,6 +58,7 @@ export default function ProfilePreview() {
   // Använd förladdade URLs från useAuth om tillgängliga, annars fallback
   const profileImageUrl = preloadedAvatarUrl || fallbackProfileImageUrl;
   const signedCoverUrl = preloadedCoverUrl || fallbackCoverUrl;
+  const videoUrl = preloadedVideoUrl || signedVideoUrl;
 
   useEffect(() => {
     const loadPreviewData = async () => {
@@ -241,9 +242,9 @@ export default function ProfilePreview() {
               }}
             >
               {/* Använd ProfileVideo komponenten om video finns */}
-              {data.video_url && signedVideoUrl ? (
+              {data.video_url && videoUrl ? (
                 <ProfileVideo
-                  videoUrl={signedVideoUrl}
+                  videoUrl={videoUrl}
                   coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
                   userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                   alt="Profilbild"
@@ -671,18 +672,18 @@ export default function ProfilePreview() {
             {/* Mindre rund profilbild eller video */}
             <div className="flex flex-col items-center gap-2">
               {/* Använd ProfileVideo om video finns, annars Avatar */}
-              {signedVideoUrl ? (
-                <div className="relative h-[120px] w-[120px]">
-                  <ProfileVideo
-                    videoUrl={signedVideoUrl}
-                    coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
-                    userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
-                    alt="Profilbild"
-                    className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
-                    showCountdown={true}
-                  />
-                </div>
-              ) : (
+               {videoUrl ? (
+                 <div className="relative h-[120px] w-[120px]">
+                   <ProfileVideo
+                     videoUrl={videoUrl}
+                     coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
+                     userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
+                     alt="Profilbild"
+                     className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
+                     showCountdown={true}
+                   />
+                 </div>
+               ) : (
                 <Avatar className="h-[120px] w-[120px] ring-2 ring-white/20 shadow-xl">
                   <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
                   <AvatarFallback className="bg-primary text-white text-3xl">
@@ -692,11 +693,11 @@ export default function ProfilePreview() {
               )}
               
               {/* Status text under bild/video */}
-              {(signedVideoUrl || profileImageUrl) && (
-                <p className="text-[10px] font-medium text-white">
-                  {signedVideoUrl ? 'Video tillgängligt' : 'Enbart profilbild vald'}
-                </p>
-              )}
+               {(videoUrl || profileImageUrl) && (
+                 <p className="text-[10px] font-medium text-white">
+                   {videoUrl ? 'Video tillgängligt' : 'Enbart profilbild vald'}
+                 </p>
+               )}
               
               {/* Namn och ålder */}
               <div className="text-center">
