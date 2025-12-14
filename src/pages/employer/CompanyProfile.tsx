@@ -751,7 +751,7 @@ const CompanyProfile = () => {
                           SWEDISH_INDUSTRIES.filter(industryOption => 
                             industryOption.toLowerCase().includes(searchTerm.toLowerCase())
                           ).length === 0 && (
-                          <div className="py-3 px-3 text-center text-white/60 text-sm">
+                          <div className="py-3 px-3 text-center text-white text-sm">
                             Inga resultat hittades för "{searchTerm}"
                           </div>
                         )}
@@ -775,7 +775,7 @@ const CompanyProfile = () => {
                     <span className="text-sm text-white">
                       {formData.employee_count || 'Välj antal'}
                     </span>
-                    <ChevronDown className="h-4 w-4 text-white/60" />
+                    <ChevronDown className="h-4 w-4 text-white" />
                   </div>
                   
                   {employeeCountOpen && (
@@ -808,7 +808,7 @@ const CompanyProfile = () => {
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                   placeholder="Hammarby Backen 89555"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 [&]:text-white"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
                 />
               </div>
 
@@ -819,7 +819,7 @@ const CompanyProfile = () => {
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
                   placeholder="https://din-webbsida.se"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 [&]:text-white"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
                 />
               </div>
             </div>
@@ -832,7 +832,7 @@ const CompanyProfile = () => {
                 onChange={(e) => setFormData({...formData, company_description: e.target.value})}
                 placeholder="Vi säljer bilar"
                 rows={4}
-                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 resize-none [&]:text-white"
+                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
               />
             </div>
 
@@ -901,7 +901,7 @@ const CompanyProfile = () => {
                       <span className="text-sm text-white truncate">
                         {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
                       </span>
-                      <ChevronDown className="h-4 w-4 text-white/60 flex-shrink-0" />
+                      <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
                     </div>
                     
                     {platformMenuOpen && (
@@ -934,7 +934,7 @@ const CompanyProfile = () => {
                     placeholder="Klistra in din sociala medier länk här"
                     value={newSocialLink.url}
                     onChange={(e) => setNewSocialLink(prev => ({ ...prev, url: e.target.value }))}
-                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 text-sm"
+                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
                   />
 
                   <Button

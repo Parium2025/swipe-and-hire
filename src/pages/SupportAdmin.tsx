@@ -248,7 +248,7 @@ const SupportAdmin = () => {
       <div className="max-w-6xl mx-auto space-y-6 p-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white">Support Admin</h1>
-          <p className="text-white/70 mt-2">Laddar ärenden...</p>
+          <p className="text-white mt-2">Laddar ärenden...</p>
         </div>
       </div>
     );
@@ -258,7 +258,7 @@ const SupportAdmin = () => {
     <div className="max-w-6xl mx-auto space-y-6 p-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-white">Support Admin</h1>
-        <p className="text-white/70 mt-2">Hantera alla supportärenden</p>
+        <p className="text-white mt-2">Hantera alla supportärenden</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -313,7 +313,7 @@ const SupportAdmin = () => {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="text-white">{selectedTicket.subject}</CardTitle>
-                    <CardDescription className="text-white/70 mt-1">
+                    <CardDescription className="text-white mt-1">
                       Ärende {selectedTicket.id.slice(0, 8)}
                     </CardDescription>
                   </div>
@@ -340,17 +340,17 @@ const SupportAdmin = () => {
               <CardContent className="space-y-4">
                 {/* Ärendeinfo */}
                 <div className="grid grid-cols-2 gap-4 p-4 bg-white/5 rounded-lg">
-                  <div className="flex items-center gap-2 text-white/70">
+                  <div className="flex items-center gap-2 text-white">
                     <User className="h-4 w-4" />
                     <span className="text-sm">
                       {selectedTicket.profiles?.first_name} {selectedTicket.profiles?.last_name}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-white/70">
+                  <div className="flex items-center gap-2 text-white">
                     <Tag className="h-4 w-4" />
                     <span className="text-sm">{getCategoryLabel(selectedTicket.category)}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-white/70">
+                  <div className="flex items-center gap-2 text-white">
                     <Calendar className="h-4 w-4" />
                     <span className="text-sm">
                       {new Date(selectedTicket.created_at).toLocaleString('sv-SE')}
@@ -434,7 +434,7 @@ const SupportAdmin = () => {
           ) : (
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="flex items-center justify-center h-96">
-                <p className="text-white/70">Välj ett ärende för att visa detaljer</p>
+                <p className="text-white">Välj ett ärende för att visa detaljer</p>
               </CardContent>
             </Card>
           )}

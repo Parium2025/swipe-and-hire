@@ -407,7 +407,7 @@ const Index = () => {
             <h1 className="text-2xl font-bold text-white">Parium</h1>
             <TruncatedText
               text={`Jobbsökare: ${profile.first_name} ${profile.last_name}`}
-              className="text-sm text-white/70 truncate block"
+              className="text-sm text-white truncate block"
             />
           </div>
           <div className="flex items-center gap-3">

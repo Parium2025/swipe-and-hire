@@ -1719,10 +1719,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onChange={(e) => handleWorkLocationSearch(e.target.value)}
                       onClick={handleWorkLocationClick}
                       placeholder="Välj arbetsplats"
-                      className={`bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer ${showWorkLocationDropdown ? 'border-white/50' : ''}`}
+                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showWorkLocationDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {showWorkLocationDropdown && (
                       <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
@@ -1749,10 +1749,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onChange={(e) => handleRemoteWorkSearch(e.target.value)}
                       onClick={handleRemoteWorkClick}
                       placeholder="Välj alternativ"
-                      className={`bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer ${showRemoteWorkDropdown ? 'border-white/50' : ''}`}
+                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showRemoteWorkDropdown ? 'border-white/50' : ''}`}
                       readOnly
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                     
                     {showRemoteWorkDropdown && (
                       <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
@@ -1777,7 +1777,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                     placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                   />
                 </div>
 
@@ -1788,7 +1788,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.contact_email}
                     onChange={(e) => handleInputChange('contact_email', e.target.value)}
                     placeholder={user?.email || "kontakt@företag.se"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                   />
                 </div>
 
@@ -1798,7 +1798,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.workplace_address}
                     onChange={(e) => handleInputChange('workplace_address', e.target.value)}
                     placeholder="T.ex. Modulvägen 1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
                   />
                 </div>
               </div>
@@ -1884,7 +1884,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         }}
                         variant="ghost"
                         size="sm"
-                        className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                        className="text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                       >
                         <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
                       </Button>
@@ -1975,7 +1975,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                             setShowQuestionTemplates(false);
                                             setShowQuestionForm(true);
                                           }}
-                                          className="p-1.5 text-white hover:text-white/70 hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                          className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
                                         >
                                           <Pencil className="h-3.5 w-3.5" />
                                         </button>

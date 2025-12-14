@@ -45,7 +45,7 @@ export const ScrollTransition = () => {
         whileTap={{ scale: 0.95 }}
       >
         <motion.div
-          className="text-white/60 text-sm font-medium group-hover:text-secondary transition-colors"
+          className="text-white text-sm font-medium group-hover:text-secondary transition-colors"
           initial={{ opacity: 0.6 }}
           animate={{ opacity: [0.6, 1, 0.6] }}
           transition={{ duration: 2, repeat: Infinity }}
@@ -63,7 +63,7 @@ export const ScrollTransition = () => {
           }}
         >
           <div className="w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 flex items-center justify-center group-hover:bg-white/10 group-hover:border-secondary/30 transition-all">
-            <ChevronDown className="w-6 h-6 text-white/70 group-hover:text-secondary transition-colors" />
+            <ChevronDown className="w-6 h-6 text-white group-hover:text-secondary transition-colors" />
           </div>
           
           {/* Glow effect */}
