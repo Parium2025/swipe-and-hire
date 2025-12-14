@@ -474,8 +474,8 @@ const JobView = () => {
                `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
                'Företag'}
             </h3>
-            <div className="flex items-center text-white/80 text-[10px] mt-0.5">
-              <Users className="h-2.5 w-2.5 mr-0.5" />
+              <div className="flex items-center text-[10px] mt-0.5" style={{ color: '#FFFFFF' }}>
+              <Users className="h-2.5 w-2.5 mr-0.5" style={{ color: '#FFFFFF' }} />
               Se företagsprofil
             </div>
           </div>
@@ -662,7 +662,7 @@ const JobView = () => {
             {/* Questions */}
             {jobQuestions.length > 0 && (
               <div className="space-y-3">
-                <h2 className="text-white font-bold text-lg">Ansökningsfrågor</h2>
+                <h2 className="font-bold text-lg" style={{ color: '#FFFFFF' }}>Ansökningsfrågor</h2>
                 
                 {jobQuestions.map((question, index) => (
                   <div key={question.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
@@ -671,13 +671,13 @@ const JobView = () => {
                         {getQuestionIcon(question.question_type)}
                       </div>
                       <div className="flex-1">
-                        <div className="text-white/70 text-[10px] mb-0.5">
+                        <div className="text-[10px] mb-0.5" style={{ color: '#FFFFFF' }}>
                           Fråga {index + 1} av {jobQuestions.length}
                         </div>
-                        <h3 className="text-white text-sm font-semibold leading-tight">
+                        <h3 className="text-sm font-semibold leading-tight" style={{ color: '#FFFFFF' }}>
                           {question.question_text}
                           {question.is_required && (
-                            <span className="text-red-300 ml-1">*</span>
+                            <span className="ml-1" style={{ color: '#FFFFFF' }}>*</span>
                           )}
                         </h3>
                       </div>
@@ -715,8 +715,8 @@ const JobView = () => {
               {/* Contact info if exists */}
               {job.contact_email && (
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                  <h3 className="text-white font-semibold text-sm mb-1.5">Kontakt</h3>
-                  <p className="text-white/80 text-[10px] mb-1.5">{job.contact_email}</p>
+                  <h3 className="font-semibold text-sm mb-1.5" style={{ color: '#FFFFFF' }}>Kontakt</h3>
+                  <p className="text-[10px] mb-1.5" style={{ color: '#FFFFFF' }}>{job.contact_email}</p>
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -732,7 +732,7 @@ const JobView = () => {
 
               {/* Job posted date */}
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <p className="text-white/70 text-[10px]">
+                <p className="text-[10px]" style={{ color: '#FFFFFF' }}>
                   Publicerad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
                     year: 'numeric', 
                     month: 'long', 
