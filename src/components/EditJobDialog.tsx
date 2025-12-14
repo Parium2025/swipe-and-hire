@@ -2146,7 +2146,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                                 
                                 {showQuestionTypeDropdown && (
-                                  <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-48 overflow-y-auto">
+                                  <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-48 overflow-y-auto">
                                     {filteredQuestionTypes.map((type) => (
                                       <button
                                         key={type.value}
