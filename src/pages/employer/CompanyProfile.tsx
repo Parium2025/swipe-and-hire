@@ -637,7 +637,7 @@ const CompanyProfile = () => {
                   id="company_name"
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 [&]:text-white"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
                 />
               </div>
 
@@ -662,7 +662,7 @@ const CompanyProfile = () => {
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
                   maxLength={11}
-                  className={`bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 [&]:text-white ${orgNumberError ? 'border-red-500/50' : ''}`}
+                  className={`bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white ${orgNumberError ? 'border-red-500/50' : ''}`}
                 />
                 {orgNumberError && (
                   <p className="text-red-400/80 text-sm mt-1">{orgNumberError}</p>
@@ -683,7 +683,7 @@ const CompanyProfile = () => {
                     <span className="text-sm text-white truncate">
                       {formData.industry || 'Välj bransch'}
                     </span>
-                    <ChevronDown className="h-4 w-4 text-white/60 flex-shrink-0" />
+                    <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
                   </div>
                   
                   {industryMenuOpen && (
@@ -691,12 +691,12 @@ const CompanyProfile = () => {
                       {/* Search input */}
                       <div className="p-2 border-b border-white/10 sticky top-0 bg-slate-900/95">
                         <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
                           <Input
                             placeholder="Sök bransch..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 h-9 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 text-sm"
+                            className="pl-10 pr-4 h-9 bg-white/10 border-white/20 text-white placeholder:text-white focus:border-white/40 text-sm"
                             autoComplete="off"
                             autoCapitalize="none"
                             autoCorrect="off"

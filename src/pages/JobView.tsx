@@ -343,7 +343,7 @@ const JobView = () => {
               }}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             />
-            <div className="flex justify-between text-xs text-white/80">
+            <div className="flex justify-between text-xs text-white">
               <span>{minVal}</span>
               <span>{maxVal}</span>
             </div>
@@ -505,7 +505,7 @@ const JobView = () => {
                `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
                'Företag'}
             </h3>
-              <div className="flex items-center text-[10px] mt-0.5 text-white/80">
+              <div className="flex items-center text-[10px] mt-0.5 text-white">
               <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
               Se företagsprofil
             </div>
@@ -571,7 +571,7 @@ const JobView = () => {
                     )}
                     {formatSalary(job.salary_min, job.salary_max, job.salary_type) && (
                       <>
-                        {job.work_schedule && <span className="text-white/60">·</span>}
+                        {job.work_schedule && <span className="text-white">·</span>}
                         <div className="flex items-center gap-1.5 text-green-300 font-semibold">
                           <Euro className="h-4 w-4" />
                           <span>{formatSalary(job.salary_min, job.salary_max, job.salary_type)}</span>
@@ -580,7 +580,7 @@ const JobView = () => {
                     )}
                     {job.positions_count && job.positions_count > 1 && (
                       <>
-                        <span className="text-white/60">·</span>
+                        <span className="text-white">·</span>
                         <div className="flex items-center gap-1.5">
                           <Hash className="h-4 w-4" />
                           <span>{job.positions_count} tjänster</span>

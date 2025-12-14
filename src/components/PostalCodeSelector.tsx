@@ -91,7 +91,7 @@ const PostalCodeSelector = ({
           value={postalCodeValue}
           onChange={handlePostalCodeChange}
           placeholder="Skriv in ditt postnummer"
-          className="h-9 pl-10 text-sm bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/50 text-white hover:bg-white/10 md:hover:border-white/50 placeholder:text-white/40"
+          className="h-9 pl-10 text-sm bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/50 text-white hover:bg-white/10 md:hover:border-white/50 placeholder:text-white"
           maxLength={6}
           autoComplete="off"
         />
@@ -160,13 +160,13 @@ const PostalCodeSelector = ({
         <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-4">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
-              <Loader2 className="h-5 w-5 animate-spin text-white/60" />
+              <Loader2 className="h-5 w-5 animate-spin text-white" />
             </div>
             <div className="flex-1">
               <p className="text-sm text-white font-medium">
                 Söker i svensk postnummerdatabas...
               </p>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-white">
                 16,000+ postnummer tillgängliga
               </p>
             </div>

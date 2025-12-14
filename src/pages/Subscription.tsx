@@ -81,7 +81,7 @@ const Subscription = () => {
                    <p className="font-semibold text-white">
                      {plans.find(p => p.id === currentPlan)?.name} Plan
                    </p>
-                  <p className="text-sm text-white/80">
+                  <p className="text-sm text-white">
                     {user?.created_at ? `Aktiv sedan ${new Date(user.created_at).toLocaleDateString('sv-SE', { 
                       year: 'numeric', 
                       month: 'long', 
@@ -131,14 +131,14 @@ const Subscription = () => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg text-white">{plan.name}</h3>
-                        <p className="text-sm text-white/80">{plan.description}</p>
+                        <p className="text-sm text-white">{plan.description}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-white whitespace-nowrap">
                         {plan.price} kr
                       </div>
-                      <div className="text-sm text-white/80">
+                      <div className="text-sm text-white">
                         /{plan.period}
                       </div>
                     </div>

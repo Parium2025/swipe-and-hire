@@ -1048,7 +1048,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <h1 className="text-xl font-semibold text-white animate-fade-in leading-tight">Välkommen till Parium</h1>
                 
                 <div className="space-y-1">
-                  <p className="text-sm text-white/80 animate-fade-in leading-relaxed">Framtiden börjar med ett swipe</p>
+                  <p className="text-sm text-white animate-fade-in leading-relaxed">Framtiden börjar med ett swipe</p>
                 </div>
               </div>
             </div>
@@ -1100,7 +1100,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    value={formData.firstName} 
                    onChange={(e) => handleInputChange('firstName', e.target.value)} 
                    placeholder="Ditt förnamn" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
                  />
                </div>
                <div>
@@ -1110,7 +1110,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    value={formData.lastName} 
                    onChange={(e) => handleInputChange('lastName', e.target.value)} 
                    placeholder="Ditt efternamn" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
                  />
                </div>
                <div>
@@ -1121,7 +1121,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    value={formData.email} 
                    onChange={(e) => handleInputChange('email', e.target.value)} 
                    placeholder="Din e-postadress" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
                  />
                </div>
                  <div>
@@ -1152,7 +1152,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     required
                     value={formData.phone} 
                     onChange={(e) => handlePhoneChange(e.target.value)} 
-                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
+                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
                     placeholder="070-123 45 67" 
                   />
                   {phoneError && (
@@ -1336,7 +1336,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
           <div className="space-y-6">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-semibold mb-2 text-white">Profilbild/Profilvideo</h2>
-              <p className="text-white/90 text-sm">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt</p>
+              <p className="text-white text-sm">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt</p>
             </div>
 
             {/* Profile Image/Video Card - matching structure from Profile.tsx */}

@@ -512,12 +512,12 @@ All colors MUST be HSL.
   
   /* Caption - Small helper text, timestamps */
   .text-caption {
-    @apply text-xs text-white/80;
+    @apply text-xs text-white;
   }
   
   /* Muted text - Less prominent information */
   .text-muted-white {
-    @apply text-white/70;
+    @apply text-white;
   }
   
   /* === BACKGROUND UTILITIES === */

@@ -298,7 +298,7 @@ const EmployerProfile = () => {
                   id="first_name"
                   value={formData.first_name}
                   onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 text-sm"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
@@ -307,7 +307,7 @@ const EmployerProfile = () => {
                   id="last_name"
                   value={formData.last_name}
                   onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 text-sm"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
                 />
               </div>
             </div>
@@ -318,7 +318,7 @@ const EmployerProfile = () => {
                 id="email"
                 value={user?.email || ''}
                 readOnly
-                className="bg-white/5 border-white/10 text-white/70 h-9 text-sm cursor-not-allowed"
+                className="bg-white/5 border-white/10 text-white h-9 text-sm cursor-not-allowed"
               />
             </div>
 
@@ -328,7 +328,7 @@ const EmployerProfile = () => {
                 id="role"
                 value={userRole?.role === 'employer' ? 'Admin' : 'Jobbsökare'}
                 readOnly
-                className="bg-white/5 border-white/10 text-white/70 h-9 text-sm cursor-not-allowed"
+                className="bg-white/5 border-white/10 text-white h-9 text-sm cursor-not-allowed"
               />
             </div>
 
@@ -339,7 +339,7 @@ const EmployerProfile = () => {
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
                   placeholder="T.ex. Stockholm, Sverige"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 text-sm"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
                 />
             </div>
 
@@ -350,7 +350,7 @@ const EmployerProfile = () => {
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   placeholder="T.ex. 070-123 45 67"
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 text-sm"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 text-sm"
                 />
             </div>
 
@@ -361,10 +361,10 @@ const EmployerProfile = () => {
                   value={formData.bio}
                   onChange={(e) => setFormData({...formData, bio: e.target.value})}
                   rows={3}
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 text-sm"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white text-sm"
                 />
               <div className="text-right">
-                <span className="text-white/50 text-sm">
+                <span className="text-white text-sm">
                   {formData.bio.trim() === '' ? 0 : formData.bio.trim().split(/\s+/).length} ord
                 </span>
               </div>

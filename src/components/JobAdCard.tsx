@@ -73,8 +73,8 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
             <h3 className="text-base font-extrabold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]">
               {title}
             </h3>
-            <div className="mt-1 text-white/95 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">{company}</div>
-            <div className="text-white/80 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">{location.replace(/\s*OK\s*$/, '')}</div>
+            <div className="mt-1 text-white text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">{company}</div>
+            <div className="text-white text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">{location.replace(/\s*OK\s*$/, '')}</div>
           </div>
 
           {/* Handlingsknappar */}

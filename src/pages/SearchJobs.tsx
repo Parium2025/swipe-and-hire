@@ -310,7 +310,7 @@ const SearchJobs = () => {
                 placeholder="Sök efter jobbtitel, företag, plats..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-4 pr-10 bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40"
+                className="pl-4 pr-10 bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white"
               />
               {searchInput && (
                 <button
@@ -679,7 +679,7 @@ const SearchJobs = () => {
             <div className="text-center py-12">
               <div className="inline-flex items-center gap-2">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                <p className="text-sm text-white/70">Söker jobb...</p>
+                <p className="text-sm text-white">Söker jobb...</p>
               </div>
             </div>
           ) : filteredAndSortedJobs.length === 0 ? (
@@ -718,7 +718,7 @@ const SearchJobs = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3 text-white/60" />
+                            <MapPin className="h-3 w-3 text-white" />
                             <TruncatedText 
                               text={job.location} 
                               className="text-sm text-white truncate max-w-[100px] block"
@@ -796,7 +796,7 @@ const SearchJobs = () => {
       {/* Show message when all jobs are loaded */}
       {!hasMoreJobs && filteredAndSortedJobs.length > 10 && (
         <div className="text-center py-4">
-          <p className="text-white/60 text-sm">
+          <p className="text-white text-sm">
             Alla {filteredAndSortedJobs.length} jobb visas
           </p>
         </div>

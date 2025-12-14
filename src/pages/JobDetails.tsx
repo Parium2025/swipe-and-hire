@@ -219,7 +219,7 @@ const JobDetails = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div className="space-y-0.5 md:space-y-1 text-xs md:text-sm text-white/70">
+            <div className="space-y-0.5 md:space-y-1 text-xs md:text-sm text-white">
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 <span>{new Date(application.applied_at).toLocaleDateString('sv-SE')}</span>
