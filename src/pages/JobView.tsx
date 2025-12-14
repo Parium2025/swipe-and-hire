@@ -164,7 +164,19 @@ const JobView = () => {
     }));
   };
 
-  // Map benefit keys to Swedish labels
+  // Check if all required questions are answered
+  const allRequiredQuestionsAnswered = () => {
+    const requiredQuestions = jobQuestions.filter(q => q.is_required);
+    return requiredQuestions.every(q => {
+      const answer = answers[q.id];
+      if (answer === undefined || answer === null || answer === '') return false;
+      if (typeof answer === 'string' && answer.trim() === '') return false;
+      return true;
+    });
+  };
+
+  const canSubmitApplication = allRequiredQuestionsAnswered();
+
   const getBenefitLabel = (benefit: string): string => {
     const labels: Record<string, string> = {
       forsakringar: 'Försäkringar',
@@ -706,9 +718,13 @@ const JobView = () => {
             {/* Submit application button */}
             <Button
               size="lg"
-              className="w-full h-12 bg-green-500 md:hover:bg-green-500/80 text-white text-base font-semibold shadow-lg transition-all duration-200"
+              className={`w-full h-12 text-white text-base font-semibold shadow-lg transition-all duration-300 ${
+                canSubmitApplication 
+                  ? 'bg-green-500 md:hover:bg-green-500/80' 
+                  : 'bg-white/20 cursor-not-allowed'
+              }`}
               onClick={handleApplicationSubmit}
-              disabled={applying}
+              disabled={applying || !canSubmitApplication}
             >
               {applying ? (
                 'Skickar...'
