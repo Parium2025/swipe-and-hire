@@ -278,7 +278,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
 
       {/* Countdown timer when video is playing */}
       {showCountdown && isPlaying && remainingSeconds !== null && (
-        <div className="absolute top-4 right-4 px-2 py-1 text-white text-xs font-semibold" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+        <div className="absolute top-3 right-3 md:top-4 md:right-4 px-2 py-1 bg-black/40 backdrop-blur-sm rounded-full text-white text-sm md:text-base font-bold" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
           {remainingSeconds}s
         </div>
       )}
@@ -286,14 +286,14 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       {/* Video progress bar */}
       {showProgressBar && duration > 0 && (
         <div 
-          className={`absolute bottom-3 left-2 right-2 transition-opacity duration-300 ${
+          className={`absolute bottom-2 left-2 right-2 md:bottom-4 md:left-3 md:right-3 transition-opacity duration-300 ${
             (controlsVisible || isDragging) && isPlaying ? 'opacity-100' : 'opacity-0'
           }`}
           onMouseMove={handleProgressDrag}
         >
           <div
             ref={progressBarRef}
-            className="h-1 bg-white/40 backdrop-blur-sm cursor-pointer hover:h-2 hover:bg-white/50 transition-all rounded-full overflow-hidden shadow-lg"
+            className="h-1.5 md:h-2 bg-white/40 backdrop-blur-sm cursor-pointer hover:h-2 hover:bg-white/50 md:hover:h-3 transition-all rounded-full overflow-hidden shadow-lg"
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onClick={handleProgressClick}
