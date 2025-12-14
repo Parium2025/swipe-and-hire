@@ -714,7 +714,7 @@ const JobView = () => {
                   <p className="text-[10px] mb-1.5" style={{ color: '#FFFFFF' }}>{job.contact_email}</p>
                   <Button 
                     size="sm"
-                    className="w-full bg-green-500 md:hover:bg-green-500/80 text-white text-xs font-semibold transition-all duration-200"
+                    className="w-full bg-white/10 border border-white/20 text-white text-xs font-medium md:hover:bg-white/15 transition-all duration-200"
                     onClick={() => {
                       window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
                     }}
