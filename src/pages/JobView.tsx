@@ -709,9 +709,9 @@ const JobView = () => {
 
               {/* Contact info if exists */}
               {job.contact_email && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                  <h3 className="font-semibold text-sm mb-1.5" style={{ color: '#FFFFFF' }}>Kontakt</h3>
-                  <p className="text-[10px] mb-1.5" style={{ color: '#FFFFFF' }}>{job.contact_email}</p>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                  <h3 className="font-semibold text-sm mb-2" style={{ color: '#FFFFFF' }}>Kontakt</h3>
+                  <p className="text-sm mb-3" style={{ color: '#FFFFFF' }}>{job.contact_email}</p>
                   <Button 
                     size="sm"
                     className="w-full bg-white/10 border border-white/20 text-white text-xs font-medium md:hover:bg-white/15 transition-all duration-200"
@@ -725,8 +725,8 @@ const JobView = () => {
               )}
 
               {/* Job posted date */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <p className="text-[10px]" style={{ color: '#FFFFFF' }}>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                <p className="text-sm" style={{ color: '#FFFFFF' }}>
                   Publicerad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
                     year: 'numeric', 
                     month: 'long', 
