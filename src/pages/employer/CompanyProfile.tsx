@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
@@ -16,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
 import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle } from 'lucide-react';
@@ -54,6 +53,35 @@ const CompanyProfile = () => {
   // Industry dropdown states
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Employee count dropdown state
+  const [employeeCountOpen, setEmployeeCountOpen] = useState(false);
+  
+  // Employee count options matching MobileJobWizard style
+  const employeeCountOptions = [
+    { value: '1-10 anställda', label: '1-10 anställda' },
+    { value: '11-50 anställda', label: '11-50 anställda' },
+    { value: '51-200 anställda', label: '51-200 anställda' },
+    { value: '201-1000 anställda', label: '201-1000 anställda' },
+    { value: '1000+ anställda', label: '1000+ anställda' },
+  ];
+  
+  // Ref for click-outside detection
+  const employeeCountRef = useRef<HTMLDivElement>(null);
+  
+  // Close employee count dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (employeeCountRef.current && !employeeCountRef.current.contains(event.target as Node)) {
+        setEmployeeCountOpen(false);
+      }
+    };
+    
+    if (employeeCountOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [employeeCountOpen]);
 
   // Session storage key for persisting unsaved state across tab switches
   const SESSION_STORAGE_KEY = 'company-profile-unsaved-state';
@@ -727,21 +755,42 @@ const CompanyProfile = () => {
 
               <div className="space-y-1.5">
                 <Label htmlFor="employee_count" className="text-white">Antal anställda</Label>
-                <Select
-                  value={formData.employee_count}
-                  onValueChange={(value) => setFormData({...formData, employee_count: value})}
-                >
-                  <SelectTrigger className="bg-white/5 border-white/10 hover:border-white/50 focus:border-white/10 data-[state=open]:border-white/50 text-white h-11">
-                    <SelectValue placeholder="Välj antal" className="text-white/90" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 text-white z-50">
-                    <SelectItem value="1-10 anställda">1-10 anställda</SelectItem>
-                    <SelectItem value="11-50 anställda">11-50 anställda</SelectItem>
-                    <SelectItem value="51-200 anställda">51-200 anställda</SelectItem>
-                    <SelectItem value="201-1000 anställda">201-1000 anställda</SelectItem>
-                    <SelectItem value="1000+ anställda">1000+ anställda</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="relative" ref={employeeCountRef}>
+                  <div
+                    onClick={() => {
+                      setEmployeeCountOpen(!employeeCountOpen);
+                      setIndustryMenuOpen(false);
+                      setPlatformMenuOpen(false);
+                    }}
+                    className={`flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 h-11 cursor-pointer hover:border-white/40 transition-colors ${employeeCountOpen ? 'border-white/50' : ''}`}
+                  >
+                    <span className="text-sm text-white">
+                      {formData.employee_count || 'Välj antal'}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-white/60" />
+                  </div>
+                  
+                  {employeeCountOpen && (
+                    <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg">
+                      {employeeCountOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setFormData({...formData, employee_count: option.value});
+                            setEmployeeCountOpen(false);
+                          }}
+                          className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors flex items-center justify-between"
+                        >
+                          <span className="font-medium">{option.label}</span>
+                          {formData.employee_count === option.value && (
+                            <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1.5">
