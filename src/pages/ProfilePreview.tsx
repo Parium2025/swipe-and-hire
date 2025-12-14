@@ -48,6 +48,11 @@ export default function ProfilePreview() {
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [cvOpen, setCvOpen] = useState(false);
+
+  // Lokala media-URLs synkade med samma cache-system som sidebaren
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(preloadedAvatarUrl ?? null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(preloadedCoverUrl ?? null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(preloadedVideoUrl ?? null);
   
   // 🎯 Generera signed URLs (hooks måste alltid anropas, inte villkorligt)
   const fallbackProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
@@ -55,10 +60,10 @@ export default function ProfilePreview() {
   const fallbackCoverUrl = useMediaUrl(profile?.cover_image_url, 'cover-image');
   const signedCvUrl = useMediaUrl(profile?.cv_url, 'cv');
   
-  // Använd förladdade URLs från useAuth om tillgängliga, annars fallback
-  const profileImageUrl = preloadedAvatarUrl || fallbackProfileImageUrl;
-  const signedCoverUrl = preloadedCoverUrl || fallbackCoverUrl;
-  const videoUrl = preloadedVideoUrl || signedVideoUrl;
+  // Använd förladdade/sidebarsynkade URLs om tillgängliga, annars fallback via useMediaUrl
+  const profileImageUrl = avatarUrl || fallbackProfileImageUrl;
+  const signedCoverUrl = coverUrl || fallbackCoverUrl;
+  const effectiveVideoUrl = videoUrl || signedVideoUrl;
 
   useEffect(() => {
     const loadPreviewData = async () => {
@@ -122,16 +127,25 @@ export default function ProfilePreview() {
 
   // 🎯 Synkronisera med förladdade URLs från useAuth (precis som sidebaren)
   useEffect(() => {
+    setAvatarUrl(preloadedAvatarUrl ?? null);
     if (preloadedAvatarUrl && profile?.profile_image_url) {
       console.log('✅ Using preloaded avatar URL in ProfilePreview');
     }
   }, [preloadedAvatarUrl, profile?.profile_image_url]);
-
+  
   useEffect(() => {
+    setCoverUrl(preloadedCoverUrl ?? null);
     if (preloadedCoverUrl && profile?.cover_image_url) {
       console.log('✅ Using preloaded cover URL in ProfilePreview');
     }
   }, [preloadedCoverUrl, profile?.cover_image_url]);
+
+  useEffect(() => {
+    setVideoUrl(preloadedVideoUrl ?? null);
+    if (preloadedVideoUrl && profile?.video_url) {
+      console.log('✅ Using preloaded video URL in ProfilePreview');
+    }
+  }, [preloadedVideoUrl, profile?.video_url]);
 
   const ProfileView = ({ data, isConsented }: { data: ProfileViewData | null; isConsented: boolean }) => {
     if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
@@ -241,17 +255,17 @@ export default function ProfilePreview() {
                 }
               }}
             >
-              {/* Använd ProfileVideo komponenten om video finns */}
-              {data.video_url && videoUrl ? (
-                <ProfileVideo
-                  videoUrl={videoUrl}
-                  coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
-                  userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
-                  alt="Profilbild"
-                  className="w-full h-full rounded-full"
-                  showCountdown={true}
-                />
-              ) : (
+               {/* Använd ProfileVideo komponenten om video finns */}
+               {data.video_url && effectiveVideoUrl ? (
+                 <ProfileVideo
+                   videoUrl={effectiveVideoUrl}
+                   coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
+                   userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
+                   alt="Profilbild"
+                   className="w-full h-full rounded-full"
+                   showCountdown={true}
+                 />
+               ) : (
                 /* Om ingen video, visa Avatar med fallback till initialer */
                 <Avatar className="w-[165px] h-[165px] border-2 border-white/40 shadow-2xl">
                   <AvatarImage 
@@ -671,11 +685,11 @@ export default function ProfilePreview() {
           <div className="relative p-3">
             {/* Mindre rund profilbild eller video */}
             <div className="flex flex-col items-center gap-2">
-              {/* Använd ProfileVideo om video finns, annars Avatar */}
-               {videoUrl ? (
+               {/* Använd ProfileVideo om video finns, annars Avatar */}
+               {effectiveVideoUrl ? (
                  <div className="relative h-[120px] w-[120px]">
                    <ProfileVideo
-                     videoUrl={videoUrl}
+                     videoUrl={effectiveVideoUrl}
                      coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
                      userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
                      alt="Profilbild"
@@ -684,18 +698,18 @@ export default function ProfilePreview() {
                    />
                  </div>
                ) : (
-                <Avatar className="h-[120px] w-[120px] ring-2 ring-white/20 shadow-xl">
-                  <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
-                  <AvatarFallback className="bg-primary text-white text-3xl">
-                    {consentedData?.first_name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-              
-              {/* Status text under bild/video */}
-               {(videoUrl || profileImageUrl) && (
+                 <Avatar className="h-[120px] w-[120px] ring-2 ring-white/20 shadow-xl">
+                   <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
+                   <AvatarFallback className="bg-primary text-white text-3xl">
+                     {consentedData?.first_name?.[0]}
+                   </AvatarFallback>
+                 </Avatar>
+               )}
+               
+               {/* Status text under bild/video */}
+               {(effectiveVideoUrl || profileImageUrl) && (
                  <p className="text-[10px] font-medium text-white">
-                   {videoUrl ? 'Video tillgängligt' : 'Enbart profilbild vald'}
+                   {effectiveVideoUrl ? 'Video tillgängligt' : 'Enbart profilbild vald'}
                  </p>
                )}
               
