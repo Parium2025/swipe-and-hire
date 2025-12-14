@@ -172,25 +172,43 @@ export const getRemoteWorkLabel = (value: string): string => {
   return found?.label || value;
 };
 
-// Benefits options
+// Benefits options - CENTRALIZED SOURCE OF TRUTH
+// All components should import and use this array
 export const BENEFITS_OPTIONS: DropdownOption[] = [
-  { value: 'forsakringar', label: 'Försäkringar' },
-  { value: 'fri-fika-frukt', label: 'Fri fika/frukt' },
-  { value: 'utbildning', label: 'Utbildning' },
-  { value: 'flexibla-arbetstider', label: 'Flexibla arbetstider' },
+  { value: 'friskvard', label: 'Friskvård' },
+  { value: 'tjanstepension', label: 'Tjänstepension' },
   { value: 'kollektivavtal', label: 'Kollektivavtal' },
+  { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
+  { value: 'bonus', label: 'Bonus' },
+  { value: 'tjanstebil', label: 'Tjänstebil' },
+  { value: 'mobiltelefon', label: 'Mobiltelefon' },
+  { value: 'utbildning', label: 'Utbildning' },
+  { value: 'forsakringar', label: 'Försäkringar' },
+  { value: 'extra-semester', label: 'Extra semester' },
+  { value: 'gym', label: 'Gym/träning' },
+  { value: 'foraldraledighet', label: 'Föräldraledighet' },
+  { value: 'lunch', label: 'Lunch/mat' },
   { value: 'fri-parkering', label: 'Fri parkering' },
   { value: 'personalrabatter', label: 'Personalrabatter' },
-  { value: 'friskvardsbidrag', label: 'Friskvårdsbidrag' },
-  { value: 'pension', label: 'Pension' },
-  { value: 'bonus', label: 'Bonus' },
-  { value: 'tjänstebil', label: 'Tjänstebil' },
   { value: 'hemarbete', label: 'Hemarbete' },
+  { value: 'pension', label: 'Pension' },
+  // Legacy values for backwards compatibility with existing data
+  { value: 'friskvardsbidrag', label: 'Friskvård' },
+  { value: 'flexibla_arbetstider', label: 'Flexibla arbetstider' },
+  { value: 'flexibla-arbetstider', label: 'Flexibla arbetstider' },
+  { value: 'fri_fika', label: 'Fri fika/frukt' },
+  { value: 'fri-fika-frukt', label: 'Fri fika/frukt' },
+  { value: 'fri_parkering', label: 'Fri parkering' },
+  { value: 'foraldraledithet', label: 'Föräldraledighet' },
 ];
 
 export const getBenefitLabel = (value: string): string => {
   const found = BENEFITS_OPTIONS.find(b => b.value === value);
-  return found?.label || value;
+  // Capitalize first letter if no match found (fallback for custom benefits)
+  if (!found) {
+    return value.charAt(0).toUpperCase() + value.slice(1).replace(/-/g, ' ');
+  }
+  return found.label;
 };
 
 // Empty form data factory
