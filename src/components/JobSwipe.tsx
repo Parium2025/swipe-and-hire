@@ -282,7 +282,7 @@ const JobSwipe = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <h2 className="text-xl">Laddar jobb...</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Laddar jobb...</h2>
         </div>
       </div>
     );
@@ -292,9 +292,9 @@ const JobSwipe = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Inga jobb tillgängliga</h2>
-          <p className="text-muted-foreground">Kom tillbaka senare för fler möjligheter!</p>
+          <Users className="mx-auto h-12 w-12 text-white mb-4" />
+          <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Inga jobb tillgängliga</h2>
+          <p className="text-sm text-white">Kom tillbaka senare för fler möjligheter!</p>
         </div>
       </div>
     );
@@ -304,9 +304,9 @@ const JobSwipe = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <Heart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Du har sett alla jobb!</h2>
-          <p className="text-muted-foreground">Kom tillbaka senare för fler möjligheter!</p>
+          <Heart className="mx-auto h-12 w-12 text-white mb-4" />
+          <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Du har sett alla jobb!</h2>
+          <p className="text-sm text-white">Kom tillbaka senare för fler möjligheter!</p>
           <Button 
             onClick={() => {
               setCurrentJobIndex(0);
@@ -326,8 +326,8 @@ const JobSwipe = () => {
   return (
     <div className="max-w-md mx-auto p-3 sm:p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="mb-4 text-center">
-        <h2 className="text-lg sm:text-xl font-bold">Upptäck jobb</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Upptäck jobb</h2>
+        <p className="text-sm text-white mt-1">
           {currentJobIndex + 1} av {jobs.length} jobb
         </p>
       </div>
@@ -369,8 +369,8 @@ const JobSwipe = () => {
             {/* Company info - only show if no image */}
             {!currentJobImageUrl && (
               <div className="flex items-center gap-2 mb-4">
-                <Building2 className="h-5 w-5 text-muted-foreground" />
-                <span className="font-medium">
+                <Building2 className="h-5 w-5 text-white" />
+                <span className="font-medium text-white">
                   {currentJob.profiles?.company_name || 
                    `${currentJob.profiles?.first_name} ${currentJob.profiles?.last_name}` || 
                    'Företag'}
@@ -380,7 +380,7 @@ const JobSwipe = () => {
 
             {/* Job title - only show if no image */}
             {!currentJobImageUrl && (
-              <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">{currentJob.title}</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3 md:mb-4">{currentJob.title}</h3>
             )}
 
             {/* Location and type */}
@@ -407,12 +407,12 @@ const JobSwipe = () => {
 
             {/* Salary with transparency */}
             <div className="mb-3 md:mb-4">
-              <div className="flex items-center gap-1 md:gap-2 text-base md:text-lg font-semibold text-green-600">
+              <div className="flex items-center gap-1 md:gap-2 text-base md:text-lg font-semibold text-green-400">
                 <Euro className="h-5 w-5" />
                 {formatSalary(currentJob.salary_min, currentJob.salary_max, currentJob.salary_type)}
               </div>
               {currentJob.salary_transparency && (
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-white mt-1">
                   Lönetransparens: {currentJob.salary_transparency}
                 </p>
               )}
@@ -422,9 +422,9 @@ const JobSwipe = () => {
             {(currentJob.work_start_time || currentJob.work_end_time) && (
               <div className="mb-3 md:mb-4">
                 <div className="flex items-center gap-2 text-sm">
-                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Arbetstider:</span>
-                  <span>{currentJob.work_start_time} - {currentJob.work_end_time}</span>
+                  <CalendarClock className="h-4 w-4 text-white" />
+                  <span className="text-white">Arbetstider:</span>
+                  <span className="text-white">{currentJob.work_start_time} - {currentJob.work_end_time}</span>
                 </div>
               </div>
             )}
@@ -438,8 +438,8 @@ const JobSwipe = () => {
 
             {/* Description */}
             <div className="mb-3 md:mb-4">
-              <h4 className="font-semibold mb-2 text-base md:text-lg">Beskrivning</h4>
-              <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              <h4 className="font-semibold mb-2 text-base md:text-lg text-white">Beskrivning</h4>
+              <p className="text-sm md:text-base text-white leading-relaxed whitespace-pre-wrap">
                 {currentJob.description}
               </p>
             </div>
@@ -447,7 +447,7 @@ const JobSwipe = () => {
             {/* Benefits */}
             {currentJob.benefits && currentJob.benefits.length > 0 && (
               <div className="mb-3 md:mb-4">
-                <h4 className="font-semibold mb-2 text-base md:text-lg flex items-center gap-2">
+                <h4 className="font-semibold mb-2 text-base md:text-lg flex items-center gap-2 text-white">
                   <Gift className="h-4 w-4" />
                   Förmåner
                 </h4>
@@ -477,7 +477,7 @@ const JobSwipe = () => {
             {/* Contact Info */}
             {currentJob.contact_email && (
               <div className="mb-3 md:mb-6">
-                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <h4 className="font-semibold mb-2 flex items-center gap-2 text-white">
                   <Mail className="h-4 w-4" />
                   Kontakt
                 </h4>
@@ -493,7 +493,7 @@ const JobSwipe = () => {
                   <Mail className="h-4 w-4 mr-2" />
                   Maila arbetsgivaren
                 </Button>
-                <p className="text-sm text-muted-foreground mt-1 text-center">
+                <p className="text-sm text-white mt-1 text-center">
                   {currentJob.contact_email}
                 </p>
               </div>
@@ -524,7 +524,7 @@ const JobSwipe = () => {
         </div>
 
         {/* Swipe instructions */}
-        <div className="text-center mt-4 text-sm text-muted-foreground">
+        <div className="text-center mt-4 text-sm text-white">
           <p>Tryck ❤️ om du är intresserad eller ✕ för att passa</p>
         </div>
       </div>
