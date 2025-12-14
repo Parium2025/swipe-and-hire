@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,22 +67,26 @@ const CompanyProfile = () => {
     { value: '1000+ anställda', label: '1000+ anställda' },
   ];
   
-  // Ref for click-outside detection
+  // Refs for click-outside detection
   const employeeCountRef = useRef<HTMLDivElement>(null);
+  const industryRef = useRef<HTMLDivElement>(null);
   
-  // Close employee count dropdown on click outside
+  // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (employeeCountRef.current && !employeeCountRef.current.contains(event.target as Node)) {
         setEmployeeCountOpen(false);
       }
+      if (industryRef.current && !industryRef.current.contains(event.target as Node)) {
+        setIndustryMenuOpen(false);
+      }
     };
     
-    if (employeeCountOpen) {
+    if (employeeCountOpen || industryMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [employeeCountOpen]);
+  }, [employeeCountOpen, industryMenuOpen]);
 
   // Session storage key for persisting unsaved state across tab switches
   const SESSION_STORAGE_KEY = 'company-profile-unsaved-state';
@@ -662,95 +667,94 @@ const CompanyProfile = () => {
 
               <div className="space-y-1.5">
                 <Label htmlFor="industry" className="text-white">Bransch</Label>
-                <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={`w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between h-9 font-normal ${industryMenuOpen ? 'border-white/50' : ''}`}
-                    >
-                      <span className="truncate text-left flex-1 px-1 text-white/90">
-                        {formData.industry || 'Välj bransch'}
-                      </span>
-                      <ChevronDown className="h-4 w-4 flex-shrink-0 text-white ml-2" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
-                    side="bottom"
-                    align="center"
-                    alignOffset={0}
-                    sideOffset={8}
-                    avoidCollisions={false}
-                    onCloseAutoFocus={(e) => e.preventDefault()}
+                <div className="relative" ref={industryRef}>
+                  <div
+                    onClick={() => {
+                      setIndustryMenuOpen(!industryMenuOpen);
+                      setEmployeeCountOpen(false);
+                      setPlatformMenuOpen(false);
+                    }}
+                    className={`flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 h-11 cursor-pointer hover:border-white/40 transition-colors ${industryMenuOpen ? 'border-white/50' : ''}`}
                   >
-                    <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-white/5 backdrop-blur-md">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
-                        <Input
-                          placeholder="Sök bransch..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-10 pr-4 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
-                          autoComplete="off"
-                          autoCapitalize="none"
-                          autoCorrect="off"
-                          onKeyDownCapture={(e) => e.stopPropagation()}
-                          onKeyDown={(e) => e.stopPropagation()}
-                        />
+                    <span className="text-sm text-white truncate">
+                      {formData.industry || 'Välj bransch'}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-white/60 flex-shrink-0" />
+                  </div>
+                  
+                  {industryMenuOpen && (
+                    <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg max-h-80 overflow-hidden">
+                      {/* Search input */}
+                      <div className="p-2 border-b border-white/10 sticky top-0 bg-slate-900/95">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                          <Input
+                            placeholder="Sök bransch..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 pr-4 h-9 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 text-sm"
+                            autoComplete="off"
+                            autoCapitalize="none"
+                            autoCorrect="off"
+                          />
+                        </div>
                       </div>
-                    </div>
-                   
-                    <div className="overflow-y-auto max-h-80 overscroll-contain">
-                      {SWEDISH_INDUSTRIES
-                        .filter(industryOption => 
-                          searchTerm.trim().length >= 2 ? industryOption.toLowerCase().includes(searchTerm.toLowerCase()) : true
-                        )
-                        .map((industryOption) => (
-                          <DropdownMenuItem
-                            key={industryOption}
-                            onSelect={(e) => e.preventDefault()}
+                      
+                      {/* Options list */}
+                      <div className="overflow-y-auto max-h-60">
+                        {SWEDISH_INDUSTRIES
+                          .filter(industryOption => 
+                            searchTerm.trim().length >= 2 ? industryOption.toLowerCase().includes(searchTerm.toLowerCase()) : true
+                          )
+                          .map((industryOption) => (
+                            <button
+                              key={industryOption}
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, industry: industryOption }));
+                                setSearchTerm('');
+                                setIndustryMenuOpen(false);
+                              }}
+                              className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors flex items-center justify-between"
+                            >
+                              <span className="font-medium">{industryOption}</span>
+                              {formData.industry === industryOption && (
+                                <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                              )}
+                            </button>
+                          ))}
+                        
+                        {/* Custom value option */}
+                        {searchTerm.trim().length >= 2 &&
+                          !SWEDISH_INDUSTRIES.some(industryOption => 
+                            industryOption.toLowerCase().includes(searchTerm.toLowerCase())
+                          ) && (
+                          <button
+                            type="button"
                             onClick={() => {
-                              setFormData(prev => ({ ...prev, industry: industryOption }));
+                              setFormData(prev => ({ ...prev, industry: searchTerm }));
                               setSearchTerm('');
                               setIndustryMenuOpen(false);
                             }}
-                            className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-t border-white/10 transition-colors"
                           >
-                            <span className="flex-1 pr-2">{industryOption}</span>
-                            {formData.industry === industryOption && (
-                              <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                            )}
-                          </DropdownMenuItem>
-                        ))}
-                      
-                      {searchTerm.trim().length >= 2 &&
-                        !SWEDISH_INDUSTRIES.some(industryOption => 
-                          industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                        ) && (
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, industry: searchTerm }));
-                            setSearchTerm('');
-                            setIndustryMenuOpen(false);
-                          }}
-                          className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white border-t border-slate-600/30 transition-colors touch-manipulation"
-                        >
-                          <span className="flex-1">Använd "{searchTerm}"</span>
-                        </DropdownMenuItem>
-                      )}
-                      
-                      {searchTerm.trim().length >= 3 && 
-                        SWEDISH_INDUSTRIES.filter(industryOption => 
-                          industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                        ).length === 0 && (
-                        <div className="py-4 px-3 text-center text-white/60 italic">
-                          Inga resultat hittades för "{searchTerm}"
-                        </div>
-                      )}
+                            <span className="font-medium">Använd "{searchTerm}"</span>
+                          </button>
+                        )}
+                        
+                        {/* No results message */}
+                        {searchTerm.trim().length >= 3 && 
+                          SWEDISH_INDUSTRIES.filter(industryOption => 
+                            industryOption.toLowerCase().includes(searchTerm.toLowerCase())
+                          ).length === 0 && (
+                          <div className="py-3 px-3 text-center text-white/60 text-sm">
+                            Inga resultat hittades för "{searchTerm}"
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1.5">
