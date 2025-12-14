@@ -667,7 +667,7 @@ const JobView = () => {
                 {jobQuestions.map((question, index) => (
                   <div key={question.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
                     <div className="mb-3">
-                      <div className="text-xs mb-1" style={{ color: '#FFFFFF' }}>
+                      <div className="text-sm mb-1" style={{ color: '#FFFFFF' }}>
                         Fråga {index + 1} av {jobQuestions.length}
                       </div>
                       <h3 className="text-sm font-semibold leading-tight" style={{ color: '#FFFFFF' }}>
