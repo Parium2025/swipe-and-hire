@@ -13,19 +13,36 @@ import { preloadImages } from '@/lib/serviceWorkerManager';
 // Map benefit keys to Swedish labels
 const getBenefitLabel = (benefit: string): string => {
   const labels: Record<string, string> = {
-    forsakringar: 'Försäkringar',
-    fri_fika: 'Fri fika/frukt',
-    utbildning: 'Utbildning',
-    flexibla_arbetstider: 'Flexibla arbetstider',
-    kollektivavtal: 'Kollektivavtal',
-    fri_parkering: 'Fri parkering',
-    personalrabatter: 'Personalrabatter',
-    friskvardsbidrag: 'Friskvårdsbidrag',
+    friskvard: 'Friskvård',
     tjanstepension: 'Tjänstepension',
+    kollektivavtal: 'Kollektivavtal',
+    'flexibla-tider': 'Flexibla arbetstider',
     bonus: 'Bonus',
-    hemarbete: 'Möjlighet till hemarbete',
+    tjanstebil: 'Tjänstebil',
+    mobiltelefon: 'Mobiltelefon',
+    utbildning: 'Utbildning',
+    forsakringar: 'Försäkringar',
+    'extra-semester': 'Extra semester',
+    gym: 'Gym/träning',
+    foraldraledighet: 'Föräldraledighet',
+    foraldraledithet: 'Föräldraledighet',
+    lunch: 'Lunch/mat',
+    'fri-parkering': 'Fri parkering',
+    personalrabatter: 'Personalrabatter',
+    hemarbete: 'Hemarbete',
+    pension: 'Pension',
+    // Legacy values
+    friskvardsbidrag: 'Friskvård',
+    flexibla_arbetstider: 'Flexibla arbetstider',
+    'flexibla-arbetstider': 'Flexibla arbetstider',
+    fri_fika: 'Fri fika/frukt',
+    'fri-fika-frukt': 'Fri fika/frukt',
+    fri_parkering: 'Fri parkering',
   };
-  return labels[benefit] || benefit;
+  if (!labels[benefit]) {
+    return benefit.charAt(0).toUpperCase() + benefit.slice(1).replace(/-/g, ' ');
+  }
+  return labels[benefit];
 };
 
 // Map salary type to Swedish label
