@@ -222,7 +222,7 @@ const Support = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
                 required
-                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 resize-none text-sm"
+                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none text-sm"
               />
             </div>
 

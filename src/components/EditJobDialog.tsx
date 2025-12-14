@@ -2125,7 +2125,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               }}
                               variant="ghost"
                               size="sm"
-                              className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                              className="text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -2140,10 +2140,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                                   onClick={handleQuestionTypeClick}
                                   placeholder="Välj frågetyp"
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                                   readOnly
                                 />
-                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
                                 
                                 {showQuestionTypeDropdown && (
                                   <div className="absolute top-full left-0 right-0 z-50 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-48 overflow-y-auto">
@@ -2169,7 +2169,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   value={editingQuestion?.question_text || ''}
                                   onChange={(e) => updateQuestionField('question_text', e.target.value)}
                                   placeholder="T.ex. Beskriv dina erfarenheter inom..."
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                                 />
                               </div>
                             )}
@@ -2181,7 +2181,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   value={editingQuestion?.question_text || ''}
                                   onChange={(e) => updateQuestionField('question_text', e.target.value)}
                                   placeholder="T.ex. Har du körkort?, Kan du arbeta helger?..."
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                                 />
                               </div>
                             )}
@@ -2194,7 +2194,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                     value={editingQuestion?.question_text || ''}
                                     onChange={(e) => updateQuestionField('question_text', e.target.value)}
                                     placeholder="T.ex. Antal års erfarenhet inom..."
-                                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                                   />
                                 </div>
                                 
@@ -2206,7 +2206,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       value={editingQuestion?.min_value ?? ''}
                                       onChange={(e) => updateQuestionField('min_value', e.target.value ? parseInt(e.target.value) : undefined)}
                                       placeholder="0"
-                                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                                     />
                                   </div>
                                   <div className="space-y-2">
@@ -2216,7 +2216,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       value={editingQuestion?.max_value ?? ''}
                                       onChange={(e) => updateQuestionField('max_value', e.target.value ? parseInt(e.target.value) : undefined)}
                                       placeholder="100"
-                                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                                     />
                                   </div>
                                 </div>
@@ -2230,7 +2230,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   value={editingQuestion?.question_text || ''}
                                   onChange={(e) => updateQuestionField('question_text', e.target.value)}
                                   placeholder="T.ex. Vilka behörigheter har du?"
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                                 />
                               </div>
                             )}
@@ -2245,7 +2245,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         value={option}
                                         onChange={(e) => updateOption(index, e.target.value)}
                                         placeholder={`Alternativ ${index + 1}`}
-                                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-8 text-sm flex-1"
+                                        className="bg-white/10 border-white/20 text-white placeholder:text-white h-8 text-sm flex-1"
                                       />
                                       <button
                                         type="button"
@@ -2317,7 +2317,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <button
                             type="button"
                             onClick={() => setPreviewMode('mobile')}
-                            className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
+                            className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
                           >
                             <Smartphone className="h-3.5 w-3.5" />
                             Mobilvy
@@ -2325,7 +2325,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <button
                             type="button"
                             onClick={() => setPreviewMode('desktop')}
-                            className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
+                            className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white"
                           >
                             <Monitor className="h-3.5 w-3.5" />
                             Datorvy
@@ -2624,8 +2624,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                    
                                                    {/* Input förhandsvisning baserat på frågetyp */}
                                                    {question.question_type === 'text' && (
-                                                     <textarea
-                                                       className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none"
+                                                      <textarea
+                                                        className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white resize-none"
                                                        placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                        rows={2}
                                                      />
@@ -2767,7 +2767,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   {question.question_type === 'date' && (
                                                     <input
                                                       type="date"
-                                                      className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9"
+                                                      className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-9"
                                                       disabled
                                                     />
                                                   )}
@@ -2775,11 +2775,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   {(question.question_type === 'file' || question.question_type === 'video') && (
                                                     <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
                                                       {question.question_type === 'file' ? (
-                                                        <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                        <FileText className="h-3 w-3 mx-auto mb-0.5 text-white" />
                                                       ) : (
-                                                        <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                        <Video className="h-3 w-3 mx-auto mb-0.5 text-white" />
                                                       )}
-                                                      <p className="text-xs text-white/60">
+                                                      <p className="text-xs text-white">
                                                         {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
                                                       </p>
                                                     </div>
@@ -3165,7 +3165,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     {/* Input förhandsvisning baserat på frågetyp */}
                                                     {question.question_type === 'text' && (
                                                       <textarea
-                                                        className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none focus:outline-none focus:border-white/40"
+                                                        className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white resize-none focus:outline-none focus:border-white/40"
                                                         placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                         rows={2}
                                                         value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
@@ -3222,7 +3222,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                    
                                                     {question.question_type === 'multiple_choice' && (
                                                       <div className="space-y-1">
-                                                        <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
+                                                        <p className="text-[10px] text-white mb-1">Alternativ:</p>
                                                         <div className="space-y-1 options-scroll">
                                                           {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
                                                             const selectedAnswers = desktopPreviewAnswers[question.id || `q_${index}`];
@@ -3298,7 +3298,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     {question.question_type === 'date' && (
                                                       <input
                                                         type="date"
-                                                        className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9 focus:outline-none focus:border-white/40"
+                                                        className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-9 focus:outline-none focus:border-white/40"
                                                         value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
                                                         onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                       />
@@ -3307,11 +3307,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     {(question.question_type === 'file' || question.question_type === 'video') && (
                                                       <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
                                                         {question.question_type === 'file' ? (
-                                                          <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                          <FileText className="h-3 w-3 mx-auto mb-0.5 text-white" />
                                                         ) : (
-                                                          <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                          <Video className="h-3 w-3 mx-auto mb-0.5 text-white" />
                                                         )}
-                                                        <p className="text-xs text-white/60">
+                                                        <p className="text-xs text-white">
                                                           {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
                                                         </p>
                                                       </div>
@@ -3346,7 +3346,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       >
                                         <button 
                                           onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                          className="text-sm text-white font-medium mb-2 hover:text-white/70 transition-colors cursor-pointer line-clamp-1"
+                                          className="text-sm text-white font-medium mb-2 hover:text-white transition-colors cursor-pointer line-clamp-1"
                                         >
                                           {profile?.company_name || 'Företag'}
                                         </button>
