@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -212,81 +212,111 @@ const JobView = () => {
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px] resize-none text-xs"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px] resize-none text-sm focus:outline-none focus:border-white/40"
           />
         );
 
       case 'yes_no':
         return (
-          <div className="space-y-3">
+          <div className="flex gap-2">
             <button
               type="button"
               onClick={() => handleAnswerChange(question.id, currentAnswer === 'yes' ? '' : 'yes')}
-              className={`w-full flex items-center space-x-1.5 p-2 rounded-lg border transition-all ${
-                currentAnswer === 'yes'
-                  ? 'bg-primary/20 border-primary'
-                  : 'bg-white/10 border-white/20 hover:bg-white/15'
-              }`}
+              className={
+                (currentAnswer === 'yes'
+                  ? 'bg-secondary/40 border-secondary text-white '
+                  : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
+                'border rounded-lg px-4 py-2 text-sm transition-colors font-medium flex-1'
+              }
             >
-              <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
-                currentAnswer === 'yes' ? 'border-primary' : 'border-white/40'
-              }`}>
-                {currentAnswer === 'yes' && <div className="w-2 h-2 rounded-full bg-primary" />}
-              </div>
-              <span className="text-white text-xs flex-1 text-left">Ja</span>
+              Ja
             </button>
             <button
               type="button"
               onClick={() => handleAnswerChange(question.id, currentAnswer === 'no' ? '' : 'no')}
-              className={`w-full flex items-center space-x-1.5 p-2 rounded-lg border transition-all ${
-                currentAnswer === 'no'
-                  ? 'bg-primary/20 border-primary'
-                  : 'bg-white/10 border-white/20 hover:bg-white/15'
-              }`}
+              className={
+                (currentAnswer === 'no'
+                  ? 'bg-secondary/40 border-secondary text-white '
+                  : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
+                'border rounded-lg px-4 py-2 text-sm transition-colors font-medium flex-1'
+              }
             >
-              <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
-                currentAnswer === 'no' ? 'border-primary' : 'border-white/40'
-              }`}>
-                {currentAnswer === 'no' && <div className="w-2 h-2 rounded-full bg-primary" />}
-              </div>
-              <span className="text-white text-xs flex-1 text-left">Nej</span>
+              Nej
             </button>
           </div>
         );
 
       case 'multiple_choice':
         return (
-          <RadioGroup
-            value={currentAnswer || ''}
-            onValueChange={(value) => handleAnswerChange(question.id, value)}
-            className="space-y-2"
-          >
-            {question.options?.map((option, index) => (
-              <div key={index} className="flex items-center space-x-1.5 p-2 rounded-lg bg-white/10 border border-white/20">
-                <RadioGroupItem 
-                  value={option} 
-                  id={`${question.id}-${index}`} 
-                  className="text-white border-white/40"
-                />
-                <Label htmlFor={`${question.id}-${index}`} className="text-white cursor-pointer flex-1 text-xs">
-                  {option}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
+          <div className="space-y-2">
+            {question.options?.filter(opt => opt.trim() !== '').map((option, index) => {
+              const selectedAnswers = typeof currentAnswer === 'string' 
+                ? currentAnswer.split('|||').filter(a => a)
+                : [];
+              const selected = selectedAnswers.includes(option);
+              
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => {
+                    const answersArray = typeof currentAnswer === 'string'
+                      ? currentAnswer.split('|||').filter(a => a)
+                      : [];
+                    
+                    if (answersArray.includes(option)) {
+                      const newAnswers = answersArray.filter(a => a !== option);
+                      handleAnswerChange(question.id, newAnswers.join('|||'));
+                    } else {
+                      handleAnswerChange(question.id, [...answersArray, option].join('|||'));
+                    }
+                  }}
+                  className={
+                    (selected
+                      ? 'bg-secondary/40 border-secondary '
+                      : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
+                    'w-full flex items-center gap-3 rounded-lg px-4 py-2.5 border transition-colors'
+                  }
+                >
+                  <div className={
+                    selected
+                      ? 'w-2 h-2 rounded-full border border-secondary bg-secondary flex-shrink-0'
+                      : 'w-2 h-2 rounded-full border border-white/40 flex-shrink-0'
+                  } />
+                  <span className="text-sm text-white text-left flex-1">{option}</span>
+                </button>
+              );
+            })}
+          </div>
         );
 
       case 'number':
+        const minVal = question.min_value ?? 0;
+        const maxVal = question.max_value ?? 100;
+        const currentVal = Number(currentAnswer || minVal);
+        const percentage = ((currentVal - minVal) / (maxVal - minVal)) * 100;
+        
         return (
-          <Input
-            type="number"
-            value={currentAnswer || ''}
-            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-            placeholder={question.placeholder_text || 'Ange ett tal...'}
-            min={question.min_value}
-            max={question.max_value}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-9 text-xs"
-          />
+          <div className="space-y-3">
+            <div className="text-center text-lg font-semibold text-white">
+              {currentVal}
+            </div>
+            <input
+              type="range"
+              min={minVal}
+              max={maxVal}
+              value={currentVal}
+              className="w-full h-2 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full"
+              style={{
+                background: `linear-gradient(to right, white ${percentage}%, rgba(255,255,255,0.3) ${percentage}%)`
+              }}
+              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+            />
+            <div className="flex justify-between text-xs text-white/60">
+              <span>{minVal}</span>
+              <span>{maxVal}</span>
+            </div>
+          </div>
         );
 
       case 'date':
@@ -295,29 +325,23 @@ const JobView = () => {
             type="date"
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-9 text-xs"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-10 text-sm focus:outline-none focus:border-white/40"
           />
         );
 
       case 'file':
         return (
-          <div className="bg-white/10 border border-white/20 rounded-lg p-3 text-center">
-            <FileText className="h-6 w-6 text-white/60 mx-auto mb-1.5" />
-            <p className="text-white/80 mb-2 text-xs">Ladda upp en fil</p>
-            <Button variant="outline" size="sm" className="border-white/40 text-white hover:bg-white/10 text-[10px] h-7">
-              Välj fil
-            </Button>
+          <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center bg-white/5">
+            <FileText className="h-6 w-6 text-white/60 mx-auto mb-2" />
+            <p className="text-sm text-white/60">Välj fil</p>
           </div>
         );
 
       case 'video':
         return (
-          <div className="bg-white/10 border border-white/20 rounded-lg p-3 text-center">
-            <Video className="h-6 w-6 text-white/60 mx-auto mb-1.5" />
-            <p className="text-white/80 mb-2 text-xs">Spela in en kort video</p>
-            <Button variant="outline" size="sm" className="border-white/40 text-white hover:bg-white/10 text-[10px] h-7">
-              Starta inspelning
-            </Button>
+          <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center bg-white/5">
+            <Video className="h-6 w-6 text-white/60 mx-auto mb-2" />
+            <p className="text-sm text-white/60">Spela in video</p>
           </div>
         );
 
@@ -327,7 +351,7 @@ const JobView = () => {
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             placeholder={question.placeholder_text || 'Ditt svar...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-9 text-xs"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-10 text-sm focus:outline-none focus:border-white/40"
           />
         );
     }

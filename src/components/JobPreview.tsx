@@ -75,88 +75,82 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(questionId, e.target.value)}
             placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 min-h-[120px] resize-none"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 min-h-[120px] resize-none focus:outline-none focus:border-white/40"
           />
         );
 
       case 'yes_no':
         return (
-          <div className="space-y-4">
+          <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => {
-                // Toggle: om redan valt "yes", avmarkera, annars sätt till "yes"
-                handleAnswerChange(questionId, currentAnswer === 'yes' ? '' : 'yes');
-              }}
-              className={`w-full flex items-center space-x-3 p-4 rounded-lg border transition-all ${
-                currentAnswer === 'yes'
-                  ? 'bg-primary/20 border-primary'
-                  : 'bg-white/10 border-white/20 hover:bg-white/15'
-              }`}
+              onClick={() => handleAnswerChange(questionId, currentAnswer === 'yes' ? '' : 'yes')}
+              className={
+                (currentAnswer === 'yes'
+                  ? 'bg-secondary/40 border-secondary text-white '
+                  : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
+                'border rounded-lg px-6 py-3 text-lg transition-colors font-medium flex-1'
+              }
             >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                currentAnswer === 'yes' ? 'border-primary' : 'border-white/40'
-              }`}>
-                {currentAnswer === 'yes' && (
-                  <div className="w-3 h-3 rounded-full bg-primary" />
-                )}
-              </div>
-              <span className="text-white text-lg flex-1 text-left">Ja</span>
+              Ja
             </button>
             <button
               type="button"
-              onClick={() => {
-                // Toggle: om redan valt "no", avmarkera, annars sätt till "no"
-                handleAnswerChange(questionId, currentAnswer === 'no' ? '' : 'no');
-              }}
-              className={`w-full flex items-center space-x-3 p-4 rounded-lg border transition-all ${
-                currentAnswer === 'no'
-                  ? 'bg-primary/20 border-primary'
-                  : 'bg-white/10 border-white/20 hover:bg-white/15'
-              }`}
+              onClick={() => handleAnswerChange(questionId, currentAnswer === 'no' ? '' : 'no')}
+              className={
+                (currentAnswer === 'no'
+                  ? 'bg-secondary/40 border-secondary text-white '
+                  : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
+                'border rounded-lg px-6 py-3 text-lg transition-colors font-medium flex-1'
+              }
             >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                currentAnswer === 'no' ? 'border-primary' : 'border-white/40'
-              }`}>
-                {currentAnswer === 'no' && (
-                  <div className="w-3 h-3 rounded-full bg-primary" />
-                )}
-              </div>
-              <span className="text-white text-lg flex-1 text-left">Nej</span>
+              Nej
             </button>
           </div>
         );
 
       case 'multiple_choice':
-        const selectedOptions = Array.isArray(currentAnswer) ? currentAnswer : [];
         return (
           <div className="space-y-3">
-            {question.options?.map((option, index) => {
-              const isSelected = selectedOptions.includes(option);
+            {question.options?.filter(opt => opt.trim() !== '').map((option, index) => {
+              const selectedAnswers = typeof currentAnswer === 'string' 
+                ? currentAnswer.split('|||').filter(a => a)
+                : Array.isArray(currentAnswer)
+                  ? currentAnswer
+                  : [];
+              const isSelected = selectedAnswers.includes(option);
+              
               return (
                 <button
                   key={index}
                   type="button"
                   onClick={() => {
-                    const newSelected = isSelected
-                      ? selectedOptions.filter((o: string) => o !== option)
-                      : [...selectedOptions, option];
-                    handleAnswerChange(questionId, newSelected);
+                    const answersArray = typeof currentAnswer === 'string'
+                      ? currentAnswer.split('|||').filter(a => a)
+                      : Array.isArray(currentAnswer)
+                        ? [...currentAnswer]
+                        : [];
+                    
+                    if (answersArray.includes(option)) {
+                      const newAnswers = answersArray.filter(a => a !== option);
+                      handleAnswerChange(questionId, newAnswers.join('|||'));
+                    } else {
+                      handleAnswerChange(questionId, [...answersArray, option].join('|||'));
+                    }
                   }}
-                  className={`w-full flex items-center gap-4 p-4 rounded-lg border transition-all ${
-                    isSelected
-                      ? 'bg-white/15 border-white/40'
-                      : 'bg-white/10 border-white/20 hover:bg-white/15'
-                  }`}
+                  className={
+                    (isSelected
+                      ? 'bg-secondary/40 border-secondary '
+                      : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
+                    'w-full flex items-center gap-4 rounded-lg px-4 py-3 border transition-colors'
+                  }
                 >
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                    isSelected ? 'border-white' : 'border-white/40'
-                  }`}>
-                    {isSelected && (
-                      <div className="w-3 h-3 rounded-full bg-white" />
-                    )}
-                  </div>
-                  <span className="text-white text-lg text-left flex-1">{option}</span>
+                  <div className={
+                    isSelected
+                      ? 'w-3 h-3 rounded-full border border-secondary bg-secondary flex-shrink-0'
+                      : 'w-3 h-3 rounded-full border border-white/40 flex-shrink-0'
+                  } />
+                  <span className="text-lg text-white text-left flex-1">{option}</span>
                 </button>
               );
             })}
@@ -164,16 +158,32 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
         );
 
       case 'number':
+        const minVal = question.min_value ?? 0;
+        const maxVal = question.max_value ?? 100;
+        const currentVal = Number(currentAnswer || minVal);
+        const percentage = ((currentVal - minVal) / (maxVal - minVal)) * 100;
+        
         return (
-          <Input
-            type="number"
-            value={currentAnswer || ''}
-            onChange={(e) => handleAnswerChange(questionId, e.target.value)}
-            placeholder={question.placeholder_text || 'Ange ett tal...'}
-            min={question.min_value}
-            max={question.max_value}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-lg"
-          />
+          <div className="space-y-4">
+            <div className="text-center text-2xl font-semibold text-white">
+              {currentVal}
+            </div>
+            <input
+              type="range"
+              min={minVal}
+              max={maxVal}
+              value={currentVal}
+              className="w-full h-2 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full"
+              style={{
+                background: `linear-gradient(to right, white ${percentage}%, rgba(255,255,255,0.3) ${percentage}%)`
+              }}
+              onChange={(e) => handleAnswerChange(questionId, e.target.value)}
+            />
+            <div className="flex justify-between text-sm text-white/60">
+              <span>{minVal}</span>
+              <span>{maxVal}</span>
+            </div>
+          </div>
         );
 
       case 'date':
@@ -182,29 +192,23 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             type="date"
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(questionId, e.target.value)}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-lg"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-lg focus:outline-none focus:border-white/40"
           />
         );
 
       case 'file':
         return (
-          <div className="bg-white/10 border border-white/20 rounded-lg p-6 text-center">
-            <FileText className="h-12 w-12 text-white/60 mx-auto mb-3" />
-            <p className="text-white/80 mb-4">Ladda upp en fil</p>
-            <Button variant="outline" className="border-white/40 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
-              Välj fil
-            </Button>
+          <div className="border-2 border-dashed border-white/30 rounded-lg p-6 text-center bg-white/5">
+            <FileText className="h-8 w-8 text-white/60 mx-auto mb-3" />
+            <p className="text-base text-white/60">Välj fil</p>
           </div>
         );
 
       case 'video':
         return (
-          <div className="bg-white/10 border border-white/20 rounded-lg p-6 text-center">
-            <Video className="h-12 w-12 text-white/60 mx-auto mb-3" />
-            <p className="text-white/80 mb-4">Spela in en kort video</p>
-            <Button variant="outline" className="border-white/40 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
-              Starta inspelning
-            </Button>
+          <div className="border-2 border-dashed border-white/30 rounded-lg p-6 text-center bg-white/5">
+            <Video className="h-8 w-8 text-white/60 mx-auto mb-3" />
+            <p className="text-base text-white/60">Spela in video</p>
           </div>
         );
 
@@ -214,7 +218,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(questionId, e.target.value)}
             placeholder={question.placeholder_text || 'Ditt svar...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-lg"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-lg focus:outline-none focus:border-white/40"
           />
         );
     }
