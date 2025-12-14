@@ -707,23 +707,6 @@ const JobView = () => {
                 )}
               </Button>
 
-              {/* Contact info if exists */}
-              {job.contact_email && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                  <h3 className="font-semibold text-sm mb-2" style={{ color: '#FFFFFF' }}>Har du några frågor?</h3>
-                  <p className="text-sm mb-3" style={{ color: '#FFFFFF' }}>Kontakt: {job.contact_email}</p>
-                  <Button 
-                    size="sm"
-                    className="w-full bg-white/10 border border-white/20 text-white text-xs font-medium md:hover:bg-white/15 transition-all duration-200"
-                    onClick={() => {
-                      window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
-                    }}
-                  >
-                    Skicka e-post
-                  </Button>
-                </div>
-              )}
-
               {/* Job posted date */}
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                 <p className="text-sm" style={{ color: '#FFFFFF' }}>
@@ -734,6 +717,23 @@ const JobView = () => {
                   })}
                 </p>
               </div>
+
+              {/* Contact info if exists */}
+              {job.contact_email && (
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                  <h3 className="font-semibold text-sm mb-2" style={{ color: '#FFFFFF' }}>Har du några frågor?</h3>
+                  <p className="text-sm mb-3" style={{ color: '#FFFFFF' }}>Kontakt: {job.contact_email}</p>
+                  <Button 
+                    size="sm"
+                    className="w-full bg-white/10 border border-white/20 text-white text-sm font-medium md:hover:bg-white/15 transition-all duration-200"
+                    onClick={() => {
+                      window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
+                    }}
+                  >
+                    Skicka e-post
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
