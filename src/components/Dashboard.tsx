@@ -225,7 +225,7 @@ const Dashboard = memo(() => {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span className={`text-xs cursor-pointer ${timeInfo.isExpired ? 'text-red-400' : 'text-white'}`}>
-                                      {timeInfo.isExpired ? 'Utgången' : `Utgår: ${timeInfo.text}`}
+                                      {timeInfo.isExpired ? 'Utgången' : `Utgår om ${timeInfo.text}`}
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">

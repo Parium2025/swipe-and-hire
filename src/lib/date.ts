@@ -54,17 +54,17 @@ export function getTimeRemaining(createdAt: string, expiresAt?: string | null): 
   
   if (daysLeft > 0) {
     return { 
-      text: `${daysLeft} ${daysLeft === 1 ? 'dag' : 'dagar'} kvar`, 
+      text: `${daysLeft} ${daysLeft === 1 ? 'dag' : 'dagar'}`, 
       isExpired: false 
     };
   } else if (hoursLeft > 0) {
     return { 
-      text: `${hoursLeft}h ${minutesLeft}min kvar`, 
+      text: `${hoursLeft}h ${minutesLeft}min`, 
       isExpired: false 
     };
   } else {
     return { 
-      text: `${minutesLeft} min kvar`, 
+      text: `${minutesLeft} min`, 
       isExpired: false 
     };
   }
