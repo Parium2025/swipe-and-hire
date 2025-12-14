@@ -693,7 +693,7 @@ const JobView = () => {
               {/* Submit application button */}
               <Button
                 size="lg"
-                className="w-full h-12 bg-green-500 hover:bg-green-600 text-white text-base font-semibold shadow-lg"
+                className="w-full h-12 bg-green-500 md:hover:bg-green-500/80 text-white text-base font-semibold shadow-lg transition-all duration-200"
                 onClick={handleApplicationSubmit}
                 disabled={applying}
               >
