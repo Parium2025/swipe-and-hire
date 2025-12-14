@@ -650,14 +650,14 @@ export default function ProfilePreview() {
     
       return (
         <div className="max-w-full mx-auto space-y-3">
-        {/* Mindre rund profilbild/video med namn - direkt på bakgrunden */}
+        {/* Större rund profilbild/video med namn - direkt på bakgrunden */}
         <div className="mb-3">
           <div className="relative p-3">
-            {/* Mindre rund profilbild eller video */}
+            {/* Större rund profilbild eller video för desktop */}
             <div className="flex flex-col items-center gap-2">
                {/* Använd ProfileVideo om video finns, annars Avatar */}
                {effectiveVideoUrl ? (
-                 <div className="relative h-[120px] w-[120px]">
+                 <div className="relative h-[150px] w-[150px]">
                    <ProfileVideo
                      videoUrl={effectiveVideoUrl}
                      coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
@@ -668,9 +668,9 @@ export default function ProfilePreview() {
                    />
                  </div>
                ) : (
-                 <Avatar className="h-[120px] w-[120px] ring-2 ring-white/20 shadow-xl">
+                 <Avatar className="h-[150px] w-[150px] ring-2 ring-white/20 shadow-xl">
                    <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
-                   <AvatarFallback className="bg-primary text-white text-3xl">
+                   <AvatarFallback className="bg-primary text-white text-4xl">
                      {consentedData?.first_name?.[0]}
                    </AvatarFallback>
                  </Avatar>
@@ -689,7 +689,10 @@ export default function ProfilePreview() {
                   {consentedData?.first_name} {consentedData?.last_name}
                 </h2>
                 {consentedData?.age && (
-                  <p className="text-white/90 text-xs mt-0.5 drop-shadow">{consentedData.age} år</p>
+                  <p className="text-sm text-white">{consentedData.age} år</p>
+                )}
+                {consentedData?.location && (
+                  <p className="text-sm text-white">Bor i {consentedData.location}, Stockholms län</p>
                 )}
               </div>
             </div>
