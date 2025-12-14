@@ -319,23 +319,23 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
               type="date"
               value={answers[question.id] || ''}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="bg-white/10 border-white/20 text-white h-10 text-sm focus:outline-none focus:border-white/40"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white h-10 text-sm focus:outline-none focus:border-white/40"
             />
           )}
 
           {/* Custom questions - file */}
           {!isStandardQuestion && question.question_type === 'file' && (
             <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center bg-white/5">
-              <FileText className="h-6 w-6 text-white/60 mx-auto mb-2" />
-              <p className="text-sm text-white/60">Välj fil</p>
+              <FileText className="h-6 w-6 mx-auto mb-2" style={{ color: '#FFFFFF' }} />
+              <p className="text-sm" style={{ color: '#FFFFFF' }}>Välj fil</p>
             </div>
           )}
 
           {/* Custom questions - video */}
           {!isStandardQuestion && question.question_type === 'video' && (
             <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center bg-white/5">
-              <Video className="h-6 w-6 text-white/60 mx-auto mb-2" />
-              <p className="text-sm text-white/60">Spela in video</p>
+              <Video className="h-6 w-6 mx-auto mb-2" style={{ color: '#FFFFFF' }} />
+              <p className="text-sm" style={{ color: '#FFFFFF' }}>Spela in video</p>
             </div>
           )}
         </div>
