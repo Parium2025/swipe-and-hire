@@ -2,12 +2,41 @@
 
 Detta dokument innehåller standardmallar och riktlinjer för att hålla designen konsekvent i hela appen.
 
-## Kort (Cards)
+---
 
-### Card-komponenter (Stats, Listor, Tabeller)
+## ⚡ VIKTIGT: Automatisk Vit Text
 
-**Stats-kort:**
+**All text i appen är automatiskt kritvit (#FFFFFF) tack vare designsystemet.**
+
+### Hur det fungerar:
+1. CSS-variabeln `--muted-foreground` är satt till vit i dark mode (index.css)
+2. CSS-variabeln `--foreground` är satt till vit i dark mode
+3. Alla shadcn-komponenter ärver dessa automatiskt
+
+### Vad du ALLTID ska göra:
 ```tsx
+// ✅ RÄTT - Använd Tailwind-klasser
+<p className="text-white">Kritvit text</p>
+<p className="text-muted-foreground">Också vit (via CSS-variabel)</p>
+<h1 className="text-xl font-semibold text-white tracking-tight">Rubrik</h1>
+
+// ❌ FEL - Använd ALDRIG inline styles
+<p style={{ color: '#FFFFFF' }}>Ful kod</p>
+<p style={{ color: 'white' }}>Också ful kod</p>
+```
+
+### Standardiserade textklasser:
+| Typ | Klass |
+|-----|-------|
+| Sidrubriker | `text-xl md:text-2xl font-semibold text-white tracking-tight` |
+| Korttitlar | `text-base md:text-lg font-semibold text-white` |
+| Brödtext | `text-sm text-white` |
+| Sekundär text | `text-xs text-white/70` |
+| Ikoner | `text-white` |
+
+---
+
+## Kort (Cards)
 <Card className="bg-white/5 backdrop-blur-sm border-white/20">
   <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-6 md:p-4">
     <Icon className="h-4 w-4 text-white" />
