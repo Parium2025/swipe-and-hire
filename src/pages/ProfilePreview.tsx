@@ -657,7 +657,7 @@ export default function ProfilePreview() {
             <div className="flex flex-col items-center gap-2">
                {/* Använd ProfileVideo om video finns, annars Avatar */}
                {effectiveVideoUrl ? (
-                 <div className="relative h-[150px] w-[150px]">
+                 <div className="relative h-[200px] w-[200px]">
                    <ProfileVideo
                      videoUrl={effectiveVideoUrl}
                      coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
@@ -668,9 +668,9 @@ export default function ProfilePreview() {
                    />
                  </div>
                ) : (
-                 <Avatar className="h-[150px] w-[150px] ring-2 ring-white/20 shadow-xl">
+                 <Avatar className="h-[200px] w-[200px] ring-2 ring-white/20 shadow-xl">
                    <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
-                   <AvatarFallback className="bg-primary text-white text-4xl">
+                   <AvatarFallback className="bg-primary text-white text-5xl">
                      {consentedData?.first_name?.[0]}
                    </AvatarFallback>
                  </Avatar>
