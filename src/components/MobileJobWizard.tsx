@@ -2224,7 +2224,7 @@ const MobileJobWizard = ({
                 variant="ghost"
                 size="icon"
                 onClick={handleClose}
-                className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                className="absolute right-4 top-4 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -3198,7 +3198,7 @@ const MobileJobWizard = ({
                   </div>
                   
                   <h3 
-                    className="text-white font-medium text-center text-sm cursor-pointer hover:text-white/80 transition-colors underline underline-offset-2"
+                    className="text-white font-medium text-center text-sm cursor-pointer hover:text-white transition-colors underline underline-offset-2"
                     onClick={() => previewMode === 'mobile' ? setShowApplicationForm(true) : setShowDesktopApplicationForm(true)}
                   >
                     {previewMode === 'mobile' 

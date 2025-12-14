@@ -1198,7 +1198,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 variant="ghost"
                 size="icon"
                 onClick={handleClose}
-                className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                className="absolute right-4 top-4 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -1211,7 +1211,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   setShowQuestionForm(false);
                   setEditingQuestion(null);
                 }}
-                className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                className="absolute right-4 top-4 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
               >
                 <X className="h-4 w-4" />
               </Button>

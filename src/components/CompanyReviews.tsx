@@ -151,7 +151,7 @@ const CompanyReviews = () => {
           <h3 className="text-lg font-semibold text-white mb-2">
             Företagsinformation saknas
           </h3>
-          <p className="text-white/70">
+          <p className="text-white">
             Fyll i din företagsprofil för att se recensioner
           </p>
         </div>
@@ -352,7 +352,7 @@ const CompanyReviews = () => {
                         </p>
                         <div className="flex items-center gap-2">
                           {renderStars(review.rating)}
-                          <span className="text-sm text-white/70">
+                          <span className="text-sm text-white">
                             {new Date(review.created_at).toLocaleDateString("sv-SE")}
                           </span>
                         </div>

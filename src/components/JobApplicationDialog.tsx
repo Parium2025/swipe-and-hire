@@ -161,7 +161,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-white/70 border-white/20">
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-white border-white/20">
                 {isStandardQuestion ? 'Grundinfo' : getQuestionTypeLabel(question.question_type)}
               </Badge>
             </div>
@@ -397,14 +397,14 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => onOpenChange(false)}
-                className="text-white/80 hover:text-white hover:bg-white/10 h-6 w-6 md:h-8 md:w-8 p-0"
+                className="text-white hover:text-white hover:bg-white/10 h-6 w-6 md:h-8 md:w-8 p-0"
               >
                 ✕
               </Button>
             </div>
             <div className="mt-1.5 md:mt-2">
               <h3 className="font-semibold text-sm md:text-lg leading-tight">{job.title}</h3>
-              <p className="text-xs md:text-sm text-white/70">{companyName}</p>
+              <p className="text-xs md:text-sm text-white">{companyName}</p>
             </div>
           </div>
 

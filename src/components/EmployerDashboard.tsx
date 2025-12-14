@@ -425,7 +425,7 @@ const EmployerDashboard = memo(() => {
                                   </TooltipTrigger>
                                   <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
                                     <p className="text-xs font-medium mb-1 text-red-400">Annonsens tid har gått ut</p>
-                                    <p className="text-xs text-white/80">Dina 14 dagar har passerat. Skapa en ny annons från dina mallar för att fortsätta rekrytera.</p>
+                                    <p className="text-xs text-white">Dina 14 dagar har passerat. Skapa en ny annons från dina mallar för att fortsätta rekrytera.</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
@@ -444,7 +444,7 @@ const EmployerDashboard = memo(() => {
                                   </TooltipTrigger>
                                   <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
                                     <p className="text-xs font-medium mb-1">Saknade fält:</p>
-                                    <p className="text-xs text-white/80">{getMissingFields(job as JobPosting).join(', ')}</p>
+                                    <p className="text-xs text-white">{getMissingFields(job as JobPosting).join(', ')}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>

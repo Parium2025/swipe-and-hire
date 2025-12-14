@@ -223,7 +223,7 @@ const WorkplacePostalCodeSelector = ({
               <p className="text-sm text-white font-medium">
                 <span className="font-semibold">{foundLocation.city}</span>
                 {foundLocation.county && (
-                  <span className="text-white/90">, {foundLocation.county}</span>
+                  <span className="text-white">, {foundLocation.county}</span>
                 )}
               </p>
             </div>
@@ -258,7 +258,7 @@ const WorkplacePostalCodeSelector = ({
               <p className="text-sm text-white font-medium">
                 Söker i svensk postnummerdatabas...
               </p>
-              <p className="text-sm text-white/70 mt-0.5">
+              <p className="text-sm text-white mt-0.5">
                 16,000+ postnummer tillgängliga
               </p>
             </div>

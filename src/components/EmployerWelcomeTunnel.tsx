@@ -332,7 +332,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
             </div>
             
             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20 hover:border-white/50 transition-all duration-300 hover:bg-white/15 hover:scale-105 max-w-md mx-auto">
-              <p className="text-sm text-white/90">
+              <p className="text-sm text-white">
                 <strong className="text-white">Tips:</strong> Börja med att skapa din första jobbannons för att locka kvalificerade kandidater till ditt företag.
               </p>
             </div>
