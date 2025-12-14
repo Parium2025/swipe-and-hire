@@ -94,14 +94,18 @@ export const JobSearchBar = ({
                 }
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20">
-              <DropdownMenuItem onClick={() => onRecruiterChange(null)}>
+            <DropdownMenuContent align="end" className="w-[200px] z-[10000] bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg">
+              <DropdownMenuItem 
+                onClick={() => onRecruiterChange(null)}
+                className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+              >
                 Alla rekryterare
               </DropdownMenuItem>
               {recruiters.map((recruiter) => (
                 <DropdownMenuItem 
                   key={recruiter.id} 
                   onClick={() => onRecruiterChange(recruiter.id)}
+                  className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                 >
                   {recruiter.first_name} {recruiter.last_name}
                 </DropdownMenuItem>
@@ -121,29 +125,38 @@ export const JobSearchBar = ({
               {sortLabels[sortBy]}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20">
-            <DropdownMenuItem onClick={() => onSortChange('newest')}>
+          <DropdownMenuContent align="end" className="w-[200px] z-[10000] bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg">
+            <DropdownMenuItem 
+              onClick={() => onSortChange('newest')}
+              className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+            >
               {sortLabels.newest}
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/20" />
-            <DropdownMenuItem onClick={() => onSortChange('oldest')}>
+            <DropdownMenuItem 
+              onClick={() => onSortChange('oldest')}
+              className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+            >
               {sortLabels.oldest}
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/20" />
-            <DropdownMenuItem onClick={() => onSortChange('title-asc')}>
+            <DropdownMenuItem 
+              onClick={() => onSortChange('title-asc')}
+              className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+            >
               {sortLabels['title-asc']}
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/20" />
-            <DropdownMenuItem onClick={() => onSortChange('title-desc')}>
+            <DropdownMenuItem 
+              onClick={() => onSortChange('title-desc')}
+              className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+            >
               {sortLabels['title-desc']}
             </DropdownMenuItem>
             {hasDrafts && (
-              <>
-                <DropdownMenuSeparator className="bg-white/20" />
-                <DropdownMenuItem onClick={() => onSortChange('drafts-only')}>
-                  {sortLabels['drafts-only']}
-                </DropdownMenuItem>
-              </>
+              <DropdownMenuItem 
+                onClick={() => onSortChange('drafts-only')}
+                className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+              >
+                {sortLabels['drafts-only']}
+              </DropdownMenuItem>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -183,11 +196,11 @@ export const JobSearchBar = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent 
                     align="end" 
-                    className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
+                    className="w-[200px] z-[10000] bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg"
                   >
                     <DropdownMenuItem 
                       onClick={() => onRecruiterChange(null)}
-                      className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                      className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                     >
                       Alla rekryterare
                     </DropdownMenuItem>
@@ -195,7 +208,7 @@ export const JobSearchBar = ({
                       <DropdownMenuItem 
                         key={recruiter.id} 
                         onClick={() => onRecruiterChange(recruiter.id)}
-                        className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                        className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                       >
                         {recruiter.first_name} {recruiter.last_name}
                       </DropdownMenuItem>
@@ -217,45 +230,39 @@ export const JobSearchBar = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
-                  className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
+                  className="w-[200px] z-[10000] bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg"
                 >
                   <DropdownMenuItem 
                     onClick={() => onSortChange('newest')}
-                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                    className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                   >
                     {sortLabels.newest}
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/20" />
                   <DropdownMenuItem 
                     onClick={() => onSortChange('oldest')}
-                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                    className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                   >
                     {sortLabels.oldest}
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/20" />
                   <DropdownMenuItem 
                     onClick={() => onSortChange('title-asc')}
-                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                    className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                   >
                     {sortLabels['title-asc']}
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/20" />
                   <DropdownMenuItem 
                     onClick={() => onSortChange('title-desc')}
-                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                    className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                   >
                     {sortLabels['title-desc']}
                   </DropdownMenuItem>
                   {hasDrafts && (
-                    <>
-                      <DropdownMenuSeparator className="bg-white/20" />
-                      <DropdownMenuItem 
-                        onClick={() => onSortChange('drafts-only')}
-                        className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
-                      >
-                        {sortLabels['drafts-only']}
-                      </DropdownMenuItem>
-                    </>
+                    <DropdownMenuItem 
+                      onClick={() => onSortChange('drafts-only')}
+                      className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                    >
+                      {sortLabels['drafts-only']}
+                    </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -308,11 +315,11 @@ export const JobSearchBar = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
-                  className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
+                  className="w-[200px] z-[10000] bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg"
                 >
                   <DropdownMenuItem 
                     onClick={() => onRecruiterChange(null)}
-                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                    className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                   >
                     Alla rekryterare
                   </DropdownMenuItem>
@@ -320,7 +327,7 @@ export const JobSearchBar = ({
                     <DropdownMenuItem 
                       key={recruiter.id} 
                       onClick={() => onRecruiterChange(recruiter.id)}
-                      className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                      className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                     >
                       {recruiter.first_name} {recruiter.last_name}
                     </DropdownMenuItem>
@@ -342,44 +349,39 @@ export const JobSearchBar = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 align="end" 
-                className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
+                className="w-[200px] z-[10000] bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg"
               >
                 <DropdownMenuItem 
                   onClick={() => onSortChange('newest')}
-                  className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                  className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                 >
                   {sortLabels.newest}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-white/20" />
                 <DropdownMenuItem 
                   onClick={() => onSortChange('oldest')}
-                  className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                  className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                 >
                   {sortLabels.oldest}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-white/20" />
                 <DropdownMenuItem 
                   onClick={() => onSortChange('title-asc')}
-                  className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                  className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                 >
                   {sortLabels['title-asc']}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => onSortChange('title-desc')}
-                  className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                  className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                 >
                   {sortLabels['title-desc']}
                 </DropdownMenuItem>
                 {hasDrafts && (
-                  <>
-                    <DropdownMenuSeparator className="bg-white/20" />
-                    <DropdownMenuItem 
-                      onClick={() => onSortChange('drafts-only')}
-                      className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
-                    >
-                      {sortLabels['drafts-only']}
-                    </DropdownMenuItem>
-                  </>
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('drafts-only')}
+                    className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                  >
+                    {sortLabels['drafts-only']}
+                  </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
