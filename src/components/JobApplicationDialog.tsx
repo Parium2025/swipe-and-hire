@@ -177,7 +177,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
               placeholder={`Ange ${question.label.toLowerCase()}...`}
               value={answers[question.id] || ''}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/40"
+              className="bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white"
               disabled={question.id === 'email'}
             />
           )}
