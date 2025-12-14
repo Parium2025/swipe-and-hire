@@ -215,10 +215,10 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
           {/* Custom questions - text */}
           {!isStandardQuestion && question.question_type === 'text' && (
             <Textarea
-              placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+              placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
               value={answers[question.id] || ''}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="min-h-[80px] bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-white/40"
+              className="min-h-[80px] bg-white/10 border-white/20 text-white placeholder:text-white focus:outline-none focus:border-white/40"
             />
           )}
 
@@ -305,7 +305,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
                   }}
                   onChange={(e) => handleAnswerChange(question.id, e.target.value)}
                 />
-                <div className="flex justify-between text-xs text-white/60">
+                <div className="flex justify-between text-xs" style={{ color: '#FFFFFF' }}>
                   <span>{minVal}</span>
                   <span>{maxVal}</span>
                 </div>

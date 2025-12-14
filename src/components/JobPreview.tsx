@@ -75,7 +75,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(questionId, e.target.value)}
             placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 min-h-[120px] resize-none focus:outline-none focus:border-white/40"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white min-h-[120px] resize-none focus:outline-none focus:border-white/40"
           />
         );
 
@@ -179,7 +179,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
               }}
               onChange={(e) => handleAnswerChange(questionId, e.target.value)}
             />
-            <div className="flex justify-between text-sm text-white/60">
+            <div className="flex justify-between text-sm" style={{ color: '#FFFFFF' }}>
               <span>{minVal}</span>
               <span>{maxVal}</span>
             </div>
@@ -354,22 +354,17 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
                 {/* Question card */}
                 <div className="bg-white/10 rounded-2xl p-8 space-y-6">
                   
-                  {/* Question header */}
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-white/20 rounded-full p-3 mt-1">
-                      {getQuestionIcon(question.question_type)}
+                  {/* Question header - without icon */}
+                  <div>
+                    <div style={{ color: '#FFFFFF' }} className="text-sm mb-2">
+                      Fråga {index + 1} av {jobData.questions.length}
                     </div>
-                    <div className="flex-1">
-                      <div className="text-white/80 text-sm mb-2">
-                        Fråga {index + 1} av {jobData.questions.length}
-                      </div>
-                      <h3 className="text-white text-xl font-bold leading-tight">
-                        {question.question_text}
-                        {question.is_required && (
-                          <span className="text-red-300 ml-1">*</span>
-                        )}
-                      </h3>
-                    </div>
+                    <h3 className="text-xl font-bold leading-tight" style={{ color: '#FFFFFF' }}>
+                      {question.question_text}
+                      {question.is_required && (
+                        <span className="ml-1" style={{ color: '#FFFFFF' }}>*</span>
+                      )}
+                    </h3>
                   </div>
 
                   {/* Question input */}
