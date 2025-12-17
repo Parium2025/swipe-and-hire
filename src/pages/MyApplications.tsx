@@ -14,10 +14,12 @@ import {
   XCircle,
   Hourglass,
   Building2,
-  Loader2
+  Loader2,
+  Timer
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { getTimeRemaining } from '@/lib/date';
 
 interface Application {
   id: string;
@@ -33,6 +35,7 @@ interface Application {
     workplace_city: string | null;
     workplace_county: string | null;
     is_active: boolean | null;
+    created_at: string;
     expires_at: string | null;
     profiles: {
       company_name: string | null;
@@ -135,6 +138,7 @@ const MyApplications = () => {
             workplace_city,
             workplace_county,
             is_active,
+            created_at,
             expires_at,
             profiles:employer_id (
               company_name,
@@ -271,6 +275,23 @@ const MyApplications = () => {
                             Sökt {format(new Date(application.applied_at || application.created_at), 'yyyy-MM-dd', { locale: sv })}
                           </span>
                         </div>
+                        {/* Days remaining badge */}
+                        {job && (() => {
+                          const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
+                          if (isExpired) {
+                            return (
+                              <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                                Utgången
+                              </Badge>
+                            );
+                          }
+                          return (
+                            <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                              <Timer className="h-3 w-3 mr-1" />
+                              {text} kvar
+                            </Badge>
+                          );
+                        })()}
                       </div>
                     </div>
 
