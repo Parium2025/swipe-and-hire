@@ -521,7 +521,7 @@ const JobView = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           
           {/* Left column - Job info */}
-          <div className="lg:col-span-2 space-y-3">
+          <div className="lg:col-span-3 space-y-3">
             
             {imageUrl && (
               <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
@@ -792,12 +792,6 @@ const JobView = () => {
                   </Badge>
                 );
               })()}
-            </div>
-          </div>
-
-          {/* Right column - Sticky actions */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-20 space-y-3">
             </div>
           </div>
         </div>
