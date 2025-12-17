@@ -767,7 +767,13 @@ const JobView = () => {
               </p>
               {(() => {
                 const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
-                if (isExpired) return null;
+                if (isExpired) {
+                  return (
+                    <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                      Utgången
+                    </Badge>
+                  );
+                }
                 return (
                   <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
                     <Timer className="h-3 w-3 mr-1" />
