@@ -20,6 +20,7 @@ import {
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { getTimeRemaining } from '@/lib/date';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 
 interface Application {
   id: string;
@@ -95,23 +96,6 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const getEmploymentTypeLabel = (type: string | null) => {
-  if (!type) return null;
-  switch (type) {
-    case 'fulltime':
-      return 'Heltid';
-    case 'parttime':
-      return 'Deltid';
-    case 'contract':
-      return 'Kontrakt';
-    case 'internship':
-      return 'Praktik';
-    case 'temporary':
-      return 'Vikariat';
-    default:
-      return type;
-  }
-};
 
 const MyApplications = () => {
   const { user } = useAuth();
