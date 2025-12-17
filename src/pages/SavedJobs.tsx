@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 
 interface SavedJob {
   id: string;
@@ -32,16 +33,6 @@ interface SavedJob {
   } | null;
 }
 
-const getEmploymentTypeLabel = (type: string | null): string => {
-  const labels: Record<string, string> = {
-    fulltime: 'Heltid',
-    parttime: 'Deltid',
-    temporary: 'Visstid',
-    internship: 'Praktik',
-    freelance: 'Frilans',
-  };
-  return type ? labels[type] || type : '';
-};
 
 const getDaysRemaining = (expiresAt: string | null): number | null => {
   if (!expiresAt) return null;
