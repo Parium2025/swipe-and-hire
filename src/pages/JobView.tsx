@@ -738,15 +738,6 @@ const JobView = () => {
               </div>
             )}
 
-            {/* Expired job warning */}
-            {isJobExpired && (
-              <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-center">
-                <p className="text-white text-sm font-medium">
-                  Denna annons har utgått och tar inte längre emot ansökningar.
-                </p>
-              </div>
-            )}
-
             {/* Submit application button - only show when job is not expired */}
             {!isJobExpired && (
               <Button
@@ -772,6 +763,12 @@ const JobView = () => {
 
             {/* Job posted date and countdown */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center space-y-2">
+              {/* Expired job warning - inside the same box */}
+              {isJobExpired && (
+                <p className="text-red-400 text-sm font-medium">
+                  Denna annons har utgått och tar inte längre emot ansökningar.
+                </p>
+              )}
               <p className="text-body-sm">
                 Publicerad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
                   year: 'numeric', 
