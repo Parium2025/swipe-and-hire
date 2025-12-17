@@ -1181,6 +1181,8 @@ const Profile = () => {
       };
 
       // Handle profile image/video updates
+      // 🔒 KRITISK FIX: profile_image_url ska ALDRIG vara null om vi har cover_image_url
+      // Detta säkerställer att sidebaren alltid har något att visa
       if (isProfileVideo && videoUrl) {
         // It's a video - save storage path only
         updates.video_url = videoUrl;
@@ -1190,12 +1192,19 @@ const Profile = () => {
           updates.cover_image_url = profileImageUrl; // Preserve old profile image as cover
           setCoverImageUrl(profileImageUrl); // Update local state
           setCoverFileName(profileFileName); // Track for deletion
-        } else {
+          // 🔒 BEHÅLL profile_image_url som cover för fallback (istället för null)
+          updates.profile_image_url = profileImageUrl;
+        } else if (coverImageUrl) {
           // Keep existing cover image when video exists
-          updates.cover_image_url = coverImageUrl || null;
+          updates.cover_image_url = coverImageUrl;
+          // 🔒 KRITISK: Sätt profile_image_url till cover som fallback
+          updates.profile_image_url = coverImageUrl;
+        } else {
+          // Ingen cover och ingen profilbild - sätt till null (oundvikligt)
+          updates.cover_image_url = null;
+          updates.profile_image_url = null;
         }
         
-        updates.profile_image_url = null; // Clear profile image when using video
         updates.is_profile_video = true;
       } else if (!profileImageUrl && coverImageUrl) {
         // No video/image but has cover - make cover the profile image (but keep cover as cover)
@@ -1212,8 +1221,8 @@ const Profile = () => {
         setDeletedCoverImage(null);
         setDeletedProfileMedia(null); // Clear undo states
       } else {
-        // It's an image or no media
-        updates.profile_image_url = profileImageUrl || null;
+        // It's an image or no media - ALDRIG null om cover finns
+        updates.profile_image_url = profileImageUrl || coverImageUrl || null;
         updates.video_url = null;
         updates.cover_image_url = coverImageUrl || null;
         updates.is_profile_video = false;
