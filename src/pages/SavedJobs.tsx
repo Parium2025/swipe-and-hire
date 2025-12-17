@@ -176,12 +176,12 @@ const SavedJobs = () => {
             <p className="text-white mb-4">
               När du hittar intressanta jobb kan du spara dem här för enkel åtkomst
             </p>
-            <Button
+            <button
               onClick={() => navigate('/search-jobs')}
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+              className="inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium bg-white/10 text-white border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30"
             >
               Sök jobb
-            </Button>
+            </button>
           </CardContent>
         </Card>
       ) : (
