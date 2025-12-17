@@ -341,16 +341,22 @@ const SearchJobs = () => {
   };
 
   // Använd cachade värden från AuthProvider för omedelbar visning
+  // Filter to only count non-expired jobs
+  const activeJobs = useMemo(() => 
+    jobs.filter(j => !getTimeRemaining(j.created_at, j.expires_at).isExpired),
+    [jobs]
+  );
+  
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Jobb hittade', value: preloadedTotalJobs || jobs.length, loading: false },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: preloadedTotalJobs || jobs.filter(j => j.is_active).length, loading: false },
-    { icon: Building, title: 'Unika företag', value: preloadedUniqueCompanies || new Set(jobs.map(j => j.company_name)).size, loading: false },
-    { icon: Users, title: 'Nya denna vecka', value: preloadedNewThisWeek || jobs.filter(j => {
+    { icon: Briefcase, title: 'Aktiva jobb', value: activeJobs.length, loading: false },
+    { icon: TrendingUp, title: 'Aktiva annonser', value: activeJobs.filter(j => j.is_active).length, loading: false },
+    { icon: Building, title: 'Unika företag', value: new Set(activeJobs.map(j => j.company_name)).size, loading: false },
+    { icon: Users, title: 'Nya denna vecka', value: activeJobs.filter(j => {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return new Date(j.created_at) > weekAgo;
     }).length, loading: false },
-  ], [jobs, preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek]);
+  ], [activeJobs]);
 
   const sortLabels = {
     newest: 'Nyast först',
