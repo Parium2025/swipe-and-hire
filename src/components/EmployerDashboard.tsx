@@ -457,9 +457,7 @@ const EmployerDashboard = memo(() => {
                                 className="scale-[0.8]"
                               />
                             )}
-                            <Button 
-                              variant="outlineNeutral" 
-                              size="sm"
+                            <button 
                               onClick={(e) => {
                                 e.stopPropagation();
                                 // For drafts, use handleEditDraft to open the wizard
@@ -469,21 +467,19 @@ const EmployerDashboard = memo(() => {
                                   handleEditJob(job as any);
                                 }
                               }}
-                              className="h-7 w-7 p-0 bg-transparent border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/40 [&_svg]:text-white md:hover:[&_svg]:text-white"
+                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/10 border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30"
                             >
                               <Edit size={14} />
-                            </Button>
-                            <Button 
-                              variant="outlineNeutral" 
-                              size="sm"
+                            </button>
+                            <button 
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDeleteClick(job as any);
                               }}
-                              className="h-7 w-7 p-0 bg-transparent border-white/20 text-white !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white"
+                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/10 border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/30 md:hover:text-red-400"
                             >
                               <Trash2 size={14} />
-                            </Button>
+                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
