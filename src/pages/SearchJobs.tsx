@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star } from 'lucide-react';
+import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer } from 'lucide-react';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
@@ -20,7 +20,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
-import { formatDateShortSv } from '@/lib/date';
+import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
 import { StatsGrid } from '@/components/StatsGrid';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -44,6 +44,7 @@ interface Job {
   salary_max?: number;
   description: string;
   created_at: string;
+  expires_at?: string;
   is_active: boolean;
   views_count: number;
   applications_count: number;
@@ -846,9 +847,27 @@ const SearchJobs = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1 text-sm text-white">
-                            <Calendar className="h-3 w-3" />
-                            {formatDateShortSv(job.created_at)}
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 text-sm text-white">
+                              <Calendar className="h-3 w-3" />
+                              {formatDateShortSv(job.created_at)}
+                            </div>
+                            {(() => {
+                              const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
+                              if (isExpired) {
+                                return (
+                                  <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                                    Utgången
+                                  </Badge>
+                                );
+                              }
+                              return (
+                                <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                                  <Timer className="h-3 w-3 mr-1" />
+                                  {text} kvar
+                                </Badge>
+                              );
+                            })()}
                           </div>
                         </TableCell>
                         <TableCell>

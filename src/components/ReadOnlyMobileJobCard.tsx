@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Users, MapPin, Calendar, Building2, Heart } from 'lucide-react';
+import { Eye, Users, MapPin, Calendar, Building2, Heart, Timer } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getTimeRemaining } from '@/lib/date';
 import { supabase } from '@/integrations/supabase/client';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 
@@ -18,6 +19,7 @@ interface ReadOnlyMobileJobCardProps {
     views_count: number;
     applications_count: number;
     created_at: string;
+    expires_at?: string;
     job_image_url?: string;
     company_name?: string;
     profiles?: {
@@ -172,6 +174,22 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
               })}
             </span>
           </div>
+          {(() => {
+            const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
+            if (isExpired) {
+              return (
+                <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                  Utgången
+                </Badge>
+              );
+            }
+            return (
+              <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                <Timer className="h-3 w-3 mr-1" />
+                {text} kvar
+              </Badge>
+            );
+          })()}
           <Button
             variant="ghost"
             size="sm"
