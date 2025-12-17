@@ -50,22 +50,26 @@ export function AppSidebar() {
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
 
-  // Använd preloadedAvatarUrl som primär källa, fallback till profile.profile_image_url
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(preloadedAvatarUrl || profile?.profile_image_url || null);
+  // Använd preloadedAvatarUrl som primär källa, fallback till profile.profile_image_url, sedan cover_image_url
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null);
   // Använd preloadedVideoUrl från AuthProvider (sessionStorage-cachad precis som arbetsgivarsidan)
   const [videoUrl, setVideoUrl] = useState<string | null>(preloadedVideoUrl ?? null);
   const [coverUrl, setCoverUrl] = useState<string | null>(preloadedCoverUrl || profile?.cover_image_url || null);
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   
-  // Håll avatar/cover/video i synk med preloadern även om de uppdateras efter mount
+  // Håll avatar i synk med preloader/profile, med cover som fallback
   useEffect(() => {
     if (preloadedAvatarUrl) {
       setAvatarUrl(preloadedAvatarUrl);
+    } else if (preloadedCoverUrl) {
+      setAvatarUrl(preloadedCoverUrl);
     } else if (profile?.profile_image_url) {
       setAvatarUrl(profile.profile_image_url);
+    } else if (profile?.cover_image_url) {
+      setAvatarUrl(profile.cover_image_url);
     }
-  }, [preloadedAvatarUrl, profile?.profile_image_url]);
+  }, [preloadedAvatarUrl, preloadedCoverUrl, profile?.profile_image_url, profile?.cover_image_url]);
 
   useEffect(() => {
     if (preloadedCoverUrl) {
