@@ -17,10 +17,10 @@ interface CandidatesTableProps {
 }
 
 const statusConfig = {
-  pending: { label: 'Ny', className: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
-  reviewing: { label: 'Granskas', className: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' },
-  accepted: { label: 'Accepterad', className: 'bg-green-500/20 text-green-300 border-green-500/30' },
-  rejected: { label: 'Avvisad', className: 'bg-red-500/20 text-red-300 border-red-500/30' },
+  pending: { label: 'Ny', className: 'bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30 transition-colors' },
+  reviewing: { label: 'Granskas', className: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30 transition-colors' },
+  accepted: { label: 'Accepterad', className: 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30 transition-colors' },
+  rejected: { label: 'Avvisad', className: 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30 transition-colors' },
 };
 
 export function CandidatesTable({ 
