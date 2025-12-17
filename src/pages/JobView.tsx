@@ -747,28 +747,28 @@ const JobView = () => {
               </div>
             )}
 
-            {/* Submit application button */}
-            <Button
-              size="lg"
-              className={`w-full h-12 text-white text-base font-semibold shadow-lg transition-all duration-300 ${
-                canSubmitApplication && !isJobExpired
-                  ? 'bg-green-500 md:hover:bg-green-500/80' 
-                  : 'bg-white/20 cursor-not-allowed'
-              }`}
-              onClick={handleApplicationSubmit}
-              disabled={applying || !canSubmitApplication || isJobExpired}
-            >
-              {applying ? (
-                'Skickar...'
-              ) : isJobExpired ? (
-                'Ansökningstiden har gått ut'
-              ) : (
-                <>
-                  <Send className="mr-1.5 h-3.5 w-3.5" />
-                  Skicka ansökan
-                </>
-              )}
-            </Button>
+            {/* Submit application button - only show when job is not expired */}
+            {!isJobExpired && (
+              <Button
+                size="lg"
+                className={`w-full h-12 text-white text-base font-semibold shadow-lg transition-all duration-300 ${
+                  canSubmitApplication
+                    ? 'bg-green-500 md:hover:bg-green-500/80' 
+                    : 'bg-white/20 cursor-not-allowed'
+                }`}
+                onClick={handleApplicationSubmit}
+                disabled={applying || !canSubmitApplication}
+              >
+                {applying ? (
+                  'Skickar...'
+                ) : (
+                  <>
+                    <Send className="mr-1.5 h-3.5 w-3.5" />
+                    Skicka ansökan
+                  </>
+                )}
+              </Button>
+            )}
 
             {/* Job posted date and countdown */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center space-y-2">
