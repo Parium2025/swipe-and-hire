@@ -230,7 +230,7 @@ const SavedJobs = () => {
                           </Badge>
                         )}
                         {showCountdown && (
-                          <Badge variant="secondary" className="bg-secondary/20 text-secondary border-secondary/30 text-xs">
+                          <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
                             <Timer className="h-3 w-3 mr-1" />
                             {daysRemaining === 1 ? '1 dag kvar' : `${daysRemaining} dagar kvar`}
                           </Badge>
