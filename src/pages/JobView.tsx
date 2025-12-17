@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash } from 'lucide-react';
+import { getTimeRemaining } from '@/lib/date';
+import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash, Timer } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
@@ -51,6 +52,7 @@ interface JobPosting {
   workplace_county?: string;
   workplace_address?: string;
   created_at: string;
+  expires_at?: string;
   employer_id: string;
   job_image_url?: string;
   profiles: {
@@ -754,8 +756,8 @@ const JobView = () => {
               )}
             </Button>
 
-            {/* Job posted date */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+            {/* Job posted date and countdown */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center space-y-2">
               <p className="text-body-sm">
                 Publicerad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
                   year: 'numeric', 
@@ -763,6 +765,16 @@ const JobView = () => {
                   day: 'numeric' 
                 })}
               </p>
+              {(() => {
+                const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
+                if (isExpired) return null;
+                return (
+                  <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                    <Timer className="h-3 w-3 mr-1" />
+                    {text} kvar att ansöka
+                  </Badge>
+                );
+              })()}
             </div>
           </div>
 
