@@ -880,7 +880,7 @@ const SearchJobs = () => {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <button 
-                              className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium bg-white/10 text-white border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30"
+                              className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium bg-white/10 backdrop-blur-sm text-white border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 active:scale-95"
                                onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/job-view/${job.id}`);
@@ -889,7 +889,7 @@ const SearchJobs = () => {
                               Ansök
                             </button>
                             <button 
-                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/10 border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30"
+                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/10 backdrop-blur-sm border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 active:scale-95"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);

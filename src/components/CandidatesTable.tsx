@@ -143,7 +143,7 @@ export function CandidatesTable({
           <button
             onClick={onLoadMore}
             disabled={isLoadingMore}
-            className="inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium bg-white/10 text-white border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30 disabled:opacity-50"
+            className="inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium bg-white/10 backdrop-blur-sm text-white border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 disabled:opacity-50 active:scale-95"
           >
             {isLoadingMore ? 'Laddar fler...' : 'Visa fler kandidater'}
           </button>

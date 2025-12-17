@@ -467,7 +467,7 @@ const EmployerDashboard = memo(() => {
                                   handleEditJob(job as any);
                                 }
                               }}
-                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/10 border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30"
+                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/10 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 active:scale-95"
                             >
                               <Edit size={14} />
                             </button>
@@ -476,7 +476,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleDeleteClick(job as any);
                               }}
-                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/10 border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/30 md:hover:text-red-400"
+                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/10 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-red-400 active:scale-95"
                             >
                               <Trash2 size={14} />
                             </button>

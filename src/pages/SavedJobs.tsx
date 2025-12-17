@@ -178,7 +178,7 @@ const SavedJobs = () => {
             </p>
             <button
               onClick={() => navigate('/search-jobs')}
-              className="inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium bg-white/10 text-white border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30"
+              className="inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium bg-white/10 backdrop-blur-sm text-white border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 active:scale-95"
             >
               Sök jobb
             </button>
@@ -259,7 +259,7 @@ const SavedJobs = () => {
                     <button
                       onClick={(e) => handleRemoveSavedJob(savedJob.id, e)}
                       disabled={isRemoving}
-                      className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/10 border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/30 md:hover:text-red-400 disabled:opacity-50 flex-shrink-0"
+                      className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/10 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-red-400 disabled:opacity-50 flex-shrink-0 active:scale-95"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

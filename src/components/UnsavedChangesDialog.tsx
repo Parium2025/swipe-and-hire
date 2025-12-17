@@ -40,7 +40,7 @@ export function UnsavedChangesDialog({
           <AlertDialogCancel 
             onClick={onCancel} 
             disabled={isSaving}
-            className="px-3 py-2 text-sm bg-white/10 border-white/30 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50 mt-0"
+            className="rounded-full px-3 py-2 text-sm bg-white/10 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50 mt-0"
           >
             Avbryt
           </AlertDialogCancel>
@@ -51,7 +51,7 @@ export function UnsavedChangesDialog({
                 onSaveAndLeave();
               }}
               disabled={isSaving}
-              className="px-3 py-2 text-sm bg-amber-500/20 text-white border border-amber-500/40 md:hover:bg-amber-500/30 md:hover:border-amber-500/50 transition-all whitespace-nowrap"
+              className="rounded-full px-3 py-2 text-sm bg-amber-500/20 backdrop-blur-sm text-white border border-amber-500/40 md:hover:bg-amber-500/30 md:hover:border-amber-500/50 transition-all duration-300 whitespace-nowrap"
             >
               {isSaving ? (
                 <>
@@ -66,7 +66,7 @@ export function UnsavedChangesDialog({
           <AlertDialogAction 
             onClick={onConfirm} 
             disabled={isSaving}
-            className="px-3 py-2 text-sm bg-red-500/20 text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all whitespace-nowrap"
+            className="rounded-full px-3 py-2 text-sm bg-red-500/20 backdrop-blur-sm text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300 whitespace-nowrap"
           >
             Lämna utan att spara
           </AlertDialogAction>

@@ -91,23 +91,25 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
           {!isApp ? (
             <>
               <Button
-                variant="outline"
+                variant="glass"
                 onClick={() => onOpenChange(false)}
-                className="flex-1 bg-primary border-primary/60 text-white hover:bg-primary/90 hover:text-white text-sm py-2"
+                className="flex-1 text-sm py-2"
               >
                 Stäng
               </Button>
               <Button
+                variant="glassGreen"
                 onClick={handleUpgrade}
-                className="flex-1 bg-primary hover:bg-primary/90 text-white text-sm py-2 border border-primary/60"
+                className="flex-1 text-sm py-2"
               >
                 Nu kör vi!
               </Button>
             </>
           ) : (
             <Button
+              variant="glassGreen"
               onClick={() => onOpenChange(false)}
-              className="w-full bg-primary hover:bg-primary/90 text-white text-sm py-2 border border-primary/60"
+              className="w-full text-sm py-2"
             >
               Nu kör vi!
             </Button>

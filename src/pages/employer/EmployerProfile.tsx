@@ -501,7 +501,8 @@ const EmployerProfile = () => {
               <Button 
                 type="submit"
                 disabled={loading || !hasUnsavedChanges}
-                className="disabled:opacity-50 disabled:cursor-not-allowed disabled:border-0 border border-white/30 text-white font-medium h-9 px-6 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
+                variant="glass"
+                className="h-9 px-6 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
