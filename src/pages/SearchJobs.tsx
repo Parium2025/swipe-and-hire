@@ -33,6 +33,7 @@ interface Job {
   id: string;
   title: string;
   company_name: string;
+  company_logo_url?: string;
   location: string;
   workplace_city?: string;
   workplace_postal_code?: string;
@@ -45,6 +46,7 @@ interface Job {
   views_count: number;
   applications_count: number;
   job_image_url?: string;
+  employer_id?: string;
   employer_profile?: {
     first_name: string;
     last_name: string;
@@ -149,27 +151,33 @@ const SearchJobs = () => {
       
       if (error) throw error;
       
-      // Fetch company names separately to avoid deep type instantiation
+      // Fetch company names and logos separately to avoid deep type instantiation
       const employerIds = [...new Set((data || []).map((job: any) => job.employer_id).filter(Boolean))] as string[];
-      let companyNames: Record<string, string> = {};
+      let companyData: Record<string, { name: string; logo?: string }> = {};
       
       if (employerIds.length > 0) {
         const { data: profiles } = await supabase
           .from('profiles')
-          .select('user_id, company_name')
+          .select('user_id, company_name, company_logo_url')
           .in('user_id', employerIds);
         
         if (profiles) {
-          companyNames = profiles.reduce((acc, p) => {
-            if (p.company_name) acc[p.user_id] = p.company_name;
+          companyData = profiles.reduce((acc, p) => {
+            if (p.company_name) {
+              acc[p.user_id] = {
+                name: p.company_name,
+                logo: p.company_logo_url || undefined
+              };
+            }
             return acc;
-          }, {} as Record<string, string>);
+          }, {} as Record<string, { name: string; logo?: string }>);
         }
       }
       
       return (data || []).map((job: any) => ({
         ...job,
-        company_name: companyNames[job.employer_id] || 'Okänt företag',
+        company_name: companyData[job.employer_id]?.name || 'Okänt företag',
+        company_logo_url: companyData[job.employer_id]?.logo,
         views_count: job.views_count || 0,
         applications_count: job.applications_count || 0,
       }));
@@ -264,9 +272,9 @@ const SearchJobs = () => {
         if (companyLower.includes(searchLower) || searchLower.includes(companyLower.split(' ')[0])) {
           if (!uniqueCompanies.has(job.company_name)) {
             uniqueCompanies.set(job.company_name, {
-              id: (job as any).employer_id || '',
+              id: job.employer_id || '',
               name: job.company_name,
-              logo: undefined
+              logo: job.company_logo_url
             });
           }
         }
