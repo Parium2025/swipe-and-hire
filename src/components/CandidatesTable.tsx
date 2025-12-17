@@ -7,6 +7,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { CandidateProfileDialog } from './CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { Button } from '@/components/ui/button';
 
 interface CandidatesTableProps {
   applications: ApplicationData[];
@@ -140,13 +141,13 @@ export function CandidatesTable({
       
       {hasMore && onLoadMore && (
         <div className="flex justify-center py-4">
-          <button
+          <Button
             onClick={onLoadMore}
             disabled={isLoadingMore}
-            className="inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium bg-white/10 backdrop-blur-sm text-white border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 disabled:opacity-50 active:scale-95"
+            variant="glass"
           >
             {isLoadingMore ? 'Laddar fler...' : 'Visa fler kandidater'}
-          </button>
+          </Button>
         </div>
       )}
 

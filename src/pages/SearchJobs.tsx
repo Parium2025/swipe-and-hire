@@ -879,24 +879,28 @@ const SearchJobs = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <button 
-                              className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium bg-white/10 backdrop-blur-sm text-white border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 active:scale-95"
-                               onClick={(e) => {
+                            <Button 
+                              variant="glass"
+                              size="sm"
+                              className="h-7 px-3 text-xs"
+                              onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/job-view/${job.id}`);
                               }}
                             >
                               Ansök
-                            </button>
-                            <button 
-                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/10 backdrop-blur-sm border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 active:scale-95"
+                            </Button>
+                            <Button 
+                              variant="glass"
+                              size="icon"
+                              className="h-7 w-7"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
                               }}
                             >
                               <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
-                            </button>
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>

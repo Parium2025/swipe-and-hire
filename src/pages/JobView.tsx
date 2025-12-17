@@ -474,13 +474,14 @@ const JobView = () => {
     <div className="min-h-screen bg-parium-gradient animate-fade-in">
       {/* Back button - fixed top left */}
       <div className="fixed top-4 left-4 z-10">
-        <button
+        <Button
           onClick={() => navigate('/search-jobs')}
-          className="inline-flex items-center rounded-full border px-3 py-1.5 text-sm bg-white/10 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 active:scale-95"
+          variant="glass"
+          size="sm"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
           Tillbaka
-        </button>
+        </Button>
       </div>
 
       <div className="max-w-3xl mx-auto px-3 md:px-6 py-8">
@@ -724,14 +725,15 @@ const JobView = () => {
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                 <h3 className="text-subsection-title mb-2">Har du några frågor?</h3>
                 <p className="text-body-sm mb-3">Kontakt: {job.contact_email}</p>
-                <button 
-                  className="inline-flex items-center justify-center rounded-full border px-4 py-2 w-full bg-white/10 backdrop-blur-sm border-white/20 text-white text-sm font-medium transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 active:scale-95"
+                <Button 
+                  variant="glass"
+                  className="w-full"
                   onClick={() => {
                     window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
                   }}
                 >
                   Skicka e-post
-                </button>
+                </Button>
               </div>
             )}
 
