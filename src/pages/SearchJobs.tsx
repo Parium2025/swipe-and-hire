@@ -34,6 +34,8 @@ interface Job {
   title: string;
   company_name: string;
   company_logo_url?: string;
+  company_avg_rating?: number;
+  company_review_count?: number;
   location: string;
   workplace_city?: string;
   workplace_postal_code?: string;
@@ -153,24 +155,46 @@ const SearchJobs = () => {
       
       // Fetch company names and logos separately to avoid deep type instantiation
       const employerIds = [...new Set((data || []).map((job: any) => job.employer_id).filter(Boolean))] as string[];
-      let companyData: Record<string, { name: string; logo?: string }> = {};
+      let companyData: Record<string, { name: string; logo?: string; avgRating?: number; reviewCount?: number }> = {};
       
       if (employerIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('user_id, company_name, company_logo_url')
-          .in('user_id', employerIds);
+        // Fetch profiles and reviews in parallel
+        const [profilesRes, reviewsRes] = await Promise.all([
+          supabase
+            .from('profiles')
+            .select('user_id, company_name, company_logo_url')
+            .in('user_id', employerIds),
+          supabase
+            .from('company_reviews')
+            .select('company_id, rating')
+            .in('company_id', employerIds)
+        ]);
         
-        if (profiles) {
-          companyData = profiles.reduce((acc, p) => {
+        // Calculate average ratings per company
+        const ratingsMap: Record<string, { total: number; count: number }> = {};
+        if (reviewsRes.data) {
+          reviewsRes.data.forEach(review => {
+            if (!ratingsMap[review.company_id]) {
+              ratingsMap[review.company_id] = { total: 0, count: 0 };
+            }
+            ratingsMap[review.company_id].total += review.rating;
+            ratingsMap[review.company_id].count++;
+          });
+        }
+        
+        if (profilesRes.data) {
+          companyData = profilesRes.data.reduce((acc, p) => {
             if (p.company_name) {
+              const ratingData = ratingsMap[p.user_id];
               acc[p.user_id] = {
                 name: p.company_name,
-                logo: p.company_logo_url || undefined
+                logo: p.company_logo_url || undefined,
+                avgRating: ratingData ? ratingData.total / ratingData.count : undefined,
+                reviewCount: ratingData?.count || 0
               };
             }
             return acc;
-          }, {} as Record<string, { name: string; logo?: string }>);
+          }, {} as Record<string, { name: string; logo?: string; avgRating?: number; reviewCount?: number }>);
         }
       }
       
@@ -178,6 +202,8 @@ const SearchJobs = () => {
         ...job,
         company_name: companyData[job.employer_id]?.name || 'Okänt företag',
         company_logo_url: companyData[job.employer_id]?.logo,
+        company_avg_rating: companyData[job.employer_id]?.avgRating,
+        company_review_count: companyData[job.employer_id]?.reviewCount || 0,
         views_count: job.views_count || 0,
         applications_count: job.applications_count || 0,
       }));
@@ -263,8 +289,8 @@ const SearchJobs = () => {
     
     const searchLower = searchInput.toLowerCase().trim();
     
-    // Get unique companies from jobs with job count
-    const uniqueCompanies = new Map<string, { id: string; name: string; logo?: string; jobCount: number }>();
+    // Get unique companies from jobs with job count and rating
+    const uniqueCompanies = new Map<string, { id: string; name: string; logo?: string; jobCount: number; avgRating?: number; reviewCount: number }>();
     jobs.forEach(job => {
       if (job.company_name && job.company_name !== 'Okänt företag') {
         const companyLower = job.company_name.toLowerCase();
@@ -278,7 +304,9 @@ const SearchJobs = () => {
               id: job.employer_id || '',
               name: job.company_name,
               logo: job.company_logo_url,
-              jobCount: 1
+              jobCount: 1,
+              avgRating: job.company_avg_rating,
+              reviewCount: job.company_review_count || 0
             });
           }
         }
@@ -728,7 +756,15 @@ const SearchJobs = () => {
                   <h3 className="text-base font-semibold text-white truncate mt-1">
                     {matchingCompany.name} - {matchingCompany.jobCount} aktiv{matchingCompany.jobCount !== 1 ? 'a' : 't'} jobb
                   </h3>
-                  <p className="text-sm text-white/70">Se företagsprofil och recensioner</p>
+                  <div className="flex items-center gap-2 text-sm text-white/70">
+                    <span>Se företagsprofil och recensioner</span>
+                    {matchingCompany.avgRating && matchingCompany.reviewCount > 0 && (
+                      <span className="flex items-center gap-1 text-amber-400">
+                        <Star className="h-3.5 w-3.5 fill-amber-400" />
+                        {matchingCompany.avgRating.toFixed(1)} ({matchingCompany.reviewCount})
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <ChevronDown className="h-5 w-5 text-white -rotate-90 flex-shrink-0" />
               </div>
