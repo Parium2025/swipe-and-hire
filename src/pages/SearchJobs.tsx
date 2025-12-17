@@ -263,18 +263,22 @@ const SearchJobs = () => {
     
     const searchLower = searchInput.toLowerCase().trim();
     
-    // Get unique companies from jobs
-    const uniqueCompanies = new Map<string, { id: string; name: string; logo?: string }>();
+    // Get unique companies from jobs with job count
+    const uniqueCompanies = new Map<string, { id: string; name: string; logo?: string; jobCount: number }>();
     jobs.forEach(job => {
       if (job.company_name && job.company_name !== 'Okänt företag') {
         const companyLower = job.company_name.toLowerCase();
         // Check if search term matches company name (partial match)
         if (companyLower.includes(searchLower) || searchLower.includes(companyLower.split(' ')[0])) {
-          if (!uniqueCompanies.has(job.company_name)) {
+          const existing = uniqueCompanies.get(job.company_name);
+          if (existing) {
+            existing.jobCount++;
+          } else {
             uniqueCompanies.set(job.company_name, {
               id: job.employer_id || '',
               name: job.company_name,
-              logo: job.company_logo_url
+              logo: job.company_logo_url,
+              jobCount: 1
             });
           }
         }
@@ -721,7 +725,9 @@ const SearchJobs = () => {
                     <Building2 className="h-4 w-4 text-white flex-shrink-0" />
                     <span className="text-xs text-white uppercase tracking-wide">Företag</span>
                   </div>
-                  <h3 className="text-base font-semibold text-white truncate mt-1">{matchingCompany.name}</h3>
+                  <h3 className="text-base font-semibold text-white truncate mt-1">
+                    {matchingCompany.name} - {matchingCompany.jobCount} aktiv{matchingCompany.jobCount !== 1 ? 'a' : 't'} jobb
+                  </h3>
                   <p className="text-sm text-white/70">Se företagsprofil och recensioner</p>
                 </div>
                 <ChevronDown className="h-5 w-5 text-white -rotate-90 flex-shrink-0" />
