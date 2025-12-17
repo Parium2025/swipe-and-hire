@@ -256,15 +256,13 @@ const SavedJobs = () => {
                     </div>
 
                     {/* Remove button */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
+                    <button
                       onClick={(e) => handleRemoveSavedJob(savedJob.id, e)}
                       disabled={isRemoving}
-                      className="text-white hover:text-red-400 hover:bg-red-500/10 flex-shrink-0"
+                      className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/10 border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/30 md:hover:text-red-400 disabled:opacity-50 flex-shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
-                    </Button>
+                    </button>
                   </div>
                 </CardContent>
               </Card>
