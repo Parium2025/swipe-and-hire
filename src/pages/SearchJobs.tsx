@@ -248,7 +248,8 @@ const SearchJobs = () => {
 
   // Filter and sort jobs
   const filteredAndSortedJobs = useMemo(() => {
-    let filtered = [...jobs];
+    // Filter out expired jobs first
+    let filtered = jobs.filter(job => !getTimeRemaining(job.created_at, job.expires_at).isExpired);
 
     // Search filter
     if (searchInput) {
