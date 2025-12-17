@@ -879,28 +879,24 @@ const SearchJobs = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Button 
-                              variant="outline"
-                              size="sm" 
-                              className="h-8 px-3 text-xs bg-white/5 border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white"
+                            <button 
+                              className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium bg-white/10 text-white border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30"
                                onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/job-view/${job.id}`);
                               }}
                             >
                               Ansök
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-8 w-8 p-0 bg-white/5 border-white/20 transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
+                            </button>
+                            <button 
+                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/10 border-white/20 transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
                               }}
                             >
-                              <Heart className={`h-3 w-3 ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
-                            </Button>
+                              <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
