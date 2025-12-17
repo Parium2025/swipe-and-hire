@@ -740,8 +740,8 @@ const JobView = () => {
 
             {/* Expired job warning */}
             {isJobExpired && (
-              <div className="bg-amber-500/20 border border-amber-500/30 rounded-lg p-3 text-center">
-                <p className="text-amber-300 text-sm font-medium">
+              <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-center">
+                <p className="text-white text-sm font-medium">
                   Denna annons har utgått och tar inte längre emot ansökningar.
                 </p>
               </div>
@@ -783,7 +783,7 @@ const JobView = () => {
                 const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                 if (isExpired) {
                   return (
-                    <Badge variant="secondary" className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
+                    <Badge variant="secondary" className="bg-red-500/20 text-white border-red-500/30 text-xs">
                       Utgången
                     </Badge>
                   );
