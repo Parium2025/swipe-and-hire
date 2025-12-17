@@ -476,7 +476,7 @@ const JobView = () => {
       <div className="fixed top-4 left-4 z-10">
         <button
           onClick={() => navigate('/search-jobs')}
-          className="inline-flex items-center rounded-full border px-3 py-1.5 text-sm bg-white/10 border-white/20 text-white backdrop-blur-sm transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30"
+          className="inline-flex items-center rounded-full border px-3 py-1.5 text-sm bg-white/10 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 active:scale-95"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
           Tillbaka
@@ -725,7 +725,7 @@ const JobView = () => {
                 <h3 className="text-subsection-title mb-2">Har du några frågor?</h3>
                 <p className="text-body-sm mb-3">Kontakt: {job.contact_email}</p>
                 <button 
-                  className="inline-flex items-center justify-center rounded-full border px-4 py-2 w-full bg-white/10 border-white/20 text-white text-sm font-medium transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30"
+                  className="inline-flex items-center justify-center rounded-full border px-4 py-2 w-full bg-white/10 backdrop-blur-sm border-white/20 text-white text-sm font-medium transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50 active:scale-95"
                   onClick={() => {
                     window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
                   }}
@@ -739,10 +739,9 @@ const JobView = () => {
             {!isJobExpired && (
               <Button
                 size="lg"
-                className={`w-full h-12 text-white text-base font-semibold shadow-lg transition-all duration-300 ${
-                  canSubmitApplication
-                    ? 'bg-green-500 md:hover:bg-green-500/80' 
-                    : 'bg-white/20 cursor-not-allowed'
+                variant={canSubmitApplication ? "glassGreen" : "glass"}
+                className={`w-full h-12 text-base font-semibold ${
+                  !canSubmitApplication ? 'cursor-not-allowed opacity-50' : ''
                 }`}
                 onClick={handleApplicationSubmit}
                 disabled={applying || !canSubmitApplication}

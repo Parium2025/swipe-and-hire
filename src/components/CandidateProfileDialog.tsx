@@ -182,24 +182,21 @@ export const CandidateProfileDialog = ({
           <div className="flex flex-wrap gap-2 pt-4 border-t border-white/10">
             <Button
               onClick={() => updateStatus('reviewing')}
-              variant="outline"
-              className="bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-300 border-yellow-500/30"
+              variant="glassYellow"
               disabled={application.status === 'reviewing'}
             >
               Sätt som granskas
             </Button>
             <Button
               onClick={() => updateStatus('accepted')}
-              variant="outline"
-              className="bg-green-500/10 hover:bg-green-500/20 text-green-300 border-green-500/30"
+              variant="glassGreen"
               disabled={application.status === 'accepted'}
             >
               Acceptera
             </Button>
             <Button
               onClick={() => updateStatus('rejected')}
-              variant="outline"
-              className="bg-red-500/10 hover:bg-red-500/20 text-red-300 border-red-500/30"
+              variant="glassRed"
               disabled={application.status === 'rejected'}
             >
               Avvisa

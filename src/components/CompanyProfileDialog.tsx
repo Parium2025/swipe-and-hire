@@ -458,6 +458,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   <Button 
                     onClick={handleSubmitReview} 
                     disabled={submitting}
+                    variant="glass"
                     className="w-full"
                   >
                     <Send className="h-4 w-4 mr-2" />

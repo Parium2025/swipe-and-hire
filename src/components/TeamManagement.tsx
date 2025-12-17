@@ -252,7 +252,8 @@ const TeamManagement = () => {
           <Button 
             onClick={handleInvite}
             disabled={inviting || !inviteEmail.trim()}
-            className="h-9 px-4 text-sm border border-white/30 text-white font-medium transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
+            variant="glass"
+            className="h-9 px-4 text-sm"
           >
             {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
             Bjud in

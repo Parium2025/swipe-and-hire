@@ -5,29 +5,47 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors duration-150 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium outline-none focus:outline-none focus-visible:outline-none focus:ring-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground md:hover:bg-primary/90",
+        default: "rounded-md bg-primary text-primary-foreground md:hover:bg-primary/90 transition-colors duration-150",
         destructive:
-          "bg-destructive text-destructive-foreground md:hover:bg-destructive md:hover:shadow-lg md:hover:scale-[1.02] transition-all",
+          "rounded-md bg-destructive text-destructive-foreground md:hover:bg-destructive md:hover:shadow-lg md:hover:scale-[1.02] transition-all",
         destructiveSoft:
-          "bg-red-500/20 text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 md:hover:shadow-lg md:hover:scale-[1.02] transition-all",
+          "rounded-full bg-red-500/20 text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300",
         outline:
-          "border border-input bg-background md:hover:bg-accent md:hover:text-accent-foreground",
+          "rounded-md border border-input bg-background md:hover:bg-accent md:hover:text-accent-foreground transition-colors duration-150",
         // Neutral outline without accent hover for precise per-button control
         outlineNeutral:
-          "border border-input bg-transparent md:hover:bg-transparent md:hover:text-inherit",
+          "rounded-md border border-input bg-transparent md:hover:bg-transparent md:hover:text-inherit transition-colors duration-150",
         secondary:
-          "bg-secondary text-secondary-foreground md:hover:bg-secondary/80",
-        ghost: "md:hover:bg-accent md:hover:text-accent-foreground",
+          "rounded-md bg-secondary text-secondary-foreground md:hover:bg-secondary/80 transition-colors duration-150",
+        ghost: "rounded-md md:hover:bg-accent md:hover:text-accent-foreground transition-colors duration-150",
         link: "text-primary underline-offset-4 md:hover:underline",
+        // 🎨 Glassmorphism oval style - consistent across entire app
+        glass:
+          "rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white md:hover:bg-white/20 md:hover:border-white/50 active:scale-95 active:bg-white/20 transition-all duration-300",
+        // Glass variant with amber accent (for save/warning actions)
+        glassAmber:
+          "rounded-full bg-amber-500/20 backdrop-blur-sm border border-amber-500/40 text-white md:hover:bg-amber-500/30 md:hover:border-amber-500/50 active:scale-95 transition-all duration-300",
+        // Glass variant with green accent (for success/confirm actions)
+        glassGreen:
+          "rounded-full bg-green-500/20 backdrop-blur-sm border border-green-500/40 text-white md:hover:bg-green-500/30 md:hover:border-green-500/50 active:scale-95 transition-all duration-300",
+        // Glass variant with red accent (for destructive actions)
+        glassRed:
+          "rounded-full bg-red-500/20 backdrop-blur-sm border border-red-500/40 text-white md:hover:bg-red-500/30 md:hover:border-red-500/50 active:scale-95 transition-all duration-300",
+        // Glass variant with blue accent (for info/primary actions)
+        glassBlue:
+          "rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white md:hover:bg-blue-500/30 md:hover:border-blue-500/50 active:scale-95 transition-all duration-300",
+        // Glass variant with yellow accent (for warning/reviewing actions)
+        glassYellow:
+          "rounded-full bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/40 text-white md:hover:bg-yellow-500/30 md:hover:border-yellow-500/50 active:scale-95 transition-all duration-300",
       },
       size: {
         default: "min-h-touch md:h-10 px-4 py-2",
-        sm: "min-h-touch md:h-9 rounded-md px-3",
-        lg: "min-h-touch md:h-11 rounded-md px-8",
+        sm: "min-h-touch md:h-9 px-3",
+        lg: "min-h-touch md:h-11 px-8",
         icon: "min-h-touch min-w-touch md:h-10 md:w-10",
       },
     },
