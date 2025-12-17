@@ -225,7 +225,7 @@ const SavedJobs = () => {
                           {job.title}
                         </h3>
                         {isExpired && (
-                          <Badge variant="secondary" className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
+                          <Badge variant="secondary" className="bg-red-500/20 text-white border-red-500/30 text-xs hover:bg-red-500/30 hover:border-red-500/50 transition-all duration-300">
                             Utgången
                           </Badge>
                         )}
