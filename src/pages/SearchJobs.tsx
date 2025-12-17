@@ -863,7 +863,7 @@ const SearchJobs = () => {
                               const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                               if (isExpired) {
                                 return (
-                                  <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                                  <Badge variant="secondary" className="bg-red-500/20 text-white border-red-500/30 text-xs hover:bg-red-500/30 hover:border-red-500/50 transition-all duration-300">
                                     Utgången
                                   </Badge>
                                 );
