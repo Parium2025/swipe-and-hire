@@ -736,7 +736,7 @@ const AuthMobile = ({
                         <span className="text-sm text-white">Håll mig inloggad</span>
                       </label>
                       
-                       <Button type="submit" className="w-full bg-parium-navy text-white min-h-[44px] transition-all duration-300 md:hover:bg-parium-navy/80" disabled={loading}>
+                       <Button type="submit" variant="glass" className="w-full min-h-[44px]" disabled={loading}>
                          {loading ? "Loggar in..." : "Logga in"}
                        </Button>
                        
@@ -753,7 +753,7 @@ const AuthMobile = ({
                          {showResetPassword && !resetPasswordSent && (
                           <div ref={resetSectionRef} className="mt-4 p-3 rounded-lg text-center">
                             <Button
-                              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                              variant="glass"
                               size="sm"
                               onClick={handleResetPasswordEmail}
                               disabled={resetLoading}
@@ -771,10 +771,10 @@ const AuthMobile = ({
                               <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
                             </div>
                              <Button
+                               variant="glass"
                                size="sm"
                                onClick={handleResetPasswordEmail}
                                disabled={resetLoading}
-                               className="bg-parium-navy hover:bg-parium-navy/90 text-white text-sm"
                              >
                                {resetLoading ? "Skickar..." : "Skicka igen"}
                              </Button>
@@ -1218,7 +1218,8 @@ const AuthMobile = ({
                       
                        <Button 
                          type="submit" 
-                         className={`w-full bg-parium-navy hover:bg-parium-navy/90 text-white min-h-[44px] ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''}`}
+                         variant="glass"
+                         className={`w-full min-h-[44px] ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''}`}
                          disabled={loading || hasRegistered}
                        >
                          {loading ? "Registrerar..." : "Registrera"}
@@ -1235,10 +1236,11 @@ const AuthMobile = ({
                       <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
                     </div>
                     <Button
-                      className="bg-parium-navy hover:bg-parium-navy/90 text-white min-h-[44px]"
+                      variant="glass"
                       size="sm"
                       onClick={handleResendConfirmation}
                       disabled={resendLoading}
+                      className="min-h-[44px]"
                     >
                       {resendLoading ? "Skickar..." : "Skicka igen"}
                     </Button>
