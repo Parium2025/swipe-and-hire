@@ -178,6 +178,9 @@ const JobView = () => {
   };
 
   const canSubmitApplication = allRequiredQuestionsAnswered();
+  
+  // Check if job is expired
+  const isJobExpired = job ? getTimeRemaining(job.created_at, job.expires_at).isExpired : false;
 
   // Use centralized benefit labels from jobWizard types
   const getBenefitLabelLocal = (benefit: string): string => {
@@ -735,19 +738,30 @@ const JobView = () => {
               </div>
             )}
 
+            {/* Expired job warning */}
+            {isJobExpired && (
+              <div className="bg-amber-500/20 border border-amber-500/30 rounded-lg p-3 text-center">
+                <p className="text-amber-300 text-sm font-medium">
+                  Denna annons har utgått och tar inte längre emot ansökningar.
+                </p>
+              </div>
+            )}
+
             {/* Submit application button */}
             <Button
               size="lg"
               className={`w-full h-12 text-white text-base font-semibold shadow-lg transition-all duration-300 ${
-                canSubmitApplication 
+                canSubmitApplication && !isJobExpired
                   ? 'bg-green-500 md:hover:bg-green-500/80' 
                   : 'bg-white/20 cursor-not-allowed'
               }`}
               onClick={handleApplicationSubmit}
-              disabled={applying || !canSubmitApplication}
+              disabled={applying || !canSubmitApplication || isJobExpired}
             >
               {applying ? (
                 'Skickar...'
+              ) : isJobExpired ? (
+                'Ansökningstiden har gått ut'
               ) : (
                 <>
                   <Send className="mr-1.5 h-3.5 w-3.5" />
