@@ -8,7 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Clock, X, ChevronDown, Check, Search, ArrowUpDown } from 'lucide-react';
+import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star } from 'lucide-react';
+import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
@@ -67,6 +69,10 @@ const SearchJobs = () => {
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  
+  // Company suggestion state
+  const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   
   // Lazy loading state
   const [displayCount, setDisplayCount] = useState(10);
@@ -242,6 +248,35 @@ const SearchJobs = () => {
   }, [filteredAndSortedJobs, displayCount]);
 
   const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
+
+  // Find matching companies for smart search suggestion
+  const matchingCompany = useMemo(() => {
+    if (!searchInput.trim() || searchInput.length < 2) return null;
+    
+    const searchLower = searchInput.toLowerCase().trim();
+    
+    // Get unique companies from jobs
+    const uniqueCompanies = new Map<string, { id: string; name: string; logo?: string }>();
+    jobs.forEach(job => {
+      if (job.company_name && job.company_name !== 'Okänt företag') {
+        const companyLower = job.company_name.toLowerCase();
+        // Check if search term matches company name (partial match)
+        if (companyLower.includes(searchLower) || searchLower.includes(companyLower.split(' ')[0])) {
+          if (!uniqueCompanies.has(job.company_name)) {
+            uniqueCompanies.set(job.company_name, {
+              id: (job as any).employer_id || '',
+              name: job.company_name,
+              logo: undefined
+            });
+          }
+        }
+      }
+    });
+    
+    // Return first matching company
+    const matches = Array.from(uniqueCompanies.values());
+    return matches.length > 0 ? matches[0] : null;
+  }, [jobs, searchInput]);
 
   // Reset display count when filters change
   useEffect(() => {
@@ -653,6 +688,41 @@ const SearchJobs = () => {
         </CardContent>
       </Card>
 
+      {/* Company Suggestion Card - LinkedIn style */}
+      {matchingCompany && searchInput.trim() && (
+        <button
+          onClick={() => {
+            setSelectedCompanyId(matchingCompany.id);
+            setCompanyDialogOpen(true);
+          }}
+          className="w-full text-left"
+        >
+          <Card className="bg-white/5 backdrop-blur-sm border-white/20 transition-all duration-300 hover:bg-white/10 hover:border-white/30 cursor-pointer">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-12 w-12 flex-shrink-0">
+                  {matchingCompany.logo ? (
+                    <AvatarImage src={matchingCompany.logo} alt={matchingCompany.name} />
+                  ) : null}
+                  <AvatarFallback className="bg-white/20 text-white text-lg font-bold">
+                    {matchingCompany.name.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-white flex-shrink-0" />
+                    <span className="text-xs text-white uppercase tracking-wide">Företag</span>
+                  </div>
+                  <h3 className="text-base font-semibold text-white truncate mt-1">{matchingCompany.name}</h3>
+                  <p className="text-sm text-white/70">Se företagsprofil och recensioner</p>
+                </div>
+                <ChevronDown className="h-5 w-5 text-white -rotate-90 flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+        </button>
+      )}
+
 
       {/* Result indicator */}
       {searchInput && (
@@ -801,6 +871,13 @@ const SearchJobs = () => {
           </p>
         </div>
       )}
+
+      {/* Company Profile Dialog */}
+      <CompanyProfileDialog
+        open={companyDialogOpen}
+        onOpenChange={setCompanyDialogOpen}
+        companyId={selectedCompanyId || ''}
+      />
     </div>
   );
 };
