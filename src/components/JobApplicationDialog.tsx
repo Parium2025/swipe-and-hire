@@ -420,6 +420,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
             <Button
               onClick={handleSubmit}
               disabled={submitting || !canSubmit()}
+              variant="glassGreen"
               className="w-full"
               size="lg"
             >
