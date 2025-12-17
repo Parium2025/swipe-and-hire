@@ -525,7 +525,7 @@ const AuthTablet = ({
                   className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                 />
               </div>
-              <Button type="submit" className="w-full text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white" disabled={loading}>
+              <Button type="submit" variant="glass" className="w-full" disabled={loading}>
                 {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
               <div className="text-center">
@@ -672,7 +672,7 @@ const AuthTablet = ({
                         <span className="text-sm text-white">Håll mig inloggad</span>
                       </label>
                       
-                       <Button type="submit" className="w-full bg-parium-navy text-white transition-all duration-300 md:hover:bg-parium-navy/80" disabled={loading}>
+                       <Button type="submit" variant="glass" className="w-full" disabled={loading}>
                          {loading ? "Loggar in..." : "Logga in"}
                        </Button>
                        
@@ -689,7 +689,7 @@ const AuthTablet = ({
                         {showResetPassword && !resetPasswordSent && (
                          <div className="mt-4 p-3 rounded-lg text-center">
                             <Button
-                              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                              variant="glass"
                               size="sm"
                               onClick={handleResetPasswordEmail}
                               disabled={resetLoading}
@@ -707,10 +707,10 @@ const AuthTablet = ({
                               <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
                             </div>
                              <Button
+                               variant="glass"
                                size="sm"
                                onClick={handleResetPasswordEmail}
                                disabled={resetLoading}
-                               className="bg-parium-navy hover:bg-parium-navy/90 text-white text-sm"
                              >
                                {resetLoading ? "Skickar..." : "Skicka igen"}
                              </Button>
@@ -1153,7 +1153,8 @@ const AuthTablet = ({
                       
                        <Button 
                          type="submit" 
-                         className={`w-full bg-parium-navy hover:bg-parium-navy/90 text-white ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''}`}
+                         variant="glass"
+                         className={`w-full ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''}`}
                          disabled={loading || hasRegistered}
                        >
                          {loading ? "Registrerar..." : "Registrera"}
@@ -1170,7 +1171,7 @@ const AuthTablet = ({
                       <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
                     </div>
                     <Button
-                      className="bg-parium-navy hover:bg-parium-navy/90 text-white"
+                      variant="glass"
                       size="sm"
                       onClick={handleResendConfirmation}
                       disabled={resendLoading}

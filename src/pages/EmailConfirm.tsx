@@ -104,6 +104,7 @@ const EmailConfirm = () => {
               </p>
               <Button 
                 onClick={handleGoToLogin}
+                variant="glass"
                 className="w-full"
               >
                 Logga in
@@ -121,6 +122,7 @@ const EmailConfirm = () => {
               </p>
               <Button 
                 onClick={handleGoToLogin}
+                variant="glass"
                 className="w-full"
               >
                 Logga in
@@ -139,6 +141,7 @@ const EmailConfirm = () => {
               </p>
               <Button 
                 onClick={handleGoToLogin}
+                variant="glass"
                 className="w-full"
               >
                 Tillbaka till inloggning
