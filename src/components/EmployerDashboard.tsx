@@ -353,19 +353,19 @@ const EmployerDashboard = memo(() => {
                           <div className="flex flex-col items-center gap-0.5">
                             <Badge
                               variant={job.is_active ? "default" : "secondary"}
-                              className={`text-sm whitespace-nowrap transition-colors ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30"}`}
+                              className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}
                             >
                               {job.is_active ? 'Aktiv' : 'Utkast'}
                             </Badge>
                           </div>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
-                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm hover:bg-purple-500/30 transition-colors">
+                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm">
                             {job.views_count || 0}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
-                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm hover:bg-blue-500/30 transition-colors">
+                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm">
                             {job.applications_count || 0}
                           </Badge>
                         </TableCell>
