@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -99,90 +98,9 @@ const EmployerDashboard = memo(() => {
     }
   }, [page]);
 
-  // Validate if a job has all required fields to be activated
-  const isJobComplete = (job: JobPosting): boolean => {
-    const requiredFields = [
-      job.title,
-      job.description,
-      job.salary_type,
-      job.salary_transparency,
-      job.work_start_time,
-      job.work_end_time,
-      job.positions_count,
-      job.location || job.workplace_city,
-    ];
-    
-    return requiredFields.every(field => field !== null && field !== undefined && field !== '');
-  };
-
-  // Get missing fields for tooltip
-  const getMissingFields = (job: JobPosting): string[] => {
-    const missing: string[] = [];
-    if (!job.title) missing.push('Jobbtitel');
-    if (!job.description) missing.push('Jobbeskrivning');
-    if (!job.salary_type) missing.push('Lönetyp');
-    if (!job.salary_transparency) missing.push('Lönetransparens');
-    if (!job.work_start_time || !job.work_end_time) missing.push('Arbetstider');
-    if (!job.positions_count) missing.push('Antal tjänster');
-    if (!job.location && !job.workplace_city) missing.push('Plats');
-    return missing;
-  };
-
   // Check if job has expired (using effective expiration date)
   const isJobExpired = (job: JobPosting): boolean => {
     return isJobExpiredCheck(job.created_at, job.expires_at);
-  };
-
-  const toggleJobStatus = async (jobId: string, currentStatus: boolean, job: JobPosting) => {
-    // If trying to activate, check if job has expired
-    if (!currentStatus && isJobExpired(job)) {
-      toast({
-        title: "Kan inte aktivera annons",
-        description: "Annonsens 14 dagar har gått ut. Vänligen skapa en ny annons från dina mallar.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // If trying to activate, check if job is complete
-    if (!currentStatus && !isJobComplete(job)) {
-      const missing = getMissingFields(job);
-      toast({
-        title: "Kan inte aktivera annons",
-        description: `Följande fält saknas: ${missing.join(', ')}`,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('job_postings')
-        .update({ is_active: !currentStatus })
-        .eq('id', jobId);
-
-      if (error) {
-        toast({
-          title: "Fel vid uppdatering",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      toast({
-        title: "Status uppdaterad",
-        description: `Annonsen är nu ${!currentStatus ? 'aktiv' : 'inaktiv'}.`
-      });
-
-      invalidateJobs();
-    } catch (error) {
-      toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte uppdatera annonsens status.",
-        variant: "destructive"
-      });
-    }
   };
 
   const handleDeleteClick = (job: JobPosting) => {
@@ -409,53 +327,6 @@ const EmployerDashboard = memo(() => {
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex items-center justify-center gap-1.5">
-                            {/* Expired job - red switch with tooltip */}
-                            {isJobExpired(job as JobPosting) ? (
-                              <TooltipProvider delayDuration={0}>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div onClick={(e) => e.stopPropagation()}>
-                                      <Switch
-                                        checked={false}
-                                        disabled
-                                        className="scale-[0.8] cursor-pointer [&>span]:bg-red-500 opacity-100"
-                                      />
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
-                                    <p className="text-xs font-medium mb-1 text-red-400">Annonsens tid har gått ut</p>
-                                    <p className="text-xs text-white">Dina 14 dagar har passerat. Skapa en ny annons från dina mallar för att fortsätta rekrytera.</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            ) : !job.is_active && !isJobComplete(job as JobPosting) ? (
-                              /* Incomplete draft - amber switch with tooltip */
-                              <TooltipProvider delayDuration={0}>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div onClick={(e) => e.stopPropagation()}>
-                                      <Switch
-                                        checked={job.is_active}
-                                        disabled
-                                        className="scale-[0.8] cursor-pointer [&>span]:bg-amber-500 opacity-100"
-                                      />
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
-                                    <p className="text-xs font-medium mb-1">Saknade fält:</p>
-                                    <p className="text-xs text-white">{getMissingFields(job as JobPosting).join(', ')}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            ) : (
-                              /* Normal switch */
-                              <Switch
-                                checked={job.is_active}
-                                onCheckedChange={() => toggleJobStatus(job.id, job.is_active, job as JobPosting)}
-                                onClick={(e) => e.stopPropagation()}
-                                className="scale-[0.8]"
-                              />
-                            )}
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -546,7 +417,6 @@ const EmployerDashboard = memo(() => {
                         <MobileJobCard
                           key={job.id}
                           job={job as any}
-                          onToggleStatus={toggleJobStatus}
                           onEdit={handleEditJob}
                           onDelete={handleDeleteClick}
                           onEditDraft={(j) => handleEditDraft(j as JobPosting)}
