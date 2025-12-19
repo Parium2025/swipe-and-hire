@@ -259,7 +259,7 @@ const SavedJobs = () => {
                     <button
                       onClick={(e) => handleRemoveSavedJob(savedJob.id, e)}
                       disabled={isRemoving}
-                      className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/10 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-red-400 disabled:opacity-50 flex-shrink-0 active:scale-95"
+                      className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-red-400 disabled:opacity-50 flex-shrink-0 active:scale-95"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

@@ -218,7 +218,7 @@ const TeamManagement = () => {
       <div className="flex items-center gap-2 mb-6">
         <Users className="h-5 w-5 text-white" />
         <h2 className="text-lg font-semibold text-white">Team</h2>
-        <Badge className="bg-white/10 text-white border-white/20 ml-auto">
+        <Badge variant="glass" className="ml-auto">
           {teamMembers.length} {teamMembers.length === 1 ? 'medlem' : 'medlemmar'}
         </Badge>
       </div>
@@ -289,7 +289,7 @@ const TeamManagement = () => {
                       : member.email || 'Okänd'}
                   </span>
                   {member.user_id === user?.id && (
-                    <Badge className="bg-white/10 text-white border-white/20 text-xs">Du</Badge>
+                    <Badge variant="glass" className="text-xs">Du</Badge>
                   )}
                 </div>
                 {member.email && (
