@@ -23,9 +23,9 @@ const buttonVariants = cva(
           "rounded-md bg-secondary text-secondary-foreground md:hover:bg-secondary/80 transition-colors duration-150",
         ghost: "rounded-md md:hover:bg-accent md:hover:text-accent-foreground transition-colors duration-150",
         link: "text-primary underline-offset-4 md:hover:underline",
-        // 🎨 Glassmorphism oval style - consistent across entire app
+        // 🎨 Glassmorphism oval style - transparent default, glass effect on hover
         glass:
-          "rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white md:hover:bg-white/20 md:hover:border-white/50 active:scale-95 active:bg-white/20 transition-all duration-300",
+          "rounded-full bg-transparent border border-white/20 text-white md:hover:bg-white/10 md:hover:backdrop-blur-sm md:hover:border-white/50 active:scale-95 active:bg-white/20 transition-all duration-300",
         // Glass variant with amber accent (for save/warning actions)
         glassAmber:
           "rounded-full bg-amber-500/20 backdrop-blur-sm border border-amber-500/40 text-white md:hover:bg-amber-500/30 md:hover:border-amber-500/50 active:scale-95 transition-all duration-300",
