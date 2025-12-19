@@ -2297,7 +2297,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                     <div className="space-y-6 max-w-4xl mx-auto w-full">
                       {/* Preview Mode Toggle - iOS Style like ProfilePreview */}
                       <div className="flex flex-col items-center space-y-4">
-                        <div className="relative inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
+                        <div className="relative inline-flex bg-white/5 backdrop-blur-[2px] rounded-lg p-1 border border-white/20">
                           {/* Sliding background */}
                           <motion.div
                             className="absolute top-1 bottom-1 bg-white/20 rounded-md"
