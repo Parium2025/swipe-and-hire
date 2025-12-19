@@ -82,17 +82,17 @@ const getStatusIcon = (status: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'pending':
-      return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+      return 'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 transition-colors';
     case 'reviewed':
-      return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      return 'bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30 transition-colors';
     case 'accepted':
-      return 'bg-green-500/20 text-green-300 border-green-500/30';
+      return 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30 transition-colors';
     case 'rejected':
-      return 'bg-red-500/20 text-red-300 border-red-500/30';
+      return 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30 transition-colors';
     case 'interview':
-      return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+      return 'bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30 transition-colors';
     default:
-      return 'bg-white/20 text-white border-white/30';
+      return 'bg-white/20 text-white border-white/30 hover:bg-white/30 transition-colors';
   }
 };
 
