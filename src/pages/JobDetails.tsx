@@ -265,10 +265,10 @@ const JobDetails = () => {
                   {job.location}
                 </div>
                 <Badge
-                  className={`text-sm whitespace-nowrap cursor-pointer transition-[background-color,border-color,transform] duration-150 hover:scale-[1.03] ${
+                  className={`text-sm whitespace-nowrap cursor-pointer transition-colors ${
                     job.is_active
-                      ? "bg-green-500/20 text-green-300 border border-green-500/30 hover:bg-green-500/30 hover:border-green-500/50"
-                      : "bg-gray-500/20 text-gray-300 border border-gray-500/30 hover:bg-gray-500/30 hover:border-gray-500/50"
+                      ? "bg-green-500/20 text-green-300 border border-green-500/30 hover:bg-green-500/30"
+                      : "bg-gray-500/20 text-gray-300 border border-gray-500/30 hover:bg-gray-500/30"
                   }`}
                   onClick={async () => {
                     try {
