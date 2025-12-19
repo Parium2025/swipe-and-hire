@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { Eye, Users, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
@@ -12,49 +11,18 @@ import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpiratio
 
 interface MobileJobCardProps {
   job: JobPosting;
-  onToggleStatus: (jobId: string, currentStatus: boolean, job: JobPosting) => void;
   onEdit: (job: JobPosting) => void;
   onDelete: (job: JobPosting) => void;
   onEditDraft?: (job: JobPosting) => void;
 }
-
-// Validate if a job has all required fields to be activated
-const isJobComplete = (job: JobPosting): boolean => {
-  const requiredFields = [
-    job.title,
-    job.description,
-    (job as any).salary_type,
-    (job as any).salary_transparency,
-    (job as any).work_start_time,
-    (job as any).work_end_time,
-    (job as any).positions_count,
-    job.location || (job as any).workplace_city,
-  ];
-  
-  return requiredFields.every(field => field !== null && field !== undefined && field !== '');
-};
-
-// Get missing fields for tooltip
-const getMissingFields = (job: JobPosting): string[] => {
-  const missing: string[] = [];
-  if (!job.title) missing.push('Jobbtitel');
-  if (!job.description) missing.push('Jobbeskrivning');
-  if (!(job as any).salary_type) missing.push('Lönetyp');
-  if (!(job as any).salary_transparency) missing.push('Lönetransparens');
-  if (!(job as any).work_start_time || !(job as any).work_end_time) missing.push('Arbetstider');
-  if (!(job as any).positions_count) missing.push('Antal tjänster');
-  if (!job.location && !(job as any).workplace_city) missing.push('Plats');
-  return missing;
-};
 
 // Check if job has expired (using effective expiration date)
 const isJobExpired = (job: JobPosting): boolean => {
   return isJobExpiredCheck(job.created_at, job.expires_at);
 };
 
-export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEditDraft }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: MobileJobCardProps) => {
   const navigate = useNavigate();
-  const jobIsComplete = isJobComplete(job);
   const jobIsExpired = isJobExpired(job);
 
   const handleCardClick = () => {
@@ -87,53 +55,6 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
               </Badge>
             )}
           </div>
-          {/* Expired job - red switch with tooltip */}
-          {jobIsExpired ? (
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <Switch
-                      checked={false}
-                      disabled
-                      className="flex-shrink-0 cursor-pointer [&>span]:bg-red-500 opacity-100"
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
-                  <p className="text-xs font-medium mb-1 text-red-400">Annonsens tid har gått ut</p>
-                  <p className="text-xs text-white">Dina 14 dagar har passerat. Skapa en ny annons från dina mallar.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : !job.is_active && !jobIsComplete ? (
-            /* Incomplete draft - amber switch with tooltip */
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <Switch
-                      checked={job.is_active}
-                      disabled
-                      className="flex-shrink-0 cursor-pointer [&>span]:bg-amber-500 opacity-100"
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="left" className="max-w-xs bg-slate-900/95 border-white/20 text-white">
-                  <p className="text-xs font-medium mb-1">Saknade fält:</p>
-                  <p className="text-xs text-white">{getMissingFields(job).join(', ')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            /* Normal switch */
-            <Switch
-              checked={job.is_active}
-              onCheckedChange={() => onToggleStatus(job.id, job.is_active, job)}
-              onClick={(e) => e.stopPropagation()}
-              className="flex-shrink-0"
-            />
-          )}
         </div>
 
         {/* Status Badge */}
