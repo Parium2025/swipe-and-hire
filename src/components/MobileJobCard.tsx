@@ -139,7 +139,6 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete, onEd
         {/* Status Badge */}
         <div className="flex flex-col items-start gap-0.5">
           <Badge
-            variant={job.is_active ? "default" : "secondary"}
             className={`text-xs transition-colors ${
               jobIsExpired 
                 ? "bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30"
