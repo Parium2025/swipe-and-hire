@@ -784,7 +784,7 @@ const JobView = () => {
                   );
                 }
                 return (
-                  <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                  <Badge variant="glass" className="text-xs">
                     <Timer className="h-3 w-3 mr-1" />
                     {text} kvar att ansöka
                   </Badge>
