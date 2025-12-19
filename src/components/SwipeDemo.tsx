@@ -90,7 +90,7 @@ export const SwipeDemo = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
+        <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 backdrop-blur-[2px] rounded-full border border-white/20">
           <Heart className="w-5 h-5 text-secondary fill-secondary" />
           <span className="text-white font-semibold">
             {matchCount} Matchningar
