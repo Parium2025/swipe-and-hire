@@ -59,17 +59,19 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
 
         {/* Status Badge */}
         <div className="flex flex-col items-start gap-0.5">
-          <Badge
-            className={`text-xs transition-colors ${
-              jobIsExpired 
-                ? "bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30"
-                : job.is_active 
-                  ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30" 
-                  : "bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30"
-            }`}
-          >
-            {jobIsExpired ? 'Utgången' : job.is_active ? 'Aktiv' : 'Utkast'}
-          </Badge>
+          {jobIsExpired ? (
+            <Badge className="bg-red-500/20 text-red-300 border-red-500/30 text-xs transition-colors hover:bg-red-500/30">
+              Utgången
+            </Badge>
+          ) : job.is_active ? (
+            <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-colors hover:bg-green-500/30">
+              Aktiv
+            </Badge>
+          ) : (
+            <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs transition-colors hover:bg-amber-500/30">
+              Utkast
+            </Badge>
+          )}
           {jobIsExpired && (
             <span className="text-[10px] text-red-300/70">Skapa ny annons</span>
           )}
