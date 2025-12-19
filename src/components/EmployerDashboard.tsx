@@ -270,23 +270,23 @@ const EmployerDashboard = memo(() => {
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex flex-col items-center gap-0.5">
                             {job.is_active ? (
-                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-colors hover:bg-green-500/30">
+                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-[background-color,border-color,transform] duration-150 hover:bg-green-500/30 hover:border-green-500/50 hover:scale-[1.03]">
                                 Aktiv
                               </Badge>
                             ) : (
-                              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-colors hover:bg-amber-500/30">
+                              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-[background-color,border-color,transform] duration-150 hover:bg-amber-500/30 hover:border-amber-500/50 hover:scale-[1.03]">
                                 Utkast
                               </Badge>
                             )}
                           </div>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
-                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm transition-colors hover:bg-purple-500/30">
+                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm transition-[background-color,border-color,transform] duration-150 hover:bg-purple-500/30 hover:border-purple-500/50 hover:scale-[1.03]">
                             {job.views_count || 0}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
-                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm transition-colors hover:bg-blue-500/30">
+                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm transition-[background-color,border-color,transform] duration-150 hover:bg-blue-500/30 hover:border-blue-500/50 hover:scale-[1.03]">
                             {job.applications_count || 0}
                           </Badge>
                         </TableCell>
