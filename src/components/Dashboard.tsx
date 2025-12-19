@@ -180,8 +180,7 @@ const Dashboard = memo(() => {
                       <TableCell className="text-center px-2 py-3">
                         <div className="flex justify-center">
                           <Badge 
-                            variant={job.is_active ? "default" : "secondary"}
-                            className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
+                            className={`text-sm whitespace-nowrap transition-[background-color,border-color,transform] duration-150 hover:scale-[1.03] ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30 hover:border-green-500/50" : "bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30 hover:border-gray-500/50"}`}
                           >
                             {job.is_active ? 'Aktiv' : 'Inaktiv'}
                           </Badge>
