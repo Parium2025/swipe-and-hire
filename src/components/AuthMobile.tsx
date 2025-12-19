@@ -579,7 +579,7 @@ const AuthMobile = ({
                           className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 sm:h-9"
                 />
               </div>
-              <Button type="submit" className="w-full min-h-[44px] text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white" disabled={loading}>
+              <Button type="submit" variant="glass" className="w-full min-h-[44px]" disabled={loading}>
                 {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
               <div className="text-center">
