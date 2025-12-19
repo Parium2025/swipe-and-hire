@@ -40,7 +40,7 @@ export function UnsavedChangesDialog({
           <AlertDialogCancel 
             onClick={onCancel} 
             disabled={isSaving}
-            className="rounded-full px-3 py-2 text-sm bg-white/10 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50 mt-0"
+            className="rounded-full px-3 py-2 text-sm bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50 mt-0"
           >
             Avbryt
           </AlertDialogCancel>

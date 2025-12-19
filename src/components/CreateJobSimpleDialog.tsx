@@ -664,7 +664,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                 setTimeout(() => setTemplateMenuOpen(true), 100);
               }}
               style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
-              className="flex-[0.6] mt-0 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+              className="flex-[0.6] mt-0 flex items-center justify-center rounded-full bg-white/5 backdrop-blur-[2px] border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50"
             >
               Avbryt
             </AlertDialogCancel>
