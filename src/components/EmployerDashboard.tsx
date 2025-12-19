@@ -270,11 +270,11 @@ const EmployerDashboard = memo(() => {
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex flex-col items-center gap-0.5">
                             {job.is_active ? (
-                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-[background-color,border-color,transform] duration-150 hover:bg-green-500/30 hover:border-green-500/50 hover:scale-[1.03]">
+                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-colors hover:bg-green-500/30">
                                 Aktiv
                               </Badge>
                             ) : (
-                              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-[background-color,border-color,transform] duration-150 hover:bg-amber-500/30 hover:border-amber-500/50 hover:scale-[1.03]">
+                              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-colors hover:bg-amber-500/30">
                                 Utkast
                               </Badge>
                             )}
