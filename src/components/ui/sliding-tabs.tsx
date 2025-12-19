@@ -7,7 +7,7 @@ interface SlidingTabsProps {
 
 export function SlidingTabs({ isLogin, onTabChange }: SlidingTabsProps) {
   return (
-    <div className="relative flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20 mb-6">
+    <div className="relative flex bg-white/5 backdrop-blur-[2px] rounded-lg p-1 border border-white/20 mb-6">
       {/* Sliding background */}
       <motion.div
         className="absolute top-1 bottom-1 bg-parium-navy rounded-md"

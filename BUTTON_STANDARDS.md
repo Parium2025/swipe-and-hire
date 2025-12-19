@@ -1,109 +1,119 @@
-# Button Standards Documentation
+# Button & Badge Standards Documentation
 
 Senast uppdaterad: 2025-12-19
 
-## Designsystem för knappar
+## Designsystem - Glass-stil
+
+### Ny Standard: Subtil Glass-effekt
+Alla interaktiva glass-element använder nu en subtil stil som matchar "Deltid"-badgen:
+
+```css
+/* Default state - subtil */
+bg-white/5 backdrop-blur-[2px] border-white/20
+
+/* Hover state - starkare */
+hover:bg-white/15 hover:backdrop-blur-sm hover:border-white/40
+```
+
+### Komponenter med glass-variant
+
+| Komponent | Variant | Beskrivning |
+|-----------|---------|-------------|
+| `Button` | `variant="glass"` | Oval knapp med subtil glass-effekt |
+| `Badge` | `variant="glass"` | Rund badge med subtil glass-effekt |
 
 ### Primära varianter
 
 | Variant | Användning | Stil |
 |---------|------------|------|
-| `glass` | Action-knappar (CTA, spara, skicka) | Oval, glasmorfism, vit text |
+| `glass` | Action-knappar, badges, interaktiva element | Subtil bakgrund (5%), starkare på hover |
 | `outline` | Form-kontroller, dropdowns | Rektangulär, transparent med border |
 | `ghost` | Sekundära actions, navigation | Ingen bakgrund, hover-effekt |
 | `destructive` | Radera, ta bort | Röd färg för varning |
 
-### Riktlinjer
+---
 
-- **Action-knappar**: Använd alltid `variant="glass"` för primära actions
-- **Form-kontroller**: Använd `variant="outline"` för select-triggers och dropdowns
-- **Ikon-knappar (destructive)**: Manuell styling med `text-destructive` och hover-effekter
-- **Inverterade knappar**: Tillåtet för kontrast (t.ex. mobil-nav på mörk bakgrund)
+## Viktiga riktlinjer
+
+### ✅ Interaktiva element (använd bg-white/5)
+- Knappar med default bakgrund
+- Badges (employment type, countdown, status)
+- Toggle-switchar
+- Interaktiva kort (CTA)
+- Ikon-knappar (edit, delete)
+
+### ✅ Paneler/Kort (behåll bg-white/10)
+- Card-komponenter
+- AlertDialogContent
+- Info-sektioner
+- Formulär-bakgrunder
+- Loading states
+
+### ✅ Hover-only effekter (korrekt som de är)
+- `hover:bg-white/10` eller `md:hover:bg-white/10`
+- Visar endast effekt vid hover
 
 ---
 
-## Granskade sidor och status
+## Uppdaterade filer
 
-### ✅ Auth-sidor
-
-| Fil | Status | Noteringar |
-|-----|--------|------------|
-| `src/pages/Auth.tsx` | ✅ Uppdaterad | Alla action-knappar använder `variant="glass"` |
-| `src/components/AuthMobile.tsx` | ✅ Uppdaterad | "Spara nytt lösenord" använder `variant="glass"` |
-| `src/components/AuthDesktop.tsx` | ✅ Uppdaterad | "Spara nytt lösenord" använder `variant="glass"` |
-
-### ✅ Landing-sidor
-
-| Fil | Status | Noteringar |
-|-----|--------|------------|
-| `src/pages/Landing.tsx` | ✅ Korrekt | CTA-kort använder manuell glass-styling (motion.div) |
-| `src/components/LandingNav.tsx` | ✅ Uppdaterad | Desktop login-knapp använder `variant="glass"` |
-
-### ✅ Employer Dashboard
-
-| Fil | Status | Noteringar |
-|-----|--------|------------|
-| `src/components/EmployerDashboard.tsx` | ✅ Korrekt | Action-knappar använder `variant="glass"` |
-| `src/components/EditJobDialog.tsx` | ✅ Korrekt | Spara/avbryt använder korrekta varianter |
-| `src/components/CreateJobSimpleDialog.tsx` | ✅ Korrekt | Action-knappar använder `variant="glass"` |
-| `src/components/CandidatesTable.tsx` | ✅ Korrekt | Pagination och ikon-knappar korrekt stylade |
-
-### ✅ Employer Profile-sidor
-
-| Fil | Status | Noteringar |
-|-----|--------|------------|
-| `src/pages/employer/EmployerProfile.tsx` | ✅ Uppdaterad | "Lägg till" för sociala medier använder `variant="glass"` |
-| `src/pages/employer/CompanyProfile.tsx` | ✅ Korrekt | Spara-knapp använder `variant="glass"` |
-| `src/pages/employer/EmployerSettings.tsx` | ✅ Korrekt | Action-knappar korrekt stylade |
-| `src/pages/Billing.tsx` | ✅ Korrekt | Använder `variant="glass"` |
-
-### ✅ Job Seeker-sidor
-
-| Fil | Status | Noteringar |
-|-----|--------|------------|
-| `src/pages/Profile.tsx` | ✅ Korrekt | "Spara ändringar" använder `variant="glass"`, dropdowns använder `variant="outline"` |
-| `src/pages/MyApplications.tsx` | ✅ Korrekt | Inga action-knappar att granska |
-| `src/pages/SavedJobs.tsx` | ✅ Korrekt | "Sök jobb" använder `variant="glass"`, remove-knapp har manuell destructive-styling |
-
----
-
-## Speciella fall
-
-### Ikon-knappar med destructive action
+### Button-komponent
 ```tsx
-// Korrekt manuell styling för destructive ikon-knappar
+// src/components/ui/button.tsx
+glass: "rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 text-white md:hover:bg-white/15 md:hover:backdrop-blur-sm md:hover:border-white/50 active:scale-95 active:bg-white/20 transition-all duration-300"
+```
+
+### Badge-komponent
+```tsx
+// src/components/ui/badge.tsx
+glass: "bg-white/5 backdrop-blur-[2px] border-white/20 text-white hover:bg-white/15 hover:backdrop-blur-sm hover:border-white/40"
+```
+
+---
+
+## Granskade och uppdaterade filer
+
+| Fil | Element | Status |
+|-----|---------|--------|
+| `src/components/ui/button.tsx` | glass variant | ✅ Uppdaterad |
+| `src/components/ui/badge.tsx` | glass variant | ✅ Uppdaterad |
+| `src/components/ui/sliding-tabs.tsx` | Toggle bakgrund | ✅ Uppdaterad |
+| `src/components/JobTitleCell.tsx` | Deltid-badge | ✅ Uppdaterad |
+| `src/components/TeamManagement.tsx` | Team badges | ✅ Uppdaterad |
+| `src/components/EmployerDashboard.tsx` | Edit/Delete knappar | ✅ Uppdaterad |
+| `src/components/SwipeDemo.tsx` | Matchningar badge | ✅ Uppdaterad |
+| `src/components/CreateJobSimpleDialog.tsx` | Avbryt-knapp | ✅ Uppdaterad |
+| `src/components/UnsavedChangesDialog.tsx` | Avbryt-knapp | ✅ Uppdaterad |
+| `src/components/EditJobDialog.tsx` | Preview toggle | ✅ Uppdaterad |
+| `src/components/MobileJobWizard.tsx` | Preview toggle | ✅ Uppdaterad |
+| `src/pages/ProfilePreview.tsx` | View mode toggle | ✅ Uppdaterad |
+| `src/pages/SavedJobs.tsx` | Soptunne-knapp | ✅ Uppdaterad |
+| `src/pages/Landing.tsx` | CTA-kort | ✅ Uppdaterad |
+| `src/pages/SearchJobs.tsx` | Ansök/hjärta | ✅ Använder variant |
+| `src/pages/JobView.tsx` | Dagar kvar badge | ✅ Använder variant |
+| `src/pages/MyApplications.tsx` | Dagar kvar badge | ✅ Använder variant |
+| `src/components/ReadOnlyMobileJobCard.tsx` | Badges | ✅ Använder variant |
+
+---
+
+## Manuell styling för destructive ikon-knappar
+
+```tsx
+// Soptunna med destructive hover
 <button
-  className="text-destructive hover:text-destructive/80 transition-colors"
-  onClick={handleDelete}
+  className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-red-400 active:scale-95"
 >
   <Trash2 className="h-4 w-4" />
 </button>
-```
-
-### CTA-kort (Landing)
-```tsx
-// Korrekt manuell glass-styling för kort-komponenter
-<motion.div
-  className="bg-white/10 backdrop-blur-sm border border-white/20 text-white p-4 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105"
->
-  {/* content */}
-</motion.div>
-```
-
-### Inverterade knappar (hög kontrast)
-```tsx
-// Tillåtet för mobil-nav på mörk bakgrund
-<Button className="w-full bg-white text-primary hover:bg-white/90">
-  Logga in
-</Button>
 ```
 
 ---
 
 ## Checklista vid ny utveckling
 
-- [ ] Använd `variant="glass"` för alla primära action-knappar
+- [ ] Använd `variant="glass"` för alla primära action-knappar och badges
 - [ ] Använd `variant="outline"` för form-kontroller och dropdowns
-- [ ] Undvik manuella klasser som `text-white` på Button - använd variant istället
-- [ ] Verifiera att destructive actions har tydlig visuell indikation
+- [ ] För manuell glass-styling: `bg-white/5 backdrop-blur-[2px]` (INTE `bg-white/10`)
+- [ ] Hover: `hover:bg-white/15` (INTE `hover:bg-white/20`)
+- [ ] Paneler/kort kan behålla `bg-white/10` för läsbarhet
 - [ ] Testa på både desktop och mobil
