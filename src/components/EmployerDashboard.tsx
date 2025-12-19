@@ -257,7 +257,7 @@ const EmployerDashboard = memo(() => {
                     pageJobs.map((job) => (
                       <TableRow 
                         key={job.id}
-                        className={`group border-white/10 cursor-pointer transition-colors ${
+                        className={`border-white/10 cursor-pointer transition-colors ${
                           job.is_active 
                             ? "hover:bg-white/5" 
                             : "hover:bg-amber-500/10"
@@ -270,11 +270,11 @@ const EmployerDashboard = memo(() => {
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex flex-col items-center gap-0.5">
                             {job.is_active ? (
-                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-colors hover:bg-green-500/30 group-hover:bg-green-500/30">
+                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-colors hover:bg-green-500/30">
                                 Aktiv
                               </Badge>
                             ) : (
-                              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-colors hover:bg-amber-500/30 group-hover:bg-amber-500/30">
+                              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-colors hover:bg-amber-500/30">
                                 Utkast
                               </Badge>
                             )}
