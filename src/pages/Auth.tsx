@@ -595,7 +595,7 @@ const Auth = () => {
                 disabled={resending}
                 className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
               />
-              <Button type="submit" className="w-full transition-all duration-300 md:hover:bg-primary/90" disabled={resending}>
+              <Button type="submit" variant="glass" className="w-full" disabled={resending}>
                 {resending ? 'Skickar...' : 'Skicka ny länk'}
               </Button>
             </form>
@@ -604,7 +604,7 @@ const Auth = () => {
                 <p className="text-sm text-white whitespace-pre-line">{resendMessage}</p>
               </div>
             )}
-            <Button onClick={handleBackToLogin} className="w-full transition-all duration-300 md:hover:bg-primary/90">
+            <Button onClick={handleBackToLogin} variant="glass" className="w-full">
               Tillbaka till inloggning
             </Button>
           </CardContent>
@@ -642,6 +642,7 @@ const Auth = () => {
                     setConfirmationStatus('none');
                     navigate('/auth', { replace: true });
                   }}
+                  variant="glass"
                   className="w-full"
                 >
                   Logga in
@@ -663,6 +664,7 @@ const Auth = () => {
                     setConfirmationStatus('none');
                     navigate('/auth', { replace: true });
                   }}
+                  variant="glass"
                   className="w-full"
                 >
                   Logga in
@@ -684,6 +686,7 @@ const Auth = () => {
                     setConfirmationStatus('none');
                     navigate('/auth', { replace: true });
                   }}
+                  variant="glass"
                   className="w-full"
                 >
                   Försök igen
