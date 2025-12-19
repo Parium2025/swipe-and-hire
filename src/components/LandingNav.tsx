@@ -47,8 +47,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
             <div className="hidden md:block">
               <Button
                 onClick={onLoginClick}
-                variant="ghost"
-                className="text-white hover:bg-white/10 border border-white/20"
+                variant="glass"
               >
                 Logga in
               </Button>
