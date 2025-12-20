@@ -369,13 +369,13 @@ export function EmployerSidebar() {
                         <span className="font-medium flex-1 text-left">
                           {item.title}
                           {item.url === '/dashboard' && preloadedEmployerActiveJobs > 0 && (
-                            <span className="text-white/80 font-normal ml-1">({preloadedEmployerActiveJobs})</span>
+                            <span className="text-white font-normal ml-1">({preloadedEmployerActiveJobs})</span>
                           )}
                           {item.url === '/my-jobs' && preloadedEmployerMyJobs > 0 && (
-                            <span className="text-white/80 font-normal ml-1">({preloadedEmployerMyJobs})</span>
+                            <span className="text-white font-normal ml-1">({preloadedEmployerMyJobs})</span>
                           )}
                           {item.url === '/candidates' && preloadedEmployerCandidates > 0 && (
-                            <span className="text-white/80 font-normal ml-1">({preloadedEmployerCandidates})</span>
+                            <span className="text-white font-normal ml-1">({preloadedEmployerCandidates})</span>
                           )}
                         </span>
                       )}
