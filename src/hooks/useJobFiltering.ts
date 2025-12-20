@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { expandSearchTerms } from '@/lib/smartSearch';
+import { expandSearchTerms, detectSalarySearch } from '@/lib/smartSearch';
 
 export interface FilterableJob {
   id: string;
@@ -61,37 +61,64 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
     
     // Filter based on search term
     if (searchTerm.trim()) {
-      const expandedTerms = expandSearchTerms(searchTerm);
-      result = result.filter(job => {
-        // Comprehensive searchable text including ALL relevant fields
-        const searchableText = [
-          job.title,
-          job.location,
-          job.workplace_city,
-          job.workplace_address,
-          job.workplace_name,
-          job.workplace_postal_code,
-          job.employment_type,
-          job.work_schedule,
-          job.occupation,
-          job.category,
-          job.description,
-          job.requirements,
-          job.pitch,
-          job.work_location_type,
-          job.remote_work_possible,
-          job.salary_type,
-          job.employer_profile?.first_name,
-          job.employer_profile?.last_name,
-          // Add formatted salary for search
-          job.salary_min && job.salary_max ? `${job.salary_min}-${job.salary_max}` : '',
-          job.positions_count ? `${job.positions_count} platser` : '',
-        ].filter(Boolean).join(' ').toLowerCase();
-        
-        return expandedTerms.some(term => 
-          searchableText.includes(term.toLowerCase())
-        );
-      });
+      // Check if it's a salary search first
+      const salarySearch = detectSalarySearch(searchTerm);
+      
+      if (salarySearch.isSalarySearch) {
+        // Filter by salary range - job's salary should overlap with the search range
+        result = result.filter(job => {
+          // Skip jobs without salary info
+          if (!job.salary_min && !job.salary_max) return false;
+          
+          const jobMin = job.salary_min || 0;
+          const jobMax = job.salary_max || jobMin;
+          
+          // Check if the target salary falls within the job's salary range
+          // OR if the job's salary range overlaps with our search range
+          const targetSalary = salarySearch.targetSalary!;
+          
+          // Job offers this salary (target is within job's range)
+          const jobOffersTarget = targetSalary >= jobMin && targetSalary <= jobMax;
+          
+          // Or job's range overlaps with our search range
+          const rangesOverlap = jobMax >= salarySearch.rangeMin && jobMin <= salarySearch.rangeMax;
+          
+          return jobOffersTarget || rangesOverlap;
+        });
+      } else {
+        // Regular text search with synonyms
+        const expandedTerms = expandSearchTerms(searchTerm);
+        result = result.filter(job => {
+          // Comprehensive searchable text including ALL relevant fields
+          const searchableText = [
+            job.title,
+            job.location,
+            job.workplace_city,
+            job.workplace_address,
+            job.workplace_name,
+            job.workplace_postal_code,
+            job.employment_type,
+            job.work_schedule,
+            job.occupation,
+            job.category,
+            job.description,
+            job.requirements,
+            job.pitch,
+            job.work_location_type,
+            job.remote_work_possible,
+            job.salary_type,
+            job.employer_profile?.first_name,
+            job.employer_profile?.last_name,
+            // Add formatted salary for search
+            job.salary_min && job.salary_max ? `${job.salary_min}-${job.salary_max}` : '',
+            job.positions_count ? `${job.positions_count} platser` : '',
+          ].filter(Boolean).join(' ').toLowerCase();
+          
+          return expandedTerms.some(term => 
+            searchableText.includes(term.toLowerCase())
+          );
+        });
+      }
     }
     
     // Sort
