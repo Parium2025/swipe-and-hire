@@ -18,10 +18,10 @@ interface CandidatesTableProps {
 }
 
 const statusConfig = {
-  pending: { label: 'Ny', className: 'bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30 transition-colors' },
-  reviewing: { label: 'Granskas', className: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30 transition-colors' },
-  accepted: { label: 'Accepterad', className: 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30 transition-colors' },
-  rejected: { label: 'Avvisad', className: 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30 transition-colors' },
+  pending: { label: 'Ny', className: 'bg-blue-500/20 text-blue-300 border-blue-500/30 group-hover:backdrop-brightness-90 hover:bg-blue-500/30 hover:backdrop-brightness-110 transition-all duration-300' },
+  reviewing: { label: 'Granskas', className: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30 group-hover:backdrop-brightness-90 hover:bg-yellow-500/30 hover:backdrop-brightness-110 transition-all duration-300' },
+  accepted: { label: 'Accepterad', className: 'bg-green-500/20 text-green-300 border-green-500/30 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:backdrop-brightness-110 transition-all duration-300' },
+  rejected: { label: 'Avvisad', className: 'bg-red-500/20 text-red-300 border-red-500/30 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:backdrop-brightness-110 transition-all duration-300' },
 };
 
 export function CandidatesTable({ 
@@ -91,7 +91,7 @@ export function CandidatesTable({
               return (
                 <TableRow
                   key={application.id}
-                  className="border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-all duration-150 active:bg-white/10 active:scale-[0.99]"
+                  className="group border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-all duration-150 active:bg-white/10 active:scale-[0.99]"
                   onClick={() => handleRowClick(application)}
                 >
                   <TableCell>
@@ -116,7 +116,7 @@ export function CandidatesTable({
                     {application.job_title || 'Okänd tjänst'}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={status.className}>
+                    <Badge variant="glass" className={status.className}>
                       {status.label}
                     </Badge>
                   </TableCell>
