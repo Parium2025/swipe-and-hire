@@ -56,6 +56,57 @@ body {
 [data-sidebar="sidebar"] :is(button, a)::-moz-focus-inner { border: 0 !important; }
 [data-sidebar="sidebar"] :is(button, a)::-webkit-focus-inner { border: 0 !important; padding: 0 !important; }
 
+/* ============================================
+   GLOBAL: Ta bort alla fokusramar (blå outlines)
+   Gäller hela appen för att undvika oönskade ramar
+   vid keyboard-interaktion eller oavsiktliga klick
+   ============================================ */
+*:focus {
+  outline: none !important;
+}
+
+*:focus-visible {
+  outline: none !important;
+}
+
+/* Ta bort ring-effekter från interaktiva element */
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible,
+[role="button"]:focus,
+[role="button"]:focus-visible,
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible,
+video:focus,
+video:focus-visible,
+[tabindex]:focus,
+[tabindex]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Specifikt för video-element och media */
+video,
+video:focus,
+video:active {
+  outline: none !important;
+  border: none !important;
+}
+
+/* Ta bort webkit-specifika fokusstilar */
+::-moz-focus-inner {
+  border: 0 !important;
+}
+
+::-webkit-focus-inner {
+  border: 0 !important;
+  padding: 0 !important;
+}
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
