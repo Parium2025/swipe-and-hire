@@ -102,6 +102,36 @@ const SearchJobs = () => {
 
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
+  // Real-time prenumeration för applications_count uppdateringar
+  useEffect(() => {
+    const channel = supabase
+      .channel('job-applications-count')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'job_postings'
+        },
+        (payload) => {
+          // Uppdatera cache med nya applications_count
+          queryClient.setQueryData(['public-jobs', selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes], (oldData: Job[] | undefined) => {
+            if (!oldData) return oldData;
+            return oldData.map(job => 
+              job.id === payload.new.id 
+                ? { ...job, applications_count: payload.new.applications_count }
+                : job
+            );
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes]);
+
   // Use React Query with lazy loading - load only what's needed
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['public-jobs', selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes],
