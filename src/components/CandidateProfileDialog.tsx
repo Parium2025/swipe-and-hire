@@ -281,19 +281,19 @@ export const CandidateProfileDialog = ({
                 <div className="grid sm:grid-cols-2 gap-3">
                 {application.employment_status && (
                     <div className="space-y-0.5">
-                      <span className="text-sm text-white/70">Anställningsstatus</span>
+                      <span className="text-sm text-white">Anställningsstatus</span>
                       <p className="text-sm text-white">{application.employment_status}</p>
                     </div>
                   )}
                   {application.work_schedule && (
                     <div className="space-y-0.5">
-                      <span className="text-sm text-white/70">Hur mycket jobbar du idag?</span>
+                      <span className="text-sm text-white">Hur mycket jobbar du idag?</span>
                       <p className="text-sm text-white">{application.work_schedule}</p>
                     </div>
                   )}
                   {application.availability && (
                     <div className="space-y-0.5 sm:col-span-2">
-                      <span className="text-sm text-white/70">När kan du börja nytt jobb?</span>
+                      <span className="text-sm text-white">När kan du börja nytt jobb?</span>
                       <p className="text-sm text-white">{application.availability}</p>
                     </div>
                   )}
@@ -374,7 +374,7 @@ export const CandidateProfileDialog = ({
                         key={questionId}
                         className="border-t border-white/10 pt-3 first:border-t-0 first:pt-0"
                       >
-                        <p className="text-sm text-white/70 mb-0.5">
+                        <p className="text-sm text-white mb-0.5">
                           {jobQuestions[questionId]?.text || questionId}
                         </p>
                         <p className="text-sm text-white">
