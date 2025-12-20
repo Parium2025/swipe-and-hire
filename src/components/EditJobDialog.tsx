@@ -305,6 +305,31 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   ];
 
   // Helper functions
+  
+  // Normalize salary_transparency to handle legacy formats (e.g., "75-80" -> "75000-80000")
+  const normalizeSalaryTransparency = (value: string | null | undefined): string => {
+    if (!value) return '';
+    
+    // Check if it's already in the new format (contains values >= 1000)
+    if (value.includes('000') || value === '100000+') return value;
+    
+    // Handle legacy "X-Y" format by multiplying by 1000
+    const match = value.match(/^(\d+)-(\d+)$/);
+    if (match) {
+      const min = parseInt(match[1]) * 1000;
+      const max = parseInt(match[2]) * 1000;
+      return `${min}-${max}`;
+    }
+    
+    // Handle legacy "X+" format
+    const plusMatch = value.match(/^(\d+)\+$/);
+    if (plusMatch) {
+      return `${parseInt(plusMatch[1]) * 1000}+`;
+    }
+    
+    return value;
+  };
+  
   const formatCity = (value?: string) => {
     if (!value) return '';
     return value
@@ -701,7 +726,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         salary_max: job.salary_max?.toString() || '',
         employment_type: normalizeEmploymentType(job.employment_type || ''),
         salary_type: job.salary_type || '',
-        salary_transparency: job.salary_transparency || '',
+        salary_transparency: normalizeSalaryTransparency(job.salary_transparency),
         benefits: job.benefits || [],
         positions_count: (job.positions_count ?? 1).toString(),
         work_start_time: job.work_start_time || '',
@@ -729,7 +754,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       setOccupationSearchTerm(job.occupation || '');
       setEmploymentTypeSearchTerm(job.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === normalizeEmploymentType(job.employment_type))?.label || '' : '');
       setSalaryTypeSearchTerm(job.salary_type ? salaryTypes.find(t => t.value === job.salary_type)?.label || '' : '');
-      setSalaryTransparencySearchTerm(job.salary_transparency ? salaryTransparencyOptions.find(t => t.value === job.salary_transparency)?.label || '' : '');
+      const normalizedSalaryTransparency = normalizeSalaryTransparency(job.salary_transparency);
+      setSalaryTransparencySearchTerm(normalizedSalaryTransparency ? salaryTransparencyOptions.find(t => t.value === normalizedSalaryTransparency)?.label || '' : '');
       setWorkLocationSearchTerm(job.work_location_type ? workLocationTypes.find(t => t.value === job.work_location_type)?.label || '' : '');
       setRemoteWorkSearchTerm(job.remote_work_possible ? remoteWorkOptions.find(t => t.value === job.remote_work_possible)?.label || '' : '');
     }

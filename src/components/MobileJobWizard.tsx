@@ -156,6 +156,17 @@ const MobileJobWizard = ({
       
       // Load existing job data if editing a draft
       if (existingJob) {
+        // Normalize legacy salary_transparency format
+        const normalizeOldSalary = (value: string | null | undefined): string => {
+          if (!value) return '';
+          if (value.includes('000') || value === '100000+') return value;
+          const match = value.match(/^(\d+)-(\d+)$/);
+          if (match) return `${parseInt(match[1]) * 1000}-${parseInt(match[2]) * 1000}`;
+          const plusMatch = value.match(/^(\d+)\+$/);
+          if (plusMatch) return `${parseInt(plusMatch[1]) * 1000}+`;
+          return value;
+        };
+        
         const loadedFormData: JobFormData = {
           title: existingJob.title || '',
           description: existingJob.description || '',
@@ -164,7 +175,7 @@ const MobileJobWizard = ({
           salary_min: existingJob.salary_min?.toString() || '',
           salary_max: existingJob.salary_max?.toString() || '',
           salary_type: existingJob.salary_type || '',
-          salary_transparency: existingJob.salary_transparency || '',
+          salary_transparency: normalizeOldSalary(existingJob.salary_transparency),
           benefits: existingJob.benefits || [],
           positions_count: existingJob.positions_count?.toString() || '1',
           work_location_type: existingJob.work_location_type || 'på-plats',
@@ -367,6 +378,30 @@ const MobileJobWizard = ({
     } else {
       return { fontSize: 'text-sm', lineHeight: 'leading-none' };
     }
+  };
+  
+  // Normalize salary_transparency to handle legacy formats (e.g., "75-80" -> "75000-80000")
+  const normalizeSalaryTransparency = (value: string | null | undefined): string => {
+    if (!value) return '';
+    
+    // Check if it's already in the new format (contains values >= 1000)
+    if (value.includes('000') || value === '100000+') return value;
+    
+    // Handle legacy "X-Y" format by multiplying by 1000
+    const match = value.match(/^(\d+)-(\d+)$/);
+    if (match) {
+      const min = parseInt(match[1]) * 1000;
+      const max = parseInt(match[2]) * 1000;
+      return `${min}-${max}`;
+    }
+    
+    // Handle legacy "X+" format
+    const plusMatch = value.match(/^(\d+)\+$/);
+    if (plusMatch) {
+      return `${parseInt(plusMatch[1]) * 1000}+`;
+    }
+    
+    return value;
   };
   
   // Format city to Title Case
