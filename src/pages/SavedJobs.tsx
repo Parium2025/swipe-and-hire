@@ -19,6 +19,7 @@ import {
 import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { getTimeRemaining } from '@/lib/date';
 
 interface SavedJob {
   id: string;
@@ -42,27 +43,6 @@ interface SavedJob {
     } | null;
   } | null;
 }
-
-
-const getDaysRemaining = (expiresAt: string | null): number | null => {
-  if (!expiresAt) return null;
-  const now = new Date();
-  const expires = new Date(expiresAt);
-  const diffTime = expires.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays; // Kan vara negativt om utgånget
-};
-
-const isJobExpired = (job: SavedJob['job_postings']): boolean => {
-  if (!job) return true;
-  if (!job.is_active) return true;
-  if (job.expires_at) {
-    const now = new Date();
-    const expires = new Date(job.expires_at);
-    return expires <= now;
-  }
-  return false;
-};
 
 const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
   const { data, error } = await supabase
@@ -223,9 +203,10 @@ const SavedJobs = () => {
             if (!job) return null;
 
             const isRemoving = removingIds.has(savedJob.id);
-            const isExpired = isJobExpired(job); // Kontrollerar både is_active OCH expires_at
-            const daysRemaining = getDaysRemaining(job.expires_at);
-            const showCountdown = !isExpired && daysRemaining !== null && daysRemaining > 0;
+            
+            // Använd centraliserad getTimeRemaining för konsekvent beräkning
+            const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
+            const isExpired = !job.is_active || timeInfo.isExpired;
 
             return (
               <Card
@@ -248,10 +229,10 @@ const SavedJobs = () => {
                             Utgången
                           </Badge>
                         )}
-                        {showCountdown && (
+                        {!isExpired && (
                           <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
                             <Timer className="h-3 w-3 mr-1" />
-                            {daysRemaining === 1 ? '1 dag kvar' : `${daysRemaining} dagar kvar`}
+                            {timeInfo.text} kvar
                           </Badge>
                         )}
                       </div>
