@@ -15,7 +15,8 @@ import {
   Hourglass,
   Building2,
   Loader2,
-  Timer
+  Timer,
+  Users
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -38,6 +39,7 @@ interface Application {
     is_active: boolean | null;
     created_at: string;
     expires_at: string | null;
+    applications_count: number | null;
     profiles: {
       company_name: string | null;
       company_logo_url: string | null;
@@ -124,6 +126,7 @@ const MyApplications = () => {
             is_active,
             created_at,
             expires_at,
+            applications_count,
             profiles:employer_id (
               company_name,
               company_logo_url
@@ -259,6 +262,13 @@ const MyApplications = () => {
                             Sökt {format(new Date(application.applied_at || application.created_at), 'yyyy-MM-dd', { locale: sv })}
                           </span>
                         </div>
+                        {/* Antal sökande badge */}
+                        {job && (
+                          <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
+                            <Users className="h-3 w-3 mr-1" />
+                            {job.applications_count ?? 0} sökande
+                          </Badge>
+                        )}
                         {/* Days remaining badge */}
                         {job && (() => {
                           const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
