@@ -349,16 +349,18 @@ const SavedJobs = () => {
 
       {/* Confirmation Dialog */}
       <AlertDialog open={!!jobToRemove} onOpenChange={() => setJobToRemove(null)}>
-        <AlertDialogContent className="bg-background border-white/10">
+        <AlertDialogContent className="bg-card/95 backdrop-blur-xl border-white/10">
           <AlertDialogHeader>
-            <AlertDialogTitle>Ta bort sparat jobb?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-white">Ta bort sparat jobb?</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/70">
               Är du säker på att du vill ta bort "{jobToRemove?.title}" från dina sparade jobb?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Avbryt</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRemoveSavedJob} className="bg-red-500 hover:bg-red-600">
+            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemoveSavedJob} className="bg-red-500/90 hover:bg-red-500 text-white border-0">
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
