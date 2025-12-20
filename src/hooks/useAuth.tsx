@@ -422,37 +422,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             let avatarUrl: string | null = null;
             let coverUrl: string | null = null;
             
-            // Parallell fetch av avatar + cover med timeout per request
+            // Parallell fetch av avatar + cover med timeout per request (ökat timeout för stabilitet)
             const fetchWithTimeout = async (promise: Promise<string | null>, timeoutMs: number): Promise<string | null> => {
               const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs));
               return Promise.race([promise, timeoutPromise]);
             };
             
-            // Profilbild (max 800ms)
-            if (processedProfile.profile_image_url) {
-              try {
-                avatarUrl = await fetchWithTimeout(
-                  getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400),
-                  800
-                );
-                if (avatarUrl) criticalImages.push(avatarUrl);
-              } catch (err) {
-                console.warn('Avatar URL generation failed, continuing:', err);
+            // Retry-wrapper för mer robust hämtning
+            const fetchWithRetry = async (
+              storagePath: string,
+              mediaType: 'profile-image' | 'cover-image' | 'profile-video',
+              timeoutMs: number,
+              maxRetries: number = 2
+            ): Promise<string | null> => {
+              for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                  const result = await fetchWithTimeout(
+                    getMediaUrl(storagePath, mediaType, 86400),
+                    timeoutMs
+                  );
+                  if (result) return result;
+                  // Om null på första försöket, prova igen med längre timeout
+                  if (attempt < maxRetries) {
+                    await new Promise(r => setTimeout(r, 200)); // Kort paus mellan retries
+                  }
+                } catch (err) {
+                  console.warn(`Media fetch attempt ${attempt + 1} failed:`, err);
+                }
               }
-            }
+              return null;
+            };
             
-            // Cover-bild (max 800ms)
-            if (processedProfile.cover_image_url) {
-              try {
-                coverUrl = await fetchWithTimeout(
-                  getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400),
-                  800
-                );
-                if (coverUrl) criticalImages.push(coverUrl);
-              } catch (err) {
-                console.warn('Cover URL generation failed, continuing:', err);
-              }
-            }
+            // Parallell fetch av profilbild + cover (ökat timeout till 2000ms + retries)
+            const [avatarResult, coverResult] = await Promise.all([
+              processedProfile.profile_image_url
+                ? fetchWithRetry(processedProfile.profile_image_url, 'profile-image', 2000)
+                : Promise.resolve(null),
+              processedProfile.cover_image_url
+                ? fetchWithRetry(processedProfile.cover_image_url, 'cover-image', 2000)
+                : Promise.resolve(null)
+            ]);
+            
+            avatarUrl = avatarResult;
+            coverUrl = coverResult;
+            
+            if (avatarUrl) criticalImages.push(avatarUrl);
+            if (coverUrl) criticalImages.push(coverUrl);
             
             // DOM-preload med timeout (max 500ms totalt)
             if (criticalImages.length > 0) {
@@ -483,18 +498,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             mediaPreloadCompleteRef.current = true;
             setMediaPreloadComplete(true);
             
-            // Video i bakgrunden (blockerar INTE men cachas för omedelbar visning)
+            // Video i bakgrunden med retry-logik (blockerar INTE men cachas för omedelbar visning)
             if (processedProfile.video_url) {
               (async () => {
                 try {
-                  const videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
+                  // Använd retry-funktionen för stabilare hämtning
+                  const videoUrl = await fetchWithRetry(processedProfile.video_url, 'profile-video', 3000, 2);
                   if (videoUrl) {
                     // Spara till state OCH sessionStorage
                     setPreloadedVideoUrl(videoUrl);
                     try { sessionStorage.setItem(VIDEO_CACHE_KEY, videoUrl); } catch {}
                     
-                    const { imageCache } = await import('@/lib/imageCache');
-                    await imageCache.preloadImages([videoUrl]);
+                    // Notera: imageCache hoppar över videofiler automatiskt
                   }
                 } catch (err) {
                   console.warn('Background video preload failed:', err);
