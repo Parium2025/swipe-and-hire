@@ -2084,15 +2084,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             key={template.id}
                                             className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 flex items-center justify-between gap-2 transition-all duration-200 group"
                                           >
-                                            <button
+                                            <TruncatedText 
+                                              text={template.question_text}
+                                              className="flex-1 text-white font-medium text-sm leading-tight truncate cursor-pointer hover:opacity-80 transition-opacity min-w-0"
                                               onClick={() => useQuestionTemplate(template)}
-                                              className="flex-1 text-left hover:opacity-80 transition-opacity min-w-0"
-                                            >
-                                              <TruncatedText 
-                                                text={template.question_text}
-                                                className="text-white font-medium text-sm leading-tight truncate"
-                                              />
-                                            </button>
+                                            />
                                             <div className="flex items-center gap-0.5 transition-opacity">
                                               <button
                                                 type="button"
