@@ -488,7 +488,7 @@ const JobView = () => {
       {/* Back button - fixed top left */}
       <div className="fixed top-4 left-4 z-10">
         <Button
-          onClick={() => navigate('/search-jobs')}
+          onClick={() => navigate(-1)}
           variant="glass"
           size="sm"
         >
