@@ -26,6 +26,8 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
               <img
                 src={pariumLogo}
                 alt="Parium"
+                width={224}
+                height={224}
                 className="h-auto w-32 md:w-48 lg:w-56"
               />
             </div>
