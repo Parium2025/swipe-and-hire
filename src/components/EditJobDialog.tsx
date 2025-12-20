@@ -524,11 +524,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   };
 
-  // Always start from step 0 when opening
+  // Always start from step 0 when opening and reset question form states
   useEffect(() => {
     if (open) {
       setCurrentStep(0);
       setIsInitializing(false);
+      // Reset question form states so navigation buttons are visible
+      setShowQuestionForm(false);
+      setShowQuestionTemplates(false);
+      setEditingQuestion(null);
     } else {
       setIsInitializing(true);
     }
