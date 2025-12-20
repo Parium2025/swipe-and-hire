@@ -50,10 +50,10 @@ interface UseJobsDataOptions {
   enableRealtime?: boolean;
 }
 
-export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: false }) => {
+export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: true }) => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
-  const { scope, enableRealtime = false } = options;
+  const { scope, enableRealtime = true } = options;
 
   // For organization scope, we need to fetch jobs from all users in the same organization
   const { data: jobs = [], isLoading, error, refetch } = useQuery({
@@ -121,8 +121,6 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
   useEffect(() => {
     if (!enableRealtime || !user) return;
 
-    console.log('[Realtime] Setting up job_postings subscription');
-    
     const channel = supabase
       .channel('job-postings-realtime')
       .on(
@@ -133,22 +131,53 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           table: 'job_postings'
         },
         (payload) => {
-          console.log('[Realtime] Job posting change detected:', payload.eventType, payload);
-          
-          // Invalidate and refetch jobs when any change occurs
-          // This ensures we get the employer_profile join data as well
-          queryClient.invalidateQueries({ queryKey: ['jobs'] });
+          // Update cache directly for updates to avoid full refetch
+          if (payload.eventType === 'UPDATE') {
+            queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
+              if (!oldData) return oldData;
+              return oldData.map(job => 
+                job.id === payload.new.id 
+                  ? { ...job, ...payload.new }
+                  : job
+              );
+            });
+          } else {
+            // For INSERT/DELETE, refetch to get complete data with joins
+            queryClient.invalidateQueries({ queryKey: ['jobs'] });
+          }
         }
       )
-      .subscribe((status) => {
-        console.log('[Realtime] Subscription status:', status);
-      });
+      .subscribe();
+
+    // Also listen to job_applications for live count updates
+    const applicationsChannel = supabase
+      .channel('job-applications-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'job_applications'
+        },
+        (payload) => {
+          // Update the applications_count for the relevant job
+          queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
+            if (!oldData) return oldData;
+            return oldData.map(job => 
+              job.id === payload.new.job_id 
+                ? { ...job, applications_count: job.applications_count + 1 }
+                : job
+            );
+          });
+        }
+      )
+      .subscribe();
 
     return () => {
-      console.log('[Realtime] Cleaning up subscription');
       supabase.removeChannel(channel);
+      supabase.removeChannel(applicationsChannel);
     };
-  }, [enableRealtime, user, queryClient]);
+  }, [enableRealtime, user, queryClient, scope, profile?.organization_id]);
 
   // Memoize stats to prevent unnecessary recalculations
   // Only count active jobs for dashboard stats (exclude drafts)
