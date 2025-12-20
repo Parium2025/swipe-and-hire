@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
+import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Minus, Trash2, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Smartphone, Monitor, Clock, CheckSquare } from 'lucide-react';
@@ -2083,21 +2084,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             key={template.id}
                                             className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 flex items-center justify-between gap-2 transition-all duration-200 group"
                                           >
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                <button
-                                                  onClick={() => useQuestionTemplate(template)}
-                                                  className="flex-1 text-left hover:opacity-80 transition-opacity min-w-0"
-                                                >
-                                                  <div className="text-white font-medium text-sm leading-tight truncate">
-                                                    {template.question_text}
-                                                  </div>
-                                                </button>
-                                              </TooltipTrigger>
-                                              <TooltipContent side="top" className="max-w-[300px] bg-slate-900/95 border border-white/20">
-                                                <p className="text-sm text-white">{template.question_text}</p>
-                                              </TooltipContent>
-                                            </Tooltip>
+                                            <button
+                                              onClick={() => useQuestionTemplate(template)}
+                                              className="flex-1 text-left hover:opacity-80 transition-opacity min-w-0"
+                                            >
+                                              <TruncatedText 
+                                                text={template.question_text}
+                                                className="text-white font-medium text-sm leading-tight truncate"
+                                              />
+                                            </button>
                                             <div className="flex items-center gap-0.5 transition-opacity">
                                               <button
                                                 type="button"
