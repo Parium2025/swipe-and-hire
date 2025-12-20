@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -1253,7 +1253,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
   // Funktion för att uppdatera sidebar-räknare (används av realtime + initial load)
-  const refreshSidebarCounts = async () => {
+  const refreshSidebarCounts = useCallback(async () => {
+    console.log('[refreshSidebarCounts] Triggered - user:', user?.id);
     try {
       // Hämta aktiva jobb med employer_id för unika företag
       const { data: activeJobs, count: totalJobs } = await supabase
@@ -1262,6 +1263,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('is_active', true);
       
       const newTotalJobs = totalJobs || 0;
+      console.log('[refreshSidebarCounts] Total jobs:', newTotalJobs);
       setPreloadedTotalJobs(newTotalJobs);
       try { sessionStorage.setItem(TOTAL_JOBS_CACHE_KEY, String(newTotalJobs)); } catch {}
 
@@ -1286,6 +1288,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('user_id', user.id);
         
         const newSavedJobs = savedJobs || 0;
+        console.log('[refreshSidebarCounts] Saved jobs:', newSavedJobs);
         setPreloadedSavedJobs(newSavedJobs);
         try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
 
@@ -1307,16 +1310,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('applicant_id', user.id);
         
         const appCount = myApplications || 0;
+        console.log('[refreshSidebarCounts] My applications:', appCount);
         setPreloadedMyApplications(appCount);
         try { sessionStorage.setItem(MY_APPLICATIONS_CACHE_KEY, String(appCount)); } catch {}
       }
     } catch (err) {
-      console.error('Error refreshing sidebar counts:', err);
+      console.error('[refreshSidebarCounts] Error:', err);
     }
-  };
+  }, [user]);
 
   // Funktion för att uppdatera employer stats (används av realtime + initial load)
-  const refreshEmployerStats = async () => {
+  const refreshEmployerStats = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -1388,7 +1392,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
     }
-  };
+  }, [user]);
 
   // Ladda räknare vid inloggning
   useEffect(() => {
@@ -1396,32 +1400,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshSidebarCounts();
       refreshEmployerStats();
     }
-  }, [user, loading]);
+  }, [user, loading, refreshSidebarCounts, refreshEmployerStats]);
 
   // Realtime-prenumerationer för räknare
   useEffect(() => {
     if (!user) return;
+
+    console.log('[Realtime] Setting up subscriptions for user:', user.id);
 
     const jobChannel = supabase
       .channel('auth-job-count')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'job_postings' },
-        () => {
+        (payload) => {
+          console.log('[Realtime] job_postings change:', payload.eventType);
           refreshSidebarCounts();
           refreshEmployerStats();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[Realtime] job_postings subscription status:', status);
+      });
 
     const savedChannel = supabase
       .channel(`auth-saved-jobs-${user.id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
-        () => refreshSidebarCounts()
+        (payload) => {
+          console.log('[Realtime] saved_jobs change:', payload.eventType);
+          refreshSidebarCounts();
+        }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[Realtime] saved_jobs subscription status:', status);
+      });
 
     // Real-time för ansökningar (uppdaterar employer stats OCH jobbsökarens räknare)
     const applicationsChannel = supabase
@@ -1429,12 +1443,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
-        () => {
+        (payload) => {
+          console.log('[Realtime] job_applications change:', payload.eventType);
           refreshSidebarCounts();
           refreshEmployerStats();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[Realtime] job_applications subscription status:', status);
+      });
 
     // Real-time för meddelanden (uppdaterar oläst-badge för både employer och jobbsökare)
     const messagesChannel = supabase
@@ -1442,12 +1459,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
-        () => {
+        (payload) => {
+          console.log('[Realtime] messages change:', payload.eventType);
           refreshEmployerStats();
           refreshSidebarCounts();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[Realtime] messages subscription status:', status);
+      });
 
     // Real-time för company reviews (uppdaterar recensionsräknare för arbetsgivare)
     const reviewsChannel = supabase
@@ -1455,18 +1475,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'company_reviews', filter: `company_id=eq.${user.id}` },
-        () => refreshEmployerStats()
+        (payload) => {
+          console.log('[Realtime] company_reviews change:', payload.eventType);
+          refreshEmployerStats();
+        }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[Realtime] company_reviews subscription status:', status);
+      });
 
     return () => {
+      console.log('[Realtime] Cleaning up subscriptions');
       supabase.removeChannel(jobChannel);
       supabase.removeChannel(savedChannel);
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(reviewsChannel);
     };
-  }, [user]);
+  }, [user, refreshSidebarCounts, refreshEmployerStats]);
 
   const value: AuthContextType = {
     user,
