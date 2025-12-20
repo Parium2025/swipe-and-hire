@@ -40,7 +40,18 @@ const getDaysRemaining = (expiresAt: string | null): number | null => {
   const expires = new Date(expiresAt);
   const diffTime = expires.getTime() - now.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays > 0 ? diffDays : 0;
+  return diffDays; // Kan vara negativt om utgånget
+};
+
+const isJobExpired = (job: SavedJob['job_postings']): boolean => {
+  if (!job) return true;
+  if (!job.is_active) return true;
+  if (job.expires_at) {
+    const now = new Date();
+    const expires = new Date(job.expires_at);
+    return expires <= now;
+  }
+  return false;
 };
 
 const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
@@ -191,9 +202,9 @@ const SavedJobs = () => {
             if (!job) return null;
 
             const isRemoving = removingIds.has(savedJob.id);
-            const isExpired = !job.is_active;
+            const isExpired = isJobExpired(job); // Kontrollerar både is_active OCH expires_at
             const daysRemaining = getDaysRemaining(job.expires_at);
-            const showCountdown = job.is_active && daysRemaining !== null && daysRemaining <= 7;
+            const showCountdown = !isExpired && daysRemaining !== null && daysRemaining > 0 && daysRemaining <= 7;
 
             return (
               <Card

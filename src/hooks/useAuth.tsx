@@ -1287,15 +1287,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPreloadedNewThisWeek(newThisWeek);
       try { sessionStorage.setItem(NEW_THIS_WEEK_CACHE_KEY, String(newThisWeek)); } catch {}
 
-      // Hämta antal sparade jobb för användaren
+      // Hämta antal sparade jobb för användaren (endast icke-utgångna)
       if (user) {
-        const { count: savedJobs } = await supabase
+        const { data: savedJobsData } = await supabase
           .from('saved_jobs')
-          .select('*', { count: 'exact', head: true })
+          .select('job_id, job_postings!inner(is_active, expires_at)')
           .eq('user_id', user.id);
         
-        const newSavedJobs = savedJobs || 0;
-        console.log('[refreshSidebarCounts] Saved jobs:', newSavedJobs);
+        // Filtrera bort sparade jobb där jobbannonsen har utgått
+        const now = new Date();
+        const activeSavedJobs = (savedJobsData || []).filter((sj: any) => {
+          const job = sj.job_postings;
+          if (!job || !job.is_active) return false;
+          if (job.expires_at && new Date(job.expires_at) <= now) return false;
+          return true;
+        });
+        
+        const newSavedJobs = activeSavedJobs.length;
+        console.log('[refreshSidebarCounts] Saved jobs (non-expired):', newSavedJobs);
         setPreloadedSavedJobs(newSavedJobs);
         try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
 
