@@ -434,12 +434,36 @@ const JobView = () => {
     try {
       setApplying(true);
       
-      // Save application to database
+      // Fetch user profile to get contact info
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, phone, email, home_location, location, birth_date, bio, cv_url, availability, employment_type')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+      
+      // Calculate age from birth_date
+      let age = null;
+      if (profile?.birth_date) {
+        const birthYear = new Date(profile.birth_date).getFullYear();
+        age = new Date().getFullYear() - birthYear;
+      }
+      
+      // Save application to database with contact info
       const { error } = await supabase
         .from('job_applications')
         .insert({
           job_id: jobId,
           applicant_id: user?.id,
+          first_name: profile?.first_name || null,
+          last_name: profile?.last_name || null,
+          email: user?.email || profile?.email || null,
+          phone: profile?.phone || null,
+          location: profile?.home_location || profile?.location || null,
+          age: age,
+          bio: profile?.bio || null,
+          cv_url: profile?.cv_url || null,
+          availability: profile?.availability || null,
+          employment_status: profile?.employment_type || null,
           custom_answers: answers,
           status: 'pending'
         });
