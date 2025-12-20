@@ -2645,7 +2645,7 @@ const MobileJobWizard = ({
                         }}
                         placeholder="08:00"
                         maxLength={5}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
+                        className={`bg-white/10 border-white/20 placeholder:text-white/60 h-9 text-sm focus:border-white/40 ${formData.work_start_time ? 'text-white' : 'text-white/60'}`}
                       />
                     </div>
                     <span className="text-white text-sm">–</span>
@@ -2672,7 +2672,7 @@ const MobileJobWizard = ({
                         }}
                         placeholder="17:00"
                         maxLength={5}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
+                        className={`bg-white/10 border-white/20 placeholder:text-white/60 h-9 text-sm focus:border-white/40 ${formData.work_end_time ? 'text-white' : 'text-white/60'}`}
                       />
                     </div>
                   </div>
