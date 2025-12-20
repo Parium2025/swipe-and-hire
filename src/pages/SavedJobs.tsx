@@ -225,7 +225,7 @@ const SavedJobs = () => {
             const isRemoving = removingIds.has(savedJob.id);
             const isExpired = isJobExpired(job); // Kontrollerar både is_active OCH expires_at
             const daysRemaining = getDaysRemaining(job.expires_at);
-            const showCountdown = !isExpired && daysRemaining !== null && daysRemaining > 0 && daysRemaining <= 7;
+            const showCountdown = !isExpired && daysRemaining !== null && daysRemaining > 0;
 
             return (
               <Card
