@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2, CheckCircle, Users } from 'lucide-react';
+import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2, CheckCircle, Users, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
@@ -349,18 +349,22 @@ const SavedJobs = () => {
 
       {/* Confirmation Dialog */}
       <AlertDialog open={!!jobToRemove} onOpenChange={() => setJobToRemove(null)}>
-        <AlertDialogContent className="bg-card/95 backdrop-blur-xl border-white/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Ta bort sparat jobb?</AlertDialogTitle>
-            <AlertDialogDescription className="text-white/70">
-              Är du säker på att du vill ta bort "{jobToRemove?.title}" från dina sparade jobb?
+        <AlertDialogContent className="bg-card/95 backdrop-blur-xl border-white/10 max-w-md">
+          <AlertDialogHeader className="text-center sm:text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20">
+              <AlertTriangle className="h-6 w-6 text-red-400" />
+            </div>
+            <AlertDialogTitle className="text-white text-lg">Ta bort sparat jobb</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/70 text-center">
+              Är du säker på att du vill ta bort <span className="font-semibold text-white">"{jobToRemove?.title}"</span>? Denna åtgärd går inte att ångra.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
+            <AlertDialogCancel className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
               Avbryt
             </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRemoveSavedJob} className="bg-red-500/90 hover:bg-red-500 text-white border-0">
+            <AlertDialogAction onClick={confirmRemoveSavedJob} className="w-full bg-red-500/90 hover:bg-red-500 text-white border-0">
+              <Trash2 className="h-4 w-4 mr-2" />
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
