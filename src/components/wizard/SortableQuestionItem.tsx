@@ -45,6 +45,13 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
           <div className="flex-1 min-w-0">
             <div className="text-white font-medium text-sm leading-tight truncate">
               {question.question_text || 'Ingen frågetext'}
+              <span className="text-white/60 font-normal ml-1">
+                ({question.question_type === 'yes_no' ? 'Ja/Nej' : 
+                  question.question_type === 'text' ? 'Text' : 
+                  question.question_type === 'number' ? 'Siffra' : 
+                  question.question_type === 'multiple_choice' ? 'Flerval' : 
+                  question.question_type})
+              </span>
             </div>
           </div>
         </div>
