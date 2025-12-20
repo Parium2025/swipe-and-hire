@@ -90,8 +90,8 @@ interface ExistingJob {
   application_instructions?: string | null;
   pitch?: string | null;
   job_image_url?: string | null;
+  job_image_desktop_url?: string | null;
   is_active?: boolean;
-  
 }
 
 interface MobileJobWizardProps {
@@ -194,7 +194,7 @@ const MobileJobWizard = ({
           application_instructions: existingJob.application_instructions || '',
           pitch: existingJob.pitch || '',
           job_image_url: existingJob.job_image_url || '',
-          job_image_desktop_url: (existingJob as any).job_image_desktop_url || '',
+          job_image_desktop_url: existingJob.job_image_desktop_url || '',
           location: existingJob.location || '',
         };
         setFormData(loadedFormData);
