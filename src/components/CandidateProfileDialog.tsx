@@ -278,23 +278,23 @@ export const CandidateProfileDialog = ({
                   <Briefcase className="h-3.5 w-3.5" />
                   Anställningsinformation
                 </h3>
-                <div className="grid sm:grid-cols-2 gap-3">
+                <div className="grid sm:grid-cols-2 gap-4">
                 {application.employment_status && (
-                    <div className="space-y-0.5">
-                      <span className="text-xs text-white">Anställningsstatus</span>
-                      <p className="text-sm text-white font-medium">{application.employment_status}</p>
+                    <div className="space-y-1">
+                      <span className="text-sm text-white/80">Anställningsstatus</span>
+                      <p className="text-base text-white font-medium">{application.employment_status}</p>
                     </div>
                   )}
                   {application.work_schedule && (
-                    <div className="space-y-0.5">
-                      <span className="text-xs text-white">Hur mycket jobbar du idag?</span>
-                      <p className="text-sm text-white font-medium">{application.work_schedule}</p>
+                    <div className="space-y-1">
+                      <span className="text-sm text-white/80">Hur mycket jobbar du idag?</span>
+                      <p className="text-base text-white font-medium">{application.work_schedule}</p>
                     </div>
                   )}
                   {application.availability && (
-                    <div className="space-y-0.5 sm:col-span-2">
-                      <span className="text-xs text-white">När kan du börja nytt jobb?</span>
-                      <p className="text-sm text-white font-medium">{application.availability}</p>
+                    <div className="space-y-1 sm:col-span-2">
+                      <span className="text-sm text-white/80">När kan du börja nytt jobb?</span>
+                      <p className="text-base text-white font-medium">{application.availability}</p>
                     </div>
                   )}
                 </div>
