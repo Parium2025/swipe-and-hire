@@ -1417,7 +1417,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
       .subscribe();
 
-    // Real-time för ansökningar (uppdaterar employer stats OCH jobbsökarens räknare)
+    // Real-time för ansökningar (uppdaterar jobbsökarens räknare)
     const applicationsChannel = supabase
       .channel(`auth-applications-${user.id}`)
       .on(
@@ -1425,6 +1425,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
         () => {
           refreshSidebarCounts();
+        }
+      )
+      .subscribe();
+
+    // Real-time för alla job_applications (uppdaterar employer kandidat-badge)
+    // Lyssnar på alla INSERT för att fånga nya ansökningar till arbetsgivarens jobb
+    const employerApplicationsChannel = supabase
+      .channel(`auth-employer-applications-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'job_applications' },
+        () => {
           refreshEmployerStats();
         }
       )
@@ -1459,6 +1471,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.removeChannel(jobChannel);
       supabase.removeChannel(savedChannel);
       supabase.removeChannel(applicationsChannel);
+      supabase.removeChannel(employerApplicationsChannel);
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(reviewsChannel);
     };
