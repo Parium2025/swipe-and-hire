@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2, CheckCircle } from 'lucide-react';
+import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2, CheckCircle, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
@@ -36,6 +36,7 @@ interface SavedJob {
     is_active: boolean;
     created_at: string;
     expires_at: string | null;
+    applications_count: number | null;
     profiles: {
       company_name: string | null;
       first_name: string | null;
@@ -62,6 +63,7 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
         is_active,
         created_at,
         expires_at,
+        applications_count,
         profiles (
           company_name,
           first_name,
@@ -277,6 +279,12 @@ const SavedJobs = () => {
                           <div className="flex items-center gap-1">
                             <Briefcase className="h-3.5 w-3.5" />
                             <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                          </div>
+                        )}
+                        {(job.applications_count ?? 0) > 0 && (
+                          <div className="flex items-center gap-1">
+                            <Users className="h-3.5 w-3.5" />
+                            <span>{job.applications_count} sökande</span>
                           </div>
                         )}
                         <div className="flex items-center gap-1">
