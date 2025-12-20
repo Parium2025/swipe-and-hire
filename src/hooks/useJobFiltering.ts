@@ -65,25 +65,24 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
       const salarySearch = detectSalarySearch(searchTerm);
       
       if (salarySearch.isSalarySearch) {
-        // Filter by salary range - job's salary should overlap with the search range
+        // Filter by salary range
         result = result.filter(job => {
           // Skip jobs without salary info
           if (!job.salary_min && !job.salary_max) return false;
           
           const jobMin = job.salary_min || 0;
           const jobMax = job.salary_max || jobMin;
-          
-          // Check if the target salary falls within the job's salary range
-          // OR if the job's salary range overlaps with our search range
           const targetSalary = salarySearch.targetSalary!;
           
-          // Job offers this salary (target is within job's range)
-          const jobOffersTarget = targetSalary >= jobMin && targetSalary <= jobMax;
-          
-          // Or job's range overlaps with our search range
-          const rangesOverlap = jobMax >= salarySearch.rangeMin && jobMin <= salarySearch.rangeMax;
-          
-          return jobOffersTarget || rangesOverlap;
+          if (salarySearch.isMinimumSearch) {
+            // "100000+" means job should offer at least this amount
+            // Job qualifies if its max salary >= target OR min salary >= target
+            return jobMax >= targetSalary || jobMin >= targetSalary;
+          } else {
+            // Regular salary search: "27500" means find jobs where this salary is within their range
+            // The job's salary range should include the target salary
+            return targetSalary >= jobMin && targetSalary <= jobMax;
+          }
         });
       } else {
         // Regular text search with synonyms

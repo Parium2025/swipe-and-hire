@@ -8,28 +8,47 @@ export interface SalarySearchResult {
   targetSalary: number | null;
   rangeMin: number;
   rangeMax: number;
+  isMinimumSearch: boolean; // For "100000+" style searches
 }
 
-// Detect if search term is a salary search (number like 32500, 55000, etc.)
+// Detect if search term is a salary search (number like 32500, 55000, 100000+, etc.)
 export const detectSalarySearch = (searchTerm: string): SalarySearchResult => {
-  const normalizedTerm = searchTerm.trim().replace(/\s+/g, '').replace(/kr/gi, '');
+  let normalizedTerm = searchTerm.trim().toLowerCase();
   
-  // Check if it's a number (allow spaces and 'kr' suffix)
+  // Check for "+" or "plus" suffix (e.g., "100000+", "100000 plus", "100000+kr")
+  const isMinimumSearch = /\+|plus/i.test(normalizedTerm);
+  
+  // Remove common suffixes and clean up
+  normalizedTerm = normalizedTerm
+    .replace(/\s+/g, '')
+    .replace(/kr/gi, '')
+    .replace(/\+/g, '')
+    .replace(/plus/gi, '');
+  
+  // Check if it's a number
   const numericValue = parseInt(normalizedTerm, 10);
   
   // Consider it a salary search if it's a number >= 10000 (reasonable salary threshold)
   if (!isNaN(numericValue) && numericValue >= 10000) {
-    // Create a smart range around the target salary
-    // For salaries, we use a range of ±10% or ±5000, whichever is larger
-    const percentageRange = numericValue * 0.1;
-    const fixedRange = 5000;
-    const range = Math.max(percentageRange, fixedRange);
+    if (isMinimumSearch) {
+      // "100000+" means 100000 or more - no upper limit
+      return {
+        isSalarySearch: true,
+        targetSalary: numericValue,
+        rangeMin: numericValue,
+        rangeMax: Infinity,
+        isMinimumSearch: true,
+      };
+    }
     
+    // Regular salary search - find jobs where this salary falls within their range
+    // No artificial range expansion needed - just check if target is within job's range
     return {
       isSalarySearch: true,
       targetSalary: numericValue,
-      rangeMin: numericValue - range,
-      rangeMax: numericValue + range,
+      rangeMin: numericValue,
+      rangeMax: numericValue,
+      isMinimumSearch: false,
     };
   }
   
@@ -38,6 +57,7 @@ export const detectSalarySearch = (searchTerm: string): SalarySearchResult => {
     targetSalary: null,
     rangeMin: 0,
     rangeMax: 0,
+    isMinimumSearch: false,
   };
 };
 
