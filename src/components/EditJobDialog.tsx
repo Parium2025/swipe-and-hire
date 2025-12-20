@@ -1793,7 +1793,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               }}
                               placeholder="08:00"
                               maxLength={5}
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-9 text-sm focus:border-white/40"
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-9 text-sm focus:border-white/40"
                             />
                           </div>
                           <span className="text-white text-sm">–</span>
@@ -1820,7 +1820,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               }}
                               placeholder="17:00"
                               maxLength={5}
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-9 text-sm focus:border-white/40"
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-9 text-sm focus:border-white/40"
                             />
                           </div>
                         </div>
