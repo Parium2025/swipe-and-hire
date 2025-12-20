@@ -61,7 +61,7 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
             className="flex-1 min-w-0 text-white font-medium text-sm leading-tight truncate"
           >
             {questionText}
-            <span className="text-white/60 font-normal ml-1">({typeLabel})</span>
+            <span className="text-white font-normal ml-1">({typeLabel})</span>
           </TruncatedText>
         </div>
         
