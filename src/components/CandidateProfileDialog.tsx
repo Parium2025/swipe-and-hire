@@ -55,18 +55,40 @@ export const CandidateProfileDialog = ({
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
+  const [jobQuestions, setJobQuestions] = useState<Record<string, string>>({});
   
   // Get signed URLs for profile media
   const profileImageUrl = useProfileImageUrl(application?.profile_image_url);
   const videoUrl = useVideoUrl(application?.video_url);
   const signedCvUrl = useMediaUrl(application?.cv_url, 'cv');
 
-  // Fetch notes when dialog opens
+  // Fetch notes and questions when dialog opens
   useEffect(() => {
     if (open && application && user) {
       fetchNotes();
+      fetchJobQuestions();
     }
   }, [open, application?.id, user?.id]);
+
+  const fetchJobQuestions = async () => {
+    if (!application?.job_id) return;
+    try {
+      const { data, error } = await supabase
+        .from('job_questions')
+        .select('id, question_text')
+        .eq('job_id', application.job_id);
+
+      if (error) throw error;
+      
+      const questionsMap: Record<string, string> = {};
+      data?.forEach(q => {
+        questionsMap[q.id] = q.question_text;
+      });
+      setJobQuestions(questionsMap);
+    } catch (error) {
+      console.error('Error fetching job questions:', error);
+    }
+  };
 
   const fetchNotes = async () => {
     if (!application || !user) return;
@@ -340,12 +362,14 @@ export const CandidateProfileDialog = ({
 
                 {questionsExpanded && (
                   <div className="px-4 pb-4 space-y-3">
-                    {Object.entries(customAnswers).map(([question, answer]) => (
+                    {Object.entries(customAnswers).map(([questionId, answer]) => (
                       <div
-                        key={question}
+                        key={questionId}
                         className="border-t border-white/10 pt-3 first:border-t-0 first:pt-0"
                       >
-                        <p className="text-sm font-medium text-white mb-0.5">{question}</p>
+                        <p className="text-sm font-medium text-white mb-0.5">
+                          {jobQuestions[questionId] || questionId}
+                        </p>
                         <p className="text-sm text-white">
                           {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
                         </p>
