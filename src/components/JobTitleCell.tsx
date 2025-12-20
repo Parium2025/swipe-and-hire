@@ -18,7 +18,7 @@ export function JobTitleCell({ title, employmentType, className }: JobTitleCellP
         className="text-sm w-full text-white font-medium text-center line-clamp-2 break-all"
       />
       {employmentType && (
-        <Badge variant="glass" className="w-fit text-[10px]">
+        <Badge variant="glass" className="w-fit text-[10px] bg-slate-800/90 border-white/20">
           {getEmploymentTypeLabel(employmentType)}
         </Badge>
       )}
