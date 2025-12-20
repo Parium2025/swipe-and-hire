@@ -2,12 +2,23 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { JobQuestion } from '@/types/jobWizard';
+import { TruncatedTitle } from '@/components/ui/truncated-title';
 
 interface SortableQuestionItemProps {
   question: JobQuestion;
   onEdit: (question: JobQuestion) => void;
   onDelete: (id: string) => void;
 }
+
+const getQuestionTypeLabel = (type: string) => {
+  switch (type) {
+    case 'yes_no': return 'Ja/Nej';
+    case 'text': return 'Text';
+    case 'number': return 'Siffra';
+    case 'multiple_choice': return 'Flerval';
+    default: return type;
+  }
+};
 
 export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionItemProps) => {
   const {
@@ -24,6 +35,10 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+
+  const questionText = question.question_text || 'Ingen frågetext';
+  const typeLabel = getQuestionTypeLabel(question.question_type);
+  const displayText = `${questionText} (${typeLabel})`;
 
   return (
     <div
@@ -43,16 +58,13 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="text-white font-medium text-sm leading-tight truncate">
-              {question.question_text || 'Ingen frågetext'}
-              <span className="text-white/60 font-normal ml-1">
-                ({question.question_type === 'yes_no' ? 'Ja/Nej' : 
-                  question.question_type === 'text' ? 'Text' : 
-                  question.question_type === 'number' ? 'Siffra' : 
-                  question.question_type === 'multiple_choice' ? 'Flerval' : 
-                  question.question_type})
-              </span>
-            </div>
+            <TruncatedTitle 
+              fullText={displayText}
+              className="text-white font-medium text-sm leading-tight truncate line-clamp-1"
+            >
+              {questionText}
+              <span className="text-white/60 font-normal ml-1">({typeLabel})</span>
+            </TruncatedTitle>
           </div>
         </div>
         
