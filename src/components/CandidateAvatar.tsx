@@ -54,7 +54,7 @@ function CandidateAvatarBase({
           draggable={false}
         />
       ) : (
-        <AvatarFallback className="bg-primary/20 text-primary font-semibold">
+        <AvatarFallback className="bg-white/20 text-white font-semibold">
           {initials || '?'}
         </AvatarFallback>
       )}

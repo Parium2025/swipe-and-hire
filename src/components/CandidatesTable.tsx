@@ -102,7 +102,7 @@ export function CandidatesTable({
                         lastName={application.last_name}
                       />
                       <div>
-                        <div className="font-medium text-foreground">
+                        <div className="font-medium text-white">
                           {application.first_name} {application.last_name}
                         </div>
                         {application.email && (
