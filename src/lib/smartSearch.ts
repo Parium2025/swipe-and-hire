@@ -1,7 +1,45 @@
-// Smart search system that understands synonyms and related terms
+// Smart search system that understands synonyms, related terms, and salary searches
 export interface SearchSynonyms {
   [key: string]: string[];
 }
+
+export interface SalarySearchResult {
+  isSalarySearch: boolean;
+  targetSalary: number | null;
+  rangeMin: number;
+  rangeMax: number;
+}
+
+// Detect if search term is a salary search (number like 32500, 55000, etc.)
+export const detectSalarySearch = (searchTerm: string): SalarySearchResult => {
+  const normalizedTerm = searchTerm.trim().replace(/\s+/g, '').replace(/kr/gi, '');
+  
+  // Check if it's a number (allow spaces and 'kr' suffix)
+  const numericValue = parseInt(normalizedTerm, 10);
+  
+  // Consider it a salary search if it's a number >= 10000 (reasonable salary threshold)
+  if (!isNaN(numericValue) && numericValue >= 10000) {
+    // Create a smart range around the target salary
+    // For salaries, we use a range of ±10% or ±5000, whichever is larger
+    const percentageRange = numericValue * 0.1;
+    const fixedRange = 5000;
+    const range = Math.max(percentageRange, fixedRange);
+    
+    return {
+      isSalarySearch: true,
+      targetSalary: numericValue,
+      rangeMin: numericValue - range,
+      rangeMax: numericValue + range,
+    };
+  }
+  
+  return {
+    isSalarySearch: false,
+    targetSalary: null,
+    rangeMin: 0,
+    rangeMax: 0,
+  };
+};
 
 export const jobSearchSynonyms: SearchSynonyms = {
   // Chef-relaterade termer
