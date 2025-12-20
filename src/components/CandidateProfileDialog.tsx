@@ -233,13 +233,13 @@ export const CandidateProfileDialog = ({
                 <User className="h-3.5 w-3.5" />
                 Information
               </h3>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-3">
                 {application.email && (
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-white shrink-0" />
                     <a
                       href={`mailto:${application.email}`}
-                      className="text-base text-white hover:text-white/80 transition-colors truncate"
+                      className="text-sm text-white hover:text-white/80 transition-colors truncate"
                     >
                       {application.email}
                     </a>
@@ -250,7 +250,7 @@ export const CandidateProfileDialog = ({
                     <Phone className="h-4 w-4 text-white shrink-0" />
                     <a
                       href={`tel:${application.phone}`}
-                      className="text-base text-white hover:text-white/80 transition-colors"
+                      className="text-sm text-white hover:text-white/80 transition-colors"
                     >
                       {application.phone}
                     </a>
@@ -259,13 +259,13 @@ export const CandidateProfileDialog = ({
                 {application.location && (
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-white shrink-0" />
-                    <span className="text-base text-white">{application.location}</span>
+                    <span className="text-sm text-white">{application.location}</span>
                   </div>
                 )}
                 {application.age && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-white shrink-0" />
-                    <span className="text-base text-white">{application.age} år</span>
+                    <span className="text-sm text-white">{application.age} år</span>
                   </div>
                 )}
               </div>
@@ -278,23 +278,23 @@ export const CandidateProfileDialog = ({
                   <Briefcase className="h-3.5 w-3.5" />
                   Anställningsinformation
                 </h3>
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid sm:grid-cols-2 gap-3">
                 {application.employment_status && (
-                    <div className="space-y-1">
-                      <span className="text-sm text-white/80">Anställningsstatus</span>
-                      <p className="text-base text-white font-medium">{application.employment_status}</p>
+                    <div className="space-y-0.5">
+                      <span className="text-sm text-white/70">Anställningsstatus</span>
+                      <p className="text-sm text-white">{application.employment_status}</p>
                     </div>
                   )}
                   {application.work_schedule && (
-                    <div className="space-y-1">
-                      <span className="text-sm text-white/80">Hur mycket jobbar du idag?</span>
-                      <p className="text-base text-white font-medium">{application.work_schedule}</p>
+                    <div className="space-y-0.5">
+                      <span className="text-sm text-white/70">Hur mycket jobbar du idag?</span>
+                      <p className="text-sm text-white">{application.work_schedule}</p>
                     </div>
                   )}
                   {application.availability && (
-                    <div className="space-y-1 sm:col-span-2">
-                      <span className="text-sm text-white/80">När kan du börja nytt jobb?</span>
-                      <p className="text-base text-white font-medium">{application.availability}</p>
+                    <div className="space-y-0.5 sm:col-span-2">
+                      <span className="text-sm text-white/70">När kan du börja nytt jobb?</span>
+                      <p className="text-sm text-white">{application.availability}</p>
                     </div>
                   )}
                 </div>
@@ -315,7 +315,7 @@ export const CandidateProfileDialog = ({
                     className="flex items-center gap-2 text-white transition-colors flex-1"
                   >
                     <FileText className="h-4 w-4 text-white shrink-0" />
-                    <span className="text-base">Visa CV</span>
+                    <span className="text-sm">Visa CV</span>
                   </button>
                   <button
                     type="button"
@@ -336,11 +336,11 @@ export const CandidateProfileDialog = ({
                 Presentation om {application.first_name || 'kandidaten'}
               </h3>
               {application.bio ? (
-                <p className="text-base text-white whitespace-pre-wrap leading-relaxed">
+                <p className="text-sm text-white whitespace-pre-wrap leading-relaxed">
                   {application.bio}
                 </p>
               ) : (
-                <p className="text-base text-white/50 italic">Ingen presentation angiven</p>
+                <p className="text-sm text-white/50 italic">Ingen presentation angiven</p>
               )}
             </div>
 
@@ -374,10 +374,10 @@ export const CandidateProfileDialog = ({
                         key={questionId}
                         className="border-t border-white/10 pt-3 first:border-t-0 first:pt-0"
                       >
-                        <p className="text-sm font-medium text-white/80 mb-1">
+                        <p className="text-sm text-white/70 mb-0.5">
                           {jobQuestions[questionId]?.text || questionId}
                         </p>
-                        <p className="text-base text-white">
+                        <p className="text-sm text-white">
                           <span className="text-white">Svar: </span>
                           {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
                         </p>
