@@ -242,21 +242,27 @@ const SavedJobs = () => {
                         <h3 className={`text-lg font-semibold truncate ${isExpired ? 'text-white' : 'text-white'}`}>
                           {job.title}
                         </h3>
+                        {(job.applications_count ?? 0) > 0 && (
+                          <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
+                            <Users className="h-3 w-3 mr-1" />
+                            {job.applications_count} sökande
+                          </Badge>
+                        )}
+                        {/* Visa "dagar kvar" FÖRST, sedan "Redan sökt" */}
+                        {isExpired ? (
+                          <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50 hover:backdrop-brightness-110">
+                            Utgången
+                          </Badge>
+                        ) : (
+                          <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
+                            <Timer className="h-3 w-3 mr-1" />
+                            {timeInfo.text} kvar
+                          </Badge>
+                        )}
                         {hasApplied && (
                           <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:border-green-500/50 hover:backdrop-brightness-110">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Redan sökt
-                          </Badge>
-                        )}
-                        {isExpired && (
-                          <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50 hover:backdrop-brightness-110">
-                            Utgången
-                          </Badge>
-                        )}
-                        {!isExpired && (
-                          <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
-                            <Timer className="h-3 w-3 mr-1" />
-                            {timeInfo.text} kvar
                           </Badge>
                         )}
                       </div>
@@ -279,12 +285,6 @@ const SavedJobs = () => {
                           <div className="flex items-center gap-1">
                             <Briefcase className="h-3.5 w-3.5" />
                             <span>{getEmploymentTypeLabel(job.employment_type)}</span>
-                          </div>
-                        )}
-                        {(job.applications_count ?? 0) > 0 && (
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5" />
-                            <span>{job.applications_count} sökande</span>
                           </div>
                         )}
                         <div className="flex items-center gap-1">

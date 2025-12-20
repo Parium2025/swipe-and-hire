@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
-import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash, Timer } from 'lucide-react';
+import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash, Timer, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
@@ -75,6 +75,7 @@ const JobView = () => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
   
   // Preloada bilden när den finns tillgänglig
   useImagePreloader(imageUrl ? [imageUrl] : [], { priority: 'high' });
@@ -146,6 +147,18 @@ const JobView = () => {
 
       if (!questionsError && questions) {
         setJobQuestions(questions as JobQuestion[]);
+      }
+
+      // Kolla om användaren redan har ansökt till detta jobb
+      if (user) {
+        const { data: existingApplication } = await supabase
+          .from('job_applications')
+          .select('id')
+          .eq('job_id', jobId)
+          .eq('applicant_id', user.id)
+          .maybeSingle();
+        
+        setHasAlreadyApplied(!!existingApplication);
       }
     } catch (error: any) {
       toast({
@@ -739,24 +752,36 @@ const JobView = () => {
 
             {/* Submit application button - only show when job is not expired */}
             {!isJobExpired && (
-              <Button
-                size="lg"
-                variant={canSubmitApplication ? "glassGreen" : "glass"}
-                className={`w-full h-12 text-base font-semibold ${
-                  !canSubmitApplication ? 'cursor-not-allowed opacity-50' : ''
-                }`}
-                onClick={handleApplicationSubmit}
-                disabled={applying || !canSubmitApplication}
-              >
-                {applying ? (
-                  'Skickar...'
-                ) : (
-                  <>
-                    <Send className="mr-1.5 h-3.5 w-3.5" />
-                    Skicka ansökan
-                  </>
-                )}
-              </Button>
+              hasAlreadyApplied ? (
+                <Button
+                  size="lg"
+                  variant="glass"
+                  className="w-full h-12 text-base font-semibold bg-green-500/20 text-green-300 border-green-500/30 cursor-default hover:bg-green-500/20"
+                  disabled
+                >
+                  <CheckCircle className="mr-1.5 h-4 w-4" />
+                  Redan sökt
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  variant={canSubmitApplication ? "glassGreen" : "glass"}
+                  className={`w-full h-12 text-base font-semibold ${
+                    !canSubmitApplication ? 'cursor-not-allowed opacity-50' : ''
+                  }`}
+                  onClick={handleApplicationSubmit}
+                  disabled={applying || !canSubmitApplication}
+                >
+                  {applying ? (
+                    'Skickar...'
+                  ) : (
+                    <>
+                      <Send className="mr-1.5 h-3.5 w-3.5" />
+                      Skicka ansökan
+                    </>
+                  )}
+                </Button>
+              )
             )}
 
             {/* Job posted date and countdown */}

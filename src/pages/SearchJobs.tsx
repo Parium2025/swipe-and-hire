@@ -869,7 +869,7 @@ const SearchJobs = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <div className="flex items-center gap-1 text-sm text-white">
                               <Calendar className="h-3 w-3" />
                               {formatDateShortSv(job.created_at)}
@@ -880,12 +880,7 @@ const SearchJobs = () => {
                                 {job.applications_count} sökande
                               </Badge>
                             )}
-                            {appliedJobIds.has(job.id) && (
-                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 md:group-hover:backdrop-brightness-90 md:hover:bg-green-500/30 md:hover:border-green-500/50">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Redan sökt
-                              </Badge>
-                            )}
+                            {/* Visa "dagar kvar" FÖRST, sedan "Redan sökt" */}
                             {(() => {
                               const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                               if (isExpired) {
@@ -905,21 +900,34 @@ const SearchJobs = () => {
                                 </Badge>
                               );
                             })()}
+                            {appliedJobIds.has(job.id) && (
+                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 md:group-hover:backdrop-brightness-90 md:hover:bg-green-500/30 md:hover:border-green-500/50">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Redan sökt
+                              </Badge>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Button 
-                              variant="glass"
-                              size="sm"
-                              className="h-7 px-3 text-xs md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/job-view/${job.id}`);
-                              }}
-                            >
-                              Ansök
-                            </Button>
+                            {appliedJobIds.has(job.id) ? (
+                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs h-7 px-3">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Redan sökt
+                              </Badge>
+                            ) : (
+                              <Button 
+                                variant="glass"
+                                size="sm"
+                                className="h-7 px-3 text-xs md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/job-view/${job.id}`);
+                                }}
+                              >
+                                Ansök
+                              </Button>
+                            )}
                             <Button 
                               variant="glass"
                               size="icon"
