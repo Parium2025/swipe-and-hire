@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -70,9 +70,10 @@ export const CandidateProfileDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-b from-[#1a2942] to-[#0f1a2a] border-white/10">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card-parium backdrop-blur-md border-white/20 text-white">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {application.first_name} {application.last_name}</DialogTitle>
+          <DialogDescription>Visa kandidatens profilinformation och ansökan</DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
@@ -117,10 +118,10 @@ export const CandidateProfileDialog = ({
             </div>
           </div>
 
-          {/* Info sections in glass cards - matching job dialog input style */}
+          {/* Info sections - matching job dialog input style exactly */}
           <div className="grid gap-4">
             {/* Contact Information */}
-            <div className="bg-[#1e3a5f]/50 rounded-xl border border-white/10 p-4">
+            <div className="bg-white/10 border border-white/20 rounded-xl p-4">
               <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
                 <User className="h-3.5 w-3.5" />
                 Kontaktinformation
@@ -158,7 +159,7 @@ export const CandidateProfileDialog = ({
             </div>
 
             {/* Personal Information */}
-            <div className="bg-[#1e3a5f]/50 rounded-xl border border-white/10 p-4">
+            <div className="bg-white/10 border border-white/20 rounded-xl p-4">
               <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
                 <Briefcase className="h-3.5 w-3.5" />
                 Personlig information
@@ -187,7 +188,7 @@ export const CandidateProfileDialog = ({
 
             {/* Bio */}
             {application.bio && (
-              <div className="bg-[#1e3a5f]/50 rounded-xl border border-white/10 p-4">
+              <div className="bg-white/10 border border-white/20 rounded-xl p-4">
                 <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">
                   Om kandidaten
                 </h3>
@@ -199,7 +200,7 @@ export const CandidateProfileDialog = ({
 
             {/* Questions & Answers */}
             {hasCustomAnswers && (
-              <div className="bg-[#1e3a5f]/50 rounded-xl border border-white/10 overflow-hidden">
+              <div className="bg-white/10 border border-white/20 rounded-xl overflow-hidden">
                 <button 
                   onClick={() => setQuestionsExpanded(!questionsExpanded)}
                   className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
@@ -219,7 +220,7 @@ export const CandidateProfileDialog = ({
                     {Object.entries(customAnswers).map(([question, answer]) => (
                       <div 
                         key={question} 
-                        className="border-t border-white/5 pt-4 first:border-t-0 first:pt-0"
+                        className="border-t border-white/10 pt-4 first:border-t-0 first:pt-0"
                       >
                         <p className="text-sm font-medium text-white mb-1">{question}</p>
                         <p className="text-sm text-white/70">
@@ -247,7 +248,7 @@ export const CandidateProfileDialog = ({
                     }
                   });
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#1e3a5f]/50 hover:bg-[#1e3a5f]/70 border border-white/10 hover:border-white/20 rounded-xl transition-all text-white"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/30 rounded-xl transition-all text-white"
               >
                 <FileText className="h-5 w-5" />
                 <span className="font-medium">Visa CV</span>
@@ -256,7 +257,7 @@ export const CandidateProfileDialog = ({
           </div>
 
           {/* Actions */}
-          <div className="flex flex-wrap justify-center gap-3 pt-4 border-t border-white/10">
+          <div className="flex flex-wrap justify-center gap-3 pt-4 border-t border-white/20">
             <Button
               onClick={() => updateStatus('reviewing')}
               variant="glassYellow"
