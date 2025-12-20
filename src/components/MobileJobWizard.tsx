@@ -2942,9 +2942,12 @@ const MobileJobWizard = ({
                                         onClick={() => useQuestionTemplate(template)}
                                         className="flex-1 text-left hover:opacity-80 transition-opacity min-w-0"
                                       >
-                                        <div className="text-white font-medium text-sm leading-tight truncate">
+                                        <TruncatedTitle
+                                          fullText={template.question_text}
+                                          className="text-white font-medium text-sm leading-tight truncate line-clamp-1"
+                                        >
                                           {template.question_text}
-                                        </div>
+                                        </TruncatedTitle>
                                       </button>
                                       <div className="flex items-center gap-0.5 transition-opacity">
                                         <button
