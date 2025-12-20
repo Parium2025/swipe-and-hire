@@ -88,9 +88,7 @@ export const TimeInputField = ({
           onBlur={handleStartBlur}
           placeholder={startPlaceholder}
           maxLength={5}
-          className={`flex-1 bg-white/5 border-white/20 placeholder:text-foreground/80 h-11 text-sm focus:border-white/40 ${
-            startValue ? 'text-foreground font-semibold' : 'text-foreground/80'
-          }`}
+          className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/50 h-11 text-sm focus:border-white/40"
         />
         <span className="text-white">–</span>
         <Input
@@ -100,9 +98,7 @@ export const TimeInputField = ({
           onBlur={handleEndBlur}
           placeholder={endPlaceholder}
           maxLength={5}
-          className={`flex-1 bg-white/5 border-white/20 placeholder:text-foreground/80 h-11 text-sm focus:border-white/40 ${
-            endValue ? 'text-foreground font-semibold' : 'text-foreground/80'
-          }`}
+          className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/50 h-11 text-sm focus:border-white/40"
         />
       </div>
     </div>
