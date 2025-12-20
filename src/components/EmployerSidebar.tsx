@@ -115,7 +115,7 @@ const LOGO_CACHE_KEY = 'parium_company_logo_url';
 export function EmployerSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages } = useAuth();
+  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerActiveJobs,preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const queryClient = useQueryClient();
@@ -366,12 +366,18 @@ export function EmployerSidebar() {
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && (
-                        <span className="font-medium flex-1 text-left">{item.title}</span>
-                      )}
-                      {item.url === '/candidates' && preloadedEmployerCandidates > 0 && !collapsed && (
-                                        <span className="bg-secondary text-white text-xs font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                                          {preloadedEmployerCandidates}
-                                        </span>
+                        <span className="font-medium flex-1 text-left">
+                          {item.title}
+                          {item.url === '/dashboard' && preloadedEmployerActiveJobs > 0 && (
+                            <span className="text-white/80 font-normal ml-1">({preloadedEmployerActiveJobs})</span>
+                          )}
+                          {item.url === '/my-jobs' && preloadedEmployerMyJobs > 0 && (
+                            <span className="text-white/80 font-normal ml-1">({preloadedEmployerMyJobs})</span>
+                          )}
+                          {item.url === '/candidates' && preloadedEmployerCandidates > 0 && (
+                            <span className="text-white/80 font-normal ml-1">({preloadedEmployerCandidates})</span>
+                          )}
+                        </span>
                       )}
                       {item.url === '/messages' && preloadedUnreadMessages > 0 && !collapsed && (
                         <span className="bg-destructive text-destructive-foreground text-xs font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
