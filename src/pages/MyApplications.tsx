@@ -221,7 +221,7 @@ const MyApplications = () => {
               <Card 
                 key={application.id}
                 onClick={() => handleApplicationClick(application)}
-                className="bg-white/5 border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
+                className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
               >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
@@ -264,13 +264,13 @@ const MyApplications = () => {
                           const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                           if (isExpired) {
                             return (
-                              <Badge variant="secondary" className="bg-red-500/20 text-white border-red-500/30 text-xs hover:bg-red-500/30 hover:border-red-500/50 transition-all duration-300">
+                              <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50 hover:backdrop-brightness-110">
                                 Utgången
                               </Badge>
                             );
                           }
                           return (
-                            <Badge variant="glass" className="text-xs">
+                            <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
                               <Timer className="h-3 w-3 mr-1" />
                               {text} kvar
                             </Badge>
@@ -281,7 +281,8 @@ const MyApplications = () => {
 
                     {/* Status Badge */}
                     <Badge 
-                      className={`flex items-center gap-1.5 px-2.5 py-1 ${getStatusColor(application.status)} border whitespace-nowrap`}
+                      variant="glass"
+                      className={`flex items-center gap-1.5 px-2.5 py-1 border whitespace-nowrap transition-all duration-300 group-hover:backdrop-brightness-90 hover:backdrop-brightness-110 ${getStatusColor(application.status)}`}
                     >
                       {getStatusIcon(application.status)}
                       {getStatusLabel(application.status)}
