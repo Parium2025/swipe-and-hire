@@ -276,12 +276,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mounted) return;
-        console.log('[AuthStateChange]', event, { hasSession: !!session });
-        
-        // Token refresh-händelser loggas för felsökning
-        if (event === 'TOKEN_REFRESHED') {
-          console.log('✅ Session token uppdaterades automatiskt');
-        }
         
         // Update session and user state for all events
         setSession(session);
@@ -777,9 +771,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       setAuthAction('login');
-      setLoading(true); // 🔥 Håll loading true under hela inloggningen
+      setLoading(true);
       isSigningInRef.current = true;
-      console.log('🔍 SignIn started for:', email);
  
       // Minsta visningstid för "Loggar in..." (ca 1–1.1 sekund)
       const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1100));
@@ -819,7 +812,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
  
       // CRITICAL: Block login if email is not confirmed
       if (signInData?.user && !signInData.user.email_confirmed_at) {
-        console.log('🚫 Login blocked: Email not confirmed for', email);
         
         // Sign out i bakgrunden utan att vänta
         supabase.auth.signOut();
@@ -847,18 +839,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             clearInterval(checkMedia);
             resolve();
           } else if (Date.now() - start > 1500) {
-            // Fallback: max ~1.5 sekunder extra väntan även om media inte rapporterar klart
             clearInterval(checkMedia);
-            console.log('⏱️ Media preload timeout (~1.5s), fortsätter login ändå');
             resolve();
           }
         }, 50);
       });
- 
-      console.log('✅ Login successful, waiting for minimum delay + media preload...');
+
       await Promise.all([minDelayPromise, mediaPromise]);
- 
-      console.log('✅ Minimum delay + media preload klar, släpper in användaren');
+
       setLoading(false);
       setAuthAction(null);
  
@@ -941,7 +929,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      console.log('🚪 Attempting to sign out...');
       setAuthAction('logout');
       
       // Markera att detta är en manuell utloggning
@@ -950,7 +937,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Sätt loading state för smooth utloggning
       setLoading(true);
 
-      // Vänta 1.1 sekund (identiskt med login-skärmen) för smooth känsla
+      // Vänta för smooth känsla
       await new Promise(resolve => setTimeout(resolve, 550));
       
       // Låt backend sköta sessionen
@@ -958,10 +945,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Vänta resterande tid för smooth övergång
       await new Promise(resolve => setTimeout(resolve, 550));
-      
-      console.log('✅ User signed out successfully');
     } catch (error: any) {
-      console.error('❌ Sign out error:', error);
+      console.error('Sign out error:', error);
       toast({
         variant: "destructive",
         title: "Fel",
@@ -1254,7 +1239,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Funktion för att uppdatera sidebar-räknare (används av realtime + initial load)
   const refreshSidebarCounts = useCallback(async () => {
-    console.log('[refreshSidebarCounts] Triggered - user:', user?.id);
     try {
       // Hämta aktiva jobb med employer_id, created_at OCH expires_at för att filtrera bort utgångna
       const { data: activeJobs } = await supabase
@@ -1265,12 +1249,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Filtrera bort utgångna jobb (där expires_at har passerat)
       const now = new Date();
       const nonExpiredJobs = (activeJobs || []).filter(job => {
-        if (!job.expires_at) return true; // Inget utgångsdatum = fortfarande aktivt
+        if (!job.expires_at) return true;
         return new Date(job.expires_at) > now;
       });
       
       const newTotalJobs = nonExpiredJobs.length;
-      console.log('[refreshSidebarCounts] Total jobs (non-expired):', newTotalJobs);
       setPreloadedTotalJobs(newTotalJobs);
       try { sessionStorage.setItem(TOTAL_JOBS_CACHE_KEY, String(newTotalJobs)); } catch {}
 
@@ -1295,7 +1278,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('user_id', user.id);
         
         const newSavedJobs = savedJobsCount || 0;
-        console.log('[refreshSidebarCounts] Saved jobs (all):', newSavedJobs);
         setPreloadedSavedJobs(newSavedJobs);
         try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
 
@@ -1317,12 +1299,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('applicant_id', user.id);
         
         const appCount = myApplications || 0;
-        console.log('[refreshSidebarCounts] My applications:', appCount);
         setPreloadedMyApplications(appCount);
         try { sessionStorage.setItem(MY_APPLICATIONS_CACHE_KEY, String(appCount)); } catch {}
       }
     } catch (err) {
-      console.error('[refreshSidebarCounts] Error:', err);
+      // Silent error handling
     }
   }, [user]);
 
@@ -1413,36 +1394,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) return;
 
-    console.log('[Realtime] Setting up subscriptions for user:', user.id);
-
     const jobChannel = supabase
       .channel('auth-job-count')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'job_postings' },
-        (payload) => {
-          console.log('[Realtime] job_postings change:', payload.eventType);
+        () => {
           refreshSidebarCounts();
           refreshEmployerStats();
         }
       )
-      .subscribe((status) => {
-        console.log('[Realtime] job_postings subscription status:', status);
-      });
+      .subscribe();
 
     const savedChannel = supabase
       .channel(`auth-saved-jobs-${user.id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          console.log('[Realtime] saved_jobs change:', payload.eventType);
+        () => {
           refreshSidebarCounts();
         }
       )
-      .subscribe((status) => {
-        console.log('[Realtime] saved_jobs subscription status:', status);
-      });
+      .subscribe();
 
     // Real-time för ansökningar (uppdaterar employer stats OCH jobbsökarens räknare)
     const applicationsChannel = supabase
@@ -1450,15 +1423,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
-        (payload) => {
-          console.log('[Realtime] job_applications change:', payload.eventType);
+        () => {
           refreshSidebarCounts();
           refreshEmployerStats();
         }
       )
-      .subscribe((status) => {
-        console.log('[Realtime] job_applications subscription status:', status);
-      });
+      .subscribe();
 
     // Real-time för meddelanden (uppdaterar oläst-badge för både employer och jobbsökare)
     const messagesChannel = supabase
@@ -1466,15 +1436,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
-        (payload) => {
-          console.log('[Realtime] messages change:', payload.eventType);
+        () => {
           refreshEmployerStats();
           refreshSidebarCounts();
         }
       )
-      .subscribe((status) => {
-        console.log('[Realtime] messages subscription status:', status);
-      });
+      .subscribe();
 
     // Real-time för company reviews (uppdaterar recensionsräknare för arbetsgivare)
     const reviewsChannel = supabase
@@ -1482,17 +1449,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'company_reviews', filter: `company_id=eq.${user.id}` },
-        (payload) => {
-          console.log('[Realtime] company_reviews change:', payload.eventType);
+        () => {
           refreshEmployerStats();
         }
       )
-      .subscribe((status) => {
-        console.log('[Realtime] company_reviews subscription status:', status);
-      });
+      .subscribe();
 
     return () => {
-      console.log('[Realtime] Cleaning up subscriptions');
       supabase.removeChannel(jobChannel);
       supabase.removeChannel(savedChannel);
       supabase.removeChannel(applicationsChannel);
