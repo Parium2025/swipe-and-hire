@@ -43,8 +43,8 @@ export const TimeInputField = ({
   endValue,
   onStartChange,
   onEndChange,
-  startPlaceholder = '08:00',
-  endPlaceholder = '17:00',
+  startPlaceholder = '--:--',
+  endPlaceholder = '--:--',
   required = false,
 }: TimeInputFieldProps) => {
   const endInputRef = useRef<HTMLInputElement>(null);

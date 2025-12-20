@@ -1791,7 +1791,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   handleInputChange('work_start_time', `${hours}:${mins.padEnd(2, '0')}`);
                                 }
                               }}
-                              placeholder="08:00"
+                              placeholder="--:--"
                               maxLength={5}
                               className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-9 text-sm focus:border-white/40"
                             />
@@ -1818,7 +1818,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   handleInputChange('work_end_time', `${hours}:${mins.padEnd(2, '0')}`);
                                 }
                               }}
-                              placeholder="17:00"
+                              placeholder="--:--"
                               maxLength={5}
                               className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-9 text-sm focus:border-white/40"
                             />
