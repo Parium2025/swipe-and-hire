@@ -2,8 +2,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { JobQuestion } from '@/types/jobWizard';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-
+import { TruncatedText } from '@/components/TruncatedText';
 interface SortableQuestionItemProps {
   question: JobQuestion;
   onEdit: (question: JobQuestion) => void;
@@ -57,19 +56,13 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
             <GripVertical className="h-4 w-4" />
           </div>
           
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex-1 min-w-0 cursor-default">
-                <div className="text-white font-medium text-sm leading-tight truncate">
-                  {questionText}
-                  <span className="text-white/60 font-normal ml-1">({typeLabel})</span>
-                </div>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-[300px] bg-slate-900/95 border border-white/20">
-              <p className="text-sm text-white">{displayText}</p>
-            </TooltipContent>
-          </Tooltip>
+          <TruncatedText 
+            text={displayText}
+            className="flex-1 min-w-0 text-white font-medium text-sm leading-tight truncate"
+          >
+            {questionText}
+            <span className="text-white/60 font-normal ml-1">({typeLabel})</span>
+          </TruncatedText>
         </div>
         
         <div className="flex items-center gap-0.5 flex-shrink-0 transition-opacity">
