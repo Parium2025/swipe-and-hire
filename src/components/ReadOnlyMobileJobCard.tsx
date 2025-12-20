@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Users, MapPin, Calendar, Building2, Heart, Timer } from 'lucide-react';
+import { Eye, Users, MapPin, Calendar, Building2, Heart, Timer, CheckCircle } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,9 +30,10 @@ interface ReadOnlyMobileJobCardProps {
       last_name: string;
     };
   };
+  hasApplied?: boolean;
 }
 
-export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) => {
+export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -174,6 +175,12 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
               })}
             </span>
           </div>
+          {hasApplied && (
+            <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:border-green-500/50">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Redan sökt
+            </Badge>
+          )}
           {(() => {
             const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
             if (isExpired) {
