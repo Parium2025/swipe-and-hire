@@ -36,7 +36,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
 
   return (
     <Card 
-      className="bg-transparent touch-border-white shadow-none min-h-[120px] cursor-pointer transition-all duration-150 hover:bg-white/5 hover:border-white/50 active:scale-[0.98] active:bg-white/10"
+      className="group bg-transparent touch-border-white shadow-none min-h-[120px] cursor-pointer transition-all duration-150 hover:bg-white/5 hover:border-white/50 active:scale-[0.98] active:bg-white/10"
       onClick={handleCardClick}
     >
       <div className="p-3 space-y-2">
@@ -48,8 +48,8 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
             </h3>
             {job.employment_type && (
               <Badge 
-                variant="secondary" 
-                className="mt-1 text-xs bg-white/10 text-white border-white/20"
+                variant="glass" 
+                className="mt-1 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-blur-sm hover:backdrop-brightness-110"
               >
                 {getEmploymentTypeLabel(job.employment_type)}
               </Badge>
@@ -60,15 +60,15 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
         {/* Status Badge */}
         <div className="flex flex-col items-start gap-0.5">
           {jobIsExpired ? (
-            <Badge className="bg-red-500/20 text-red-300 border-red-500/30 text-xs transition-colors hover:bg-red-500/30">
+            <Badge variant="glass" className="bg-red-500/20 text-red-300 border-red-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:backdrop-brightness-110">
               Utgången
             </Badge>
           ) : job.is_active ? (
-            <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-colors hover:bg-green-500/30">
+            <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:backdrop-brightness-110">
               Aktiv
             </Badge>
           ) : (
-            <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs transition-colors hover:bg-amber-500/30">
+            <Badge variant="glass" className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-amber-500/30 hover:backdrop-brightness-110">
               Utkast
             </Badge>
           )}
@@ -133,7 +133,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
         {/* Action Buttons */}
         <div className="flex gap-2 pt-1">
           <Button 
-            variant="outlineNeutral" 
+            variant="glass" 
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
@@ -144,19 +144,19 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
                 onEdit(job);
               }
             }}
-            className="flex-1 h-11 bg-transparent border-white/20 text-white !hover:bg-blue-500/20 !hover:border-blue-500/40 hover:!text-white text-sm"
+            className="flex-1 h-11 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-blue-500/20 hover:border-blue-500/40 hover:backdrop-brightness-110"
           >
             <Edit className="h-4 w-4 mr-2" />
             Redigera
           </Button>
           <Button 
-            variant="outlineNeutral" 
+            variant="glass" 
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(job);
             }}
-            className="flex-1 h-11 bg-transparent border-white/20 text-white !hover:bg-red-500/20 !hover:border-red-500/40 hover:!text-white text-sm"
+            className="flex-1 h-11 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/20 hover:border-red-500/40 hover:backdrop-brightness-110"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Ta bort
