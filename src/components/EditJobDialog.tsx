@@ -1249,7 +1249,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
              formData.description.trim() && 
              formData.employment_type &&
              formData.salary_type &&
-             parseInt(formData.positions_count) > 0;
+             formData.salary_transparency &&
+             parseInt(formData.positions_count) > 0 &&
+             formData.work_start_time &&
+             formData.work_end_time;
     }
     
     if (currentStep === 1) {
