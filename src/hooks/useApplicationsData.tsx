@@ -42,15 +42,29 @@ const readSnapshot = (userId: string): ApplicationData[] => {
     const key = SNAPSHOT_KEY_PREFIX + userId;
     const raw = localStorage.getItem(key);
     if (!raw) return [];
-    
+
     const snapshot: SnapshotData = JSON.parse(raw);
     const age = Date.now() - snapshot.timestamp;
-    
+
     if (age > SNAPSHOT_EXPIRY_MS) {
       localStorage.removeItem(key);
       return [];
     }
-    
+
+    // If schema changed (old snapshot missing fields), ignore it.
+    const first = snapshot.items?.[0] as any;
+    const isValid =
+      !first ||
+      ('age' in first &&
+        'employment_status' in first &&
+        'availability' in first &&
+        'cv_url' in first);
+
+    if (!isValid) {
+      localStorage.removeItem(key);
+      return [];
+    }
+
     return snapshot.items;
   } catch {
     return [];
