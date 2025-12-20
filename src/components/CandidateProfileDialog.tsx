@@ -202,18 +202,18 @@ export const CandidateProfileDialog = ({
 
           {/* Info sections - matching job dialog input style exactly */}
           <div className="grid gap-4">
-            {/* Contact Information */}
+            {/* Information */}
             <div className="bg-white/10 border border-white/20 rounded-xl p-4">
               <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
                 <User className="h-3.5 w-3.5" />
-                Kontaktinformation
+                Information
               </h3>
               <div className="grid sm:grid-cols-2 gap-3">
                 {application.email && (
                   <div className="flex items-center gap-3">
                     <Mail className="h-4 w-4 text-white/50 shrink-0" />
-                    <a 
-                      href={`mailto:${application.email}`} 
+                    <a
+                      href={`mailto:${application.email}`}
                       className="text-sm text-white hover:text-white/80 transition-colors truncate"
                     >
                       {application.email}
@@ -223,8 +223,8 @@ export const CandidateProfileDialog = ({
                 {application.phone && (
                   <div className="flex items-center gap-3">
                     <Phone className="h-4 w-4 text-white/50 shrink-0" />
-                    <a 
-                      href={`tel:${application.phone}`} 
+                    <a
+                      href={`tel:${application.phone}`}
                       className="text-sm text-white hover:text-white/80 transition-colors"
                     >
                       {application.phone}
@@ -255,6 +255,29 @@ export const CandidateProfileDialog = ({
                     <span className="text-sm text-white">{application.availability}</span>
                   </div>
                 )}
+                {application.cv_url && (
+                  <div className="flex items-center gap-3 sm:col-span-2">
+                    <FileText className="h-4 w-4 text-white/50 shrink-0" />
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        await openCvFile({
+                          cvUrl: application.cv_url,
+                          onSuccess: (message) => {
+                            toast.success(message || 'CV öppnat i ny flik');
+                          },
+                          onError: (error) => {
+                            toast.error(error.message || 'Kunde inte öppna CV');
+                          },
+                        });
+                      }}
+                      className="text-sm text-white hover:text-white/80 transition-colors underline decoration-white/30 underline-offset-4"
+                    >
+                      Visa CV
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -276,7 +299,7 @@ export const CandidateProfileDialog = ({
             {/* Questions & Answers */}
             {hasCustomAnswers && (
               <div className="bg-white/10 border border-white/20 rounded-xl overflow-hidden">
-                <button 
+                <button
                   onClick={() => setQuestionsExpanded(!questionsExpanded)}
                   className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
                 >
@@ -289,12 +312,12 @@ export const CandidateProfileDialog = ({
                     <ChevronDown className="h-4 w-4 text-white/50" />
                   )}
                 </button>
-                
+
                 {questionsExpanded && (
                   <div className="px-4 pb-4 space-y-4">
                     {Object.entries(customAnswers).map(([question, answer]) => (
-                      <div 
-                        key={question} 
+                      <div
+                        key={question}
                         className="border-t border-white/10 pt-4 first:border-t-0 first:pt-0"
                       >
                         <p className="text-sm font-medium text-white mb-1">{question}</p>
@@ -306,28 +329,6 @@ export const CandidateProfileDialog = ({
                   </div>
                 )}
               </div>
-            )}
-
-            {/* CV Button */}
-            {application.cv_url && (
-              <button
-                onClick={async (e) => {
-                  e.preventDefault();
-                  await openCvFile({
-                    cvUrl: application.cv_url,
-                    onSuccess: (message) => {
-                      toast.success(message || 'CV öppnat i ny flik');
-                    },
-                    onError: (error) => {
-                      toast.error(error.message || 'Kunde inte öppna CV');
-                    }
-                  });
-                }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/30 rounded-xl transition-all text-white"
-              >
-                <FileText className="h-5 w-5" />
-                <span className="font-medium">Visa CV</span>
-              </button>
             )}
 
             {/* Notes Section */}
