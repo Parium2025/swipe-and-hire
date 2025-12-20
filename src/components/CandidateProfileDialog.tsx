@@ -206,17 +206,17 @@ export const CandidateProfileDialog = ({
           <div className="grid gap-4">
             {/* Information */}
             <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-              <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-                <User className="h-3.5 w-3.5" />
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                <User className="h-4 w-4" />
                 Information
               </h3>
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className="grid sm:grid-cols-2 gap-4">
                 {application.email && (
                   <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-white shrink-0" />
+                    <Mail className="h-5 w-5 text-white shrink-0" />
                     <a
                       href={`mailto:${application.email}`}
-                      className="text-sm text-white hover:text-white/80 transition-colors truncate"
+                      className="text-base text-white hover:text-white/80 transition-colors truncate"
                     >
                       {application.email}
                     </a>
@@ -224,10 +224,10 @@ export const CandidateProfileDialog = ({
                 )}
                 {application.phone && (
                   <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-white shrink-0" />
+                    <Phone className="h-5 w-5 text-white shrink-0" />
                     <a
                       href={`tel:${application.phone}`}
-                      className="text-sm text-white hover:text-white/80 transition-colors"
+                      className="text-base text-white hover:text-white/80 transition-colors"
                     >
                       {application.phone}
                     </a>
@@ -235,14 +235,14 @@ export const CandidateProfileDialog = ({
                 )}
                 {application.location && (
                   <div className="flex items-center gap-3">
-                    <MapPin className="h-4 w-4 text-white shrink-0" />
-                    <span className="text-sm text-white">{application.location}</span>
+                    <MapPin className="h-5 w-5 text-white shrink-0" />
+                    <span className="text-base text-white">{application.location}</span>
                   </div>
                 )}
                 {application.age && (
                   <div className="flex items-center gap-3">
-                    <Calendar className="h-4 w-4 text-white shrink-0" />
-                    <span className="text-sm text-white">{application.age} år</span>
+                    <Calendar className="h-5 w-5 text-white shrink-0" />
+                    <span className="text-base text-white">{application.age} år</span>
                   </div>
                 )}
               </div>
@@ -251,27 +251,27 @@ export const CandidateProfileDialog = ({
             {/* Anställningsinformation */}
             {(application.employment_status || application.work_schedule || application.availability) && (
               <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-                <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <Briefcase className="h-3.5 w-3.5" />
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Briefcase className="h-4 w-4" />
                   Anställningsinformation
                 </h3>
-                <div className="grid sm:grid-cols-2 gap-3">
+                <div className="grid sm:grid-cols-2 gap-4">
                 {application.employment_status && (
                     <div className="space-y-1">
-                      <span className="text-xs text-white">Anställningsstatus</span>
-                      <p className="text-sm text-white">{application.employment_status}</p>
+                      <span className="text-sm text-white">Anställningsstatus</span>
+                      <p className="text-base text-white font-medium">{application.employment_status}</p>
                     </div>
                   )}
                   {application.work_schedule && (
                     <div className="space-y-1">
-                      <span className="text-xs text-white">Hur mycket jobbar du idag?</span>
-                      <p className="text-sm text-white">{application.work_schedule}</p>
+                      <span className="text-sm text-white">Hur mycket jobbar du idag?</span>
+                      <p className="text-base text-white font-medium">{application.work_schedule}</p>
                     </div>
                   )}
                   {application.availability && (
                     <div className="space-y-1 sm:col-span-2">
-                      <span className="text-xs text-white">När kan du börja nytt jobb?</span>
-                      <p className="text-sm text-white">{application.availability}</p>
+                      <span className="text-sm text-white">När kan du börja nytt jobb?</span>
+                      <p className="text-base text-white font-medium">{application.availability}</p>
                     </div>
                   )}
                 </div>
@@ -281,18 +281,18 @@ export const CandidateProfileDialog = ({
             {/* CV Section - matching profile page style with dialog */}
             {application.cv_url && (
               <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-                <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <FileText className="h-3.5 w-3.5" />
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
                   CV
                 </h3>
-                <div className="w-full min-h-9 py-2.5 bg-white/5 border border-white/10 rounded-md flex items-center px-3 gap-2">
+                <div className="w-full min-h-11 py-3 bg-white/5 border border-white/10 rounded-md flex items-center px-4 gap-3">
                   <button
                     type="button"
                     onClick={() => setCvOpen(true)}
-                    className="flex items-center gap-2 text-white transition-colors flex-1"
+                    className="flex items-center gap-3 text-white transition-colors flex-1"
                   >
-                    <FileText className="h-4 w-4 text-white shrink-0" />
-                    <span className="text-sm">Visa CV</span>
+                    <FileText className="h-5 w-5 text-white shrink-0" />
+                    <span className="text-base">Visa CV</span>
                   </button>
                   <button
                     type="button"
@@ -300,7 +300,7 @@ export const CandidateProfileDialog = ({
                     className="text-white hover:text-white/80 transition-colors"
                     title="Öppna CV"
                   >
-                    <ExternalLink className="h-4 w-4" />
+                    <ExternalLink className="h-5 w-5" />
                   </button>
                 </div>
               </div>
@@ -308,16 +308,16 @@ export const CandidateProfileDialog = ({
 
             {/* Presentation om kandidaten */}
             <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-              <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-                <User className="h-3.5 w-3.5" />
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                <User className="h-4 w-4" />
                 Presentation om {application.first_name || 'kandidaten'}
               </h3>
               {application.bio ? (
-                <p className="text-sm text-white whitespace-pre-wrap leading-relaxed">
+                <p className="text-base text-white whitespace-pre-wrap leading-relaxed">
                   {application.bio}
                 </p>
               ) : (
-                <p className="text-sm text-white/50 italic">Ingen presentation angiven</p>
+                <p className="text-base text-white/50 italic">Ingen presentation angiven</p>
               )}
             </div>
 
@@ -328,13 +328,13 @@ export const CandidateProfileDialog = ({
                   onClick={() => setQuestionsExpanded(!questionsExpanded)}
                   className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
                 >
-                  <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
+                  <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
                     Frågor ({Object.keys(customAnswers).length})
                   </h3>
                   {questionsExpanded ? (
-                    <ChevronUp className="h-4 w-4 text-white/50" />
+                    <ChevronUp className="h-5 w-5 text-white" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 text-white/50" />
+                    <ChevronDown className="h-5 w-5 text-white" />
                   )}
                 </button>
 
@@ -345,8 +345,8 @@ export const CandidateProfileDialog = ({
                         key={question}
                         className="border-t border-white/10 pt-4 first:border-t-0 first:pt-0"
                       >
-                        <p className="text-sm font-medium text-white mb-1">{question}</p>
-                        <p className="text-sm text-white/70">
+                        <p className="text-base font-medium text-white mb-1">{question}</p>
+                        <p className="text-base text-white">
                           {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
                         </p>
                       </div>
@@ -362,14 +362,14 @@ export const CandidateProfileDialog = ({
                 onClick={() => setNotesExpanded(!notesExpanded)}
                 className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
               >
-                <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
-                  <StickyNote className="h-3.5 w-3.5" />
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                  <StickyNote className="h-4 w-4" />
                   Anteckningar ({notes.length})
                 </h3>
                 {notesExpanded ? (
-                  <ChevronUp className="h-4 w-4 text-white/50" />
+                  <ChevronUp className="h-5 w-5 text-white" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-white/50" />
+                  <ChevronDown className="h-5 w-5 text-white" />
                 )}
               </button>
               
