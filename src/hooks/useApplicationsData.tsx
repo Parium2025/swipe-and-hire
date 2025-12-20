@@ -23,6 +23,8 @@ export interface ApplicationData {
   custom_answers: any;
   job_title?: string;
   profile_image_url?: string | null;
+  video_url?: string | null;
+  is_profile_video?: boolean | null;
 }
 
 const PAGE_SIZE = 25;
@@ -137,27 +139,38 @@ export const useApplicationsData = (searchQuery: string = '') => {
         return { items: [], hasMore: false };
       }
 
-      // Fetch profile images via secure RPC function for each applicant
+      // Fetch profile media (image, video, is_profile_video) via secure RPC function for each applicant
       const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
-      const profileImageMap: Record<string, string | null> = {};
+      const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }> = {};
       
-      // Batch fetch profile images via RPC (security definer function)
+      // Batch fetch profile media via RPC (security definer function)
       await Promise.all(
         applicantIds.map(async (applicantId) => {
-          const { data: profileImageUrl } = await supabase.rpc('get_applicant_profile_image', {
+          const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
             p_applicant_id: applicantId,
             p_employer_id: user.id
           });
-          profileImageMap[applicantId] = profileImageUrl;
+          if (mediaData && mediaData.length > 0) {
+            profileMediaMap[applicantId] = {
+              profile_image_url: mediaData[0].profile_image_url,
+              video_url: mediaData[0].video_url,
+              is_profile_video: mediaData[0].is_profile_video
+            };
+          } else {
+            profileMediaMap[applicantId] = { profile_image_url: null, video_url: null, is_profile_video: null };
+          }
         })
       );
 
-      // Transform data to flatten job_postings and add profile images
+      // Transform data to flatten job_postings and add profile media
       const items = baseData.map((item: any) => {
+        const media = profileMediaMap[item.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null };
         return {
           ...item,
           job_title: item.job_postings?.title || 'Okänt jobb',
-          profile_image_url: profileImageMap[item.applicant_id] || null,
+          profile_image_url: media.profile_image_url,
+          video_url: media.video_url,
+          is_profile_video: media.is_profile_video,
           job_postings: undefined
         };
       }) as ApplicationData[];

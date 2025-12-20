@@ -875,6 +875,14 @@ export type Database = {
         Args: { p_applicant_id: string; p_employer_id: string }
         Returns: string
       }
+      get_applicant_profile_media: {
+        Args: { p_applicant_id: string; p_employer_id: string }
+        Returns: {
+          is_profile_video: boolean
+          profile_image_url: string
+          video_url: string
+        }[]
+      }
       get_consented_profile_for_employer: {
         Args: { p_employer_id: string; p_profile_id: string }
         Returns: {

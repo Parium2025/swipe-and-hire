@@ -1,12 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { CandidateProfileDialog } from './CandidateProfileDialog';
-import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { CandidateAvatar } from './CandidateAvatar';
 import { Button } from '@/components/ui/button';
 
 interface CandidatesTableProps {
@@ -85,7 +84,6 @@ export function CandidatesTable({
           </TableHeader>
           <TableBody>
             {applications.map((application) => {
-              const initials = `${application.first_name?.[0] || ''}${application.last_name?.[0] || ''}`.toUpperCase();
               const status = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
               
               return (
@@ -96,12 +94,13 @@ export function CandidatesTable({
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={useMediaUrl(application.profile_image_url, 'profile-image') || undefined} />
-                        <AvatarFallback className="bg-primary/20 text-primary">
-                          {initials}
-                        </AvatarFallback>
-                      </Avatar>
+                      <CandidateAvatar
+                        profileImageUrl={application.profile_image_url}
+                        videoUrl={application.video_url}
+                        isProfileVideo={application.is_profile_video}
+                        firstName={application.first_name}
+                        lastName={application.last_name}
+                      />
                       <div>
                         <div className="font-medium text-foreground">
                           {application.first_name} {application.last_name}
