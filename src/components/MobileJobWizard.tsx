@@ -2645,7 +2645,7 @@ const MobileJobWizard = ({
                         }}
                         placeholder="08:00"
                         maxLength={5}
-                        className={`bg-white/10 border-white/20 placeholder:text-white/60 h-9 text-sm focus:border-white/40 ${formData.work_start_time ? 'text-white' : 'text-white/60'}`}
+                        className={`bg-white/10 border-white/20 placeholder:text-foreground/80 h-9 text-sm focus:border-white/40 ${formData.work_start_time ? 'text-foreground font-semibold' : 'text-foreground/80'}`}
                       />
                     </div>
                     <span className="text-white text-sm">–</span>
@@ -2672,7 +2672,7 @@ const MobileJobWizard = ({
                         }}
                         placeholder="17:00"
                         maxLength={5}
-                        className={`bg-white/10 border-white/20 placeholder:text-white/60 h-9 text-sm focus:border-white/40 ${formData.work_end_time ? 'text-white' : 'text-white/60'}`}
+                        className={`bg-white/10 border-white/20 placeholder:text-foreground/80 h-9 text-sm focus:border-white/40 ${formData.work_end_time ? 'text-foreground font-semibold' : 'text-foreground/80'}`}
                       />
                     </div>
                   </div>
