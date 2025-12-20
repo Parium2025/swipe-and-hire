@@ -86,7 +86,7 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
 
   return (
     <Card 
-      className="bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-all duration-200 hover:bg-white/10 active:scale-[0.98]"
+      className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-all duration-200 hover:bg-white/10 active:scale-[0.98]"
       onClick={handleCardClick}
     >
       {/* Job Image - Simplex style */}
@@ -130,8 +130,8 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
         {/* Employment Type Badge */}
         {job.employment_type && (
           <Badge 
-            variant="secondary" 
-            className="text-xs bg-white/10 text-white border-white/20"
+            variant="glass" 
+            className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-blur-sm hover:backdrop-brightness-110"
           >
             {getEmploymentTypeLabel(job.employment_type)}
           </Badge>
@@ -178,23 +178,23 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
             const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
             if (isExpired) {
               return (
-                <Badge variant="glass" className="text-xs">
+                <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-blur-sm hover:backdrop-brightness-110">
                   Utgången
                 </Badge>
               );
             }
             return (
-              <Badge variant="glass" className="text-xs">
+              <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-blur-sm hover:backdrop-brightness-110">
                 <Timer className="h-3 w-3 mr-1" />
                 {text} kvar
               </Badge>
             );
           })()}
           <Button
-            variant="ghost"
+            variant="glass"
             size="sm"
             onClick={handleSaveClick}
-            className="ml-auto h-8 w-8 p-0 rounded-full text-white hover:text-white hover:bg-white/10 transition-all"
+            className="ml-auto h-8 w-8 p-0 rounded-full transition-all duration-300 group-hover:backdrop-brightness-90 hover:backdrop-brightness-110"
           >
             <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : ''}`} />
           </Button>
