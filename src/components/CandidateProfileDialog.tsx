@@ -70,7 +70,7 @@ export const CandidateProfileDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border-white/10">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-b from-[#1a2942] to-[#0f1a2a] border-white/10">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {application.first_name} {application.last_name}</DialogTitle>
         </DialogHeader>
@@ -78,10 +78,10 @@ export const CandidateProfileDialog = ({
         <div className="space-y-6">
           {/* Header with circular profile image/video */}
           <div className="flex flex-col items-center text-center space-y-4">
-            {/* Circular Profile Image/Video */}
+            {/* Circular Profile Image/Video - Larger */}
             <div className="relative">
               {isProfileVideo && videoUrl ? (
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20">
+                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-primary/30 shadow-xl shadow-primary/10">
                   <ProfileVideo
                     videoUrl={videoUrl}
                     coverImageUrl={profileImageUrl || undefined}
@@ -92,13 +92,13 @@ export const CandidateProfileDialog = ({
                   />
                 </div>
               ) : (
-                <Avatar className="w-32 h-32 border-4 border-primary/20">
+                <Avatar className="w-40 h-40 md:w-48 md:h-48 border-4 border-primary/30 shadow-xl shadow-primary/10">
                   <AvatarImage 
                     src={profileImageUrl || undefined} 
                     alt={`${application.first_name} ${application.last_name}`}
                     className="object-cover"
                   />
-                  <AvatarFallback className="bg-primary/20 text-primary text-3xl font-semibold">
+                  <AvatarFallback className="bg-primary/20 text-primary text-4xl md:text-5xl font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
