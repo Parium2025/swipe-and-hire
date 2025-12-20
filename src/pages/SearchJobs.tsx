@@ -874,13 +874,12 @@ const SearchJobs = () => {
                               <Calendar className="h-3 w-3" />
                               {formatDateShortSv(job.created_at)}
                             </div>
-                            {job.applications_count > 0 && (
-                              <Badge variant="glass" className="text-xs transition-all duration-300 md:group-hover:backdrop-brightness-90 md:hover:bg-white/15 md:hover:border-white/50">
-                                <Users className="h-3 w-3 mr-1" />
-                                {job.applications_count} sökande
-                              </Badge>
-                            )}
-                            {/* Visa "dagar kvar" FÖRST, sedan "Redan sökt" */}
+                            {/* Visa antal sökande */}
+                            <Badge variant="glass" className="text-xs transition-all duration-300 md:group-hover:backdrop-brightness-90 md:hover:bg-white/15 md:hover:border-white/50">
+                              <Users className="h-3 w-3 mr-1" />
+                              {job.applications_count || 0} sökande
+                            </Badge>
+                            {/* Visa "dagar kvar" eller "Utgången" */}
                             {(() => {
                               const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                               if (isExpired) {
@@ -900,12 +899,6 @@ const SearchJobs = () => {
                                 </Badge>
                               );
                             })()}
-                            {appliedJobIds.has(job.id) && (
-                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 md:group-hover:backdrop-brightness-90 md:hover:bg-green-500/30 md:hover:border-green-500/50">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Redan sökt
-                              </Badge>
-                            )}
                           </div>
                         </TableCell>
                         <TableCell>

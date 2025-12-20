@@ -164,7 +164,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
           </div>
           <div className="flex items-center gap-1">
             <Users className="h-3.5 w-3.5" />
-            <span>{job.applications_count || 0}</span>
+            <span>{job.applications_count || 0} sökande</span>
           </div>
           <div className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" />
@@ -175,7 +175,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
               })}
             </span>
           </div>
-          {/* Visa "dagar kvar" FÖRST, sedan "Redan sökt" */}
+          {/* Visa "dagar kvar" eller "Utgången" */}
           {(() => {
             const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
             if (isExpired) {
@@ -192,6 +192,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
               </Badge>
             );
           })()}
+          {/* Visa "Redan sökt" badge på mobil */}
           {hasApplied && (
             <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:border-green-500/50">
               <CheckCircle className="h-3 w-3 mr-1" />
