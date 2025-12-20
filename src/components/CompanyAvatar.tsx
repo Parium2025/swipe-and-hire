@@ -23,7 +23,7 @@ function CompanyAvatarBase({ companyLogoUrl, companyName, initials }: CompanyAva
           onError={() => setError(true)}
         />
       ) : (
-        <AvatarFallback className="bg-white/10 text-white font-semibold">
+        <AvatarFallback className="bg-white/20 text-white font-semibold">
           {initials}
         </AvatarFallback>
       )}
