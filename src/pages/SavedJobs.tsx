@@ -6,6 +6,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
@@ -87,10 +97,11 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
 };
 
 const SavedJobs = () => {
-  const { user } = useAuth();
+  const { user, refreshSidebarCounts } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
+  const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
   // Show cached data immediately, refresh silently in background
   const { data: savedJobs = [], isLoading, isFetched } = useQuery({
@@ -102,9 +113,16 @@ const SavedJobs = () => {
     refetchOnWindowFocus: false, // Don't refetch on tab focus
   });
 
-  const handleRemoveSavedJob = async (savedJobId: string, e: React.MouseEvent) => {
+  const handleRemoveClick = (savedJobId: string, jobTitle: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    setJobToRemove({ id: savedJobId, title: jobTitle });
+  };
+
+  const confirmRemoveSavedJob = async () => {
+    if (!jobToRemove) return;
     
+    const savedJobId = jobToRemove.id;
+    setJobToRemove(null);
     setRemovingIds(prev => new Set(prev).add(savedJobId));
     
     try {
@@ -120,6 +138,9 @@ const SavedJobs = () => {
         old?.filter(job => job.id !== savedJobId) || []
       );
       toast.success('Jobb borttaget från sparade');
+      
+      // Uppdatera sidebar-räknaren
+      refreshSidebarCounts();
     } catch (err) {
       console.error('Error removing saved job:', err);
       toast.error('Kunde inte ta bort jobbet');
@@ -264,7 +285,7 @@ const SavedJobs = () => {
 
                     {/* Remove button */}
                     <button
-                      onClick={(e) => handleRemoveSavedJob(savedJob.id, e)}
+                      onClick={(e) => handleRemoveClick(savedJob.id, job.title, e)}
                       disabled={isRemoving}
                       className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 hover:backdrop-brightness-110 disabled:opacity-50 flex-shrink-0 active:scale-95"
                     >
@@ -277,6 +298,24 @@ const SavedJobs = () => {
           })}
         </div>
       )}
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={!!jobToRemove} onOpenChange={() => setJobToRemove(null)}>
+        <AlertDialogContent className="bg-background border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ta bort sparat jobb?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Är du säker på att du vill ta bort "{jobToRemove?.title}" från dina sparade jobb?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemoveSavedJob} className="bg-red-500 hover:bg-red-600">
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
