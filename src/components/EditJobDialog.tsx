@@ -74,6 +74,7 @@ interface JobPosting {
   workplace_municipality?: string;
   pitch?: string;
   job_image_url?: string;
+  job_image_desktop_url?: string;
 }
 
 interface JobFormData {
@@ -744,7 +745,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         application_instructions: job.application_instructions || '',
         pitch: job.pitch || '',
         job_image_url: job.job_image_url || '',
-        job_image_desktop_url: (job as any).job_image_desktop_url || ''
+        job_image_desktop_url: job.job_image_desktop_url || ''
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
