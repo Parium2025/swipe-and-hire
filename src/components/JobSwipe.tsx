@@ -227,8 +227,52 @@ const JobSwipe = () => {
 
   const handleApplicationSubmit = async (answers: Record<string, any>) => {
     try {
-      // Here you would save the application to database
-      // For now, just show success message
+      // Fetch user profile to get contact info
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, phone, email, home_location, location, birth_date, bio, cv_url, availability, employment_type')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+      
+      // Calculate age from birth_date
+      let age = null;
+      if (profile?.birth_date) {
+        const birthYear = new Date(profile.birth_date).getFullYear();
+        age = new Date().getFullYear() - birthYear;
+      }
+
+      // Extract standard fields from answers and prepare custom_answers
+      const { first_name, last_name, email, phone, location: answerLocation, age: answerAge, ...customAnswers } = answers;
+      
+      // Clean custom answers - remove 'custom_' prefix from keys
+      const cleanedCustomAnswers: Record<string, any> = {};
+      Object.entries(customAnswers).forEach(([key, value]) => {
+        const cleanKey = key.startsWith('custom_') ? key.replace('custom_', '') : key;
+        cleanedCustomAnswers[cleanKey] = value;
+      });
+      
+      // Save application to database with contact info
+      const { error } = await supabase
+        .from('job_applications')
+        .insert({
+          job_id: currentJob.id,
+          applicant_id: user?.id,
+          first_name: first_name || profile?.first_name || null,
+          last_name: last_name || profile?.last_name || null,
+          email: email || user?.email || profile?.email || null,
+          phone: phone || profile?.phone || null,
+          location: answerLocation || profile?.home_location || profile?.location || null,
+          age: answerAge ? parseInt(answerAge) : age,
+          bio: profile?.bio || null,
+          cv_url: profile?.cv_url || null,
+          availability: profile?.availability || null,
+          employment_status: profile?.employment_type || null,
+          custom_answers: cleanedCustomAnswers,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+
       toast({
         title: "Ansökan skickad!",
         description: "Din ansökan har skickats till arbetsgivaren"
@@ -240,6 +284,7 @@ const JobSwipe = () => {
         setShowApplicationDialog(false);
       }, 1000);
     } catch (error) {
+      console.error('Error submitting application:', error);
       toast({
         title: "Ett fel uppstod",
         description: "Kunde inte skicka ansökan",
