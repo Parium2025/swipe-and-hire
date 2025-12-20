@@ -869,7 +869,10 @@ const SearchJobs = () => {
                                 );
                               }
                               return (
-                                <Badge variant="glass" className="text-xs bg-slate-800/90 border-white/20">
+                                <Badge
+                                  variant="glass"
+                                  className="text-xs transition-all duration-300 md:group-hover:backdrop-brightness-90 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110"
+                                >
                                   <Timer className="h-3 w-3 mr-1" />
                                   {text} kvar
                                 </Badge>
@@ -882,7 +885,7 @@ const SearchJobs = () => {
                             <Button 
                               variant="glass"
                               size="sm"
-                              className="h-7 px-3 text-xs bg-slate-800/90 border-white/20"
+                              className="h-7 px-3 text-xs md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/job-view/${job.id}`);
@@ -893,7 +896,7 @@ const SearchJobs = () => {
                             <Button 
                               variant="glass"
                               size="icon"
-                              className="h-7 w-7 bg-slate-800/90 border-white/20"
+                              className="h-7 w-7 md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
