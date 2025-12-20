@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -109,6 +109,43 @@ const SavedJobs = () => {
     staleTime: 60000,
     gcTime: Infinity,
   });
+
+  // Real-time prenumeration för applications_count uppdateringar
+  useEffect(() => {
+    const channel = supabase
+      .channel('saved-jobs-applications-count')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'job_postings'
+        },
+        (payload) => {
+          // Uppdatera cache med nya applications_count
+          queryClient.setQueryData(['saved-jobs', user?.id], (oldData: SavedJob[] | undefined) => {
+            if (!oldData) return oldData;
+            return oldData.map(savedJob => {
+              if (savedJob.job_postings && savedJob.job_postings.id === payload.new.id) {
+                return {
+                  ...savedJob,
+                  job_postings: {
+                    ...savedJob.job_postings,
+                    applications_count: payload.new.applications_count
+                  }
+                };
+              }
+              return savedJob;
+            });
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient, user?.id]);
 
   const handleRemoveClick = (savedJobId: string, jobTitle: string, e: React.MouseEvent) => {
     e.stopPropagation();

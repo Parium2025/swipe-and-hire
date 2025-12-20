@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -102,6 +103,7 @@ const getStatusColor = (status: string) => {
 const MyApplications = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: applications, isLoading, error } = useQuery({
     queryKey: ['my-applications', user?.id],
@@ -141,6 +143,43 @@ const MyApplications = () => {
     },
     enabled: !!user,
   });
+
+  // Real-time prenumeration för applications_count uppdateringar
+  useEffect(() => {
+    const channel = supabase
+      .channel('my-applications-count')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'job_postings'
+        },
+        (payload) => {
+          // Uppdatera cache med nya applications_count
+          queryClient.setQueryData(['my-applications', user?.id], (oldData: Application[] | undefined) => {
+            if (!oldData) return oldData;
+            return oldData.map(application => {
+              if (application.job_postings && application.job_postings.id === payload.new.id) {
+                return {
+                  ...application,
+                  job_postings: {
+                    ...application.job_postings,
+                    applications_count: payload.new.applications_count
+                  }
+                };
+              }
+              return application;
+            });
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient, user?.id]);
 
   const handleApplicationClick = (application: Application) => {
     if (application.job_postings?.id) {
