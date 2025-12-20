@@ -59,6 +59,7 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
             cv_url,
             age,
             employment_status,
+            work_schedule,
             availability,
             custom_answers,
             status,

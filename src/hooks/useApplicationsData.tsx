@@ -16,6 +16,7 @@ export interface ApplicationData {
   cv_url: string | null;
   age: number | null;
   employment_status: string | null;
+  work_schedule: string | null;
   availability: string | null;
   status: string | null;
   applied_at: string;
@@ -57,6 +58,7 @@ const readSnapshot = (userId: string): ApplicationData[] => {
       !first ||
       ('age' in first &&
         'employment_status' in first &&
+        'work_schedule' in first &&
         'availability' in first &&
         'cv_url' in first);
 
@@ -125,6 +127,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
           cv_url,
           age,
           employment_status,
+          work_schedule,
           availability,
           custom_answers,
           status,
