@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { openCvFile } from '@/utils/cvUtils';
@@ -243,43 +243,88 @@ export const CandidateProfileDialog = ({
                     <span className="text-sm text-white">{application.age} år</span>
                   </div>
                 )}
-                {application.employment_status && (
-                  <div className="flex items-center gap-3">
-                    <Briefcase className="h-4 w-4 text-white/50 shrink-0" />
-                    <span className="text-sm text-white">{application.employment_status}</span>
-                  </div>
-                )}
-                {application.availability && (
-                  <div className="flex items-center gap-3">
-                    <Clock className="h-4 w-4 text-white/50 shrink-0" />
-                    <span className="text-sm text-white">{application.availability}</span>
-                  </div>
-                )}
-                {application.cv_url && (
-                  <div className="flex items-center gap-3 sm:col-span-2">
-                    <FileText className="h-4 w-4 text-white/50 shrink-0" />
-                    <button
-                      type="button"
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        await openCvFile({
-                          cvUrl: application.cv_url,
-                          onSuccess: (message) => {
-                            toast.success(message || 'CV öppnat i ny flik');
-                          },
-                          onError: (error) => {
-                            toast.error(error.message || 'Kunde inte öppna CV');
-                          },
-                        });
-                      }}
-                      className="text-sm text-white hover:text-white/80 transition-colors underline decoration-white/30 underline-offset-4"
-                    >
-                      Visa CV
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
+
+            {/* Anställningsinformation */}
+            {(application.employment_status || application.work_schedule || application.availability) && (
+              <div className="bg-white/10 border border-white/20 rounded-xl p-4">
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Briefcase className="h-3.5 w-3.5" />
+                  Anställningsinformation
+                </h3>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {application.employment_status && (
+                    <div className="space-y-1">
+                      <span className="text-xs text-white/50">Anställningsstatus</span>
+                      <p className="text-sm text-white">{application.employment_status}</p>
+                    </div>
+                  )}
+                  {application.work_schedule && (
+                    <div className="space-y-1">
+                      <span className="text-xs text-white/50">Hur mycket jobbar du idag?</span>
+                      <p className="text-sm text-white">{application.work_schedule}</p>
+                    </div>
+                  )}
+                  {application.availability && (
+                    <div className="space-y-1 sm:col-span-2">
+                      <span className="text-xs text-white/50">När kan du börja nytt jobb?</span>
+                      <p className="text-sm text-white">{application.availability}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* CV Section - matching profile page style */}
+            {application.cv_url && (
+              <div className="bg-white/10 border border-white/20 rounded-xl p-4">
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <FileText className="h-3.5 w-3.5" />
+                  CV
+                </h3>
+                <div className="w-full min-h-9 py-2.5 bg-white/5 border border-white/10 rounded-md flex items-center px-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      await openCvFile({
+                        cvUrl: application.cv_url,
+                        onSuccess: (message) => {
+                          toast.success(message || 'CV öppnat i ny flik');
+                        },
+                        onError: (error) => {
+                          toast.error(error.message || 'Kunde inte öppna CV');
+                        },
+                      });
+                    }}
+                    className="flex items-center gap-2 text-white transition-colors flex-1"
+                  >
+                    <FileText className="h-4 w-4 text-white/50 shrink-0" />
+                    <span className="text-sm">Visa CV</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      await openCvFile({
+                        cvUrl: application.cv_url,
+                        onSuccess: (message) => {
+                          toast.success(message || 'CV öppnat i ny flik');
+                        },
+                        onError: (error) => {
+                          toast.error(error.message || 'Kunde inte öppna CV');
+                        },
+                      });
+                    }}
+                    className="text-white hover:text-white/80 transition-colors"
+                    title="Öppna CV"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Presentation om kandidaten */}
             <div className="bg-white/10 border border-white/20 rounded-xl p-4">
