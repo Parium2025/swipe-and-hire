@@ -55,7 +55,7 @@ export const CandidateProfileDialog = ({
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
-  const [jobQuestions, setJobQuestions] = useState<Record<string, string>>({});
+  const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   
   // Get signed URLs for profile media
   const profileImageUrl = useProfileImageUrl(application?.profile_image_url);
@@ -75,14 +75,15 @@ export const CandidateProfileDialog = ({
     try {
       const { data, error } = await supabase
         .from('job_questions')
-        .select('id, question_text')
-        .eq('job_id', application.job_id);
+        .select('id, question_text, order_index')
+        .eq('job_id', application.job_id)
+        .order('order_index', { ascending: true });
 
       if (error) throw error;
       
-      const questionsMap: Record<string, string> = {};
+      const questionsMap: Record<string, { text: string; order: number }> = {};
       data?.forEach(q => {
-        questionsMap[q.id] = q.question_text;
+        questionsMap[q.id] = { text: q.question_text, order: q.order_index };
       });
       setJobQuestions(questionsMap);
     } catch (error) {
@@ -362,13 +363,19 @@ export const CandidateProfileDialog = ({
 
                 {questionsExpanded && (
                   <div className="px-4 pb-4 space-y-3">
-                    {Object.entries(customAnswers).map(([questionId, answer]) => (
+                    {Object.entries(customAnswers)
+                      .sort(([idA], [idB]) => {
+                        const orderA = jobQuestions[idA]?.order ?? 999;
+                        const orderB = jobQuestions[idB]?.order ?? 999;
+                        return orderA - orderB;
+                      })
+                      .map(([questionId, answer]) => (
                       <div
                         key={questionId}
                         className="border-t border-white/10 pt-3 first:border-t-0 first:pt-0"
                       >
                         <p className="text-sm font-medium text-white mb-0.5">
-                          {jobQuestions[questionId] || questionId}
+                          {jobQuestions[questionId]?.text || questionId}
                         </p>
                         <p className="text-sm text-white">
                           {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
