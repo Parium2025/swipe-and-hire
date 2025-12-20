@@ -257,7 +257,7 @@ const EmployerDashboard = memo(() => {
                     pageJobs.map((job) => (
                       <TableRow 
                         key={job.id}
-                        className={`border-white/10 cursor-pointer transition-colors ${
+                        className={`group border-white/10 cursor-pointer transition-colors ${
                           job.is_active 
                             ? "hover:bg-white/5" 
                             : "hover:bg-amber-500/10"
@@ -270,23 +270,23 @@ const EmployerDashboard = memo(() => {
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex flex-col items-center gap-0.5">
                             {job.is_active ? (
-                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-colors hover:bg-green-500/30">
+                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:backdrop-brightness-110">
                                 Aktiv
                               </Badge>
                             ) : (
-                              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-colors hover:bg-amber-500/30">
+                              <Badge variant="glass" className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-amber-500/30 hover:backdrop-brightness-110">
                                 Utkast
                               </Badge>
                             )}
                           </div>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
-                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm transition-[background-color,border-color,transform] duration-150 hover:bg-purple-500/30 hover:border-purple-500/50 hover:scale-[1.03]">
+                          <Badge variant="glass" className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-purple-500/30 hover:border-purple-500/50 hover:backdrop-brightness-110 hover:scale-[1.03]">
                             {job.views_count || 0}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
-                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm transition-[background-color,border-color,transform] duration-150 hover:bg-blue-500/30 hover:border-blue-500/50 hover:scale-[1.03]">
+                          <Badge variant="glass" className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-blue-500/30 hover:border-blue-500/50 hover:backdrop-brightness-110 hover:scale-[1.03]">
                             {job.applications_count || 0}
                           </Badge>
                         </TableCell>
@@ -341,7 +341,7 @@ const EmployerDashboard = memo(() => {
                                   handleEditJob(job as any);
                                 }
                               }}
-                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 active:scale-95"
+                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110 active:scale-95"
                             >
                               <Edit size={14} />
                             </button>
@@ -350,7 +350,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleDeleteClick(job as any);
                               }}
-                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-red-400 active:scale-95"
+                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 hover:backdrop-brightness-110 active:scale-95"
                             >
                               <Trash2 size={14} />
                             </button>
