@@ -577,6 +577,7 @@ const MobileJobWizard = ({
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [previewAnswers, setPreviewAnswers] = useState<Record<string, string>>({});
   const [desktopPreviewAnswers, setDesktopPreviewAnswers] = useState<Record<string, string>>({});
+  const [attemptedNext, setAttemptedNext] = useState(false);
   const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
   const screenRef = useRef<HTMLDivElement>(null);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
@@ -1710,6 +1711,32 @@ const MobileJobWizard = ({
     return true;
   };
 
+  // Helper to check if a field is missing and should show error styling
+  const isFieldMissing = (field: keyof JobFormData): boolean => {
+    if (!attemptedNext) return false;
+    
+    if (currentStep === 0) {
+      const step0Required = ['title', 'occupation', 'description', 'employment_type', 'salary_type', 'salary_transparency', 'positions_count', 'work_start_time', 'work_end_time'];
+      if (!step0Required.includes(field)) return false;
+      
+      if (field === 'positions_count') return !(parseInt(formData.positions_count) > 0);
+      const value = formData[field];
+      if (typeof value === 'string') return !value.trim();
+      return !value;
+    }
+    
+    if (currentStep === 1) {
+      const step1Required = ['work_location_type', 'remote_work_possible', 'workplace_name', 'contact_email', 'workplace_postal_code', 'workplace_city'];
+      if (!step1Required.includes(field)) return false;
+      
+      const value = formData[field];
+      if (typeof value === 'string') return !value.trim();
+      return !value;
+    }
+    
+    return false;
+  };
+
   const getMissingFieldsMessage = (): string[] => {
     const missing: string[] = [];
     
@@ -1739,6 +1766,7 @@ const MobileJobWizard = ({
 
   const nextStep = () => {
     if (validateCurrentStep() && currentStep < steps.length - 1) {
+      setAttemptedNext(false);
       setCurrentStep(currentStep + 1);
       // Scroll to top immediately when changing steps
       setTimeout(() => {
@@ -1750,6 +1778,7 @@ const MobileJobWizard = ({
         }
       }, 0);
     } else if (!validateCurrentStep()) {
+      setAttemptedNext(true);
       const missingFields = getMissingFieldsMessage();
       if (missingFields.length > 0) {
         toast({
@@ -2285,7 +2314,7 @@ const MobileJobWizard = ({
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40"
+                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm focus:border-white/40 ${isFieldMissing('title') ? 'border-red-500 border-2' : ''}`}
                   />
                 </div>
 
@@ -2297,7 +2326,7 @@ const MobileJobWizard = ({
                       onChange={(e) => handleOccupationSearch(e.target.value)}
                       onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
                       placeholder="t.ex. Mjukvaru- och systemutvecklare"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 focus:border-white/40"
+                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 focus:border-white/40 ${isFieldMissing('occupation') ? 'border-red-500 border-2' : ''}`}
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
                     
@@ -2346,7 +2375,7 @@ const MobileJobWizard = ({
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                     rows={3}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white p-2 text-sm resize-none leading-tight focus:border-white/40 min-h-[80px] sm:min-h-[200px]"
+                    className={`bg-white/10 border-white/20 text-white placeholder:text-white p-2 text-sm resize-none leading-tight focus:border-white/40 min-h-[80px] sm:min-h-[200px] ${isFieldMissing('description') ? 'border-red-500 border-2' : ''}`}
                   />
                 </div>
 
@@ -2491,7 +2520,7 @@ const MobileJobWizard = ({
                       onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
                       onClick={handleEmploymentTypeClick}
                       placeholder="Välj anställningsform"
-                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showEmploymentTypeDropdown ? 'border-white/50' : ''}`}
+                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showEmploymentTypeDropdown ? 'border-white/50' : ''} ${isFieldMissing('employment_type') ? 'border-red-500 border-2' : ''}`}
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
@@ -2522,7 +2551,7 @@ const MobileJobWizard = ({
                       onChange={(e) => handleSalaryTypeSearch(e.target.value)}
                       onClick={handleSalaryTypeClick}
                       placeholder="Välj lönetyp"
-                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showSalaryTypeDropdown ? 'border-white/50' : ''}`}
+                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showSalaryTypeDropdown ? 'border-white/50' : ''} ${isFieldMissing('salary_type') ? 'border-red-500 border-2' : ''}`}
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
@@ -2553,7 +2582,7 @@ const MobileJobWizard = ({
                       onChange={(e) => handleSalaryTransparencySearch(e.target.value)}
                       onClick={handleSalaryTransparencyClick}
                       placeholder="Välj lönespann"
-                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showSalaryTransparencyDropdown ? 'border-white/50' : ''}`}
+                      className={`bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer ${showSalaryTransparencyDropdown ? 'border-white/50' : ''} ${isFieldMissing('salary_transparency') ? 'border-red-500 border-2' : ''}`}
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
@@ -2783,6 +2812,8 @@ const MobileJobWizard = ({
                   onPostalCodeChange={handleWorkplacePostalCodeChange}
                   onLocationChange={handleWorkplaceLocationChange}
                   cachedInfo={cachedPostalCodeInfo}
+                  showPostalCodeError={isFieldMissing('workplace_postal_code')}
+                  showCityError={isFieldMissing('workplace_city')}
                 />
               </div>
             )}

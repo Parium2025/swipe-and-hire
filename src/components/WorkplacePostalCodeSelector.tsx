@@ -13,6 +13,8 @@ interface WorkplacePostalCodeSelectorProps {
   onValidationChange?: (isValid: boolean) => void;
   cachedInfo?: {postalCode: string, city: string, municipality: string, county: string} | null;
   className?: string;
+  showPostalCodeError?: boolean;
+  showCityError?: boolean;
 }
 
 const WorkplacePostalCodeSelector = ({ 
@@ -22,7 +24,9 @@ const WorkplacePostalCodeSelector = ({
   onLocationChange,
   onValidationChange,
   cachedInfo,
-  className = ""
+  className = "",
+  showPostalCodeError = false,
+  showCityError = false
 }: WorkplacePostalCodeSelectorProps) => {
   const [foundLocation, setFoundLocation] = useState<PostalCodeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -166,7 +170,7 @@ const WorkplacePostalCodeSelector = ({
             value={postalCodeValue}
             onChange={handlePostalCodeChange}
             placeholder="XXX XX"
-            className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-9 text-sm pl-10 transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
+            className={`bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-9 text-sm pl-10 transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 ${showPostalCodeError ? 'border-red-500 border-2' : ''}`}
             maxLength={6}
             autoComplete="off"
             autoCorrect="off"
@@ -202,7 +206,7 @@ const WorkplacePostalCodeSelector = ({
               ? "Ange ort manuellt"
               : "Fylls i automatiskt"
           }
-          className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-9 text-sm transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
+          className={`bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-9 text-sm transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 ${showCityError ? 'border-red-500 border-2' : ''}`}
           readOnly={foundLocation !== null}
           autoComplete="off"
           autoCorrect="off"
