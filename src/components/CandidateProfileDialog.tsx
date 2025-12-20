@@ -41,7 +41,7 @@ export const CandidateProfileDialog = ({
 }: CandidateProfileDialogProps) => {
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
   
-  // Move hooks to top level - they'll receive null/undefined when no application
+  // Get signed URLs for profile media
   const profileImageUrl = useProfileImageUrl(application?.profile_image_url);
   const videoUrl = useVideoUrl(application?.video_url);
   
@@ -70,58 +70,62 @@ export const CandidateProfileDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border-white/10 p-0">
-        {/* Header with job title and status */}
-        <DialogHeader className="p-6 pb-0">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-xl md:text-2xl font-semibold text-foreground tracking-tight">
-                {application.first_name} {application.last_name}
-              </DialogTitle>
-              <p className="text-muted-foreground mt-1">{application.job_title}</p>
-            </div>
-            <Badge variant="outline" className={currentStatus.className}>
-              {currentStatus.label}
-            </Badge>
-          </div>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border-white/10">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Kandidatprofil: {application.first_name} {application.last_name}</DialogTitle>
         </DialogHeader>
-
-        <div className="p-6 pt-4 space-y-6">
-          {/* Large Profile Image/Video Section */}
-          <div className="flex justify-center">
-            <div className="w-full max-w-md aspect-[3/4] rounded-2xl overflow-hidden bg-muted/30 border border-white/10">
+        
+        <div className="space-y-6">
+          {/* Header with circular profile image/video */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            {/* Circular Profile Image/Video */}
+            <div className="relative">
               {isProfileVideo && videoUrl ? (
-                <ProfileVideo
-                  videoUrl={videoUrl}
-                  coverImageUrl={profileImageUrl || undefined}
-                  userInitials={initials}
-                  className="w-full h-full"
-                  showCountdown={true}
-                  showProgressBar={true}
-                />
-              ) : profileImageUrl ? (
-                <img 
-                  src={profileImageUrl} 
-                  alt={`${application.first_name} ${application.last_name}`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                  <span className="text-6xl font-bold text-foreground/70">{initials}</span>
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20">
+                  <ProfileVideo
+                    videoUrl={videoUrl}
+                    coverImageUrl={profileImageUrl || undefined}
+                    userInitials={initials}
+                    className="w-full h-full"
+                    showCountdown={true}
+                    showProgressBar={false}
+                  />
                 </div>
+              ) : (
+                <Avatar className="w-32 h-32 border-4 border-primary/20">
+                  <AvatarImage 
+                    src={profileImageUrl || undefined} 
+                    alt={`${application.first_name} ${application.last_name}`}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-primary/20 text-primary text-3xl font-semibold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
               )}
             </div>
+            
+            {/* Name and Job */}
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground">
+                {application.first_name} {application.last_name}
+              </h2>
+              <p className="text-muted-foreground mt-1">{application.job_title}</p>
+              <Badge variant="outline" className={`${currentStatus.className} mt-2`}>
+                {currentStatus.label}
+              </Badge>
+            </div>
           </div>
 
-          {/* Glass info sections */}
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* Contact Information Card */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 space-y-3">
-              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-2">
+          {/* Info sections in glass cards */}
+          <div className="grid gap-4">
+            {/* Contact Information */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3 flex items-center gap-2">
                 <User className="h-3.5 w-3.5" />
                 Kontaktinformation
               </h3>
-              <div className="space-y-2.5">
+              <div className="grid sm:grid-cols-2 gap-3">
                 {application.email && (
                   <div className="flex items-center gap-3">
                     <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -153,13 +157,13 @@ export const CandidateProfileDialog = ({
               </div>
             </div>
 
-            {/* Personal Information Card */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 space-y-3">
-              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-2">
+            {/* Personal Information */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3 flex items-center gap-2">
                 <Briefcase className="h-3.5 w-3.5" />
                 Personlig information
               </h3>
-              <div className="space-y-2.5">
+              <div className="grid sm:grid-cols-2 gap-3">
                 {application.age && (
                   <div className="flex items-center gap-3">
                     <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -180,54 +184,56 @@ export const CandidateProfileDialog = ({
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Bio Section */}
-          {application.bio && (
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 space-y-3">
-              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider">Om kandidaten</h3>
-              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{application.bio}</p>
-            </div>
-          )}
-
-          {/* Questions & Answers Section - Collapsible */}
-          {hasCustomAnswers && (
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
-              <button 
-                onClick={() => setQuestionsExpanded(!questionsExpanded)}
-                className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-              >
-                <h3 className="text-xs font-semibold text-primary uppercase tracking-wider">
-                  Frågor ({Object.keys(customAnswers).length})
+            {/* Bio */}
+            {application.bio && (
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+                <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
+                  Om kandidaten
                 </h3>
-                {questionsExpanded ? (
-                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                )}
-              </button>
-              
-              {questionsExpanded && (
-                <div className="px-4 pb-4 space-y-4">
-                  {Object.entries(customAnswers).map(([question, answer], index) => (
-                    <div 
-                      key={question} 
-                      className="border-t border-white/5 pt-4 first:border-t-0 first:pt-0"
-                    >
-                      <p className="text-sm font-medium text-foreground mb-1.5">{question}</p>
-                      <p className="text-sm text-muted-foreground italic">
-                        {String(answer) || <span className="opacity-50">Inget svar</span>}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                  {application.bio}
+                </p>
+              </div>
+            )}
 
-          {/* CV Button */}
-          {application.cv_url && (
-            <div className="flex justify-center">
+            {/* Questions & Answers */}
+            {hasCustomAnswers && (
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
+                <button 
+                  onClick={() => setQuestionsExpanded(!questionsExpanded)}
+                  className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <h3 className="text-xs font-semibold text-primary uppercase tracking-wider">
+                    Frågor ({Object.keys(customAnswers).length})
+                  </h3>
+                  {questionsExpanded ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </button>
+                
+                {questionsExpanded && (
+                  <div className="px-4 pb-4 space-y-4">
+                    {Object.entries(customAnswers).map(([question, answer]) => (
+                      <div 
+                        key={question} 
+                        className="border-t border-white/5 pt-4 first:border-t-0 first:pt-0"
+                      >
+                        <p className="text-sm font-medium text-foreground mb-1">{question}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* CV Button */}
+            {application.cv_url && (
               <button
                 onClick={async (e) => {
                   e.preventDefault();
@@ -241,13 +247,13 @@ export const CandidateProfileDialog = ({
                     }
                   });
                 }}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all text-foreground cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all text-foreground"
               >
                 <FileText className="h-5 w-5" />
                 <span className="font-medium">Visa CV</span>
               </button>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Actions */}
           <div className="flex flex-wrap justify-center gap-3 pt-4 border-t border-white/10">
@@ -255,7 +261,7 @@ export const CandidateProfileDialog = ({
               onClick={() => updateStatus('reviewing')}
               variant="glassYellow"
               disabled={application.status === 'reviewing'}
-              className="min-w-[140px]"
+              size="lg"
             >
               Granska
             </Button>
@@ -263,7 +269,7 @@ export const CandidateProfileDialog = ({
               onClick={() => updateStatus('accepted')}
               variant="glassGreen"
               disabled={application.status === 'accepted'}
-              className="min-w-[140px]"
+              size="lg"
             >
               Acceptera
             </Button>
@@ -271,7 +277,7 @@ export const CandidateProfileDialog = ({
               onClick={() => updateStatus('rejected')}
               variant="glassRed"
               disabled={application.status === 'rejected'}
-              className="min-w-[140px]"
+              size="lg"
             >
               Avvisa
             </Button>
