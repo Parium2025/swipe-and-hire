@@ -198,12 +198,12 @@ const SavedJobs = () => {
             return (
               <Card
                 key={savedJob.id}
-                className={`border-white/10 transition-all cursor-pointer ${
+                className={`group border-white/10 transition-all cursor-pointer ${
                   isRemoving ? 'opacity-50' : ''
                 } ${
                   isExpired 
                     ? 'bg-white/[0.02] opacity-60 hover:opacity-80' 
-                    : 'bg-white/5 hover:border-white/30'
+                    : 'bg-white/5 hover:bg-white/10 hover:border-white/30'
                 }`}
                 onClick={() => handleJobClick(job.id, job.is_active)}
               >

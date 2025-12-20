@@ -832,7 +832,7 @@ const SearchJobs = () => {
                     {displayedJobs.map((job) => (
                        <TableRow 
                         key={job.id} 
-                        className="border-white/10 cursor-pointer transition-all duration-300 md:hover:bg-white/10"
+                        className="group border-white/10 cursor-pointer transition-all duration-300 md:hover:bg-white/10"
                         onClick={() => navigate(`/job-view/${job.id}`)}
                       >
                         <TableCell>
