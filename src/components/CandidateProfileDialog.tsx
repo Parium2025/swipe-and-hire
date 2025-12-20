@@ -6,12 +6,12 @@ import { ApplicationData } from '@/hooks/useApplicationsData';
 import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { openCvFile } from '@/utils/cvUtils';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import ProfileVideo from '@/components/ProfileVideo';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Textarea } from '@/components/ui/textarea';
+import { CvViewer } from '@/components/CvViewer';
 
 function useProfileImageUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-image');
@@ -54,10 +54,12 @@ export const CandidateProfileDialog = ({
   const [newNote, setNewNote] = useState('');
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
+  const [cvOpen, setCvOpen] = useState(false);
   
   // Get signed URLs for profile media
   const profileImageUrl = useProfileImageUrl(application?.profile_image_url);
   const videoUrl = useVideoUrl(application?.video_url);
+  const signedCvUrl = useMediaUrl(application?.cv_url, 'cv');
 
   // Fetch notes when dialog opens
   useEffect(() => {
@@ -276,7 +278,7 @@ export const CandidateProfileDialog = ({
               </div>
             )}
 
-            {/* CV Section - matching profile page style */}
+            {/* CV Section - matching profile page style with dialog */}
             {application.cv_url && (
               <div className="bg-white/10 border border-white/20 rounded-xl p-4">
                 <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -286,18 +288,7 @@ export const CandidateProfileDialog = ({
                 <div className="w-full min-h-9 py-2.5 bg-white/5 border border-white/10 rounded-md flex items-center px-3 gap-2">
                   <button
                     type="button"
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      await openCvFile({
-                        cvUrl: application.cv_url,
-                        onSuccess: (message) => {
-                          toast.success(message || 'CV öppnat i ny flik');
-                        },
-                        onError: (error) => {
-                          toast.error(error.message || 'Kunde inte öppna CV');
-                        },
-                      });
-                    }}
+                    onClick={() => setCvOpen(true)}
                     className="flex items-center gap-2 text-white transition-colors flex-1"
                   >
                     <FileText className="h-4 w-4 text-white/50 shrink-0" />
@@ -305,18 +296,7 @@ export const CandidateProfileDialog = ({
                   </button>
                   <button
                     type="button"
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      await openCvFile({
-                        cvUrl: application.cv_url,
-                        onSuccess: (message) => {
-                          toast.success(message || 'CV öppnat i ny flik');
-                        },
-                        onError: (error) => {
-                          toast.error(error.message || 'Kunde inte öppna CV');
-                        },
-                      });
-                    }}
+                    onClick={() => setCvOpen(true)}
                     className="text-white hover:text-white/80 transition-colors"
                     title="Öppna CV"
                   >
@@ -479,6 +459,23 @@ export const CandidateProfileDialog = ({
           </div>
         </div>
       </DialogContent>
+
+      {/* CV Dialog - matching profile page exactly */}
+      <Dialog open={cvOpen} onOpenChange={setCvOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-transparent border-none shadow-none p-8">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-white text-2xl">CV</DialogTitle>
+          </DialogHeader>
+          {application?.cv_url && signedCvUrl && (
+            <CvViewer 
+              src={signedCvUrl} 
+              fileName="cv.pdf" 
+              height="70vh"
+              onClose={() => setCvOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
