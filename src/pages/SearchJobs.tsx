@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer } from 'lucide-react';
+import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer, CheckCircle } from 'lucide-react';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
@@ -63,8 +63,23 @@ const SearchJobs = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek } = useAuth();
+  const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
+  
+  // Hämta användarens ansökningar för att visa "Redan sökt"-badge
+  const { data: appliedJobIds = new Set<string>() } = useQuery({
+    queryKey: ['applied-job-ids', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('job_applications')
+        .select('job_id')
+        .eq('applicant_id', user!.id);
+      return new Set((data || []).map(a => a.job_id));
+    },
+    enabled: !!user,
+    staleTime: 60000,
+    gcTime: Infinity,
+  });
   const [searchInput, setSearchInput] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
   const [selectedPostalCode, setSelectedPostalCode] = useState('');
@@ -859,6 +874,12 @@ const SearchJobs = () => {
                               <Calendar className="h-3 w-3" />
                               {formatDateShortSv(job.created_at)}
                             </div>
+                            {appliedJobIds.has(job.id) && (
+                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 md:group-hover:backdrop-brightness-90 md:hover:bg-green-500/30 md:hover:border-green-500/50">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Redan sökt
+                              </Badge>
+                            )}
                             {(() => {
                               const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                               if (isExpired) {
@@ -920,6 +941,7 @@ const SearchJobs = () => {
                       <ReadOnlyMobileJobCard
                         key={job.id}
                         job={job as any}
+                        hasApplied={appliedJobIds.has(job.id)}
                       />
                     ))}
                   </div>
