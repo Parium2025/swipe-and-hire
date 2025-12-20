@@ -117,10 +117,10 @@ export const CandidateProfileDialog = ({
             </div>
           </div>
 
-          {/* Info sections in glass cards */}
+          {/* Info sections in glass cards - matching job dialog input style */}
           <div className="grid gap-4">
             {/* Contact Information */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+            <div className="bg-[#1e3a5f]/50 rounded-xl border border-white/10 p-4">
               <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
                 <User className="h-3.5 w-3.5" />
                 Kontaktinformation
@@ -158,7 +158,7 @@ export const CandidateProfileDialog = ({
             </div>
 
             {/* Personal Information */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+            <div className="bg-[#1e3a5f]/50 rounded-xl border border-white/10 p-4">
               <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
                 <Briefcase className="h-3.5 w-3.5" />
                 Personlig information
@@ -187,7 +187,7 @@ export const CandidateProfileDialog = ({
 
             {/* Bio */}
             {application.bio && (
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+              <div className="bg-[#1e3a5f]/50 rounded-xl border border-white/10 p-4">
                 <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">
                   Om kandidaten
                 </h3>
@@ -199,7 +199,7 @@ export const CandidateProfileDialog = ({
 
             {/* Questions & Answers */}
             {hasCustomAnswers && (
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
+              <div className="bg-[#1e3a5f]/50 rounded-xl border border-white/10 overflow-hidden">
                 <button 
                   onClick={() => setQuestionsExpanded(!questionsExpanded)}
                   className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
@@ -247,7 +247,7 @@ export const CandidateProfileDialog = ({
                     }
                   });
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all text-white"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#1e3a5f]/50 hover:bg-[#1e3a5f]/70 border border-white/10 hover:border-white/20 rounded-xl transition-all text-white"
               >
                 <FileText className="h-5 w-5" />
                 <span className="font-medium">Visa CV</span>
