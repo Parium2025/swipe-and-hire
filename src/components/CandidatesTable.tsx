@@ -105,8 +105,8 @@ export function CandidatesTable({
                         <div className="font-medium text-white">
                           {application.first_name} {application.last_name}
                         </div>
-                        {application.email && (
-                          <div className="text-sm text-muted-foreground">{application.email}</div>
+                        {application.phone && (
+                          <div className="text-sm text-muted-foreground">{application.phone}</div>
                         )}
                       </div>
                     </div>
