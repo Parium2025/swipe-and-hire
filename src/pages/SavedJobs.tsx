@@ -242,13 +242,12 @@ const SavedJobs = () => {
                         <h3 className={`text-lg font-semibold truncate ${isExpired ? 'text-white' : 'text-white'}`}>
                           {job.title}
                         </h3>
-                        {(job.applications_count ?? 0) > 0 && (
-                          <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
-                            <Users className="h-3 w-3 mr-1" />
-                            {job.applications_count} sökande
-                          </Badge>
-                        )}
-                        {/* Visa "dagar kvar" FÖRST, sedan "Redan sökt" */}
+                        {/* Visa antal sökande */}
+                        <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
+                          <Users className="h-3 w-3 mr-1" />
+                          {job.applications_count ?? 0} sökande
+                        </Badge>
+                        {/* Visa "dagar kvar" eller "Utgången" */}
                         {isExpired ? (
                           <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50 hover:backdrop-brightness-110">
                             Utgången
@@ -259,6 +258,7 @@ const SavedJobs = () => {
                             {timeInfo.text} kvar
                           </Badge>
                         )}
+                        {/* Visa "Redan sökt" badge på Sparade Jobb */}
                         {hasApplied && (
                           <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:border-green-500/50 hover:backdrop-brightness-110">
                             <CheckCircle className="h-3 w-3 mr-1" />
