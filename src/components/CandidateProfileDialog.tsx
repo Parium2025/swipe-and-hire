@@ -3,13 +3,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { openCvFile } from '@/utils/cvUtils';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import ProfileVideo from '@/components/ProfileVideo';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { Textarea } from '@/components/ui/textarea';
 
 function useProfileImageUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-image');
@@ -33,17 +35,97 @@ const statusConfig = {
   rejected: { label: 'Avvisad', className: 'bg-red-500/20 text-red-300 border-red-500/30' },
 };
 
+interface CandidateNote {
+  id: string;
+  note: string;
+  created_at: string;
+}
+
 export const CandidateProfileDialog = ({
   application,
   open,
   onOpenChange,
   onStatusUpdate,
 }: CandidateProfileDialogProps) => {
+  const { user } = useAuth();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
+  const [notesExpanded, setNotesExpanded] = useState(true);
+  const [notes, setNotes] = useState<CandidateNote[]>([]);
+  const [newNote, setNewNote] = useState('');
+  const [loadingNotes, setLoadingNotes] = useState(false);
+  const [savingNote, setSavingNote] = useState(false);
   
   // Get signed URLs for profile media
   const profileImageUrl = useProfileImageUrl(application?.profile_image_url);
   const videoUrl = useVideoUrl(application?.video_url);
+
+  // Fetch notes when dialog opens
+  useEffect(() => {
+    if (open && application && user) {
+      fetchNotes();
+    }
+  }, [open, application?.id, user?.id]);
+
+  const fetchNotes = async () => {
+    if (!application || !user) return;
+    setLoadingNotes(true);
+    try {
+      const { data, error } = await supabase
+        .from('candidate_notes')
+        .select('id, note, created_at')
+        .eq('employer_id', user.id)
+        .eq('applicant_id', application.applicant_id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setNotes(data || []);
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+    } finally {
+      setLoadingNotes(false);
+    }
+  };
+
+  const saveNote = async () => {
+    if (!newNote.trim() || !application || !user) return;
+    setSavingNote(true);
+    try {
+      const { error } = await supabase
+        .from('candidate_notes')
+        .insert({
+          employer_id: user.id,
+          applicant_id: application.applicant_id,
+          job_id: application.job_id,
+          note: newNote.trim()
+        });
+
+      if (error) throw error;
+      toast.success('Anteckning sparad');
+      setNewNote('');
+      fetchNotes();
+    } catch (error) {
+      console.error('Error saving note:', error);
+      toast.error('Kunde inte spara anteckning');
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  const deleteNote = async (noteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('candidate_notes')
+        .delete()
+        .eq('id', noteId);
+
+      if (error) throw error;
+      toast.success('Anteckning borttagen');
+      setNotes(notes.filter(n => n.id !== noteId));
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      toast.error('Kunde inte ta bort anteckning');
+    }
+  };
   
   if (!application) return null;
 
@@ -254,6 +336,79 @@ export const CandidateProfileDialog = ({
                 <span className="font-medium">Visa CV</span>
               </button>
             )}
+
+            {/* Notes Section */}
+            <div className="bg-white/10 border border-white/20 rounded-xl overflow-hidden">
+              <button 
+                onClick={() => setNotesExpanded(!notesExpanded)}
+                className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+              >
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                  <StickyNote className="h-3.5 w-3.5" />
+                  Anteckningar ({notes.length})
+                </h3>
+                {notesExpanded ? (
+                  <ChevronUp className="h-4 w-4 text-white/50" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-white/50" />
+                )}
+              </button>
+              
+              {notesExpanded && (
+                <div className="px-4 pb-4 space-y-3">
+                  {/* Add new note */}
+                  <div className="flex gap-2">
+                    <Textarea
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      placeholder="Skriv en anteckning om kandidaten..."
+                      className="flex-1 min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none"
+                    />
+                    <Button
+                      onClick={saveNote}
+                      disabled={!newNote.trim() || savingNote}
+                      size="icon"
+                      className="h-[60px] w-10 bg-white/10 hover:bg-white/20 border border-white/20"
+                    >
+                      <Send className="h-4 w-4 text-white" />
+                    </Button>
+                  </div>
+
+                  {/* Existing notes */}
+                  {loadingNotes ? (
+                    <p className="text-sm text-white/50 text-center py-2">Laddar...</p>
+                  ) : notes.length === 0 ? (
+                    <p className="text-sm text-white/50 text-center py-2">Inga anteckningar ännu</p>
+                  ) : (
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                      {notes.map((note) => (
+                        <div 
+                          key={note.id}
+                          className="bg-white/5 rounded-lg p-3 group relative"
+                        >
+                          <p className="text-sm text-white whitespace-pre-wrap pr-6">{note.note}</p>
+                          <p className="text-xs text-white/40 mt-1">
+                            {new Date(note.created_at).toLocaleDateString('sv-SE', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                          <button
+                            onClick={() => deleteNote(note.id)}
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-white/50 hover:text-red-400" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Actions */}

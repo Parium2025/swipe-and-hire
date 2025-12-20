@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      candidate_notes: {
+        Row: {
+          applicant_id: string
+          created_at: string
+          employer_id: string
+          id: string
+          job_id: string | null
+          note: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          created_at?: string
+          employer_id: string
+          id?: string
+          job_id?: string | null
+          note: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          created_at?: string
+          employer_id?: string
+          id?: string
+          job_id?: string | null
+          note?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_notes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_reviews: {
         Row: {
           comment: string | null
