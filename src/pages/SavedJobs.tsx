@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2 } from 'lucide-react';
+import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
@@ -88,9 +88,24 @@ const SavedJobs = () => {
     queryKey: ['saved-jobs', user?.id],
     queryFn: () => fetchSavedJobs(user!.id),
     enabled: !!user,
-    staleTime: 0, // Always refetch in background when returning
-    gcTime: Infinity, // Keep in cache forever
-    refetchOnWindowFocus: false, // Don't refetch on tab focus
+    staleTime: 0,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
+
+  // Hämta användarens ansökningar för att visa "Redan sökt"-badge
+  const { data: appliedJobIds = new Set<string>() } = useQuery({
+    queryKey: ['applied-job-ids', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('job_applications')
+        .select('job_id')
+        .eq('applicant_id', user!.id);
+      return new Set((data || []).map(a => a.job_id));
+    },
+    enabled: !!user,
+    staleTime: 60000,
+    gcTime: Infinity,
   });
 
   const handleRemoveClick = (savedJobId: string, jobTitle: string, e: React.MouseEvent) => {
@@ -203,6 +218,7 @@ const SavedJobs = () => {
             if (!job) return null;
 
             const isRemoving = removingIds.has(savedJob.id);
+            const hasApplied = appliedJobIds.has(job.id);
             
             // Använd centraliserad getTimeRemaining för konsekvent beräkning
             const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
@@ -224,6 +240,12 @@ const SavedJobs = () => {
                         <h3 className={`text-lg font-semibold truncate ${isExpired ? 'text-white' : 'text-white'}`}>
                           {job.title}
                         </h3>
+                        {hasApplied && (
+                          <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:border-green-500/50 hover:backdrop-brightness-110">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Redan sökt
+                          </Badge>
+                        )}
                         {isExpired && (
                           <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50 hover:backdrop-brightness-110">
                             Utgången
