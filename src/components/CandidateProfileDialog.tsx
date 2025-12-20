@@ -378,7 +378,7 @@ export const CandidateProfileDialog = ({
                           {jobQuestions[questionId]?.text || questionId}
                         </p>
                         <p className="text-sm text-white">
-                          <span className="text-white/70">Svar: </span>
+                          <span className="text-white">Svar: </span>
                           {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
                         </p>
                       </div>
