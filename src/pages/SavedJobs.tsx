@@ -216,12 +216,12 @@ const SavedJobs = () => {
                           {job.title}
                         </h3>
                         {isExpired && (
-                          <Badge variant="secondary" className="bg-red-500/20 text-white border-red-500/30 text-xs hover:bg-red-500/30 hover:border-red-500/50 transition-all duration-300">
+                          <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50 hover:backdrop-brightness-110">
                             Utgången
                           </Badge>
                         )}
                         {showCountdown && (
-                          <Badge variant="glass" className="text-xs">
+                          <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
                             <Timer className="h-3 w-3 mr-1" />
                             {daysRemaining === 1 ? '1 dag kvar' : `${daysRemaining} dagar kvar`}
                           </Badge>
@@ -259,7 +259,7 @@ const SavedJobs = () => {
                     <button
                       onClick={(e) => handleRemoveSavedJob(savedJob.id, e)}
                       disabled={isRemoving}
-                      className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-red-400 disabled:opacity-50 flex-shrink-0 active:scale-95"
+                      className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 hover:backdrop-brightness-110 disabled:opacity-50 flex-shrink-0 active:scale-95"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
