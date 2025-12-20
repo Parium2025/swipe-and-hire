@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ProfileVideo from "@/components/ProfileVideo";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
@@ -19,6 +19,7 @@ function CandidateAvatarBase({
   lastName 
 }: CandidateAvatarProps) {
   const [avatarError, setAvatarError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   // Use useMediaUrl hook properly at component level
   const resolvedImageUrl = useMediaUrl(profileImageUrl, 'profile-image');
@@ -26,6 +27,14 @@ function CandidateAvatarBase({
   
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   const hasVideo = !!isProfileVideo && !!resolvedVideoUrl;
+
+  // Reset error state when URL changes
+  useEffect(() => {
+    if (resolvedImageUrl) {
+      setAvatarError(false);
+      setImageLoaded(false);
+    }
+  }, [resolvedImageUrl]);
 
   if (hasVideo) {
     return (
@@ -44,15 +53,26 @@ function CandidateAvatarBase({
   return (
     <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
       {resolvedImageUrl && !avatarError ? (
-        <AvatarImage 
-          src={resolvedImageUrl} 
-          alt={`${firstName || ''} ${lastName || ''}`}
-          onError={() => setAvatarError(true)}
-          loading="eager"
-          decoding="async"
-          fetchPriority="high"
-          draggable={false}
-        />
+        <>
+          <AvatarImage 
+            src={resolvedImageUrl} 
+            alt={`${firstName || ''} ${lastName || ''}`}
+            onError={() => setAvatarError(true)}
+            onLoad={() => setImageLoaded(true)}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            draggable={false}
+            className={imageLoaded ? 'opacity-100' : 'opacity-0'}
+            style={{ transition: 'opacity 150ms ease-in' }}
+          />
+          {/* Visa fallback medan bilden laddar */}
+          {!imageLoaded && (
+            <AvatarFallback className="bg-white/20 text-white font-semibold absolute inset-0">
+              {initials || '?'}
+            </AvatarFallback>
+          )}
+        </>
       ) : (
         <AvatarFallback className="bg-white/20 text-white font-semibold">
           {initials || '?'}
