@@ -729,6 +729,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       setOccupationSearchTerm(job.occupation || '');
       setEmploymentTypeSearchTerm(job.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === normalizeEmploymentType(job.employment_type))?.label || '' : '');
       setSalaryTypeSearchTerm(job.salary_type ? salaryTypes.find(t => t.value === job.salary_type)?.label || '' : '');
+      setSalaryTransparencySearchTerm(job.salary_transparency ? salaryTransparencyOptions.find(t => t.value === job.salary_transparency)?.label || '' : '');
       setWorkLocationSearchTerm(job.work_location_type ? workLocationTypes.find(t => t.value === job.work_location_type)?.label || '' : '');
       setRemoteWorkSearchTerm(job.remote_work_possible ? remoteWorkOptions.find(t => t.value === job.remote_work_possible)?.label || '' : '');
     }
