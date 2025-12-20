@@ -81,7 +81,7 @@ export const CandidateProfileDialog = ({
             {/* Circular Profile Image/Video - Larger */}
             <div className="relative">
               {isProfileVideo && videoUrl ? (
-                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-primary/30 shadow-xl shadow-primary/10">
+                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
                   <ProfileVideo
                     videoUrl={videoUrl}
                     coverImageUrl={profileImageUrl || undefined}
@@ -92,13 +92,13 @@ export const CandidateProfileDialog = ({
                   />
                 </div>
               ) : (
-                <Avatar className="w-40 h-40 md:w-48 md:h-48 border-4 border-primary/30 shadow-xl shadow-primary/10">
+                <Avatar className="w-40 h-40 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
                   <AvatarImage 
                     src={profileImageUrl || undefined} 
                     alt={`${application.first_name} ${application.last_name}`}
                     className="object-cover"
                   />
-                  <AvatarFallback className="bg-primary/20 text-primary text-4xl md:text-5xl font-semibold">
+                  <AvatarFallback className="bg-white/10 text-white text-4xl md:text-5xl font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
@@ -107,10 +107,10 @@ export const CandidateProfileDialog = ({
             
             {/* Name and Job */}
             <div>
-              <h2 className="text-2xl font-semibold text-foreground">
+              <h2 className="text-2xl font-semibold text-white">
                 {application.first_name} {application.last_name}
               </h2>
-              <p className="text-muted-foreground mt-1">{application.job_title}</p>
+              <p className="text-white/70 mt-1">{application.job_title}</p>
               <Badge variant="outline" className={`${currentStatus.className} mt-2`}>
                 {currentStatus.label}
               </Badge>
@@ -121,17 +121,17 @@ export const CandidateProfileDialog = ({
           <div className="grid gap-4">
             {/* Contact Information */}
             <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
-              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3 flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
                 <User className="h-3.5 w-3.5" />
                 Kontaktinformation
               </h3>
               <div className="grid sm:grid-cols-2 gap-3">
                 {application.email && (
                   <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <Mail className="h-4 w-4 text-white/50 shrink-0" />
                     <a 
                       href={`mailto:${application.email}`} 
-                      className="text-sm text-foreground hover:text-primary transition-colors truncate"
+                      className="text-sm text-white hover:text-white/80 transition-colors truncate"
                     >
                       {application.email}
                     </a>
@@ -139,10 +139,10 @@ export const CandidateProfileDialog = ({
                 )}
                 {application.phone && (
                   <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <Phone className="h-4 w-4 text-white/50 shrink-0" />
                     <a 
                       href={`tel:${application.phone}`} 
-                      className="text-sm text-foreground hover:text-primary transition-colors"
+                      className="text-sm text-white hover:text-white/80 transition-colors"
                     >
                       {application.phone}
                     </a>
@@ -150,8 +150,8 @@ export const CandidateProfileDialog = ({
                 )}
                 {application.location && (
                   <div className="flex items-center gap-3">
-                    <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm text-foreground">{application.location}</span>
+                    <MapPin className="h-4 w-4 text-white/50 shrink-0" />
+                    <span className="text-sm text-white">{application.location}</span>
                   </div>
                 )}
               </div>
@@ -159,27 +159,27 @@ export const CandidateProfileDialog = ({
 
             {/* Personal Information */}
             <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
-              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3 flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
                 <Briefcase className="h-3.5 w-3.5" />
                 Personlig information
               </h3>
               <div className="grid sm:grid-cols-2 gap-3">
                 {application.age && (
                   <div className="flex items-center gap-3">
-                    <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm text-foreground">{application.age} år</span>
+                    <Calendar className="h-4 w-4 text-white/50 shrink-0" />
+                    <span className="text-sm text-white">{application.age} år</span>
                   </div>
                 )}
                 {application.employment_status && (
                   <div className="flex items-center gap-3">
-                    <Briefcase className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm text-foreground">{application.employment_status}</span>
+                    <Briefcase className="h-4 w-4 text-white/50 shrink-0" />
+                    <span className="text-sm text-white">{application.employment_status}</span>
                   </div>
                 )}
                 {application.availability && (
                   <div className="flex items-center gap-3">
-                    <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm text-foreground">{application.availability}</span>
+                    <Clock className="h-4 w-4 text-white/50 shrink-0" />
+                    <span className="text-sm text-white">{application.availability}</span>
                   </div>
                 )}
               </div>
@@ -188,10 +188,10 @@ export const CandidateProfileDialog = ({
             {/* Bio */}
             {application.bio && (
               <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
-                <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">
                   Om kandidaten
                 </h3>
-                <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                <p className="text-sm text-white whitespace-pre-wrap leading-relaxed">
                   {application.bio}
                 </p>
               </div>
@@ -204,13 +204,13 @@ export const CandidateProfileDialog = ({
                   onClick={() => setQuestionsExpanded(!questionsExpanded)}
                   className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
                 >
-                  <h3 className="text-xs font-semibold text-primary uppercase tracking-wider">
+                  <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
                     Frågor ({Object.keys(customAnswers).length})
                   </h3>
                   {questionsExpanded ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    <ChevronUp className="h-4 w-4 text-white/50" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    <ChevronDown className="h-4 w-4 text-white/50" />
                   )}
                 </button>
                 
@@ -221,8 +221,8 @@ export const CandidateProfileDialog = ({
                         key={question} 
                         className="border-t border-white/5 pt-4 first:border-t-0 first:pt-0"
                       >
-                        <p className="text-sm font-medium text-foreground mb-1">{question}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm font-medium text-white mb-1">{question}</p>
+                        <p className="text-sm text-white/70">
                           {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
                         </p>
                       </div>
@@ -247,7 +247,7 @@ export const CandidateProfileDialog = ({
                     }
                   });
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all text-foreground"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all text-white"
               >
                 <FileText className="h-5 w-5" />
                 <span className="font-medium">Visa CV</span>
