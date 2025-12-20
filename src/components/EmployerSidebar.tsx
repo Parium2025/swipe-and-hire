@@ -369,9 +369,9 @@ export function EmployerSidebar() {
                         <span className="font-medium flex-1 text-left">{item.title}</span>
                       )}
                       {item.url === '/candidates' && preloadedEmployerCandidates > 0 && !collapsed && (
-                        <span className="bg-secondary text-secondary-foreground text-xs font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                          {preloadedEmployerCandidates}
-                        </span>
+                                        <span className="bg-secondary text-white text-xs font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                                          {preloadedEmployerCandidates}
+                                        </span>
                       )}
                       {item.url === '/messages' && preloadedUnreadMessages > 0 && !collapsed && (
                         <span className="bg-destructive text-destructive-foreground text-xs font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
