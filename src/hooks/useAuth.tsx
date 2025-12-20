@@ -1256,27 +1256,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshSidebarCounts = useCallback(async () => {
     console.log('[refreshSidebarCounts] Triggered - user:', user?.id);
     try {
-      // Hämta aktiva jobb med employer_id för unika företag
-      const { data: activeJobs, count: totalJobs } = await supabase
+      // Hämta aktiva jobb med employer_id, created_at OCH expires_at för att filtrera bort utgångna
+      const { data: activeJobs } = await supabase
         .from('job_postings')
-        .select('employer_id, created_at', { count: 'exact' })
+        .select('employer_id, created_at, expires_at')
         .eq('is_active', true);
       
-      const newTotalJobs = totalJobs || 0;
-      console.log('[refreshSidebarCounts] Total jobs:', newTotalJobs);
+      // Filtrera bort utgångna jobb (där expires_at har passerat)
+      const now = new Date();
+      const nonExpiredJobs = (activeJobs || []).filter(job => {
+        if (!job.expires_at) return true; // Inget utgångsdatum = fortfarande aktivt
+        return new Date(job.expires_at) > now;
+      });
+      
+      const newTotalJobs = nonExpiredJobs.length;
+      console.log('[refreshSidebarCounts] Total jobs (non-expired):', newTotalJobs);
       setPreloadedTotalJobs(newTotalJobs);
       try { sessionStorage.setItem(TOTAL_JOBS_CACHE_KEY, String(newTotalJobs)); } catch {}
 
-      // Räkna unika företag
-      const uniqueEmployers = new Set(activeJobs?.map(j => j.employer_id) || []);
+      // Räkna unika företag (endast icke-utgångna)
+      const uniqueEmployers = new Set(nonExpiredJobs.map(j => j.employer_id));
       const newUniqueCompanies = uniqueEmployers.size;
       setPreloadedUniqueCompanies(newUniqueCompanies);
       try { sessionStorage.setItem(UNIQUE_COMPANIES_CACHE_KEY, String(newUniqueCompanies)); } catch {}
 
-      // Räkna nya denna vecka
+      // Räkna nya denna vecka (endast icke-utgångna)
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
-      const newThisWeek = activeJobs?.filter(j => new Date(j.created_at) > weekAgo).length || 0;
+      const newThisWeek = nonExpiredJobs.filter(j => new Date(j.created_at) > weekAgo).length;
       setPreloadedNewThisWeek(newThisWeek);
       try { sessionStorage.setItem(NEW_THIS_WEEK_CACHE_KEY, String(newThisWeek)); } catch {}
 
