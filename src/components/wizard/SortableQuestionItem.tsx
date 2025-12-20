@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { JobQuestion } from '@/types/jobWizard';
-import { TruncatedTitle } from '@/components/ui/truncated-title';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SortableQuestionItemProps {
   question: JobQuestion;
@@ -57,15 +57,19 @@ export const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQue
             <GripVertical className="h-4 w-4" />
           </div>
           
-          <div className="flex-1 min-w-0">
-            <TruncatedTitle 
-              fullText={displayText}
-              className="text-white font-medium text-sm leading-tight truncate line-clamp-1"
-            >
-              {questionText}
-              <span className="text-white/60 font-normal ml-1">({typeLabel})</span>
-            </TruncatedTitle>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex-1 min-w-0 cursor-default">
+                <div className="text-white font-medium text-sm leading-tight truncate">
+                  {questionText}
+                  <span className="text-white/60 font-normal ml-1">({typeLabel})</span>
+                </div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-[300px] bg-slate-900/95 border border-white/20">
+              <p className="text-sm text-white">{displayText}</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
         
         <div className="flex items-center gap-0.5 flex-shrink-0 transition-opacity">
