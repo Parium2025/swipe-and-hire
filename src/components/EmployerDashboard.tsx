@@ -271,16 +271,16 @@ const EmployerDashboard = memo(() => {
                           <div className="flex flex-col items-center gap-0.5">
                             {job.is_active ? (
                               isJobExpiredCheck(job.created_at, job.expires_at) ? (
-                                <Badge variant="glassDestructive" className="whitespace-nowrap text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:backdrop-brightness-110">
+                                <Badge variant="glassDestructive" className="whitespace-nowrap px-3.5 py-1 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:backdrop-brightness-110">
                                   Utgången
                                 </Badge>
                               ) : (
-                                <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:backdrop-brightness-110">
+                                <Badge variant="glass" className="whitespace-nowrap px-3 py-1 bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:backdrop-brightness-110">
                                   Aktiv
                                 </Badge>
                               )
                             ) : (
-                              <Badge variant="glass" className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-amber-500/30 hover:backdrop-brightness-110">
+                              <Badge variant="glass" className="whitespace-nowrap px-3 py-1 bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-amber-500/30 hover:backdrop-brightness-110">
                                 Utkast
                               </Badge>
                             )}
