@@ -14,41 +14,49 @@ const getCacheKey = (storagePath: string, mediaType: MediaType) =>
 
 // Hämta cached URL synkront (för initial render utan flicker)
 function getCachedUrlSync(storagePath: string, mediaType: MediaType): string | null {
-  // 1. Kolla blob cache först (snabbast)
-  const blobUrl = imageCache.getCachedUrl(storagePath);
-  if (blobUrl) return blobUrl;
-  
-  // 2. Kolla memory cache
   const cacheKey = getCacheKey(storagePath, mediaType);
-  const memCached = signedUrlMemoryCache.get(cacheKey);
   const now = Date.now();
-  if (memCached && memCached.expiresAt > now) {
+
+  const resolveSignedUrl = (signedUrl: string | null | undefined): string | null => {
+    if (!signedUrl || typeof signedUrl !== 'string') return null;
+
     // Skydda mot gamla/ogiltiga cache-värden som pekar på legacy bucket 'profile-media'
-    if (typeof memCached.url === 'string' && memCached.url.includes('/profile-media/')) {
-      signedUrlMemoryCache.delete(cacheKey);
-    } else {
-      return memCached.url;
-    }
+    if (signedUrl.includes('/profile-media/')) return null;
+
+    // Om vi redan har blob i cache för den signerade URL:en → instant
+    const blobUrl = imageCache.getCachedUrl(signedUrl);
+    return blobUrl || signedUrl;
+  };
+
+  // 1) Memory cache
+  const memCached = signedUrlMemoryCache.get(cacheKey);
+  if (memCached && memCached.expiresAt > now) {
+    const resolved = resolveSignedUrl(memCached.url);
+    if (resolved) return resolved;
+    signedUrlMemoryCache.delete(cacheKey);
   }
 
-  // 3. Kolla localStorage
+  // 2) LocalStorage cache
   try {
     const stored = localStorage.getItem(cacheKey);
     if (stored) {
       const parsed = JSON.parse(stored);
-      if (parsed.expiresAt > now) {
-        // Skydda mot gamla/ogiltiga cache-värden som pekar på legacy bucket 'profile-media'
-        if (typeof parsed.url === 'string' && parsed.url.includes('/profile-media/')) {
-          localStorage.removeItem(cacheKey);
-          return null;
+
+      if (parsed?.expiresAt > now && typeof parsed.url === 'string') {
+        const resolved = resolveSignedUrl(parsed.url);
+        if (resolved) {
+          // Uppdatera memory cache
+          signedUrlMemoryCache.set(cacheKey, parsed);
+          return resolved;
         }
 
-        // Uppdatera memory cache
-        signedUrlMemoryCache.set(cacheKey, parsed);
-        return parsed.url;
+        // Legacy/ogiltigt → rensa
+        localStorage.removeItem(cacheKey);
+      } else if (parsed?.expiresAt <= now) {
+        localStorage.removeItem(cacheKey);
       }
     }
-  } catch (e) {
+  } catch {
     // Ignore cache read errors
   }
 
@@ -160,6 +168,52 @@ export function useMediaUrl(storagePath: string | null | undefined, mediaType: M
   }, [storagePath, mediaType, expiresInSeconds, cachedUrl]);
 
   return url;
+}
+
+// Prefetch/prime: seed signed-url cache + blob-cache så avatars kan vara "bam" när man öppnar /candidates
+export async function prefetchMediaUrl(
+  storagePath: string | null | undefined,
+  mediaType: MediaType,
+  expiresInSeconds: number = 86400
+): Promise<void> {
+  if (!storagePath) return;
+
+  const cacheKey = getCacheKey(storagePath, mediaType);
+  const now = Date.now();
+
+  // Om vi redan har en cached signed URL (eller blob) → bara säkerställ blob
+  const cached = getCachedUrlSync(storagePath, mediaType);
+  if (cached) {
+    if (!cached.startsWith('blob:')) {
+      await imageCache.loadImage(cached).catch(() => {});
+    }
+    return;
+  }
+
+  // Undvik dubbla requests
+  if (ongoingLoads.has(cacheKey)) return;
+  ongoingLoads.add(cacheKey);
+
+  try {
+    const signedUrl = await getMediaUrl(storagePath, mediaType, expiresInSeconds);
+    if (!signedUrl) return;
+
+    // Cacha signed URL (expires 80% av faktisk expire tid för säkerhet)
+    const expiresAt = now + (expiresInSeconds * 1000 * 0.8);
+    const cacheData = { url: signedUrl, expiresAt };
+
+    signedUrlMemoryCache.set(cacheKey, cacheData);
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch {
+      // ignore
+    }
+
+    // Preloada till blob-cache (så UI kan visa direkt)
+    await imageCache.loadImage(signedUrl).catch(() => {});
+  } finally {
+    ongoingLoads.delete(cacheKey);
+  }
 }
 
 // Utility för att rensa utgångna cache-poster
