@@ -13,12 +13,31 @@ import {
   Calendar, 
   Briefcase,
   Users,
-  UserCheck,
   Gift,
-  PartyPopper
+  PartyPopper,
+  GripVertical
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragStartEvent,
+  DragEndEvent,
+  DragOverEvent,
+  useDroppable,
+} from '@dnd-kit/core';
+import {
+  useSortable,
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const STAGE_ICONS = {
   to_contact: Phone,
@@ -37,25 +56,39 @@ interface CandidateCardProps {
   onOpenProfile: () => void;
   canMoveLeft: boolean;
   canMoveRight: boolean;
+  isDragging?: boolean;
 }
 
-const CandidateCard = ({ 
+const CandidateCardContent = ({ 
   candidate, 
   onMoveLeft, 
   onMoveRight, 
   onRemove, 
   onOpenProfile,
   canMoveLeft, 
-  canMoveRight 
-}: CandidateCardProps) => {
+  canMoveRight,
+  isDragging,
+  dragHandleProps,
+}: CandidateCardProps & { dragHandleProps?: any }) => {
   const initials = `${candidate.first_name?.[0] || ''}${candidate.last_name?.[0] || ''}`.toUpperCase() || '?';
 
   return (
     <div 
-      className="bg-white/5 border border-white/10 rounded-lg p-3 hover:border-white/30 transition-all cursor-pointer group"
+      className={`bg-white/5 border border-white/10 rounded-lg p-3 transition-all cursor-pointer group ${
+        isDragging ? 'shadow-xl ring-2 ring-primary/50 bg-white/10' : 'hover:border-white/30'
+      }`}
       onClick={onOpenProfile}
     >
       <div className="flex items-start gap-3">
+        {/* Drag handle */}
+        <div 
+          {...dragHandleProps}
+          className="flex items-center justify-center h-10 w-5 cursor-grab active:cursor-grabbing text-white/30 hover:text-white/60 transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="h-4 w-4" />
+        </div>
+        
         <Avatar className="h-10 w-10 ring-2 ring-white/20">
           {candidate.profile_image_url ? (
             <AvatarImage src={candidate.profile_image_url} alt={`${candidate.first_name} ${candidate.last_name}`} />
@@ -117,22 +150,55 @@ const CandidateCard = ({
   );
 };
 
+// Sortable wrapper for the card
+const SortableCandidateCard = (props: CandidateCardProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: props.candidate.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <CandidateCardContent 
+        {...props} 
+        isDragging={isDragging}
+        dragHandleProps={{ ...attributes, ...listeners }}
+      />
+    </div>
+  );
+};
+
 interface StageColumnProps {
   stage: CandidateStage;
   candidates: MyCandidateData[];
   onMoveCandidate: (id: string, stage: CandidateStage) => void;
   onRemoveCandidate: (id: string) => void;
   onOpenProfile: (candidate: MyCandidateData) => void;
+  isOver?: boolean;
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile }: StageColumnProps) => {
+const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, isOver }: StageColumnProps) => {
   const config = STAGE_CONFIG[stage];
   const Icon = STAGE_ICONS[stage];
   const stageIndex = STAGE_ORDER.indexOf(stage);
 
+  const { setNodeRef } = useDroppable({
+    id: stage,
+  });
+
   return (
     <div className="flex-1 min-w-[280px] max-w-[350px]">
-      <div className={`rounded-lg border ${config.color} p-3 mb-3`}>
+      <div className={`rounded-lg border ${config.color} p-3 mb-3 transition-all ${isOver ? 'ring-2 ring-primary scale-[1.02]' : ''}`}>
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4" />
           <span className="font-medium text-sm">{config.label}</span>
@@ -142,31 +208,38 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
         </div>
       </div>
 
-      <div className="space-y-2 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
-        {candidates.map(candidate => (
-          <CandidateCard
-            key={candidate.id}
-            candidate={candidate}
-            onMoveLeft={() => {
-              if (stageIndex > 0) {
-                onMoveCandidate(candidate.id, STAGE_ORDER[stageIndex - 1]);
-              }
-            }}
-            onMoveRight={() => {
-              if (stageIndex < STAGE_ORDER.length - 1) {
-                onMoveCandidate(candidate.id, STAGE_ORDER[stageIndex + 1]);
-              }
-            }}
-            onRemove={() => onRemoveCandidate(candidate.id)}
-            onOpenProfile={() => onOpenProfile(candidate)}
-            canMoveLeft={stageIndex > 0}
-            canMoveRight={stageIndex < STAGE_ORDER.length - 1}
-          />
-        ))}
+      <div 
+        ref={setNodeRef}
+        className={`space-y-2 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 min-h-[100px] rounded-lg transition-colors ${
+          isOver ? 'bg-white/5' : ''
+        }`}
+      >
+        <SortableContext items={candidates.map(c => c.id)} strategy={verticalListSortingStrategy}>
+          {candidates.map(candidate => (
+            <SortableCandidateCard
+              key={candidate.id}
+              candidate={candidate}
+              onMoveLeft={() => {
+                if (stageIndex > 0) {
+                  onMoveCandidate(candidate.id, STAGE_ORDER[stageIndex - 1]);
+                }
+              }}
+              onMoveRight={() => {
+                if (stageIndex < STAGE_ORDER.length - 1) {
+                  onMoveCandidate(candidate.id, STAGE_ORDER[stageIndex + 1]);
+                }
+              }}
+              onRemove={() => onRemoveCandidate(candidate.id)}
+              onOpenProfile={() => onOpenProfile(candidate)}
+              canMoveLeft={stageIndex > 0}
+              canMoveRight={stageIndex < STAGE_ORDER.length - 1}
+            />
+          ))}
+        </SortableContext>
 
         {candidates.length === 0 && (
           <div className="text-center py-8 text-white/50 text-sm">
-            Inga kandidater i detta steg
+            {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
           </div>
         )}
       </div>
@@ -177,6 +250,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
 const MyCandidates = () => {
   const { 
     candidatesByStage, 
+    candidates,
     stats, 
     isLoading, 
     moveCandidate, 
@@ -185,6 +259,54 @@ const MyCandidates = () => {
 
   const [selectedCandidate, setSelectedCandidate] = useState<MyCandidateData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  );
+
+  const activeCandidate = useMemo(() => {
+    if (!activeId) return null;
+    return candidates.find(c => c.id === activeId) || null;
+  }, [activeId, candidates]);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const overId = event.over?.id as string | undefined;
+    if (overId && STAGE_ORDER.includes(overId as CandidateStage)) {
+      setOverId(overId);
+    } else {
+      setOverId(null);
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+    setOverId(null);
+
+    if (!over) return;
+
+    const candidateId = active.id as string;
+    const targetStage = over.id as string;
+
+    // Check if dropped on a stage column
+    if (STAGE_ORDER.includes(targetStage as CandidateStage)) {
+      const candidate = candidates.find(c => c.id === candidateId);
+      if (candidate && candidate.stage !== targetStage) {
+        moveCandidate.mutate({ id: candidateId, stage: targetStage as CandidateStage });
+      }
+    }
+  };
 
   const handleMoveCandidate = (id: string, stage: CandidateStage) => {
     moveCandidate.mutate({ id, stage });
@@ -267,7 +389,7 @@ const MyCandidates = () => {
           Mina kandidater ({stats.total})
         </h1>
         <p className="text-sm text-white mt-1">
-          Din personliga rekryteringspipeline - flytta kandidater mellan steg
+          Din personliga rekryteringspipeline - dra kandidater mellan steg
         </p>
       </div>
 
@@ -284,18 +406,44 @@ const MyCandidates = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {STAGE_ORDER.map(stage => (
-            <StageColumn
-              key={stage}
-              stage={stage}
-              candidates={candidatesByStage[stage]}
-              onMoveCandidate={handleMoveCandidate}
-              onRemoveCandidate={handleRemoveCandidate}
-              onOpenProfile={handleOpenProfile}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {STAGE_ORDER.map(stage => (
+              <StageColumn
+                key={stage}
+                stage={stage}
+                candidates={candidatesByStage[stage]}
+                onMoveCandidate={handleMoveCandidate}
+                onRemoveCandidate={handleRemoveCandidate}
+                onOpenProfile={handleOpenProfile}
+                isOver={overId === stage}
+              />
+            ))}
+          </div>
+
+          <DragOverlay>
+            {activeCandidate ? (
+              <div className="opacity-90">
+                <CandidateCardContent
+                  candidate={activeCandidate}
+                  onMoveLeft={() => {}}
+                  onMoveRight={() => {}}
+                  onRemove={() => {}}
+                  onOpenProfile={() => {}}
+                  canMoveLeft={false}
+                  canMoveRight={false}
+                  isDragging
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {/* Candidate Profile Dialog */}
