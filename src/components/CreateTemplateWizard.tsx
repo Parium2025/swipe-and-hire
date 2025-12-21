@@ -143,11 +143,20 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       
       setProfile(data);
       
+      // IMPORTANT: Do NOT auto-fill form fields if editing an existing template.
+      // This prevents false "unsaved changes" detection.
+      if (templateToEdit) return;
+      
       if (data?.company_name && !formData.workplace_name) {
         setFormData(prev => ({
           ...prev,
           workplace_name: data.company_name
         }));
+        // Also update initialFormData to prevent false "unsaved changes"
+        setInitialFormData(prev => prev ? ({
+          ...prev,
+          workplace_name: data.company_name
+        }) : prev);
       }
       
       if (!formData.contact_email && user.email) {
@@ -155,6 +164,11 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
           ...prev,
           contact_email: user.email
         }));
+        // Also update initialFormData to prevent false "unsaved changes"
+        setInitialFormData(prev => prev ? ({
+          ...prev,
+          contact_email: user.email
+        }) : prev);
       }
     };
 
@@ -162,7 +176,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       fetchProfile();
       fetchQuestionTemplates();
     }
-  }, [user, open]);
+  }, [user, open, templateToEdit]);
 
   // Fetch question templates from database
   const fetchQuestionTemplates = async () => {
