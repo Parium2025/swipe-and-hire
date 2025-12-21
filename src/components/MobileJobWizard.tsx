@@ -993,20 +993,35 @@ const MobileJobWizard = ({
     
     setProfile(data);
     
-    // Auto-fill workplace name with company name
+    // IMPORTANT: Do NOT auto-fill form fields if editing an existing job.
+    // This prevents false "unsaved changes" detection when profile data
+    // differs from the existing job's saved values.
+    if (existingJob) return;
+    
+    // Auto-fill workplace name with company name (only for new jobs)
     if (data?.company_name && !formData.workplace_name) {
       setFormData(prev => ({
         ...prev,
         workplace_name: data.company_name
       }));
+      // Also update initialFormData to prevent false "unsaved changes"
+      setInitialFormData(prev => prev ? ({
+        ...prev,
+        workplace_name: data.company_name
+      }) : prev);
     }
     
-    // Auto-fill contact email if not already set and use user email as fallback
+    // Auto-fill contact email if not already set (only for new jobs)
     if (!formData.contact_email && user.email) {
       setFormData(prev => ({
         ...prev,
         contact_email: user.email
       }));
+      // Also update initialFormData to prevent false "unsaved changes"
+      setInitialFormData(prev => prev ? ({
+        ...prev,
+        contact_email: user.email
+      }) : prev);
     }
   };
 
