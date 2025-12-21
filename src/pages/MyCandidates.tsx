@@ -25,8 +25,11 @@ import {
   Briefcase,
   UserCheck,
   Gift,
-  PartyPopper
+  PartyPopper,
+  Search,
+  X
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import {
@@ -223,6 +226,43 @@ const MyCandidates = () => {
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [candidateToRemove, setCandidateToRemove] = useState<MyCandidateData | null>(null);
+  
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeStageFilter, setActiveStageFilter] = useState<CandidateStage | 'all'>('all');
+
+  // Filter candidates based on search query and stage filter
+  const filteredCandidatesByStage = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
+    
+    const filterCandidates = (candidates: MyCandidateData[]) => {
+      if (!query) return candidates;
+      return candidates.filter(c => {
+        const fullName = `${c.first_name || ''} ${c.last_name || ''}`.toLowerCase();
+        const jobTitle = (c.job_title || '').toLowerCase();
+        const notes = (c.notes || '').toLowerCase();
+        return fullName.includes(query) || jobTitle.includes(query) || notes.includes(query);
+      });
+    };
+
+    return {
+      to_contact: filterCandidates(candidatesByStage.to_contact),
+      interview: filterCandidates(candidatesByStage.interview),
+      offer: filterCandidates(candidatesByStage.offer),
+      hired: filterCandidates(candidatesByStage.hired),
+    };
+  }, [candidatesByStage, searchQuery]);
+
+  // Get total filtered count
+  const filteredTotal = useMemo(() => {
+    return Object.values(filteredCandidatesByStage).reduce((sum, arr) => sum + arr.length, 0);
+  }, [filteredCandidatesByStage]);
+
+  // Stages to display based on filter
+  const stagesToDisplay = useMemo(() => {
+    if (activeStageFilter === 'all') return STAGE_ORDER;
+    return [activeStageFilter];
+  }, [activeStageFilter]);
 
   // Fetch all applications for the selected candidate when dialog opens
   useEffect(() => {
@@ -444,7 +484,7 @@ const MyCandidates = () => {
   return (
     <div className="max-w-7xl mx-auto px-3 md:px-12 animate-fade-in">
       {/* Header */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-4">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
           Mina kandidater ({stats.total})
         </h1>
@@ -452,6 +492,70 @@ const MyCandidates = () => {
           Din personliga rekryteringspipeline - dra kandidater mellan steg
         </p>
       </div>
+
+      {/* Search and Stage Filters */}
+      {stats.total > 0 && (
+        <div className="mb-6 space-y-3">
+          {/* Search input */}
+          <div className="relative max-w-md mx-auto">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
+            <Input
+              placeholder="Sök på namn, jobb eller anteckningar..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Stage filters */}
+          <div className="flex flex-wrap justify-center gap-2">
+            <button
+              onClick={() => setActiveStageFilter('all')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+                activeStageFilter === 'all'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              Alla ({stats.total})
+            </button>
+            {STAGE_ORDER.map(stage => {
+              const config = STAGE_CONFIG[stage];
+              const count = candidatesByStage[stage].length;
+              return (
+                <button
+                  key={stage}
+                  onClick={() => setActiveStageFilter(activeStageFilter === stage ? 'all' : stage)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+                    activeStageFilter === stage
+                      ? config.color
+                      : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {config.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search results info */}
+          {searchQuery && (
+            <p className="text-center text-sm text-white/70">
+              {filteredTotal === 0 
+                ? 'Inga kandidater hittades' 
+                : `Visar ${filteredTotal} av ${stats.total} kandidater`}
+            </p>
+          )}
+        </div>
+      )}
 
       {stats.total === 0 ? (
         <Card className="bg-white/5 border-white/10">
@@ -473,12 +577,12 @@ const MyCandidates = () => {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {STAGE_ORDER.map(stage => (
+          <div className={`flex gap-4 overflow-x-auto pb-4 ${activeStageFilter !== 'all' ? 'justify-center' : ''}`}>
+            {stagesToDisplay.map(stage => (
               <StageColumn
                 key={stage}
                 stage={stage}
-                candidates={candidatesByStage[stage]}
+                candidates={filteredCandidatesByStage[stage]}
                 onMoveCandidate={handleMoveCandidate}
                 onRemoveCandidate={handleRemoveCandidate}
                 onOpenProfile={handleOpenProfile}
