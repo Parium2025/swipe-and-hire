@@ -22,11 +22,13 @@ function CandidateAvatarBase({
   const [imageLoaded, setImageLoaded] = useState(false);
   
   // Use useMediaUrl hook properly at component level
+  // These will generate signed URLs for private bucket files
   const resolvedImageUrl = useMediaUrl(profileImageUrl, 'profile-image');
   const resolvedVideoUrl = useMediaUrl(videoUrl, 'profile-video');
   
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   const hasVideo = !!isProfileVideo && !!resolvedVideoUrl;
+  const hasImage = !!resolvedImageUrl && !avatarError;
 
   // Reset error state when URL changes
   useEffect(() => {
@@ -35,6 +37,13 @@ function CandidateAvatarBase({
       setImageLoaded(false);
     }
   }, [resolvedImageUrl]);
+
+  // Debug logging for troubleshooting (remove in production)
+  useEffect(() => {
+    if (profileImageUrl && !resolvedImageUrl) {
+      console.debug('[CandidateAvatar] Waiting for signed URL:', profileImageUrl);
+    }
+  }, [profileImageUrl, resolvedImageUrl]);
 
   if (hasVideo) {
     return (
