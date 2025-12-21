@@ -7,6 +7,9 @@ import { sv } from 'date-fns/locale';
 import { CandidateProfileDialog } from './CandidateProfileDialog';
 import { CandidateAvatar } from './CandidateAvatar';
 import { Button } from '@/components/ui/button';
+import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
+import { UserPlus, Check } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface CandidatesTableProps {
   applications: ApplicationData[];
@@ -32,6 +35,7 @@ export function CandidatesTable({
 }: CandidatesTableProps) {
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { isInMyCandidates, addCandidate } = useMyCandidatesData();
 
   // Derive selected application from latest list so refetch updates the dialog content
   const selectedApplication = useMemo(() => {
@@ -86,11 +90,13 @@ export function CandidatesTable({
               <TableHead className="text-white">Status</TableHead>
               <TableHead className="text-white">Ansökt</TableHead>
               <TableHead className="text-white">Senaste aktivitet</TableHead>
+              <TableHead className="text-white w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {applications.map((application) => {
               const status = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
+              const isAlreadyAdded = isInMyCandidates(application.id);
               
               return (
                 <TableRow
@@ -136,6 +142,31 @@ export function CandidatesTable({
                       addSuffix: true,
                       locale: sv,
                     })}
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`h-8 w-8 p-0 ${isAlreadyAdded ? 'text-green-400' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+                          disabled={isAlreadyAdded || addCandidate.isPending}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addCandidate.mutate({
+                              applicationId: application.id,
+                              applicantId: application.applicant_id,
+                              jobId: application.job_id,
+                            });
+                          }}
+                        >
+                          {isAlreadyAdded ? <Check className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {isAlreadyAdded ? 'Redan i din lista' : 'Lägg till i Mina kandidater'}
+                      </TooltipContent>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               );

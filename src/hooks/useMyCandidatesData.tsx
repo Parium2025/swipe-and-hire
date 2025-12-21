@@ -1,0 +1,283 @@
+import { useState, useCallback, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+
+export type CandidateStage = 'to_contact' | 'interview' | 'offer' | 'hired';
+
+export interface MyCandidateData {
+  id: string;
+  recruiter_id: string;
+  applicant_id: string;
+  application_id: string;
+  job_id: string | null;
+  stage: CandidateStage;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  // Joined data from job_applications
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  location: string | null;
+  job_title: string | null;
+  profile_image_url: string | null;
+  video_url: string | null;
+  is_profile_video: boolean | null;
+  applied_at: string | null;
+}
+
+export const STAGE_CONFIG = {
+  to_contact: { label: 'Att kontakta', color: 'bg-blue-500/20 border-blue-500/50 text-blue-100' },
+  interview: { label: 'Intervju', color: 'bg-yellow-500/20 border-yellow-500/50 text-yellow-100' },
+  offer: { label: 'Erbjudande', color: 'bg-purple-500/20 border-purple-500/50 text-purple-100' },
+  hired: { label: 'Anställd', color: 'bg-green-500/20 border-green-500/50 text-green-100' },
+} as const;
+
+export function useMyCandidatesData() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { data: candidates = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['my-candidates', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      // Fetch my_candidates with joined application data
+      const { data: myCandidates, error: mcError } = await supabase
+        .from('my_candidates')
+        .select('*')
+        .eq('recruiter_id', user.id)
+        .order('updated_at', { ascending: false });
+
+      if (mcError) throw mcError;
+      if (!myCandidates || myCandidates.length === 0) return [];
+
+      // Get application IDs to fetch related data
+      const applicationIds = myCandidates.map(mc => mc.application_id);
+
+      // Fetch job applications data
+      const { data: applications, error: appError } = await supabase
+        .from('job_applications')
+        .select(`
+          id,
+          applicant_id,
+          first_name,
+          last_name,
+          email,
+          phone,
+          location,
+          applied_at,
+          job_postings!inner(title)
+        `)
+        .in('id', applicationIds);
+
+      if (appError) throw appError;
+
+      // Create a map for quick lookup
+      const appMap = new Map(applications?.map(app => [app.id, app]) || []);
+
+      // Fetch profile media for each applicant
+      const applicantIds = [...new Set(myCandidates.map(mc => mc.applicant_id))];
+      const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }> = {};
+
+      await Promise.all(
+        applicantIds.map(async (applicantId) => {
+          const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
+            p_applicant_id: applicantId,
+            p_employer_id: user.id,
+          });
+
+          if (mediaData && mediaData.length > 0) {
+            profileMediaMap[applicantId] = {
+              profile_image_url: mediaData[0].profile_image_url,
+              video_url: mediaData[0].video_url,
+              is_profile_video: mediaData[0].is_profile_video,
+            };
+          } else {
+            profileMediaMap[applicantId] = {
+              profile_image_url: null,
+              video_url: null,
+              is_profile_video: null,
+            };
+          }
+        })
+      );
+
+      // Combine the data
+      const result: MyCandidateData[] = myCandidates.map(mc => {
+        const app = appMap.get(mc.application_id);
+        const media = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null };
+
+        return {
+          id: mc.id,
+          recruiter_id: mc.recruiter_id,
+          applicant_id: mc.applicant_id,
+          application_id: mc.application_id,
+          job_id: mc.job_id,
+          stage: mc.stage as CandidateStage,
+          notes: mc.notes,
+          created_at: mc.created_at,
+          updated_at: mc.updated_at,
+          first_name: app?.first_name || null,
+          last_name: app?.last_name || null,
+          email: app?.email || null,
+          phone: app?.phone || null,
+          location: app?.location || null,
+          job_title: (app?.job_postings as any)?.title || null,
+          profile_image_url: media.profile_image_url,
+          video_url: media.video_url,
+          is_profile_video: media.is_profile_video,
+          applied_at: app?.applied_at || null,
+        };
+      });
+
+      return result;
+    },
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Add candidate to my list
+  const addCandidate = useMutation({
+    mutationFn: async ({ applicationId, applicantId, jobId }: { applicationId: string; applicantId: string; jobId?: string }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('my_candidates')
+        .insert({
+          recruiter_id: user.id,
+          applicant_id: applicantId,
+          application_id: applicationId,
+          job_id: jobId || null,
+          stage: 'to_contact',
+        })
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error('Kandidaten finns redan i din lista');
+        }
+        throw error;
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      toast.success('Kandidat tillagd i din lista');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Kunde inte lägga till kandidaten');
+    },
+  });
+
+  // Move candidate to different stage
+  const moveCandidate = useMutation({
+    mutationFn: async ({ id, stage }: { id: string; stage: CandidateStage }) => {
+      const { data, error } = await supabase
+        .from('my_candidates')
+        .update({ stage })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+    },
+    onError: () => {
+      toast.error('Kunde inte flytta kandidaten');
+    },
+  });
+
+  // Remove candidate from my list
+  const removeCandidate = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('my_candidates')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      toast.success('Kandidat borttagen från din lista');
+    },
+    onError: () => {
+      toast.error('Kunde inte ta bort kandidaten');
+    },
+  });
+
+  // Update notes
+  const updateNotes = useMutation({
+    mutationFn: async ({ id, notes }: { id: string; notes: string }) => {
+      const { data, error } = await supabase
+        .from('my_candidates')
+        .update({ notes })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+    },
+    onError: () => {
+      toast.error('Kunde inte uppdatera anteckningar');
+    },
+  });
+
+  // Group candidates by stage
+  const candidatesByStage = useMemo(() => {
+    const grouped: Record<CandidateStage, MyCandidateData[]> = {
+      to_contact: [],
+      interview: [],
+      offer: [],
+      hired: [],
+    };
+
+    candidates.forEach(candidate => {
+      if (grouped[candidate.stage]) {
+        grouped[candidate.stage].push(candidate);
+      }
+    });
+
+    return grouped;
+  }, [candidates]);
+
+  // Stats
+  const stats = useMemo(() => ({
+    total: candidates.length,
+    to_contact: candidatesByStage.to_contact.length,
+    interview: candidatesByStage.interview.length,
+    offer: candidatesByStage.offer.length,
+    hired: candidatesByStage.hired.length,
+  }), [candidates, candidatesByStage]);
+
+  // Check if an application is already in my candidates
+  const isInMyCandidates = useCallback((applicationId: string) => {
+    return candidates.some(c => c.application_id === applicationId);
+  }, [candidates]);
+
+  return {
+    candidates,
+    candidatesByStage,
+    stats,
+    isLoading,
+    error,
+    refetch,
+    addCandidate,
+    moveCandidate,
+    removeCandidate,
+    updateNotes,
+    isInMyCandidates,
+  };
+}

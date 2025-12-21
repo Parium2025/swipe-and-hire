@@ -552,6 +552,42 @@ export type Database = {
           },
         ]
       }
+      my_candidates: {
+        Row: {
+          applicant_id: string
+          application_id: string
+          created_at: string
+          id: string
+          job_id: string | null
+          notes: string | null
+          recruiter_id: string
+          stage: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          application_id: string
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          recruiter_id: string
+          stage?: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          application_id?: string
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          recruiter_id?: string
+          stage?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       organizations: {
         Row: {
           created_at: string

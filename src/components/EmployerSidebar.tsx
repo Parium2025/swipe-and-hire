@@ -31,7 +31,8 @@ import {
   HelpCircle,
   FileText,
   Star,
-  UserCircle
+  UserCircle,
+  UserCheck
 } from "lucide-react";
 
 
@@ -53,6 +54,12 @@ const employerNavItems = [
     title: "Kandidater",
     url: "/candidates", 
     icon: Users,
+    group: "huvudmeny"
+  },
+  {
+    title: "Mina Kandidater",
+    url: "/my-candidates", 
+    icon: UserCheck,
     group: "huvudmeny"
   },
   {
