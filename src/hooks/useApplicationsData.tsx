@@ -54,6 +54,7 @@ const readSnapshot = (userId: string): ApplicationData[] => {
     }
 
     // If schema changed (old snapshot missing fields), ignore it.
+    // Must include profile_image_url field to show candidate avatars correctly
     const first = snapshot.items?.[0] as any;
     const isValid =
       !first ||
@@ -61,7 +62,8 @@ const readSnapshot = (userId: string): ApplicationData[] => {
         'employment_status' in first &&
         'work_schedule' in first &&
         'availability' in first &&
-        'cv_url' in first);
+        'cv_url' in first &&
+        'profile_image_url' in first);
 
     if (!isValid) {
       localStorage.removeItem(key);
