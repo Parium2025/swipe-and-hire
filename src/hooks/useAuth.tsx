@@ -78,6 +78,7 @@ const JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY = 'parium_job_seeker_unread_messages'
 const COMPANY_REVIEWS_COUNT_CACHE_KEY = 'parium_company_reviews_count';
 const COMPANY_LOGO_CACHE_KEY = 'parium_company_logo_url';
 const MY_APPLICATIONS_CACHE_KEY = 'parium_my_applications';
+const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates';
 
 interface AuthContextType {
   user: User | null;
@@ -108,6 +109,7 @@ interface AuthContextType {
   preloadedJobSeekerUnreadMessages: number;
   preloadedCompanyReviewsCount: number;
   preloadedMyApplications: number;
+  preloadedMyCandidates: number;
   refreshSidebarCounts: () => Promise<void>;
   refreshEmployerStats: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
@@ -264,6 +266,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [preloadedMyApplications, setPreloadedMyApplications] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(MY_APPLICATIONS_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedMyCandidates, setPreloadedMyCandidates] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(MY_CANDIDATES_CACHE_KEY) : null;
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
@@ -1448,6 +1456,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const reviews = reviewsCount || 0;
       setPreloadedCompanyReviewsCount(reviews);
       try { sessionStorage.setItem(COMPANY_REVIEWS_COUNT_CACHE_KEY, String(reviews)); } catch {}
+
+      // Hämta antal kandidater i "Mina kandidater" (my_candidates table)
+      const { count: myCandidatesCount } = await supabase
+        .from('my_candidates')
+        .select('id', { count: 'exact', head: true })
+        .eq('recruiter_id', user.id);
+      
+      const myCandidates = myCandidatesCount || 0;
+      setPreloadedMyCandidates(myCandidates);
+      try { sessionStorage.setItem(MY_CANDIDATES_CACHE_KEY, String(myCandidates)); } catch {}
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
     }
@@ -1618,6 +1636,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedJobSeekerUnreadMessages,
     preloadedCompanyReviewsCount,
     preloadedMyApplications,
+    preloadedMyCandidates,
     refreshSidebarCounts,
     refreshEmployerStats,
     signUp,
