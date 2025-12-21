@@ -23,7 +23,7 @@ import {
   Phone, 
   Calendar, 
   Briefcase,
-  Users,
+  UserCheck,
   Gift,
   PartyPopper
 } from 'lucide-react';
@@ -456,11 +456,11 @@ const MyCandidates = () => {
       {stats.total === 0 ? (
         <Card className="bg-white/5 border-white/10">
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <Users className="h-12 w-12 text-white/30 mb-4" />
+            <UserCheck className="h-12 w-12 text-white mb-4" />
             <p className="text-white text-center">
               Du har inga kandidater i din lista än.
             </p>
-            <p className="text-white/70 text-sm text-center mt-2">
+            <p className="text-white text-sm text-center mt-2">
               Gå till <span className="font-medium">Kandidater</span> och lägg till kandidater du vill arbeta med.
             </p>
           </CardContent>
