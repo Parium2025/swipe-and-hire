@@ -270,9 +270,15 @@ const EmployerDashboard = memo(() => {
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex flex-col items-center gap-0.5">
                             {job.is_active ? (
-                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:backdrop-brightness-110">
-                                Aktiv
-                              </Badge>
+                              isJobExpiredCheck(job.created_at, job.expires_at) ? (
+                                <Badge variant="glassDestructive" className="text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:backdrop-brightness-110">
+                                  Utgången
+                                </Badge>
+                              ) : (
+                                <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:backdrop-brightness-110">
+                                  Aktiv
+                                </Badge>
+                              )
                             ) : (
                               <Badge variant="glass" className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-amber-500/30 hover:backdrop-brightness-110">
                                 Utkast
