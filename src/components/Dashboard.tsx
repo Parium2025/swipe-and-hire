@@ -49,6 +49,14 @@ const Dashboard = memo(() => {
     job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)
   ), [allJobs]);
 
+  // Calculate stats from filtered jobs (same filter as the list) for consistency
+  const filteredStats = useMemo(() => ({
+    totalJobs: jobs.length,
+    activeJobs: jobs.length,
+    totalViews: jobs.reduce((sum, job) => sum + (job.views_count || 0), 0),
+    totalApplications: jobs.reduce((sum, job) => sum + (job.applications_count || 0), 0),
+  }), [jobs]);
+
   const {
     searchInput,
     setSearchInput,
@@ -88,12 +96,13 @@ const Dashboard = memo(() => {
     }
   }, [page]);
 
+  // Use filtered stats (excluding expired jobs) for accurate representation
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Totalt annonser', value: isLoading ? preloadedEmployerActiveJobs : stats.totalJobs, loading: false },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: isLoading ? preloadedEmployerActiveJobs : stats.activeJobs, loading: false },
-    { icon: Eye, title: 'Totala visningar', value: isLoading ? preloadedEmployerTotalViews : stats.totalViews, loading: false },
-    { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : stats.totalApplications, loading: false },
-  ], [stats, isLoading, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
+    { icon: Briefcase, title: 'Totalt annonser', value: isLoading ? preloadedEmployerActiveJobs : filteredStats.totalJobs, loading: false },
+    { icon: TrendingUp, title: 'Aktiva annonser', value: isLoading ? preloadedEmployerActiveJobs : filteredStats.activeJobs, loading: false },
+    { icon: Eye, title: 'Totala visningar', value: isLoading ? preloadedEmployerTotalViews : filteredStats.totalViews, loading: false },
+    { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : filteredStats.totalApplications, loading: false },
+  ], [filteredStats, isLoading, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
   // Wait for data AND minimum delay before showing content with fade
   if (isLoading || !showContent) {
