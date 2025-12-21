@@ -53,11 +53,50 @@ const readSnapshot = (userId: string): ApplicationData[] => {
       return [];
     }
 
+
+    // Invalidate snapshot if it contains legacy profile-media URLs (old format).
+    // Those URLs are no longer a reliable source of truth; we only store storage paths.
+    const hasLegacyProfileMediaUrls = (snapshot.items || []).some((item: any) => {
+      const vals = [item?.profile_image_url, item?.video_url, item?.cv_url];
+      return vals.some(
+        (v) => typeof v === 'string' && v.includes('/storage/v1/object/') && v.includes('/profile-media/')
+      );
+    });
+
+    if (hasLegacyProfileMediaUrls) {
+      localStorage.removeItem(key);
+
+      // Also clear any signed-url cache entries tied to legacy URLs so we don't reuse them.
+      try {
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k) continue;
+          if (!k.startsWith('media_url_')) continue;
+
+          if (k.includes('profile-media')) {
+            keysToRemove.push(k);
+            continue;
+          }
+
+          const v = localStorage.getItem(k);
+          if (v && v.includes('profile-media')) {
+            keysToRemove.push(k);
+          }
+        }
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
+      } catch {
+        // ignore
+      }
+
+      return [];
+    }
+
     // If schema changed (old snapshot missing fields), ignore it.
     // Must include profile_image_url field to show candidate avatars correctly
     // Also invalidate if profile media fields exist but are not properly set
     const first = snapshot.items?.[0] as any;
-    
+
     // Check that all required fields exist
     const hasRequiredFields =
       !first ||
@@ -69,12 +108,12 @@ const readSnapshot = (userId: string): ApplicationData[] => {
         'profile_image_url' in first &&
         'video_url' in first &&
         'is_profile_video' in first);
-    
+
     if (!hasRequiredFields) {
       localStorage.removeItem(key);
       return [];
     }
-    
+
     const isValid = hasRequiredFields;
 
     if (!isValid) {
