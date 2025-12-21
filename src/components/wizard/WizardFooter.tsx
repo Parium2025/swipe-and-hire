@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
-import { MouseEvent, TouchEvent } from 'react';
+import type { MouseEvent, TouchEvent } from 'react';
 
 export interface WizardFooterProps {
   /** Current step index (0-based) */
@@ -64,17 +64,17 @@ export const WizardFooter = ({
   };
 
   // Wrapper to blur + call handler
-  const handleBackClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleBackClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.blur();
     onBack();
   };
 
-  const handleNextClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleNextClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.blur();
     onNext();
   };
 
-  const handleSubmitClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSubmitClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.blur();
     onSubmit();
   };
