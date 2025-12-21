@@ -42,6 +42,7 @@ import { CandidatesTable } from '@/components/CandidatesTable';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TruncatedText } from '@/components/TruncatedText';
+import MyCandidates from '@/pages/MyCandidates';
 
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -362,6 +363,8 @@ const Index = () => {
           return <EmployerDashboard />;
         case '/candidates':
           return <CandidatesContent />;
+        case '/my-candidates':
+          return <MyCandidates />;
         case '/profile':
           return <EmployerProfile />;
         case '/company-profile':
