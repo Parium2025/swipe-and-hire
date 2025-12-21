@@ -3569,7 +3569,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
             {/* Footer Navigation - Hide when in question form or template selection */}
             {!showQuestionTemplates && !showQuestionForm && (
-            <div className="p-4 border-t border-white/20 flex-shrink-0 flex justify-between gap-3">
+            <div
+              className="p-4 border-t border-white/20 flex-shrink-0 flex justify-between gap-3"
+              onMouseDown={(e) => {
+                // Clicking the empty space between buttons should not leave a focused button state
+                if (e.target === e.currentTarget && document.activeElement instanceof HTMLElement) {
+                  document.activeElement.blur();
+                }
+              }}
+              onTouchStart={(e) => {
+                if (e.target === e.currentTarget && document.activeElement instanceof HTMLElement) {
+                  document.activeElement.blur();
+                }
+              }}
+            >
               <Button
                 onClick={handleBack}
                 disabled={currentStep === 0}
