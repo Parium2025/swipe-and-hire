@@ -907,6 +907,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_view_job_application: { Args: { p_job_id: string }; Returns: boolean }
       employer_owns_job: { Args: { p_job_id: string }; Returns: boolean }
       employer_owns_job_for_question: {
         Args: { p_job_id: string }
