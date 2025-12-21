@@ -316,7 +316,8 @@ const EmployerDashboard = memo(() => {
                               <Calendar size={14} />
                               {formatDateShortSv(job.created_at)}
                             </div>
-                            {(() => {
+                            {/* Only show expiration info for active (published) jobs, not drafts */}
+                            {job.is_active && (() => {
                               const timeInfo = getTimeRemaining(job.created_at, (job as JobPosting).expires_at);
                               return (
                                 <TooltipProvider delayDuration={0}>
