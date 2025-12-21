@@ -338,8 +338,8 @@ const EmployerDashboard = memo(() => {
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex items-center justify-center gap-1.5">
-                            {/* Hide edit button for expired jobs */}
-                            {!isJobExpiredCheck(job.created_at, (job as JobPosting).expires_at) && (
+                            {/* Hide edit button for expired active jobs, but always show for drafts */}
+                            {(!job.is_active || !isJobExpiredCheck(job.created_at, (job as JobPosting).expires_at)) && (
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
