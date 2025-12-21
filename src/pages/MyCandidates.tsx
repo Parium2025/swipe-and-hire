@@ -9,16 +9,13 @@ import { ApplicationData } from '@/hooks/useApplicationsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { 
-  ChevronLeft, 
-  ChevronRight, 
   Trash2, 
   Phone, 
   Calendar, 
   Briefcase,
   Users,
   Gift,
-  PartyPopper,
-  GripVertical
+  PartyPopper
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -53,45 +50,26 @@ const STAGE_ORDER: CandidateStage[] = ['to_contact', 'interview', 'offer', 'hire
 
 interface CandidateCardProps {
   candidate: MyCandidateData;
-  onMoveLeft: () => void;
-  onMoveRight: () => void;
   onRemove: () => void;
   onOpenProfile: () => void;
-  canMoveLeft: boolean;
-  canMoveRight: boolean;
   isDragging?: boolean;
 }
 
 const CandidateCardContent = ({ 
   candidate, 
-  onMoveLeft, 
-  onMoveRight, 
   onRemove, 
   onOpenProfile,
-  canMoveLeft, 
-  canMoveRight,
   isDragging,
-  dragHandleProps,
-}: CandidateCardProps & { dragHandleProps?: any }) => {
+}: CandidateCardProps) => {
   const initials = `${candidate.first_name?.[0] || ''}${candidate.last_name?.[0] || ''}`.toUpperCase() || '?';
 
   return (
     <div 
-      className={`bg-white/5 border border-white/10 rounded-lg p-3 transition-all cursor-pointer group ${
-        isDragging ? 'shadow-xl ring-2 ring-primary/50 bg-white/10' : 'hover:border-white/30'
+      className={`bg-white/5 border border-white/10 rounded-lg p-3 transition-all cursor-grab active:cursor-grabbing group ${
+        isDragging ? 'shadow-xl ring-2 ring-primary/50 bg-white/10' : 'hover:border-white/30 hover:bg-white/[0.08]'
       }`}
-      onClick={onOpenProfile}
     >
-      <div className="flex items-start gap-3">
-        {/* Drag handle */}
-        <div 
-          {...dragHandleProps}
-          className="flex items-center justify-center h-10 w-5 cursor-grab active:cursor-grabbing text-white/30 hover:text-white/60 transition-colors"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <GripVertical className="h-4 w-4" />
-        </div>
-        
+      <div className="flex items-start gap-3" onClick={onOpenProfile}>
         <Avatar className="h-10 w-10 ring-2 ring-white/20">
           {candidate.profile_image_url ? (
             <AvatarImage src={candidate.profile_image_url} alt={`${candidate.first_name} ${candidate.last_name}`} />
@@ -118,33 +96,13 @@ const CandidateCardContent = ({
         </div>
       </div>
 
-      {/* Action buttons - stop propagation to prevent opening profile */}
-      <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/10">
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => { e.stopPropagation(); onMoveLeft(); }}
-            disabled={!canMoveLeft}
-            className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-30"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => { e.stopPropagation(); onMoveRight(); }}
-            disabled={!canMoveRight}
-            className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-30"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+      {/* Remove button */}
+      <div className="flex items-center justify-end mt-3 pt-2 border-t border-white/10">
         <Button
           variant="ghost"
           size="sm"
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="h-7 w-7 p-0 text-red-400/70 hover:text-red-400 hover:bg-red-500/10"
+          className="h-7 w-7 p-0 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
@@ -153,7 +111,7 @@ const CandidateCardContent = ({
   );
 };
 
-// Sortable wrapper for the card
+// Sortable wrapper for the card - entire card is draggable
 const SortableCandidateCard = (props: CandidateCardProps) => {
   const {
     attributes,
@@ -171,11 +129,10 @@ const SortableCandidateCard = (props: CandidateCardProps) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <CandidateCardContent 
         {...props} 
         isDragging={isDragging}
-        dragHandleProps={{ ...attributes, ...listeners }}
       />
     </div>
   );
@@ -222,20 +179,8 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
             <SortableCandidateCard
               key={candidate.id}
               candidate={candidate}
-              onMoveLeft={() => {
-                if (stageIndex > 0) {
-                  onMoveCandidate(candidate.id, STAGE_ORDER[stageIndex - 1]);
-                }
-              }}
-              onMoveRight={() => {
-                if (stageIndex < STAGE_ORDER.length - 1) {
-                  onMoveCandidate(candidate.id, STAGE_ORDER[stageIndex + 1]);
-                }
-              }}
               onRemove={() => onRemoveCandidate(candidate.id)}
               onOpenProfile={() => onOpenProfile(candidate)}
-              canMoveLeft={stageIndex > 0}
-              canMoveRight={stageIndex < STAGE_ORDER.length - 1}
             />
           ))}
         </SortableContext>
@@ -529,12 +474,8 @@ const MyCandidates = () => {
               <div className="opacity-90">
                 <CandidateCardContent
                   candidate={activeCandidate}
-                  onMoveLeft={() => {}}
-                  onMoveRight={() => {}}
                   onRemove={() => {}}
                   onOpenProfile={() => {}}
-                  canMoveLeft={false}
-                  canMoveRight={false}
                   isDragging
                 />
               </div>
