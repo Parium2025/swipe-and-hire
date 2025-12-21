@@ -22,6 +22,14 @@ export interface MyCandidateData {
   email: string | null;
   phone: string | null;
   location: string | null;
+  bio: string | null;
+  cv_url: string | null;
+  age: number | null;
+  employment_status: string | null;
+  work_schedule: string | null;
+  availability: string | null;
+  custom_answers: any | null;
+  status: string;
   job_title: string | null;
   profile_image_url: string | null;
   video_url: string | null;
@@ -58,7 +66,7 @@ export function useMyCandidatesData() {
       // Get application IDs to fetch related data
       const applicationIds = myCandidates.map(mc => mc.application_id);
 
-      // Fetch job applications data
+      // Fetch job applications data - all fields needed for profile dialog
       const { data: applications, error: appError } = await supabase
         .from('job_applications')
         .select(`
@@ -69,6 +77,14 @@ export function useMyCandidatesData() {
           email,
           phone,
           location,
+          bio,
+          cv_url,
+          age,
+          employment_status,
+          work_schedule,
+          availability,
+          custom_answers,
+          status,
           applied_at,
           job_postings!inner(title)
         `)
@@ -126,6 +142,14 @@ export function useMyCandidatesData() {
           email: app?.email || null,
           phone: app?.phone || null,
           location: app?.location || null,
+          bio: app?.bio || null,
+          cv_url: app?.cv_url || null,
+          age: app?.age || null,
+          employment_status: app?.employment_status || null,
+          work_schedule: app?.work_schedule || null,
+          availability: app?.availability || null,
+          custom_answers: app?.custom_answers || null,
+          status: app?.status || 'pending',
           job_title: (app?.job_postings as any)?.title || null,
           profile_image_url: media.profile_image_url,
           video_url: media.video_url,
