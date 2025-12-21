@@ -949,6 +949,7 @@ export type Database = {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean
       }
+      try_uuid: { Args: { p_text: string }; Returns: string }
     }
     Enums: {
       user_role: "job_seeker" | "employer"
