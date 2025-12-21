@@ -69,6 +69,7 @@ const NEW_THIS_WEEK_CACHE_KEY = 'parium_new_this_week';
 // Employer stats cache keys
 const EMPLOYER_MY_JOBS_CACHE_KEY = 'parium_employer_my_jobs';
 const EMPLOYER_ACTIVE_JOBS_CACHE_KEY = 'parium_employer_active_jobs';
+const EMPLOYER_DASHBOARD_JOBS_CACHE_KEY = 'parium_employer_dashboard_jobs';
 const EMPLOYER_TOTAL_VIEWS_CACHE_KEY = 'parium_employer_total_views';
 const EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY = 'parium_employer_total_applications';
 const EMPLOYER_CANDIDATES_CACHE_KEY = 'parium_employer_candidates';
@@ -99,6 +100,7 @@ interface AuthContextType {
   /** Förladdade räknare för employer stats */
   preloadedEmployerMyJobs: number;
   preloadedEmployerActiveJobs: number;
+  preloadedEmployerDashboardJobs: number;
   preloadedEmployerTotalViews: number;
   preloadedEmployerTotalApplications: number;
   preloadedEmployerCandidates: number;
@@ -209,6 +211,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [preloadedEmployerActiveJobs, setPreloadedEmployerActiveJobs] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY) : null;
+      return cached ? parseInt(cached, 10) : 0;
+    } catch { return 0; }
+  });
+  const [preloadedEmployerDashboardJobs, setPreloadedEmployerDashboardJobs] = useState<number>(() => {
+    try {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_DASHBOARD_JOBS_CACHE_KEY) : null;
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
@@ -1388,6 +1396,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPreloadedEmployerActiveJobs(activeCount);
       try { sessionStorage.setItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY, String(activeCount)); } catch {}
       
+      // Dashboard jobb (aktiva + utgångna, dvs alla is_active=true jobb)
+      const dashboardJobs = orgJobs.filter(j => j.is_active);
+      const dashboardCount = dashboardJobs.length;
+      setPreloadedEmployerDashboardJobs(dashboardCount);
+      try { sessionStorage.setItem(EMPLOYER_DASHBOARD_JOBS_CACHE_KEY, String(dashboardCount)); } catch {}
+      
       // Totala visningar (bara från aktiva, icke-utgångna jobb)
       const totalViews = activeJobs.reduce((sum, j) => sum + (j.views_count || 0), 0);
       setPreloadedEmployerTotalViews(totalViews);
@@ -1596,6 +1610,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedNewThisWeek,
     preloadedEmployerMyJobs,
     preloadedEmployerActiveJobs,
+    preloadedEmployerDashboardJobs,
     preloadedEmployerTotalViews,
     preloadedEmployerTotalApplications,
     preloadedEmployerCandidates,
