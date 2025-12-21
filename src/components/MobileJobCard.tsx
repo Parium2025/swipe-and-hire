@@ -60,7 +60,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
         {/* Status Badge */}
         <div className="flex flex-col items-start gap-0.5">
           {jobIsExpired ? (
-            <Badge variant="glassDestructive" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:backdrop-brightness-110">
+            <Badge variant="glassDestructive" className="px-3 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:backdrop-brightness-110">
               Utgången
             </Badge>
           ) : job.is_active ? (
