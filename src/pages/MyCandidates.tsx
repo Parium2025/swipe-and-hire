@@ -8,6 +8,16 @@ import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { 
   Trash2, 
   Phone, 
@@ -142,7 +152,7 @@ interface StageColumnProps {
   stage: CandidateStage;
   candidates: MyCandidateData[];
   onMoveCandidate: (id: string, stage: CandidateStage) => void;
-  onRemoveCandidate: (id: string) => void;
+  onRemoveCandidate: (candidate: MyCandidateData) => void;
   onOpenProfile: (candidate: MyCandidateData) => void;
   isOver?: boolean;
 }
@@ -179,7 +189,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
             <SortableCandidateCard
               key={candidate.id}
               candidate={candidate}
-              onRemove={() => onRemoveCandidate(candidate.id)}
+              onRemove={() => onRemoveCandidate(candidate)}
               onOpenProfile={() => onOpenProfile(candidate)}
             />
           ))}
@@ -212,6 +222,7 @@ const MyCandidates = () => {
   const [overId, setOverId] = useState<string | null>(null);
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
+  const [candidateToRemove, setCandidateToRemove] = useState<MyCandidateData | null>(null);
 
   // Fetch all applications for the selected candidate when dialog opens
   useEffect(() => {
@@ -354,8 +365,15 @@ const MyCandidates = () => {
     moveCandidate.mutate({ id, stage });
   };
 
-  const handleRemoveCandidate = (id: string) => {
-    removeCandidate.mutate(id);
+  const handleRemoveCandidate = (candidate: MyCandidateData) => {
+    setCandidateToRemove(candidate);
+  };
+
+  const confirmRemoveCandidate = () => {
+    if (candidateToRemove) {
+      removeCandidate.mutate(candidateToRemove.id);
+      setCandidateToRemove(null);
+    }
   };
 
   const handleOpenProfile = (candidate: MyCandidateData) => {
@@ -492,6 +510,33 @@ const MyCandidates = () => {
         onStatusUpdate={() => {}}
         allApplications={allCandidateApplications.length > 1 ? allCandidateApplications : undefined}
       />
+
+      {/* Remove Confirmation Dialog */}
+      <AlertDialog open={!!candidateToRemove} onOpenChange={(open) => !open && setCandidateToRemove(null)}>
+        <AlertDialogContent className="bg-card-parium border-white/20">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Ta bort kandidat</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/70">
+              Är du säker på att du vill ta bort{' '}
+              <span className="font-medium text-white">
+                {candidateToRemove?.first_name} {candidateToRemove?.last_name}
+              </span>{' '}
+              från din kandidatlista? Detta tar inte bort kandidatens ansökan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemoveCandidate}
+              className="bg-red-500/80 hover:bg-red-500 text-white border-none"
+            >
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
