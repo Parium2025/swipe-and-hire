@@ -117,7 +117,6 @@ const MobileJobWizard = ({
   existingJob
 }: MobileJobWizardProps) => {
   const navigate = useNavigate();
-  const didCaptureInitialSnapshotRef = useRef(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
   
@@ -138,14 +137,12 @@ const MobileJobWizard = ({
     if (!open) {
       setCurrentStep(0);
       setIsInitializing(true);
-      didCaptureInitialSnapshotRef.current = false;
     }
   }, [open]);
   
   // Start from step 0 when opening
   useEffect(() => {
     if (open) {
-      didCaptureInitialSnapshotRef.current = false;
       setCurrentStep(0);
       setIsInitializing(false);
       
@@ -740,23 +737,11 @@ const MobileJobWizard = ({
     setHasUnsavedChanges(formChanged || questionsChanged);
   }, [formData, customQuestions, initialFormData, initialCustomQuestions, open]);
 
-  // Capture a stable "initial snapshot" after the wizard has hydrated.
-  // This prevents false "unsaved changes" when we auto-normalize empty draft fields on open.
-  useEffect(() => {
-    if (!open) return;
-    if (!initialFormData) return;
-    if (didCaptureInitialSnapshotRef.current) return;
-
-    const raf = requestAnimationFrame(() => {
-      // Align baseline with the current hydrated state
-      setInitialFormData(formData);
-      setInitialCustomQuestions(customQuestions);
-      setHasUnsavedChanges(false);
-      didCaptureInitialSnapshotRef.current = true;
-    });
-
-    return () => cancelAnimationFrame(raf);
-  }, [open, initialFormData, formData, customQuestions]);
+  // NOTE: The previous "snapshot" useEffect that re-aligned initialFormData after hydration
+  // has been removed. The root cause of false "unsaved changes" was in fetchProfile()
+  // auto-filling fields after initialFormData was already set. This is now fixed by:
+  // 1. Skipping auto-fill entirely when editing an existing job (existingJob)
+  // 2. Updating initialFormData simultaneously when auto-filling new jobs
 
   // Show company tooltip only once when first reaching step 4, then keep it visible
   useEffect(() => {
