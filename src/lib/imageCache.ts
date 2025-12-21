@@ -70,10 +70,12 @@ class ImageCache {
 
   private async fetchAndCache(url: string): Promise<CachedImage> {
     try {
-      // Använd no-cache för att undvika browser cache problem
+      // Fetch utan credentials för cross-origin storage URLs (undviker CORS-fel)
+      const isStorageUrl = url.includes('/storage/v1/object/');
       const response = await fetch(url, {
         cache: 'force-cache',
-        credentials: 'include'
+        credentials: isStorageUrl ? 'omit' : 'include',
+        mode: isStorageUrl ? 'cors' : 'same-origin'
       });
 
       if (!response.ok) {
