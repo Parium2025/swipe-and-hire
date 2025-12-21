@@ -91,40 +91,18 @@ export const useGlobalImagePreloader = () => {
 
         if (profiles) {
           profiles.forEach(profile => {
-            // Profile images - konvertera storage-paths till publika URLs från profile-media
-            if (profile.profile_image_url) {
-              if (profile.profile_image_url.includes('/storage/v1/object/public/')) {
-                imagesToPreload.push(profile.profile_image_url.split('?')[0]);
-              } else {
-                const publicUrl = supabase.storage
-                  .from('profile-media')
-                  .getPublicUrl(profile.profile_image_url).data.publicUrl;
-                if (publicUrl) imagesToPreload.push(publicUrl);
-              }
+            // Profile/Cover/Video media kan ligga i private bucket (job-applications) och kräver signed URL.
+            // Vi förladdar därför bara media som redan är publika URLs här (för att undvika felaktiga fetches).
+            if (profile.profile_image_url?.includes('/storage/v1/object/public/')) {
+              imagesToPreload.push(profile.profile_image_url.split('?')[0]);
             }
-            
-            // Cover images - konvertera storage-paths till publika URLs från profile-media
-            if (profile.cover_image_url) {
-              if (profile.cover_image_url.includes('/storage/v1/object/public/')) {
-                imagesToPreload.push(profile.cover_image_url.split('?')[0]);
-              } else {
-                const publicUrl = supabase.storage
-                  .from('profile-media')
-                  .getPublicUrl(profile.cover_image_url).data.publicUrl;
-                if (publicUrl) imagesToPreload.push(publicUrl);
-              }
+
+            if (profile.cover_image_url?.includes('/storage/v1/object/public/')) {
+              imagesToPreload.push(profile.cover_image_url.split('?')[0]);
             }
-            
-            // Videos - konvertera storage-paths till publika URLs från profile-media
-            if (profile.video_url) {
-              if (profile.video_url.includes('/storage/v1/object/public/')) {
-                imagesToPreload.push(profile.video_url.split('?')[0]);
-              } else {
-                const publicUrl = supabase.storage
-                  .from('profile-media')
-                  .getPublicUrl(profile.video_url).data.publicUrl;
-                if (publicUrl) imagesToPreload.push(publicUrl);
-              }
+
+            if (profile.video_url?.includes('/storage/v1/object/public/')) {
+              imagesToPreload.push(profile.video_url.split('?')[0]);
             }
             
             // Company logos - redan publika URLs i profiles-tabellen
