@@ -62,13 +62,13 @@ const Dashboard = memo(() => {
   // Current jobs based on selected tab
   const jobs = activeTab === 'active' ? activeJobs : expiredJobs;
 
-  // Calculate stats from ACTIVE jobs only (for consistency with sidebar)
+  // Calculate stats - totalJobs includes BOTH active and expired, activeJobs shows only active
   const filteredStats = useMemo(() => ({
-    totalJobs: activeJobs.length,
+    totalJobs: activeJobs.length + expiredJobs.length,
     activeJobs: activeJobs.length,
     totalViews: activeJobs.reduce((sum, job) => sum + (job.views_count || 0), 0),
     totalApplications: activeJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0),
-  }), [activeJobs]);
+  }), [activeJobs, expiredJobs]);
 
   const {
     searchInput,
