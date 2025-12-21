@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 import { getMediaUrl } from '@/lib/mediaManager';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 
 export type UserRole = Database['public']['Enums']['user_role'];
@@ -262,6 +263,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
   const mediaPreloadCompleteRef = useRef(false);
+  const prefetchedEmployerCandidateMediaForUserRef = useRef<string | null>(null);
  
   // Håll en ref i synk med state så att async login kan läsa korrekt värde
   useEffect(() => {
@@ -1404,6 +1406,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshEmployerStats();
     }
   }, [user, loading, refreshSidebarCounts, refreshEmployerStats]);
+
+  // Prefetch kandidat-avatarer i bakgrunden direkt efter login (så /candidates känns "bam")
+  useEffect(() => {
+    if (!user || loading) return;
+    if (userRole?.role !== 'employer') return;
+
+    // Kör 1 gång per user-id
+    if (prefetchedEmployerCandidateMediaForUserRef.current === user.id) return;
+    prefetchedEmployerCandidateMediaForUserRef.current = user.id;
+
+    setTimeout(() => {
+      (async () => {
+        try {
+          const { data: apps, error } = await supabase
+            .from('job_applications')
+            .select('applicant_id')
+            .order('applied_at', { ascending: false })
+            .range(0, 24);
+
+          if (error || !apps || apps.length === 0) return;
+
+          const applicantIds = [...new Set(apps.map((a: any) => a.applicant_id))].slice(0, 20);
+
+          const media = await Promise.all(
+            applicantIds.map(async (applicantId) => {
+              const { data } = await supabase.rpc('get_applicant_profile_media', {
+                p_applicant_id: applicantId,
+                p_employer_id: user.id,
+              });
+              const storagePath = data?.[0]?.profile_image_url as string | undefined;
+              return storagePath && storagePath.trim() ? storagePath : null;
+            })
+          );
+
+          const paths = media.filter((p): p is string => typeof p === 'string' && p.trim() !== '');
+          if (paths.length === 0) return;
+
+          await Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {})));
+        } catch {
+          // silent
+        }
+      })();
+    }, 0);
+  }, [user, userRole?.role, loading]);
 
   // Realtime-prenumerationer för räknare
   useEffect(() => {

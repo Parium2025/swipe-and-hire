@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { 
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -330,6 +330,16 @@ export function EmployerSidebar() {
             job_postings: undefined,
           };
         });
+
+        // Prefetch avatars i bakgrunden så /candidates känns "bam" direkt
+        setTimeout(() => {
+          const paths = (items as any[])
+            .map((i) => i.profile_image_url)
+            .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
+            .slice(0, 25);
+          if (paths.length === 0) return;
+          Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {}))).catch(() => {});
+        }, 0);
 
         return { items, hasMore: items.length === 25 };
       },

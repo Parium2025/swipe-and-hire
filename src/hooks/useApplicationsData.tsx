@@ -2,7 +2,7 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { getMediaUrl } from '@/lib/mediaManager';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 
 export interface ApplicationData {
   id: string;
@@ -253,31 +253,19 @@ export const useApplicationsData = (searchQuery: string = '') => {
         writeSnapshot(user.id, items);
       }
 
-      // 🔥 Preload signed URLs för kandidatbilder i bakgrunden (samma mönster som jobbsökarsidan)
+      // 🔥 Prefetch signed URLs + blob-cache för kandidatbilder i bakgrunden
       // Detta körs asynkront och blockerar inte returnering av data
       (async () => {
-        const imagesToPreload: string[] = [];
-        
-        for (const item of items) {
-          if (item.profile_image_url) {
-            try {
-              const signedUrl = await getMediaUrl(item.profile_image_url, 'profile-image', 86400);
-              if (signedUrl) imagesToPreload.push(signedUrl);
-            } catch (e) {
-              // Silent fail - bilden laddas on-demand istället
-            }
-          }
-        }
-        
-        // Preload alla bilder till blob cache
-        if (imagesToPreload.length > 0) {
-          try {
-            const { imageCache } = await import('@/lib/imageCache');
-            await imageCache.preloadImages(imagesToPreload);
-          } catch (e) {
-            // Silent fail
-          }
-        }
+        const storagePaths = items
+          .map((i) => i.profile_image_url)
+          .filter((p): p is string => typeof p === 'string' && p.trim() !== '');
+
+        if (storagePaths.length === 0) return;
+
+        // Begränsa för att undvika att spamma (samtidigt som /candidates känns instant)
+        await Promise.all(
+          storagePaths.slice(0, 25).map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {}))
+        );
       })();
 
       return { items, hasMore };
