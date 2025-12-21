@@ -123,7 +123,7 @@ const LOGO_CACHE_KEY = 'parium_company_logo_url';
 export function EmployerSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
+  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates } = useAuth();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const queryClient = useQueryClient();
@@ -449,6 +449,9 @@ export function EmployerSidebar() {
                           )}
                           {item.url === '/candidates' && preloadedEmployerCandidates > 0 && (
                             <span className="text-white font-normal ml-1">({preloadedEmployerCandidates})</span>
+                          )}
+                          {item.url === '/my-candidates' && preloadedMyCandidates > 0 && (
+                            <span className="text-white font-normal ml-1">({preloadedMyCandidates})</span>
                           )}
                         </span>
                       )}
