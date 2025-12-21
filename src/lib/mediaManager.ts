@@ -217,14 +217,20 @@ export async function getMediaUrl(
   
   if (error) {
     console.error(`Error creating signed URL for ${mediaType}:`, error);
+
     // Backwards compatibility: some older profile/cover images may live in public 'profile-media'
-    if ((mediaType === 'profile-image' || mediaType === 'cover-image') &&
-        (error as any)?.statusCode === '404' || (error as any)?.message?.includes('Object not found')) {
-      const { data: pub } = supabase.storage
-        .from('profile-media')
-        .getPublicUrl(cleanPath);
+    // IMPORTANT: This fallback must NEVER run for cv/video/application docs.
+    const isLegacyProfileImage = mediaType === 'profile-image' || mediaType === 'cover-image';
+    const isNotFound =
+      (error as any)?.statusCode === '404' ||
+      (error as any)?.message?.includes('Object not found') ||
+      (error as any)?.message?.includes('Bucket not found');
+
+    if (isLegacyProfileImage && isNotFound) {
+      const { data: pub } = supabase.storage.from('profile-media').getPublicUrl(cleanPath);
       return pub?.publicUrl ?? null;
     }
+
     return null;
   }
   
