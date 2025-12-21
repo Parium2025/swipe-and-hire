@@ -1600,6 +1600,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
       .subscribe();
 
+    // Real-time för my_candidates (uppdaterar "Mina kandidater" räknare i sidebaren)
+    const myCandidatesChannel = supabase
+      .channel(`auth-my-candidates-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'my_candidates', filter: `recruiter_id=eq.${user.id}` },
+        () => {
+          refreshEmployerStats();
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(jobChannel);
       supabase.removeChannel(savedChannel);
@@ -1607,6 +1619,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.removeChannel(employerApplicationsChannel);
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(reviewsChannel);
+      supabase.removeChannel(myCandidatesChannel);
     };
   }, [user, refreshSidebarCounts, refreshEmployerStats]);
 
