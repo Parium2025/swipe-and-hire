@@ -130,25 +130,27 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
           })()}
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons - Hide edit button for expired jobs */}
         <div className="flex gap-2 pt-1">
-          <Button 
-            variant="glass" 
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              // For drafts, use onEditDraft to open the wizard
-              if (!job.is_active && onEditDraft) {
-                onEditDraft(job);
-              } else {
-                onEdit(job);
-              }
-            }}
-            className="flex-1 h-11 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-blue-500/20 hover:border-blue-500/40 hover:backdrop-brightness-110"
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Redigera
-          </Button>
+          {!jobIsExpired && (
+            <Button 
+              variant="glass" 
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                // For drafts, use onEditDraft to open the wizard
+                if (!job.is_active && onEditDraft) {
+                  onEditDraft(job);
+                } else {
+                  onEdit(job);
+                }
+              }}
+              className="flex-1 h-11 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-blue-500/20 hover:border-blue-500/40 hover:backdrop-brightness-110"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Redigera
+            </Button>
+          )}
           <Button 
             variant="glass" 
             size="sm"
@@ -156,7 +158,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
               e.stopPropagation();
               onDelete(job);
             }}
-            className="flex-1 h-11 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/20 hover:border-red-500/40 hover:backdrop-brightness-110"
+            className={`${jobIsExpired ? 'w-full' : 'flex-1'} h-11 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/20 hover:border-red-500/40 hover:backdrop-brightness-110`}
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Ta bort
