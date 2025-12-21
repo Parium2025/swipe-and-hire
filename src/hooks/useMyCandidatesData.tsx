@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -163,6 +163,32 @@ export function useMyCandidatesData() {
     enabled: !!user,
     staleTime: 2 * 60 * 1000,
   });
+
+  // Real-time subscription for my_candidates changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`my-candidates-realtime-${user.id}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'my_candidates', 
+          filter: `recruiter_id=eq.${user.id}` 
+        },
+        () => {
+          // Refetch data when any change occurs
+          queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
   // Add candidate to my list
   const addCandidate = useMutation({
