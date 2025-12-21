@@ -23,15 +23,26 @@ function getCachedUrlSync(storagePath: string, mediaType: MediaType): string | n
   const memCached = signedUrlMemoryCache.get(cacheKey);
   const now = Date.now();
   if (memCached && memCached.expiresAt > now) {
-    return memCached.url;
+    // Skydda mot gamla/ogiltiga cache-värden som pekar på legacy bucket 'profile-media'
+    if (typeof memCached.url === 'string' && memCached.url.includes('/profile-media/')) {
+      signedUrlMemoryCache.delete(cacheKey);
+    } else {
+      return memCached.url;
+    }
   }
-  
+
   // 3. Kolla localStorage
   try {
     const stored = localStorage.getItem(cacheKey);
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed.expiresAt > now) {
+        // Skydda mot gamla/ogiltiga cache-värden som pekar på legacy bucket 'profile-media'
+        if (typeof parsed.url === 'string' && parsed.url.includes('/profile-media/')) {
+          localStorage.removeItem(cacheKey);
+          return null;
+        }
+
         // Uppdatera memory cache
         signedUrlMemoryCache.set(cacheKey, parsed);
         return parsed.url;
@@ -40,7 +51,7 @@ function getCachedUrlSync(storagePath: string, mediaType: MediaType): string | n
   } catch (e) {
     // Ignore cache read errors
   }
-  
+
   return null;
 }
 
@@ -91,9 +102,14 @@ export function useMediaUrl(storagePath: string | null | undefined, mediaType: M
     const memCached = signedUrlMemoryCache.get(cacheKey);
     const now = Date.now();
     if (memCached && memCached.expiresAt > now) {
-      setUrl(memCached.url);
-      imageCache.loadImage(memCached.url).catch(() => {});
-      return;
+      // Skydda mot legacy cache-värden som pekar på profile-media
+      if (typeof memCached.url === 'string' && memCached.url.includes('/profile-media/')) {
+        signedUrlMemoryCache.delete(cacheKey);
+      } else {
+        setUrl(memCached.url);
+        imageCache.loadImage(memCached.url).catch(() => {});
+        return;
+      }
     }
 
     // Ingen cache finns, generera ny signed URL
