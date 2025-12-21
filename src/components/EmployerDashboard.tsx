@@ -338,20 +338,23 @@ const EmployerDashboard = memo(() => {
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
                           <div className="flex items-center justify-center gap-1.5">
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // For drafts, use handleEditDraft to open the wizard
-                                if (!job.is_active) {
-                                  handleEditDraft(job as JobPosting);
-                                } else {
-                                  handleEditJob(job as any);
-                                }
-                              }}
-                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110 active:scale-95"
-                            >
-                              <Edit size={14} />
-                            </button>
+                            {/* Hide edit button for expired jobs */}
+                            {!isJobExpiredCheck(job.created_at, (job as JobPosting).expires_at) && (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // For drafts, use handleEditDraft to open the wizard
+                                  if (!job.is_active) {
+                                    handleEditDraft(job as JobPosting);
+                                  } else {
+                                    handleEditJob(job as any);
+                                  }
+                                }}
+                                className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110 active:scale-95"
+                              >
+                                <Edit size={14} />
+                              </button>
+                            )}
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
