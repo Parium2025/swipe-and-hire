@@ -617,7 +617,11 @@ const MyCandidates = () => {
 
       {/* Remove Confirmation Dialog */}
       <AlertDialog open={!!candidateToRemove} onOpenChange={(open) => !open && setCandidateToRemove(null)}>
-        <AlertDialogContent className="bg-card-parium border-white/20">
+        <AlertDialogContent 
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          className="bg-card-parium border-white/20"
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Ta bort kandidat</AlertDialogTitle>
             <AlertDialogDescription className="text-white/70">
