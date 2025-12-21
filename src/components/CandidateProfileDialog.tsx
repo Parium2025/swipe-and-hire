@@ -269,17 +269,13 @@ export const CandidateProfileDialog = ({
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-white/50 mt-1">
-                    {allApplications.length} jobbansökningar
+                  <p className="text-sm text-white mt-1">
+                    ({allApplications.length} jobbansökningar)
                   </p>
                 </div>
               ) : (
-                <p className="text-white/70 mt-1">{displayApp.job_title}</p>
+                <p className="text-white mt-1">{displayApp.job_title}</p>
               )}
-              
-              <Badge variant="outline" className={`${currentStatus.className} mt-2`}>
-                {currentStatus.label}
-              </Badge>
             </div>
           </div>
 
