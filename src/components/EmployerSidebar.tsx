@@ -242,13 +242,20 @@ export function EmployerSidebar() {
   };
 
   // Prefetch applications data on hover/focus for instant navigation
+  // IMPORTANT: Use the same secure RPC-based media flow as /candidates.
+  // Do NOT join profiles() from job_applications (no FK) - it causes PGRST200.
   const prefetchApplications = () => {
     if (!user) return;
 
-    queryClient.prefetchQuery({
-      queryKey: ['applications', user.id],
-      queryFn: async () => {
-        const { data, error } = await supabase
+    queryClient.prefetchInfiniteQuery({
+      queryKey: ['applications', user.id, ''],
+      initialPageParam: 0,
+      queryFn: async ({ pageParam = 0 }) => {
+        // Prefetch only first page (same page size as candidates)
+        const from = (pageParam as number) * 25;
+        const to = from + 25 - 1;
+
+        const { data: baseData, error: baseError } = await supabase
           .from('job_applications')
           .select(`
             id,
@@ -257,26 +264,74 @@ export function EmployerSidebar() {
             first_name,
             last_name,
             email,
+            phone,
+            location,
+            bio,
+            cv_url,
+            age,
+            employment_status,
+            work_schedule,
+            availability,
+            custom_answers,
             status,
             applied_at,
             updated_at,
-            job_postings!inner(
-              title
-            ),
-            profiles(
-              profile_image_url
-            )
+            job_postings!inner(title)
           `)
-          .order('applied_at', { ascending: false });
+          .order('applied_at', { ascending: false })
+          .range(from, to);
 
-        if (error) throw error;
-        if (!data) return [];
+        if (baseError) throw baseError;
+        if (!baseData) return { items: [], hasMore: false };
 
-        return (data || []).map((app: any) => ({
-          ...app,
-          job_title: app.job_postings?.title,
-          profile_image_url: app.profiles?.profile_image_url,
-        }));
+        // Batch fetch profile media via RPC (secure, access-controlled)
+        const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
+        const profileMediaMap: Record<
+          string,
+          { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }
+        > = {};
+
+        await Promise.all(
+          applicantIds.map(async (applicantId) => {
+            const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
+              p_applicant_id: applicantId,
+              p_employer_id: user.id,
+            });
+
+            if (mediaData && mediaData.length > 0) {
+              profileMediaMap[applicantId] = {
+                profile_image_url: mediaData[0].profile_image_url,
+                video_url: mediaData[0].video_url,
+                is_profile_video: mediaData[0].is_profile_video,
+              };
+            } else {
+              profileMediaMap[applicantId] = {
+                profile_image_url: null,
+                video_url: null,
+                is_profile_video: null,
+              };
+            }
+          })
+        );
+
+        const items = baseData.map((item: any) => {
+          const media = profileMediaMap[item.applicant_id] || {
+            profile_image_url: null,
+            video_url: null,
+            is_profile_video: null,
+          };
+
+          return {
+            ...item,
+            job_title: item.job_postings?.title || 'Okänt jobb',
+            profile_image_url: media.profile_image_url,
+            video_url: media.video_url,
+            is_profile_video: media.is_profile_video,
+            job_postings: undefined,
+          };
+        });
+
+        return { items, hasMore: items.length === 25 };
       },
       staleTime: 2 * 60 * 1000,
     });
