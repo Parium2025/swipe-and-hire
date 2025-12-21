@@ -276,9 +276,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
         </div>
       )}
 
-      {/* Countdown timer when video is playing - inside top-right corner */}
+      {/* Countdown timer when video is playing */}
       {showCountdown && isPlaying && remainingSeconds !== null && (
-        <div className="absolute top-2 right-2 md:top-3 md:right-3 text-white text-[10px] md:text-xs font-bold" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8)' }}>
+        <div className="absolute top-3 right-3 md:top-3 md:right-6 px-2 py-1 text-white text-sm md:text-base font-bold" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8)' }}>
           {remainingSeconds}s
         </div>
       )}
