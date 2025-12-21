@@ -117,6 +117,7 @@ const MobileJobWizard = ({
   existingJob
 }: MobileJobWizardProps) => {
   const navigate = useNavigate();
+  const didCaptureInitialSnapshotRef = useRef(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
   
@@ -137,12 +138,14 @@ const MobileJobWizard = ({
     if (!open) {
       setCurrentStep(0);
       setIsInitializing(true);
+      didCaptureInitialSnapshotRef.current = false;
     }
   }, [open]);
   
   // Start from step 0 when opening
   useEffect(() => {
     if (open) {
+      didCaptureInitialSnapshotRef.current = false;
       setCurrentStep(0);
       setIsInitializing(false);
       
@@ -730,12 +733,30 @@ const MobileJobWizard = ({
   // Track form changes
   useEffect(() => {
     if (!initialFormData || !open) return;
-    
+
     const formChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
     const questionsChanged = JSON.stringify(customQuestions) !== JSON.stringify(initialCustomQuestions);
-    
+
     setHasUnsavedChanges(formChanged || questionsChanged);
   }, [formData, customQuestions, initialFormData, initialCustomQuestions, open]);
+
+  // Capture a stable "initial snapshot" after the wizard has hydrated.
+  // This prevents false "unsaved changes" when we auto-normalize empty draft fields on open.
+  useEffect(() => {
+    if (!open) return;
+    if (!initialFormData) return;
+    if (didCaptureInitialSnapshotRef.current) return;
+
+    const raf = requestAnimationFrame(() => {
+      // Align baseline with the current hydrated state
+      setInitialFormData(formData);
+      setInitialCustomQuestions(customQuestions);
+      setHasUnsavedChanges(false);
+      didCaptureInitialSnapshotRef.current = true;
+    });
+
+    return () => cancelAnimationFrame(raf);
+  }, [open, initialFormData, formData, customQuestions]);
 
   // Show company tooltip only once when first reaching step 4, then keep it visible
   useEffect(() => {
@@ -2263,8 +2284,11 @@ const MobileJobWizard = ({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleClose}
-                className="absolute right-4 top-4 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  handleClose();
+                }}
+                className="absolute right-4 top-4 h-8 w-8 text-white transition-colors duration-150 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -4531,12 +4555,28 @@ const MobileJobWizard = ({
 
           {/* Navigation - Hide during initialization to prevent button flash */}
           {!showQuestionTemplates && !showQuestionForm && !isInitializing && (
-            <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
+            <div
+              className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0"
+              onMouseDown={(e) => {
+                // Clicking empty space between buttons should not leave a focused button state
+                if (e.target === e.currentTarget && document.activeElement instanceof HTMLElement) {
+                  document.activeElement.blur();
+                }
+              }}
+              onTouchStart={(e) => {
+                if (e.target === e.currentTarget && document.activeElement instanceof HTMLElement) {
+                  document.activeElement.blur();
+                }
+              }}
+            >
               <Button
                 variant="outline"
-                onClick={prevStep}
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  prevStep();
+                }}
                 disabled={currentStep === 0}
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-all duration-300 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white"
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
@@ -4544,9 +4584,12 @@ const MobileJobWizard = ({
 
               {isLastStep ? (
                 <Button
-                  onClick={handleSubmit}
+                  onClick={(e) => {
+                    e.currentTarget.blur();
+                    handleSubmit();
+                  }}
                   disabled={loading || !validateCurrentStep()}
-                  className="bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-8 py-2 transition-all duration-300"
+                  className="bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
                   {loading ? (
                     <>
@@ -4562,9 +4605,12 @@ const MobileJobWizard = ({
                 </Button>
               ) : (
                 <Button
-                  onClick={nextStep}
+                  onClick={(e) => {
+                    e.currentTarget.blur();
+                    nextStep();
+                  }}
                   disabled={!validateCurrentStep()}
-                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-all duration-300 focus:outline-none"
+                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
                   Nästa
                   <ArrowRight className="h-4 w-4 ml-2" />
