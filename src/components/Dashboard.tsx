@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
+import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import {
   Pagination,
   PaginationContent,
@@ -24,6 +25,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+
+type JobStatusTab = 'active' | 'expired';
 
 const Dashboard = memo(() => {
   // Dashboard shows organization-wide data (all colleagues' published jobs)
@@ -44,18 +47,28 @@ const Dashboard = memo(() => {
     }
   }, [isLoading]);
 
-  // Dashboard only shows active AND non-expired jobs - drafts and expired jobs are only in "Mina Annonser"
-  const jobs = useMemo(() => allJobs.filter(job => 
+  // Tab state for switching between active and expired jobs
+  const [activeTab, setActiveTab] = useState<JobStatusTab>('active');
+
+  // Separate active and expired jobs
+  const activeJobs = useMemo(() => allJobs.filter(job => 
     job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)
   ), [allJobs]);
 
-  // Calculate stats from filtered jobs (same filter as the list) for consistency
+  const expiredJobs = useMemo(() => allJobs.filter(job => 
+    job.is_active && isJobExpiredCheck(job.created_at, job.expires_at)
+  ), [allJobs]);
+
+  // Current jobs based on selected tab
+  const jobs = activeTab === 'active' ? activeJobs : expiredJobs;
+
+  // Calculate stats from ACTIVE jobs only (for consistency with sidebar)
   const filteredStats = useMemo(() => ({
-    totalJobs: jobs.length,
-    activeJobs: jobs.length,
-    totalViews: jobs.reduce((sum, job) => sum + (job.views_count || 0), 0),
-    totalApplications: jobs.reduce((sum, job) => sum + (job.applications_count || 0), 0),
-  }), [jobs]);
+    totalJobs: activeJobs.length,
+    activeJobs: activeJobs.length,
+    totalViews: activeJobs.reduce((sum, job) => sum + (job.views_count || 0), 0),
+    totalApplications: activeJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0),
+  }), [activeJobs]);
 
   const {
     searchInput,
@@ -67,6 +80,11 @@ const Dashboard = memo(() => {
     setSelectedRecruiterId,
     filteredAndSortedJobs,
   } = useJobFiltering(jobs);
+
+  // Reset page when tab changes
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab]);
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -142,9 +160,17 @@ const Dashboard = memo(() => {
 
       <Card className="bg-white/5 backdrop-blur-sm border-0">
         <CardHeader className="p-6 md:p-4">
-          <CardTitle className="text-sm text-white text-center md:text-left">
-            Utlagda jobb av {profile?.company_name || 'ditt företag'}
-          </CardTitle>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <CardTitle className="text-sm text-white text-center md:text-left">
+              {activeTab === 'active' ? 'Aktiva jobb' : 'Utgångna jobb'} av {profile?.company_name || 'ditt företag'}
+            </CardTitle>
+            <JobStatusTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              activeCount={activeJobs.length}
+              expiredCount={expiredJobs.length}
+            />
+          </div>
         </CardHeader>
         <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
           
@@ -173,7 +199,11 @@ const Dashboard = memo(() => {
                 ) : filteredAndSortedJobs.length === 0 ? (
                   <TableRow className="hover:bg-transparent">
                     <TableCell colSpan={7} className="text-center !text-white py-8 font-medium text-sm">
-                      {searchTerm ? 'Inga annonser matchar din sökning' : 'Inga jobbannonser än. Skapa din första annons!'}
+                      {searchTerm 
+                        ? 'Inga annonser matchar din sökning' 
+                        : activeTab === 'active' 
+                          ? 'Inga aktiva jobbannonser. Skapa din första annons!' 
+                          : 'Inga utgångna jobbannonser.'}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -189,9 +219,15 @@ const Dashboard = memo(() => {
                       <TableCell className="text-center px-2 py-3">
                         <div className="flex justify-center">
                           <Badge 
-                            className={`text-sm whitespace-nowrap transition-colors ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30"}`}
+                            className={`text-sm whitespace-nowrap transition-colors ${
+                              activeTab === 'expired' 
+                                ? "bg-orange-500/20 text-orange-300 border-orange-500/30 hover:bg-orange-500/30"
+                                : job.is_active 
+                                  ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30" 
+                                  : "bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30"
+                            }`}
                           >
-                            {job.is_active ? 'Aktiv' : 'Inaktiv'}
+                            {activeTab === 'expired' ? 'Utgången' : job.is_active ? 'Aktiv' : 'Inaktiv'}
                           </Badge>
                         </div>
                       </TableCell>
@@ -356,7 +392,11 @@ const Dashboard = memo(() => {
               </div>
             ) : filteredAndSortedJobs.length === 0 ? (
               <div className="text-center text-white py-8 font-medium text-sm">
-                {searchTerm ? 'Inga annonser matchar din sökning' : 'Inga jobbannonser än. Skapa din första annons!'}
+                {searchTerm 
+                  ? 'Inga annonser matchar din sökning' 
+                  : activeTab === 'active' 
+                    ? 'Inga aktiva jobbannonser. Skapa din första annons!' 
+                    : 'Inga utgångna jobbannonser.'}
               </div>
             ) : (
               <>
