@@ -292,6 +292,31 @@ export const useApplicationsData = (searchQuery: string = '') => {
   // Flatten all pages
   const applications = data?.pages.flatMap(page => page.items) || [];
 
+  // Real-time subscription for job_applications changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('applications-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_applications'
+        },
+        (payload) => {
+          // Invalidate queries to refetch with updated data
+          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
+
   // Om vi råkar ha en gammal cache (prefetch utan media-fält) → tvinga refetch en gång.
   // Detta eliminerar behovet av manuell refresh för att avatar/video ska dyka upp.
   const fixedLegacyCacheRef = useRef(false);
