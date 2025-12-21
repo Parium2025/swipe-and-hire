@@ -2081,8 +2081,10 @@ const MobileJobWizard = ({
 
     try {
       // Include all job posting fields
-      // Only set expires_at for NEW jobs, not when updating existing ones
+      // Check if this is a new job OR if we're publishing a draft (was inactive)
       const isNewJob = !existingJob?.id;
+      const isPublishingDraft = existingJob?.id && existingJob?.is_active === false;
+      const now = new Date();
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 14);
       
@@ -2119,8 +2121,11 @@ const MobileJobWizard = ({
         is_active: true
       };
       
-      // Only set expires_at for new jobs - existing jobs keep their original expiration
-      if (isNewJob) {
+      // Set created_at and expires_at when:
+      // 1. Creating a new job
+      // 2. Publishing a draft (was is_active=false, now becoming true)
+      if (isNewJob || isPublishingDraft) {
+        jobData.created_at = now.toISOString();
         jobData.expires_at = expiresAt.toISOString();
       }
 
