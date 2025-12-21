@@ -43,7 +43,7 @@ import {
 } from '@dnd-kit/sortable';
 
 // Import shared wizard components and types
-import { SortableQuestionItem } from '@/components/wizard/SortableQuestionItem';
+import { SortableQuestionItem, WizardFooter } from '@/components/wizard';
 import { JobQuestion } from '@/types/jobWizard';
 
 interface JobPosting {
@@ -3569,62 +3569,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
             {/* Footer Navigation - Hide when in question form or template selection */}
             {!showQuestionTemplates && !showQuestionForm && (
-            <div
-              className="p-4 border-t border-white/20 flex-shrink-0 flex justify-between gap-3"
-              onMouseDown={(e) => {
-                // Clicking the empty space between buttons should not leave a focused button state
-                if (e.target === e.currentTarget && document.activeElement instanceof HTMLElement) {
-                  document.activeElement.blur();
-                }
-              }}
-              onTouchStart={(e) => {
-                if (e.target === e.currentTarget && document.activeElement instanceof HTMLElement) {
-                  document.activeElement.blur();
-                }
-              }}
-            >
-              <Button
-                onClick={(e) => {
-                  e.currentTarget.blur();
-                  handleBack();
-                }}
-                disabled={currentStep === 0}
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Tillbaka
-              </Button>
-
-              {/* Both buttons are always rendered but only one is visible - eliminates render delay */}
-              <Button
-                onClick={(e) => {
-                  e.currentTarget.blur();
-                  handleSubmit();
-                }}
-                disabled={loading}
-                className={`bg-green-600 hover:bg-green-700 md:hover:bg-green-700 text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${isLastStep ? '' : 'hidden'}`}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Sparar...
-                  </>
-                ) : (
-                  'Spara ändringar'
-                )}
-              </Button>
-              <Button
-                onClick={(e) => {
-                  e.currentTarget.blur();
-                  handleNext();
-                }}
+              <WizardFooter
+                currentStep={currentStep}
+                isLastStep={isLastStep}
+                onBack={handleBack}
+                onNext={handleNext}
+                onSubmit={handleSubmit}
                 disabled={!canProceed()}
-                className={`bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${isLastStep ? 'hidden' : ''}`}
-              >
-                Nästa
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
+                loading={loading}
+                submitLabel="Spara ändringar"
+                loadingLabel="Sparar..."
+                showSubmitIcon={false}
+                hideBackOnFirstStep={false}
+                className="gap-3"
+              />
             )}
           </div>
         </DialogContent>

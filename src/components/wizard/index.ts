@@ -4,10 +4,12 @@ export { DropdownField } from './DropdownField';
 export { BenefitsDropdown } from './BenefitsDropdown';
 export { QuestionFormFields } from './QuestionFormFields';
 export { TimeInputField } from './TimeInputField';
+export { WizardFooter } from './WizardFooter';
+export type { WizardFooterProps } from './WizardFooter';
 
 // Re-export types
 export type { JobQuestion, JobFormData, TemplateFormData, JobTemplate, DropdownOption } from '@/types/jobWizard';
-export { 
+export {
   QUESTION_TYPES, 
   SALARY_TYPES, 
   SALARY_TRANSPARENCY_OPTIONS,
