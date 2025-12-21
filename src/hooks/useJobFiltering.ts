@@ -23,6 +23,7 @@ export interface FilterableJob {
   salary_max?: number;
   positions_count?: number;
   created_at: string;
+  expires_at?: string;
   is_active: boolean;
   views_count: number;
   applications_count: number;
