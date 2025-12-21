@@ -219,9 +219,10 @@ const Dashboard = memo(() => {
                       <TableCell className="text-center px-2 py-3">
                         <div className="flex justify-center">
                           <Badge 
+                            variant={activeTab === 'expired' ? 'glassDestructive' : undefined}
                             className={`text-sm whitespace-nowrap transition-colors ${
                               activeTab === 'expired' 
-                                ? "bg-orange-500/20 text-orange-300 border-orange-500/30 hover:bg-orange-500/30"
+                                ? ""
                                 : job.is_active 
                                   ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30" 
                                   : "bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30"
