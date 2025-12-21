@@ -116,7 +116,7 @@ const LOGO_CACHE_KEY = 'parium_company_logo_url';
 export function EmployerSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerActiveJobs,preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
+  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const queryClient = useQueryClient();
@@ -434,8 +434,8 @@ export function EmployerSidebar() {
                       {!collapsed && (
                         <span className="font-medium flex-1 text-left">
                           {item.title}
-                          {item.url === '/dashboard' && preloadedEmployerActiveJobs > 0 && (
-                            <span className="text-white font-normal ml-1">({preloadedEmployerActiveJobs})</span>
+                          {item.url === '/dashboard' && preloadedEmployerDashboardJobs > 0 && (
+                            <span className="text-white font-normal ml-1">({preloadedEmployerDashboardJobs})</span>
                           )}
                           {item.url === '/my-jobs' && preloadedEmployerMyJobs > 0 && (
                             <span className="text-white font-normal ml-1">({preloadedEmployerMyJobs})</span>
