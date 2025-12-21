@@ -52,7 +52,7 @@ import {
 } from '@dnd-kit/sortable';
 
 // Import shared wizard components and types
-import { SortableQuestionItem } from '@/components/wizard/SortableQuestionItem';
+import { SortableQuestionItem, WizardFooter } from '@/components/wizard';
 import { 
   JobQuestion, 
   JobFormData,
@@ -4555,68 +4555,19 @@ const MobileJobWizard = ({
 
           {/* Navigation - Hide during initialization to prevent button flash */}
           {!showQuestionTemplates && !showQuestionForm && !isInitializing && (
-            <div
-              className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0"
-              onMouseDown={(e) => {
-                // Clicking empty space between buttons should not leave a focused button state
-                if (e.target === e.currentTarget && document.activeElement instanceof HTMLElement) {
-                  document.activeElement.blur();
-                }
-              }}
-              onTouchStart={(e) => {
-                if (e.target === e.currentTarget && document.activeElement instanceof HTMLElement) {
-                  document.activeElement.blur();
-                }
-              }}
-            >
-              <Button
-                variant="outline"
-                onClick={(e) => {
-                  e.currentTarget.blur();
-                  prevStep();
-                }}
-                disabled={currentStep === 0}
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Tillbaka
-              </Button>
-
-              {isLastStep ? (
-                <Button
-                  onClick={(e) => {
-                    e.currentTarget.blur();
-                    handleSubmit();
-                  }}
-                  disabled={loading || !validateCurrentStep()}
-                  className="bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Skapar...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Publicera
-                    </>
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  onClick={(e) => {
-                    e.currentTarget.blur();
-                    nextStep();
-                  }}
-                  disabled={!validateCurrentStep()}
-                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                >
-                  Nästa
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              )}
-            </div>
+            <WizardFooter
+              currentStep={currentStep}
+              isLastStep={isLastStep}
+              onBack={prevStep}
+              onNext={nextStep}
+              onSubmit={handleSubmit}
+              disabled={!validateCurrentStep()}
+              loading={loading}
+              submitLabel="Publicera"
+              loadingLabel="Skapar..."
+              showSubmitIcon={true}
+              hideBackOnFirstStep={false}
+            />
           )}
         </div>
 
