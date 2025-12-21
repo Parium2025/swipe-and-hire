@@ -12,12 +12,12 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { 
   Trash2, 
   Phone, 
@@ -617,9 +617,7 @@ const MyCandidates = () => {
 
       {/* Remove Confirmation Dialog */}
       <AlertDialog open={!!candidateToRemove} onOpenChange={(open) => !open && setCandidateToRemove(null)}>
-        <AlertDialogContent 
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          onCloseAutoFocus={(e) => e.preventDefault()}
+        <AlertDialogContentNoFocus 
           className="bg-card-parium border-white/20"
         >
           <AlertDialogHeader>
@@ -643,7 +641,7 @@ const MyCandidates = () => {
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogContentNoFocus>
       </AlertDialog>
     </div>
   );

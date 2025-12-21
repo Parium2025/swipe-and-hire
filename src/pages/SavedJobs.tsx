@@ -10,12 +10,12 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2, CheckCircle, Users, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
@@ -349,9 +349,7 @@ const SavedJobs = () => {
 
       {/* Confirmation Dialog */}
       <AlertDialog open={!!jobToRemove} onOpenChange={() => setJobToRemove(null)}>
-        <AlertDialogContent 
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          onCloseAutoFocus={(e) => e.preventDefault()}
+        <AlertDialogContentNoFocus 
           className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
@@ -389,7 +387,7 @@ const SavedJobs = () => {
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogContentNoFocus>
       </AlertDialog>
     </div>
   );

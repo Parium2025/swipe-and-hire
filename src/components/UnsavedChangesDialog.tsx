@@ -2,11 +2,11 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { AlertDialogContentNoFocus } from "@/components/ui/alert-dialog-no-focus";
 import { Loader2 } from "lucide-react";
 import type { MouseEvent, TouchEvent } from "react";
 
@@ -57,17 +57,7 @@ export function UnsavedChangesDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent
-        onOpenAutoFocus={(e) => {
-          // Radix auto-focuses the cancel button by default; prevent that to avoid focus-ring/double-border.
-          e.preventDefault();
-          blurActiveElement();
-        }}
-        onCloseAutoFocus={(e) => {
-          // Avoid returning focus to the trigger (which can also flash a focus ring)
-          e.preventDefault();
-          blurActiveElement();
-        }}
+      <AlertDialogContentNoFocus
         className="max-w-lg bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden"
       >
         <AlertDialogHeader className="text-center">
@@ -132,7 +122,7 @@ export function UnsavedChangesDialog({
             Lämna utan att spara
           </AlertDialogAction>
         </div>
-      </AlertDialogContent>
+      </AlertDialogContentNoFocus>
     </AlertDialog>
   );
 }
