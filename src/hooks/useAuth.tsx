@@ -1325,25 +1325,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   // Funktion för att uppdatera employer stats (används av realtime + initial load)
+  // OBS: För Dashboard-konsistens hämtar vi organisations-jobb om användaren tillhör en org
   const refreshEmployerStats = useCallback(async () => {
     if (!user) return;
     
     try {
-      // Hämta alla jobb för denna employer
-      const { data: myJobs } = await supabase
-        .from('job_postings')
-        .select('id, is_active, views_count, applications_count')
-        .eq('employer_id', user.id);
+      // Hämta organization_id för användaren (om de tillhör en)
+      const { data: userRole } = await supabase
+        .from('user_roles')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle();
       
-      if (!myJobs) return;
+      const orgId = userRole?.organization_id;
       
-      // Mina annonser (totalt)
-      const myJobsCount = myJobs.length;
+      let orgJobs: { id: string; is_active: boolean | null; views_count: number | null; applications_count: number | null; employer_id: string }[] = [];
+      
+      if (orgId) {
+        // Hämta alla user_ids i organisationen
+        const { data: orgUsers } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('organization_id', orgId)
+          .eq('is_active', true);
+        
+        const userIds = orgUsers?.map(u => u.user_id) || [user.id];
+        
+        // Hämta alla jobb för organisationen
+        const { data } = await supabase
+          .from('job_postings')
+          .select('id, is_active, views_count, applications_count, employer_id')
+          .in('employer_id', userIds);
+        
+        orgJobs = data || [];
+      } else {
+        // Ingen organisation - hämta bara egna jobb
+        const { data } = await supabase
+          .from('job_postings')
+          .select('id, is_active, views_count, applications_count, employer_id')
+          .eq('employer_id', user.id);
+        
+        orgJobs = data || [];
+      }
+      
+      // Mina annonser (totalt - alla i organisationen)
+      const myJobsCount = orgJobs.length;
       setPreloadedEmployerMyJobs(myJobsCount);
       try { sessionStorage.setItem(EMPLOYER_MY_JOBS_CACHE_KEY, String(myJobsCount)); } catch {}
       
       // Aktiva annonser
-      const activeJobs = myJobs.filter(j => j.is_active);
+      const activeJobs = orgJobs.filter(j => j.is_active);
       const activeCount = activeJobs.length;
       setPreloadedEmployerActiveJobs(activeCount);
       try { sessionStorage.setItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY, String(activeCount)); } catch {}
@@ -1358,8 +1390,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPreloadedEmployerTotalApplications(totalApplications);
       try { sessionStorage.setItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, String(totalApplications)); } catch {}
       
-      // Hämta antal unika kandidater (baserat på job_applications)
-      const jobIds = myJobs.map(j => j.id);
+      // Hämta antal unika kandidater (baserat på job_applications för organisationens jobb)
+      const jobIds = orgJobs.map(j => j.id);
       if (jobIds.length > 0) {
         const { count } = await supabase
           .from('job_applications')
