@@ -53,11 +53,23 @@ export function UnsavedChangesDialog({
   };
 
   const noFocusRing =
-    "focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0";
+    "outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0";
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-lg bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden">
+      <AlertDialogContent
+        onOpenAutoFocus={(e) => {
+          // Radix auto-focuses the cancel button by default; prevent that to avoid focus-ring/double-border.
+          e.preventDefault();
+          blurActiveElement();
+        }}
+        onCloseAutoFocus={(e) => {
+          // Avoid returning focus to the trigger (which can also flash a focus ring)
+          e.preventDefault();
+          blurActiveElement();
+        }}
+        className="max-w-lg bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden"
+      >
         <AlertDialogHeader className="text-center">
           <AlertDialogTitle className="text-center">Osparade ändringar</AlertDialogTitle>
           <AlertDialogDescription className="text-white text-center">
