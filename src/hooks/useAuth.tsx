@@ -1340,7 +1340,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       const orgId = userRole?.organization_id;
       
-      let orgJobs: { id: string; is_active: boolean | null; views_count: number | null; applications_count: number | null; employer_id: string }[] = [];
+      let orgJobs: { id: string; is_active: boolean | null; views_count: number | null; applications_count: number | null; employer_id: string; created_at: string; expires_at: string | null }[] = [];
       
       if (orgId) {
         // Hämta alla user_ids i organisationen
@@ -1352,10 +1352,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         const userIds = orgUsers?.map(u => u.user_id) || [user.id];
         
-        // Hämta alla jobb för organisationen
+        // Hämta alla jobb för organisationen (inkl. created_at och expires_at för utgångsfiltrering)
         const { data } = await supabase
           .from('job_postings')
-          .select('id, is_active, views_count, applications_count, employer_id')
+          .select('id, is_active, views_count, applications_count, employer_id, created_at, expires_at')
           .in('employer_id', userIds);
         
         orgJobs = data || [];
@@ -1363,29 +1363,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Ingen organisation - hämta bara egna jobb
         const { data } = await supabase
           .from('job_postings')
-          .select('id, is_active, views_count, applications_count, employer_id')
+          .select('id, is_active, views_count, applications_count, employer_id, created_at, expires_at')
           .eq('employer_id', user.id);
         
         orgJobs = data || [];
       }
+      
+      // Helper för att kolla om ett jobb är utgånget (samma logik som i date.ts)
+      const isJobExpired = (createdAt: string, expiresAt: string | null): boolean => {
+        const effectiveExpiry = expiresAt 
+          ? new Date(expiresAt) 
+          : new Date(new Date(createdAt).getTime() + 24 * 60 * 60 * 1000); // Default: 1 dag
+        return effectiveExpiry < new Date();
+      };
       
       // Mina annonser (totalt - alla i organisationen)
       const myJobsCount = orgJobs.length;
       setPreloadedEmployerMyJobs(myJobsCount);
       try { sessionStorage.setItem(EMPLOYER_MY_JOBS_CACHE_KEY, String(myJobsCount)); } catch {}
       
-      // Aktiva annonser
-      const activeJobs = orgJobs.filter(j => j.is_active);
+      // Aktiva annonser (exkludera utgångna jobb - samma filter som Dashboard)
+      const activeJobs = orgJobs.filter(j => j.is_active && !isJobExpired(j.created_at, j.expires_at));
       const activeCount = activeJobs.length;
       setPreloadedEmployerActiveJobs(activeCount);
       try { sessionStorage.setItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY, String(activeCount)); } catch {}
       
-      // Totala visningar
+      // Totala visningar (bara från aktiva, icke-utgångna jobb)
       const totalViews = activeJobs.reduce((sum, j) => sum + (j.views_count || 0), 0);
       setPreloadedEmployerTotalViews(totalViews);
       try { sessionStorage.setItem(EMPLOYER_TOTAL_VIEWS_CACHE_KEY, String(totalViews)); } catch {}
       
-      // Totala ansökningar
+      // Totala ansökningar (bara från aktiva, icke-utgångna jobb)
       const totalApplications = activeJobs.reduce((sum, j) => sum + (j.applications_count || 0), 0);
       setPreloadedEmployerTotalApplications(totalApplications);
       try { sessionStorage.setItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, String(totalApplications)); } catch {}
