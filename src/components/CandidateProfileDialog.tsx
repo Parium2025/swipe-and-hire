@@ -8,10 +8,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import ProfileVideo from '@/components/ProfileVideo';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Textarea } from '@/components/ui/textarea';
 import { CvViewer } from '@/components/CvViewer';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 function useProfileImageUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-image');
@@ -26,6 +33,8 @@ interface CandidateProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStatusUpdate: () => void;
+  /** All applications from the same candidate (for job dropdown) */
+  allApplications?: ApplicationData[];
 }
 
 const statusConfig = {
@@ -46,6 +55,7 @@ export const CandidateProfileDialog = ({
   open,
   onOpenChange,
   onStatusUpdate,
+  allApplications,
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
@@ -56,27 +66,42 @@ export const CandidateProfileDialog = ({
   const [savingNote, setSavingNote] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+
+  // Determine the active application (selected job or default)
+  const activeApplication = useMemo(() => {
+    if (!allApplications || allApplications.length <= 1) return application;
+    if (!selectedJobId) return application;
+    return allApplications.find(app => app.job_id === selectedJobId) || application;
+  }, [allApplications, selectedJobId, application]);
   
   // Get signed URLs for profile media
-  const profileImageUrl = useProfileImageUrl(application?.profile_image_url);
-  const videoUrl = useVideoUrl(application?.video_url);
-  const signedCvUrl = useMediaUrl(application?.cv_url, 'cv');
+  const profileImageUrl = useProfileImageUrl(activeApplication?.profile_image_url);
+  const videoUrl = useVideoUrl(activeApplication?.video_url);
+  const signedCvUrl = useMediaUrl(activeApplication?.cv_url, 'cv');
 
-  // Fetch notes and questions when dialog opens
+  // Reset selected job when dialog opens with new application
   useEffect(() => {
-    if (open && application && user) {
+    if (open && application) {
+      setSelectedJobId(application.job_id);
+    }
+  }, [open, application?.applicant_id]);
+
+  // Fetch notes and questions when dialog opens or job selection changes
+  useEffect(() => {
+    if (open && activeApplication && user) {
       fetchNotes();
       fetchJobQuestions();
     }
-  }, [open, application?.id, user?.id]);
+  }, [open, activeApplication?.id, user?.id]);
 
   const fetchJobQuestions = async () => {
-    if (!application?.job_id) return;
+    if (!activeApplication?.job_id) return;
     try {
       const { data, error } = await supabase
         .from('job_questions')
         .select('id, question_text, order_index')
-        .eq('job_id', application.job_id)
+        .eq('job_id', activeApplication.job_id)
         .order('order_index', { ascending: true });
 
       if (error) throw error;
@@ -154,15 +179,17 @@ export const CandidateProfileDialog = ({
   
   if (!application) return null;
 
-  const initials = `${application.first_name?.[0] || ''}${application.last_name?.[0] || ''}`.toUpperCase();
-  const currentStatus = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
-  const isProfileVideo = application.is_profile_video && application.video_url;
+  // Use activeApplication for display, but keep application for initial check
+  const displayApp = activeApplication || application;
+  const initials = `${displayApp.first_name?.[0] || ''}${displayApp.last_name?.[0] || ''}`.toUpperCase();
+  const currentStatus = statusConfig[displayApp.status as keyof typeof statusConfig] || statusConfig.pending;
+  const isProfileVideo = displayApp.is_profile_video && displayApp.video_url;
 
   const updateStatus = async (newStatus: string) => {
     const { error } = await supabase
       .from('job_applications')
       .update({ status: newStatus, updated_at: new Date().toISOString() })
-      .eq('id', application.id);
+      .eq('id', displayApp.id);
 
     if (error) {
       toast.error('Kunde inte uppdatera status');
@@ -172,14 +199,15 @@ export const CandidateProfileDialog = ({
     }
   };
 
-  const customAnswers = application.custom_answers || {};
+  const customAnswers = displayApp.custom_answers || {};
   const hasCustomAnswers = Object.keys(customAnswers).length > 0;
+  const hasMultipleApplications = allApplications && allApplications.length > 1;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card-parium backdrop-blur-md border-white/20 text-white">
         <DialogHeader className="sr-only">
-          <DialogTitle>Kandidatprofil: {application.first_name} {application.last_name}</DialogTitle>
+          <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
           <DialogDescription>Visa kandidatens profilinformation och ansökan</DialogDescription>
         </DialogHeader>
         
@@ -203,7 +231,7 @@ export const CandidateProfileDialog = ({
                 <Avatar className="w-40 h-40 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
                   <AvatarImage 
                     src={profileImageUrl || undefined} 
-                    alt={`${application.first_name} ${application.last_name}`}
+                    alt={`${displayApp.first_name} ${displayApp.last_name}`}
                     className="object-cover"
                   />
                   <AvatarFallback className="bg-white/10 text-white text-4xl md:text-5xl font-semibold">
@@ -213,12 +241,42 @@ export const CandidateProfileDialog = ({
               )}
             </div>
             
-            {/* Name and Job */}
-            <div>
+            {/* Name and Job Selector */}
+            <div className="w-full max-w-sm">
               <h2 className="text-2xl font-semibold text-white">
-                {application.first_name} {application.last_name}
+                {displayApp.first_name} {displayApp.last_name}
               </h2>
-              <p className="text-white/70 mt-1">{application.job_title}</p>
+              
+              {/* Job dropdown or single job display */}
+              {hasMultipleApplications ? (
+                <div className="mt-2">
+                  <Select 
+                    value={selectedJobId || displayApp.job_id} 
+                    onValueChange={setSelectedJobId}
+                  >
+                    <SelectTrigger className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">
+                      <SelectValue placeholder="Välj jobbansökan" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card-parium border-white/20">
+                      {allApplications.map((app) => (
+                        <SelectItem 
+                          key={app.job_id} 
+                          value={app.job_id}
+                          className="text-white hover:bg-white/10 focus:bg-white/10"
+                        >
+                          {app.job_title || 'Okänt jobb'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-white/50 mt-1">
+                    {allApplications.length} jobbansökningar
+                  </p>
+                </div>
+              ) : (
+                <p className="text-white/70 mt-1">{displayApp.job_title}</p>
+              )}
+              
               <Badge variant="outline" className={`${currentStatus.className} mt-2`}>
                 {currentStatus.label}
               </Badge>
@@ -234,67 +292,67 @@ export const CandidateProfileDialog = ({
                 Information
               </h3>
               <div className="grid sm:grid-cols-2 gap-3">
-                {application.email && (
+                {displayApp.email && (
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-white shrink-0" />
                     <a
-                      href={`mailto:${application.email}`}
+                      href={`mailto:${displayApp.email}`}
                       className="text-sm text-white hover:text-white/80 transition-colors truncate"
                     >
-                      {application.email}
+                      {displayApp.email}
                     </a>
                   </div>
                 )}
-                {application.phone && (
+                {displayApp.phone && (
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-white shrink-0" />
                     <a
-                      href={`tel:${application.phone}`}
+                      href={`tel:${displayApp.phone}`}
                       className="text-sm text-white hover:text-white/80 transition-colors"
                     >
-                      {application.phone}
+                      {displayApp.phone}
                     </a>
                   </div>
                 )}
-                {application.location && (
+                {displayApp.location && (
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-white shrink-0" />
-                    <span className="text-sm text-white">{application.location}</span>
+                    <span className="text-sm text-white">{displayApp.location}</span>
                   </div>
                 )}
-                {application.age && (
+                {displayApp.age && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-white shrink-0" />
-                    <span className="text-sm text-white">{application.age} år</span>
+                    <span className="text-sm text-white">{displayApp.age} år</span>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Anställningsinformation */}
-            {(application.employment_status || application.work_schedule || application.availability) && (
+            {(displayApp.employment_status || displayApp.work_schedule || displayApp.availability) && (
               <div className="bg-white/10 border border-white/20 rounded-xl p-4">
                 <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
                   <Briefcase className="h-3.5 w-3.5" />
                   Anställningsinformation
                 </h3>
                 <div className="grid sm:grid-cols-2 gap-3">
-                {application.employment_status && (
+                {displayApp.employment_status && (
                     <div className="space-y-0.5">
                       <span className="text-sm text-white">Anställningsstatus?</span>
-                      <p className="text-sm text-white">Svar: {application.employment_status}</p>
+                      <p className="text-sm text-white">Svar: {displayApp.employment_status}</p>
                     </div>
                   )}
-                  {application.work_schedule && (
+                  {displayApp.work_schedule && (
                     <div className="space-y-0.5">
                       <span className="text-sm text-white">Hur mycket jobbar du idag?</span>
-                      <p className="text-sm text-white">Svar: {application.work_schedule}</p>
+                      <p className="text-sm text-white">Svar: {displayApp.work_schedule}</p>
                     </div>
                   )}
-                  {application.availability && (
+                  {displayApp.availability && (
                     <div className="space-y-0.5 sm:col-span-2">
                       <span className="text-sm text-white">När kan du börja nytt jobb?</span>
-                      <p className="text-sm text-white">Svar: {application.availability}</p>
+                      <p className="text-sm text-white">Svar: {displayApp.availability}</p>
                     </div>
                   )}
                 </div>
@@ -302,7 +360,7 @@ export const CandidateProfileDialog = ({
             )}
 
             {/* CV Section - matching profile page style with dialog */}
-            {application.cv_url && (
+            {displayApp.cv_url && (
               <div className="bg-white/10 border border-white/20 rounded-xl p-4">
                 <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
                   <FileText className="h-3.5 w-3.5" />
@@ -333,11 +391,11 @@ export const CandidateProfileDialog = ({
             <div className="bg-white/10 border border-white/20 rounded-xl p-4">
               <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
                 <User className="h-3.5 w-3.5" />
-                Presentation om {application.first_name || 'kandidaten'}
+                Presentation om {displayApp.first_name || 'kandidaten'}
               </h3>
-              {application.bio ? (
+              {displayApp.bio ? (
                 <p className="text-sm text-white whitespace-pre-wrap leading-relaxed">
-                  {application.bio}
+                  {displayApp.bio}
                 </p>
               ) : (
                 <p className="text-sm text-white/50 italic">Ingen presentation angiven</p>
@@ -467,7 +525,7 @@ export const CandidateProfileDialog = ({
             <Button
               onClick={() => updateStatus('reviewing')}
               variant="glassYellow"
-              disabled={application.status === 'reviewing'}
+              disabled={displayApp.status === 'reviewing'}
               size="lg"
             >
               Granska
@@ -475,7 +533,7 @@ export const CandidateProfileDialog = ({
             <Button
               onClick={() => updateStatus('accepted')}
               variant="glassGreen"
-              disabled={application.status === 'accepted'}
+              disabled={displayApp.status === 'accepted'}
               size="lg"
             >
               Acceptera
@@ -483,7 +541,7 @@ export const CandidateProfileDialog = ({
             <Button
               onClick={() => updateStatus('rejected')}
               variant="glassRed"
-              disabled={application.status === 'rejected'}
+              disabled={displayApp.status === 'rejected'}
               size="lg"
             >
               Avvisa
@@ -498,7 +556,7 @@ export const CandidateProfileDialog = ({
           <DialogHeader className="mb-4">
             <DialogTitle className="text-white text-2xl">CV</DialogTitle>
           </DialogHeader>
-          {application?.cv_url && signedCvUrl && (
+          {displayApp?.cv_url && signedCvUrl && (
             <CvViewer 
               src={signedCvUrl} 
               fileName="cv.pdf" 

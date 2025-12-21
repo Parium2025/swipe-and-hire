@@ -1,10 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useMyCandidatesData, STAGE_CONFIG, CandidateStage, MyCandidateData } from '@/hooks/useMyCandidatesData';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
+import { ApplicationData } from '@/hooks/useApplicationsData';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -257,10 +260,104 @@ const MyCandidates = () => {
     removeCandidate 
   } = useMyCandidatesData();
 
+  const { user } = useAuth();
   const [selectedCandidate, setSelectedCandidate] = useState<MyCandidateData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+
+  // Fetch all applications for the selected candidate when dialog opens
+  useEffect(() => {
+    const fetchAllApplications = async () => {
+      if (!selectedCandidate || !user || !dialogOpen) {
+        setAllCandidateApplications([]);
+        return;
+      }
+
+      setLoadingApplications(true);
+      try {
+        // Get all jobs from the user's organization
+        const { data: orgJobs, error: jobsError } = await supabase
+          .from('job_postings')
+          .select('id, title, employer_id')
+          .eq('employer_id', user.id);
+
+        if (jobsError) throw jobsError;
+        if (!orgJobs || orgJobs.length === 0) {
+          setAllCandidateApplications([]);
+          return;
+        }
+
+        const jobIds = orgJobs.map(j => j.id);
+
+        // Get all applications from this candidate for organization's jobs
+        const { data: applications, error: appError } = await supabase
+          .from('job_applications')
+          .select(`
+            id,
+            job_id,
+            applicant_id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            location,
+            bio,
+            cv_url,
+            age,
+            employment_status,
+            work_schedule,
+            availability,
+            custom_answers,
+            status,
+            applied_at,
+            updated_at,
+            job_postings!inner(title)
+          `)
+          .eq('applicant_id', selectedCandidate.applicant_id)
+          .in('job_id', jobIds);
+
+        if (appError) throw appError;
+
+        // Transform to ApplicationData format
+        const transformedApps: ApplicationData[] = (applications || []).map(app => ({
+          id: app.id,
+          job_id: app.job_id,
+          applicant_id: app.applicant_id,
+          first_name: app.first_name,
+          last_name: app.last_name,
+          email: app.email,
+          phone: app.phone,
+          location: app.location,
+          bio: app.bio,
+          cv_url: app.cv_url,
+          age: app.age,
+          employment_status: app.employment_status,
+          work_schedule: app.work_schedule,
+          availability: app.availability,
+          custom_answers: app.custom_answers,
+          status: app.status,
+          applied_at: app.applied_at || '',
+          updated_at: app.updated_at,
+          job_title: (app.job_postings as any)?.title || 'Okänt jobb',
+          profile_image_url: selectedCandidate.profile_image_url,
+          video_url: selectedCandidate.video_url,
+          is_profile_video: selectedCandidate.is_profile_video,
+        }));
+
+        setAllCandidateApplications(transformedApps);
+      } catch (error) {
+        console.error('Error fetching candidate applications:', error);
+        setAllCandidateApplications([]);
+      } finally {
+        setLoadingApplications(false);
+      }
+    };
+
+    fetchAllApplications();
+  }, [selectedCandidate?.applicant_id, user?.id, dialogOpen]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -452,6 +549,7 @@ const MyCandidates = () => {
         open={dialogOpen}
         onOpenChange={handleDialogClose}
         onStatusUpdate={() => {}}
+        allApplications={allCandidateApplications.length > 1 ? allCandidateApplications : undefined}
       />
     </div>
   );
