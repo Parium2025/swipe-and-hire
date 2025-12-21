@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 
 export interface ApplicationData {
@@ -291,6 +291,25 @@ export const useApplicationsData = (searchQuery: string = '') => {
 
   // Flatten all pages
   const applications = data?.pages.flatMap(page => page.items) || [];
+
+  // Om vi råkar ha en gammal cache (prefetch utan media-fält) → tvinga refetch en gång.
+  // Detta eliminerar behovet av manuell refresh för att avatar/video ska dyka upp.
+  const fixedLegacyCacheRef = useRef(false);
+  useEffect(() => {
+    if (!user) return;
+    if (fixedLegacyCacheRef.current) return;
+    if (applications.length === 0) return;
+
+    const first: any = applications[0];
+    const hasMediaFields =
+      !first ||
+      ('profile_image_url' in first && 'video_url' in first && 'is_profile_video' in first);
+
+    if (!hasMediaFields) {
+      fixedLegacyCacheRef.current = true;
+      queryClient.invalidateQueries({ queryKey: ['applications', user.id, searchQuery] });
+    }
+  }, [applications, user, searchQuery, queryClient]);
 
   // Enrich with additional job metadata if needed (kept for backwards compatibility)
   useEffect(() => {

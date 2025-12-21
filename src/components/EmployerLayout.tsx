@@ -8,6 +8,7 @@ import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 
 interface EmployerLayoutProps {
   children: ReactNode;
@@ -36,15 +37,32 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // Prefetch applications on mount for instant /candidates load
+  // Prefetch applications + kandidat-media på mount för instant /candidates (utan refresh)
   useEffect(() => {
     if (!user) return;
 
+    const userId = user.id;
+    const queryKey = ['applications', userId, ''] as const;
+
+    // Om vi har gammal cache utan media-fält → rensa så vi inte fastnar med "initialer" tills refresh
+    const existing: any = queryClient.getQueryData(queryKey);
+    const first = existing?.pages?.[0]?.items?.[0];
+    const hasMediaFields =
+      !first ||
+      ('profile_image_url' in first && 'video_url' in first && 'is_profile_video' in first);
+
+    if (!hasMediaFields) {
+      queryClient.removeQueries({ queryKey });
+    }
+
     queryClient.prefetchInfiniteQuery({
-      queryKey: ['applications', user.id, ''], // Include empty search query to match hook
+      queryKey,
       initialPageParam: 0,
-      queryFn: async () => {
-        const { data, error } = await supabase
+      queryFn: async ({ pageParam = 0 }) => {
+        const from = (pageParam as number) * 25;
+        const to = from + 25 - 1;
+
+        const { data: baseData, error: baseError } = await supabase
           .from('job_applications')
           .select(`
             id,
@@ -68,31 +86,95 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
             job_postings!inner(title)
           `)
           .order('applied_at', { ascending: false })
-          .range(0, 24);
+          .range(from, to);
 
-        if (error) throw error;
-        if (!data) return { items: [], hasMore: false };
+        if (baseError) throw baseError;
+        if (!baseData) return { items: [], hasMore: false };
 
-        // Transform data to match useApplicationsData format
-        const items = data.map((item: any) => ({
-          ...item,
-          job_title: item.job_postings?.title || 'Okänt jobb',
-          job_postings: undefined,
-        }));
-        
+        // Hämta kandidat-media via säkert RPC (samma flöde som /candidates)
+        const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
+        const profileMediaMap: Record<
+          string,
+          { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }
+        > = {};
+
+        await Promise.all(
+          applicantIds.map(async (applicantId) => {
+            const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
+              p_applicant_id: applicantId,
+              p_employer_id: userId,
+            });
+
+            if (mediaData && mediaData.length > 0) {
+              profileMediaMap[applicantId] = {
+                profile_image_url: mediaData[0].profile_image_url,
+                video_url: mediaData[0].video_url,
+                is_profile_video: mediaData[0].is_profile_video,
+              };
+            } else {
+              profileMediaMap[applicantId] = {
+                profile_image_url: null,
+                video_url: null,
+                is_profile_video: null,
+              };
+            }
+          })
+        );
+
+        const items = baseData.map((item: any) => {
+          const media = profileMediaMap[item.applicant_id] || {
+            profile_image_url: null,
+            video_url: null,
+            is_profile_video: null,
+          };
+
+          return {
+            ...item,
+            job_title: item.job_postings?.title || 'Okänt jobb',
+            profile_image_url: media.profile_image_url,
+            video_url: media.video_url,
+            is_profile_video: media.is_profile_video,
+            job_postings: undefined,
+          };
+        });
+
         const hasMore = items.length === 25;
 
-        // Write to snapshot
-        try {
-          const snapshot = {
-            items: items.slice(0, 50),
-            timestamp: Date.now(),
-          };
-          localStorage.setItem(`applications_snapshot_${user.id}`, JSON.stringify(snapshot));
-        } catch {}
+        // Snapshot för omedelbar first paint (matchar useApplicationsData schema)
+        if (from === 0) {
+          try {
+            const snapshot = {
+              items: items.slice(0, 50),
+              timestamp: Date.now(),
+            };
+            localStorage.setItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
+          } catch {}
+        }
+
+        // Prime:a cache i bakgrunden (bild + video-signed URL) så det känns "bam"
+        setTimeout(() => {
+          const imagePaths = (items as any[])
+            .map((i) => i.profile_image_url)
+            .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
+            .slice(0, 25);
+
+          const videoPaths = (items as any[])
+            .filter((i) => !!i.is_profile_video)
+            .map((i) => i.video_url)
+            .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
+            .slice(0, 10);
+
+          if (imagePaths.length === 0 && videoPaths.length === 0) return;
+
+          Promise.all([
+            ...imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {})),
+            ...videoPaths.map((p) => prefetchMediaUrl(p, 'profile-video').catch(() => {})),
+          ]).catch(() => {});
+        }, 0);
 
         return { items, hasMore };
       },
+      staleTime: 5 * 60 * 1000,
     });
   }, [user, queryClient]);
 
