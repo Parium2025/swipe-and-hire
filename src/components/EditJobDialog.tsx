@@ -3573,7 +3573,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               <Button
                 onClick={handleBack}
                 disabled={currentStep === 0}
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-all duration-300 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white"
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-all duration-300 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
@@ -3583,7 +3583,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               <Button
                 onClick={handleSubmit}
                 disabled={loading}
-                className={`bg-green-600 hover:bg-green-700 md:hover:bg-green-700 text-white px-8 py-2 transition-all duration-300 ${isLastStep ? '' : 'hidden'}`}
+                className={`bg-green-600 hover:bg-green-700 md:hover:bg-green-700 text-white px-8 py-2 transition-all duration-300 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${isLastStep ? '' : 'hidden'}`}
               >
                 {loading ? (
                   <>
@@ -3597,7 +3597,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               <Button
                 onClick={handleNext}
                 disabled={!canProceed()}
-                className={`bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-all duration-300 focus:outline-none ${isLastStep ? 'hidden' : ''}`}
+                className={`bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-all duration-300 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${isLastStep ? 'hidden' : ''}`}
               >
                 Nästa
                 <ArrowRight className="h-4 w-4 ml-2" />
