@@ -57,6 +57,11 @@ const CandidatesContent = () => {
     isFetchingNextPage 
   } = useApplicationsData(searchQuery);
 
+  // Ensure we fetch fresh data on mount (important when backend permissions just changed)
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
   // Safety check to prevent null crash
   const safeApplications = applications || [];
 

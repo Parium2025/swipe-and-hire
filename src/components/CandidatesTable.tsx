@@ -30,17 +30,23 @@ export function CandidatesTable({
   hasMore = false,
   isLoadingMore = false 
 }: CandidatesTableProps) {
-  const [selectedApplication, setSelectedApplication] = useState<ApplicationData | null>(null);
+  const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  // Derive selected application from latest list so refetch updates the dialog content
+  const selectedApplication = useMemo(() => {
+    if (!selectedApplicationId) return null;
+    return applications.find((a) => a.id === selectedApplicationId) || null;
+  }, [applications, selectedApplicationId]);
+
   const handleRowClick = (application: ApplicationData) => {
-    setSelectedApplication(application);
+    setSelectedApplicationId(application.id);
     setDialogOpen(true);
   };
 
   const handleDialogClose = () => {
     setDialogOpen(false);
-    setTimeout(() => setSelectedApplication(null), 300);
+    setTimeout(() => setSelectedApplicationId(null), 300);
   };
 
   if (applications.length === 0) {
