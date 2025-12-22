@@ -284,7 +284,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
             countdownVariant === 'compact'
               ? 'top-2 right-[1.375rem] px-1 py-0.5 text-xs'
               : countdownVariant === 'preview'
-                ? 'top-2 right-5 md:top-3 md:right-7 px-1 py-0.5 text-[10px] md:text-xs'
+                ? 'top-2 right-5 md:top-3 md:right-7 px-1 py-0.5 text-xs md:text-sm'
                 : 'top-3 right-3 md:top-3 md:right-6 px-2 py-1 text-sm md:text-base'
           }`}
           style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8)' }}
