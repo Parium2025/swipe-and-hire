@@ -282,7 +282,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
         <div 
           className={`absolute font-bold text-white ${
             countdownVariant === 'compact' 
-              ? 'top-2 right-6 px-1 py-0.5 text-xs' 
+              ? 'top-2 right-[1.375rem] px-1 py-0.5 text-xs' 
               : 'top-3 right-3 md:top-3 md:right-6 px-2 py-1 text-sm md:text-base'
           }`} 
           style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8)' }}
