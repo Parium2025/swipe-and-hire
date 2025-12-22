@@ -32,7 +32,6 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   }, [location.pathname, showUnsavedDialog]);
 
   const checkBeforeNavigation = (targetUrl: string): boolean => {
-    console.log('checkBeforeNavigation called, hasUnsavedChanges:', hasUnsavedChangesRef.current);
     if (hasUnsavedChangesRef.current) {
       setPendingNavigation(targetUrl);
       setShowUnsavedDialog(true);
@@ -60,7 +59,6 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   };
 
   const handleCancelLeave = () => {
-    console.log('Cancel button clicked - staying on current page');
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
     // Notify listeners (e.g., sidebar) to close on cancel
