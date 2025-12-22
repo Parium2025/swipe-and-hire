@@ -50,13 +50,9 @@ const redirected = redirectAuthTokensIfNeeded();
 if (!redirected) {
   // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
   if (import.meta.env.PROD) {
-    registerServiceWorker()
-      .then(() => {
-        console.log('✅ Service Worker ready for offline caching');
-      })
-      .catch((error) => {
-        console.warn('Service Worker registration failed:', error);
-      });
+    registerServiceWorker().catch(() => {
+      // Silent fail - SW is optional enhancement
+    });
   }
 
   const root = createRoot(document.getElementById("root")!);
