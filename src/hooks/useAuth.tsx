@@ -1531,6 +1531,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const connectionTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
     const hasShownConnectionError = { current: false };
     const CONNECTION_ERROR_DELAY = 8000; // 8 seconds before showing error
+    let reconnectionPollInterval: ReturnType<typeof setInterval> | null = null;
+
+    // Start polling for reconnection after showing error toast
+    const startReconnectionPolling = () => {
+      if (reconnectionPollInterval) return; // Already polling
+      
+      reconnectionPollInterval = setInterval(() => {
+        // Check if realtime connection is restored
+        if (supabase.realtime.isConnected()) {
+          // Connection restored!
+          if (hasShownConnectionError.current) {
+            hasShownConnectionError.current = false;
+            toast({
+              title: "Anslutningen återupprättad",
+              description: "Live-uppdateringar fungerar igen.",
+              duration: 3000,
+            });
+            // Re-sync data after reconnection
+            refreshSidebarCounts();
+            refreshEmployerStats();
+          }
+          // Stop polling
+          if (reconnectionPollInterval) {
+            clearInterval(reconnectionPollInterval);
+            reconnectionPollInterval = null;
+          }
+        }
+      }, 1000); // Check every second
+    };
 
     const handleChannelStatus = (channelName: string, status: string) => {
       if (status === 'SUBSCRIBED') {
@@ -1552,6 +1581,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Re-sync data after reconnection
           refreshSidebarCounts();
           refreshEmployerStats();
+          // Stop polling since we confirmed reconnection
+          if (reconnectionPollInterval) {
+            clearInterval(reconnectionPollInterval);
+            reconnectionPollInterval = null;
+          }
         }
       } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
         // Start a timeout - only show error if issue persists
@@ -1564,6 +1598,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 description: "Live-uppdateringar är tillfälligt otillgängliga. Appen försöker återansluta...",
                 duration: 5000,
               });
+              // Start polling for reconnection
+              startReconnectionPolling();
             }
             connectionTimeouts.delete(channelName);
           }, CONNECTION_ERROR_DELAY);
@@ -1661,6 +1697,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Clear all pending timeouts
       connectionTimeouts.forEach((timeout) => clearTimeout(timeout));
       connectionTimeouts.clear();
+      
+      // Stop reconnection polling
+      if (reconnectionPollInterval) {
+        clearInterval(reconnectionPollInterval);
+        reconnectionPollInterval = null;
+      }
       
       supabase.removeChannel(jobChannel);
       supabase.removeChannel(savedChannel);
