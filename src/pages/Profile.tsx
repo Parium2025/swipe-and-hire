@@ -227,7 +227,6 @@ const Profile = () => {
       if (localMediaRaw && localMediaMatchesDb) {
         // Clear stale session state that would otherwise falsely trigger "Osparade ändringar"
         setLocalMediaState(null);
-        console.log('🔒 Cleared stale local media state (matched DB)');
       }
 
       const localMedia = localMediaMatchesDb ? null : localMediaRaw;
@@ -241,7 +240,6 @@ const Profile = () => {
         setProfileFileName(localMedia.profileFileName);
         setCoverFileName(localMedia.coverFileName);
         setCvUrl(localMedia.cvUrl);
-        console.log('🔒 Restored local media state from sessionStorage');
       } else {
         // No local changes - sync from database
         setVideoUrl(values.videoUrl);
@@ -275,15 +273,11 @@ const Profile = () => {
   // 🎯 Synkronisera med förladdade URLs från useAuth (precis som sidebaren)
   // Detta säkerställer att Profile.tsx alltid visar de redan cachade bilderna
   useEffect(() => {
-    if (preloadedAvatarUrl && profile?.profile_image_url) {
-      console.log('✅ Using preloaded avatar URL in Profile.tsx');
-    }
+    // Sync preloaded avatar URL
   }, [preloadedAvatarUrl, profile?.profile_image_url]);
 
   useEffect(() => {
-    if (preloadedCoverUrl && profile?.cover_image_url) {
-      console.log('✅ Using preloaded cover URL in Profile.tsx');
-    }
+    // Sync preloaded cover URL
   }, [preloadedCoverUrl, profile?.cover_image_url]);
 
   const checkForChanges = useCallback(() => {
