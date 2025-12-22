@@ -11,12 +11,18 @@ interface UnsavedChangesContextType {
 const UnsavedChangesContext = createContext<UnsavedChangesContextType | undefined>(undefined);
 
 export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasUnsavedChanges, _setHasUnsavedChanges] = useState(false);
+  const hasUnsavedChangesRef = useRef(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const lastSafePathRef = useRef<string>(location.pathname);
+
+  const setHasUnsavedChanges = (value: boolean) => {
+    hasUnsavedChangesRef.current = value;
+    _setHasUnsavedChanges(value);
+  };
 
   // Track the last safe path (where the user currently is) to return on cancel
   useEffect(() => {
@@ -26,8 +32,8 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   }, [location.pathname, showUnsavedDialog]);
 
   const checkBeforeNavigation = (targetUrl: string): boolean => {
-    console.log('checkBeforeNavigation called, hasUnsavedChanges:', hasUnsavedChanges);
-    if (hasUnsavedChanges) {
+    console.log('checkBeforeNavigation called, hasUnsavedChanges:', hasUnsavedChangesRef.current);
+    if (hasUnsavedChangesRef.current) {
       setPendingNavigation(targetUrl);
       setShowUnsavedDialog(true);
       return false; // Block navigation initially
@@ -36,14 +42,21 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   };
 
   const handleConfirmLeave = () => {
-    if (pendingNavigation) {
-      // Notify listeners (e.g., forms) to reset their state
-      window.dispatchEvent(new CustomEvent('unsaved-confirm'));
-      setHasUnsavedChanges(false);
-      navigate(pendingNavigation);
-    }
+    const target = pendingNavigation;
+
+    // Close dialog first
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
+
+    // Notify listeners (e.g., forms) to reset their state
+    window.dispatchEvent(new CustomEvent('unsaved-confirm'));
+
+    // Ensure navigation isn't blocked a second time (state updates are async)
+    setHasUnsavedChanges(false);
+
+    if (target) {
+      navigate(target);
+    }
   };
 
   const handleCancelLeave = () => {
@@ -59,7 +72,7 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     <UnsavedChangesContext.Provider value={{
       hasUnsavedChanges,
       setHasUnsavedChanges,
-      checkBeforeNavigation
+      checkBeforeNavigation,
     }}>
       {children}
       <UnsavedChangesDialog
