@@ -180,6 +180,8 @@ const Profile = () => {
   // Load profile data when profile changes
   useEffect(() => {
     if (profile) {
+      const dbHasVideo = !!(profile as any)?.video_url;
+
       const values = {
         firstName: profile.first_name || '',
         lastName: profile.last_name || '',
@@ -188,8 +190,9 @@ const Profile = () => {
         postalCode: (profile as any)?.postal_code || '',
         phone: profile.phone || '',
         birthDate: profile.birth_date || '',
-        profileImageUrl: profile.profile_image_url || '',
-        videoUrl: profile.video_url || '',
+        // If profile has a video, treat it as the active profile media (ignore any stale image path in DB)
+        profileImageUrl: dbHasVideo ? '' : ((profile as any)?.profile_image_url || ''),
+        videoUrl: dbHasVideo ? (profile as any).video_url : '',
         cvUrl: (profile as any)?.cv_url || '',
         companyName: profile.company_name || '',
         orgNumber: profile.org_number || '',
@@ -197,7 +200,7 @@ const Profile = () => {
         workingHours: (profile as any)?.work_schedule || '',
         availability: (profile as any)?.availability || '',
         coverImageUrl: (profile as any)?.cover_image_url || '',
-        isProfileVideo: false,
+        isProfileVideo: dbHasVideo,
         profileFileName: '',
         coverFileName: '',
       };
@@ -212,7 +215,23 @@ const Profile = () => {
       
       // 🔒 CRITICAL: Restore local media state from sessionStorage if it exists
       // This survives component remounts from tab switches or screenshot tools
-      const localMedia = getLocalMediaState();
+      const localMediaRaw = getLocalMediaState();
+      const localMediaMatchesDb =
+        !!localMediaRaw &&
+        localMediaRaw.profileImageUrl === values.profileImageUrl &&
+        localMediaRaw.videoUrl === values.videoUrl &&
+        localMediaRaw.coverImageUrl === values.coverImageUrl &&
+        localMediaRaw.isProfileVideo === values.isProfileVideo &&
+        localMediaRaw.cvUrl === values.cvUrl;
+
+      if (localMediaRaw && localMediaMatchesDb) {
+        // Clear stale session state that would otherwise falsely trigger "Osparade ändringar"
+        setLocalMediaState(null);
+        console.log('🔒 Cleared stale local media state (matched DB)');
+      }
+
+      const localMedia = localMediaMatchesDb ? null : localMediaRaw;
+
       if (localMedia) {
         // Restore local unsaved media values instead of DB values
         setProfileImageUrl(localMedia.profileImageUrl);
@@ -225,28 +244,12 @@ const Profile = () => {
         console.log('🔒 Restored local media state from sessionStorage');
       } else {
         // No local changes - sync from database
-        if ((profile as any)?.video_url) {
-          setVideoUrl((profile as any).video_url);
-          setProfileImageUrl('');
-          setIsProfileVideo(true);
-          values.videoUrl = (profile as any).video_url;
-          values.profileImageUrl = '';
-          values.isProfileVideo = true;
-        } else {
-          setVideoUrl('');
-          setProfileImageUrl(values.profileImageUrl);
-          setIsProfileVideo(false);
-          values.videoUrl = '';
-          values.isProfileVideo = false;
-        }
-        
-        const dbCoverImage = (profile as any)?.cover_image_url || '';
-        setCoverImageUrl(dbCoverImage);
-        values.coverImageUrl = dbCoverImage;
-        
+        setVideoUrl(values.videoUrl);
+        setProfileImageUrl(values.profileImageUrl);
+        setIsProfileVideo(values.isProfileVideo);
+        setCoverImageUrl(values.coverImageUrl);
         setCvUrl(values.cvUrl);
       }
-      
       // Only extract from URL if no filename in DB (for old records)
       if ((profile as any)?.cv_filename) {
         setCvFileName((profile as any).cv_filename);
