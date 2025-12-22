@@ -224,7 +224,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     // 🔒 CRITICAL: Restore local media state from sessionStorage if it exists
     const localMedia = getLocalMediaState();
     if (localMedia) {
-      console.log('🔒 Restoring local media state from sessionStorage');
       setFormData(prev => ({
         ...prev,
         profileImageUrl: localMedia.profileImageUrl,

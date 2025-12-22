@@ -128,23 +128,14 @@ export default function ProfilePreview() {
   // 🎯 Synkronisera med förladdade URLs från useAuth (precis som sidebaren)
   useEffect(() => {
     setAvatarUrl(preloadedAvatarUrl ?? null);
-    if (preloadedAvatarUrl && profile?.profile_image_url) {
-      console.log('✅ Using preloaded avatar URL in ProfilePreview');
-    }
   }, [preloadedAvatarUrl, profile?.profile_image_url]);
   
   useEffect(() => {
     setCoverUrl(preloadedCoverUrl ?? null);
-    if (preloadedCoverUrl && profile?.cover_image_url) {
-      console.log('✅ Using preloaded cover URL in ProfilePreview');
-    }
   }, [preloadedCoverUrl, profile?.cover_image_url]);
 
   useEffect(() => {
     setVideoUrl(preloadedVideoUrl ?? null);
-    if (preloadedVideoUrl && profile?.video_url) {
-      console.log('✅ Using preloaded video URL in ProfilePreview');
-    }
   }, [preloadedVideoUrl, profile?.video_url]);
 
   const ProfileView = ({ data, isConsented }: { data: ProfileViewData | null; isConsented: boolean }) => {
