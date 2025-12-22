@@ -19,7 +19,7 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
       scope: '/'
     });
 
-    console.log('✅ Service Worker registered:', registration.scope);
+    
 
     // Lyssna på uppdateringar
     registration.addEventListener('updatefound', () => {
@@ -27,7 +27,7 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
       if (newWorker) {
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('🔄 New Service Worker available');
+            
             // Här kan vi visa en toast till användaren om uppdatering
           }
         });
@@ -85,14 +85,14 @@ export const preloadImages = async (urls: string[]): Promise<void> => {
     const validUrls = urls.filter(url => url && url.trim() !== '');
     if (validUrls.length === 0) return;
 
-    console.log(`📦 Preloading ${validUrls.length} images via Service Worker...`);
+    
     
     await sendMessage({
       type: 'PRELOAD_IMAGES',
       urls: validUrls
     });
 
-    console.log('✅ Images preloaded successfully');
+    
   } catch (error) {
     console.error('Failed to preload images:', error);
   }
@@ -110,14 +110,14 @@ export const preloadSingleFile = async (url: string): Promise<void> => {
   if (!url || url.trim() === '') return;
 
   try {
-    console.log(`📦 Preloading newly uploaded file: ${url.substring(0, 80)}...`);
+    
     
     await sendMessage({
       type: 'PRELOAD_IMAGES',
       urls: [url]
     });
 
-    console.log('✅ File cached and ready for offline use');
+    
   } catch (error) {
     console.error('Failed to preload file:', error);
   }
@@ -136,7 +136,7 @@ export const clearImageCache = async (): Promise<void> => {
     await sendMessage({
       type: 'CLEAR_IMAGE_CACHE'
     });
-    console.log('✅ Image cache cleared');
+    
   } catch (error) {
     console.error('Failed to clear image cache:', error);
   }
