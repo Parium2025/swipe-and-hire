@@ -313,13 +313,6 @@ const Profile = () => {
       key => currentValues[key as keyof typeof currentValues] !== originalValues[key as keyof typeof originalValues]
     );
 
-    console.log('Checking for changes:', { 
-      currentValues, 
-      originalValues, 
-      hasChanges,
-      userLocation,
-      originalLocation: originalValues.userLocation
-    });
     setHasUnsavedChanges(hasChanges);
     return hasChanges;
   }, [originalValues, firstName, lastName, bio, userLocation, postalCode, phone, birthDate, 
