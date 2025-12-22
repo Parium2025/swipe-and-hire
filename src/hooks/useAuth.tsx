@@ -1523,9 +1523,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 0);
   }, [user, userRole?.role, loading]);
 
-  // Realtime-prenumerationer för räknare
+  // Realtime-prenumerationer för räknare med tyst felhantering
   useEffect(() => {
     if (!user) return;
+
+    // Track connection issues for silent error handling
+    const connectionTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
+    const hasShownConnectionError = { current: false };
+    const CONNECTION_ERROR_DELAY = 8000; // 8 seconds before showing error
+
+    const handleChannelStatus = (channelName: string, status: string) => {
+      if (status === 'SUBSCRIBED') {
+        // Clear any pending error timeout
+        const timeout = connectionTimeouts.get(channelName);
+        if (timeout) {
+          clearTimeout(timeout);
+          connectionTimeouts.delete(channelName);
+        }
+        
+        // If we previously showed an error, show reconnection success
+        if (hasShownConnectionError.current) {
+          hasShownConnectionError.current = false;
+          toast({
+            title: "Anslutningen återupprättad",
+            description: "Live-uppdateringar fungerar igen.",
+            duration: 3000,
+          });
+          // Re-sync data after reconnection
+          refreshSidebarCounts();
+          refreshEmployerStats();
+        }
+      } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+        // Start a timeout - only show error if issue persists
+        if (!connectionTimeouts.has(channelName)) {
+          const timeout = setTimeout(() => {
+            if (!hasShownConnectionError.current) {
+              hasShownConnectionError.current = true;
+              toast({
+                title: "Anslutningsproblem",
+                description: "Live-uppdateringar är tillfälligt otillgängliga. Appen försöker återansluta...",
+                variant: "destructive",
+                duration: 5000,
+              });
+            }
+            connectionTimeouts.delete(channelName);
+          }, CONNECTION_ERROR_DELAY);
+          connectionTimeouts.set(channelName, timeout);
+        }
+      }
+    };
 
     const jobChannel = supabase
       .channel('auth-job-count')
@@ -1537,7 +1583,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshEmployerStats();
         }
       )
-      .subscribe();
+      .subscribe((status) => handleChannelStatus('job', status));
 
     const savedChannel = supabase
       .channel(`auth-saved-jobs-${user.id}`)
@@ -1548,7 +1594,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshSidebarCounts();
         }
       )
-      .subscribe();
+      .subscribe((status) => handleChannelStatus('saved', status));
 
     // Real-time för ansökningar (uppdaterar jobbsökarens räknare)
     const applicationsChannel = supabase
@@ -1560,7 +1606,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshSidebarCounts();
         }
       )
-      .subscribe();
+      .subscribe((status) => handleChannelStatus('applications', status));
 
     // Real-time för alla job_applications (uppdaterar employer kandidat-badge)
     // Lyssnar på alla INSERT för att fånga nya ansökningar till arbetsgivarens jobb
@@ -1573,7 +1619,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshEmployerStats();
         }
       )
-      .subscribe();
+      .subscribe((status) => handleChannelStatus('employerApps', status));
 
     // Real-time för meddelanden (uppdaterar oläst-badge för både employer och jobbsökare)
     const messagesChannel = supabase
@@ -1586,7 +1632,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshSidebarCounts();
         }
       )
-      .subscribe();
+      .subscribe((status) => handleChannelStatus('messages', status));
 
     // Real-time för company reviews (uppdaterar recensionsräknare för arbetsgivare)
     const reviewsChannel = supabase
@@ -1598,7 +1644,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshEmployerStats();
         }
       )
-      .subscribe();
+      .subscribe((status) => handleChannelStatus('reviews', status));
 
     // Real-time för my_candidates (uppdaterar "Mina kandidater" räknare i sidebaren)
     const myCandidatesChannel = supabase
@@ -1610,9 +1656,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshEmployerStats();
         }
       )
-      .subscribe();
+      .subscribe((status) => handleChannelStatus('myCandidates', status));
 
     return () => {
+      // Clear all pending timeouts
+      connectionTimeouts.forEach((timeout) => clearTimeout(timeout));
+      connectionTimeouts.clear();
+      
       supabase.removeChannel(jobChannel);
       supabase.removeChannel(savedChannel);
       supabase.removeChannel(applicationsChannel);
