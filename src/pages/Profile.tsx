@@ -365,6 +365,10 @@ const Profile = () => {
       setVideoUrl(originalValues.videoUrl || '');
       setDeletedProfileMedia(null);
       setDeletedCoverImage(null);
+      // Discard any locally cached (unsaved) media state when user chooses "Lämna utan att spara"
+      try {
+        sessionStorage.removeItem(LOCAL_MEDIA_KEY);
+      } catch {}
       setHasUnsavedChanges(false);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
