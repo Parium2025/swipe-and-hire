@@ -1562,7 +1562,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               toast({
                 title: "Anslutningsproblem",
                 description: "Live-uppdateringar är tillfälligt otillgängliga. Appen försöker återansluta...",
-                variant: "destructive",
                 duration: 5000,
               });
             }
