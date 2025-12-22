@@ -263,6 +263,7 @@ export default function ProfilePreview() {
                    userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                    alt="Profilbild"
                    className="w-full h-full rounded-full"
+                   countdownVariant="preview"
                    showCountdown={true}
                  />
                ) : (
@@ -664,6 +665,7 @@ export default function ProfilePreview() {
                      userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
                      alt="Profilbild"
                      className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
+                     countdownVariant="preview"
                      showCountdown={true}
                    />
                  </div>
