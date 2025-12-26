@@ -49,6 +49,7 @@ export const STAGE_CONFIG = {
 export function useMyCandidatesData() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [isDragging, setIsDragging] = useState(false);
 
   const { data: candidates = [], isLoading, error, refetch } = useQuery({
     queryKey: ['my-candidates', user?.id],
@@ -184,8 +185,10 @@ export function useMyCandidatesData() {
           filter: `recruiter_id=eq.${user.id}` 
         },
         () => {
-          // Refetch data when any change occurs
-          queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          // Don't refetch during drag operations to avoid overwriting optimistic updates
+          if (!isDragging) {
+            queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          }
         }
       )
       .subscribe();
@@ -193,7 +196,7 @@ export function useMyCandidatesData() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, queryClient]);
+  }, [user, queryClient, isDragging]);
 
   // Add candidate to my list
   const addCandidate = useMutation({
@@ -243,6 +246,8 @@ export function useMyCandidatesData() {
       return data;
     },
     onMutate: async ({ id, stage }) => {
+      // Mark as dragging to prevent realtime from overwriting
+      setIsDragging(true);
       // Optimistic update - move card immediately
       await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
       const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
@@ -259,6 +264,7 @@ export function useMyCandidatesData() {
       toast.error('Kunde inte flytta kandidaten');
     },
     onSettled: () => {
+      setIsDragging(false);
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
     },
   });
