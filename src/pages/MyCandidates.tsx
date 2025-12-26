@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useMyCandidatesData, STAGE_CONFIG, CandidateStage, MyCandidateData } from '@/hooks/useMyCandidatesData';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,8 @@ import {
   DndContext,
   DragOverlay,
   closestCorners,
+  pointerWithin,
+  type CollisionDetection,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -244,8 +246,11 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
   });
 
   return (
-    <div className="flex-1 min-w-[220px] max-w-[280px]">
-      <div className={`rounded-md border ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary scale-[1.02]' : ''}`}>
+    <div 
+      ref={setNodeRef}
+      className={`flex-1 min-w-[220px] max-w-[280px] transition-all ${isOver ? 'scale-[1.02]' : ''}`}
+    >
+      <div className={`rounded-md border ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary' : ''}`}>
         <div className="flex items-center gap-1.5">
           <Icon className="h-3.5 w-3.5" />
           <span className="font-medium text-xs">{config.label}</span>
@@ -256,9 +261,8 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
       </div>
 
       <div 
-        ref={setNodeRef}
-        className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 min-h-[60px] rounded-lg transition-colors ${
-          isOver ? 'bg-white/5' : ''
+        className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 min-h-[100px] rounded-lg transition-colors ${
+          isOver ? 'bg-white/10' : ''
         }`}
       >
         <SortableContext items={candidates.map(c => c.id)} strategy={verticalListSortingStrategy}>
@@ -272,8 +276,14 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
           ))}
         </SortableContext>
 
+        {isOver && candidates.length > 0 && (
+          <div className="text-center py-2 text-xs text-white font-medium">
+            Släpp här
+          </div>
+        )}
+
         {candidates.length === 0 && (
-          <div className="text-center py-4 text-white text-xs">
+          <div className={`text-center py-8 text-xs transition-all ${isOver ? 'text-white font-medium' : 'text-white/60'}`}>
             {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
           </div>
         )}
@@ -440,22 +450,42 @@ const MyCandidates = () => {
     useSensor(KeyboardSensor)
   );
 
+  // Custom collision detection - pointerWithin first, then closestCorners
+  const collisionDetectionStrategy = useCallback<CollisionDetection>((args) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) return pointerCollisions;
+    return closestCorners(args);
+  }, []);
+
   const activeCandidate = useMemo(() => {
     if (!activeId) return null;
     return candidates.find(c => c.id === activeId) || null;
   }, [activeId, candidates]);
+
+  // Resolve which stage we're hovering over (works for both column and card hovers)
+  const resolveOverStage = (overRawId?: string): CandidateStage | null => {
+    if (!overRawId) return null;
+
+    if (STAGE_ORDER.includes(overRawId as CandidateStage)) {
+      return overRawId as CandidateStage;
+    }
+
+    const overCandidate = candidates.find((c) => c.id === overRawId);
+    if (overCandidate && STAGE_ORDER.includes(overCandidate.stage as CandidateStage)) {
+      return overCandidate.stage as CandidateStage;
+    }
+
+    return null;
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
 
   const handleDragOver = (event: DragOverEvent) => {
-    const overId = event.over?.id as string | undefined;
-    if (overId && STAGE_ORDER.includes(overId as CandidateStage)) {
-      setOverId(overId);
-    } else {
-      setOverId(null);
-    }
+    const overRawId = event.over?.id as string | undefined;
+    const stage = resolveOverStage(overRawId);
+    setOverId(stage);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -466,14 +496,14 @@ const MyCandidates = () => {
     if (!over) return;
 
     const candidateId = active.id as string;
-    const targetStage = over.id as string;
+    const overRawId = over.id as string;
+    const targetStage = resolveOverStage(overRawId);
 
-    // Check if dropped on a stage column
-    if (STAGE_ORDER.includes(targetStage as CandidateStage)) {
-      const candidate = candidates.find(c => c.id === candidateId);
-      if (candidate && candidate.stage !== targetStage) {
-        moveCandidate.mutate({ id: candidateId, stage: targetStage as CandidateStage });
-      }
+    if (!targetStage) return;
+
+    const candidate = candidates.find(c => c.id === candidateId);
+    if (candidate && candidate.stage !== targetStage) {
+      moveCandidate.mutate({ id: candidateId, stage: targetStage });
     }
   };
 
@@ -655,7 +685,7 @@ const MyCandidates = () => {
       ) : (
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCorners}
+          collisionDetection={collisionDetectionStrategy}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
