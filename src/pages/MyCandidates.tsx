@@ -28,7 +28,6 @@ import {
   Search,
   X,
   Star,
-  Video,
   ArrowDown,
   Clock
 } from 'lucide-react';
@@ -116,7 +115,7 @@ const CandidateCardContent = ({
   isDragging,
 }: CandidateCardProps) => {
   const initials = `${candidate.first_name?.[0] || ''}${candidate.last_name?.[0] || ''}`.toUpperCase() || '?';
-  const hasVideo = candidate.video_url || candidate.is_profile_video;
+  const isUnread = !candidate.viewed_at;
   const appliedTime = formatCompactTime(candidate.applied_at);
   
   return (
@@ -126,8 +125,8 @@ const CandidateCardContent = ({
       }`}
       onClick={onOpenProfile}
     >
-      {/* Video indicator dot */}
-      {hasVideo && (
+      {/* Unread indicator dot - shows if application hasn't been viewed */}
+      {isUnread && (
         <div className="absolute right-1.5 top-1.5">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500" />
         </div>
@@ -265,7 +264,8 @@ const MyCandidates = () => {
     isLoading, 
     moveCandidate, 
     removeCandidate,
-    updateRating
+    updateRating,
+    markAsViewed
   } = useMyCandidatesData();
 
   const { user } = useAuth();
@@ -469,6 +469,13 @@ const MyCandidates = () => {
   const handleOpenProfile = (candidate: MyCandidateData) => {
     setSelectedCandidate(candidate);
     setDialogOpen(true);
+    
+    // Mark as viewed if not already
+    if (!candidate.viewed_at) {
+      markAsViewed.mutate(candidate.application_id);
+      // Update local state immediately
+      setSelectedCandidate(prev => prev ? { ...prev, viewed_at: new Date().toISOString() } : null);
+    }
   };
 
   const handleDialogClose = () => {

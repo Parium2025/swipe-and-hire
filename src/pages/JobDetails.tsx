@@ -43,6 +43,7 @@ interface JobApplication {
   applied_at: string;
   status: 'pending' | 'reviewing' | 'interview' | 'offered' | 'hired' | 'rejected';
   custom_answers: any;
+  viewed_at: string | null;
 }
 
 interface JobPosting {
@@ -165,77 +166,119 @@ const JobDetails = () => {
     return applications.filter(app => app.status === status);
   };
 
-  const ApplicationCard = ({ application }: { application: JobApplication }) => (
-    <Card className="bg-white/5 backdrop-blur-sm border-white/20 mb-2">
-      <CardContent className="p-2 md:p-3">
-        <div className="flex items-start gap-2 md:gap-3">
-          <Avatar className="h-7 w-7 md:h-8 md:w-8">
-            <AvatarFallback className="bg-primary text-white text-xs">
-              {getInitials(application.first_name, application.last_name)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-0.5 md:mb-1">
-              <h4 className="text-white font-semibold text-xs md:text-sm truncate">
-                {application.first_name} {application.last_name}
-              </h4>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 md:h-8 md:w-8 p-0 text-white hover:bg-white/10">
-                    <MoreVertical className="h-3 w-3 md:h-4 md:w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg">
-                  <DropdownMenuItem 
-                    onClick={() => updateApplicationStatus(application.id, 'reviewing')}
-                    className="text-white hover:bg-white/10"
-                  >
-                    Flytta till Granskar
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => updateApplicationStatus(application.id, 'interview')}
-                    className="text-white hover:bg-white/10"
-                  >
-                    Flytta till Intervju
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => updateApplicationStatus(application.id, 'offered')}
-                    className="text-white hover:bg-white/10"
-                  >
-                    Flytta till Erbjuden
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => updateApplicationStatus(application.id, 'hired')}
-                    className="text-white hover:bg-white/10"
-                  >
-                    Flytta till Anställd
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => updateApplicationStatus(application.id, 'rejected')}
-                    className="text-red-300 hover:bg-red-500/10"
-                  >
-                    Avvisa
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <div className="space-y-0.5 md:space-y-1 text-xs md:text-sm text-white">
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span>{new Date(application.applied_at).toLocaleDateString('sv-SE')}</span>
+  const markApplicationAsViewed = async (applicationId: string) => {
+    try {
+      await supabase
+        .from('job_applications')
+        .update({ viewed_at: new Date().toISOString() })
+        .eq('id', applicationId)
+        .is('viewed_at', null);
+      
+      // Update local state
+      setApplications(prev => prev.map(app => 
+        app.id === applicationId ? { ...app, viewed_at: new Date().toISOString() } : app
+      ));
+    } catch (error) {
+      console.error('Error marking as viewed:', error);
+    }
+  };
+
+  const ApplicationCard = ({ application }: { application: JobApplication }) => {
+    const isUnread = !application.viewed_at;
+    
+    const handleClick = () => {
+      if (isUnread) {
+        markApplicationAsViewed(application.id);
+      }
+      // Here you could open a profile dialog
+    };
+    
+    return (
+      <Card 
+        className="bg-white/5 backdrop-blur-sm border-white/20 mb-2 cursor-pointer hover:bg-white/10 transition-colors"
+        onClick={handleClick}
+      >
+        <CardContent className="p-2 md:p-3">
+          <div className="flex items-start gap-2 md:gap-3 relative">
+            {/* Unread indicator */}
+            {isUnread && (
+              <div className="absolute right-0 top-0">
+                <div className="h-2 w-2 rounded-full bg-fuchsia-500" />
               </div>
-              {application.location && (
+            )}
+            <Avatar className="h-7 w-7 md:h-8 md:w-8">
+              <AvatarFallback className="bg-primary text-white text-xs">
+                {getInitials(application.first_name, application.last_name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-0.5 md:mb-1">
+                <h4 className="text-white font-semibold text-xs md:text-sm truncate">
+                  {application.first_name} {application.last_name}
+                </h4>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 w-7 md:h-8 md:w-8 p-0 text-white hover:bg-white/10"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreVertical className="h-3 w-3 md:h-4 md:w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg">
+                    <DropdownMenuItem 
+                      onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'reviewing'); }}
+                      className="text-white hover:bg-white/10"
+                    >
+                      Flytta till Granskar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'interview'); }}
+                      className="text-white hover:bg-white/10"
+                    >
+                      Flytta till Intervju
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'offered'); }}
+                      className="text-white hover:bg-white/10"
+                    >
+                      Flytta till Erbjuden
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'hired'); }}
+                      className="text-white hover:bg-white/10"
+                    >
+                      Flytta till Anställd
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'rejected'); }}
+                      className="text-red-300 hover:bg-red-500/10"
+                    >
+                      Avvisa
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <div className="space-y-0.5 md:space-y-1 text-xs md:text-sm text-white">
                 <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  <span>{application.location}</span>
+                  <Clock className="h-3 w-3" />
+                  <span>{new Date(application.applied_at).toLocaleDateString('sv-SE')}</span>
                 </div>
-              )}
+                {application.location && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>{application.location}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   if (loading) {
     return null; // Return nothing while loading for smooth fade-in

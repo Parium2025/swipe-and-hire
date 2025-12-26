@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
@@ -27,6 +27,7 @@ export interface ApplicationData {
   profile_image_url?: string | null;
   video_url?: string | null;
   is_profile_video?: boolean | null;
+  viewed_at?: string | null;
 }
 
 const PAGE_SIZE = 25;
@@ -187,6 +188,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
           status,
           applied_at,
           updated_at,
+          viewed_at,
           job_postings!inner(title)
         `);
 
@@ -242,6 +244,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
           profile_image_url: media.profile_image_url,
           video_url: media.video_url,
           is_profile_video: media.is_profile_video,
+          viewed_at: item.viewed_at,
           job_postings: undefined
         };
       }) as ApplicationData[];
@@ -375,6 +378,40 @@ export const useApplicationsData = (searchQuery: string = '') => {
     queryClient.invalidateQueries({ queryKey: ['applications'] });
   };
 
+  // Mark application as viewed
+  const markAsViewed = useMutation({
+    mutationFn: async (applicationId: string) => {
+      const { error } = await supabase
+        .from('job_applications')
+        .update({ viewed_at: new Date().toISOString() })
+        .eq('id', applicationId)
+        .is('viewed_at', null);
+
+      if (error) throw error;
+    },
+    onMutate: async (applicationId) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['applications', user?.id] });
+      
+      queryClient.setQueryData(['applications', user?.id, searchQuery], (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((app: ApplicationData) =>
+              app.id === applicationId ? { ...app, viewed_at: new Date().toISOString() } : app
+            ),
+          })),
+        };
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['applications'] });
+      queryClient.invalidateQueries({ queryKey: ['my-candidates'] });
+    },
+  });
+
   return {
     applications: enrichedApplications,
     stats,
@@ -382,6 +419,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
     error,
     refetch,
     invalidateApplications,
+    markAsViewed,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
