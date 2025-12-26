@@ -395,14 +395,6 @@ const JobDetails = () => {
             )}
           </div>
         </div>
-
-        {/* Reject button - shows on hover */}
-        <button
-          onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'rejected'); }}
-          className="absolute right-1 bottom-1 h-5 w-5 flex items-center justify-center text-red-400/50 hover:text-red-400 hover:bg-red-500/10 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <Trash2 className="h-3 w-3" />
-        </button>
       </div>
     );
   };
