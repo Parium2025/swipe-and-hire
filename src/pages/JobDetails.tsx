@@ -236,20 +236,25 @@ const JobDetails = () => {
   };
 
   const updateApplicationStatus = async (applicationId: string, newStatus: string) => {
+    // Optimistic update - move card immediately
+    const previousApplications = [...applications];
+    setApplications(prev => prev.map(app => 
+      app.id === applicationId 
+        ? { ...app, status: newStatus as JobApplication['status'] } 
+        : app
+    ));
+
     try {
       const { error } = await supabase
         .from('job_applications')
         .update({ status: newStatus })
         .eq('id', applicationId);
 
-      if (error) throw error;
-
-      toast({
-        title: 'Status uppdaterad',
-        description: 'Ansökningsstatus har uppdaterats.',
-      });
-
-      fetchJobData();
+      if (error) {
+        // Revert on error
+        setApplications(previousApplications);
+        throw error;
+      }
     } catch (error: any) {
       toast({
         title: 'Fel',
