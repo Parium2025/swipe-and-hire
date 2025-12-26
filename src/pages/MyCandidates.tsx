@@ -111,6 +111,7 @@ const StarRating = ({
 
 // Wrapper component for CandidateAvatar with inline video playback
 const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => {
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const hasVideo = candidate.is_profile_video && candidate.video_url;
   
   return (
@@ -127,9 +128,10 @@ const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => 
         isProfileVideo={candidate.is_profile_video}
         firstName={candidate.first_name}
         lastName={candidate.last_name}
+        onPlayingChange={setIsVideoPlaying}
       />
-      {/* Large play overlay for video avatars - always visible, pointer-events-none so clicks go through to ProfileVideo */}
-      {hasVideo && (
+      {/* Large play overlay for video avatars - hidden when video is playing */}
+      {hasVideo && !isVideoPlaying && (
         <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center pointer-events-none">
           <Play className="h-4 w-4 text-white drop-shadow-lg fill-white" />
         </div>
