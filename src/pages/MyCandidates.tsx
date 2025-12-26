@@ -128,10 +128,10 @@ const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => 
         firstName={candidate.first_name}
         lastName={candidate.last_name}
       />
-      {/* Play indicator for video avatars */}
+      {/* Large play overlay for video avatars - always visible */}
       {hasVideo && (
-        <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-fuchsia-500 rounded-full flex items-center justify-center shadow-sm border border-white/20">
-          <Play className="h-2 w-2 text-white fill-white" />
+        <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center">
+          <Play className="h-4 w-4 text-white drop-shadow-lg" />
         </div>
       )}
     </div>
