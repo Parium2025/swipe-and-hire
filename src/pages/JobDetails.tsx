@@ -429,8 +429,11 @@ const JobDetails = () => {
     });
 
     return (
-      <div className="flex-1 min-w-[220px] max-w-[280px]">
-        <div className={`rounded-md border ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary scale-[1.02]' : ''}`}>
+      <div 
+        ref={setNodeRef}
+        className={`flex-1 min-w-[220px] max-w-[280px] transition-all ${isOver ? 'scale-[1.02]' : ''}`}
+      >
+        <div className={`rounded-md border ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary' : ''}`}>
           <div className="flex items-center gap-1.5">
             <Icon className="h-3.5 w-3.5" />
             <span className="font-medium text-xs">{config.label}</span>
@@ -441,9 +444,8 @@ const JobDetails = () => {
         </div>
 
         <div 
-          ref={setNodeRef}
-          className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 min-h-[60px] rounded-lg transition-colors ${
-            isOver ? 'bg-white/5' : ''
+          className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 min-h-[100px] rounded-lg transition-colors ${
+            isOver ? 'bg-white/10' : ''
           }`}
         >
           <SortableContext items={apps.map(a => a.id)} strategy={verticalListSortingStrategy}>
@@ -453,8 +455,8 @@ const JobDetails = () => {
           </SortableContext>
 
           {apps.length === 0 && (
-            <div className="text-center py-4 text-white text-xs">
-              {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
+            <div className={`text-center py-8 text-xs transition-all ${isOver ? 'text-white font-medium' : 'text-white/60'}`}>
+              {isOver ? '👇 Släpp här' : 'Inga kandidater i detta steg'}
             </div>
           )}
         </div>
