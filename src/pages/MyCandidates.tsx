@@ -54,6 +54,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { snapCenterToCursor } from '@dnd-kit/modifiers';
 
 const STAGE_ICONS = {
   to_contact: Phone,
@@ -673,7 +674,7 @@ const MyCandidates = () => {
             ))}
           </div>
 
-          <DragOverlay>
+          <DragOverlay modifiers={[snapCenterToCursor]}>
             {activeCandidate ? (
               <div className="opacity-90">
                 <CandidateCardContent
