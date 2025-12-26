@@ -29,7 +29,8 @@ import {
   X,
   Star,
   ArrowDown,
-  Clock
+  Clock,
+  Play
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { formatDistanceToNow, differenceInDays, differenceInHours } from 'date-fns';
@@ -114,7 +115,7 @@ const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => 
   
   return (
     <div 
-      className="h-8 w-8 flex-shrink-0 [&>*]:h-8 [&>*]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
+      className="h-8 w-8 flex-shrink-0 relative [&>*:first-child]:h-8 [&>*:first-child]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
       onClick={hasVideo ? (e) => {
         // Prevent opening profile dialog when clicking on video - let ProfileVideo handle playback
         e.stopPropagation();
@@ -127,6 +128,12 @@ const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => 
         firstName={candidate.first_name}
         lastName={candidate.last_name}
       />
+      {/* Play indicator for video avatars */}
+      {hasVideo && (
+        <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-fuchsia-500 rounded-full flex items-center justify-center shadow-sm border border-white/20">
+          <Play className="h-2 w-2 text-white fill-white" />
+        </div>
+      )}
     </div>
   );
 };
