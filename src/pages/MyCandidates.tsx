@@ -22,15 +22,18 @@ import {
   Trash2, 
   Phone, 
   Calendar, 
-  Briefcase,
   UserCheck,
   Gift,
   PartyPopper,
   Search,
-  X
+  X,
+  Star,
+  Video,
+  ArrowDown,
+  Clock
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, differenceInDays, differenceInHours } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import {
   DndContext,
@@ -68,6 +71,34 @@ interface CandidateCardProps {
   isDragging?: boolean;
 }
 
+// Format time in compact way like Teamtailor
+const formatCompactTime = (date: string | null) => {
+  if (!date) return null;
+  const now = new Date();
+  const d = new Date(date);
+  const days = differenceInDays(now, d);
+  const hours = differenceInHours(now, d);
+  
+  if (days >= 1) {
+    return `${days}dag`;
+  }
+  return `${hours}tim`;
+};
+
+// Star rating component
+const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxStars?: number }) => {
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: maxStars }).map((_, i) => (
+        <Star 
+          key={i} 
+          className={`h-2.5 w-2.5 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-white/30'}`}
+        />
+      ))}
+    </div>
+  );
+};
+
 const CandidateCardContent = ({ 
   candidate, 
   onRemove, 
@@ -75,51 +106,60 @@ const CandidateCardContent = ({
   isDragging,
 }: CandidateCardProps) => {
   const initials = `${candidate.first_name?.[0] || ''}${candidate.last_name?.[0] || ''}`.toUpperCase() || '?';
-
+  const hasVideo = candidate.video_url || candidate.is_profile_video;
+  const appliedTime = formatCompactTime(candidate.applied_at);
+  
   return (
     <div 
-      className={`bg-white/5 border border-white/10 rounded-lg p-3 transition-all cursor-grab active:cursor-grabbing group ${
+      className={`bg-white/5 border border-white/10 rounded-md px-2 py-1.5 transition-all cursor-grab active:cursor-grabbing group relative ${
         isDragging ? 'shadow-xl ring-2 ring-primary/50 bg-white/10' : 'hover:border-white/30 hover:bg-white/[0.08]'
       }`}
+      onClick={onOpenProfile}
     >
-      <div className="flex items-start gap-3" onClick={onOpenProfile}>
-        <Avatar className="h-10 w-10 ring-2 ring-white/20">
+      {/* Video indicator dot */}
+      {hasVideo && (
+        <div className="absolute right-1.5 top-1.5">
+          <div className="h-2 w-2 rounded-full bg-fuchsia-500" />
+        </div>
+      )}
+      
+      <div className="flex items-center gap-2">
+        <Avatar className="h-8 w-8 ring-1 ring-white/20 flex-shrink-0">
           {candidate.profile_image_url ? (
             <AvatarImage src={candidate.profile_image_url} alt={`${candidate.first_name} ${candidate.last_name}`} />
           ) : null}
-          <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
+          <AvatarFallback className="bg-fuchsia-500/80 text-white text-xs font-semibold">
             {initials}
           </AvatarFallback>
         </Avatar>
-        <div className="flex-1 min-w-0">
-          <p className="text-white font-medium text-sm truncate">
+        
+        <div className="flex-1 min-w-0 pr-4">
+          <p className="text-fuchsia-400 font-medium text-xs truncate hover:underline">
             {candidate.first_name} {candidate.last_name}
           </p>
-          {candidate.job_title && (
-            <p className="text-white text-xs truncate flex items-center gap-1">
-              <Briefcase className="h-3 w-3" />
-              {candidate.job_title}
-            </p>
-          )}
-          {candidate.applied_at && (
-            <p className="text-white text-xs mt-1">
-              {formatDistanceToNow(new Date(candidate.applied_at), { addSuffix: true, locale: sv })}
-            </p>
+          <StarRating rating={0} />
+          {appliedTime && (
+            <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px]">
+              <span className="flex items-center gap-0.5">
+                <ArrowDown className="h-2.5 w-2.5" />
+                {appliedTime}
+              </span>
+              <span className="flex items-center gap-0.5">
+                <Clock className="h-2.5 w-2.5" />
+                {appliedTime}
+              </span>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Remove button */}
-      <div className="flex items-center justify-end mt-3 pt-2 border-t border-white/10">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="h-7 w-7 p-0 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
+      {/* Remove button - shows on hover */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onRemove(); }}
+        className="absolute right-1 bottom-1 h-5 w-5 flex items-center justify-center text-red-400/50 hover:text-red-400 hover:bg-red-500/10 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <Trash2 className="h-3 w-3" />
+      </button>
     </div>
   );
 };
@@ -163,19 +203,18 @@ interface StageColumnProps {
 const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, isOver }: StageColumnProps) => {
   const config = STAGE_CONFIG[stage];
   const Icon = STAGE_ICONS[stage];
-  const stageIndex = STAGE_ORDER.indexOf(stage);
 
   const { setNodeRef } = useDroppable({
     id: stage,
   });
 
   return (
-    <div className="flex-1 min-w-[280px] max-w-[350px]">
-      <div className={`rounded-lg border ${config.color} p-3 mb-3 transition-all ${isOver ? 'ring-2 ring-primary scale-[1.02]' : ''}`}>
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4" />
-          <span className="font-medium text-sm">{config.label}</span>
-          <span className="ml-auto bg-white/20 text-white/90 text-xs px-2 py-0.5 rounded-full">
+    <div className="flex-1 min-w-[220px] max-w-[280px]">
+      <div className={`rounded-md border ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary scale-[1.02]' : ''}`}>
+        <div className="flex items-center gap-1.5">
+          <Icon className="h-3.5 w-3.5" />
+          <span className="font-medium text-xs">{config.label}</span>
+          <span className="ml-auto bg-white/20 text-white/90 text-[10px] px-1.5 py-0.5 rounded-full">
             {candidates.length}
           </span>
         </div>
@@ -183,7 +222,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
 
       <div 
         ref={setNodeRef}
-        className={`space-y-2 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 min-h-[100px] rounded-lg transition-colors ${
+        className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 min-h-[60px] rounded-lg transition-colors ${
           isOver ? 'bg-white/5' : ''
         }`}
       >
@@ -199,7 +238,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
         </SortableContext>
 
         {candidates.length === 0 && (
-          <div className="text-center py-8 text-white text-sm">
+          <div className="text-center py-4 text-white text-xs">
             {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
           </div>
         )}
