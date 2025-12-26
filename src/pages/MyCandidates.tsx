@@ -666,6 +666,9 @@ const MyCandidates = () => {
         candidateRating={selectedCandidate?.rating}
         onRatingChange={(rating) => {
           if (selectedCandidate) {
+            // Update local state immediately for responsive UI
+            setSelectedCandidate(prev => prev ? { ...prev, rating } : null);
+            // Persist to database
             updateRating.mutate({ id: selectedCandidate.id, rating });
           }
         }}
