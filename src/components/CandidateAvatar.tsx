@@ -9,6 +9,7 @@ type CandidateAvatarProps = {
   isProfileVideo: boolean | null | undefined;
   firstName: string | null | undefined;
   lastName: string | null | undefined;
+  onPlayingChange?: (isPlaying: boolean) => void;
 };
 
 function CandidateAvatarBase({ 
@@ -16,7 +17,8 @@ function CandidateAvatarBase({
   videoUrl, 
   isProfileVideo, 
   firstName, 
-  lastName 
+  lastName,
+  onPlayingChange
 }: CandidateAvatarProps) {
   const [avatarError, setAvatarError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -55,6 +57,7 @@ function CandidateAvatarBase({
         className="h-10 w-10 ring-2 ring-white/20 rounded-full"
         showCountdown={false}
         showProgressBar={false}
+        onPlayingChange={onPlayingChange}
       />
     );
   }
@@ -97,7 +100,8 @@ export const CandidateAvatar = React.memo(CandidateAvatarBase, (prev, next) => {
     prev.videoUrl === next.videoUrl &&
     prev.isProfileVideo === next.isProfileVideo &&
     prev.firstName === next.firstName &&
-    prev.lastName === next.lastName
+    prev.lastName === next.lastName &&
+    prev.onPlayingChange === next.onPlayingChange
   );
 });
 

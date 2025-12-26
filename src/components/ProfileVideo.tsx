@@ -12,9 +12,10 @@ interface ProfileVideoProps {
   showCountdown?: boolean; // Show countdown timer (default: true for employer view)
   showProgressBar?: boolean; // Show progress/scrubbing bar on hover (default: true)
   countdownVariant?: 'default' | 'compact' | 'preview'; // 'compact' for Min Profil, 'preview' for Förhandsgranska Profil, 'default' elsewhere
+  onPlayingChange?: (isPlaying: boolean) => void; // Callback when playing state changes
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default' }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -56,6 +57,11 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       setRemainingSeconds(null);
     };
   }, [isPlaying]);
+
+  // Notify parent when playing state changes
+  useEffect(() => {
+    onPlayingChange?.(isPlaying);
+  }, [isPlaying, onPlayingChange]);
 
   // Cleanup when component unmounts - reset video and clear all states
   useEffect(() => {
