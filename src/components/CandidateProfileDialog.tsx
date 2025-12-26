@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -35,6 +35,10 @@ interface CandidateProfileDialogProps {
   onStatusUpdate: () => void;
   /** All applications from the same candidate (for job dropdown) */
   allApplications?: ApplicationData[];
+  /** Current rating for the candidate in my_candidates */
+  candidateRating?: number;
+  /** Callback when rating is changed */
+  onRatingChange?: (rating: number) => void;
 }
 
 const statusConfig = {
@@ -50,12 +54,62 @@ interface CandidateNote {
   created_at: string;
 }
 
+// Interactive Star Rating component
+const InteractiveStarRating = ({ 
+  rating = 0, 
+  maxStars = 5, 
+  onChange 
+}: { 
+  rating?: number; 
+  maxStars?: number; 
+  onChange?: (rating: number) => void;
+}) => {
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
+  
+  const handleClick = (starIndex: number) => {
+    if (onChange) {
+      // If clicking the same rating, reset to 0
+      const newRating = starIndex + 1 === rating ? 0 : starIndex + 1;
+      onChange(newRating);
+    }
+  };
+  
+  const displayRating = hoverRating !== null ? hoverRating : rating;
+  
+  return (
+    <div 
+      className="flex gap-1 justify-center"
+      onMouseLeave={() => setHoverRating(null)}
+    >
+      {Array.from({ length: maxStars }).map((_, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => handleClick(i)}
+          onMouseEnter={() => onChange && setHoverRating(i + 1)}
+          className="p-0.5 focus:outline-none transition-transform hover:scale-110"
+        >
+          <Star 
+            className={`h-5 w-5 transition-colors ${
+              i < displayRating 
+                ? 'text-yellow-400 fill-yellow-400' 
+                : 'text-white/30 hover:text-yellow-400/50'
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  );
+};
+
 export const CandidateProfileDialog = ({
   application,
   open,
   onOpenChange,
   onStatusUpdate,
   allApplications,
+  candidateRating,
+  onRatingChange,
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
@@ -241,11 +295,21 @@ export const CandidateProfileDialog = ({
               )}
             </div>
             
-            {/* Name and Job Selector */}
+            {/* Name, Rating and Job Selector */}
             <div className="w-full max-w-sm">
               <h2 className="text-2xl font-semibold text-white">
                 {displayApp.first_name} {displayApp.last_name}
               </h2>
+              
+              {/* Star Rating - Interactive */}
+              {onRatingChange && (
+                <div className="mt-2">
+                  <InteractiveStarRating 
+                    rating={candidateRating} 
+                    onChange={onRatingChange} 
+                  />
+                </div>
+              )}
               
               {/* Job dropdown or single job display */}
               {hasMultipleApplications ? (
