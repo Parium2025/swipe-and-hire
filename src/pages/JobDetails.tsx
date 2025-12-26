@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
+import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
+import { ApplicationData } from '@/hooks/useApplicationsData';
 import { 
   Clock, 
   X,
@@ -145,6 +147,8 @@ const JobDetails = () => {
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // DnD sensors
   const sensors = useSensors(
@@ -348,7 +352,7 @@ const JobDetails = () => {
     );
   };
 
-  const ApplicationCardContent = ({ application, isDragging }: { application: JobApplication; isDragging?: boolean }) => {
+  const ApplicationCardContent = ({ application, isDragging, onOpenProfile }: { application: JobApplication; isDragging?: boolean; onOpenProfile?: () => void }) => {
     const isUnread = !application.viewed_at;
     const appliedTime = formatCompactTime(application.applied_at);
     
@@ -356,7 +360,7 @@ const JobDetails = () => {
       if (isUnread) {
         markApplicationAsViewed(application.id);
       }
-      // Here you could open a profile dialog
+      onOpenProfile?.();
     };
     
     return (
@@ -400,7 +404,7 @@ const JobDetails = () => {
   };
 
   // Sortable wrapper for application cards
-  const SortableApplicationCard = ({ application }: { application: JobApplication }) => {
+  const SortableApplicationCard = ({ application, onOpenProfile }: { application: JobApplication; onOpenProfile: () => void }) => {
     const {
       attributes,
       listeners,
@@ -418,7 +422,7 @@ const JobDetails = () => {
 
     return (
       <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-        <ApplicationCardContent application={application} isDragging={isDragging} />
+        <ApplicationCardContent application={application} isDragging={isDragging} onOpenProfile={onOpenProfile} />
       </div>
     );
   };
@@ -455,7 +459,14 @@ const JobDetails = () => {
         >
           <SortableContext items={apps.map(a => a.id)} strategy={verticalListSortingStrategy}>
             {apps.map((app) => (
-              <SortableApplicationCard key={app.id} application={app} />
+              <SortableApplicationCard 
+                key={app.id} 
+                application={app} 
+                onOpenProfile={() => {
+                  setSelectedApplication(app);
+                  setDialogOpen(true);
+                }}
+              />
             ))}
           </SortableContext>
 
@@ -638,6 +649,46 @@ const JobDetails = () => {
             ) : null}
           </DragOverlay>
         </DndContext>
+
+        {/* Candidate Profile Dialog */}
+        <CandidateProfileDialog
+          application={selectedApplication ? {
+            id: selectedApplication.id,
+            job_id: jobId || '',
+            applicant_id: selectedApplication.applicant_id,
+            first_name: selectedApplication.first_name,
+            last_name: selectedApplication.last_name,
+            email: selectedApplication.email,
+            phone: selectedApplication.phone,
+            location: selectedApplication.location,
+            bio: selectedApplication.bio,
+            cv_url: selectedApplication.cv_url,
+            age: selectedApplication.age,
+            employment_status: selectedApplication.employment_status,
+            work_schedule: null,
+            availability: selectedApplication.availability,
+            custom_answers: selectedApplication.custom_answers,
+            status: selectedApplication.status,
+            applied_at: selectedApplication.applied_at,
+            updated_at: selectedApplication.applied_at,
+            job_title: job?.title || 'Okänt jobb',
+            profile_image_url: selectedApplication.profile_image_url,
+            video_url: selectedApplication.video_url,
+            is_profile_video: selectedApplication.is_profile_video,
+          } as ApplicationData : null}
+          open={dialogOpen}
+          onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) {
+              setTimeout(() => setSelectedApplication(null), 300);
+            }
+          }}
+          onStatusUpdate={() => {
+            // Refetch to get updated data
+            fetchJobData();
+          }}
+          candidateRating={selectedApplication?.rating}
+        />
       </div>
   );
 };
