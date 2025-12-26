@@ -1545,7 +1545,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             hasShownConnectionError.current = false;
             toast({
               title: "Anslutningen återupprättad",
-              description: "Live-uppdateringar fungerar igen.",
               duration: 3000,
             });
             // Re-sync data after reconnection
@@ -1575,7 +1574,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           hasShownConnectionError.current = false;
           toast({
             title: "Anslutningen återupprättad",
-            description: "Live-uppdateringar fungerar igen.",
             duration: 3000,
           });
           // Re-sync data after reconnection
@@ -1595,7 +1593,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               hasShownConnectionError.current = true;
               toast({
                 title: "Anslutningsproblem",
-                description: "Live-uppdateringar är tillfälligt otillgängliga. Appen försöker återansluta...",
+                description: "Live-uppdateringar är tillfälligt otillgängliga. Försöker återansluta...",
                 duration: 5000,
               });
               // Start polling for reconnection
