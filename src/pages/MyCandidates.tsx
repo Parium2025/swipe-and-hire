@@ -128,10 +128,10 @@ const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => 
         firstName={candidate.first_name}
         lastName={candidate.last_name}
       />
-      {/* Large play overlay for video avatars - always visible */}
+      {/* Large play overlay for video avatars - always visible, pointer-events-none so clicks go through to ProfileVideo */}
       {hasVideo && (
-        <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center">
-          <Play className="h-4 w-4 text-white drop-shadow-lg" />
+        <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center pointer-events-none">
+          <Play className="h-4 w-4 text-white drop-shadow-lg fill-white" />
         </div>
       )}
     </div>
