@@ -301,15 +301,15 @@ export const CandidateProfileDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0">
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
           <DialogDescription>Visa kandidatens profilinformation och ansökan</DialogDescription>
         </DialogHeader>
         
-        <div className="flex h-full max-h-[90vh]">
+        <div className="flex h-full max-h-[85vh]">
           {/* Main content - left side */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* Header with circular profile image/video */}
           <div className="flex flex-col items-center text-center space-y-4">
             {/* Circular Profile Image/Video - Larger */}
@@ -655,14 +655,14 @@ export const CandidateProfileDialog = ({
           </div>
 
           {/* Activity Sidebar - right side */}
-          <div className="w-80 border-l border-white/20 bg-white/5 flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-white/20">
-              <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                <Activity className="h-4 w-4" />
+          <div className="w-64 border-l border-white/20 bg-white/5 flex flex-col overflow-hidden">
+            <div className="p-3 border-b border-white/20">
+              <h3 className="text-xs font-semibold text-white flex items-center gap-2">
+                <Activity className="h-3.5 w-3.5" />
                 Aktivitet
               </h3>
             </div>
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-3">
               <CandidateActivityLog applicantId={application?.applicant_id || null} />
             </div>
           </div>
