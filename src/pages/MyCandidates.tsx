@@ -498,17 +498,17 @@ const MyCandidates = () => {
         <div className="mb-6 space-y-3">
           {/* Search input */}
           <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
             <Input
               placeholder="Sök på namn, jobb eller anteckningar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
+              className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -522,7 +522,7 @@ const MyCandidates = () => {
               className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
                 activeStageFilter === 'all'
                   ? 'bg-white/20 text-white'
-                  : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                  : 'bg-white/5 text-white hover:bg-white/10 hover:text-white'
               }`}
             >
               Alla ({stats.total})
@@ -537,7 +537,7 @@ const MyCandidates = () => {
                   className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
                     activeStageFilter === stage
                       ? config.color
-                      : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                      : 'bg-white/5 text-white hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   {config.label} ({count})
@@ -548,7 +548,7 @@ const MyCandidates = () => {
 
           {/* Search results info */}
           {searchQuery && (
-            <p className="text-center text-sm text-white/70">
+            <p className="text-center text-sm text-white">
               {filteredTotal === 0 
                 ? 'Inga kandidater hittades' 
                 : `Visar ${filteredTotal} av ${stats.total} kandidater`}
@@ -622,7 +622,7 @@ const MyCandidates = () => {
         >
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Ta bort kandidat</AlertDialogTitle>
-            <AlertDialogDescription className="text-white/70">
+            <AlertDialogDescription className="text-white">
               Är du säker på att du vill ta bort{' '}
               <span className="font-medium text-white">
                 {candidateToRemove?.first_name} {candidateToRemove?.last_name}
