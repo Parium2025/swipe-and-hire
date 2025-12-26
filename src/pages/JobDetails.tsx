@@ -45,6 +45,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { snapCenterToCursor } from '@dnd-kit/modifiers';
 
 interface JobApplication {
   id: string;
@@ -604,7 +605,7 @@ const JobDetails = () => {
           </div>
 
           {/* Drag Overlay */}
-          <DragOverlay>
+          <DragOverlay modifiers={[snapCenterToCursor]}>
             {activeApplication ? (
               <div className="opacity-90">
                 <ApplicationCardContent application={activeApplication} isDragging />
