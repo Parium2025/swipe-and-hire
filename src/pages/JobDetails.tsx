@@ -469,13 +469,13 @@ const JobDetails = () => {
 
           {isOver && apps.length > 0 && (
             <div className="text-center py-2 text-xs text-white font-medium">
-              👇 Släpp här
+              Släpp här
             </div>
           )}
 
           {apps.length === 0 && (
             <div className={`text-center py-8 text-xs transition-all ${isOver ? 'text-white font-medium' : 'text-white/60'}`}>
-              {isOver ? '👇 Släpp här' : 'Inga kandidater i detta steg'}
+              {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
             </div>
           )}
         </div>
