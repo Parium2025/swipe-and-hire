@@ -242,11 +242,24 @@ export function useMyCandidatesData() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+    onMutate: async ({ id, stage }) => {
+      // Optimistic update - move card immediately
+      await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
+      const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
+      
+      queryClient.setQueryData(['my-candidates', user?.id], (old: MyCandidateData[] | undefined) => {
+        if (!old) return old;
+        return old.map(c => c.id === id ? { ...c, stage } : c);
+      });
+      
+      return { previousCandidates };
     },
-    onError: () => {
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['my-candidates', user?.id], context?.previousCandidates);
       toast.error('Kunde inte flytta kandidaten');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
     },
   });
 
