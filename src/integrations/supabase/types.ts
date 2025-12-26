@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      candidate_activities: {
+        Row: {
+          activity_type: string
+          applicant_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          new_value: string | null
+          old_value: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          applicant_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_value?: string | null
+          old_value?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          applicant_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_value?: string | null
+          old_value?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       candidate_notes: {
         Row: {
           applicant_id: string

@@ -3,15 +3,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import ProfileVideo from '@/components/ProfileVideo';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Textarea } from '@/components/ui/textarea';
 import { CvViewer } from '@/components/CvViewer';
+import { CandidateActivityLog } from '@/components/CandidateActivityLog';
+import { useCandidateActivities } from '@/hooks/useCandidateActivities';
 import {
   Select,
   SelectContent,
@@ -19,6 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 function useProfileImageUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-image');
@@ -119,6 +126,7 @@ export const CandidateProfileDialog = ({
   const { user } = useAuth();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
   const [notesExpanded, setNotesExpanded] = useState(true);
+  const [activityExpanded, setActivityExpanded] = useState(false);
   const [notes, setNotes] = useState<CandidateNote[]>([]);
   const [newNote, setNewNote] = useState('');
   const [loadingNotes, setLoadingNotes] = useState(false);
@@ -126,6 +134,10 @@ export const CandidateProfileDialog = ({
   const [cvOpen, setCvOpen] = useState(false);
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const previousRating = useRef<number | undefined>(undefined);
+
+  // Activity logging
+  const { logActivity } = useCandidateActivities(application?.applicant_id || null);
 
   // Determine the active application (selected job or default)
   const activeApplication = useMemo(() => {
@@ -139,12 +151,29 @@ export const CandidateProfileDialog = ({
   const videoUrl = useVideoUrl(activeApplication?.video_url);
   const signedCvUrl = useMediaUrl(activeApplication?.cv_url, 'cv');
 
-  // Reset selected job when dialog opens with new application
+  // Reset selected job and track rating when dialog opens with new application
   useEffect(() => {
     if (open && application) {
       setSelectedJobId(application.job_id);
+      previousRating.current = candidateRating;
     }
   }, [open, application?.applicant_id]);
+
+  // Handle rating change with activity logging
+  const handleRatingChange = (newRating: number) => {
+    if (onRatingChange && application) {
+      // Log the activity
+      logActivity.mutate({
+        applicantId: application.applicant_id,
+        activityType: 'rating_changed',
+        oldValue: previousRating.current?.toString() || '0',
+        newValue: newRating.toString(),
+        metadata: { job_id: application.job_id },
+      });
+      previousRating.current = newRating;
+      onRatingChange(newRating);
+    }
+  };
 
   // Fetch notes and questions when dialog opens or job selection changes
   useEffect(() => {
@@ -209,6 +238,15 @@ export const CandidateProfileDialog = ({
         });
 
       if (error) throw error;
+
+      // Log activity
+      logActivity.mutate({
+        applicantId: application.applicant_id,
+        activityType: 'note_added',
+        newValue: newNote.trim().substring(0, 100), // Store preview of note
+        metadata: { job_id: application.job_id },
+      });
+
       toast.success('Anteckning sparad');
       setNewNote('');
       fetchNotes();
@@ -311,7 +349,7 @@ export const CandidateProfileDialog = ({
                 <div className="mt-2">
                   <InteractiveStarRating 
                     rating={candidateRating} 
-                    onChange={onRatingChange} 
+                    onChange={handleRatingChange} 
                   />
                 </div>
               )}
@@ -580,6 +618,29 @@ export const CandidateProfileDialog = ({
                       ))}
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+
+            {/* Activity Log Section */}
+            <div className="bg-white/5 rounded-lg overflow-hidden">
+              <button
+                onClick={() => setActivityExpanded(!activityExpanded)}
+                className="flex items-center justify-between w-full px-4 py-3 text-left hover:bg-white/5 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-white/70" />
+                  <span className="font-medium text-white">Aktivitet</span>
+                </div>
+                {activityExpanded ? (
+                  <ChevronUp className="h-4 w-4 text-white/50" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-white/50" />
+                )}
+              </button>
+              {activityExpanded && (
+                <div className="px-4 pb-4">
+                  <CandidateActivityLog applicantId={application?.applicant_id || null} />
                 </div>
               )}
             </div>

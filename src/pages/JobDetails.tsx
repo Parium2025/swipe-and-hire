@@ -149,6 +149,7 @@ const JobDetails = () => {
   const [overId, setOverId] = useState<string | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [myCandidatesMap, setMyCandidatesMap] = useState<Map<string, string>>(new Map()); // applicant_id -> my_candidate_id
 
   // DnD sensors
   const sensors = useSensors(
@@ -193,16 +194,19 @@ const JobDetails = () => {
 
       if (applicationsError) throw applicationsError;
       
-      // Fetch my_candidates ratings for this recruiter
+      // Fetch my_candidates ratings and IDs for this recruiter
       const { data: myCandidatesData } = await supabase
         .from('my_candidates')
-        .select('applicant_id, rating')
+        .select('id, applicant_id, rating')
         .eq('recruiter_id', user?.id);
       
       const ratingsByApplicant = new Map<string, number>();
+      const candidateIdsMap = new Map<string, string>();
       (myCandidatesData || []).forEach(mc => {
         ratingsByApplicant.set(mc.applicant_id, mc.rating || 0);
+        candidateIdsMap.set(mc.applicant_id, mc.id);
       });
+      setMyCandidatesMap(candidateIdsMap);
 
       // Fetch profile media for each applicant using RPC
       const applicationsWithMedia = await Promise.all(
@@ -268,6 +272,24 @@ const JobDetails = () => {
     }
   };
 
+  const updateCandidateRating = async (applicantId: string, newRating: number) => {
+    const myCandidateId = myCandidatesMap.get(applicantId);
+    if (!myCandidateId) {
+      toast({ title: 'Info', description: 'Lägg först till kandidaten i din lista för att ge betyg' });
+      return;
+    }
+    setApplications(prev => prev.map(app => app.applicant_id === applicantId ? { ...app, rating: newRating } : app));
+    if (selectedApplication?.applicant_id === applicantId) {
+      setSelectedApplication(prev => prev ? { ...prev, rating: newRating } : null);
+    }
+    try {
+      const { error } = await supabase.from('my_candidates').update({ rating: newRating }).eq('id', myCandidateId);
+      if (error) throw error;
+    } catch {
+      toast({ title: 'Fel', description: 'Kunde inte uppdatera betyg', variant: 'destructive' });
+      fetchJobData();
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -684,10 +706,14 @@ const JobDetails = () => {
             }
           }}
           onStatusUpdate={() => {
-            // Refetch to get updated data
             fetchJobData();
           }}
           candidateRating={selectedApplication?.rating}
+          onRatingChange={(rating) => {
+            if (selectedApplication) {
+              updateCandidateRating(selectedApplication.applicant_id, rating);
+            }
+          }}
         />
       </div>
   );
