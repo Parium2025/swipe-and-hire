@@ -16,7 +16,8 @@ import {
   CheckCircle,
   X,
   Users,
-  Eye
+  Eye,
+  Play
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
@@ -208,6 +209,37 @@ const JobDetails = () => {
     }
   };
 
+  // Wrapper component for CandidateAvatar with inline video playback
+  const SmallCandidateAvatarWrapper = ({ application }: { application: JobApplication }) => {
+    const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+    const hasVideo = application.is_profile_video && application.video_url;
+    
+    return (
+      <div 
+        className="h-7 w-7 md:h-8 md:w-8 flex-shrink-0 relative [&>*:first-child]:h-7 [&>*:first-child]:w-7 md:[&>*:first-child]:h-8 md:[&>*:first-child]:w-8 [&_.h-10]:h-7 [&_.w-10]:w-7 md:[&_.h-10]:h-8 md:[&_.w-10]:w-8 [&_.ring-2]:ring-1"
+        onClick={hasVideo ? (e) => {
+          // Prevent opening profile dialog when clicking on video - let ProfileVideo handle playback
+          e.stopPropagation();
+        } : undefined}
+      >
+        <CandidateAvatar
+          profileImageUrl={application.profile_image_url}
+          videoUrl={application.video_url}
+          isProfileVideo={application.is_profile_video}
+          firstName={application.first_name}
+          lastName={application.last_name}
+          onPlayingChange={setIsVideoPlaying}
+        />
+        {/* Large play overlay for video avatars - hidden when video is playing */}
+        {hasVideo && !isVideoPlaying && (
+          <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center pointer-events-none">
+            <Play className="h-3 w-3 md:h-4 md:w-4 text-white drop-shadow-lg fill-white" />
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const ApplicationCard = ({ application }: { application: JobApplication }) => {
     const isUnread = !application.viewed_at;
     
@@ -231,15 +263,7 @@ const JobDetails = () => {
                 <div className="h-2 w-2 rounded-full bg-fuchsia-500" />
               </div>
             )}
-            <div className="h-7 w-7 md:h-8 md:w-8 flex-shrink-0 [&>*]:h-7 [&>*]:w-7 md:[&>*]:h-8 md:[&>*]:w-8 [&_.h-10]:h-7 [&_.w-10]:w-7 md:[&_.h-10]:h-8 md:[&_.w-10]:w-8 [&_.ring-2]:ring-1">
-              <CandidateAvatar
-                profileImageUrl={application.profile_image_url}
-                videoUrl={application.video_url}
-                isProfileVideo={application.is_profile_video}
-                firstName={application.first_name}
-                lastName={application.last_name}
-              />
-            </div>
+            <SmallCandidateAvatarWrapper application={application} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-0.5 md:mb-1">
                 <h4 className="text-white font-semibold text-xs md:text-sm truncate">
