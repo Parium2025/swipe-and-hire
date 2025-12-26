@@ -8,26 +8,23 @@ import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { 
   Clock, 
-  MapPin, 
-  Mail, 
-  Phone, 
-  FileText,
-  MoreVertical,
-  CheckCircle,
   X,
   Users,
   Eye,
   Play,
-  Star
+  Star,
+  ArrowDown,
+  Trash2,
+  Phone as PhoneIcon,
+  Calendar,
+  Gift,
+  PartyPopper,
+  Inbox,
+  MapPin
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { differenceInDays, differenceInHours } from 'date-fns';
 import EmployerLayout from '@/components/EmployerLayout';
 import {
   DndContext,
@@ -66,13 +63,33 @@ interface JobApplication {
   status: 'pending' | 'reviewing' | 'interview' | 'offered' | 'hired' | 'rejected';
   custom_answers: any;
   viewed_at: string | null;
-  // Profile media from RPC
   profile_image_url: string | null;
   video_url: string | null;
   is_profile_video: boolean;
-  // Rating from my_candidates
   rating: number;
 }
+
+// Format time in compact way like MyCandidates
+const formatCompactTime = (date: string | null) => {
+  if (!date) return null;
+  const now = new Date();
+  const d = new Date(date);
+  const days = differenceInDays(now, d);
+  const hours = differenceInHours(now, d);
+  
+  if (days >= 1) {
+    return `${days}dag`;
+  }
+  return `${hours}tim`;
+};
+
+const STATUS_ICONS = {
+  pending: Inbox,
+  reviewing: Eye,
+  interview: Calendar,
+  offered: Gift,
+  hired: PartyPopper,
+};
 
 // Star rating component - read-only for cards
 const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxStars?: number }) => {
@@ -319,6 +336,7 @@ const JobDetails = () => {
 
   const ApplicationCardContent = ({ application, isDragging }: { application: JobApplication; isDragging?: boolean }) => {
     const isUnread = !application.viewed_at;
+    const appliedTime = formatCompactTime(application.applied_at);
     
     const handleClick = () => {
       if (isUnread) {
@@ -328,90 +346,50 @@ const JobDetails = () => {
     };
     
     return (
-      <Card 
-        className={`bg-white/5 backdrop-blur-sm border-white/20 mb-2 cursor-grab active:cursor-grabbing hover:bg-white/10 transition-all ${
-          isDragging ? 'shadow-xl ring-2 ring-primary/50 bg-white/10' : ''
+      <div 
+        className={`bg-white/5 border border-white/10 rounded-md px-2 py-1.5 transition-all cursor-grab active:cursor-grabbing group relative ${
+          isDragging ? 'shadow-xl ring-2 ring-primary/50 bg-white/10' : 'hover:border-white/30 hover:bg-white/[0.08]'
         }`}
         onClick={handleClick}
       >
-        <CardContent className="p-2 md:p-3">
-          <div className="flex items-start gap-2 md:gap-3 relative">
-            {/* Unread indicator */}
-            {isUnread && (
-              <div className="absolute right-0 top-0">
-                <div className="h-2 w-2 rounded-full bg-fuchsia-500" />
+        {/* Unread indicator dot */}
+        {isUnread && (
+          <div className="absolute right-1.5 top-1.5">
+            <div className="h-2 w-2 rounded-full bg-fuchsia-500" />
+          </div>
+        )}
+        
+        <div className="flex items-center gap-2">
+          <SmallCandidateAvatarWrapper application={application} />
+          
+          <div className="flex-1 min-w-0 pr-4">
+            <p className="text-fuchsia-400 font-medium text-xs truncate hover:underline">
+              {application.first_name} {application.last_name}
+            </p>
+            <StarRating rating={application.rating} />
+            {appliedTime && (
+              <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px]">
+                <span className="flex items-center gap-0.5">
+                  <ArrowDown className="h-2.5 w-2.5" />
+                  {appliedTime}
+                </span>
+                <span className="flex items-center gap-0.5">
+                  <Clock className="h-2.5 w-2.5" />
+                  {appliedTime}
+                </span>
               </div>
             )}
-            <SmallCandidateAvatarWrapper application={application} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-0.5 md:mb-1">
-                <div className="min-w-0">
-                  <h4 className="text-fuchsia-400 font-medium text-xs md:text-sm truncate hover:underline">
-                    {application.first_name} {application.last_name}
-                  </h4>
-                  <StarRating rating={application.rating} />
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-7 w-7 md:h-8 md:w-8 p-0 text-white hover:bg-white/10"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreVertical className="h-3 w-3 md:h-4 md:w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg">
-                    <DropdownMenuItem 
-                      onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'reviewing'); }}
-                      className="text-white hover:bg-white/10"
-                    >
-                      Flytta till Granskar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'interview'); }}
-                      className="text-white hover:bg-white/10"
-                    >
-                      Flytta till Intervju
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'offered'); }}
-                      className="text-white hover:bg-white/10"
-                    >
-                      Flytta till Erbjuden
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'hired'); }}
-                      className="text-white hover:bg-white/10"
-                    >
-                      Flytta till Anställd
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'rejected'); }}
-                      className="text-red-300 hover:bg-red-500/10"
-                    >
-                      Avvisa
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="space-y-0.5 md:space-y-1 text-xs md:text-sm text-white">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  <span>{new Date(application.applied_at).toLocaleDateString('sv-SE')}</span>
-                </div>
-                {application.location && (
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    <span>{application.location}</span>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Reject button - shows on hover */}
+        <button
+          onClick={(e) => { e.stopPropagation(); updateApplicationStatus(application.id, 'rejected'); }}
+          className="absolute right-1 bottom-1 h-5 w-5 flex items-center justify-center text-red-400/50 hover:text-red-400 hover:bg-red-500/10 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Trash2 className="h-3 w-3" />
+        </button>
+      </div>
     );
   };
 
@@ -439,35 +417,43 @@ const JobDetails = () => {
     );
   };
 
-  // Droppable status column
+  // Droppable status column - matching MyCandidates style
   const StatusColumn = ({ status, isOver }: { status: ApplicationStatus; isOver?: boolean }) => {
     const config = STATUS_CONFIG[status];
     const apps = filterApplicationsByStatus(status);
+    const Icon = STATUS_ICONS[status] || Inbox;
     
     const { setNodeRef } = useDroppable({
       id: status,
     });
 
     return (
-      <div className={`bg-white/5 rounded-lg p-2 md:p-3 transition-all ${isOver ? 'ring-2 ring-primary scale-[1.02]' : ''}`}>
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-white font-semibold text-sm">{config.label}</h3>
-          <Badge variant="outline" className={config.color}>
-            {apps.length}
-          </Badge>
+      <div className="flex-1 min-w-[220px] max-w-[280px]">
+        <div className={`rounded-md border ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary scale-[1.02]' : ''}`}>
+          <div className="flex items-center gap-1.5">
+            <Icon className="h-3.5 w-3.5" />
+            <span className="font-medium text-xs">{config.label}</span>
+            <span className="ml-auto bg-white/20 text-white/90 text-[10px] px-1.5 py-0.5 rounded-full">
+              {apps.length}
+            </span>
+          </div>
         </div>
+
         <div 
           ref={setNodeRef}
-          className={`space-y-2 min-h-[60px] rounded-lg transition-colors ${isOver ? 'bg-white/5' : ''}`}
+          className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 min-h-[60px] rounded-lg transition-colors ${
+            isOver ? 'bg-white/5' : ''
+          }`}
         >
           <SortableContext items={apps.map(a => a.id)} strategy={verticalListSortingStrategy}>
             {apps.map((app) => (
               <SortableApplicationCard key={app.id} application={app} />
             ))}
           </SortableContext>
+
           {apps.length === 0 && (
-            <div className="text-center py-4 text-white/60 text-xs">
-              {isOver ? 'Släpp här' : 'Inga kandidater'}
+            <div className="text-center py-4 text-white text-xs">
+              {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
             </div>
           )}
         </div>
@@ -607,7 +593,7 @@ const JobDetails = () => {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
+          <div className="flex gap-4 overflow-x-auto pb-4">
             {STATUS_ORDER.map((status) => (
               <StatusColumn 
                 key={status} 
