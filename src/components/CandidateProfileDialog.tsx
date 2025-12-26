@@ -126,7 +126,6 @@ export const CandidateProfileDialog = ({
   const { user } = useAuth();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
   const [notesExpanded, setNotesExpanded] = useState(true);
-  const [activityExpanded, setActivityExpanded] = useState(false);
   const [notes, setNotes] = useState<CandidateNote[]>([]);
   const [newNote, setNewNote] = useState('');
   const [loadingNotes, setLoadingNotes] = useState(false);
@@ -302,13 +301,15 @@ export const CandidateProfileDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card-parium backdrop-blur-md border-white/20 text-white">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
           <DialogDescription>Visa kandidatens profilinformation och ansökan</DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="flex h-full max-h-[90vh]">
+          {/* Main content - left side */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Header with circular profile image/video */}
           <div className="flex flex-col items-center text-center space-y-4">
             {/* Circular Profile Image/Video - Larger */}
@@ -622,56 +623,48 @@ export const CandidateProfileDialog = ({
               )}
             </div>
 
-            {/* Activity Log Section */}
-            <div className="bg-white/5 rounded-lg overflow-hidden">
-              <button
-                onClick={() => setActivityExpanded(!activityExpanded)}
-                className="flex items-center justify-between w-full px-4 py-3 text-left hover:bg-white/5 transition-colors"
+          </div>
+
+            {/* Actions */}
+            <div className="flex flex-wrap justify-center gap-3 pt-4 border-t border-white/20">
+              <Button
+                onClick={() => updateStatus('reviewing')}
+                variant="glassYellow"
+                disabled={displayApp.status === 'reviewing'}
+                size="lg"
               >
-                <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-white/70" />
-                  <span className="font-medium text-white">Aktivitet</span>
-                </div>
-                {activityExpanded ? (
-                  <ChevronUp className="h-4 w-4 text-white/50" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 text-white/50" />
-                )}
-              </button>
-              {activityExpanded && (
-                <div className="px-4 pb-4">
-                  <CandidateActivityLog applicantId={application?.applicant_id || null} />
-                </div>
-              )}
+                Granska
+              </Button>
+              <Button
+                onClick={() => updateStatus('accepted')}
+                variant="glassGreen"
+                disabled={displayApp.status === 'accepted'}
+                size="lg"
+              >
+                Acceptera
+              </Button>
+              <Button
+                onClick={() => updateStatus('rejected')}
+                variant="glassRed"
+                disabled={displayApp.status === 'rejected'}
+                size="lg"
+              >
+                Avvisa
+              </Button>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-wrap justify-center gap-3 pt-4 border-t border-white/20">
-            <Button
-              onClick={() => updateStatus('reviewing')}
-              variant="glassYellow"
-              disabled={displayApp.status === 'reviewing'}
-              size="lg"
-            >
-              Granska
-            </Button>
-            <Button
-              onClick={() => updateStatus('accepted')}
-              variant="glassGreen"
-              disabled={displayApp.status === 'accepted'}
-              size="lg"
-            >
-              Acceptera
-            </Button>
-            <Button
-              onClick={() => updateStatus('rejected')}
-              variant="glassRed"
-              disabled={displayApp.status === 'rejected'}
-              size="lg"
-            >
-              Avvisa
-            </Button>
+          {/* Activity Sidebar - right side */}
+          <div className="w-80 border-l border-white/20 bg-white/5 flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-white/20">
+              <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                Aktivitet
+              </h3>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <CandidateActivityLog applicantId={application?.applicant_id || null} />
+            </div>
           </div>
         </div>
       </DialogContent>
