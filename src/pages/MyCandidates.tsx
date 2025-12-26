@@ -96,13 +96,13 @@ const CandidateCardContent = ({
             {candidate.first_name} {candidate.last_name}
           </p>
           {candidate.job_title && (
-            <p className="text-white/70 text-xs truncate flex items-center gap-1">
+            <p className="text-white text-xs truncate flex items-center gap-1">
               <Briefcase className="h-3 w-3" />
               {candidate.job_title}
             </p>
           )}
           {candidate.applied_at && (
-            <p className="text-white/50 text-xs mt-1">
+            <p className="text-white text-xs mt-1">
               {formatDistanceToNow(new Date(candidate.applied_at), { addSuffix: true, locale: sv })}
             </p>
           )}
@@ -199,7 +199,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
         </SortableContext>
 
         {candidates.length === 0 && (
-          <div className="text-center py-8 text-white/50 text-sm">
+          <div className="text-center py-8 text-white text-sm">
             {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
           </div>
         )}
@@ -462,7 +462,7 @@ const MyCandidates = () => {
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
             Mina kandidater
           </h1>
-          <p className="text-sm text-white mt-1">
+          <p className="text-sm text-white/90 mt-1">
             Din personliga rekryteringspipeline
           </p>
         </div>
@@ -488,7 +488,7 @@ const MyCandidates = () => {
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
           Mina kandidater ({stats.total})
         </h1>
-        <p className="text-sm text-white mt-1">
+        <p className="text-sm text-white/90 mt-1">
           Din personliga rekryteringspipeline - dra kandidater mellan steg
         </p>
       </div>
