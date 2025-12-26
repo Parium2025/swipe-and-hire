@@ -36,6 +36,7 @@ export interface MyCandidateData {
   video_url: string | null;
   is_profile_video: boolean | null;
   applied_at: string | null;
+  viewed_at: string | null;
 }
 
 export const STAGE_CONFIG = {
@@ -87,6 +88,7 @@ export function useMyCandidatesData() {
           custom_answers,
           status,
           applied_at,
+          viewed_at,
           job_postings!inner(title)
         `)
         .in('id', applicationIds);
@@ -157,6 +159,7 @@ export function useMyCandidatesData() {
           video_url: media.video_url,
           is_profile_video: media.is_profile_video,
           applied_at: app?.applied_at || null,
+          viewed_at: app?.viewed_at || null,
         };
       });
 
@@ -353,6 +356,36 @@ export function useMyCandidatesData() {
     return candidates.some(c => c.application_id === applicationId);
   }, [candidates]);
 
+  // Mark application as viewed
+  const markAsViewed = useMutation({
+    mutationFn: async (applicationId: string) => {
+      const { error } = await supabase
+        .from('job_applications')
+        .update({ viewed_at: new Date().toISOString() })
+        .eq('id', applicationId)
+        .is('viewed_at', null);
+
+      if (error) throw error;
+    },
+    onMutate: async (applicationId) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
+      
+      queryClient.setQueryData(['my-candidates', user?.id], (old: MyCandidateData[] | undefined) => {
+        if (!old) return old;
+        return old.map(c => 
+          c.application_id === applicationId 
+            ? { ...c, viewed_at: new Date().toISOString() } 
+            : c
+        );
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['applications'] });
+    },
+  });
+
   return {
     candidates,
     candidatesByStage,
@@ -366,5 +399,6 @@ export function useMyCandidatesData() {
     updateNotes,
     updateRating,
     isInMyCandidates,
+    markAsViewed,
   };
 }

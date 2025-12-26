@@ -133,6 +133,7 @@ export type Database = {
           phone: string | null
           status: string
           updated_at: string
+          viewed_at: string | null
           work_schedule: string | null
         }
         Insert: {
@@ -155,6 +156,7 @@ export type Database = {
           phone?: string | null
           status?: string
           updated_at?: string
+          viewed_at?: string | null
           work_schedule?: string | null
         }
         Update: {
@@ -177,6 +179,7 @@ export type Database = {
           phone?: string | null
           status?: string
           updated_at?: string
+          viewed_at?: string | null
           work_schedule?: string | null
         }
         Relationships: [
