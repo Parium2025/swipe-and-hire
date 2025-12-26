@@ -108,10 +108,18 @@ const StarRating = ({
   );
 };
 
-// Wrapper component for CandidateAvatar to make it smaller
+// Wrapper component for CandidateAvatar with inline video playback
 const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => {
+  const hasVideo = candidate.is_profile_video && candidate.video_url;
+  
   return (
-    <div className="h-8 w-8 flex-shrink-0 [&>*]:h-8 [&>*]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1">
+    <div 
+      className="h-8 w-8 flex-shrink-0 [&>*]:h-8 [&>*]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
+      onClick={hasVideo ? (e) => {
+        // Prevent opening profile dialog when clicking on video - let ProfileVideo handle playback
+        e.stopPropagation();
+      } : undefined}
+    >
       <CandidateAvatar
         profileImageUrl={candidate.profile_image_url}
         videoUrl={candidate.video_url}
