@@ -66,7 +66,9 @@ const InteractiveStarRating = ({
 }) => {
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   
-  const handleClick = (starIndex: number) => {
+  const handleClick = (e: React.MouseEvent, starIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (onChange) {
       // If clicking the same rating, reset to 0
       const newRating = starIndex + 1 === rating ? 0 : starIndex + 1;
@@ -85,8 +87,11 @@ const InteractiveStarRating = ({
         <button
           key={i}
           type="button"
-          onClick={() => handleClick(i)}
-          onMouseEnter={() => onChange && setHoverRating(i + 1)}
+          onClick={(e) => handleClick(e, i)}
+          onMouseEnter={(e) => {
+            e.stopPropagation();
+            if (onChange) setHoverRating(i + 1);
+          }}
           className="p-0.5 focus:outline-none transition-transform hover:scale-110"
         >
           <Star 
