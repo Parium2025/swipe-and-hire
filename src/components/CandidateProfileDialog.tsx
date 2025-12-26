@@ -125,7 +125,7 @@ export const CandidateProfileDialog = ({
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
-  const [notesExpanded, setNotesExpanded] = useState(true);
+  const [sidebarTab, setSidebarTab] = useState<'activity' | 'comments'>('activity');
   const [notes, setNotes] = useState<CandidateNote[]>([]);
   const [newNote, setNewNote] = useState('');
   const [loadingNotes, setLoadingNotes] = useState(false);
@@ -550,78 +550,6 @@ export const CandidateProfileDialog = ({
               </div>
             )}
 
-            {/* Notes Section */}
-            <div className="bg-white/10 border border-white/20 rounded-xl overflow-hidden">
-              <button 
-                onClick={() => setNotesExpanded(!notesExpanded)}
-                className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-              >
-                <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
-                  <StickyNote className="h-3.5 w-3.5" />
-                  Anteckningar ({notes.length})
-                </h3>
-                {notesExpanded ? (
-                  <ChevronUp className="h-4 w-4 text-white" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 text-white" />
-                )}
-              </button>
-              
-              {notesExpanded && (
-                <div className="px-4 pb-4 space-y-3">
-                  {/* Add new note */}
-                  <div className="flex gap-2">
-                    <Textarea
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
-                      placeholder="Skriv en anteckning om kandidaten..."
-                      className="flex-1 min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none"
-                    />
-                    <Button
-                      onClick={saveNote}
-                      disabled={!newNote.trim() || savingNote}
-                      size="icon"
-                      className="h-[60px] w-10 bg-white/10 hover:bg-white/20 border border-white/20"
-                    >
-                      <Send className="h-4 w-4 text-white" />
-                    </Button>
-                  </div>
-
-                  {/* Existing notes */}
-                  {loadingNotes ? (
-                    <p className="text-sm text-white/50 text-center py-2">Laddar...</p>
-                  ) : notes.length === 0 ? (
-                    <p className="text-sm text-white/50 text-center py-2">Inga anteckningar ännu</p>
-                  ) : (
-                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                      {notes.map((note) => (
-                        <div 
-                          key={note.id}
-                          className="bg-white/5 rounded-lg p-3 group relative"
-                        >
-                          <p className="text-sm text-white whitespace-pre-wrap pr-6">{note.note}</p>
-                          <p className="text-xs text-white/40 mt-1">
-                            {new Date(note.created_at).toLocaleDateString('sv-SE', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                          <button
-                            onClick={() => deleteNote(note.id)}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded"
-                          >
-                            <Trash2 className="h-3.5 w-3.5 text-white/50 hover:text-red-400" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
 
           </div>
 
@@ -655,15 +583,95 @@ export const CandidateProfileDialog = ({
           </div>
 
           {/* Activity Sidebar - right side */}
-          <div className="w-64 border-l border-white/20 bg-white/5 flex flex-col overflow-hidden">
-            <div className="p-3 border-b border-white/20">
-              <h3 className="text-xs font-semibold text-white flex items-center gap-2">
-                <Activity className="h-3.5 w-3.5" />
-                Aktivitet
-              </h3>
+          <div className="w-72 border-l border-white/20 bg-white/5 flex flex-col overflow-hidden">
+            {/* Tabs */}
+            <div className="flex border-b border-white/20">
+              <button
+                onClick={() => setSidebarTab('activity')}
+                className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
+                  sidebarTab === 'activity' 
+                    ? 'text-white border-b-2 border-white' 
+                    : 'text-white/50 hover:text-white/70'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-1.5">
+                  <Activity className="h-3.5 w-3.5" />
+                  Aktivitet
+                </div>
+              </button>
+              <button
+                onClick={() => setSidebarTab('comments')}
+                className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
+                  sidebarTab === 'comments' 
+                    ? 'text-white border-b-2 border-white' 
+                    : 'text-white/50 hover:text-white/70'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-1.5">
+                  <StickyNote className="h-3.5 w-3.5" />
+                  Anteckningar
+                </div>
+              </button>
             </div>
+
+            {/* Tab content */}
             <div className="flex-1 overflow-y-auto p-3">
-              <CandidateActivityLog applicantId={application?.applicant_id || null} />
+              {sidebarTab === 'activity' ? (
+                <CandidateActivityLog applicantId={application?.applicant_id || null} />
+              ) : (
+                <div className="space-y-3">
+                  {/* Add new note */}
+                  <div className="space-y-2">
+                    <Textarea
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      placeholder="Skriv en anteckning..."
+                      className="w-full min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none text-xs"
+                    />
+                    <Button
+                      onClick={saveNote}
+                      disabled={!newNote.trim() || savingNote}
+                      size="sm"
+                      className="w-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs"
+                    >
+                      <Send className="h-3 w-3 mr-1.5" />
+                      Lägg till
+                    </Button>
+                  </div>
+
+                  {/* Existing notes */}
+                  {loadingNotes ? (
+                    <p className="text-xs text-white/50 text-center py-2">Laddar...</p>
+                  ) : notes.length === 0 ? (
+                    <p className="text-xs text-white/50 text-center py-4">Inga anteckningar ännu</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {notes.map((note) => (
+                        <div 
+                          key={note.id}
+                          className="bg-white/5 rounded-lg p-2.5 group relative"
+                        >
+                          <p className="text-xs text-white whitespace-pre-wrap pr-5 leading-relaxed">{note.note}</p>
+                          <p className="text-[10px] text-white/40 mt-1">
+                            {new Date(note.created_at).toLocaleDateString('sv-SE', {
+                              day: 'numeric',
+                              month: 'short',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                          <button
+                            onClick={() => deleteNote(note.id)}
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-white/10 rounded"
+                          >
+                            <Trash2 className="h-3 w-3 text-white/50 hover:text-red-400" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
