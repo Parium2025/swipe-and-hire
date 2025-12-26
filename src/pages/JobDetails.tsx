@@ -28,6 +28,25 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import EmployerLayout from '@/components/EmployerLayout';
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragStartEvent,
+  DragEndEvent,
+  DragOverEvent,
+  useDroppable,
+} from '@dnd-kit/core';
+import {
+  useSortable,
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface JobApplication {
   id: string;
@@ -62,6 +81,19 @@ interface JobPosting {
   created_at: string;
 }
 
+type ApplicationStatus = 'pending' | 'reviewing' | 'interview' | 'offered' | 'hired' | 'rejected';
+
+const STATUS_ORDER: ApplicationStatus[] = ['pending', 'reviewing', 'interview', 'offered', 'hired'];
+
+const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string }> = {
+  pending: { label: 'Inkorg', color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40' },
+  reviewing: { label: 'Granskar', color: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
+  interview: { label: 'Intervju', color: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
+  offered: { label: 'Erbjuden', color: 'bg-green-500/20 text-green-300 border-green-500/40' },
+  hired: { label: 'Anställd', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
+  rejected: { label: 'Avvisad', color: 'bg-red-500/20 text-red-300 border-red-500/40' },
+};
+
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
@@ -70,6 +102,18 @@ const JobDetails = () => {
   const [job, setJob] = useState<JobPosting | null>(null);
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  );
 
   useEffect(() => {
     if (!jobId || !user) return;
@@ -240,7 +284,7 @@ const JobDetails = () => {
     );
   };
 
-  const ApplicationCard = ({ application }: { application: JobApplication }) => {
+  const ApplicationCardContent = ({ application, isDragging }: { application: JobApplication; isDragging?: boolean }) => {
     const isUnread = !application.viewed_at;
     
     const handleClick = () => {
@@ -252,7 +296,9 @@ const JobDetails = () => {
     
     return (
       <Card 
-        className="bg-white/5 backdrop-blur-sm border-white/20 mb-2 cursor-pointer hover:bg-white/10 transition-colors"
+        className={`bg-white/5 backdrop-blur-sm border-white/20 mb-2 cursor-grab active:cursor-grabbing hover:bg-white/10 transition-all ${
+          isDragging ? 'shadow-xl ring-2 ring-primary/50 bg-white/10' : ''
+        }`}
         onClick={handleClick}
       >
         <CardContent className="p-2 md:p-3">
@@ -332,6 +378,101 @@ const JobDetails = () => {
       </Card>
     );
   };
+
+  // Sortable wrapper for application cards
+  const SortableApplicationCard = ({ application }: { application: JobApplication }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: application.id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <ApplicationCardContent application={application} isDragging={isDragging} />
+      </div>
+    );
+  };
+
+  // Droppable status column
+  const StatusColumn = ({ status, isOver }: { status: ApplicationStatus; isOver?: boolean }) => {
+    const config = STATUS_CONFIG[status];
+    const apps = filterApplicationsByStatus(status);
+    
+    const { setNodeRef } = useDroppable({
+      id: status,
+    });
+
+    return (
+      <div className={`bg-white/5 rounded-lg p-2 md:p-3 transition-all ${isOver ? 'ring-2 ring-primary scale-[1.02]' : ''}`}>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-white font-semibold text-sm">{config.label}</h3>
+          <Badge variant="outline" className={config.color}>
+            {apps.length}
+          </Badge>
+        </div>
+        <div 
+          ref={setNodeRef}
+          className={`space-y-2 min-h-[60px] rounded-lg transition-colors ${isOver ? 'bg-white/5' : ''}`}
+        >
+          <SortableContext items={apps.map(a => a.id)} strategy={verticalListSortingStrategy}>
+            {apps.map((app) => (
+              <SortableApplicationCard key={app.id} application={app} />
+            ))}
+          </SortableContext>
+          {apps.length === 0 && (
+            <div className="text-center py-4 text-white/60 text-xs">
+              {isOver ? 'Släpp här' : 'Inga kandidater'}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // DnD handlers
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const overId = event.over?.id as string | undefined;
+    if (overId && STATUS_ORDER.includes(overId as ApplicationStatus)) {
+      setOverId(overId);
+    } else {
+      setOverId(null);
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+    setOverId(null);
+
+    if (!over) return;
+
+    const applicationId = active.id as string;
+    const targetStatus = over.id as string;
+
+    // Check if dropped on a status column
+    if (STATUS_ORDER.includes(targetStatus as ApplicationStatus)) {
+      const application = applications.find(a => a.id === applicationId);
+      if (application && application.status !== targetStatus) {
+        updateApplicationStatus(applicationId, targetStatus);
+      }
+    }
+  };
+
+  const activeApplication = activeId ? applications.find(a => a.id === activeId) : null;
 
   if (loading) {
     return null; // Return nothing while loading for smooth fade-in
@@ -422,83 +563,33 @@ const JobDetails = () => {
           </div>
         </div>
 
-        {/* Kanban View */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
-          {/* Inkorg */}
-          <div className="bg-white/5 rounded-lg p-2 md:p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-white font-semibold text-sm">Inkorg</h3>
-              <Badge variant="outline" className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40">
-                {filterApplicationsByStatus('pending').length}
-              </Badge>
-            </div>
-            <div className="space-y-2">
-              {filterApplicationsByStatus('pending').map((app) => (
-                <ApplicationCard key={app.id} application={app} />
-              ))}
-            </div>
+        {/* Kanban View with Drag and Drop */}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
+            {STATUS_ORDER.map((status) => (
+              <StatusColumn 
+                key={status} 
+                status={status} 
+                isOver={overId === status}
+              />
+            ))}
           </div>
 
-          {/* Granskar */}
-          <div className="bg-white/5 rounded-lg p-2 md:p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-white font-semibold text-sm">Granskar</h3>
-              <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-500/40">
-                {filterApplicationsByStatus('reviewing').length}
-              </Badge>
-            </div>
-            <div className="space-y-2">
-              {filterApplicationsByStatus('reviewing').map((app) => (
-                <ApplicationCard key={app.id} application={app} />
-              ))}
-            </div>
-          </div>
-
-          {/* Intervju */}
-          <div className="bg-white/5 rounded-lg p-2 md:p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-white font-semibold text-sm">Intervju</h3>
-              <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/40">
-                {filterApplicationsByStatus('interview').length}
-              </Badge>
-            </div>
-            <div className="space-y-2">
-              {filterApplicationsByStatus('interview').map((app) => (
-                <ApplicationCard key={app.id} application={app} />
-              ))}
-            </div>
-          </div>
-
-          {/* Erbjuden */}
-          <div className="bg-white/5 rounded-lg p-2 md:p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-white font-semibold text-sm">Erbjuden</h3>
-              <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/40">
-                {filterApplicationsByStatus('offered').length}
-              </Badge>
-            </div>
-            <div className="space-y-2">
-              {filterApplicationsByStatus('offered').map((app) => (
-                <ApplicationCard key={app.id} application={app} />
-              ))}
-            </div>
-          </div>
-
-          {/* Anställd */}
-          <div className="bg-white/5 rounded-lg p-2 md:p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-white font-semibold text-sm">Anställd</h3>
-              <Badge variant="outline" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
-                {filterApplicationsByStatus('hired').length}
-              </Badge>
-            </div>
-            <div className="space-y-2">
-              {filterApplicationsByStatus('hired').map((app) => (
-                <ApplicationCard key={app.id} application={app} />
-              ))}
-            </div>
-          </div>
-        </div>
+          {/* Drag Overlay */}
+          <DragOverlay>
+            {activeApplication ? (
+              <div className="opacity-90">
+                <ApplicationCardContent application={activeApplication} isDragging />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </div>
   );
 };
