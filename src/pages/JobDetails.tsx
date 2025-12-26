@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +30,8 @@ import {
   DndContext,
   DragOverlay,
   closestCorners,
+  pointerWithin,
+  type CollisionDetection,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -153,6 +155,12 @@ const JobDetails = () => {
     }),
     useSensor(KeyboardSensor)
   );
+
+  const collisionDetectionStrategy = useCallback<CollisionDetection>((args) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) return pointerCollisions;
+    return closestCorners(args);
+  }, []);
 
   useEffect(() => {
     if (!jobId || !user) return;
@@ -454,6 +462,12 @@ const JobDetails = () => {
             ))}
           </SortableContext>
 
+          {isOver && apps.length > 0 && (
+            <div className="text-center py-2 text-xs text-white font-medium">
+              👇 Släpp här
+            </div>
+          )}
+
           {apps.length === 0 && (
             <div className={`text-center py-8 text-xs transition-all ${isOver ? 'text-white font-medium' : 'text-white/60'}`}>
               {isOver ? '👇 Släpp här' : 'Inga kandidater i detta steg'}
@@ -469,13 +483,25 @@ const JobDetails = () => {
     setActiveId(event.active.id as string);
   };
 
-  const handleDragOver = (event: DragOverEvent) => {
-    const overId = event.over?.id as string | undefined;
-    if (overId && STATUS_ORDER.includes(overId as ApplicationStatus)) {
-      setOverId(overId);
-    } else {
-      setOverId(null);
+  const resolveOverStatus = (overRawId?: string): ApplicationStatus | null => {
+    if (!overRawId) return null;
+
+    if (STATUS_ORDER.includes(overRawId as ApplicationStatus)) {
+      return overRawId as ApplicationStatus;
     }
+
+    const overApp = applications.find((a) => a.id === overRawId);
+    if (overApp && STATUS_ORDER.includes(overApp.status as ApplicationStatus)) {
+      return overApp.status as ApplicationStatus;
+    }
+
+    return null;
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const overRawId = event.over?.id as string | undefined;
+    const status = resolveOverStatus(overRawId);
+    setOverId(status);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -486,14 +512,14 @@ const JobDetails = () => {
     if (!over) return;
 
     const applicationId = active.id as string;
-    const targetStatus = over.id as string;
+    const overRawId = over.id as string;
+    const targetStatus = resolveOverStatus(overRawId);
 
-    // Check if dropped on a status column
-    if (STATUS_ORDER.includes(targetStatus as ApplicationStatus)) {
-      const application = applications.find(a => a.id === applicationId);
-      if (application && application.status !== targetStatus) {
-        updateApplicationStatus(applicationId, targetStatus);
-      }
+    if (!targetStatus) return;
+
+    const application = applications.find((a) => a.id === applicationId);
+    if (application && application.status !== targetStatus) {
+      updateApplicationStatus(applicationId, targetStatus);
     }
   };
 
@@ -591,7 +617,7 @@ const JobDetails = () => {
         {/* Kanban View with Drag and Drop */}
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCorners}
+          collisionDetection={collisionDetectionStrategy}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
