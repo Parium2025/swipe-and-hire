@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useMyCandidatesData, STAGE_CONFIG, CandidateStage, MyCandidateData } from '@/hooks/useMyCandidatesData';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -108,6 +108,21 @@ const StarRating = ({
   );
 };
 
+// Wrapper component for CandidateAvatar to make it smaller
+const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => {
+  return (
+    <div className="h-8 w-8 flex-shrink-0 [&>*]:h-8 [&>*]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1">
+      <CandidateAvatar
+        profileImageUrl={candidate.profile_image_url}
+        videoUrl={candidate.video_url}
+        isProfileVideo={candidate.is_profile_video}
+        firstName={candidate.first_name}
+        lastName={candidate.last_name}
+      />
+    </div>
+  );
+};
+
 const CandidateCardContent = ({ 
   candidate, 
   onRemove, 
@@ -133,14 +148,7 @@ const CandidateCardContent = ({
       )}
       
       <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8 ring-1 ring-white/20 flex-shrink-0">
-          {candidate.profile_image_url ? (
-            <AvatarImage src={candidate.profile_image_url} alt={`${candidate.first_name} ${candidate.last_name}`} />
-          ) : null}
-          <AvatarFallback className="bg-fuchsia-500/80 text-white text-xs font-semibold">
-            {initials}
-          </AvatarFallback>
-        </Avatar>
+        <SmallCandidateAvatar candidate={candidate} />
         
         <div className="flex-1 min-w-0 pr-4">
           <p className="text-fuchsia-400 font-medium text-xs truncate hover:underline">
