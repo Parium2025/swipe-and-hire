@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { 
   Clock, 
   MapPin, 
@@ -30,6 +30,7 @@ import EmployerLayout from '@/components/EmployerLayout';
 
 interface JobApplication {
   id: string;
+  applicant_id: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -44,6 +45,10 @@ interface JobApplication {
   status: 'pending' | 'reviewing' | 'interview' | 'offered' | 'hired' | 'rejected';
   custom_answers: any;
   viewed_at: string | null;
+  // Profile media from RPC
+  profile_image_url: string | null;
+  video_url: string | null;
+  is_profile_video: boolean;
 }
 
 interface JobPosting {
@@ -91,7 +96,30 @@ const JobDetails = () => {
         .order('applied_at', { ascending: false });
 
       if (applicationsError) throw applicationsError;
-      setApplications((applicationsData || []) as JobApplication[]);
+      
+      // Fetch profile media for each applicant using RPC
+      const applicationsWithMedia = await Promise.all(
+        (applicationsData || []).map(async (app) => {
+          const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
+            p_applicant_id: app.applicant_id,
+            p_employer_id: user?.id
+          });
+          
+          const media = (mediaData?.[0] || {}) as {
+            profile_image_url?: string;
+            video_url?: string;
+            is_profile_video?: boolean;
+          };
+          return {
+            ...app,
+            profile_image_url: media.profile_image_url || null,
+            video_url: media.video_url || null,
+            is_profile_video: media.is_profile_video || false,
+          };
+        })
+      );
+      
+      setApplications(applicationsWithMedia as JobApplication[]);
     } catch (error: any) {
       toast({
         title: 'Fel',
@@ -127,9 +155,6 @@ const JobDetails = () => {
     }
   };
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -206,11 +231,15 @@ const JobDetails = () => {
                 <div className="h-2 w-2 rounded-full bg-fuchsia-500" />
               </div>
             )}
-            <Avatar className="h-7 w-7 md:h-8 md:w-8">
-              <AvatarFallback className="bg-primary text-white text-xs">
-                {getInitials(application.first_name, application.last_name)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="h-7 w-7 md:h-8 md:w-8 flex-shrink-0 [&>*]:h-7 [&>*]:w-7 md:[&>*]:h-8 md:[&>*]:w-8 [&_.h-10]:h-7 [&_.w-10]:w-7 md:[&_.h-10]:h-8 md:[&_.w-10]:w-8 [&_.ring-2]:ring-1">
+              <CandidateAvatar
+                profileImageUrl={application.profile_image_url}
+                videoUrl={application.video_url}
+                isProfileVideo={application.is_profile_video}
+                firstName={application.first_name}
+                lastName={application.last_name}
+              />
+            </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-0.5 md:mb-1">
                 <h4 className="text-white font-semibold text-xs md:text-sm truncate">
