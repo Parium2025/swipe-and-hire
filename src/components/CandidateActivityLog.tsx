@@ -3,7 +3,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { Star, StickyNote, Edit3, Activity } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 
 interface CandidateActivityLogProps {
   applicantId: string | null;
@@ -115,34 +115,32 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
   }, {} as Record<string, CandidateActivity[]>);
 
   return (
-    <ScrollArea className="h-[300px] pr-4">
-      <div className="space-y-4">
-        {Object.entries(groupedActivities).map(([date, dateActivities]) => (
-          <div key={date}>
-            <p className="text-xs text-white/40 mb-2 capitalize">{date}</p>
-            <div className="space-y-3">
-              {dateActivities.map((activity) => {
-                const Icon = getActivityIcon(activity.activity_type);
-                return (
-                  <div key={activity.id} className="flex gap-3">
-                    <div className="flex-shrink-0 h-7 w-7 rounded-full bg-white/10 flex items-center justify-center">
-                      <Icon className="h-3.5 w-3.5 text-white/70" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs leading-relaxed">
-                        {getActivityDescription(activity)}
-                      </p>
-                      <p className="text-[10px] text-white/40 mt-0.5">
-                        {formatTime(activity.created_at)}
-                      </p>
-                    </div>
+    <div className="space-y-4">
+      {Object.entries(groupedActivities).map(([date, dateActivities]) => (
+        <div key={date}>
+          <p className="text-xs text-white/40 mb-2 capitalize">{date}</p>
+          <div className="space-y-3">
+            {dateActivities.map((activity) => {
+              const Icon = getActivityIcon(activity.activity_type);
+              return (
+                <div key={activity.id} className="flex gap-3">
+                  <div className="flex-shrink-0 h-7 w-7 rounded-full bg-white/10 flex items-center justify-center">
+                    <Icon className="h-3.5 w-3.5 text-white/70" />
                   </div>
-                );
-              })}
-            </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs leading-relaxed">
+                      {getActivityDescription(activity)}
+                    </p>
+                    <p className="text-[10px] text-white/40 mt-0.5">
+                      {formatTime(activity.created_at)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
-    </ScrollArea>
+        </div>
+      ))}
+    </div>
   );
 }
