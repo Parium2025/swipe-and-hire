@@ -17,7 +17,8 @@ import {
   X,
   Users,
   Eye,
-  Play
+  Play,
+  Star
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
@@ -69,7 +70,27 @@ interface JobApplication {
   profile_image_url: string | null;
   video_url: string | null;
   is_profile_video: boolean;
+  // Rating from my_candidates
+  rating: number;
 }
+
+// Star rating component - read-only for cards
+const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxStars?: number }) => {
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: maxStars }).map((_, i) => (
+        <Star 
+          key={i}
+          className={`h-2.5 w-2.5 ${
+            i < rating 
+              ? 'text-yellow-400 fill-yellow-400' 
+              : 'text-white/30'
+          }`}
+        />
+      ))}
+    </div>
+  );
+};
 
 interface JobPosting {
   id: string;
@@ -142,6 +163,17 @@ const JobDetails = () => {
 
       if (applicationsError) throw applicationsError;
       
+      // Fetch my_candidates ratings for this recruiter
+      const { data: myCandidatesData } = await supabase
+        .from('my_candidates')
+        .select('applicant_id, rating')
+        .eq('recruiter_id', user?.id);
+      
+      const ratingsByApplicant = new Map<string, number>();
+      (myCandidatesData || []).forEach(mc => {
+        ratingsByApplicant.set(mc.applicant_id, mc.rating || 0);
+      });
+
       // Fetch profile media for each applicant using RPC
       const applicationsWithMedia = await Promise.all(
         (applicationsData || []).map(async (app) => {
@@ -160,6 +192,7 @@ const JobDetails = () => {
             profile_image_url: media.profile_image_url || null,
             video_url: media.video_url || null,
             is_profile_video: media.is_profile_video || false,
+            rating: ratingsByApplicant.get(app.applicant_id) || 0,
           };
         })
       );
@@ -312,9 +345,12 @@ const JobDetails = () => {
             <SmallCandidateAvatarWrapper application={application} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-0.5 md:mb-1">
-                <h4 className="text-white font-semibold text-xs md:text-sm truncate">
-                  {application.first_name} {application.last_name}
-                </h4>
+                <div className="min-w-0">
+                  <h4 className="text-fuchsia-400 font-medium text-xs md:text-sm truncate hover:underline">
+                    {application.first_name} {application.last_name}
+                  </h4>
+                  <StarRating rating={application.rating} />
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
