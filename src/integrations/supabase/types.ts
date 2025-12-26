@@ -560,6 +560,7 @@ export type Database = {
           id: string
           job_id: string | null
           notes: string | null
+          rating: number | null
           recruiter_id: string
           stage: string
           updated_at: string
@@ -571,6 +572,7 @@ export type Database = {
           id?: string
           job_id?: string | null
           notes?: string | null
+          rating?: number | null
           recruiter_id: string
           stage?: string
           updated_at?: string
@@ -582,6 +584,7 @@ export type Database = {
           id?: string
           job_id?: string | null
           notes?: string | null
+          rating?: number | null
           recruiter_id?: string
           stage?: string
           updated_at?: string

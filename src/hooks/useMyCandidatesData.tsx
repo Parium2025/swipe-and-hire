@@ -14,6 +14,7 @@ export interface MyCandidateData {
   job_id: string | null;
   stage: CandidateStage;
   notes: string | null;
+  rating: number;
   created_at: string;
   updated_at: string;
   // Joined data from job_applications
@@ -135,6 +136,7 @@ export function useMyCandidatesData() {
           job_id: mc.job_id,
           stage: mc.stage as CandidateStage,
           notes: mc.notes,
+          rating: mc.rating || 0,
           created_at: mc.created_at,
           updated_at: mc.updated_at,
           first_name: app?.first_name || null,
@@ -285,6 +287,40 @@ export function useMyCandidatesData() {
     },
   });
 
+  // Update rating
+  const updateRating = useMutation({
+    mutationFn: async ({ id, rating }: { id: string; rating: number }) => {
+      const { data, error } = await supabase
+        .from('my_candidates')
+        .update({ rating })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onMutate: async ({ id, rating }) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
+      const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
+      
+      queryClient.setQueryData(['my-candidates', user?.id], (old: MyCandidateData[] | undefined) => {
+        if (!old) return old;
+        return old.map(c => c.id === id ? { ...c, rating } : c);
+      });
+      
+      return { previousCandidates };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['my-candidates', user?.id], context?.previousCandidates);
+      toast.error('Kunde inte uppdatera betyg');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+    },
+  });
+
   // Group candidates by stage
   const candidatesByStage = useMemo(() => {
     const grouped: Record<CandidateStage, MyCandidateData[]> = {
@@ -328,6 +364,7 @@ export function useMyCandidatesData() {
     moveCandidate,
     removeCandidate,
     updateNotes,
+    updateRating,
     isInMyCandidates,
   };
 }

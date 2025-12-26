@@ -68,6 +68,7 @@ interface CandidateCardProps {
   candidate: MyCandidateData;
   onRemove: () => void;
   onOpenProfile: () => void;
+  onRatingChange: (rating: number) => void;
   isDragging?: boolean;
 }
 
@@ -85,15 +86,52 @@ const formatCompactTime = (date: string | null) => {
   return `${hours}tim`;
 };
 
-// Star rating component
-const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxStars?: number }) => {
+// Star rating component - interactive
+const StarRating = ({ 
+  rating = 0, 
+  maxStars = 5, 
+  onChange,
+  candidateId 
+}: { 
+  rating?: number; 
+  maxStars?: number; 
+  onChange?: (rating: number) => void;
+  candidateId?: string;
+}) => {
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
+  
+  const handleClick = (e: React.MouseEvent, starIndex: number) => {
+    e.stopPropagation();
+    if (onChange) {
+      // If clicking the same rating, reset to 0
+      const newRating = starIndex + 1 === rating ? 0 : starIndex + 1;
+      onChange(newRating);
+    }
+  };
+  
+  const displayRating = hoverRating !== null ? hoverRating : rating;
+  
   return (
-    <div className="flex gap-0.5">
+    <div 
+      className="flex gap-0.5"
+      onMouseLeave={() => setHoverRating(null)}
+    >
       {Array.from({ length: maxStars }).map((_, i) => (
-        <Star 
-          key={i} 
-          className={`h-2.5 w-2.5 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-white/30'}`}
-        />
+        <button
+          key={i}
+          type="button"
+          onClick={(e) => handleClick(e, i)}
+          onMouseEnter={() => onChange && setHoverRating(i + 1)}
+          className="p-0 focus:outline-none transition-transform hover:scale-110"
+        >
+          <Star 
+            className={`h-2.5 w-2.5 transition-colors ${
+              i < displayRating 
+                ? 'text-yellow-400 fill-yellow-400' 
+                : 'text-white/30 hover:text-yellow-400/50'
+            }`}
+          />
+        </button>
       ))}
     </div>
   );
@@ -103,6 +141,7 @@ const CandidateCardContent = ({
   candidate, 
   onRemove, 
   onOpenProfile,
+  onRatingChange,
   isDragging,
 }: CandidateCardProps) => {
   const initials = `${candidate.first_name?.[0] || ''}${candidate.last_name?.[0] || ''}`.toUpperCase() || '?';
@@ -137,7 +176,11 @@ const CandidateCardContent = ({
           <p className="text-fuchsia-400 font-medium text-xs truncate hover:underline">
             {candidate.first_name} {candidate.last_name}
           </p>
-          <StarRating rating={0} />
+          <StarRating 
+            rating={candidate.rating} 
+            onChange={onRatingChange}
+            candidateId={candidate.id}
+          />
           {appliedTime && (
             <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px]">
               <span className="flex items-center gap-0.5">
@@ -197,10 +240,11 @@ interface StageColumnProps {
   onMoveCandidate: (id: string, stage: CandidateStage) => void;
   onRemoveCandidate: (candidate: MyCandidateData) => void;
   onOpenProfile: (candidate: MyCandidateData) => void;
+  onRatingChange: (candidateId: string, rating: number) => void;
   isOver?: boolean;
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, isOver }: StageColumnProps) => {
+const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, onRatingChange, isOver }: StageColumnProps) => {
   const config = STAGE_CONFIG[stage];
   const Icon = STAGE_ICONS[stage];
 
@@ -233,6 +277,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
               candidate={candidate}
               onRemove={() => onRemoveCandidate(candidate)}
               onOpenProfile={() => onOpenProfile(candidate)}
+              onRatingChange={(rating) => onRatingChange(candidate.id, rating)}
             />
           ))}
         </SortableContext>
@@ -254,7 +299,8 @@ const MyCandidates = () => {
     stats, 
     isLoading, 
     moveCandidate, 
-    removeCandidate 
+    removeCandidate,
+    updateRating
   } = useMyCandidatesData();
 
   const { user } = useAuth();
@@ -625,6 +671,7 @@ const MyCandidates = () => {
                 onMoveCandidate={handleMoveCandidate}
                 onRemoveCandidate={handleRemoveCandidate}
                 onOpenProfile={handleOpenProfile}
+                onRatingChange={(candidateId, rating) => updateRating.mutate({ id: candidateId, rating })}
                 isOver={overId === stage}
               />
             ))}
@@ -637,6 +684,7 @@ const MyCandidates = () => {
                   candidate={activeCandidate}
                   onRemove={() => {}}
                   onOpenProfile={() => {}}
+                  onRatingChange={() => {}}
                   isDragging
                 />
               </div>
