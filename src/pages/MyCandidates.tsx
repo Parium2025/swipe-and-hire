@@ -39,9 +39,6 @@ import { sv } from 'date-fns/locale';
 import {
   DndContext,
   DragOverlay,
-  closestCorners,
-  pointerWithin,
-  type CollisionDetection,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -59,6 +56,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
+import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 
 const STAGE_ICONS = {
   to_contact: Phone,
@@ -254,7 +252,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
   return (
     <div 
       ref={setNodeRef}
-      className={`flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-all ${isOver ? 'scale-[1.02]' : ''}`}
+      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors"
       style={{ minHeight: 'calc(100vh - 280px)' }}
     >
       <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-primary' : ''}`}>
@@ -607,12 +605,11 @@ const MyCandidates = () => {
     useSensor(KeyboardSensor)
   );
 
-  // Custom collision detection - pointerWithin first, then closestCorners
-  const collisionDetectionStrategy = useCallback<CollisionDetection>((args) => {
-    const pointerCollisions = pointerWithin(args);
-    if (pointerCollisions.length > 0) return pointerCollisions;
-    return closestCorners(args);
-  }, []);
+  // Custom collision detection - stable column selection based on pointer X-position
+  const collisionDetectionStrategy = useMemo(
+    () => columnXCollisionDetection(stagesToDisplay),
+    [stagesToDisplay]
+  );
 
   const activeCandidate = useMemo(() => {
     if (!activeId) return null;
