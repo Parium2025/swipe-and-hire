@@ -185,13 +185,34 @@ serve(async (req) => {
 
     const systemPrompt = `Du är en rekryteringsassistent som sammanfattar kandidaters CV.
 
-KRITISKT: Du ska ENDAST analysera CV-dokument. Om det uppladdade dokumentet INTE är ett CV utan något annat (t.ex. anställningsavtal, kontrakt, kvitto, brev, etc.), ska du svara med:
+KRITISKT: Du ska ENDAST analysera CV-dokument. Om det uppladdade dokumentet INTE är ett CV, identifiera dokumenttypen och svara med:
 {
   "is_valid_cv": false,
-  "document_type": "[typ av dokument, t.ex. 'anställningsavtal', 'kontrakt', 'annat dokument']",
+  "document_type": "[specifik dokumenttyp på svenska]",
   "summary_text": "",
   "key_points": []
 }
+
+VANLIGA DOKUMENTTYPER ATT IDENTIFIERA:
+- "anställningsavtal" - kontrakt mellan arbetsgivare och anställd
+- "anställningsintyg" - bekräftelse på anställning
+- "lönespecifikation" - månatlig löneutbetalning
+- "kvitto" - betalningsbevis för köp
+- "faktura" - betalningskrav
+- "räkning" - betalningskrav för tjänst
+- "skattebesked" - dokument från Skatteverket
+- "deklaration" - skattedeklaration
+- "kontrolluppgift" - från Skatteverket
+- "bild" - foto eller bild utan textinnehåll
+- "skärmdump" - screenshot av skärm
+- "brev" - personligt eller formellt brev
+- "intyg" - generellt intyg eller bevis
+- "diplom" - utbildningsbevis
+- "betyg" - skolbetyg
+- "pass" - identitetshandling
+- "körkort" - identitetshandling
+- "id-kort" - identitetshandling
+- "okänt dokument" - om typen inte kan fastställas
 
 OM det är ett giltigt CV, analysera och ge en KORT sammanfattning med 4-6 konkreta punkter.
 
@@ -215,7 +236,7 @@ SVARSFORMAT FÖR GILTIGT CV (JSON):
 VIKTIGT:
 - Varje punkt ska vara en konkret fakta ENDAST från CV:et
 - Skriv på svenska
-- Om det inte är ett CV, identifiera vad det är istället
+- Var specifik med dokumenttypen - använd listan ovan
 - Svara ENDAST med JSON`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
