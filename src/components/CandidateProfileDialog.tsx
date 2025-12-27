@@ -655,30 +655,10 @@ export const CandidateProfileDialog = ({
               ) : (
                 <div className="text-center py-4">
                   {signedCvUrl ? (
-                    <>
-                      <p className="text-sm text-white/50 mb-3">
-                        Ingen sammanfattning ännu
-                      </p>
-                      <Button
-                        onClick={() => generateAiSummary(false)}
-                        disabled={generatingSummary}
-                        variant="ghost"
-                        size="sm"
-                        className="text-white/80 hover:text-white hover:bg-white/10"
-                      >
-                        {generatingSummary ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Läser CV...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            Analysera CV
-                          </>
-                        )}
-                      </Button>
-                    </>
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-white/50" />
+                      <span className="ml-2 text-sm text-white/50">Genererar sammanfattning...</span>
+                    </div>
                   ) : (
                     <p className="text-sm text-white/50">
                       Kandidaten har inte laddat upp något CV
