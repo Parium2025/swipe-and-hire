@@ -273,14 +273,20 @@ const JobSwipe = () => {
 
       if (error) throw error;
 
-      // Trigger CV summary generation in background (fire and forget)
+      // Queue CV for analysis (rate-limit safe, handles millions of users)
       if (profile?.cv_url) {
-        supabase.functions.invoke('generate-cv-summary', {
-          body: {
-            applicant_id: user?.id,
-            job_id: currentJob.id,
-          },
-        }).catch(err => console.warn('Background CV summary generation failed:', err));
+        supabase.rpc('queue_cv_analysis', {
+          p_applicant_id: user?.id,
+          p_cv_url: profile.cv_url,
+          p_job_id: currentJob.id,
+          p_priority: 5, // Normal priority for applications
+        }).then(({ error }) => {
+          if (error) console.warn('Failed to queue CV for analysis:', error);
+          else {
+            // Trigger queue processor in background
+            supabase.functions.invoke('process-cv-queue').catch(() => {});
+          }
+        });
       }
 
       toast({

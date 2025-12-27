@@ -44,3 +44,6 @@ verify_jwt = true
 
 [functions.generate-cv-summary]
 verify_jwt = true
+
+[functions.process-cv-queue]
+verify_jwt = false
