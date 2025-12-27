@@ -149,38 +149,15 @@ serve(async (req) => {
       }
     }
 
-    // Build candidate context from available data
-    let candidateInfo = '';
+    // ONLY use CV content - not profile or application info
+    // The summary should be based PURELY on the uploaded CV document
     
-    if (profile) {
-      candidateInfo += '=== PROFILINFORMATION ===\n';
-      if (profile.first_name || profile.last_name) {
-        candidateInfo += `Namn: ${profile.first_name || ''} ${profile.last_name || ''}\n`;
-      }
-      if (profile.occupation) candidateInfo += `Yrke: ${profile.occupation}\n`;
-      if (profile.bio) candidateInfo += `Om mig: ${profile.bio}\n`;
-      if (profile.city) candidateInfo += `Stad: ${profile.city}\n`;
-      if (profile.availability) candidateInfo += `Tillgänglighet: ${profile.availability}\n`;
-      if (profile.work_schedule) candidateInfo += `Arbetstider: ${profile.work_schedule}\n`;
-      if (profile.employment_type) candidateInfo += `Anställningstyp: ${profile.employment_type}\n`;
-    }
-
-    if (application) {
-      candidateInfo += '\n=== ANSÖKNINGSINFO ===\n';
-      if (application.cover_letter) candidateInfo += `Personligt brev: ${application.cover_letter}\n`;
-      if (application.employment_status) candidateInfo += `Anställningsstatus: ${application.employment_status}\n`;
-    }
-
-    if (cvText && cvText.length > 50) {
-      candidateInfo += '\n=== CV-INNEHÅLL ===\n' + cvText;
-    }
-
-    // Check if we have enough data to generate a summary
-    if (!candidateInfo.trim() && !cvText.trim()) {
+    // Check if we have CV data to analyze
+    if (!cvText || cvText.length < 50) {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Ingen profilinformation eller CV tillgängligt för denna kandidat' 
+          error: 'Inget CV uppladdad för denna kandidat' 
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -195,32 +172,39 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `Du är en rekryteringsassistent som sammanfattar kandidaters CV och profil.
+    const systemPrompt = `Du är en rekryteringsassistent som sammanfattar kandidaters CV.
 
-Din uppgift är att analysera kandidatens information och ge en KORT sammanfattning med 4-6 konkreta punkter.
+KRITISKT: Du ska ENDAST analysera CV-dokument. Om det uppladdade dokumentet INTE är ett CV utan något annat (t.ex. anställningsavtal, kontrakt, kvitto, brev, etc.), ska du svara med:
+{
+  "is_valid_cv": false,
+  "document_type": "[typ av dokument, t.ex. 'anställningsavtal', 'kontrakt', 'annat dokument']",
+  "summary_text": "",
+  "key_points": []
+}
 
-FOKUSERA PÅ:
+OM det är ett giltigt CV, analysera och ge en KORT sammanfattning med 4-6 konkreta punkter.
+
+FOKUSERA PÅ (om tillgängligt i CV:et):
 - Arbetslivserfarenhet (företag, roller, tid)
 - Utbildning
-- Körkort och certifieringar (truckkort, etc.)
+- Körkort och certifieringar
 - Kompetenser och färdigheter
-- Tillgänglighet och preferenser
 
-SVARSFORMAT (JSON):
+SVARSFORMAT FÖR GILTIGT CV (JSON):
 {
+  "is_valid_cv": true,
   "summary_text": "En mening som sammanfattar kandidaten",
   "key_points": [
-    "Punkt 1: Konkret observation",
-    "Punkt 2: Konkret observation",
-    "Punkt 3: Konkret observation",
-    "Punkt 4: Konkret observation"
+    "Punkt 1: Konkret observation från CV",
+    "Punkt 2: Konkret observation från CV",
+    "Punkt 3: Konkret observation från CV"
   ]
 }
 
 VIKTIGT:
-- Varje punkt ska vara en konkret fakta från CV:et/profilen
+- Varje punkt ska vara en konkret fakta ENDAST från CV:et
 - Skriv på svenska
-- Om information saknas, nämn det inte alls
+- Om det inte är ett CV, identifiera vad det är istället
 - Svara ENDAST med JSON`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -233,7 +217,7 @@ VIKTIGT:
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: candidateInfo || 'Ingen information tillgänglig.' },
+          { role: 'user', content: cvText },
         ],
       }),
     });
@@ -282,14 +266,51 @@ VIKTIGT:
       }
     } catch (parseError) {
       console.error('Failed to parse AI response:', content);
-      // Create a fallback summary
       summary = {
-        summary_text: content.substring(0, 200),
-        key_points: content.split('\n').filter((l: string) => l.trim().startsWith('-') || l.trim().startsWith('•')).slice(0, 5)
+        is_valid_cv: false,
+        document_type: 'okänt dokument',
+        summary_text: '',
+        key_points: []
       };
     }
 
-    // Save summary to database
+    // Check if the document is NOT a CV
+    if (summary.is_valid_cv === false) {
+      const documentType = summary.document_type || 'ett dokument som inte är ett CV';
+      
+      // Save a special summary indicating this is not a CV
+      const saveJobId = job_id || application?.job_id;
+      if (saveJobId) {
+        await supabase
+          .from('candidate_summaries')
+          .upsert({
+            job_id: saveJobId,
+            applicant_id,
+            application_id: application?.id || application_id,
+            summary_text: `Det uppladdade dokumentet är ${documentType}. Kan inte läsa av ett CV.`,
+            key_points: [{ text: `Dokumenttyp: ${documentType}`, type: 'negative' }],
+            generated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'job_id,applicant_id',
+          });
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          is_valid_cv: false,
+          document_type: documentType,
+          summary: {
+            summary_text: `Det uppladdade dokumentet är ${documentType}. Kan inte läsa av ett CV.`,
+            key_points: [{ text: `Dokumenttyp: ${documentType}`, type: 'negative' }],
+          },
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Save valid CV summary to database
     const saveJobId = job_id || application?.job_id;
     if (saveJobId) {
       const { error: saveError } = await supabase
@@ -315,11 +336,12 @@ VIKTIGT:
       }
     }
 
-    console.log('Summary generated successfully');
+    console.log('CV summary generated successfully');
 
     return new Response(
       JSON.stringify({
         success: true,
+        is_valid_cv: true,
         summary: {
           summary_text: summary.summary_text,
           key_points: summary.key_points,
