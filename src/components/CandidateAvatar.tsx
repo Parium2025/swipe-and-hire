@@ -54,7 +54,7 @@ function CandidateAvatarBase({
         coverImageUrl={resolvedImageUrl || undefined}
         userInitials={initials}
         alt="Kandidatvideo"
-        className="h-10 w-10 ring-2 ring-white/20 rounded-full"
+        className="h-10 w-10 ring-2 ring-inset ring-white/20 rounded-full"
         showCountdown={false}
         showProgressBar={false}
         onPlayingChange={onPlayingChange}
@@ -63,7 +63,7 @@ function CandidateAvatarBase({
   }
 
   return (
-    <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
+    <Avatar className="h-10 w-10 ring-2 ring-inset ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
       {resolvedImageUrl && !avatarError ? (
         <>
           <AvatarImage 
