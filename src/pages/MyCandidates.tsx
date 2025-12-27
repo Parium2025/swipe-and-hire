@@ -50,6 +50,7 @@ import {
   DragEndEvent,
   DragOverEvent,
   useDroppable,
+  MeasuringStrategy,
 } from '@dnd-kit/core';
 import {
   useSortable,
@@ -671,20 +672,35 @@ const MyCandidates = () => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveId(null);
-    setOverId(null);
 
-    if (!over) return;
+    if (!over) {
+      setActiveId(null);
+      setOverId(null);
+      return;
+    }
 
     const candidateId = active.id as string;
     const overRawId = over.id as string;
     const targetStage = resolveOverStage(overRawId);
 
-    if (!targetStage) return;
+    if (!targetStage) {
+      setActiveId(null);
+      setOverId(null);
+      return;
+    }
 
     const candidate = candidates.find(c => c.id === candidateId);
     if (candidate && candidate.stage !== targetStage) {
+      // Update stage FIRST (optimistic update)
       updateCandidateStage(candidateId, targetStage);
+      // Clear drag state after a frame to ensure optimistic update is rendered
+      requestAnimationFrame(() => {
+        setActiveId(null);
+        setOverId(null);
+      });
+    } else {
+      setActiveId(null);
+      setOverId(null);
     }
   };
 
@@ -926,6 +942,11 @@ const MyCandidates = () => {
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
+          measuring={{
+            droppable: {
+              strategy: MeasuringStrategy.Always,
+            },
+          }}
         >
           <div className={`flex gap-4 overflow-x-auto pb-4 pt-2 px-2 ${activeStageFilter !== 'all' ? 'justify-center' : ''}`}>
             {stagesToDisplay.map(stage => (
