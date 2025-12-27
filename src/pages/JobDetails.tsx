@@ -387,8 +387,8 @@ const JobDetails = () => {
     
     return (
       <div 
-        className={`bg-white/5 border border-white/10 rounded-md px-2 py-1.5 transition-all cursor-grab active:cursor-grabbing group relative ${
-          isDragging ? 'shadow-xl ring-2 ring-primary/50 bg-white/10' : 'hover:border-white/30 hover:bg-white/[0.08]'
+        className={`bg-white/5 ring-1 ring-inset ring-white/10 rounded-md px-2 py-1.5 transition-all cursor-grab active:cursor-grabbing group relative ${
+          isDragging ? 'shadow-xl ring-2 ring-inset ring-primary/50 bg-white/10' : 'hover:ring-white/30 hover:bg-white/[0.08]'
         }`}
         onClick={handleClick}
       >
@@ -464,7 +464,7 @@ const JobDetails = () => {
         ref={setNodeRef}
         className={`flex-1 min-w-[220px] max-w-[280px] transition-all ${isOver ? 'scale-[1.02]' : ''}`}
       >
-        <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary' : ''}`}>
+        <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-primary' : ''}`}>
           <div className="flex items-center gap-1.5">
             <Icon className="h-3.5 w-3.5" />
             <span className="font-medium text-xs">{config.label}</span>
