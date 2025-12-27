@@ -495,76 +495,6 @@ export const CandidateProfileDialog = ({
             </div>
           </div>
 
-          {/* AI Summary Section - like Teamtailor's Co-pilot */}
-          <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5" />
-                Sammanfattning
-                <span className="text-[10px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
-                  Baserat på CV
-                </span>
-              </h3>
-            </div>
-
-            {loadingSummary ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-white/50" />
-              </div>
-            ) : aiSummary ? (
-              <div>
-                {/* Key points as bullet list - like Teamtailor Co-pilot */}
-                {aiSummary.key_points && aiSummary.key_points.length > 0 ? (
-                  <ul className="space-y-1.5">
-                    {aiSummary.key_points.map((point, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-white">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 mt-2" />
-                        <span>{point.text}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-white leading-relaxed">
-                    {aiSummary.summary_text}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                {signedCvUrl ? (
-                  <>
-                    <p className="text-sm text-white/50 mb-3">
-                      Ingen sammanfattning ännu
-                    </p>
-                    <Button
-                      onClick={() => generateAiSummary(false)}
-                      disabled={generatingSummary}
-                      variant="ghost"
-                      size="sm"
-                      className="text-white/80 hover:text-white hover:bg-white/10"
-                    >
-                      {generatingSummary ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Läser CV...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Analysera CV
-                        </>
-                      )}
-                    </Button>
-                  </>
-                ) : (
-                  <p className="text-sm text-white/50">
-                    Kandidaten har inte laddat upp något CV
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
           {/* Info sections - matching job dialog input style exactly */}
           <div className="grid gap-4">
             {/* Information */}
@@ -611,7 +541,7 @@ export const CandidateProfileDialog = ({
               </div>
             </div>
 
-            {/* Anställningsinformation */}
+            {/* Anställningsinformation - MOVED UP */}
             {(displayApp.employment_status || displayApp.work_schedule || displayApp.availability) && (
               <div className="bg-white/10 border border-white/20 rounded-xl p-4">
                 <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -641,50 +571,7 @@ export const CandidateProfileDialog = ({
               </div>
             )}
 
-            {/* CV Section - matching profile page style with dialog */}
-            {displayApp.cv_url && (
-              <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-                <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <FileText className="h-3.5 w-3.5" />
-                  CV
-                </h3>
-                <div className="w-full min-h-9 py-2.5 bg-white/5 border border-white/10 rounded-md flex items-center px-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCvOpen(true)}
-                    className="flex items-center gap-2 text-white transition-colors flex-1"
-                  >
-                    <FileText className="h-4 w-4 text-white shrink-0" />
-                    <span className="text-sm">Visa CV</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCvOpen(true)}
-                    className="text-white hover:text-white/80 transition-colors"
-                    title="Öppna CV"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Presentation om kandidaten */}
-            <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-              <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-                <User className="h-3.5 w-3.5" />
-                Presentation om {displayApp.first_name || 'kandidaten'}
-              </h3>
-              {displayApp.bio ? (
-                <p className="text-sm text-white whitespace-pre-wrap leading-relaxed">
-                  {displayApp.bio}
-                </p>
-              ) : (
-                <p className="text-sm text-white/50 italic">Ingen presentation angiven</p>
-              )}
-            </div>
-
-            {/* Questions & Answers */}
+            {/* Questions & Answers - MOVED UP */}
             {hasCustomAnswers && (
               <div className="bg-white/10 border border-white/20 rounded-xl overflow-hidden">
                 <button
@@ -728,7 +615,121 @@ export const CandidateProfileDialog = ({
               </div>
             )}
 
+            {/* AI Summary Section - MOVED: Now after questions, before CV */}
+            <div className="bg-white/10 border border-white/20 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Sammanfattning
+                  <span className="text-[10px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
+                    Baserat på CV
+                  </span>
+                </h3>
+              </div>
 
+              {loadingSummary || generatingSummary ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-white/50" />
+                  <span className="ml-2 text-sm text-white/50">Analyserar CV...</span>
+                </div>
+              ) : aiSummary ? (
+                <div>
+                  {/* Key points as bullet list - like Teamtailor Co-pilot */}
+                  {aiSummary.key_points && aiSummary.key_points.length > 0 ? (
+                    <ul className="space-y-1.5">
+                      {aiSummary.key_points.map((point, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-white">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-2 ${
+                            point.type === 'negative' ? 'bg-red-400' : 'bg-white'
+                          }`} />
+                          <span>{point.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-white leading-relaxed">
+                      {aiSummary.summary_text}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  {signedCvUrl ? (
+                    <>
+                      <p className="text-sm text-white/50 mb-3">
+                        Ingen sammanfattning ännu
+                      </p>
+                      <Button
+                        onClick={() => generateAiSummary(false)}
+                        disabled={generatingSummary}
+                        variant="ghost"
+                        size="sm"
+                        className="text-white/80 hover:text-white hover:bg-white/10"
+                      >
+                        {generatingSummary ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Läser CV...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Analysera CV
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  ) : (
+                    <p className="text-sm text-white/50">
+                      Kandidaten har inte laddat upp något CV
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* CV Section - MOVED: Now last */}
+            {displayApp.cv_url && (
+              <div className="bg-white/10 border border-white/20 rounded-xl p-4">
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <FileText className="h-3.5 w-3.5" />
+                  CV
+                </h3>
+                <div className="w-full min-h-9 py-2.5 bg-white/5 border border-white/10 rounded-md flex items-center px-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCvOpen(true)}
+                    className="flex items-center gap-2 text-white transition-colors flex-1"
+                  >
+                    <FileText className="h-4 w-4 text-white shrink-0" />
+                    <span className="text-sm">Visa CV</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCvOpen(true)}
+                    className="text-white hover:text-white/80 transition-colors"
+                    title="Öppna CV"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Presentation om kandidaten */}
+            <div className="bg-white/10 border border-white/20 rounded-xl p-4">
+              <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+                <User className="h-3.5 w-3.5" />
+                Presentation om {displayApp.first_name || 'kandidaten'}
+              </h3>
+              {displayApp.bio ? (
+                <p className="text-sm text-white whitespace-pre-wrap leading-relaxed">
+                  {displayApp.bio}
+                </p>
+              ) : (
+                <p className="text-sm text-white/50 italic">Ingen presentation angiven</p>
+              )}
+            </div>
           </div>
 
             {/* Actions */}
