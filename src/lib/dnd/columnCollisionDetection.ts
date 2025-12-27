@@ -1,6 +1,6 @@
-import { type CollisionDetection, type UniqueIdentifier } from "@dnd-kit/core";
+import { type CollisionDetection, type UniqueIdentifier, type ClientRect } from "@dnd-kit/core";
 
-const centerX = (rect: { left: number; width: number }) => rect.left + rect.width / 2;
+const centerX = (rect: ClientRect) => rect.left + rect.width / 2;
 
 /**
  * Collision detection that picks the active column purely by the pointer X-position.
@@ -12,10 +12,7 @@ export function columnXCollisionDetection(columnIds: UniqueIdentifier[]): Collis
 
     const rects = columnIds
       .map((id) => ({ id, rect: droppableRects.get(id) }))
-      .filter(
-        (v): v is { id: UniqueIdentifier; rect: { left: number; width: number } } =>
-          Boolean(v.rect)
-      );
+      .filter((v): v is { id: UniqueIdentifier; rect: ClientRect } => Boolean(v.rect));
 
     if (rects.length === 0) return [];
 
