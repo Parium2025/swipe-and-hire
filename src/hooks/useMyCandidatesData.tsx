@@ -264,8 +264,9 @@ export function useMyCandidatesData() {
       toast.error('Kunde inte flytta kandidaten');
     },
     onSettled: () => {
+      // Only reset dragging state - don't invalidate to avoid flicker
+      // The realtime subscription will sync when needed
       setIsDragging(false);
-      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
     },
   });
 
