@@ -437,7 +437,7 @@ const JobDetails = () => {
     } = useSortable({ id: application.id });
 
     const style = {
-      transform: CSS.Transform.toString(transform),
+      transform: transform ? CSS.Transform.toString(transform) : undefined,
       transition,
       opacity: isDragging ? 0.5 : 1,
     };

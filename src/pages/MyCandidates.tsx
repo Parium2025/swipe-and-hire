@@ -213,7 +213,7 @@ const SortableCandidateCard = (props: CandidateCardProps) => {
   } = useSortable({ id: props.candidate.id });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: transform ? CSS.Transform.toString(transform) : undefined,
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
