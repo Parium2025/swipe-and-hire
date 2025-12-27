@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, ThumbsUp, ThumbsDown, RefreshCw } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -460,7 +460,7 @@ export const CandidateProfileDialog = ({
 
           {/* AI Summary Section - like Teamtailor's Co-pilot */}
           <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2 mb-3">
               <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
                 <Sparkles className="h-3.5 w-3.5" />
                 Sammanfattning
@@ -468,14 +468,6 @@ export const CandidateProfileDialog = ({
                   Baserat på CV
                 </span>
               </h3>
-              <button
-                onClick={generateAiSummary}
-                disabled={generatingSummary || !signedCvUrl}
-                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white disabled:opacity-50"
-                title={signedCvUrl ? "Generera ny sammanfattning" : "Inget CV uppladdad"}
-              >
-                <RefreshCw className={`h-3.5 w-3.5 ${generatingSummary ? 'animate-spin' : ''}`} />
-              </button>
             </div>
 
             {loadingSummary ? (
@@ -483,7 +475,7 @@ export const CandidateProfileDialog = ({
                 <Loader2 className="h-5 w-5 animate-spin text-white/50" />
               </div>
             ) : aiSummary ? (
-              <div className="space-y-3">
+              <div>
                 {/* Key points as bullet list - like Teamtailor Co-pilot */}
                 {aiSummary.key_points && aiSummary.key_points.length > 0 ? (
                   <ul className="space-y-1.5">
@@ -499,19 +491,6 @@ export const CandidateProfileDialog = ({
                     {aiSummary.summary_text}
                   </p>
                 )}
-                
-                {/* Feedback row */}
-                <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                  <span className="text-xs text-white/50">Stämde sammanfattningen?</span>
-                  <div className="flex items-center gap-2">
-                    <button className="flex items-center gap-1 text-xs text-white/60 hover:text-green-400 transition-colors">
-                      <ThumbsUp className="h-3 w-3" /> Ja
-                    </button>
-                    <button className="flex items-center gap-1 text-xs text-white/60 hover:text-red-400 transition-colors">
-                      <ThumbsDown className="h-3 w-3" /> Nej
-                    </button>
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="text-center py-4">
