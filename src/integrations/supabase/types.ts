@@ -47,6 +47,60 @@ export type Database = {
         }
         Relationships: []
       }
+      candidate_evaluations: {
+        Row: {
+          applicant_id: string
+          application_id: string | null
+          created_at: string
+          error_message: string | null
+          evaluated_at: string | null
+          evaluated_by: string | null
+          id: string
+          job_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          application_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          evaluated_at?: string | null
+          evaluated_by?: string | null
+          id?: string
+          job_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          application_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          evaluated_at?: string | null
+          evaluated_by?: string | null
+          id?: string
+          job_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_evaluations_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_evaluations_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_notes: {
         Row: {
           applicant_id: string
@@ -78,6 +132,57 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "candidate_notes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_summaries: {
+        Row: {
+          applicant_id: string
+          application_id: string | null
+          created_at: string
+          generated_at: string
+          id: string
+          job_id: string
+          key_points: Json | null
+          summary_text: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          application_id?: string | null
+          created_at?: string
+          generated_at?: string
+          id?: string
+          job_id: string
+          key_points?: Json | null
+          summary_text: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          application_id?: string | null
+          created_at?: string
+          generated_at?: string
+          id?: string
+          job_id?: string
+          key_points?: Json | null
+          summary_text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_summaries_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_summaries_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "job_postings"
@@ -117,6 +222,54 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      criterion_results: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          criterion_id: string
+          evaluation_id: string
+          id: string
+          reasoning: string | null
+          result: string
+          source: string | null
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          criterion_id: string
+          evaluation_id: string
+          id?: string
+          reasoning?: string | null
+          result: string
+          source?: string | null
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          criterion_id?: string
+          evaluation_id?: string
+          id?: string
+          reasoning?: string | null
+          result?: string
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "criterion_results_criterion_id_fkey"
+            columns: ["criterion_id"]
+            isOneToOne: false
+            referencedRelation: "job_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "criterion_results_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_confirmations: {
         Row: {
@@ -218,6 +371,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_criteria: {
+        Row: {
+          created_at: string
+          employer_id: string
+          id: string
+          is_active: boolean
+          job_id: string
+          order_index: number
+          prompt: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employer_id: string
+          id?: string
+          is_active?: boolean
+          job_id: string
+          order_index?: number
+          prompt: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employer_id?: string
+          id?: string
+          is_active?: boolean
+          job_id?: string
+          order_index?: number
+          prompt?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_criteria_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "job_postings"

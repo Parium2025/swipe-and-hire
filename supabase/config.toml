@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.job-expiration-notifications]
 verify_jwt = false
+
+[functions.evaluate-candidate]
+verify_jwt = true
