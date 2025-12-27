@@ -281,6 +281,37 @@ export const CandidateProfileDialog = ({
     autoGenerateIfNeeded();
   }, [open, activeApplication?.id, user?.id]);
 
+  // Polling: Check for summary updates every 3 seconds if no summary exists
+  useEffect(() => {
+    if (!open || !activeApplication || aiSummary || loadingSummary) return;
+    
+    const pollInterval = setInterval(async () => {
+      if (!activeApplication.cv_url) return;
+      
+      try {
+        const { data } = await supabase
+          .from('candidate_summaries')
+          .select('summary_text, key_points')
+          .eq('job_id', activeApplication.job_id)
+          .eq('applicant_id', activeApplication.applicant_id)
+          .order('generated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (data) {
+          setAiSummary({
+            summary_text: data.summary_text,
+            key_points: data.key_points as { text: string; type: 'positive' | 'negative' | 'neutral' }[] | null,
+          });
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    }, 3000);
+
+    return () => clearInterval(pollInterval);
+  }, [open, activeApplication?.id, aiSummary, loadingSummary]);
+
   // Fetch notes and questions when dialog opens
   useEffect(() => {
     if (open && activeApplication && user) {
