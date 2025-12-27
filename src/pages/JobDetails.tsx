@@ -289,7 +289,7 @@ const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed }: S
     <div 
       ref={setNodeRef}
       className={`flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-all ${isOver ? 'scale-[1.02]' : ''}`}
-      style={{ minHeight: 'calc(100vh - 320px)' }}
+      style={{ minHeight: 'calc(100vh - 280px)' }}
     >
       <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-primary' : ''}`}>
         <div className="flex items-center gap-1.5">
@@ -301,11 +301,8 @@ const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed }: S
         </div>
       </div>
 
-      <div 
-        className={`relative flex-1 space-y-1 overflow-y-auto p-1 pr-2 rounded-lg transition-colors ${
-          isOver ? 'bg-white/5' : ''
-        }`}
-      >
+      {/* Content area - no visible background change on hover */}
+      <div className="flex-1 space-y-1 overflow-y-auto p-1 pr-2">
         <SortableContext items={applications.map(a => a.id)} strategy={verticalListSortingStrategy}>
           {applications.map((app) => (
             <SortableApplicationCard 
@@ -323,7 +320,7 @@ const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed }: S
           </div>
         )}
 
-        {/* Drop indicator - fixed position in column */}
+        {/* Small transparent drop indicator - only this is visible */}
         {isOver && (
           <div className="mt-2 flex items-center justify-center">
             <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
