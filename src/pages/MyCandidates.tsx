@@ -265,8 +265,17 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
         </div>
       </div>
 
-      {/* Content area - no visible background change on hover */}
+      {/* Content area */}
       <div className="flex-1 space-y-1 overflow-y-auto p-1 pr-2">
+        {/* Drop indicator at top */}
+        {isOver && (
+          <div className="mb-2 flex items-center justify-center">
+            <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
+              Släpp här
+            </div>
+          </div>
+        )}
+
         <SortableContext items={candidates.map(c => c.id)} strategy={verticalListSortingStrategy}>
           {candidates.map(candidate => (
             <SortableCandidateCard
@@ -281,15 +290,6 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
         {candidates.length === 0 && !isOver && (
           <div className="text-center py-8 text-xs text-white">
             Inga kandidater i detta steg
-          </div>
-        )}
-
-        {/* Small transparent drop indicator - only this is visible */}
-        {isOver && (
-          <div className="mt-2 flex items-center justify-center">
-            <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
-              Släpp här
-            </div>
           </div>
         )}
       </div>
