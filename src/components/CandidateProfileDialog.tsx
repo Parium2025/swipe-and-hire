@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, ThumbsUp, ThumbsDown, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -134,6 +134,14 @@ export const CandidateProfileDialog = ({
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const previousRating = useRef<number | undefined>(undefined);
+  
+  // AI Summary state
+  const [aiSummary, setAiSummary] = useState<{
+    summary_text: string;
+    key_points: { text: string; type: 'positive' | 'negative' | 'neutral' }[] | null;
+  } | null>(null);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [generatingSummary, setGeneratingSummary] = useState(false);
 
   // Activity logging
   const { logActivity } = useCandidateActivities(application?.applicant_id || null);
@@ -174,13 +182,69 @@ export const CandidateProfileDialog = ({
     }
   };
 
-  // Fetch notes and questions when dialog opens or job selection changes
+  // Fetch notes, questions, and AI summary when dialog opens or job selection changes
   useEffect(() => {
     if (open && activeApplication && user) {
       fetchNotes();
       fetchJobQuestions();
+      fetchAiSummary();
     }
   }, [open, activeApplication?.id, user?.id]);
+
+  // Fetch AI summary for this candidate/job combination
+  const fetchAiSummary = async () => {
+    if (!activeApplication?.job_id || !activeApplication?.applicant_id) return;
+    setLoadingSummary(true);
+    try {
+      const { data, error } = await supabase
+        .from('candidate_summaries')
+        .select('summary_text, key_points')
+        .eq('job_id', activeApplication.job_id)
+        .eq('applicant_id', activeApplication.applicant_id)
+        .order('generated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        setAiSummary({
+          summary_text: data.summary_text,
+          key_points: data.key_points as { text: string; type: 'positive' | 'negative' | 'neutral' }[] | null,
+        });
+      } else {
+        setAiSummary(null);
+      }
+    } catch (error) {
+      console.error('Error fetching AI summary:', error);
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
+  // Generate AI summary on-demand
+  const generateAiSummary = async () => {
+    if (!activeApplication?.id || !activeApplication?.job_id) return;
+    setGeneratingSummary(true);
+    try {
+      const { error } = await supabase.functions.invoke('evaluate-candidate', {
+        body: {
+          applicationId: activeApplication.id,
+          jobId: activeApplication.job_id,
+          applicantId: activeApplication.applicant_id,
+        },
+      });
+
+      if (error) throw error;
+      toast.success('Sammanfattning genererad');
+      fetchAiSummary();
+    } catch (error) {
+      console.error('Error generating AI summary:', error);
+      toast.error('Kunde inte generera sammanfattning');
+    } finally {
+      setGeneratingSummary(false);
+    }
+  };
 
   const fetchJobQuestions = async () => {
     if (!activeApplication?.job_id) return;
@@ -385,6 +449,95 @@ export const CandidateProfileDialog = ({
                 <p className="text-white mt-1">{displayApp.job_title}</p>
               )}
             </div>
+          </div>
+
+          {/* AI Summary Section - like Teamtailor's Co-pilot */}
+          <div className="bg-white/10 border border-white/20 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                <Sparkles className="h-3.5 w-3.5" />
+                Sammanfattning
+                <span className="text-[10px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
+                  Tillagd av Co-pilot
+                </span>
+              </h3>
+              <button
+                onClick={generateAiSummary}
+                disabled={generatingSummary}
+                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white disabled:opacity-50"
+                title="Generera ny sammanfattning"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${generatingSummary ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+
+            {loadingSummary ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-white/50" />
+              </div>
+            ) : aiSummary ? (
+              <div className="space-y-3">
+                {/* Key points as bullet list */}
+                {aiSummary.key_points && aiSummary.key_points.length > 0 ? (
+                  <ul className="space-y-1.5">
+                    {aiSummary.key_points.map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-white">
+                        {point.type === 'positive' ? (
+                          <ThumbsUp className="h-3.5 w-3.5 text-green-400 shrink-0 mt-0.5" />
+                        ) : point.type === 'negative' ? (
+                          <ThumbsDown className="h-3.5 w-3.5 text-yellow-400 shrink-0 mt-0.5" />
+                        ) : (
+                          <span className="w-1.5 h-1.5 rounded-full bg-white/50 shrink-0 mt-2" />
+                        )}
+                        <span>{point.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-white leading-relaxed">
+                    {aiSummary.summary_text}
+                  </p>
+                )}
+                
+                {/* Feedback row */}
+                <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                  <span className="text-xs text-white/50">Stämde sammanfattningen?</span>
+                  <div className="flex items-center gap-2">
+                    <button className="flex items-center gap-1 text-xs text-white/60 hover:text-green-400 transition-colors">
+                      <ThumbsUp className="h-3 w-3" /> Ja
+                    </button>
+                    <button className="flex items-center gap-1 text-xs text-white/60 hover:text-red-400 transition-colors">
+                      <ThumbsDown className="h-3 w-3" /> Nej
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-white/50 mb-3">
+                  Ingen sammanfattning ännu
+                </p>
+                <Button
+                  onClick={generateAiSummary}
+                  disabled={generatingSummary}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  {generatingSummary ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Genererar...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generera sammanfattning
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Info sections - matching job dialog input style exactly */}
