@@ -272,16 +272,16 @@ const SortableApplicationCard = ({
 interface StatusColumnProps {
   status: ApplicationStatus;
   applications: JobApplication[];
-  isOver: boolean;
   onOpenProfile: (app: JobApplication) => void;
   onMarkAsViewed: (id: string) => void;
 }
 
-const StatusColumn = ({ status, applications, isOver, onOpenProfile, onMarkAsViewed }: StatusColumnProps) => {
+const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed }: StatusColumnProps) => {
   const config = STATUS_CONFIG[status];
   const Icon = STATUS_ICONS[status] || Inbox;
   
-  const { setNodeRef } = useDroppable({
+  // Use useDroppable's own isOver for accurate detection
+  const { setNodeRef, isOver } = useDroppable({
     id: status,
   });
 
@@ -734,7 +734,6 @@ const JobDetails = () => {
                 key={status} 
                 status={status}
                 applications={applicationsByStatus[status]}
-                isOver={overId === status}
                 onOpenProfile={handleOpenProfile}
                 onMarkAsViewed={markApplicationAsViewed}
               />
