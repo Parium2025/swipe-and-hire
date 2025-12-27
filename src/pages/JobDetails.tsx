@@ -387,15 +387,18 @@ const JobDetails = () => {
     
     return (
       <div 
-        className={`bg-white/5 ring-1 ring-inset ring-white/10 rounded-md px-2 py-1.5 transition-all cursor-grab active:cursor-grabbing group relative ${
-          isDragging ? 'ring-2 ring-inset ring-primary/50 bg-white/10' : 'hover:ring-white/30 hover:bg-white/[0.08]'
-        }`}
+        className={`bg-white/5 ring-1 ring-inset ring-white/10 rounded-md px-2 py-1.5 cursor-grab active:cursor-grabbing group relative
+          transition-all duration-200 ease-out
+          ${isDragging 
+            ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
+            : 'hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
+          }`}
         onClick={handleClick}
       >
         {/* Unread indicator dot */}
         {isUnread && (
           <div className="absolute right-1.5 top-1.5">
-            <div className="h-2 w-2 rounded-full bg-fuchsia-500" />
+            <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
           </div>
         )}
         
@@ -403,12 +406,12 @@ const JobDetails = () => {
           <SmallCandidateAvatarWrapper application={application} />
           
           <div className="flex-1 min-w-0 pr-4">
-            <p className="text-fuchsia-400 font-medium text-xs truncate hover:underline">
+            <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors">
               {application.first_name} {application.last_name}
             </p>
             <StarRating rating={application.rating} />
             {appliedTime && (
-              <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px]">
+              <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px] group-hover:text-white/80 transition-colors">
                 <span className="flex items-center gap-0.5">
                   <ArrowDown className="h-2.5 w-2.5" />
                   {appliedTime}
