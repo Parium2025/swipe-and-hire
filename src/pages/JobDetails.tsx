@@ -288,21 +288,35 @@ const StatusColumn = ({ status, applications, isOver, onOpenProfile, onMarkAsVie
   return (
     <div 
       ref={setNodeRef}
-      className={`flex-1 min-w-[220px] max-w-[280px] transition-all ${isOver ? 'scale-[1.02]' : ''}`}
+      className={`flex-1 min-w-[220px] max-w-[280px] transition-all duration-200 ease-out ${
+        isOver ? 'scale-[1.02]' : ''
+      }`}
     >
-      <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-primary' : ''}`}>
+      {/* Column header with enhanced hover animation */}
+      <div 
+        className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all duration-200 ${
+          isOver 
+            ? 'ring-2 ring-inset ring-primary shadow-lg shadow-primary/30 brightness-125' 
+            : ''
+        }`}
+      >
         <div className="flex items-center gap-1.5">
-          <Icon className="h-3.5 w-3.5" />
+          <Icon className={`h-3.5 w-3.5 transition-transform duration-200 ${isOver ? 'scale-110' : ''}`} />
           <span className="font-medium text-xs">{config.label}</span>
-          <span className="ml-auto bg-white/20 text-white/90 text-[10px] px-1.5 py-0.5 rounded-full">
+          <span className={`ml-auto text-white/90 text-[10px] px-1.5 py-0.5 rounded-full transition-all duration-200 ${
+            isOver ? 'bg-white/40 scale-110' : 'bg-white/20'
+          }`}>
             {applications.length}
           </span>
         </div>
       </div>
 
+      {/* Card container with enhanced drop zone animation */}
       <div 
-        className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-colors ${
-          isOver ? 'bg-white/10' : ''
+        className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-all duration-200 ${
+          isOver 
+            ? 'bg-primary/10 ring-2 ring-dashed ring-primary/50' 
+            : ''
         }`}
       >
         <SortableContext items={applications.map(a => a.id)} strategy={verticalListSortingStrategy}>
@@ -316,15 +330,20 @@ const StatusColumn = ({ status, applications, isOver, onOpenProfile, onMarkAsVie
           ))}
         </SortableContext>
 
+        {/* Enhanced drop indicator */}
         {isOver && applications.length > 0 && (
-          <div className="text-center py-2 text-xs text-white font-medium">
-            Släpp här
+          <div className="text-center py-3 text-xs text-primary font-semibold animate-pulse border-2 border-dashed border-primary/40 rounded-md bg-primary/5">
+            ↓ Släpp här
           </div>
         )}
 
         {applications.length === 0 && (
-          <div className={`text-center py-8 text-xs transition-all ${isOver ? 'text-white font-medium' : 'text-white/60'}`}>
-            {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
+          <div className={`text-center py-8 text-xs transition-all duration-200 rounded-md ${
+            isOver 
+              ? 'text-primary font-semibold bg-primary/10 border-2 border-dashed border-primary/40 animate-pulse' 
+              : 'text-white/60'
+          }`}>
+            {isOver ? '↓ Släpp här' : 'Inga kandidater i detta steg'}
           </div>
         )}
       </div>
