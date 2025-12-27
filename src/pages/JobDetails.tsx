@@ -388,7 +388,7 @@ const JobDetails = () => {
     return (
       <div 
         className={`bg-white/5 ring-1 ring-inset ring-white/10 rounded-md px-2 py-1.5 transition-all cursor-grab active:cursor-grabbing group relative ${
-          isDragging ? 'shadow-xl ring-2 ring-inset ring-primary/50 bg-white/10' : 'hover:ring-white/30 hover:bg-white/[0.08]'
+          isDragging ? 'ring-2 ring-inset ring-primary/50 bg-white/10' : 'hover:ring-white/30 hover:bg-white/[0.08]'
         }`}
         onClick={handleClick}
       >
@@ -475,7 +475,7 @@ const JobDetails = () => {
         </div>
 
         <div 
-          className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 min-h-[100px] rounded-lg transition-colors ${
+          className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-colors ${
             isOver ? 'bg-white/10' : ''
           }`}
         >
