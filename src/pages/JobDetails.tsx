@@ -316,7 +316,7 @@ const StatusColumn = ({ status, applications, isOver, onOpenProfile, onMarkAsVie
           ))}
         </SortableContext>
 
-        {applications.length === 0 && (
+        {applications.length === 0 && !isOver && (
           <div className="text-center py-8 text-xs text-white/60">
             Inga kandidater i detta steg
           </div>
