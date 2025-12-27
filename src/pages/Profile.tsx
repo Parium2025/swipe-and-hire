@@ -1894,14 +1894,19 @@ const Profile = () => {
                             setCvFileName(fileName);
                             setHasUnsavedChanges(true);
                             
-                            // Pre-analyze CV in background so it's ready for future applications
+                            // Queue CV for pre-analysis (rate-limit safe)
                             if (user?.id) {
-                              supabase.functions.invoke('generate-cv-summary', {
-                                body: {
-                                  applicant_id: user.id,
-                                  cv_url_override: url, // Analyze the just-uploaded CV
-                                },
-                              }).catch(err => console.warn('Background CV pre-analysis failed:', err));
+                              supabase.rpc('queue_cv_analysis', {
+                                p_applicant_id: user.id,
+                                p_cv_url: url,
+                                p_priority: 10, // High priority for direct uploads
+                              }).then(({ error }) => {
+                                if (error) console.warn('Failed to queue CV for analysis:', error);
+                                else {
+                                  // Trigger queue processor
+                                  supabase.functions.invoke('process-cv-queue').catch(() => {});
+                                }
+                              });
                             }
                           }}
                           onFileRemoved={() => {

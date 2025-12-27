@@ -271,6 +271,72 @@ export type Database = {
           },
         ]
       }
+      cv_analysis_queue: {
+        Row: {
+          applicant_id: string
+          application_id: string | null
+          attempts: number
+          completed_at: string | null
+          created_at: string
+          cv_url: string
+          error_message: string | null
+          id: string
+          job_id: string | null
+          max_attempts: number
+          priority: number
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          application_id?: string | null
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          cv_url: string
+          error_message?: string | null
+          id?: string
+          job_id?: string | null
+          max_attempts?: number
+          priority?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          application_id?: string | null
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          cv_url?: string
+          error_message?: string | null
+          id?: string
+          job_id?: string | null
+          max_attempts?: number
+          priority?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_analysis_queue_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_analysis_queue_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_confirmations: {
         Row: {
           confirmed_at: string | null
@@ -1180,6 +1246,14 @@ export type Database = {
     }
     Functions: {
       can_view_job_application: { Args: { p_job_id: string }; Returns: boolean }
+      complete_cv_analysis: {
+        Args: {
+          p_error_message?: string
+          p_queue_id: string
+          p_success: boolean
+        }
+        Returns: undefined
+      }
       employer_owns_job: { Args: { p_job_id: string }; Returns: boolean }
       employer_owns_job_for_question: {
         Args: { p_job_id: string }
@@ -1211,12 +1285,32 @@ export type Database = {
           video_url: string
         }[]
       }
+      get_cv_queue_batch: {
+        Args: { p_batch_size?: number }
+        Returns: {
+          applicant_id: string
+          application_id: string
+          cv_url: string
+          id: string
+          job_id: string
+        }[]
+      }
       get_user_organization_id: { Args: { p_user_id: string }; Returns: string }
       has_applied_to_employer: {
         Args: { p_applicant_id: string; p_employer_id: string }
         Returns: boolean
       }
       is_org_admin: { Args: { p_user_id: string }; Returns: boolean }
+      queue_cv_analysis: {
+        Args: {
+          p_applicant_id: string
+          p_application_id?: string
+          p_cv_url: string
+          p_job_id?: string
+          p_priority?: number
+        }
+        Returns: string
+      }
       same_organization: {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean
