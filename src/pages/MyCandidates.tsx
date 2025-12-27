@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useMyCandidatesData, STAGE_CONFIG, CandidateStage, MyCandidateData } from '@/hooks/useMyCandidatesData';
+import { STAGE_CONFIG, CandidateStage, MyCandidateData } from '@/hooks/useMyCandidatesData';
+import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
@@ -293,18 +294,12 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
 };
 
 const MyCandidates = () => {
-  const { 
-    candidatesByStage, 
-    candidates,
-    stats, 
-    isLoading, 
-    moveCandidate, 
-    removeCandidate,
-    updateRating,
-    markAsViewed
-  } = useMyCandidatesData();
-
   const { user } = useAuth();
+  
+  // Local state for candidates - like JobDetails pattern
+  const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const [selectedCandidate, setSelectedCandidate] = useState<MyCandidateData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -316,6 +311,165 @@ const MyCandidates = () => {
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStageFilter, setActiveStageFilter] = useState<CandidateStage | 'all'>('all');
+
+  // Fetch candidates data
+  const fetchCandidates = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      // Fetch my_candidates with joined application data
+      const { data: myCandidates, error: mcError } = await supabase
+        .from('my_candidates')
+        .select('*')
+        .eq('recruiter_id', user.id)
+        .order('updated_at', { ascending: false });
+
+      if (mcError) throw mcError;
+      if (!myCandidates || myCandidates.length === 0) {
+        setCandidates([]);
+        return;
+      }
+
+      // Get application IDs to fetch related data
+      const applicationIds = myCandidates.map(mc => mc.application_id);
+
+      // Fetch job applications data
+      const { data: applications, error: appError } = await supabase
+        .from('job_applications')
+        .select(`
+          id,
+          applicant_id,
+          first_name,
+          last_name,
+          email,
+          phone,
+          location,
+          bio,
+          cv_url,
+          age,
+          employment_status,
+          work_schedule,
+          availability,
+          custom_answers,
+          status,
+          applied_at,
+          viewed_at,
+          job_postings!inner(title)
+        `)
+        .in('id', applicationIds);
+
+      if (appError) throw appError;
+
+      // Create a map for quick lookup
+      const appMap = new Map(applications?.map(app => [app.id, app]) || []);
+
+      // Fetch profile media for each applicant
+      const applicantIds = [...new Set(myCandidates.map(mc => mc.applicant_id))];
+      const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }> = {};
+
+      await Promise.all(
+        applicantIds.map(async (applicantId) => {
+          const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
+            p_applicant_id: applicantId,
+            p_employer_id: user.id,
+          });
+
+          if (mediaData && mediaData.length > 0) {
+            profileMediaMap[applicantId] = {
+              profile_image_url: mediaData[0].profile_image_url,
+              video_url: mediaData[0].video_url,
+              is_profile_video: mediaData[0].is_profile_video,
+            };
+          } else {
+            profileMediaMap[applicantId] = {
+              profile_image_url: null,
+              video_url: null,
+              is_profile_video: null,
+            };
+          }
+        })
+      );
+
+      // Combine the data
+      const result: MyCandidateData[] = myCandidates.map(mc => {
+        const app = appMap.get(mc.application_id);
+        const media = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null };
+
+        return {
+          id: mc.id,
+          recruiter_id: mc.recruiter_id,
+          applicant_id: mc.applicant_id,
+          application_id: mc.application_id,
+          job_id: mc.job_id,
+          stage: mc.stage as CandidateStage,
+          notes: mc.notes,
+          rating: mc.rating || 0,
+          created_at: mc.created_at,
+          updated_at: mc.updated_at,
+          first_name: app?.first_name || null,
+          last_name: app?.last_name || null,
+          email: app?.email || null,
+          phone: app?.phone || null,
+          location: app?.location || null,
+          bio: app?.bio || null,
+          cv_url: app?.cv_url || null,
+          age: app?.age || null,
+          employment_status: app?.employment_status || null,
+          work_schedule: app?.work_schedule || null,
+          availability: app?.availability || null,
+          custom_answers: app?.custom_answers || null,
+          status: app?.status || 'pending',
+          job_title: (app?.job_postings as any)?.title || null,
+          profile_image_url: media.profile_image_url,
+          video_url: media.video_url,
+          is_profile_video: media.is_profile_video,
+          applied_at: app?.applied_at || null,
+          viewed_at: app?.viewed_at || null,
+        };
+      });
+
+      setCandidates(result);
+    } catch (error) {
+      console.error('Error fetching candidates:', error);
+      toast.error('Kunde inte ladda kandidater');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  // Initial fetch
+  useEffect(() => {
+    if (user) {
+      fetchCandidates();
+    }
+  }, [user, fetchCandidates]);
+
+  // Group candidates by stage (computed from local state)
+  const candidatesByStage = useMemo(() => {
+    const grouped: Record<CandidateStage, MyCandidateData[]> = {
+      to_contact: [],
+      interview: [],
+      offer: [],
+      hired: [],
+    };
+
+    candidates.forEach(candidate => {
+      if (grouped[candidate.stage]) {
+        grouped[candidate.stage].push(candidate);
+      }
+    });
+
+    return grouped;
+  }, [candidates]);
+
+  // Stats
+  const stats = useMemo(() => ({
+    total: candidates.length,
+    to_contact: candidatesByStage.to_contact.length,
+    interview: candidatesByStage.interview.length,
+    offer: candidatesByStage.offer.length,
+    hired: candidatesByStage.hired.length,
+  }), [candidates, candidatesByStage]);
 
   // Filter candidates based on search query and stage filter
   const filteredCandidatesByStage = useMemo(() => {
@@ -360,7 +514,6 @@ const MyCandidates = () => {
 
       setLoadingApplications(true);
       try {
-        // Get all jobs from the user's organization
         const { data: orgJobs, error: jobsError } = await supabase
           .from('job_postings')
           .select('id, title, employer_id')
@@ -374,7 +527,6 @@ const MyCandidates = () => {
 
         const jobIds = orgJobs.map(j => j.id);
 
-        // Get all applications from this candidate for organization's jobs
         const { data: applications, error: appError } = await supabase
           .from('job_applications')
           .select(`
@@ -403,7 +555,6 @@ const MyCandidates = () => {
 
         if (appError) throw appError;
 
-        // Transform to ApplicationData format
         const transformedApps: ApplicationData[] = (applications || []).map(app => ({
           id: app.id,
           job_id: app.job_id,
@@ -488,6 +639,32 @@ const MyCandidates = () => {
     setOverId(stage);
   };
 
+  // Move candidate - OPTIMISTIC UPDATE like JobDetails
+  const updateCandidateStage = async (candidateId: string, newStage: CandidateStage) => {
+    // Optimistic update - move card immediately
+    const previousCandidates = [...candidates];
+    setCandidates(prev => prev.map(c => 
+      c.id === candidateId 
+        ? { ...c, stage: newStage } 
+        : c
+    ));
+
+    try {
+      const { error } = await supabase
+        .from('my_candidates')
+        .update({ stage: newStage })
+        .eq('id', candidateId);
+
+      if (error) {
+        // Revert on error
+        setCandidates(previousCandidates);
+        throw error;
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Kunde inte flytta kandidaten');
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
@@ -503,22 +680,79 @@ const MyCandidates = () => {
 
     const candidate = candidates.find(c => c.id === candidateId);
     if (candidate && candidate.stage !== targetStage) {
-      moveCandidate.mutate({ id: candidateId, stage: targetStage });
+      updateCandidateStage(candidateId, targetStage);
     }
   };
 
   const handleMoveCandidate = (id: string, stage: CandidateStage) => {
-    moveCandidate.mutate({ id, stage });
+    updateCandidateStage(id, stage);
   };
 
   const handleRemoveCandidate = (candidate: MyCandidateData) => {
     setCandidateToRemove(candidate);
   };
 
-  const confirmRemoveCandidate = () => {
+  const confirmRemoveCandidate = async () => {
     if (candidateToRemove) {
-      removeCandidate.mutate(candidateToRemove.id);
+      const idToRemove = candidateToRemove.id;
+      // Optimistic remove
+      setCandidates(prev => prev.filter(c => c.id !== idToRemove));
       setCandidateToRemove(null);
+      
+      try {
+        const { error } = await supabase
+          .from('my_candidates')
+          .delete()
+          .eq('id', idToRemove);
+          
+        if (error) throw error;
+        toast.success('Kandidat borttagen från din lista');
+      } catch (error) {
+        // Refetch on error
+        fetchCandidates();
+        toast.error('Kunde inte ta bort kandidaten');
+      }
+    }
+  };
+
+  // Update rating - optimistic
+  const updateCandidateRating = async (candidateId: string, newRating: number) => {
+    setCandidates(prev => prev.map(c => 
+      c.id === candidateId ? { ...c, rating: newRating } : c
+    ));
+    if (selectedCandidate?.id === candidateId) {
+      setSelectedCandidate(prev => prev ? { ...prev, rating: newRating } : null);
+    }
+
+    try {
+      const { error } = await supabase
+        .from('my_candidates')
+        .update({ rating: newRating })
+        .eq('id', candidateId);
+        
+      if (error) throw error;
+    } catch (error) {
+      fetchCandidates();
+      toast.error('Kunde inte uppdatera betyg');
+    }
+  };
+
+  // Mark as viewed - optimistic
+  const markApplicationAsViewed = async (applicationId: string) => {
+    setCandidates(prev => prev.map(c => 
+      c.application_id === applicationId 
+        ? { ...c, viewed_at: new Date().toISOString() } 
+        : c
+    ));
+
+    try {
+      await supabase
+        .from('job_applications')
+        .update({ viewed_at: new Date().toISOString() })
+        .eq('id', applicationId)
+        .is('viewed_at', null);
+    } catch (error) {
+      console.error('Error marking as viewed:', error);
     }
   };
 
@@ -528,8 +762,7 @@ const MyCandidates = () => {
     
     // Mark as viewed if not already
     if (!candidate.viewed_at) {
-      markAsViewed.mutate(candidate.application_id);
-      // Update local state immediately
+      markApplicationAsViewed(candidate.application_id);
       setSelectedCandidate(prev => prev ? { ...prev, viewed_at: new Date().toISOString() } : null);
     }
   };
@@ -729,10 +962,7 @@ const MyCandidates = () => {
         candidateRating={selectedCandidate?.rating}
         onRatingChange={(rating) => {
           if (selectedCandidate) {
-            // Update local state immediately for responsive UI
-            setSelectedCandidate(prev => prev ? { ...prev, rating } : null);
-            // Persist to database
-            updateRating.mutate({ id: selectedCandidate.id, rating });
+            updateCandidateRating(selectedCandidate.id, rating);
           }
         }}
       />
