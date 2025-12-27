@@ -273,6 +273,16 @@ const JobSwipe = () => {
 
       if (error) throw error;
 
+      // Trigger CV summary generation in background (fire and forget)
+      if (profile?.cv_url) {
+        supabase.functions.invoke('generate-cv-summary', {
+          body: {
+            applicant_id: user?.id,
+            job_id: currentJob.id,
+          },
+        }).catch(err => console.warn('Background CV summary generation failed:', err));
+      }
+
       toast({
         title: "Ansökan skickad!",
         description: "Din ansökan har skickats till arbetsgivaren"
