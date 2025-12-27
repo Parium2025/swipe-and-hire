@@ -477,18 +477,12 @@ export const CandidateProfileDialog = ({
               </div>
             ) : aiSummary ? (
               <div className="space-y-3">
-                {/* Key points as bullet list */}
+                {/* Key points as bullet list - like Teamtailor Co-pilot */}
                 {aiSummary.key_points && aiSummary.key_points.length > 0 ? (
                   <ul className="space-y-1.5">
                     {aiSummary.key_points.map((point, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-sm text-white">
-                        {point.type === 'positive' ? (
-                          <ThumbsUp className="h-3.5 w-3.5 text-green-400 shrink-0 mt-0.5" />
-                        ) : point.type === 'negative' ? (
-                          <ThumbsDown className="h-3.5 w-3.5 text-yellow-400 shrink-0 mt-0.5" />
-                        ) : (
-                          <span className="w-1.5 h-1.5 rounded-full bg-white/50 shrink-0 mt-2" />
-                        )}
+                        <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 mt-2" />
                         <span>{point.text}</span>
                       </li>
                     ))}
