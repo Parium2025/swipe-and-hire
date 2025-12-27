@@ -438,8 +438,8 @@ const JobDetails = () => {
 
     const style = {
       transform: transform ? CSS.Transform.toString(transform) : undefined,
-      transition,
-      opacity: isDragging ? 0.5 : 1,
+      transition: isDragging ? undefined : transition, // No transition while dragging to avoid flicker
+      opacity: isDragging ? 0 : 1, // Fully hide while dragging (DragOverlay shows the visual)
     };
 
     return (
@@ -663,9 +663,9 @@ const JobDetails = () => {
           </div>
 
           {/* Drag Overlay */}
-          <DragOverlay modifiers={[snapCenterToCursor]}>
+          <DragOverlay modifiers={[snapCenterToCursor]} dropAnimation={null}>
             {activeApplication ? (
-              <div className="opacity-90">
+              <div className="opacity-95 pointer-events-none">
                 <ApplicationCardContent application={activeApplication} isDragging />
               </div>
             ) : null}
