@@ -1888,11 +1888,21 @@ const Profile = () => {
                     ) : (
                       <div className="p-0">
                         <FileUpload
-                          onFileUploaded={(url, fileName) => {
+                          onFileUploaded={async (url, fileName) => {
                             console.log('CV uploaded, received:', { url, fileName });
                             setCvUrl(url);
                             setCvFileName(fileName);
                             setHasUnsavedChanges(true);
+                            
+                            // Pre-analyze CV in background so it's ready for future applications
+                            if (user?.id) {
+                              supabase.functions.invoke('generate-cv-summary', {
+                                body: {
+                                  applicant_id: user.id,
+                                  cv_url_override: url, // Analyze the just-uploaded CV
+                                },
+                              }).catch(err => console.warn('Background CV pre-analysis failed:', err));
+                            }
                           }}
                           onFileRemoved={() => {
                             setCvUrl('');

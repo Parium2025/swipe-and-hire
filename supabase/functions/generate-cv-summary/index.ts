@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { applicant_id, application_id, job_id } = await req.json();
+    const { applicant_id, application_id, job_id, cv_url_override } = await req.json();
     
     if (!applicant_id) {
       return new Response(
@@ -58,8 +58,11 @@ serve(async (req) => {
       if (!error) application = data;
     }
 
-    // Get CV URL from profile or application
-    const cvUrl = application?.cv_url || profile?.cv_url;
+    // Get CV URL - prioritize override, then application, then profile
+    const cvUrl = cv_url_override || application?.cv_url || profile?.cv_url;
+    
+    // For pre-analysis without job_id, we'll use a special "profile" summary
+    const isPreAnalysis = !job_id && !application_id && cv_url_override;
     
     let cvText = '';
     
@@ -286,7 +289,7 @@ VIKTIGT:
     if (summary.is_valid_cv === false) {
       const documentType = summary.document_type || 'ett dokument som inte är ett CV';
       
-      // Save a special summary indicating this is not a CV
+      // Save a special summary indicating this is not a CV (only if we have a job_id)
       const saveJobId = job_id || application?.job_id;
       if (saveJobId) {
         await supabase
@@ -313,12 +316,14 @@ VIKTIGT:
             summary_text: `Det uppladdade dokumentet är ${documentType}. Kan inte läsa av ett CV.`,
             key_points: [{ text: `Dokumenttyp: ${documentType}`, type: 'negative' }],
           },
+          // Return extracted text for caching even if not a CV
+          cv_text_cached: cvText.substring(0, 5000),
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Save valid CV summary to database
+    // Save valid CV summary to database (only if we have a job_id)
     const saveJobId = job_id || application?.job_id;
     if (saveJobId) {
       const { error: saveError } = await supabase
@@ -354,6 +359,8 @@ VIKTIGT:
           summary_text: summary.summary_text,
           key_points: summary.key_points,
         },
+        // Return extracted text for future use (e.g., pre-analysis)
+        cv_text_cached: isPreAnalysis ? cvText.substring(0, 5000) : undefined,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
