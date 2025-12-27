@@ -288,7 +288,7 @@ const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed }: S
   return (
     <div 
       ref={setNodeRef}
-      className={`flex-1 min-w-[220px] max-w-[280px] transition-all ${isOver ? 'scale-[1.02]' : ''}`}
+      className={`flex-1 min-w-[220px] max-w-[280px] h-full flex flex-col transition-all ${isOver ? 'scale-[1.02]' : ''}`}
     >
       <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-primary' : ''}`}>
         <div className="flex items-center gap-1.5">
@@ -301,7 +301,7 @@ const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed }: S
       </div>
 
       <div 
-        className={`relative space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-colors ${
+        className={`relative flex-1 space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-colors ${
           isOver ? 'bg-white/10' : ''
         }`}
       >
@@ -325,7 +325,7 @@ const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed }: S
         {/* Drop indicator (always centered, regardless of list length) */}
         {isOver && (
           <div className="pointer-events-none absolute inset-1 flex items-center justify-center">
-            <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white">
+            <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
               Släpp här
             </div>
           </div>
@@ -728,7 +728,7 @@ const JobDetails = () => {
             },
           }}
         >
-          <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2">
+          <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2 min-h-[300px]">
             {STATUS_ORDER.map((status) => (
               <StatusColumn 
                 key={status} 

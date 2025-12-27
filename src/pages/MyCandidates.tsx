@@ -240,21 +240,21 @@ interface StageColumnProps {
   onMoveCandidate: (id: string, stage: CandidateStage) => void;
   onRemoveCandidate: (candidate: MyCandidateData) => void;
   onOpenProfile: (candidate: MyCandidateData) => void;
-  isOver?: boolean;
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, isOver }: StageColumnProps) => {
+const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile }: Omit<StageColumnProps, 'isOver'>) => {
   const config = STAGE_CONFIG[stage];
   const Icon = STAGE_ICONS[stage];
 
-  const { setNodeRef } = useDroppable({
+  // Use useDroppable's own isOver for accurate column-level detection
+  const { setNodeRef, isOver } = useDroppable({
     id: stage,
   });
 
   return (
     <div 
       ref={setNodeRef}
-      className={`flex-1 min-w-[220px] max-w-[280px] transition-all ${isOver ? 'scale-[1.02]' : ''}`}
+      className={`flex-1 min-w-[220px] max-w-[280px] h-full flex flex-col transition-all ${isOver ? 'scale-[1.02]' : ''}`}
     >
       <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-primary' : ''}`}>
         <div className="flex items-center gap-1.5">
@@ -267,7 +267,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
       </div>
 
       <div 
-        className={`relative space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-colors ${
+        className={`relative flex-1 space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-colors ${
           isOver ? 'bg-white/10' : ''
         }`}
       >
@@ -291,7 +291,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
         {/* Drop indicator (always centered, regardless of list length) */}
         {isOver && (
           <div className="pointer-events-none absolute inset-1 flex items-center justify-center">
-            <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white">
+            <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
               Släpp här
             </div>
           </div>
@@ -951,7 +951,7 @@ const MyCandidates = () => {
             },
           }}
         >
-          <div className={`flex gap-4 overflow-x-auto pb-4 pt-2 px-2 ${activeStageFilter !== 'all' ? 'justify-center' : ''}`}>
+          <div className={`flex gap-4 overflow-x-auto pb-4 pt-2 px-2 min-h-[300px] ${activeStageFilter !== 'all' ? 'justify-center' : ''}`}>
             {stagesToDisplay.map(stage => (
               <StageColumn
                 key={stage}
@@ -960,7 +960,6 @@ const MyCandidates = () => {
                 onMoveCandidate={handleMoveCandidate}
                 onRemoveCandidate={handleRemoveCandidate}
                 onOpenProfile={handleOpenProfile}
-                isOver={overId === stage}
               />
             ))}
           </div>
