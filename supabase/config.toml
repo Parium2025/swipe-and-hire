@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.evaluate-candidate]
 verify_jwt = true
+
+[functions.generate-cv-summary]
+verify_jwt = true

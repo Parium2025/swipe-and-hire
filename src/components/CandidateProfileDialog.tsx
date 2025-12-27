@@ -222,24 +222,31 @@ export const CandidateProfileDialog = ({
     }
   };
 
-  // Generate AI summary on-demand
+  // Generate AI summary on-demand - based ONLY on CV/profile data
   const generateAiSummary = async () => {
-    if (!activeApplication?.id || !activeApplication?.job_id) return;
+    if (!activeApplication?.applicant_id) return;
     setGeneratingSummary(true);
     try {
-      const { error } = await supabase.functions.invoke('evaluate-candidate', {
+      // Use the new CV-focused summary function
+      const { data, error } = await supabase.functions.invoke('generate-cv-summary', {
         body: {
-          applicationId: activeApplication.id,
-          jobId: activeApplication.job_id,
-          applicantId: activeApplication.applicant_id,
+          applicant_id: activeApplication.applicant_id,
+          application_id: activeApplication.id,
+          job_id: activeApplication.job_id,
         },
       });
 
       if (error) throw error;
-      toast.success('Sammanfattning genererad');
+      
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+      
+      toast.success('Sammanfattning genererad från CV');
       fetchAiSummary();
     } catch (error) {
-      console.error('Error generating AI summary:', error);
+      console.error('Error generating CV summary:', error);
       toast.error('Kunde inte generera sammanfattning');
     } finally {
       setGeneratingSummary(false);
@@ -458,14 +465,14 @@ export const CandidateProfileDialog = ({
                 <Sparkles className="h-3.5 w-3.5" />
                 Sammanfattning
                 <span className="text-[10px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
-                  Tillagd av Co-pilot
+                  Baserat på CV
                 </span>
               </h3>
               <button
                 onClick={generateAiSummary}
-                disabled={generatingSummary}
+                disabled={generatingSummary || !signedCvUrl}
                 className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white disabled:opacity-50"
-                title="Generera ny sammanfattning"
+                title={signedCvUrl ? "Generera ny sammanfattning" : "Inget CV uppladdad"}
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${generatingSummary ? 'animate-spin' : ''}`} />
               </button>
@@ -508,28 +515,36 @@ export const CandidateProfileDialog = ({
               </div>
             ) : (
               <div className="text-center py-4">
-                <p className="text-sm text-white/50 mb-3">
-                  Ingen sammanfattning ännu
-                </p>
-                <Button
-                  onClick={generateAiSummary}
-                  disabled={generatingSummary}
-                  variant="ghost"
-                  size="sm"
-                  className="text-white/80 hover:text-white hover:bg-white/10"
-                >
-                  {generatingSummary ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Genererar...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Generera sammanfattning
-                    </>
-                  )}
-                </Button>
+                {signedCvUrl ? (
+                  <>
+                    <p className="text-sm text-white/50 mb-3">
+                      Ingen sammanfattning ännu
+                    </p>
+                    <Button
+                      onClick={generateAiSummary}
+                      disabled={generatingSummary}
+                      variant="ghost"
+                      size="sm"
+                      className="text-white/80 hover:text-white hover:bg-white/10"
+                    >
+                      {generatingSummary ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Läser CV...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Analysera CV
+                        </>
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  <p className="text-sm text-white/50">
+                    Kandidaten har inte laddat upp något CV
+                  </p>
+                )}
               </div>
             )}
           </div>
