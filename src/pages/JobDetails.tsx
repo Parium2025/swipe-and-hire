@@ -652,7 +652,7 @@ const JobDetails = () => {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2 -mx-2">
+          <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2">
             {STATUS_ORDER.map((status) => (
               <StatusColumn 
                 key={status} 
