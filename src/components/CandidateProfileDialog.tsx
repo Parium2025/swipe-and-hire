@@ -213,17 +213,21 @@ export const CandidateProfileDialog = ({
           key_points: data.key_points as { text: string; type: 'positive' | 'negative' | 'neutral' }[] | null,
         });
       } else {
+        // No existing summary - auto-generate if CV exists
         setAiSummary(null);
+        return { shouldAutoGenerate: true };
       }
+      return { shouldAutoGenerate: false };
     } catch (error) {
       console.error('Error fetching AI summary:', error);
+      return { shouldAutoGenerate: false };
     } finally {
       setLoadingSummary(false);
     }
   };
 
   // Generate AI summary on-demand - based ONLY on CV/profile data
-  const generateAiSummary = async () => {
+  const generateAiSummary = async (silent = false) => {
     if (!activeApplication?.applicant_id) return;
     setGeneratingSummary(true);
     try {
@@ -239,19 +243,51 @@ export const CandidateProfileDialog = ({
       if (error) throw error;
       
       if (data?.error) {
-        toast.error(data.error);
+        if (!silent) toast.error(data.error);
         return;
       }
       
-      toast.success('Sammanfattning genererad från CV');
-      fetchAiSummary();
+      if (!silent) toast.success('Sammanfattning genererad från CV');
+      
+      // Update the summary directly from response instead of refetching
+      if (data?.summary) {
+        setAiSummary({
+          summary_text: data.summary.summary_text,
+          key_points: data.summary.key_points,
+        });
+      }
     } catch (error) {
       console.error('Error generating CV summary:', error);
-      toast.error('Kunde inte generera sammanfattning');
+      if (!silent) toast.error('Kunde inte generera sammanfattning');
     } finally {
       setGeneratingSummary(false);
     }
   };
+
+  // Auto-generate summary when dialog opens and no summary exists
+  useEffect(() => {
+    const autoGenerateIfNeeded = async () => {
+      if (!open || !activeApplication || !user) return;
+      
+      // Check if summary already exists
+      const result = await fetchAiSummary();
+      
+      // Auto-generate if no summary and CV exists
+      if (result?.shouldAutoGenerate && activeApplication.cv_url) {
+        generateAiSummary(true); // Silent mode - no toast
+      }
+    };
+    
+    autoGenerateIfNeeded();
+  }, [open, activeApplication?.id, user?.id]);
+
+  // Fetch notes and questions when dialog opens
+  useEffect(() => {
+    if (open && activeApplication && user) {
+      fetchNotes();
+      fetchJobQuestions();
+    }
+  }, [open, activeApplication?.id, user?.id]);
 
   const fetchJobQuestions = async () => {
     if (!activeApplication?.job_id) return;
@@ -371,7 +407,8 @@ export const CandidateProfileDialog = ({
   const hasMultipleApplications = allApplications && allApplications.length > 1;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
@@ -500,7 +537,7 @@ export const CandidateProfileDialog = ({
                       Ingen sammanfattning ännu
                     </p>
                     <Button
-                      onClick={generateAiSummary}
+                      onClick={() => generateAiSummary(false)}
                       disabled={generatingSummary}
                       variant="ghost"
                       size="sm"
@@ -817,23 +854,26 @@ export const CandidateProfileDialog = ({
           </div>
         </div>
       </DialogContent>
-
-      {/* CV Dialog - matching profile page exactly */}
-      <Dialog open={cvOpen} onOpenChange={setCvOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-transparent border-none shadow-none p-8">
-          <DialogHeader className="mb-4">
-            <DialogTitle className="text-white text-2xl">CV</DialogTitle>
-          </DialogHeader>
-          {displayApp?.cv_url && signedCvUrl && (
-            <CvViewer 
-              src={signedCvUrl} 
-              fileName="cv.pdf" 
-              height="70vh"
-              onClose={() => setCvOpen(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </Dialog>
+
+    {/* CV Dialog - matching profile page exactly */}
+    <Dialog open={cvOpen} onOpenChange={setCvOpen}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-transparent border-none shadow-none p-8">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="text-white text-2xl">CV</DialogTitle>
+        </DialogHeader>
+        {displayApp?.cv_url && signedCvUrl && (
+          <CvViewer 
+            src={signedCvUrl} 
+            fileName="cv.pdf" 
+            height="70vh"
+            onClose={() => setCvOpen(false)}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 };
+
+export default CandidateProfileDialog;
