@@ -250,7 +250,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
       ref={setNodeRef}
       className={`flex-1 min-w-[220px] max-w-[280px] transition-all ${isOver ? 'scale-[1.02]' : ''}`}
     >
-      <div className={`rounded-md border ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary' : ''}`}>
+      <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary' : ''}`}>
         <div className="flex items-center gap-1.5">
           <Icon className="h-3.5 w-3.5" />
           <span className="font-medium text-xs">{config.label}</span>

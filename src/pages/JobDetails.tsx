@@ -129,12 +129,12 @@ type ApplicationStatus = 'pending' | 'reviewing' | 'interview' | 'offered' | 'hi
 const STATUS_ORDER: ApplicationStatus[] = ['pending', 'reviewing', 'interview', 'offered', 'hired'];
 
 const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string }> = {
-  pending: { label: 'Inkorg', color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40' },
-  reviewing: { label: 'Granskar', color: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
-  interview: { label: 'Intervju', color: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
-  offered: { label: 'Erbjuden', color: 'bg-green-500/20 text-green-300 border-green-500/40' },
-  hired: { label: 'Anställd', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
-  rejected: { label: 'Avvisad', color: 'bg-red-500/20 text-red-300 border-red-500/40' },
+  pending: { label: 'Inkorg', color: 'bg-yellow-500/20 ring-1 ring-inset ring-yellow-500/50 text-yellow-300' },
+  reviewing: { label: 'Granskar', color: 'bg-blue-500/20 ring-1 ring-inset ring-blue-500/50 text-blue-300' },
+  interview: { label: 'Intervju', color: 'bg-purple-500/20 ring-1 ring-inset ring-purple-500/50 text-purple-300' },
+  offered: { label: 'Erbjuden', color: 'bg-green-500/20 ring-1 ring-inset ring-green-500/50 text-green-300' },
+  hired: { label: 'Anställd', color: 'bg-emerald-500/20 ring-1 ring-inset ring-emerald-500/50 text-emerald-300' },
+  rejected: { label: 'Avvisad', color: 'bg-red-500/20 ring-1 ring-inset ring-red-500/50 text-red-300' },
 };
 
 const JobDetails = () => {
@@ -464,7 +464,7 @@ const JobDetails = () => {
         ref={setNodeRef}
         className={`flex-1 min-w-[220px] max-w-[280px] transition-all ${isOver ? 'scale-[1.02]' : ''}`}
       >
-        <div className={`rounded-md border ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary' : ''}`}>
+        <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-primary' : ''}`}>
           <div className="flex items-center gap-1.5">
             <Icon className="h-3.5 w-3.5" />
             <span className="font-medium text-xs">{config.label}</span>
