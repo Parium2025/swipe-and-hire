@@ -42,6 +42,7 @@ import {
   DragEndEvent,
   DragOverEvent,
   useDroppable,
+  MeasuringStrategy,
 } from '@dnd-kit/core';
 import {
   useSortable,
@@ -539,20 +540,35 @@ const JobDetails = () => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveId(null);
-    setOverId(null);
 
-    if (!over) return;
+    if (!over) {
+      setActiveId(null);
+      setOverId(null);
+      return;
+    }
 
     const applicationId = active.id as string;
     const overRawId = over.id as string;
     const targetStatus = resolveOverStatus(overRawId);
 
-    if (!targetStatus) return;
+    if (!targetStatus) {
+      setActiveId(null);
+      setOverId(null);
+      return;
+    }
 
     const application = applications.find((a) => a.id === applicationId);
     if (application && application.status !== targetStatus) {
+      // Update status FIRST (optimistic update)
       updateApplicationStatus(applicationId, targetStatus);
+      // Clear drag state after a frame to ensure optimistic update is rendered
+      requestAnimationFrame(() => {
+        setActiveId(null);
+        setOverId(null);
+      });
+    } else {
+      setActiveId(null);
+      setOverId(null);
     }
   };
 
@@ -654,6 +670,11 @@ const JobDetails = () => {
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
+          measuring={{
+            droppable: {
+              strategy: MeasuringStrategy.Always,
+            },
+          }}
         >
           <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2">
             {STATUS_ORDER.map((status) => (
