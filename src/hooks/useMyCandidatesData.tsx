@@ -178,17 +178,35 @@ export function useMyCandidatesData() {
       .channel(`my-candidates-realtime-${user.id}`)
       .on(
         'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'my_candidates', 
-          filter: `recruiter_id=eq.${user.id}` 
+        {
+          event: '*',
+          schema: 'public',
+          table: 'my_candidates',
+          filter: `recruiter_id=eq.${user.id}`,
         },
-        () => {
-          // Don't refetch during drag operations to avoid overwriting optimistic updates
-          if (!isDragging) {
-            queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+        (payload: any) => {
+          // Don't apply realtime changes during drag/drop optimistic updates
+          if (isDragging) return;
+
+          // For the common case (stage change), update cache in-place to avoid
+          // refetch jitter that makes drag/drop feel "laggy".
+          if (payload?.eventType === 'UPDATE' && payload?.new?.id) {
+            const next = payload.new as { id: string; stage?: CandidateStage };
+
+            if (next.stage) {
+              queryClient.setQueryData(
+                ['my-candidates', user.id],
+                (old: MyCandidateData[] | undefined) => {
+                  if (!old) return old;
+                  return old.map((c) => (c.id === next.id ? { ...c, stage: next.stage! } : c));
+                }
+              );
+              return;
+            }
           }
+
+          // Fallback: refetch for other changes (insert/delete/unknown updates)
+          queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
         }
       )
       .subscribe();
@@ -245,18 +263,19 @@ export function useMyCandidatesData() {
       if (error) throw error;
       return data;
     },
-    onMutate: async ({ id, stage }) => {
+    onMutate: ({ id, stage }) => {
       // Mark as dragging to prevent realtime from overwriting
       setIsDragging(true);
-      // Optimistic update - move card immediately
-      await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
+
+      // Optimistic update - MUST be synchronous to feel instant (like JobDetails)
+      void queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
       const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
-      
+
       queryClient.setQueryData(['my-candidates', user?.id], (old: MyCandidateData[] | undefined) => {
         if (!old) return old;
-        return old.map(c => c.id === id ? { ...c, stage } : c);
+        return old.map((c) => (c.id === id ? { ...c, stage } : c));
       });
-      
+
       return { previousCandidates };
     },
     onError: (err, variables, context) => {
