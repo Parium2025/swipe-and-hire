@@ -40,10 +40,10 @@ export interface MyCandidateData {
 }
 
 export const STAGE_CONFIG = {
-  to_contact: { label: 'Att kontakta', color: 'bg-blue-500/20 ring-1 ring-inset ring-blue-500/50 text-blue-100' },
-  interview: { label: 'Intervju', color: 'bg-yellow-500/20 ring-1 ring-inset ring-yellow-500/50 text-yellow-100' },
-  offer: { label: 'Erbjudande', color: 'bg-purple-500/20 ring-1 ring-inset ring-purple-500/50 text-purple-100' },
-  hired: { label: 'Anställd', color: 'bg-green-500/20 ring-1 ring-inset ring-green-500/50 text-green-100' },
+  to_contact: { label: 'Att kontakta', color: 'bg-blue-500/20 ring-1 ring-inset ring-blue-500/50 text-blue-100', hoverRing: 'ring-blue-500/70' },
+  interview: { label: 'Intervju', color: 'bg-yellow-500/20 ring-1 ring-inset ring-yellow-500/50 text-yellow-100', hoverRing: 'ring-yellow-500/70' },
+  offer: { label: 'Erbjudande', color: 'bg-purple-500/20 ring-1 ring-inset ring-purple-500/50 text-purple-100', hoverRing: 'ring-purple-500/70' },
+  hired: { label: 'Anställd', color: 'bg-green-500/20 ring-1 ring-inset ring-green-500/50 text-green-100', hoverRing: 'ring-green-500/70' },
 } as const;
 
 export function useMyCandidatesData() {
