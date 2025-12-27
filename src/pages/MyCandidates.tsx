@@ -267,7 +267,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
       </div>
 
       <div 
-        className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-colors ${
+        className={`relative space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-colors ${
           isOver ? 'bg-white/10' : ''
         }`}
       >
@@ -282,15 +282,18 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
           ))}
         </SortableContext>
 
-        {isOver && candidates.length > 0 && (
-          <div className="text-center py-2 text-xs text-white font-medium">
-            Släpp här
+        {candidates.length === 0 && !isOver && (
+          <div className="text-center py-8 text-xs text-white">
+            Inga kandidater i detta steg
           </div>
         )}
 
-        {candidates.length === 0 && (
-          <div className={`text-center py-8 text-xs transition-all ${isOver ? 'text-white font-medium' : 'text-white/60'}`}>
-            {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
+        {/* Drop indicator (always centered, regardless of list length) */}
+        {isOver && (
+          <div className="pointer-events-none absolute inset-1 flex items-center justify-center">
+            <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white">
+              Släpp här
+            </div>
           </div>
         )}
       </div>
