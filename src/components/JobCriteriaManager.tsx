@@ -4,8 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { 
   Plus, 
@@ -16,7 +14,8 @@ import {
   Check,
   X,
   AlertCircle,
-  Loader2
+  Loader2,
+  Pencil
 } from 'lucide-react';
 import {
   Dialog,
@@ -209,160 +208,163 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
 
   if (isLoading) {
     return (
-      <Card className="bg-card/50 border-border/50">
-        <CardContent className="p-4 flex items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-3">
+        <Loader2 className="h-4 w-4 animate-spin text-white/50" />
+      </div>
     );
   }
 
   return (
     <>
-      <Card className="bg-card/50 border-border/50">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm font-medium">AI-Urvalskriterier</CardTitle>
-              <Badge variant="secondary" className="text-xs">
-                {criteria.length} st
-              </Badge>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={openNewCriterionDialog}
-              className="h-7 text-xs"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Lägg till
-            </Button>
+      {/* Slim inline section - matches app design */}
+      <div className="bg-white/10 border border-white/20 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 text-white" />
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
+              AI-Urvalskriterier
+            </h3>
+            {criteria.length > 0 && (
+              <span className="text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full">
+                {criteria.length}
+              </span>
+            )}
           </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {criteria.length === 0 ? (
-            <div className="text-center py-4 text-muted-foreground text-sm">
-              <p>Inga urvalskriterier ännu.</p>
-              <p className="text-xs mt-1">
-                AI:n utvärderar kandidater automatiskt mot dina kriterier.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {criteria.map((criterion, index) => (
-                <div
-                  key={criterion.id}
-                  className="flex items-start gap-2 p-2 rounded-md bg-background/50 border border-border/30 group hover:border-border/60 transition-colors"
-                >
-                  <GripVertical className="h-4 w-4 text-muted-foreground/50 mt-0.5 cursor-grab" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{criterion.title}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground truncate mt-0.5">
-                      {criterion.prompt}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openEditCriterionDialog(criterion)}
-                      className="h-6 w-6 p-0"
-                    >
-                      <Sparkles className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(criterion.id)}
-                      className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={openNewCriterionDialog}
+            className="h-7 px-2 text-xs text-white hover:bg-white/10"
+          >
+            <Plus className="h-3.5 w-3.5 mr-1" />
+            Lägg till
+          </Button>
+        </div>
 
+        {criteria.length === 0 ? (
+          <p className="text-xs text-white/60 text-center py-2">
+            Inga kriterier. AI:n utvärderar kandidater automatiskt.
+          </p>
+        ) : (
+          <div className="space-y-1.5">
+            {criteria.map((criterion) => (
+              <div
+                key={criterion.id}
+                className="flex items-center gap-2 py-1.5 px-2 rounded-lg bg-white/5 group hover:bg-white/10 transition-colors"
+              >
+                <GripVertical className="h-3 w-3 text-white/30 cursor-grab shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm text-white">{criterion.title}</span>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => openEditCriterionDialog(criterion)}
+                    className="p-1 hover:bg-white/10 rounded text-white/60 hover:text-white"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(criterion.id)}
+                    className="p-1 hover:bg-white/10 rounded text-white/60 hover:text-red-400"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Dialog - matching app's glass style */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-card-parium backdrop-blur-md border-white/20 text-white">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-white">
               {editingCriterion ? 'Redigera kriterium' : 'Nytt urvalskriterium'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-white/70">
               AI:n utvärderar kandidater baserat på detta kriterium och visar ✅, ❌ eller ⚠️.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Titel <span className="text-destructive">*</span>
+              <label className="text-sm font-medium text-white">
+                Titel <span className="text-red-400">*</span>
               </label>
               <Input
                 placeholder="T.ex. Har körkort"
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                className="h-9"
+                className="h-9 bg-white/5 border-white/20 text-white placeholder:text-white/40"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-white/50">
                 Visas på kandidatkortet som referens för dig.
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Prompt <span className="text-destructive">*</span>
+              <label className="text-sm font-medium text-white">
+                Prompt <span className="text-red-400">*</span>
               </label>
               <Textarea
                 placeholder="T.ex. Kontrollera om kandidaten har B-körkort baserat på CV eller svar"
                 value={prompt}
                 onChange={(e) => handlePromptChange(e.target.value)}
                 rows={3}
-                className="resize-none"
+                className="resize-none bg-white/5 border-white/20 text-white placeholder:text-white/40"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-white/50">
                 Vad AI:n ska leta efter. Formulera tydligt och objektivt.
               </p>
             </div>
 
             {validationError && (
-              <div className="flex items-start gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/30">
-                <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-                <p className="text-sm text-destructive">{validationError}</p>
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                <AlertTriangle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                <p className="text-sm text-red-300">{validationError}</p>
               </div>
             )}
 
-            <div className="p-3 rounded-md bg-muted/50 border border-border/50">
-              <p className="text-xs text-muted-foreground">
-                <strong>Tips:</strong> Bra kriterier är specifika och mätbara:
+            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+              <p className="text-xs text-white/70">
+                <strong className="text-white">Tips:</strong> Bra kriterier är specifika och mätbara:
               </p>
-              <ul className="text-xs text-muted-foreground mt-1 space-y-0.5">
-                <li>✅ "Har B-körkort"</li>
-                <li>✅ "Minst 2 års erfarenhet inom lager"</li>
-                <li>✅ "Kan arbeta kvällar och helger"</li>
-                <li>❌ "Är trevlig" (för subjektivt)</li>
+              <ul className="text-xs text-white/60 mt-1.5 space-y-0.5">
+                <li className="flex items-center gap-1.5">
+                  <Check className="h-3 w-3 text-green-400" />
+                  "Har B-körkort"
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Check className="h-3 w-3 text-green-400" />
+                  "Minst 2 års erfarenhet inom lager"
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Check className="h-3 w-3 text-green-400" />
+                  "Kan arbeta kvällar och helger"
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <X className="h-3 w-3 text-red-400" />
+                  "Är trevlig" (för subjektivt)
+                </li>
               </ul>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={() => setIsDialogOpen(false)}
               disabled={isSaving}
+              className="text-white hover:bg-white/10"
             >
               Avbryt
             </Button>
             <Button
               onClick={handleSave}
               disabled={isSaving || !!validationError || !title.trim() || !prompt.trim()}
+              className="bg-white/20 hover:bg-white/30 text-white border border-white/20"
             >
               {isSaving ? (
                 <>
@@ -388,25 +390,21 @@ interface CriterionResultBadgeProps {
 }
 
 export function CriterionResultBadge({ result, title, reasoning }: CriterionResultBadgeProps) {
-  const icons = {
-    match: <Check className="h-3 w-3 text-green-500" />,
-    no_match: <X className="h-3 w-3 text-red-500" />,
-    no_data: <AlertCircle className="h-3 w-3 text-yellow-500" />,
+  const config = {
+    match: { icon: Check, color: 'text-green-400', bg: 'bg-green-500/10' },
+    no_match: { icon: X, color: 'text-red-400', bg: 'bg-red-500/10' },
+    no_data: { icon: AlertCircle, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
   };
-
-  const colors = {
-    match: 'bg-green-500/10 border-green-500/30 text-green-200',
-    no_match: 'bg-red-500/10 border-red-500/30 text-red-200',
-    no_data: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-200',
-  };
+  
+  const { icon: Icon, color, bg } = config[result];
 
   return (
     <div
-      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border ${colors[result]}`}
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${bg}`}
       title={reasoning}
     >
-      {icons[result]}
-      <span className="truncate max-w-[80px]">{title}</span>
+      <Icon className={`h-2.5 w-2.5 ${color}`} />
+      <span className="text-white/80 truncate max-w-[60px]">{title}</span>
     </div>
   );
 }

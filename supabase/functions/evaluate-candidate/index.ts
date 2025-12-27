@@ -69,7 +69,11 @@ serve(async (req) => {
   }
 
   try {
-    const { job_id, applicant_id, application_id, action } = await req.json();
+    const body = await req.json();
+    const job_id = body.job_id || body.jobId;
+    const applicant_id = body.applicant_id || body.applicantId;
+    const application_id = body.application_id || body.applicationId;
+    const action = body.action;
     
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
