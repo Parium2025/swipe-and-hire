@@ -138,6 +138,200 @@ const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string }>
   rejected: { label: 'Avvisad', color: 'bg-red-500/20 ring-1 ring-inset ring-red-500/50 text-red-300' },
 };
 
+// Small Candidate Avatar Wrapper - MUST be outside JobDetails to prevent recreation
+const SmallCandidateAvatarWrapper = ({ application }: { application: JobApplication }) => {
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const hasVideo = application.is_profile_video && application.video_url;
+  
+  return (
+    <div 
+      className="h-7 w-7 md:h-8 md:w-8 flex-shrink-0 relative [&>*:first-child]:h-7 [&>*:first-child]:w-7 md:[&>*:first-child]:h-8 md:[&>*:first-child]:w-8 [&_.h-10]:h-7 [&_.w-10]:w-7 md:[&_.h-10]:h-8 md:[&_.w-10]:w-8 [&_.ring-2]:ring-1"
+      onClick={hasVideo ? (e) => {
+        e.stopPropagation();
+      } : undefined}
+    >
+      <CandidateAvatar
+        profileImageUrl={application.profile_image_url}
+        videoUrl={application.video_url}
+        isProfileVideo={application.is_profile_video}
+        firstName={application.first_name}
+        lastName={application.last_name}
+        onPlayingChange={setIsVideoPlaying}
+      />
+      {hasVideo && !isVideoPlaying && (
+        <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center pointer-events-none">
+          <Play className="h-3 w-3 md:h-4 md:w-4 text-white drop-shadow-lg fill-white" />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Application Card Content - MUST be outside JobDetails to prevent recreation
+const ApplicationCardContent = ({ 
+  application, 
+  isDragging, 
+  onOpenProfile,
+  onMarkAsViewed
+}: { 
+  application: JobApplication; 
+  isDragging?: boolean; 
+  onOpenProfile?: () => void;
+  onMarkAsViewed?: (id: string) => void;
+}) => {
+  const isUnread = !application.viewed_at;
+  const appliedTime = formatCompactTime(application.applied_at);
+  
+  const handleClick = () => {
+    if (isUnread && onMarkAsViewed) {
+      onMarkAsViewed(application.id);
+    }
+    onOpenProfile?.();
+  };
+  
+  return (
+    <div 
+      className={`bg-white/5 ring-1 ring-inset ring-white/10 rounded-md px-2 py-1.5 cursor-grab active:cursor-grabbing group relative
+        transition-all duration-200 ease-out
+        ${isDragging 
+          ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
+          : 'hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
+        }`}
+      onClick={handleClick}
+    >
+      {isUnread && (
+        <div className="absolute right-1.5 top-1.5">
+          <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
+        </div>
+      )}
+      
+      <div className="flex items-center gap-2">
+        <SmallCandidateAvatarWrapper application={application} />
+        
+        <div className="flex-1 min-w-0 pr-4">
+          <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors">
+            {application.first_name} {application.last_name}
+          </p>
+          <StarRating rating={application.rating} />
+          {appliedTime && (
+            <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px] group-hover:text-white/80 transition-colors">
+              <span className="flex items-center gap-0.5">
+                <ArrowDown className="h-2.5 w-2.5" />
+                {appliedTime}
+              </span>
+              <span className="flex items-center gap-0.5">
+                <Clock className="h-2.5 w-2.5" />
+                {appliedTime}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Sortable Application Card - MUST be outside JobDetails to stabilize useSortable hook
+const SortableApplicationCard = ({ 
+  application, 
+  onOpenProfile,
+  onMarkAsViewed
+}: { 
+  application: JobApplication; 
+  onOpenProfile: () => void;
+  onMarkAsViewed?: (id: string) => void;
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: application.id });
+
+  const style = {
+    transform: transform ? CSS.Transform.toString(transform) : undefined,
+    transition: isDragging ? undefined : transition,
+    opacity: isDragging ? 0 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <ApplicationCardContent 
+        application={application} 
+        isDragging={isDragging} 
+        onOpenProfile={onOpenProfile}
+        onMarkAsViewed={onMarkAsViewed}
+      />
+    </div>
+  );
+};
+
+// Status Column - MUST be outside JobDetails to stabilize useDroppable hook
+interface StatusColumnProps {
+  status: ApplicationStatus;
+  applications: JobApplication[];
+  isOver: boolean;
+  onOpenProfile: (app: JobApplication) => void;
+  onMarkAsViewed: (id: string) => void;
+}
+
+const StatusColumn = ({ status, applications, isOver, onOpenProfile, onMarkAsViewed }: StatusColumnProps) => {
+  const config = STATUS_CONFIG[status];
+  const Icon = STATUS_ICONS[status] || Inbox;
+  
+  const { setNodeRef } = useDroppable({
+    id: status,
+  });
+
+  return (
+    <div 
+      ref={setNodeRef}
+      className={`flex-1 min-w-[220px] max-w-[280px] transition-all ${isOver ? 'scale-[1.02]' : ''}`}
+    >
+      <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-primary' : ''}`}>
+        <div className="flex items-center gap-1.5">
+          <Icon className="h-3.5 w-3.5" />
+          <span className="font-medium text-xs">{config.label}</span>
+          <span className="ml-auto bg-white/20 text-white/90 text-[10px] px-1.5 py-0.5 rounded-full">
+            {applications.length}
+          </span>
+        </div>
+      </div>
+
+      <div 
+        className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-colors ${
+          isOver ? 'bg-white/10' : ''
+        }`}
+      >
+        <SortableContext items={applications.map(a => a.id)} strategy={verticalListSortingStrategy}>
+          {applications.map((app) => (
+            <SortableApplicationCard 
+              key={app.id} 
+              application={app} 
+              onOpenProfile={() => onOpenProfile(app)}
+              onMarkAsViewed={onMarkAsViewed}
+            />
+          ))}
+        </SortableContext>
+
+        {isOver && applications.length > 0 && (
+          <div className="text-center py-2 text-xs text-white font-medium">
+            Släpp här
+          </div>
+        )}
+
+        {applications.length === 0 && (
+          <div className={`text-center py-8 text-xs transition-all ${isOver ? 'text-white font-medium' : 'text-white/60'}`}>
+            {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
@@ -344,173 +538,28 @@ const JobDetails = () => {
     }
   };
 
-  // Wrapper component for CandidateAvatar with inline video playback
-  const SmallCandidateAvatarWrapper = ({ application }: { application: JobApplication }) => {
-    const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-    const hasVideo = application.is_profile_video && application.video_url;
-    
-    return (
-      <div 
-        className="h-7 w-7 md:h-8 md:w-8 flex-shrink-0 relative [&>*:first-child]:h-7 [&>*:first-child]:w-7 md:[&>*:first-child]:h-8 md:[&>*:first-child]:w-8 [&_.h-10]:h-7 [&_.w-10]:w-7 md:[&_.h-10]:h-8 md:[&_.w-10]:w-8 [&_.ring-2]:ring-1"
-        onClick={hasVideo ? (e) => {
-          // Prevent opening profile dialog when clicking on video - let ProfileVideo handle playback
-          e.stopPropagation();
-        } : undefined}
-      >
-        <CandidateAvatar
-          profileImageUrl={application.profile_image_url}
-          videoUrl={application.video_url}
-          isProfileVideo={application.is_profile_video}
-          firstName={application.first_name}
-          lastName={application.last_name}
-          onPlayingChange={setIsVideoPlaying}
-        />
-        {/* Large play overlay for video avatars - hidden when video is playing */}
-        {hasVideo && !isVideoPlaying && (
-          <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center pointer-events-none">
-            <Play className="h-3 w-3 md:h-4 md:w-4 text-white drop-shadow-lg fill-white" />
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const ApplicationCardContent = ({ application, isDragging, onOpenProfile }: { application: JobApplication; isDragging?: boolean; onOpenProfile?: () => void }) => {
-    const isUnread = !application.viewed_at;
-    const appliedTime = formatCompactTime(application.applied_at);
-    
-    const handleClick = () => {
-      if (isUnread) {
-        markApplicationAsViewed(application.id);
+  // Memoize applications by status to prevent unnecessary re-renders
+  const applicationsByStatus = useMemo(() => {
+    const result: Record<ApplicationStatus, JobApplication[]> = {
+      pending: [],
+      reviewing: [],
+      interview: [],
+      offered: [],
+      hired: [],
+      rejected: [],
+    };
+    applications.forEach(app => {
+      if (result[app.status]) {
+        result[app.status].push(app);
       }
-      onOpenProfile?.();
-    };
-    
-    return (
-      <div 
-        className={`bg-white/5 ring-1 ring-inset ring-white/10 rounded-md px-2 py-1.5 cursor-grab active:cursor-grabbing group relative
-          transition-all duration-200 ease-out
-          ${isDragging 
-            ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
-            : 'hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
-          }`}
-        onClick={handleClick}
-      >
-        {/* Unread indicator dot */}
-        {isUnread && (
-          <div className="absolute right-1.5 top-1.5">
-            <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
-          </div>
-        )}
-        
-        <div className="flex items-center gap-2">
-          <SmallCandidateAvatarWrapper application={application} />
-          
-          <div className="flex-1 min-w-0 pr-4">
-            <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors">
-              {application.first_name} {application.last_name}
-            </p>
-            <StarRating rating={application.rating} />
-            {appliedTime && (
-              <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px] group-hover:text-white/80 transition-colors">
-                <span className="flex items-center gap-0.5">
-                  <ArrowDown className="h-2.5 w-2.5" />
-                  {appliedTime}
-                </span>
-                <span className="flex items-center gap-0.5">
-                  <Clock className="h-2.5 w-2.5" />
-                  {appliedTime}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Sortable wrapper for application cards
-  const SortableApplicationCard = ({ application, onOpenProfile }: { application: JobApplication; onOpenProfile: () => void }) => {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      transform,
-      transition,
-      isDragging,
-    } = useSortable({ id: application.id });
-
-    const style = {
-      transform: transform ? CSS.Transform.toString(transform) : undefined,
-      transition: isDragging ? undefined : transition, // No transition while dragging to avoid flicker
-      opacity: isDragging ? 0 : 1, // Fully hide while dragging (DragOverlay shows the visual)
-    };
-
-    return (
-      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-        <ApplicationCardContent application={application} isDragging={isDragging} onOpenProfile={onOpenProfile} />
-      </div>
-    );
-  };
-
-  // Droppable status column - matching MyCandidates style
-  const StatusColumn = ({ status, isOver }: { status: ApplicationStatus; isOver?: boolean }) => {
-    const config = STATUS_CONFIG[status];
-    const apps = filterApplicationsByStatus(status);
-    const Icon = STATUS_ICONS[status] || Inbox;
-    
-    const { setNodeRef } = useDroppable({
-      id: status,
     });
+    return result;
+  }, [applications]);
 
-    return (
-      <div 
-        ref={setNodeRef}
-        className={`flex-1 min-w-[220px] max-w-[280px] transition-all ${isOver ? 'scale-[1.02]' : ''}`}
-      >
-        <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-primary' : ''}`}>
-          <div className="flex items-center gap-1.5">
-            <Icon className="h-3.5 w-3.5" />
-            <span className="font-medium text-xs">{config.label}</span>
-            <span className="ml-auto bg-white/20 text-white/90 text-[10px] px-1.5 py-0.5 rounded-full">
-              {apps.length}
-            </span>
-          </div>
-        </div>
-
-        <div 
-          className={`space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto p-1 pr-2 min-h-[100px] rounded-lg transition-colors ${
-            isOver ? 'bg-white/10' : ''
-          }`}
-        >
-          <SortableContext items={apps.map(a => a.id)} strategy={verticalListSortingStrategy}>
-            {apps.map((app) => (
-              <SortableApplicationCard 
-                key={app.id} 
-                application={app} 
-                onOpenProfile={() => {
-                  setSelectedApplication(app);
-                  setDialogOpen(true);
-                }}
-              />
-            ))}
-          </SortableContext>
-
-          {isOver && apps.length > 0 && (
-            <div className="text-center py-2 text-xs text-white font-medium">
-              Släpp här
-            </div>
-          )}
-
-          {apps.length === 0 && (
-            <div className={`text-center py-8 text-xs transition-all ${isOver ? 'text-white font-medium' : 'text-white/60'}`}>
-              {isOver ? 'Släpp här' : 'Inga kandidater i detta steg'}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
+  const handleOpenProfile = useCallback((app: JobApplication) => {
+    setSelectedApplication(app);
+    setDialogOpen(true);
+  }, []);
 
   // DnD handlers
   const handleDragStart = (event: DragStartEvent) => {
@@ -680,8 +729,11 @@ const JobDetails = () => {
             {STATUS_ORDER.map((status) => (
               <StatusColumn 
                 key={status} 
-                status={status} 
+                status={status}
+                applications={applicationsByStatus[status]}
                 isOver={overId === status}
+                onOpenProfile={handleOpenProfile}
+                onMarkAsViewed={markApplicationAsViewed}
               />
             ))}
           </div>
