@@ -225,6 +225,7 @@ FOKUSERA PÅ (om tillgängligt i CV:et):
 SVARSFORMAT FÖR GILTIGT CV (JSON):
 {
   "is_valid_cv": true,
+  "document_type": "CV",
   "summary_text": "En mening som sammanfattar kandidaten",
   "key_points": [
     "Punkt 1: Konkret observation från CV",
