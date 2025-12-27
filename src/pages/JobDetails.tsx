@@ -31,9 +31,6 @@ import EmployerLayout from '@/components/EmployerLayout';
 import {
   DndContext,
   DragOverlay,
-  closestCorners,
-  pointerWithin,
-  type CollisionDetection,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -51,6 +48,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
+import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 
 interface JobApplication {
   id: string;
@@ -288,7 +286,7 @@ const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed }: S
   return (
     <div 
       ref={setNodeRef}
-      className={`flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-all ${isOver ? 'scale-[1.02]' : ''}`}
+      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors"
       style={{ minHeight: 'calc(100vh - 280px)' }}
     >
       <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-primary' : ''}`}>
@@ -357,11 +355,10 @@ const JobDetails = () => {
     useSensor(KeyboardSensor)
   );
 
-  const collisionDetectionStrategy = useCallback<CollisionDetection>((args) => {
-    const pointerCollisions = pointerWithin(args);
-    if (pointerCollisions.length > 0) return pointerCollisions;
-    return closestCorners(args);
-  }, []);
+  const collisionDetectionStrategy = useMemo(
+    () => columnXCollisionDetection(STATUS_ORDER),
+    []
+  );
 
   useEffect(() => {
     if (!jobId || !user) return;
