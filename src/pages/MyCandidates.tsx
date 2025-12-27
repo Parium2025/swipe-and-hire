@@ -579,7 +579,7 @@ const MyCandidates = () => {
             Din personliga rekryteringspipeline
           </p>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2">
           {STAGE_ORDER.map(stage => (
             <div key={stage} className="flex-1 min-w-[280px] max-w-[350px]">
               <Skeleton className="h-12 w-full bg-white/10 rounded-lg mb-3" />
@@ -690,7 +690,7 @@ const MyCandidates = () => {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className={`flex gap-4 overflow-x-auto pb-4 ${activeStageFilter !== 'all' ? 'justify-center' : ''}`}>
+          <div className={`flex gap-4 overflow-x-auto pb-4 pt-2 px-2 ${activeStageFilter !== 'all' ? 'justify-center' : ''}`}>
             {stagesToDisplay.map(stage => (
               <StageColumn
                 key={stage}
