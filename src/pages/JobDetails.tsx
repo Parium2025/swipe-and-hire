@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { ApplicationData } from '@/hooks/useApplicationsData';
+import { JobCriteriaManager, CriterionResultBadge } from '@/components/JobCriteriaManager';
 import { 
   Clock, 
   X,
@@ -22,7 +23,8 @@ import {
   Gift,
   PartyPopper,
   Inbox,
-  MapPin
+  MapPin,
+  Sparkles
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
@@ -50,6 +52,14 @@ import { CSS } from '@dnd-kit/utilities';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 
+// Types for criterion results
+interface CriterionResult {
+  criterion_id: string;
+  result: 'match' | 'no_match' | 'no_data';
+  reasoning?: string;
+  title: string;
+}
+
 interface JobApplication {
   id: string;
   applicant_id: string;
@@ -71,6 +81,7 @@ interface JobApplication {
   video_url: string | null;
   is_profile_video: boolean;
   rating: number;
+  criterionResults?: CriterionResult[];
 }
 
 // Format time in compact way like MyCandidates
@@ -179,6 +190,7 @@ const ApplicationCardContent = ({
 }) => {
   const isUnread = !application.viewed_at;
   const appliedTime = formatCompactTime(application.applied_at);
+  const criterionResults = application.criterionResults || [];
   
   const handleClick = () => {
     if (isUnread && onMarkAsViewed) {
@@ -225,6 +237,23 @@ const ApplicationCardContent = ({
           )}
         </div>
       </div>
+
+      {/* Criterion Results */}
+      {criterionResults.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1.5 pt-1.5 border-t border-white/5">
+          {criterionResults.slice(0, 3).map((cr) => (
+            <CriterionResultBadge
+              key={cr.criterion_id}
+              result={cr.result}
+              title={cr.title}
+              reasoning={cr.reasoning}
+            />
+          ))}
+          {criterionResults.length > 3 && (
+            <span className="text-[10px] text-white/50">+{criterionResults.length - 3}</span>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -401,6 +430,47 @@ const JobDetails = () => {
       });
       setMyCandidatesMap(candidateIdsMap);
 
+      // Fetch criteria for this job
+      const { data: criteriaData } = await supabase
+        .from('job_criteria')
+        .select('id, title')
+        .eq('job_id', jobId);
+      
+      const criteriaMap = new Map<string, string>();
+      (criteriaData || []).forEach(c => criteriaMap.set(c.id, c.title));
+
+      // Fetch criterion results for all applicants
+      const applicantIds = (applicationsData || []).map(a => a.applicant_id);
+      const { data: evaluationsData } = await supabase
+        .from('candidate_evaluations')
+        .select('id, applicant_id')
+        .eq('job_id', jobId)
+        .in('applicant_id', applicantIds.length > 0 ? applicantIds : ['']);
+
+      const evaluationIds = (evaluationsData || []).map(e => e.id);
+      const evaluationByApplicant = new Map<string, string>();
+      (evaluationsData || []).forEach(e => evaluationByApplicant.set(e.applicant_id, e.id));
+
+      const { data: criterionResultsData } = await supabase
+        .from('criterion_results')
+        .select('evaluation_id, criterion_id, result, reasoning')
+        .in('evaluation_id', evaluationIds.length > 0 ? evaluationIds : ['']);
+
+      // Group results by evaluation_id
+      const resultsByEvaluation = new Map<string, CriterionResult[]>();
+      (criterionResultsData || []).forEach(cr => {
+        const title = criteriaMap.get(cr.criterion_id) || 'Okänt kriterium';
+        const result: CriterionResult = {
+          criterion_id: cr.criterion_id,
+          result: cr.result as 'match' | 'no_match' | 'no_data',
+          reasoning: cr.reasoning || undefined,
+          title,
+        };
+        const existing = resultsByEvaluation.get(cr.evaluation_id) || [];
+        existing.push(result);
+        resultsByEvaluation.set(cr.evaluation_id, existing);
+      });
+
       // Fetch profile media for each applicant using RPC
       const applicationsWithMedia = await Promise.all(
         (applicationsData || []).map(async (app) => {
@@ -414,12 +484,18 @@ const JobDetails = () => {
             video_url?: string;
             is_profile_video?: boolean;
           };
+
+          // Get criterion results for this applicant
+          const evalId = evaluationByApplicant.get(app.applicant_id);
+          const criterionResults = evalId ? resultsByEvaluation.get(evalId) || [] : [];
+
           return {
             ...app,
             profile_image_url: media.profile_image_url || null,
             video_url: media.video_url || null,
             is_profile_video: media.is_profile_video || false,
             rating: ratingsByApplicant.get(app.applicant_id) || 0,
+            criterionResults,
           };
         })
       );
@@ -709,6 +785,11 @@ const JobDetails = () => {
             </div>
           </div>
         </div>
+
+        {/* AI Criteria Manager */}
+        {jobId && (
+          <JobCriteriaManager jobId={jobId} onCriteriaChange={fetchJobData} />
+        )}
 
         {/* Kanban View with Drag and Drop */}
         <DndContext
