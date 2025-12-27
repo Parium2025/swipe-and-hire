@@ -255,7 +255,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
       className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors"
       style={{ minHeight: 'calc(100vh - 280px)' }}
     >
-      <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-primary' : ''}`}>
+      <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? `ring-2 ring-inset ${config.hoverRing}` : ''}`}>
         <div className="flex items-center gap-1.5">
           <Icon className="h-3.5 w-3.5" />
           <span className="font-medium text-xs">{config.label}</span>
