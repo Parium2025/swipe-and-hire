@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { UserPlus, Check } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 
 interface CandidatesTableProps {
   applications: ApplicationData[];
@@ -36,6 +37,16 @@ export function CandidatesTable({
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { isInMyCandidates, addCandidate } = useMyCandidatesData();
+
+  // Förladda CV-sammanfattningar i bakgrunden
+  useCvSummaryPreloader(
+    applications.map(app => ({
+      applicant_id: app.applicant_id,
+      application_id: app.id,
+      job_id: app.job_id,
+      cv_url: app.cv_url,
+    }))
+  );
 
   // Derive selected application from latest list so refetch updates the dialog content
   const selectedApplication = useMemo(() => {

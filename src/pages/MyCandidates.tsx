@@ -9,6 +9,7 @@ import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -447,6 +448,9 @@ const MyCandidates = () => {
       fetchCandidates();
     }
   }, [user, fetchCandidates]);
+
+  // Förladda CV-sammanfattningar i bakgrunden
+  useCvSummaryPreloader(candidates);
 
   // Group candidates by stage (computed from local state)
   const candidatesByStage = useMemo(() => {
