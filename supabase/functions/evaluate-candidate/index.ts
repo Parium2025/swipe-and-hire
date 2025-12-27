@@ -368,23 +368,37 @@ async function callLovableAI(
   criteria: any[]
 ): Promise<EvaluationResponse | null> {
   try {
-    const systemPrompt = `Du är en professionell rekryteringsassistent som utvärderar kandidater.
+    // IMPORTANT: Summary and criteria evaluation are SEPARATE
+    // Summary = independent CV/profile analysis (like Teamtailor Co-pilot)
+    // Criteria = yes/no matching for quick filtering on Kanban cards
+    
+    const systemPrompt = `Du är en professionell rekryteringsassistent. Du har TVÅ uppgifter:
 
-VIKTIGA REGLER:
-1. Ge ENDAST "match" (✅) om du hittar KONKRET bevis i kandidatens information
-2. Ge "no_match" (❌) om du hittar bevis för motsatsen ELLER om informationen tydligt saknas
-3. Ge "no_data" (⚠️) ENDAST om det inte finns någon information alls att basera bedömningen på
-4. Var alltid KONSERVATIV - hellre "no_data" än fel "match"
-5. Citera exakt var du hittade informationen i "reasoning"
-6. Confidence ska vara 0.0-1.0 baserat på hur säker du är
+## UPPGIFT 1: SAMMANFATTNING (OBEROENDE AV KRITERIER)
+Analysera kandidatens CV, profil och svar och ge en sammanfattning med 4-6 punkter.
+Fokusera på:
+- Relevant arbetslivserfarenhet
+- Utbildning och certifieringar (körkort, truckkort, etc.)
+- Tillgänglighet och arbetstider
+- Styrkor och eventuella saknade kvalifikationer för rollen
 
-SVAR FORMAT:
-Du MÅSTE svara med giltig JSON i exakt detta format:
+Varje punkt ska vara en konkret observation, t.ex.:
+- "Erfarenhet av lagerarbete: praktik hos Tvättex och stationärt arbete på Stora Coop Port73"
+- "Innehav av B-körkort uppfyller ett av de meriterande kraven"
+- "Ingen uttryckt truckkort (A+B) — viktig merit saknas för rollen"
+
+## UPPGIFT 2: KRITERIERESULTAT (OM KRITERIER FINNS)
+Om det finns kriterier att utvärdera, ge resultat för varje:
+- "match" (✅) = konkret bevis hittades
+- "no_match" (❌) = bevis för motsatsen eller tydligt saknas
+- "no_data" (⚠️) = ingen information att basera bedömningen på
+
+SVAR FORMAT (giltig JSON):
 {
   "criteria_results": [
     {
       "criterion_id": "uuid",
-      "title": "Kriteriets titel",
+      "title": "Kriteriets titel", 
       "result": "match" | "no_match" | "no_data",
       "confidence": 0.0-1.0,
       "reasoning": "Förklaring på svenska",
@@ -392,22 +406,28 @@ Du MÅSTE svara med giltig JSON i exakt detta format:
     }
   ],
   "summary": {
-    "text": "Övergripande sammanfattning av kandidaten (2-3 meningar)",
+    "text": "Kort övergripande sammanfattning (1-2 meningar)",
     "key_points": [
-      { "text": "Viktig punkt 1", "type": "positive" | "negative" | "neutral" },
-      { "text": "Viktig punkt 2", "type": "positive" | "negative" | "neutral" }
+      { "text": "Erfarenhet av X: konkret beskrivning", "type": "positive" },
+      { "text": "Saknar Y som är viktigt för rollen", "type": "negative" },
+      { "text": "Kan arbeta helger och kvällar", "type": "positive" },
+      { "text": "Har 2 års erfarenhet inom branschen", "type": "neutral" }
     ]
   }
 }`;
 
-    const userPrompt = `${jobContext}\n\n${candidateContext}\n\nUtvärdera kandidaten mot alla kriterier och ge en sammanfattning. Svara ENDAST med JSON.`;
+    const userPrompt = `${jobContext}\n\n${candidateContext}\n\nGe en sammanfattning av kandidaten och utvärdera eventuella kriterier. Svara ENDAST med JSON.`;
 
-    // Add criteria info for the response
+    // Add criteria info for the response (if any exist)
     const criteriaInfo = criteria.map(c => ({
       criterion_id: c.id,
       title: c.title,
       prompt: c.prompt,
     }));
+
+    const criteriaSection = criteria.length > 0 
+      ? `\n\nKriterier att utvärdera:\n${JSON.stringify(criteriaInfo, null, 2)}`
+      : '\n\nInga specifika kriterier att utvärdera, fokusera på sammanfattningen.';
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -421,7 +441,7 @@ Du MÅSTE svara med giltig JSON i exakt detta format:
           { role: 'system', content: systemPrompt },
           { 
             role: 'user', 
-            content: `${userPrompt}\n\nKriterier att utvärdera:\n${JSON.stringify(criteriaInfo, null, 2)}`
+            content: userPrompt + criteriaSection
           },
         ],
         temperature: 0.3, // Lower temperature for more consistent results
