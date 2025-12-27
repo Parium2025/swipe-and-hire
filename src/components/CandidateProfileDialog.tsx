@@ -138,7 +138,9 @@ export const CandidateProfileDialog = ({
   // AI Summary state
   const [aiSummary, setAiSummary] = useState<{
     summary_text: string;
-    key_points: { text: string; type: 'positive' | 'negative' | 'neutral' }[] | null;
+    key_points: { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
+    document_type?: string | null;
+    is_valid_cv?: boolean;
   } | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState(false);
@@ -208,9 +210,26 @@ export const CandidateProfileDialog = ({
       if (error) throw error;
       
       if (data) {
+        // Parse key_points to extract document_type if present
+        const keyPoints = data.key_points as { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
+        
+        // Check if first key_point contains document type info
+        let documentType: string | null = null;
+        let isValidCv = true;
+        
+        if (keyPoints && keyPoints.length > 0) {
+          const firstPoint = keyPoints[0];
+          if (firstPoint.text.startsWith('Dokumenttyp:')) {
+            documentType = firstPoint.text.replace('Dokumenttyp:', '').trim();
+            isValidCv = documentType.toLowerCase() === 'cv';
+          }
+        }
+        
         setAiSummary({
           summary_text: data.summary_text,
-          key_points: data.key_points as { text: string; type: 'positive' | 'negative' | 'neutral' }[] | null,
+          key_points: keyPoints,
+          document_type: documentType,
+          is_valid_cv: isValidCv,
         });
       } else {
         // No existing summary - auto-generate if CV exists
@@ -251,9 +270,14 @@ export const CandidateProfileDialog = ({
       
       // Update the summary directly from response instead of refetching
       if (data?.summary) {
+        const isValidCv = data.is_valid_cv !== false;
+        const docType = data.summary.document_type || (isValidCv ? 'CV' : null);
+        
         setAiSummary({
           summary_text: data.summary.summary_text,
           key_points: data.summary.key_points,
+          document_type: docType,
+          is_valid_cv: isValidCv,
         });
       }
     } catch (error) {
@@ -665,10 +689,24 @@ export const CandidateProfileDialog = ({
                 </div>
               ) : aiSummary ? (
                 <div>
+                  {/* Document type indicator */}
+                  {aiSummary.document_type && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`w-2 h-2 rounded-full ${
+                        aiSummary.is_valid_cv !== false ? 'bg-green-400' : 'bg-orange-400'
+                      }`} />
+                      <span className="text-sm text-white/80">
+                        Dokumenttyp: {aiSummary.document_type.charAt(0).toUpperCase() + aiSummary.document_type.slice(1)}
+                      </span>
+                    </div>
+                  )}
+                  
                   {/* Key points as bullet list - like Teamtailor Co-pilot */}
                   {aiSummary.key_points && aiSummary.key_points.length > 0 ? (
                     <ul className="space-y-1.5">
-                      {aiSummary.key_points.map((point, idx) => (
+                      {aiSummary.key_points
+                        .filter(point => !point.text.startsWith('Dokumenttyp:'))
+                        .map((point, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm text-white">
                           <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-2 ${
                             point.type === 'negative' ? 'bg-red-400' : 'bg-white'
