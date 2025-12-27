@@ -86,10 +86,18 @@ serve(async (req) => {
             console.log('CV content type:', contentType);
             
             if (contentType.includes('pdf')) {
-              // For PDF files, we'll use the AI's vision capabilities
-              // or extract what we can from the binary
-              const buffer = await cvResponse.arrayBuffer();
-              const base64Cv = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+               // For PDF files, we'll use the AI's vision capabilities
+               // or extract what we can from the binary
+               const buffer = await cvResponse.arrayBuffer();
+               const bytes = new Uint8Array(buffer);
+
+               // NOTE: Avoid spreading large arrays into String.fromCharCode (causes call stack overflow)
+               let binary = '';
+               const chunkSize = 0x8000;
+               for (let i = 0; i < bytes.length; i += chunkSize) {
+                 binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+               }
+               const base64Cv = btoa(binary);
               
               // Store the base64 for later use with AI vision
               cvText = `[PDF CV UPPLADDAD - ${buffer.byteLength} bytes]`;
