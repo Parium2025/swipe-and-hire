@@ -243,18 +243,18 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex justify-between gap-2">
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setRenameDialogOpen(false)}
-              className="text-white/70 hover:text-white hover:bg-white/10"
+              className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-0"
             >
               Avbryt
             </Button>
             <Button
               onClick={handleRename}
               disabled={!newLabel.trim() || updateStageSetting.isPending}
-              className="bg-primary hover:bg-primary/90"
+              className="bg-primary hover:bg-primary/90 text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0"
             >
               Spara
             </Button>
