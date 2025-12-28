@@ -131,6 +131,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "candidate_notes_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "candidate_notes_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
