@@ -1020,7 +1020,7 @@ export const CandidateProfileDialog = ({
                                   ) : (
                                     <>
                                       <p className="text-xs text-white whitespace-pre-wrap pr-10 leading-relaxed">{note.note}</p>
-                                      <p className="text-[10px] text-white/70 mt-1">
+                                      <p className="text-[10px] text-white mt-1">
                                         {new Date(note.created_at).toLocaleTimeString('sv-SE', {
                                           hour: '2-digit',
                                           minute: '2-digit'
