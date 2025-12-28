@@ -629,14 +629,14 @@ export const CandidateProfileDialog = ({
           <div className="grid gap-2.5">
             {/* Information */}
             <div className="bg-white/10 border border-white/20 rounded-lg p-3">
-              <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <User className="h-3 w-3" />
                 Information
               </h3>
               <div className="grid sm:grid-cols-2 gap-2">
                 {displayApp.email && (
                   <div className="flex items-center gap-2">
-                    <Mail className="h-3.5 w-3.5 text-white/60 shrink-0" />
+                    <Mail className="h-3.5 w-3.5 text-white shrink-0" />
                     <a
                       href={`mailto:${displayApp.email}`}
                       className="text-sm text-white hover:text-white/80 transition-colors truncate"
@@ -647,7 +647,7 @@ export const CandidateProfileDialog = ({
                 )}
                 {displayApp.phone && (
                   <div className="flex items-center gap-2">
-                    <Phone className="h-3.5 w-3.5 text-white/60 shrink-0" />
+                    <Phone className="h-3.5 w-3.5 text-white shrink-0" />
                     <a
                       href={`tel:${displayApp.phone}`}
                       className="text-sm text-white hover:text-white/80 transition-colors"
@@ -658,13 +658,13 @@ export const CandidateProfileDialog = ({
                 )}
                 {displayApp.location && (
                   <div className="flex items-center gap-2">
-                    <MapPin className="h-3.5 w-3.5 text-white/60 shrink-0" />
+                    <MapPin className="h-3.5 w-3.5 text-white shrink-0" />
                     <span className="text-sm text-white">{displayApp.location}</span>
                   </div>
                 )}
                 {displayApp.age && (
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-3.5 w-3.5 text-white/60 shrink-0" />
+                    <Calendar className="h-3.5 w-3.5 text-white shrink-0" />
                     <span className="text-sm text-white">{displayApp.age} år</span>
                   </div>
                 )}
@@ -674,26 +674,26 @@ export const CandidateProfileDialog = ({
             {/* Anställningsinformation */}
             {(displayApp.employment_status || displayApp.work_schedule || displayApp.availability) && (
               <div className="bg-white/10 border border-white/20 rounded-lg p-3">
-                <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <Briefcase className="h-3 w-3" />
                   Anställningsinformation
                 </h3>
                 <div className="grid sm:grid-cols-2 gap-2">
                 {displayApp.employment_status && (
                     <div>
-                      <span className="text-sm text-white/70">Anställningsstatus?</span>
+                      <span className="text-sm text-white">Anställningsstatus?</span>
                       <p className="text-sm text-white">{displayApp.employment_status}</p>
                     </div>
                   )}
                   {displayApp.work_schedule && (
                     <div>
-                      <span className="text-sm text-white/70">Hur mycket jobbar du idag?</span>
+                      <span className="text-sm text-white">Hur mycket jobbar du idag?</span>
                       <p className="text-sm text-white">{displayApp.work_schedule}</p>
                     </div>
                   )}
                   {displayApp.availability && (
                     <div className="sm:col-span-2">
-                      <span className="text-sm text-white/70">När kan du börja nytt jobb?</span>
+                      <span className="text-sm text-white">När kan du börja nytt jobb?</span>
                       <p className="text-sm text-white">{displayApp.availability}</p>
                     </div>
                   )}
@@ -708,13 +708,13 @@ export const CandidateProfileDialog = ({
                   onClick={() => setQuestionsExpanded(!questionsExpanded)}
                   className="w-full px-3 py-2 flex items-center justify-between hover:bg-white/5 transition-colors"
                 >
-                  <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider">
+                  <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider">
                     Frågor ({Object.keys(customAnswers).length})
                   </h3>
                   {questionsExpanded ? (
-                    <ChevronUp className="h-3.5 w-3.5 text-white/60" />
+                    <ChevronUp className="h-3.5 w-3.5 text-white" />
                   ) : (
-                    <ChevronDown className="h-3.5 w-3.5 text-white/60" />
+                    <ChevronDown className="h-3.5 w-3.5 text-white" />
                   )}
                 </button>
 
@@ -731,7 +731,7 @@ export const CandidateProfileDialog = ({
                         key={questionId}
                         className="border-t border-white/10 pt-2 first:border-t-0 first:pt-0"
                       >
-                        <p className="text-sm text-white/70">
+                        <p className="text-sm text-white">
                           {jobQuestions[questionId]?.text || questionId}
                         </p>
                         <p className="text-sm text-white">
@@ -747,7 +747,7 @@ export const CandidateProfileDialog = ({
             {/* AI Summary Section */}
             <div className="bg-white/10 border border-white/20 rounded-lg p-3">
               <div className="flex items-center gap-1.5 mb-2">
-                <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider flex items-center gap-1.5">
+                <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
                   <Sparkles className="h-3 w-3" />
                   Sammanfattning
                   <span className="text-[9px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
@@ -814,7 +814,7 @@ export const CandidateProfileDialog = ({
             {/* CV Section */}
             {displayApp.cv_url && (
               <div className="bg-white/10 border border-white/20 rounded-lg p-3">
-                <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <FileText className="h-3 w-3" />
                   CV
                 </h3>
@@ -824,13 +824,13 @@ export const CandidateProfileDialog = ({
                     onClick={() => setCvOpen(true)}
                     className="flex items-center gap-2 text-white transition-colors flex-1"
                   >
-                    <FileText className="h-3.5 w-3.5 text-white/60 shrink-0" />
+                    <FileText className="h-3.5 w-3.5 text-white shrink-0" />
                     <span className="text-sm">Visa CV</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setCvOpen(true)}
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-white hover:text-white/80 transition-colors"
                     title="Öppna CV"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
@@ -841,7 +841,7 @@ export const CandidateProfileDialog = ({
 
             {/* Presentation om kandidaten */}
             <div className="bg-white/10 border border-white/20 rounded-lg p-3">
-              <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <User className="h-3 w-3" />
                 Presentation om {displayApp.first_name || 'kandidaten'}
               </h3>
