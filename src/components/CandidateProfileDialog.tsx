@@ -886,16 +886,8 @@ export const CandidateProfileDialog = ({
 
           {/* Activity Sidebar - right side */}
           <div className="w-80 border-l border-white/20 bg-white/5 flex flex-col overflow-hidden relative">
-            {/* Close button */}
-            <button
-              onClick={() => onOpenChange(false)}
-              className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-            >
-              <X className="h-4 w-4 text-white" />
-            </button>
-            
-            {/* Tabs */}
-            <div className="flex border-b border-white/20 pr-10">
+            {/* Tabs + close */}
+            <div className="relative flex border-b border-white/20 pr-10">
               <button
                 onClick={() => setSidebarTab('activity')}
                 className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
@@ -921,6 +913,14 @@ export const CandidateProfileDialog = ({
                   <StickyNote className="h-3.5 w-3.5" />
                   Anteckningar
                 </div>
+              </button>
+
+              <button
+                onClick={() => onOpenChange(false)}
+                aria-label="Stäng"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <X className="h-4 w-4 text-white" />
               </button>
             </div>
 
