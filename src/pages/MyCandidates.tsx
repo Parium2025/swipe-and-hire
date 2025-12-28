@@ -1067,22 +1067,77 @@ const MyCandidates = () => {
       {/* Search and Stage Filters */}
       {stats.total > 0 && (
         <div className="mb-6 space-y-3">
-          {/* Search input */}
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
-            <Input
-              placeholder="Sök på namn, jobb eller anteckningar..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
+          {/* Search input and Urvalskriterier button */}
+          <div className="flex items-center gap-2 max-w-lg mx-auto">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
+              <Input
+                placeholder="Sök på namn, jobb eller anteckningar..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            
+            {/* Urvalskriterier button with job selector */}
+            {!isViewingColleague && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white gap-2 whitespace-nowrap"
+                  >
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Urvalskriterier
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-card-parium border-white/20 min-w-[240px]">
+                  <div className="px-2 py-1.5 text-xs text-white/50 font-medium">
+                    Välj jobb för urvalskriterier
+                  </div>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  {(() => {
+                    // Get unique jobs from candidates
+                    const uniqueJobs = displayedCandidates.reduce((acc, c) => {
+                      if (c.job_id && !acc.find(j => j.id === c.job_id)) {
+                        acc.push({ id: c.job_id, title: c.job_title || 'Okänt jobb' });
+                      }
+                      return acc;
+                    }, [] as { id: string; title: string }[]);
+                    
+                    if (uniqueJobs.length === 0) {
+                      return (
+                        <div className="px-2 py-3 text-sm text-white/50 text-center">
+                          Inga jobb med kandidater
+                        </div>
+                      );
+                    }
+                    
+                    return uniqueJobs.map(job => (
+                      <DropdownMenuItem
+                        key={job.id}
+                        onClick={() => {
+                          setSelectedJobIdForCriteria(job.id);
+                          setCriteriaDialogOpen(true);
+                        }}
+                        className="text-white hover:text-white cursor-pointer"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2 text-primary" />
+                        {job.title}
+                      </DropdownMenuItem>
+                    ));
+                  })()}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
 
