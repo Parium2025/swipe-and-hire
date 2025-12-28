@@ -2,17 +2,33 @@ import { useMemo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { formatDistanceToNow } from 'date-fns';
-import { sv } from 'date-fns/locale';
+import { differenceInMinutes, differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from 'date-fns';
 import { CandidateProfileDialog } from './CandidateProfileDialog';
 import { CandidateAvatar } from './CandidateAvatar';
 import { Button } from '@/components/ui/button';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus, Check } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
+
+// Format time with numbers instead of words
+const formatTimeAgo = (date: Date): string => {
+  const now = new Date();
+  const minutes = differenceInMinutes(now, date);
+  const hours = differenceInHours(now, date);
+  const days = differenceInDays(now, date);
+  const weeks = differenceInWeeks(now, date);
+  const months = differenceInMonths(now, date);
+
+  if (minutes < 1) return 'Just nu';
+  if (minutes < 60) return `${minutes} min sedan`;
+  if (hours < 24) return `${hours} tim sedan`;
+  if (days < 7) return `${days} ${days === 1 ? 'dag' : 'dagar'} sedan`;
+  if (weeks < 4) return `${weeks} ${weeks === 1 ? 'vecka' : 'veckor'} sedan`;
+  return `${months} ${months === 1 ? 'månad' : 'månader'} sedan`;
+};
 
 interface CandidatesTableProps {
   applications: ApplicationData[];
@@ -150,48 +166,44 @@ export function CandidatesTable({
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {formatDistanceToNow(new Date(application.applied_at), {
-                      addSuffix: true,
-                      locale: sv,
-                    })}
+                    {formatTimeAgo(new Date(application.applied_at))}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {formatDistanceToNow(new Date(application.updated_at), {
-                      addSuffix: true,
-                      locale: sv,
-                    })}
+                    {formatTimeAgo(new Date(application.updated_at))}
                   </TableCell>
                   <TableCell>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={`h-8 w-8 p-0 ${isAlreadyAdded ? 'text-green-400' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
-                          disabled={isAlreadyAdded || addCandidate.isPending}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // If user has team members, show selection dialog
-                            if (hasTeam) {
-                              setSelectedApplicationForTeam(application);
-                              setTeamDialogOpen(true);
-                            } else {
-                              // No team, add directly to own list
-                              addCandidate.mutate({
-                                applicationId: application.id,
-                                applicantId: application.applicant_id,
-                                jobId: application.job_id,
-                              });
-                            }
-                          }}
-                        >
-                          {isAlreadyAdded ? <Check className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {isAlreadyAdded ? 'Redan i din lista' : hasTeam ? 'Lägg till i kandidatlista' : 'Lägg till i Mina kandidater'}
-                      </TooltipContent>
-                    </Tooltip>
+                    {!isAlreadyAdded && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-white/10"
+                            disabled={addCandidate.isPending}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // If user has team members, show selection dialog
+                              if (hasTeam) {
+                                setSelectedApplicationForTeam(application);
+                                setTeamDialogOpen(true);
+                              } else {
+                                // No team, add directly to own list
+                                addCandidate.mutate({
+                                  applicationId: application.id,
+                                  applicantId: application.applicant_id,
+                                  jobId: application.job_id,
+                                });
+                              }
+                            }}
+                          >
+                            <UserPlus className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {hasTeam ? 'Lägg till i kandidatlista' : 'Lägg till i Mina kandidater'}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                   </TableCell>
                 </TableRow>
               );
