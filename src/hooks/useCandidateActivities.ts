@@ -108,13 +108,11 @@ export function useCandidateActivities(applicantId: string | null) {
     }) => {
       if (!user) throw new Error('Not authenticated');
 
-      // Delete all note-related activities for this applicant by this user
-      const { error } = await supabase
-        .from('candidate_activities')
-        .delete()
-        .eq('applicant_id', applicantId)
-        .eq('user_id', user.id)
-        .in('activity_type', ['note_added', 'note_edited']);
+      // Use the database function to delete all note activities for this applicant
+      // This works regardless of who created the activity
+      const { error } = await supabase.rpc('delete_note_activities_for_applicant', {
+        p_applicant_id: applicantId,
+      });
 
       if (error) throw error;
     },

@@ -1261,6 +1261,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      delete_note_activities_for_applicant: {
+        Args: { p_applicant_id: string }
+        Returns: undefined
+      }
       employer_owns_job: { Args: { p_job_id: string }; Returns: boolean }
       employer_owns_job_for_question: {
         Args: { p_job_id: string }
