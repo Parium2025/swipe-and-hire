@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { MoreVertical, Pencil, Palette, Image, RotateCcw, Check, Trash2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { MoreVertical, Pencil, Palette, Image, RotateCcw, Trash2 } from 'lucide-react';
+import { HexColorPicker } from 'react-colorful';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +12,11 @@ import {
   DropdownMenuSubContent,
   DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Dialog,
   DialogContent,
@@ -34,7 +40,6 @@ import { Label } from '@/components/ui/label';
 import { 
   useStageSettings, 
   AVAILABLE_ICONS, 
-  AVAILABLE_COLORS,
   getIconByName,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
@@ -48,11 +53,31 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
   const { stageConfig, updateStageSetting, resetStageSetting, deleteCustomStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
+  const [tempColor, setTempColor] = useState('');
   const [newLabel, setNewLabel] = useState('');
+  const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
   const isCustom = currentConfig?.isCustom ?? false;
+
+  const handleColorPickerOpen = () => {
+    setTempColor(currentConfig?.color || '#0EA5E9');
+    setColorPickerOpen(true);
+  };
+
+  const handleColorPickerChange = (color: string) => {
+    setTempColor(color);
+    
+    // Debounce the save to avoid too many API calls while dragging
+    if (colorDebounceRef.current) {
+      clearTimeout(colorDebounceRef.current);
+    }
+    colorDebounceRef.current = setTimeout(() => {
+      handleColorChange(color);
+    }, 300);
+  };
 
   const handleOpenRenameDialog = () => {
     setNewLabel(currentConfig?.label || '');
@@ -131,21 +156,36 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
             Byt namn
           </DropdownMenuItem>
           
-          {/* Color picker */}
-          <DropdownMenuItem 
-            className="cursor-pointer"
-            onSelect={(e) => e.preventDefault()}
-          >
-            <Palette className="h-4 w-4 mr-2" />
-            <span className="flex-1">Välj färg</span>
-            <input
-              type="color"
-              value={currentConfig.color}
-              onChange={(e) => handleColorChange(e.target.value)}
-              className="w-6 h-6 rounded cursor-pointer border-0 p-0"
-              style={{ backgroundColor: 'transparent' }}
-            />
-          </DropdownMenuItem>
+          {/* Color picker with popover */}
+          <Popover open={colorPickerOpen} onOpenChange={setColorPickerOpen}>
+            <PopoverTrigger asChild>
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  handleColorPickerOpen();
+                }}
+              >
+                <Palette className="h-4 w-4 mr-2" />
+                <span className="flex-1">Välj färg</span>
+                <div 
+                  className="w-5 h-5 rounded-full border border-white/30"
+                  style={{ backgroundColor: currentConfig.color }}
+                />
+              </DropdownMenuItem>
+            </PopoverTrigger>
+            <PopoverContent 
+              side="left" 
+              align="start"
+              className="w-auto p-3 bg-card border-white/20"
+              sideOffset={8}
+            >
+              <HexColorPicker 
+                color={tempColor || currentConfig.color} 
+                onChange={handleColorPickerChange}
+              />
+            </PopoverContent>
+          </Popover>
 
           {/* Icon submenu */}
           <DropdownMenuSub>
