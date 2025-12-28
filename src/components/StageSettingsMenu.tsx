@@ -95,14 +95,14 @@ export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-1 rounded hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100">
-            <MoreVertical className="h-4 w-4 text-white/70" />
+          <button className="p-1 rounded hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100">
+            <MoreVertical className="h-4 w-4 text-white" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48 bg-slate-800 border-white/10">
+        <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem 
             onClick={handleOpenRenameDialog}
-            className="text-white hover:bg-white/10 cursor-pointer"
+            className="cursor-pointer"
           >
             <Pencil className="h-4 w-4 mr-2" />
             Byt namn
@@ -110,12 +110,12 @@ export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
           
           {/* Color submenu */}
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-white hover:bg-white/10 cursor-pointer">
+            <DropdownMenuSubTrigger className="cursor-pointer">
               <Palette className="h-4 w-4 mr-2" />
               Välj färg
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent className="bg-slate-800 border-white/10">
+              <DropdownMenuSubContent>
                 <div className="grid grid-cols-5 gap-1 p-2">
                   {AVAILABLE_COLORS.map((color) => (
                     <button
@@ -140,12 +140,12 @@ export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
 
           {/* Icon submenu */}
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-white hover:bg-white/10 cursor-pointer">
+            <DropdownMenuSubTrigger className="cursor-pointer">
               <Image className="h-4 w-4 mr-2" />
               Välj ikon
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent className="bg-slate-800 border-white/10 w-56">
+              <DropdownMenuSubContent className="w-56">
                 <div className="grid grid-cols-5 gap-1 p-2">
                   {AVAILABLE_ICONS.map(({ name, Icon, label }) => (
                     <button
@@ -166,11 +166,11 @@ export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
             </DropdownMenuPortal>
           </DropdownMenuSub>
 
-          <DropdownMenuSeparator className="bg-white/10" />
+          <DropdownMenuSeparator />
           
           <DropdownMenuItem 
             onClick={handleReset}
-            className="text-white/70 hover:bg-white/10 cursor-pointer"
+            className="text-white/70 cursor-pointer"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Återställ
@@ -180,7 +180,7 @@ export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
 
       {/* Rename dialog */}
       <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-        <DialogContent className="bg-slate-900 border-white/10 sm:max-w-md">
+        <DialogContent className="bg-card-parium border-white/20 sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">Byt namn på steg</DialogTitle>
           </DialogHeader>
@@ -192,7 +192,7 @@ export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 placeholder={defaultConfig.label}
-                className="bg-white/5 border-white/20 text-white"
+                className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
                 onKeyDown={(e) => e.key === 'Enter' && handleRename()}
               />
             </div>
