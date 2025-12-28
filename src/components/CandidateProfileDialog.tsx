@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -132,6 +132,8 @@ export const CandidateProfileDialog = ({
   const [newNote, setNewNote] = useState('');
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editingNoteText, setEditingNoteText] = useState('');
   const [cvOpen, setCvOpen] = useState(false);
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -452,6 +454,47 @@ export const CandidateProfileDialog = ({
     } catch (error) {
       console.error('Error deleting note:', error);
       toast.error('Kunde inte ta bort anteckning');
+    }
+  };
+
+  const startEditingNote = (note: CandidateNote) => {
+    setEditingNoteId(note.id);
+    setEditingNoteText(note.note);
+  };
+
+  const cancelEditingNote = () => {
+    setEditingNoteId(null);
+    setEditingNoteText('');
+  };
+
+  const updateNote = async () => {
+    if (!editingNoteId || !editingNoteText.trim() || !application) return;
+    setSavingNote(true);
+    try {
+      const { error } = await supabase
+        .from('candidate_notes')
+        .update({ note: editingNoteText.trim() })
+        .eq('id', editingNoteId);
+
+      if (error) throw error;
+
+      // Log activity
+      logActivity.mutate({
+        applicantId: application.applicant_id,
+        activityType: 'note_edited',
+        newValue: editingNoteText.trim().substring(0, 100),
+        metadata: { job_id: application.job_id },
+      });
+
+      toast.success('Anteckning uppdaterad');
+      setEditingNoteId(null);
+      setEditingNoteText('');
+      fetchNotes();
+    } catch (error) {
+      console.error('Error updating note:', error);
+      toast.error('Kunde inte uppdatera anteckning');
+    } finally {
+      setSavingNote(false);
     }
   };
   
@@ -904,23 +947,65 @@ export const CandidateProfileDialog = ({
                               {note.author_name || 'Okänd'}
                             </span>
                           </div>
-                          <p className="text-xs text-white whitespace-pre-wrap pr-5 leading-relaxed">{note.note}</p>
-                          <p className="text-[10px] text-white/70 mt-1">
-                            {new Date(note.created_at).toLocaleDateString('sv-SE', {
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                          {note.employer_id === user?.id && (
-                            <button
-                              onClick={() => deleteNote(note.id)}
-                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-white/10 rounded"
-                            >
-                              <Trash2 className="h-3 w-3 text-white/50 hover:text-red-400" />
-                            </button>
+                          
+                          {editingNoteId === note.id ? (
+                            <div className="space-y-2">
+                              <Textarea
+                                value={editingNoteText}
+                                onChange={(e) => setEditingNoteText(e.target.value)}
+                                className="min-h-[60px] text-xs bg-white/10 border-white/20 text-white resize-none"
+                                placeholder="Skriv din anteckning..."
+                              />
+                              <div className="flex gap-1.5">
+                                <Button
+                                  size="sm"
+                                  onClick={updateNote}
+                                  disabled={savingNote || !editingNoteText.trim()}
+                                  className="h-6 text-[10px] px-2 bg-green-600 hover:bg-green-700"
+                                >
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Spara
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={cancelEditingNote}
+                                  className="h-6 text-[10px] px-2 text-white/70 hover:text-white hover:bg-white/10"
+                                >
+                                  <X className="h-3 w-3 mr-1" />
+                                  Avbryt
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-xs text-white whitespace-pre-wrap pr-10 leading-relaxed">{note.note}</p>
+                              <p className="text-[10px] text-white/70 mt-1">
+                                {new Date(note.created_at).toLocaleDateString('sv-SE', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                              {note.employer_id === user?.id && (
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                  <button
+                                    onClick={() => startEditingNote(note)}
+                                    className="p-0.5 hover:bg-white/10 rounded"
+                                  >
+                                    <Pencil className="h-3 w-3 text-white/50 hover:text-white" />
+                                  </button>
+                                  <button
+                                    onClick={() => deleteNote(note.id)}
+                                    className="p-0.5 hover:bg-white/10 rounded"
+                                  >
+                                    <Trash2 className="h-3 w-3 text-white/50 hover:text-red-400" />
+                                  </button>
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                       ))}
