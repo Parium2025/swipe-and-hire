@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-export type CandidateStage = 'to_contact' | 'interview' | 'offer' | 'hired';
+// Stage can be a default stage or a custom stage key
+export type CandidateStage = string;
 
 export interface MyCandidateData {
   id: string;
@@ -12,7 +13,7 @@ export interface MyCandidateData {
   applicant_id: string;
   application_id: string;
   job_id: string | null;
-  stage: CandidateStage;
+  stage: string; // Can be default stage or custom stage key
   notes: string | null;
   rating: number;
   created_at: string;
