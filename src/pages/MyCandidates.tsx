@@ -262,9 +262,10 @@ interface StageColumnProps {
   onOpenProfile: (candidate: MyCandidateData) => void;
   stageSettings: { label: string; color: string; iconName: string };
   isReadOnly?: boolean;
+  onOpenCriteriaDialog?: (jobId: string) => void;
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly }: Omit<StageColumnProps, 'isOver'>) => {
+const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly, onOpenCriteriaDialog }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -279,6 +280,14 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
 
   // Use live color while dragging, fall back to saved color
   const displayColor = liveColor ?? stageSettings.color;
+
+  // Get unique jobs from candidates in this column for criteria dialog
+  const uniqueJobs = candidates.reduce((acc, c) => {
+    if (c.job_id && !acc.find(j => j.id === c.job_id)) {
+      acc.push({ id: c.job_id, title: c.job_title || 'Okänt jobb' });
+    }
+    return acc;
+  }, [] as { id: string; title: string }[]);
 
   // Check scroll position to show/hide indicators
   const checkScroll = useCallback(() => {
@@ -316,9 +325,48 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
           >
             {candidates.length}
           </span>
-          {/* Only show settings menu for own list */}
+          {/* Only show action buttons for own list */}
           {!isReadOnly && (
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-0.5">
+              {/* AI Criteria button - only show if column has candidates with jobs */}
+              {uniqueJobs.length > 0 && onOpenCriteriaDialog && (
+                uniqueJobs.length === 1 ? (
+                  <button
+                    onClick={() => onOpenCriteriaDialog(uniqueJobs[0].id)}
+                    className="p-1 rounded hover:bg-white/10 transition-colors text-white/60 hover:text-primary"
+                    title="Urvalskriterier"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                  </button>
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="p-1 rounded hover:bg-white/10 transition-colors text-white/60 hover:text-primary"
+                        title="Urvalskriterier"
+                      >
+                        <Sparkles className="h-3.5 w-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-card-parium border-white/20 min-w-[200px]">
+                      <div className="px-2 py-1.5 text-xs text-white/50 font-medium">
+                        Välj jobb
+                      </div>
+                      <DropdownMenuSeparator className="bg-white/10" />
+                      {uniqueJobs.map(job => (
+                        <DropdownMenuItem
+                          key={job.id}
+                          onClick={() => onOpenCriteriaDialog(job.id)}
+                          className="text-white hover:text-white cursor-pointer"
+                        >
+                          <Sparkles className="h-4 w-4 mr-2 text-primary" />
+                          {job.title}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )
+              )}
               <StageSettingsMenu 
                 stageKey={stage} 
                 onLiveColorChange={setLiveColor}
@@ -1116,69 +1164,18 @@ const MyCandidates = () => {
               );
             })}
             
-            {/* Action buttons - Urvalskriterier & Nytt steg */}
+            {/* Nytt steg button */}
             {!isViewingColleague && (
-              <>
-                {/* Urvalskriterier button */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-primary/40 bg-primary/10 hover:bg-primary/20 backdrop-blur-sm flex items-center gap-1.5"
-                    >
-                      <Sparkles className="h-3.5 w-3.5" />
-                      Urvalskriterier
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[240px]">
-                    <div className="px-2 py-1.5 text-xs text-white/50 font-medium">
-                      Välj jobb för urvalskriterier
-                    </div>
-                    <DropdownMenuSeparator className="bg-white/10" />
-                    {(() => {
-                      const uniqueJobs = displayedCandidates.reduce((acc, c) => {
-                        if (c.job_id && !acc.find(j => j.id === c.job_id)) {
-                          acc.push({ id: c.job_id, title: c.job_title || 'Okänt jobb' });
-                        }
-                        return acc;
-                      }, [] as { id: string; title: string }[]);
-                      
-                      if (uniqueJobs.length === 0) {
-                        return (
-                          <div className="px-2 py-3 text-sm text-white/50 text-center">
-                            Inga jobb med kandidater
-                          </div>
-                        );
-                      }
-                      
-                      return uniqueJobs.map(job => (
-                        <DropdownMenuItem
-                          key={job.id}
-                          onClick={() => {
-                            setSelectedJobIdForCriteria(job.id);
-                            setCriteriaDialogOpen(true);
-                          }}
-                          className="text-white hover:text-white cursor-pointer"
-                        >
-                          <Sparkles className="h-4 w-4 mr-2 text-primary" />
-                          {job.title}
-                        </DropdownMenuItem>
-                      ));
-                    })()}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Nytt steg button */}
-                <CreateStageDialog 
-                  trigger={
-                    <button
-                      className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-primary/40 bg-primary/10 hover:bg-primary/20 backdrop-blur-sm flex items-center gap-1.5"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      Nytt steg
-                    </button>
-                  }
-                />
-              </>
+              <CreateStageDialog 
+                trigger={
+                  <button
+                    className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-primary/40 bg-primary/10 hover:bg-primary/20 backdrop-blur-sm flex items-center gap-1.5"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Nytt steg
+                  </button>
+                }
+              />
             )}
           </div>
 
@@ -1229,6 +1226,10 @@ const MyCandidates = () => {
                 onOpenProfile={handleOpenProfile}
                 stageSettings={activeStageConfig[stage] || { label: stage, color: '#6366F1', iconName: 'flag' }}
                 isReadOnly={isViewingColleague}
+                onOpenCriteriaDialog={(jobId) => {
+                  setSelectedJobIdForCriteria(jobId);
+                  setCriteriaDialogOpen(true);
+                }}
               />
             ))}
           </div>
