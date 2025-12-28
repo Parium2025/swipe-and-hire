@@ -869,9 +869,9 @@ export const CandidateProfileDialog = ({
 
                   {/* Existing notes */}
                   {loadingNotes ? (
-                    <p className="text-xs text-white/50 text-center py-2">Laddar...</p>
+                    <p className="text-xs text-white text-center py-2">Laddar...</p>
                   ) : notes.length === 0 ? (
-                    <p className="text-xs text-white/50 text-center py-4">Inga anteckningar ännu</p>
+                    <p className="text-xs text-white text-center py-4">Inga anteckningar ännu</p>
                   ) : (
                     <div className="space-y-2">
                       {notes.map((note) => (
@@ -880,10 +880,11 @@ export const CandidateProfileDialog = ({
                           className="bg-white/5 rounded-lg p-2.5 group relative"
                         >
                           <p className="text-xs text-white whitespace-pre-wrap pr-5 leading-relaxed">{note.note}</p>
-                          <p className="text-[10px] text-white/40 mt-1">
+                          <p className="text-[10px] text-white mt-1">
                             {new Date(note.created_at).toLocaleDateString('sv-SE', {
                               day: 'numeric',
-                              month: 'short',
+                              month: 'long',
+                              year: 'numeric',
                               hour: '2-digit',
                               minute: '2-digit'
                             })}
