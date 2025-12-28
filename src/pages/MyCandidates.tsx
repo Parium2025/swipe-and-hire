@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { MyCandidateData } from '@/hooks/useMyCandidatesData';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -255,6 +255,9 @@ interface StageColumnProps {
 const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Use useDroppable's own isOver for accurate column-level detection
   const { setNodeRef, isOver } = useDroppable({
@@ -264,6 +267,24 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
 
   // Use live color while dragging, fall back to saved color
   const displayColor = liveColor ?? stageSettings.color;
+
+  // Check scroll position to show/hide indicators
+  const checkScroll = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    
+    const hasScrollableContent = el.scrollHeight > el.clientHeight;
+    const isAtTop = el.scrollTop <= 5;
+    const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
+    
+    setCanScrollUp(hasScrollableContent && !isAtTop);
+    setCanScrollDown(hasScrollableContent && !isAtBottom);
+  }, []);
+
+  // Check scroll on mount and when candidates change
+  useEffect(() => {
+    checkScroll();
+  }, [candidates.length, checkScroll]);
 
   return (
     <div 
@@ -296,30 +317,50 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
       </div>
 
       {/* Content area - scrollable independently per column */}
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-1 p-1 pr-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
-        {/* Drop indicator at top */}
-        {isOver && (
-          <div className="mb-2 flex items-center justify-center">
-            <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
-              Släpp här
-            </div>
-          </div>
+      <div className="relative flex-1 min-h-0">
+        {/* Scroll up indicator */}
+        {canScrollUp && (
+          <div className="absolute top-0 left-0 right-2 h-6 bg-gradient-to-b from-background/80 to-transparent z-10 pointer-events-none rounded-t-md" />
         )}
+        
+        <div 
+          ref={scrollContainerRef}
+          onScroll={checkScroll}
+          className="h-full overflow-y-auto space-y-1 p-1 pr-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
+        >
+          {/* Drop indicator at top */}
+          {isOver && (
+            <div className="mb-2 flex items-center justify-center">
+              <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
+                Släpp här
+              </div>
+            </div>
+          )}
 
-        <SortableContext items={candidates.map(c => c.id)} strategy={verticalListSortingStrategy}>
-          {candidates.map(candidate => (
-            <SortableCandidateCard
-              key={candidate.id}
-              candidate={candidate}
-              onRemove={() => onRemoveCandidate(candidate)}
-              onOpenProfile={() => onOpenProfile(candidate)}
-            />
-          ))}
-        </SortableContext>
+          <SortableContext items={candidates.map(c => c.id)} strategy={verticalListSortingStrategy}>
+            {candidates.map(candidate => (
+              <SortableCandidateCard
+                key={candidate.id}
+                candidate={candidate}
+                onRemove={() => onRemoveCandidate(candidate)}
+                onOpenProfile={() => onOpenProfile(candidate)}
+              />
+            ))}
+          </SortableContext>
 
-        {candidates.length === 0 && !isOver && (
-          <div className="text-center py-8 text-xs text-white">
-            Inga kandidater i detta steg
+          {candidates.length === 0 && !isOver && (
+            <div className="text-center py-8 text-xs text-white">
+              Inga kandidater i detta steg
+            </div>
+          )}
+        </div>
+
+        {/* Scroll down indicator */}
+        {canScrollDown && (
+          <div className="absolute bottom-0 left-0 right-2 h-8 bg-gradient-to-t from-background/80 to-transparent z-10 pointer-events-none rounded-b-md flex items-end justify-center pb-1">
+            <div className="animate-bounce">
+              <ChevronDown className="h-3.5 w-3.5 text-white/60" />
+            </div>
           </div>
         )}
       </div>
