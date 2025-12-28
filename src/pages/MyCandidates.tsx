@@ -268,11 +268,10 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors group"
-      style={{ minHeight: 'calc(100vh - 280px)' }}
+      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors group h-full"
     >
       <div 
-        className={`rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm ${isOver ? 'ring-2 ring-white/40' : ''}`}
+        className={`rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
         style={{ backgroundColor: `${displayColor}33` }}
       >
         <div className="flex items-center gap-1.5">
@@ -296,8 +295,8 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
         </div>
       </div>
 
-      {/* Content area */}
-      <div className="flex-1 space-y-1 overflow-y-auto p-1 pr-2">
+      {/* Content area - scrollable independently per column */}
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-1 p-1 pr-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
         {/* Drop indicator at top */}
         {isOver && (
           <div className="mb-2 flex items-center justify-center">
@@ -1087,7 +1086,7 @@ const MyCandidates = () => {
             },
           }}
         >
-          <div className={`flex gap-4 overflow-x-auto pb-4 pt-2 px-2 ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} style={{ minHeight: 'calc(100vh - 300px)' }}>
+          <div className={`flex gap-4 overflow-x-auto pb-4 pt-2 px-2 ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} style={{ height: 'calc(100vh - 300px)' }}>
             {stagesToDisplay.map(stage => (
               <StageColumn
                 key={stage}
