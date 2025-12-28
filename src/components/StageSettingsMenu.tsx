@@ -69,11 +69,15 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
     if (colorDebounceRef.current) {
       clearTimeout(colorDebounceRef.current);
     }
-    colorDebounceRef.current = setTimeout(() => {
-      handleColorChange(color);
-      // Clear live color after save
-      setLiveColor(null);
-      onLiveColorChange?.(null);
+    colorDebounceRef.current = setTimeout(async () => {
+      try {
+        await updateStageSetting.mutateAsync({ stageKey, color });
+        // Only clear live color AFTER the save is complete
+        setLiveColor(null);
+        onLiveColorChange?.(null);
+      } catch (error) {
+        toast.error('Kunde inte uppdatera färg');
+      }
     }, 500);
   };
 
@@ -94,15 +98,6 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
       toast.success('Namn uppdaterat');
     } catch (error) {
       toast.error('Kunde inte uppdatera namn');
-    }
-  };
-
-  const handleColorChange = async (color: string) => {
-    try {
-      await updateStageSetting.mutateAsync({ stageKey, color });
-      toast.success('Färg uppdaterad');
-    } catch (error) {
-      toast.error('Kunde inte uppdatera färg');
     }
   };
 
