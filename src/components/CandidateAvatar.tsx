@@ -10,6 +10,7 @@ type CandidateAvatarProps = {
   firstName: string | null | undefined;
   lastName: string | null | undefined;
   onPlayingChange?: (isPlaying: boolean) => void;
+  stopPropagation?: boolean;
 };
 
 function CandidateAvatarBase({ 
@@ -18,7 +19,8 @@ function CandidateAvatarBase({
   isProfileVideo, 
   firstName, 
   lastName,
-  onPlayingChange
+  onPlayingChange,
+  stopPropagation = false
 }: CandidateAvatarProps) {
   const [avatarError, setAvatarError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -47,18 +49,22 @@ function CandidateAvatarBase({
     }
   }, [profileImageUrl, resolvedImageUrl]);
 
+  const handleClick = stopPropagation ? (e: React.MouseEvent) => e.stopPropagation() : undefined;
+
   if (hasVideo) {
     return (
-      <ProfileVideo
-        videoUrl={resolvedVideoUrl!}
-        coverImageUrl={resolvedImageUrl || undefined}
-        userInitials={initials}
-        alt="Kandidatvideo"
-        className="h-10 w-10 ring-2 ring-inset ring-white/20 rounded-full"
-        showCountdown={false}
-        showProgressBar={false}
-        onPlayingChange={onPlayingChange}
-      />
+      <div onClick={handleClick}>
+        <ProfileVideo
+          videoUrl={resolvedVideoUrl!}
+          coverImageUrl={resolvedImageUrl || undefined}
+          userInitials={initials}
+          alt="Kandidatvideo"
+          className="h-10 w-10 ring-2 ring-inset ring-white/20 rounded-full"
+          showCountdown={false}
+          showProgressBar={false}
+          onPlayingChange={onPlayingChange}
+        />
+      </div>
     );
   }
 
@@ -101,7 +107,8 @@ export const CandidateAvatar = React.memo(CandidateAvatarBase, (prev, next) => {
     prev.isProfileVideo === next.isProfileVideo &&
     prev.firstName === next.firstName &&
     prev.lastName === next.lastName &&
-    prev.onPlayingChange === next.onPlayingChange
+    prev.onPlayingChange === next.onPlayingChange &&
+    prev.stopPropagation === next.stopPropagation
   );
 });
 
