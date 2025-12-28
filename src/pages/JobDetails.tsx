@@ -9,6 +9,7 @@ import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { JobCriteriaManager, CriterionResultBadge } from '@/components/JobCriteriaManager';
+import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 import { 
   Clock, 
   X,
@@ -301,9 +302,10 @@ interface StatusColumnProps {
   applications: JobApplication[];
   onOpenProfile: (app: JobApplication) => void;
   onMarkAsViewed: (id: string) => void;
+  onOpenCriteriaDialog?: () => void;
 }
 
-const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed }: StatusColumnProps) => {
+const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed, onOpenCriteriaDialog }: StatusColumnProps) => {
   const config = STATUS_CONFIG[status];
   const Icon = STATUS_ICONS[status] || Inbox;
   
@@ -325,6 +327,16 @@ const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed }: S
           <span className="ml-auto bg-white/20 text-white/90 text-[10px] px-1.5 py-0.5 rounded-full">
             {applications.length}
           </span>
+          {/* AI Criteria button - only show on Inkorg (pending) */}
+          {status === 'pending' && onOpenCriteriaDialog && (
+            <button
+              onClick={onOpenCriteriaDialog}
+              className="p-1 rounded hover:bg-white/20 transition-colors text-white/70 hover:text-primary"
+              title="Urvalskriterier"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -373,6 +385,7 @@ const JobDetails = () => {
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [myCandidatesMap, setMyCandidatesMap] = useState<Map<string, string>>(new Map()); // applicant_id -> my_candidate_id
+  const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
 
   // DnD sensors
   const sensors = useSensors(
@@ -812,6 +825,7 @@ const JobDetails = () => {
                 applications={applicationsByStatus[status]}
                 onOpenProfile={handleOpenProfile}
                 onMarkAsViewed={markApplicationAsViewed}
+                onOpenCriteriaDialog={status === 'pending' ? () => setCriteriaDialogOpen(true) : undefined}
               />
             ))}
           </div>
@@ -869,6 +883,18 @@ const JobDetails = () => {
             }
           }}
         />
+
+        {/* Selection Criteria Dialog */}
+        {jobId && (
+          <SelectionCriteriaDialog
+            open={criteriaDialogOpen}
+            onOpenChange={setCriteriaDialogOpen}
+            jobId={jobId}
+            onActivate={(count) => {
+              toast({ title: `${count} urvalskriterier aktiverade`, description: 'AI börjar utvärdera kandidater' });
+            }}
+          />
+        )}
       </div>
   );
 };

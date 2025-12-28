@@ -41,8 +41,7 @@ import {
   Plus,
   Users,
   ChevronDown,
-  Eye,
-  Sparkles
+  Eye
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -79,7 +78,7 @@ import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 import { useStageSettings, getIconByName, DEFAULT_STAGE_KEYS, CandidateStage } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
-import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
+
 
 interface CandidateCardProps {
   candidate: MyCandidateData;
@@ -262,10 +261,9 @@ interface StageColumnProps {
   onOpenProfile: (candidate: MyCandidateData) => void;
   stageSettings: { label: string; color: string; iconName: string };
   isReadOnly?: boolean;
-  onOpenCriteriaDialog?: (jobId: string) => void;
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly, onOpenCriteriaDialog }: Omit<StageColumnProps, 'isOver'>) => {
+const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -280,14 +278,6 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
 
   // Use live color while dragging, fall back to saved color
   const displayColor = liveColor ?? stageSettings.color;
-
-  // Get unique jobs from candidates in this column for criteria dialog
-  const uniqueJobs = candidates.reduce((acc, c) => {
-    if (c.job_id && !acc.find(j => j.id === c.job_id)) {
-      acc.push({ id: c.job_id, title: c.job_title || 'Okänt jobb' });
-    }
-    return acc;
-  }, [] as { id: string; title: string }[]);
 
   // Check scroll position to show/hide indicators
   const checkScroll = useCallback(() => {
@@ -325,48 +315,9 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
           >
             {candidates.length}
           </span>
-          {/* Only show action buttons for own list */}
+          {/* Only show settings menu for own list */}
           {!isReadOnly && (
-            <div className="ml-auto flex items-center gap-0.5">
-              {/* AI Criteria button - only show if column has candidates with jobs */}
-              {uniqueJobs.length > 0 && onOpenCriteriaDialog && (
-                uniqueJobs.length === 1 ? (
-                  <button
-                    onClick={() => onOpenCriteriaDialog(uniqueJobs[0].id)}
-                    className="p-1 rounded hover:bg-white/10 transition-colors text-white/60 hover:text-primary"
-                    title="Urvalskriterier"
-                  >
-                    <Sparkles className="h-3.5 w-3.5" />
-                  </button>
-                ) : (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        className="p-1 rounded hover:bg-white/10 transition-colors text-white/60 hover:text-primary"
-                        title="Urvalskriterier"
-                      >
-                        <Sparkles className="h-3.5 w-3.5" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-card-parium border-white/20 min-w-[200px]">
-                      <div className="px-2 py-1.5 text-xs text-white/50 font-medium">
-                        Välj jobb
-                      </div>
-                      <DropdownMenuSeparator className="bg-white/10" />
-                      {uniqueJobs.map(job => (
-                        <DropdownMenuItem
-                          key={job.id}
-                          onClick={() => onOpenCriteriaDialog(job.id)}
-                          className="text-white hover:text-white cursor-pointer"
-                        >
-                          <Sparkles className="h-4 w-4 mr-2 text-primary" />
-                          {job.title}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )
-              )}
+            <div className="ml-auto">
               <StageSettingsMenu 
                 stageKey={stage} 
                 onLiveColorChange={setLiveColor}
@@ -478,9 +429,6 @@ const MyCandidates = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStageFilter, setActiveStageFilter] = useState<string | 'all'>('all');
   
-  // Selection criteria dialog state
-  const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
-  const [selectedJobIdForCriteria, setSelectedJobIdForCriteria] = useState<string | null>(null);
   
   // Fetch criteria results for all candidates
   const { data: criteriaResultsMap = {} } = useCriteriaResultsForCandidates(
@@ -1226,10 +1174,6 @@ const MyCandidates = () => {
                 onOpenProfile={handleOpenProfile}
                 stageSettings={activeStageConfig[stage] || { label: stage, color: '#6366F1', iconName: 'flag' }}
                 isReadOnly={isViewingColleague}
-                onOpenCriteriaDialog={(jobId) => {
-                  setSelectedJobIdForCriteria(jobId);
-                  setCriteriaDialogOpen(true);
-                }}
               />
             ))}
           </div>
@@ -1293,20 +1237,6 @@ const MyCandidates = () => {
         </AlertDialogContentNoFocus>
       </AlertDialog>
 
-      {/* Selection Criteria Dialog */}
-      {selectedJobIdForCriteria && (
-        <SelectionCriteriaDialog
-          open={criteriaDialogOpen}
-          onOpenChange={(open) => {
-            setCriteriaDialogOpen(open);
-            if (!open) setSelectedJobIdForCriteria(null);
-          }}
-          jobId={selectedJobIdForCriteria}
-          onActivate={(count) => {
-            toast.success(`${count} urvalskriterier aktiverade - AI börjar utvärdera kandidater`);
-          }}
-        />
-      )}
     </div>
   );
 };
