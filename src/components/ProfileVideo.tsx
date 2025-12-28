@@ -276,9 +276,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
         </div>
       )}
       
-      {/* Hover indicator for desktop */}
-      {!isMobile && !isPlaying && (
-        <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+      {/* Video indicator - always visible when not playing */}
+      {!isPlaying && (
+        <div className="absolute inset-0 bg-black/20 flex items-center justify-center cursor-pointer">
           <Play className="h-6 w-6 text-white drop-shadow-lg" />
         </div>
       )}

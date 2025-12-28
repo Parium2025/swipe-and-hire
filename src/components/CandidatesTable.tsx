@@ -140,13 +140,15 @@ export function CandidatesTable({
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <CandidateAvatar
-                        profileImageUrl={application.profile_image_url}
-                        videoUrl={application.video_url}
-                        isProfileVideo={application.is_profile_video}
-                        firstName={application.first_name}
-                        lastName={application.last_name}
-                      />
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <CandidateAvatar
+                          profileImageUrl={application.profile_image_url}
+                          videoUrl={application.video_url}
+                          isProfileVideo={application.is_profile_video}
+                          firstName={application.first_name}
+                          lastName={application.last_name}
+                        />
+                      </div>
                       <div>
                         <div className="font-medium text-white">
                           {application.first_name} {application.last_name}
