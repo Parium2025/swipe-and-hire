@@ -1254,6 +1254,8 @@ export type Database = {
           custom_label: string | null
           icon_name: string | null
           id: string
+          is_custom: boolean
+          order_index: number
           stage_key: string
           updated_at: string
           user_id: string
@@ -1264,6 +1266,8 @@ export type Database = {
           custom_label?: string | null
           icon_name?: string | null
           id?: string
+          is_custom?: boolean
+          order_index?: number
           stage_key: string
           updated_at?: string
           user_id: string
@@ -1274,6 +1278,8 @@ export type Database = {
           custom_label?: string | null
           icon_name?: string | null
           id?: string
+          is_custom?: boolean
+          order_index?: number
           stage_key?: string
           updated_at?: string
           user_id?: string

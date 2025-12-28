@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { STAGE_CONFIG, CandidateStage, MyCandidateData } from '@/hooks/useMyCandidatesData';
+import { MyCandidateData } from '@/hooks/useMyCandidatesData';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,8 @@ import {
   Star,
   ArrowDown,
   Clock,
-  Play
+  Play,
+  Plus
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { formatDistanceToNow, differenceInDays, differenceInHours } from 'date-fns';
@@ -58,10 +59,9 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
-import { useStageSettings, getIconByName } from '@/hooks/useStageSettings';
+import { useStageSettings, getIconByName, DEFAULT_STAGE_KEYS, CandidateStage } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
-
-const STAGE_ORDER: CandidateStage[] = ['to_contact', 'interview', 'offer', 'hired'];
+import { CreateStageDialog } from '@/components/CreateStageDialog';
 
 interface CandidateCardProps {
   candidate: MyCandidateData;
@@ -304,7 +304,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
 
 const MyCandidates = () => {
   const { user } = useAuth();
-  const { stageConfig } = useStageSettings();
+  const { stageConfig, stageOrder } = useStageSettings();
   
   // Local state for candidates - like JobDetails pattern
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
@@ -320,7 +320,7 @@ const MyCandidates = () => {
   
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeStageFilter, setActiveStageFilter] = useState<CandidateStage | 'all'>('all');
+  const [activeStageFilter, setActiveStageFilter] = useState<string | 'all'>('all');
 
   // Fetch candidates data
   const fetchCandidates = useCallback(async () => {
@@ -457,40 +457,45 @@ const MyCandidates = () => {
   // Förladda CV-sammanfattningar i bakgrunden
   useCvSummaryPreloader(candidates);
 
-  // Group candidates by stage (computed from local state)
+  // Group candidates by stage (computed from local state) - dynamic for custom stages
   const candidatesByStage = useMemo(() => {
-    const grouped: Record<CandidateStage, MyCandidateData[]> = {
-      to_contact: [],
-      interview: [],
-      offer: [],
-      hired: [],
-    };
+    const grouped: Record<string, MyCandidateData[]> = {};
+    
+    // Initialize with all known stages
+    stageOrder.forEach(stageKey => {
+      grouped[stageKey] = [];
+    });
 
     candidates.forEach(candidate => {
-      if (grouped[candidate.stage]) {
-        grouped[candidate.stage].push(candidate);
+      if (!grouped[candidate.stage]) {
+        grouped[candidate.stage] = [];
       }
+      grouped[candidate.stage].push(candidate);
     });
 
     return grouped;
-  }, [candidates]);
+  }, [candidates, stageOrder]);
 
   // Stats
-  const stats = useMemo(() => ({
-    total: candidates.length,
-    to_contact: candidatesByStage.to_contact.length,
-    interview: candidatesByStage.interview.length,
-    offer: candidatesByStage.offer.length,
-    hired: candidatesByStage.hired.length,
-  }), [candidates, candidatesByStage]);
+  const stats = useMemo(() => {
+    const stageStats: Record<string, number> = {};
+    stageOrder.forEach(stage => {
+      stageStats[stage] = candidatesByStage[stage]?.length || 0;
+    });
+    return {
+      total: candidates.length,
+      ...stageStats,
+    };
+  }, [candidates, candidatesByStage, stageOrder]);
 
   // Filter candidates based on search query and stage filter
   const filteredCandidatesByStage = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     
-    const filterCandidates = (candidates: MyCandidateData[]) => {
-      if (!query) return candidates;
-      return candidates.filter(c => {
+    const filterCandidates = (stageKey: string) => {
+      const stageCandidates = candidatesByStage[stageKey] || [];
+      if (!query) return stageCandidates;
+      return stageCandidates.filter(c => {
         const fullName = `${c.first_name || ''} ${c.last_name || ''}`.toLowerCase();
         const jobTitle = (c.job_title || '').toLowerCase();
         const notes = (c.notes || '').toLowerCase();
@@ -498,13 +503,12 @@ const MyCandidates = () => {
       });
     };
 
-    return {
-      to_contact: filterCandidates(candidatesByStage.to_contact),
-      interview: filterCandidates(candidatesByStage.interview),
-      offer: filterCandidates(candidatesByStage.offer),
-      hired: filterCandidates(candidatesByStage.hired),
-    };
-  }, [candidatesByStage, searchQuery]);
+    const filtered: Record<string, MyCandidateData[]> = {};
+    stageOrder.forEach(stage => {
+      filtered[stage] = filterCandidates(stage);
+    });
+    return filtered;
+  }, [candidatesByStage, searchQuery, stageOrder]);
 
   // Get total filtered count
   const filteredTotal = useMemo(() => {
@@ -513,9 +517,9 @@ const MyCandidates = () => {
 
   // Stages to display based on filter
   const stagesToDisplay = useMemo(() => {
-    if (activeStageFilter === 'all') return STAGE_ORDER;
+    if (activeStageFilter === 'all') return stageOrder;
     return [activeStageFilter];
-  }, [activeStageFilter]);
+  }, [activeStageFilter, stageOrder]);
 
   // Fetch all applications for the selected candidate when dialog opens
   useEffect(() => {
@@ -626,16 +630,16 @@ const MyCandidates = () => {
   }, [activeId, candidates]);
 
   // Resolve which stage we're hovering over (works for both column and card hovers)
-  const resolveOverStage = (overRawId?: string): CandidateStage | null => {
+  const resolveOverStage = (overRawId?: string): string | null => {
     if (!overRawId) return null;
 
-    if (STAGE_ORDER.includes(overRawId as CandidateStage)) {
-      return overRawId as CandidateStage;
+    if (stageOrder.includes(overRawId)) {
+      return overRawId;
     }
 
     const overCandidate = candidates.find((c) => c.id === overRawId);
-    if (overCandidate && STAGE_ORDER.includes(overCandidate.stage as CandidateStage)) {
-      return overCandidate.stage as CandidateStage;
+    if (overCandidate && stageOrder.includes(overCandidate.stage)) {
+      return overCandidate.stage;
     }
 
     return null;
@@ -840,7 +844,7 @@ const MyCandidates = () => {
           </p>
         </div>
         <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2">
-          {STAGE_ORDER.map(stage => (
+          {DEFAULT_STAGE_KEYS.map(stage => (
             <div key={stage} className="flex-1 min-w-[280px] max-w-[350px]">
               <Skeleton className="h-12 w-full bg-white/10 rounded-lg mb-3" />
               <div className="space-y-2">
@@ -900,7 +904,7 @@ const MyCandidates = () => {
             >
               Alla ({stats.total})
             </button>
-            {STAGE_ORDER.map(stage => {
+            {stageOrder.map(stage => {
               const settings = stageConfig[stage];
               const count = candidatesByStage[stage].length;
               const isActive = activeStageFilter === stage;
@@ -917,6 +921,7 @@ const MyCandidates = () => {
                 </button>
               );
             })}
+            <CreateStageDialog />
           </div>
 
           {/* Search results info */}

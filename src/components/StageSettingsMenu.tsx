@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoreVertical, Pencil, Palette, Image, RotateCcw, Check } from 'lucide-react';
+import { MoreVertical, Pencil, Palette, Image, RotateCcw, Check, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +18,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,24 +36,26 @@ import {
   AVAILABLE_ICONS, 
   AVAILABLE_COLORS,
   getIconByName,
-  type CandidateStage,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
 
 interface StageSettingsMenuProps {
-  stageKey: CandidateStage;
+  stageKey: string;
+  onDelete?: () => void;
 }
 
-export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
-  const { stageConfig, updateStageSetting, resetStageSetting, getDefaultConfig } = useStageSettings();
+export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps) {
+  const { stageConfig, updateStageSetting, resetStageSetting, deleteCustomStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
+  const isCustom = currentConfig?.isCustom ?? false;
 
   const handleOpenRenameDialog = () => {
-    setNewLabel(currentConfig.label);
+    setNewLabel(currentConfig?.label || '');
     setRenameDialogOpen(true);
   };
 
@@ -89,7 +101,18 @@ export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
     }
   };
 
-  const CurrentIcon = getIconByName(currentConfig.iconName);
+  const handleDelete = async () => {
+    try {
+      await deleteCustomStage.mutateAsync(stageKey);
+      setDeleteDialogOpen(false);
+      toast.success('Steg borttaget');
+      onDelete?.();
+    } catch (error) {
+      toast.error('Kunde inte ta bort steg');
+    }
+  };
+
+  if (!currentConfig) return null;
 
   return (
     <>
@@ -168,13 +191,23 @@ export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
 
           <DropdownMenuSeparator />
           
-          <DropdownMenuItem 
-            onClick={handleReset}
-            className="text-white/70 cursor-pointer"
-          >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Återställ
-          </DropdownMenuItem>
+          {isCustom ? (
+            <DropdownMenuItem 
+              onClick={() => setDeleteDialogOpen(true)}
+              className="text-red-400 cursor-pointer focus:text-red-400"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Ta bort steg
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem 
+              onClick={handleReset}
+              className="text-white/70 cursor-pointer"
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Återställ
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -191,7 +224,7 @@ export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
                 id="stage-label"
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
-                placeholder={defaultConfig.label}
+                placeholder={defaultConfig?.label || 'Ange namn'}
                 className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
                 onKeyDown={(e) => e.key === 'Enter' && handleRename()}
               />
@@ -215,6 +248,30 @@ export function StageSettingsMenu({ stageKey }: StageSettingsMenuProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContentNoFocus className="bg-card-parium border-white/20">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Ta bort steg</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/70">
+              Är du säker på att du vill ta bort steget "{currentConfig.label}"? 
+              Kandidater i detta steg kommer att flyttas till "Att kontakta".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500/80 hover:bg-red-500 text-white border-none"
+            >
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
     </>
   );
 }
