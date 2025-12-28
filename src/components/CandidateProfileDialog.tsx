@@ -539,7 +539,7 @@ export const CandidateProfileDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0">
+      <DialogContent className="max-w-[950px] max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
           <DialogDescription>Visa kandidatens profilinformation och ansökan</DialogDescription>
@@ -886,9 +886,17 @@ export const CandidateProfileDialog = ({
           </div>
 
           {/* Activity Sidebar - right side */}
-          <div className="w-72 border-l border-white/20 bg-white/5 flex flex-col overflow-hidden">
+          <div className="w-80 border-l border-white/20 bg-white/5 flex flex-col overflow-hidden relative">
+            {/* Close button */}
+            <button
+              onClick={() => onOpenChange(false)}
+              className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <X className="h-4 w-4 text-white" />
+            </button>
+            
             {/* Tabs */}
-            <div className="flex border-b border-white/20">
+            <div className="flex border-b border-white/20 pr-10">
               <button
                 onClick={() => setSidebarTab('activity')}
                 className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
