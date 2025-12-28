@@ -625,18 +625,18 @@ export const CandidateProfileDialog = ({
             </div>
           </div>
 
-          {/* Info sections - matching job dialog input style exactly */}
-          <div className="grid gap-4">
+          {/* Info sections - compact version */}
+          <div className="grid gap-2.5">
             {/* Information */}
-            <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-              <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-                <User className="h-3.5 w-3.5" />
+            <div className="bg-white/10 border border-white/20 rounded-lg p-3">
+              <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <User className="h-3 w-3" />
                 Information
               </h3>
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className="grid sm:grid-cols-2 gap-2">
                 {displayApp.email && (
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-white shrink-0" />
+                    <Mail className="h-3.5 w-3.5 text-white/60 shrink-0" />
                     <a
                       href={`mailto:${displayApp.email}`}
                       className="text-sm text-white hover:text-white/80 transition-colors truncate"
@@ -647,7 +647,7 @@ export const CandidateProfileDialog = ({
                 )}
                 {displayApp.phone && (
                   <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-white shrink-0" />
+                    <Phone className="h-3.5 w-3.5 text-white/60 shrink-0" />
                     <a
                       href={`tel:${displayApp.phone}`}
                       className="text-sm text-white hover:text-white/80 transition-colors"
@@ -658,68 +658,68 @@ export const CandidateProfileDialog = ({
                 )}
                 {displayApp.location && (
                   <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-white shrink-0" />
+                    <MapPin className="h-3.5 w-3.5 text-white/60 shrink-0" />
                     <span className="text-sm text-white">{displayApp.location}</span>
                   </div>
                 )}
                 {displayApp.age && (
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-white shrink-0" />
+                    <Calendar className="h-3.5 w-3.5 text-white/60 shrink-0" />
                     <span className="text-sm text-white">{displayApp.age} år</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Anställningsinformation - MOVED UP */}
+            {/* Anställningsinformation */}
             {(displayApp.employment_status || displayApp.work_schedule || displayApp.availability) && (
-              <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-                <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <Briefcase className="h-3.5 w-3.5" />
+              <div className="bg-white/10 border border-white/20 rounded-lg p-3">
+                <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <Briefcase className="h-3 w-3" />
                   Anställningsinformation
                 </h3>
-                <div className="grid sm:grid-cols-2 gap-3">
+                <div className="grid sm:grid-cols-2 gap-2">
                 {displayApp.employment_status && (
-                    <div className="space-y-0.5">
-                      <span className="text-sm text-white">Anställningsstatus?</span>
-                      <p className="text-sm text-white">Svar: {displayApp.employment_status}</p>
+                    <div>
+                      <span className="text-sm text-white/70">Anställningsstatus?</span>
+                      <p className="text-sm text-white">{displayApp.employment_status}</p>
                     </div>
                   )}
                   {displayApp.work_schedule && (
-                    <div className="space-y-0.5">
-                      <span className="text-sm text-white">Hur mycket jobbar du idag?</span>
-                      <p className="text-sm text-white">Svar: {displayApp.work_schedule}</p>
+                    <div>
+                      <span className="text-sm text-white/70">Hur mycket jobbar du idag?</span>
+                      <p className="text-sm text-white">{displayApp.work_schedule}</p>
                     </div>
                   )}
                   {displayApp.availability && (
-                    <div className="space-y-0.5 sm:col-span-2">
-                      <span className="text-sm text-white">När kan du börja nytt jobb?</span>
-                      <p className="text-sm text-white">Svar: {displayApp.availability}</p>
+                    <div className="sm:col-span-2">
+                      <span className="text-sm text-white/70">När kan du börja nytt jobb?</span>
+                      <p className="text-sm text-white">{displayApp.availability}</p>
                     </div>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Questions & Answers - MOVED UP */}
+            {/* Questions & Answers */}
             {hasCustomAnswers && (
-              <div className="bg-white/10 border border-white/20 rounded-xl overflow-hidden">
+              <div className="bg-white/10 border border-white/20 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setQuestionsExpanded(!questionsExpanded)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                  className="w-full px-3 py-2 flex items-center justify-between hover:bg-white/5 transition-colors"
                 >
-                  <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
+                  <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider">
                     Frågor ({Object.keys(customAnswers).length})
                   </h3>
                   {questionsExpanded ? (
-                    <ChevronUp className="h-4 w-4 text-white" />
+                    <ChevronUp className="h-3.5 w-3.5 text-white/60" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 text-white" />
+                    <ChevronDown className="h-3.5 w-3.5 text-white/60" />
                   )}
                 </button>
 
                 {questionsExpanded && (
-                  <div className="px-4 pb-4 space-y-3">
+                  <div className="px-3 pb-3 space-y-2">
                     {Object.entries(customAnswers)
                       .sort(([idA], [idB]) => {
                         const orderA = jobQuestions[idA]?.order ?? 999;
@@ -729,13 +729,12 @@ export const CandidateProfileDialog = ({
                       .map(([questionId, answer]) => (
                       <div
                         key={questionId}
-                        className="border-t border-white/10 pt-3 first:border-t-0 first:pt-0"
+                        className="border-t border-white/10 pt-2 first:border-t-0 first:pt-0"
                       >
-                        <p className="text-sm text-white mb-0.5">
+                        <p className="text-sm text-white/70">
                           {jobQuestions[questionId]?.text || questionId}
                         </p>
                         <p className="text-sm text-white">
-                          <span className="text-white">Svar: </span>
                           {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
                         </p>
                       </div>
@@ -745,29 +744,29 @@ export const CandidateProfileDialog = ({
               </div>
             )}
 
-            {/* AI Summary Section - MOVED: Now after questions, before CV */}
-            <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
-                  <Sparkles className="h-3.5 w-3.5" />
+            {/* AI Summary Section */}
+            <div className="bg-white/10 border border-white/20 rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="h-3 w-3" />
                   Sammanfattning
-                  <span className="text-[10px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
+                  <span className="text-[9px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
                     Baserat på CV
                   </span>
                 </h3>
               </div>
 
               {loadingSummary || generatingSummary ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-white/50" />
+                <div className="flex items-center justify-center py-3">
+                  <Loader2 className="h-4 w-4 animate-spin text-white/50" />
                   <span className="ml-2 text-sm text-white/50">Analyserar CV...</span>
                 </div>
               ) : aiSummary ? (
                 <div>
                   {/* Document type indicator */}
                   {aiSummary.document_type && (
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`w-2 h-2 rounded-full ${
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`w-1.5 h-1.5 rounded-full ${
                         aiSummary.is_valid_cv !== false ? 'bg-green-400' : 'bg-orange-400'
                       }`} />
                       <span className="text-sm text-white">
@@ -776,14 +775,14 @@ export const CandidateProfileDialog = ({
                     </div>
                   )}
                   
-                  {/* Key points as bullet list - like Teamtailor Co-pilot */}
+                  {/* Key points as bullet list */}
                   {aiSummary.key_points && aiSummary.key_points.length > 0 ? (
-                    <ul className="space-y-1.5">
+                    <ul className="space-y-1">
                       {aiSummary.key_points
                         .filter(point => !point.text.startsWith('Dokumenttyp:'))
                         .map((point, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm text-white">
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-2 ${
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
                             point.type === 'negative' ? 'bg-red-400' : 'bg-white'
                           }`} />
                           <span>{point.text}</span>
@@ -797,10 +796,10 @@ export const CandidateProfileDialog = ({
                   )}
                 </div>
               ) : (
-                <div className="text-center py-4">
+                <div className="text-center py-3">
                   {signedCvUrl ? (
                     <div className="flex items-center justify-center">
-                      <Loader2 className="h-5 w-5 animate-spin text-white/50" />
+                      <Loader2 className="h-4 w-4 animate-spin text-white/50" />
                       <span className="ml-2 text-sm text-white/50">Genererar sammanfattning...</span>
                     </div>
                   ) : (
@@ -812,38 +811,38 @@ export const CandidateProfileDialog = ({
               )}
             </div>
 
-            {/* CV Section - MOVED: Now last */}
+            {/* CV Section */}
             {displayApp.cv_url && (
-              <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-                <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <FileText className="h-3.5 w-3.5" />
+              <div className="bg-white/10 border border-white/20 rounded-lg p-3">
+                <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <FileText className="h-3 w-3" />
                   CV
                 </h3>
-                <div className="w-full min-h-9 py-2.5 bg-white/5 border border-white/10 rounded-md flex items-center px-3 gap-2">
+                <div className="w-full py-2 bg-white/5 border border-white/10 rounded-md flex items-center px-2.5 gap-2">
                   <button
                     type="button"
                     onClick={() => setCvOpen(true)}
                     className="flex items-center gap-2 text-white transition-colors flex-1"
                   >
-                    <FileText className="h-4 w-4 text-white shrink-0" />
+                    <FileText className="h-3.5 w-3.5 text-white/60 shrink-0" />
                     <span className="text-sm">Visa CV</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setCvOpen(true)}
-                    className="text-white hover:text-white/80 transition-colors"
+                    className="text-white/60 hover:text-white transition-colors"
                     title="Öppna CV"
                   >
-                    <ExternalLink className="h-4 w-4" />
+                    <ExternalLink className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>
             )}
 
             {/* Presentation om kandidaten */}
-            <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-              <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-                <User className="h-3.5 w-3.5" />
+            <div className="bg-white/10 border border-white/20 rounded-lg p-3">
+              <h3 className="text-[10px] font-semibold text-white/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <User className="h-3 w-3" />
                 Presentation om {displayApp.first_name || 'kandidaten'}
               </h3>
               {displayApp.bio ? (
