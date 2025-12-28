@@ -59,6 +59,8 @@ interface CandidateNote {
   id: string;
   note: string;
   created_at: string;
+  employer_id: string;
+  author_name?: string;
 }
 
 // Interactive Star Rating component
@@ -369,15 +371,33 @@ export const CandidateProfileDialog = ({
     if (!application || !user) return;
     setLoadingNotes(true);
     try {
+      // Fetch notes with author profile info
       const { data, error } = await supabase
         .from('candidate_notes')
-        .select('id, note, created_at')
-        .eq('employer_id', user.id)
+        .select(`
+          id, 
+          note, 
+          created_at, 
+          employer_id,
+          profiles!candidate_notes_employer_id_fkey(first_name, last_name)
+        `)
         .eq('applicant_id', application.applicant_id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNotes(data || []);
+      
+      // Transform data to include author name
+      const notesWithAuthor = (data || []).map((note: any) => ({
+        id: note.id,
+        note: note.note,
+        created_at: note.created_at,
+        employer_id: note.employer_id,
+        author_name: note.profiles 
+          ? `${note.profiles.first_name || ''} ${note.profiles.last_name || ''}`.trim() || 'Okänd'
+          : 'Okänd',
+      }));
+      
+      setNotes(notesWithAuthor);
     } catch (error) {
       console.error('Error fetching notes:', error);
     } finally {
@@ -879,8 +899,13 @@ export const CandidateProfileDialog = ({
                           key={note.id}
                           className="bg-white/5 rounded-lg p-2.5 group relative"
                         >
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-[10px] font-medium text-white">
+                              {note.author_name || 'Okänd'}
+                            </span>
+                          </div>
                           <p className="text-xs text-white whitespace-pre-wrap pr-5 leading-relaxed">{note.note}</p>
-                          <p className="text-[10px] text-white mt-1">
+                          <p className="text-[10px] text-white/70 mt-1">
                             {new Date(note.created_at).toLocaleDateString('sv-SE', {
                               day: 'numeric',
                               month: 'long',
@@ -889,12 +914,14 @@ export const CandidateProfileDialog = ({
                               minute: '2-digit'
                             })}
                           </p>
-                          <button
-                            onClick={() => deleteNote(note.id)}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-white/10 rounded"
-                          >
-                            <Trash2 className="h-3 w-3 text-white/50 hover:text-red-400" />
-                          </button>
+                          {note.employer_id === user?.id && (
+                            <button
+                              onClick={() => deleteNote(note.id)}
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-white/10 rounded"
+                            >
+                              <Trash2 className="h-3 w-3 text-white/50 hover:text-red-400" />
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
