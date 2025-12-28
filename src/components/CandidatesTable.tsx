@@ -8,6 +8,8 @@ import { CandidateProfileDialog } from './CandidateProfileDialog';
 import { CandidateAvatar } from './CandidateAvatar';
 import { Button } from '@/components/ui/button';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { AddToColleagueListDialog } from './AddToColleagueListDialog';
 import { UserPlus, Check } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
@@ -37,6 +39,11 @@ export function CandidatesTable({
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { isInMyCandidates, addCandidate } = useMyCandidatesData();
+  const { teamMembers, hasTeam } = useTeamMembers();
+  
+  // State for team selection dialog
+  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
+  const [selectedApplicationForTeam, setSelectedApplicationForTeam] = useState<ApplicationData | null>(null);
 
   // Förladda CV-sammanfattningar i bakgrunden
   useCvSummaryPreloader(
@@ -164,18 +171,25 @@ export function CandidatesTable({
                           disabled={isAlreadyAdded || addCandidate.isPending}
                           onClick={(e) => {
                             e.stopPropagation();
-                            addCandidate.mutate({
-                              applicationId: application.id,
-                              applicantId: application.applicant_id,
-                              jobId: application.job_id,
-                            });
+                            // If user has team members, show selection dialog
+                            if (hasTeam) {
+                              setSelectedApplicationForTeam(application);
+                              setTeamDialogOpen(true);
+                            } else {
+                              // No team, add directly to own list
+                              addCandidate.mutate({
+                                applicationId: application.id,
+                                applicantId: application.applicant_id,
+                                jobId: application.job_id,
+                              });
+                            }
                           }}
                         >
                           {isAlreadyAdded ? <Check className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {isAlreadyAdded ? 'Redan i din lista' : 'Lägg till i Mina kandidater'}
+                        {isAlreadyAdded ? 'Redan i din lista' : hasTeam ? 'Lägg till i kandidatlista' : 'Lägg till i Mina kandidater'}
                       </TooltipContent>
                     </Tooltip>
                   </TableCell>
@@ -207,6 +221,22 @@ export function CandidatesTable({
           handleDialogClose();
         }}
       />
+
+      {/* Team selection dialog */}
+      {selectedApplicationForTeam && (
+        <AddToColleagueListDialog
+          open={teamDialogOpen}
+          onOpenChange={(open) => {
+            setTeamDialogOpen(open);
+            if (!open) setSelectedApplicationForTeam(null);
+          }}
+          teamMembers={teamMembers}
+          applicationId={selectedApplicationForTeam.id}
+          applicantId={selectedApplicationForTeam.applicant_id}
+          jobId={selectedApplicationForTeam.job_id}
+          candidateName={`${selectedApplicationForTeam.first_name || ''} ${selectedApplicationForTeam.last_name || ''}`.trim() || 'Kandidat'}
+        />
+      )}
     </>
   );
 };
