@@ -49,19 +49,28 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [newLabel, setNewLabel] = useState('');
+  const [liveColor, setLiveColor] = useState<string | null>(null);
   const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
   const isCustom = currentConfig?.isCustom ?? false;
+  
+  // Use liveColor while dragging, fall back to saved color
+  const displayColor = liveColor ?? currentConfig?.color ?? '#0EA5E9';
 
   const handleColorPickerChange = (color: string) => {
+    // Update display immediately
+    setLiveColor(color);
+    
     // Debounce the save to avoid too many API calls while dragging
     if (colorDebounceRef.current) {
       clearTimeout(colorDebounceRef.current);
     }
     colorDebounceRef.current = setTimeout(() => {
       handleColorChange(color);
+      // Clear live color after save so it uses the saved value
+      setLiveColor(null);
     }, 300);
   };
 
@@ -149,7 +158,7 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
               <span className="flex-1">Välj färg</span>
               <div 
                 className="w-5 h-5 rounded-full border border-white/30 ml-2"
-                style={{ backgroundColor: currentConfig.color }}
+                style={{ backgroundColor: displayColor }}
               />
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -158,7 +167,7 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
                 sideOffset={8}
               >
                 <HexColorPicker 
-                  color={currentConfig.color} 
+                  color={displayColor} 
                   onChange={handleColorPickerChange}
                 />
               </DropdownMenuSubContent>
