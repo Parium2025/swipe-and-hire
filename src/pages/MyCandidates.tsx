@@ -239,11 +239,15 @@ interface StageColumnProps {
 
 const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
+  const [liveColor, setLiveColor] = useState<string | null>(null);
 
   // Use useDroppable's own isOver for accurate column-level detection
   const { setNodeRef, isOver } = useDroppable({
     id: stage,
   });
+
+  // Use live color while dragging, fall back to saved color
+  const displayColor = liveColor ?? stageSettings.color;
 
   return (
     <div 
@@ -253,19 +257,22 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
     >
       <div 
         className={`rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm ${isOver ? 'ring-2 ring-white/40' : ''}`}
-        style={{ backgroundColor: `${stageSettings.color}33` }}
+        style={{ backgroundColor: `${displayColor}33` }}
       >
         <div className="flex items-center gap-1.5">
           <Icon className="h-3.5 w-3.5 text-white" />
           <span className="font-medium text-xs text-white">{stageSettings.label}</span>
           <span 
             className="text-white text-[10px] px-1.5 py-0.5 rounded-full"
-            style={{ backgroundColor: `${stageSettings.color}66` }}
+            style={{ backgroundColor: `${displayColor}66` }}
           >
             {candidates.length}
           </span>
           <div className="ml-auto">
-            <StageSettingsMenu stageKey={stage} />
+            <StageSettingsMenu 
+              stageKey={stage} 
+              onLiveColorChange={setLiveColor}
+            />
           </div>
         </div>
       </div>

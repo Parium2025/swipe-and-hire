@@ -42,9 +42,10 @@ import { toast } from 'sonner';
 interface StageSettingsMenuProps {
   stageKey: string;
   onDelete?: () => void;
+  onLiveColorChange?: (color: string | null) => void;
 }
 
-export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps) {
+export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteCustomStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -60,8 +61,9 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
   const displayColor = liveColor ?? currentConfig?.color ?? '#0EA5E9';
 
   const handleColorPickerChange = (color: string) => {
-    // Update display immediately
+    // Update display immediately - both local and parent
     setLiveColor(color);
+    onLiveColorChange?.(color);
     
     // Debounce the save to avoid too many API calls while dragging
     if (colorDebounceRef.current) {
@@ -69,9 +71,10 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
     }
     colorDebounceRef.current = setTimeout(() => {
       handleColorChange(color);
-      // Clear live color after save so it uses the saved value
+      // Clear live color after save
       setLiveColor(null);
-    }, 300);
+      onLiveColorChange?.(null);
+    }, 500);
   };
 
   const handleOpenRenameDialog = () => {
