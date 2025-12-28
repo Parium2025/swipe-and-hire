@@ -13,11 +13,6 @@ import {
   DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -53,8 +48,6 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
   const { stageConfig, updateStageSetting, resetStageSetting, deleteCustomStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [colorPickerOpen, setColorPickerOpen] = useState(false);
-  const [tempColor, setTempColor] = useState('');
   const [newLabel, setNewLabel] = useState('');
   const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -62,14 +55,7 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
   const defaultConfig = getDefaultConfig(stageKey);
   const isCustom = currentConfig?.isCustom ?? false;
 
-  const handleColorPickerOpen = () => {
-    setTempColor(currentConfig?.color || '#0EA5E9');
-    setColorPickerOpen(true);
-  };
-
   const handleColorPickerChange = (color: string) => {
-    setTempColor(color);
-    
     // Debounce the save to avoid too many API calls while dragging
     if (colorDebounceRef.current) {
       clearTimeout(colorDebounceRef.current);
@@ -156,36 +142,28 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
             Byt namn
           </DropdownMenuItem>
           
-          {/* Color picker with popover */}
-          <Popover open={colorPickerOpen} onOpenChange={setColorPickerOpen}>
-            <PopoverTrigger asChild>
-              <DropdownMenuItem 
-                className="cursor-pointer"
-                onSelect={(e) => {
-                  e.preventDefault();
-                  handleColorPickerOpen();
-                }}
-              >
-                <Palette className="h-4 w-4 mr-2" />
-                <span className="flex-1">Välj färg</span>
-                <div 
-                  className="w-5 h-5 rounded-full border border-white/30"
-                  style={{ backgroundColor: currentConfig.color }}
-                />
-              </DropdownMenuItem>
-            </PopoverTrigger>
-            <PopoverContent 
-              side="left" 
-              align="start"
-              className="w-auto p-3 bg-card border-white/20"
-              sideOffset={8}
-            >
-              <HexColorPicker 
-                color={tempColor || currentConfig.color} 
-                onChange={handleColorPickerChange}
+          {/* Color picker as submenu */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="cursor-pointer">
+              <Palette className="h-4 w-4 mr-2" />
+              <span className="flex-1">Välj färg</span>
+              <div 
+                className="w-5 h-5 rounded-full border border-white/30 ml-2"
+                style={{ backgroundColor: currentConfig.color }}
               />
-            </PopoverContent>
-          </Popover>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent 
+                className="p-3"
+                sideOffset={8}
+              >
+                <HexColorPicker 
+                  color={currentConfig.color} 
+                  onChange={handleColorPickerChange}
+                />
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
 
           {/* Icon submenu */}
           <DropdownMenuSub>
