@@ -1027,18 +1027,18 @@ export const CandidateProfileDialog = ({
                                         })}
                                       </p>
                                       {note.employer_id === user?.id && (
-                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
                                           <button
                                             onClick={() => startEditingNote(note)}
-                                            className="p-0.5 hover:bg-white/10 rounded"
+                                            className="h-6 w-6 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
                                           >
-                                            <Pencil className="h-3 w-3 text-white/50 hover:text-white" />
+                                            <Pencil className="h-3 w-3 text-white" />
                                           </button>
                                           <button
                                             onClick={() => confirmDeleteNote(note.id)}
-                                            className="p-0.5 hover:bg-white/10 rounded"
+                                            className="h-6 w-6 rounded-full bg-destructive/80 border border-destructive flex items-center justify-center hover:bg-destructive transition-colors"
                                           >
-                                            <Trash2 className="h-3 w-3 text-white/50 hover:text-red-400" />
+                                            <Trash2 className="h-3 w-3 text-white" />
                                           </button>
                                         </div>
                                       )}
