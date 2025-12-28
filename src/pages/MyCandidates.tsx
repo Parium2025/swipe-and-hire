@@ -10,6 +10,9 @@ import { ApplicationData } from '@/hooks/useApplicationsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { useColleagueCandidates } from '@/hooks/useColleagueCandidates';
+import { useColleagueStageSettings } from '@/hooks/useColleagueStageSettings';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,9 +36,20 @@ import {
   ArrowDown,
   Clock,
   Play,
-  Plus
+  Plus,
+  Users,
+  ChevronDown,
+  Eye
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow, differenceInDays, differenceInHours } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import {
@@ -235,15 +249,17 @@ interface StageColumnProps {
   onRemoveCandidate: (candidate: MyCandidateData) => void;
   onOpenProfile: (candidate: MyCandidateData) => void;
   stageSettings: { label: string; color: string; iconName: string };
+  isReadOnly?: boolean;
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings }: Omit<StageColumnProps, 'isOver'>) => {
+const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
 
   // Use useDroppable's own isOver for accurate column-level detection
   const { setNodeRef, isOver } = useDroppable({
     id: stage,
+    disabled: isReadOnly,
   });
 
   // Use live color while dragging, fall back to saved color
@@ -268,12 +284,15 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
           >
             {candidates.length}
           </span>
-          <div className="ml-auto">
-            <StageSettingsMenu 
-              stageKey={stage} 
-              onLiveColorChange={setLiveColor}
-            />
-          </div>
+          {/* Only show settings menu for own list */}
+          {!isReadOnly && (
+            <div className="ml-auto">
+              <StageSettingsMenu 
+                stageKey={stage} 
+                onLiveColorChange={setLiveColor}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -313,9 +332,39 @@ const MyCandidates = () => {
   const { user } = useAuth();
   const { stageConfig, stageOrder } = useStageSettings();
   
+  // Team members for colleague switching
+  const { teamMembers, hasTeam, isLoading: loadingTeam } = useTeamMembers();
+  
+  // State for viewing a colleague's list
+  const [viewingColleagueId, setViewingColleagueId] = useState<string | null>(null);
+  const viewingColleague = teamMembers.find(m => m.userId === viewingColleagueId);
+  const isViewingColleague = !!viewingColleagueId;
+  
+  // Colleague's candidates and stage settings
+  const { 
+    candidates: colleagueCandidates, 
+    isLoading: loadingColleagueCandidates,
+    fetchColleagueCandidates,
+    moveCandidateInColleagueList,
+    removeCandidateFromColleagueList,
+    setCandidates: setColleagueCandidates,
+  } = useColleagueCandidates(viewingColleagueId);
+  
+  const { 
+    stageConfig: colleagueStageConfig, 
+    stageOrder: colleagueStageOrder,
+  } = useColleagueStageSettings(viewingColleagueId);
+  
+  // Use colleague's settings when viewing their list
+  const activeStageConfig = isViewingColleague ? colleagueStageConfig : stageConfig;
+  const activeStageOrder = isViewingColleague ? colleagueStageOrder : stageOrder;
+  
   // Local state for candidates - like JobDetails pattern
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Active candidates to display
+  const displayedCandidates = isViewingColleague ? colleagueCandidates : candidates;
   
   const [selectedCandidate, setSelectedCandidate] = useState<MyCandidateData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -328,6 +377,13 @@ const MyCandidates = () => {
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStageFilter, setActiveStageFilter] = useState<string | 'all'>('all');
+  
+  // Fetch colleague's candidates when switching
+  useEffect(() => {
+    if (viewingColleagueId) {
+      fetchColleagueCandidates();
+    }
+  }, [viewingColleagueId, fetchColleagueCandidates]);
 
   // Fetch candidates data
   const fetchCandidates = useCallback(async () => {
@@ -462,18 +518,18 @@ const MyCandidates = () => {
   }, [user, fetchCandidates]);
 
   // Förladda CV-sammanfattningar i bakgrunden
-  useCvSummaryPreloader(candidates);
+  useCvSummaryPreloader(displayedCandidates);
 
   // Group candidates by stage (computed from local state) - dynamic for custom stages
   const candidatesByStage = useMemo(() => {
     const grouped: Record<string, MyCandidateData[]> = {};
     
-    // Initialize with all known stages
-    stageOrder.forEach(stageKey => {
+    // Initialize with all known stages from active stage order
+    activeStageOrder.forEach(stageKey => {
       grouped[stageKey] = [];
     });
 
-    candidates.forEach(candidate => {
+    displayedCandidates.forEach(candidate => {
       if (!grouped[candidate.stage]) {
         grouped[candidate.stage] = [];
       }
@@ -481,19 +537,19 @@ const MyCandidates = () => {
     });
 
     return grouped;
-  }, [candidates, stageOrder]);
+  }, [displayedCandidates, activeStageOrder]);
 
   // Stats
   const stats = useMemo(() => {
     const stageStats: Record<string, number> = {};
-    stageOrder.forEach(stage => {
+    activeStageOrder.forEach(stage => {
       stageStats[stage] = candidatesByStage[stage]?.length || 0;
     });
     return {
-      total: candidates.length,
+      total: displayedCandidates.length,
       ...stageStats,
     };
-  }, [candidates, candidatesByStage, stageOrder]);
+  }, [displayedCandidates, candidatesByStage, activeStageOrder]);
 
   // Filter candidates based on search query and stage filter
   const filteredCandidatesByStage = useMemo(() => {
@@ -511,11 +567,11 @@ const MyCandidates = () => {
     };
 
     const filtered: Record<string, MyCandidateData[]> = {};
-    stageOrder.forEach(stage => {
+    activeStageOrder.forEach(stage => {
       filtered[stage] = filterCandidates(stage);
     });
     return filtered;
-  }, [candidatesByStage, searchQuery, stageOrder]);
+  }, [candidatesByStage, searchQuery, activeStageOrder]);
 
   // Get total filtered count
   const filteredTotal = useMemo(() => {
@@ -524,9 +580,9 @@ const MyCandidates = () => {
 
   // Stages to display based on filter
   const stagesToDisplay = useMemo(() => {
-    if (activeStageFilter === 'all') return stageOrder;
+    if (activeStageFilter === 'all') return activeStageOrder;
     return [activeStageFilter];
-  }, [activeStageFilter, stageOrder]);
+  }, [activeStageFilter, activeStageOrder]);
 
   // Fetch all applications for the selected candidate when dialog opens
   useEffect(() => {
@@ -633,19 +689,19 @@ const MyCandidates = () => {
 
   const activeCandidate = useMemo(() => {
     if (!activeId) return null;
-    return candidates.find(c => c.id === activeId) || null;
-  }, [activeId, candidates]);
+    return displayedCandidates.find(c => c.id === activeId) || null;
+  }, [activeId, displayedCandidates]);
 
   // Resolve which stage we're hovering over (works for both column and card hovers)
   const resolveOverStage = (overRawId?: string): string | null => {
     if (!overRawId) return null;
 
-    if (stageOrder.includes(overRawId)) {
+    if (activeStageOrder.includes(overRawId)) {
       return overRawId;
     }
 
-    const overCandidate = candidates.find((c) => c.id === overRawId);
-    if (overCandidate && stageOrder.includes(overCandidate.stage)) {
+    const overCandidate = displayedCandidates.find((c) => c.id === overRawId);
+    if (overCandidate && activeStageOrder.includes(overCandidate.stage)) {
       return overCandidate.stage;
     }
 
@@ -664,6 +720,12 @@ const MyCandidates = () => {
 
   // Move candidate - OPTIMISTIC UPDATE like JobDetails
   const updateCandidateStage = async (candidateId: string, newStage: CandidateStage) => {
+    if (isViewingColleague) {
+      // Use colleague mutation
+      await moveCandidateInColleagueList(candidateId, newStage);
+      return;
+    }
+    
     // Optimistic update - move card immediately
     const previousCandidates = [...candidates];
     setCandidates(prev => prev.map(c => 
@@ -707,7 +769,7 @@ const MyCandidates = () => {
       return;
     }
 
-    const candidate = candidates.find(c => c.id === candidateId);
+    const candidate = displayedCandidates.find(c => c.id === candidateId);
     if (candidate && candidate.stage !== targetStage) {
       // Update stage FIRST (optimistic update)
       updateCandidateStage(candidateId, targetStage);
@@ -733,6 +795,13 @@ const MyCandidates = () => {
   const confirmRemoveCandidate = async () => {
     if (candidateToRemove) {
       const idToRemove = candidateToRemove.id;
+      
+      if (isViewingColleague) {
+        await removeCandidateFromColleagueList(idToRemove);
+        setCandidateToRemove(null);
+        return;
+      }
+      
       // Optimistic remove
       setCandidates(prev => prev.filter(c => c.id !== idToRemove));
       setCandidateToRemove(null);
@@ -869,11 +938,61 @@ const MyCandidates = () => {
     <div className="max-w-7xl mx-auto px-3 md:px-12 animate-fade-in">
       {/* Header */}
       <div className="text-center mb-4">
-        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
-          Mina kandidater ({stats.total})
-        </h1>
+        <div className="flex items-center justify-center gap-2">
+          {hasTeam ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-white tracking-tight hover:text-white/80 transition-colors">
+                  {isViewingColleague ? (
+                    <>
+                      <Eye className="h-5 w-5 text-fuchsia-400" />
+                      {viewingColleague?.firstName} {viewingColleague?.lastName}s kandidater
+                    </>
+                  ) : (
+                    <>Mina kandidater</>
+                  )}
+                  <span className="text-white/60">({stats.total})</span>
+                  <ChevronDown className="h-4 w-4 text-white/60" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[200px]">
+                <DropdownMenuItem 
+                  onClick={() => setViewingColleagueId(null)}
+                  className={`text-white hover:text-white ${!isViewingColleague ? 'bg-white/10' : ''}`}
+                >
+                  <UserCheck className="h-4 w-4 mr-2" />
+                  Mina kandidater
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/10" />
+                <div className="px-2 py-1.5 text-xs text-white/50 font-medium">Kollegors listor</div>
+                {teamMembers.map(member => (
+                  <DropdownMenuItem 
+                    key={member.userId}
+                    onClick={() => setViewingColleagueId(member.userId)}
+                    className={`text-white hover:text-white ${viewingColleagueId === member.userId ? 'bg-white/10' : ''}`}
+                  >
+                    <Avatar className="h-5 w-5 mr-2">
+                      <AvatarImage src={member.profileImageUrl || undefined} />
+                      <AvatarFallback className="text-[10px] bg-white/20">
+                        {member.firstName?.[0]}{member.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    {member.firstName} {member.lastName}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
+              Mina kandidater ({stats.total})
+            </h1>
+          )}
+        </div>
         <p className="text-sm text-white/90 mt-1">
-          Din personliga rekryteringspipeline - dra kandidater mellan steg
+          {isViewingColleague 
+            ? `Visar ${viewingColleague?.firstName}s rekryteringspipeline - du kan flytta och ta bort kandidater`
+            : 'Din personliga rekryteringspipeline - dra kandidater mellan steg'
+          }
         </p>
       </div>
 
