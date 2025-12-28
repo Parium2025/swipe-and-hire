@@ -41,10 +41,12 @@ const getActivityDescription = (activity: CandidateActivity) => {
       return (
         <span>
           <span className="font-medium text-white">{name}</span>
-            <span className="text-white"> ändrade betyg från </span>
-            <span className="text-white">{oldRating} ★</span>
-            <span className="text-white"> till </span>
-          <span className="text-yellow-400">{newRating} ★</span>
+          <span className="text-white"> ändrade betyg från </span>
+          <span className="text-white">{oldRating} </span>
+          <span className="text-white">★</span>
+          <span className="text-white"> till </span>
+          <span className="text-white">{newRating} </span>
+          <span className="text-yellow-400">★</span>
         </span>
       );
     case 'note_added':
