@@ -349,7 +349,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
           </SortableContext>
 
           {candidates.length === 0 && !isOver && (
-            <div className="text-center py-8 text-xs text-white/50">
+            <div className="text-center py-8 text-xs text-white">
               Inga kandidater i detta steg
             </div>
           )}
