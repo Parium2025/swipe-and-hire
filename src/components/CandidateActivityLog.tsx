@@ -117,10 +117,15 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
     return groups;
   }, {} as Record<string, CandidateActivity[]>);
 
+  const dateEntries = Object.entries(groupedActivities);
+
   return (
     <div className="space-y-4">
-      {Object.entries(groupedActivities).map(([date, dateActivities]) => (
+      {dateEntries.map(([date, dateActivities], index) => (
         <div key={date}>
+          {index > 0 && (
+            <div className="h-px bg-white/20 mb-4" />
+          )}
           <p className="text-xs text-white mb-2 capitalize">{date}</p>
           <div className="space-y-3">
             {dateActivities.map((activity) => {
