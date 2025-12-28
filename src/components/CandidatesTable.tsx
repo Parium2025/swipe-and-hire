@@ -121,7 +121,6 @@ export function CandidatesTable({
             <TableRow className="border-white/10 hover:bg-white/5 hover:border-white/50">
               <TableHead className="text-white">Kandidat</TableHead>
               <TableHead className="text-white">Tjänst</TableHead>
-              <TableHead className="text-white">Status</TableHead>
               <TableHead className="text-white">Ansökt</TableHead>
               <TableHead className="text-white">Senaste aktivitet</TableHead>
               <TableHead className="text-white w-12"></TableHead>
@@ -160,11 +159,6 @@ export function CandidatesTable({
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {application.job_title || 'Okänd tjänst'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="glass" className={status.className}>
-                      {status.label}
-                    </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {formatTimeAgo(new Date(application.applied_at))}
