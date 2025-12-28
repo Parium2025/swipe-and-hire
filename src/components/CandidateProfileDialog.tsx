@@ -695,7 +695,7 @@ export const CandidateProfileDialog = ({
                       <span className={`w-2 h-2 rounded-full ${
                         aiSummary.is_valid_cv !== false ? 'bg-green-400' : 'bg-orange-400'
                       }`} />
-                      <span className="text-sm text-white/80">
+                      <span className="text-sm text-white">
                         Dokumenttyp: {aiSummary.document_type.charAt(0).toUpperCase() + aiSummary.document_type.slice(1)}
                       </span>
                     </div>

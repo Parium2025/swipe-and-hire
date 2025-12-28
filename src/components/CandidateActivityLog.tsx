@@ -33,7 +33,7 @@ const getActivityDescription = (activity: CandidateActivity) => {
         return (
           <span>
             <span className="font-medium text-white">{name}</span>
-            <span className="text-white/70"> gav betyg </span>
+            <span className="text-white"> gav betyg </span>
             <span className="text-yellow-400">{newRating} ★</span>
           </span>
         );
@@ -41,9 +41,9 @@ const getActivityDescription = (activity: CandidateActivity) => {
       return (
         <span>
           <span className="font-medium text-white">{name}</span>
-          <span className="text-white/70"> ändrade betyg från </span>
-          <span className="text-white/50">{oldRating} ★</span>
-          <span className="text-white/70"> till </span>
+            <span className="text-white"> ändrade betyg från </span>
+            <span className="text-white">{oldRating} ★</span>
+            <span className="text-white"> till </span>
           <span className="text-yellow-400">{newRating} ★</span>
         </span>
       );
@@ -51,19 +51,19 @@ const getActivityDescription = (activity: CandidateActivity) => {
       return (
         <span>
           <span className="font-medium text-white">{name}</span>
-          <span className="text-white/70"> lade till en anteckning</span>
+          <span className="text-white"> lade till en anteckning</span>
         </span>
       );
     case 'note_edited':
       return (
         <span>
           <span className="font-medium text-white">{name}</span>
-          <span className="text-white/70"> redigerade en anteckning</span>
+          <span className="text-white"> redigerade en anteckning</span>
         </span>
       );
     default:
       return (
-        <span className="text-white/70">Okänd aktivitet</span>
+        <span className="text-white">Okänd aktivitet</span>
       );
   }
 };
@@ -95,7 +95,7 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <Activity className="h-8 w-8 text-white/30 mb-2" />
-        <p className="text-sm text-white/50">Ingen aktivitet ännu</p>
+        <p className="text-sm text-white">Ingen aktivitet ännu</p>
       </div>
     );
   }
@@ -118,20 +118,20 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
     <div className="space-y-4">
       {Object.entries(groupedActivities).map(([date, dateActivities]) => (
         <div key={date}>
-          <p className="text-xs text-white/40 mb-2 capitalize">{date}</p>
+          <p className="text-xs text-white mb-2 capitalize">{date}</p>
           <div className="space-y-3">
             {dateActivities.map((activity) => {
               const Icon = getActivityIcon(activity.activity_type);
               return (
                 <div key={activity.id} className="flex gap-3">
                   <div className="flex-shrink-0 h-7 w-7 rounded-full bg-white/10 flex items-center justify-center">
-                    <Icon className="h-3.5 w-3.5 text-white/70" />
+                    <Icon className="h-3.5 w-3.5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs leading-relaxed">
                       {getActivityDescription(activity)}
                     </p>
-                    <p className="text-[10px] text-white/40 mt-0.5">
+                    <p className="text-[10px] text-white mt-0.5">
                       {formatTime(activity.created_at)}
                     </p>
                   </div>
