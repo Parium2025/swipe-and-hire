@@ -9,6 +9,7 @@ import { useJobsData } from '@/hooks/useJobsData';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { useActivityTracker } from '@/hooks/useActivityTracker';
 
 interface EmployerLayoutProps {
   children: ReactNode;
@@ -21,6 +22,9 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
   const { invalidateJobs } = useJobsData();
   const queryClient = useQueryClient();
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
+  
+  // Track user activity for "last seen" feature
+  useActivityTracker();
 
   // Keyboard shortcut: Cmd+N / Ctrl+N to open "Create New Job" dialog
   const handleKeyDown = useCallback((e: KeyboardEvent) => {

@@ -169,7 +169,9 @@ export function CandidatesTable({
                     {formatTimeAgo(new Date(application.applied_at))}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {formatTimeAgo(new Date(application.updated_at))}
+                    {application.last_active_at 
+                      ? formatTimeAgo(new Date(application.last_active_at))
+                      : '-'}
                   </TableCell>
                   <TableCell>
                     {!isAlreadyAdded && (

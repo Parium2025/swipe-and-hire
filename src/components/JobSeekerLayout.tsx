@@ -7,6 +7,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TruncatedText } from '@/components/TruncatedText';
+import { useActivityTracker } from '@/hooks/useActivityTracker';
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
@@ -17,6 +18,9 @@ interface JobSeekerLayoutProps {
 const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
+  
+  // Track user activity for "last seen" feature
+  useActivityTracker();
 
   // Prefetch public jobs in background so they're ready instantly when navigating to /search-jobs
   useEffect(() => {

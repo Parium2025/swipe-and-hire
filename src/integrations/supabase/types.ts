@@ -974,6 +974,7 @@ export type Database = {
           industry: string | null
           interests: string[] | null
           is_profile_video: boolean | null
+          last_active_at: string | null
           last_name: string | null
           location: string | null
           not_currently_looking: boolean | null
@@ -1015,6 +1016,7 @@ export type Database = {
           industry?: string | null
           interests?: string[] | null
           is_profile_video?: boolean | null
+          last_active_at?: string | null
           last_name?: string | null
           location?: string | null
           not_currently_looking?: boolean | null
@@ -1056,6 +1058,7 @@ export type Database = {
           industry?: string | null
           interests?: string[] | null
           is_profile_video?: boolean | null
+          last_active_at?: string | null
           last_name?: string | null
           location?: string | null
           not_currently_looking?: boolean | null
