@@ -252,13 +252,16 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
       style={{ minHeight: 'calc(100vh - 280px)' }}
     >
       <div 
-        className={`rounded-md px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-white/40' : ''}`}
-        style={{ backgroundColor: stageSettings.color }}
+        className={`rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm ${isOver ? 'ring-2 ring-white/40' : ''}`}
+        style={{ backgroundColor: `${stageSettings.color}33` }}
       >
         <div className="flex items-center gap-1.5">
           <Icon className="h-3.5 w-3.5 text-white" />
           <span className="font-medium text-xs text-white">{stageSettings.label}</span>
-          <span className="bg-white/20 text-white/90 text-[10px] px-1.5 py-0.5 rounded-full">
+          <span 
+            className="text-white text-[10px] px-1.5 py-0.5 rounded-full"
+            style={{ backgroundColor: `${stageSettings.color}66` }}
+          >
             {candidates.length}
           </span>
           <div className="ml-auto">
@@ -900,13 +903,14 @@ const MyCandidates = () => {
             {STAGE_ORDER.map(stage => {
               const settings = stageConfig[stage];
               const count = candidatesByStage[stage].length;
+              const isActive = activeStageFilter === stage;
               return (
                 <button
                   key={stage}
-                  onClick={() => setActiveStageFilter(activeStageFilter === stage ? 'all' : stage)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white`}
+                  onClick={() => setActiveStageFilter(isActive ? 'all' : stage)}
+                  className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm"
                   style={{
-                    backgroundColor: activeStageFilter === stage ? settings.color : 'rgba(255,255,255,0.05)',
+                    backgroundColor: isActive ? `${settings.color}66` : 'rgba(255,255,255,0.05)',
                   }}
                 >
                   {settings.label} ({count})
