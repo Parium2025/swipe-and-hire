@@ -73,10 +73,13 @@ const getActivityDescription = (activity: CandidateActivity) => {
 const formatTime = (date: string) => {
   const distance = formatDistanceToNow(new Date(date), { addSuffix: true, locale: sv });
   
-  // Remove "ungefär" and "mindre än" prefixes
-  let formatted = distance
-    .replace(/ungefär /g, '')
-    .replace(/mindre än /g, '<');
+  // Handle "mindre än en minut sedan" -> "0 minuter sedan"
+  if (distance.includes('mindre än')) {
+    return '0 minuter sedan';
+  }
+  
+  // Remove "ungefär" prefix
+  let formatted = distance.replace(/ungefär /g, '');
   
   // Convert Swedish number words to digits (order matters - longer words first)
   const replacements: [RegExp, string][] = [
