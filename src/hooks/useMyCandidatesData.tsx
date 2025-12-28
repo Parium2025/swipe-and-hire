@@ -170,19 +170,18 @@ export function useMyCandidatesData() {
     staleTime: 2 * 60 * 1000,
   });
 
-  // Real-time subscription for my_candidates changes
+  // Real-time subscription for my_candidates changes (all users for team sync)
   useEffect(() => {
     if (!user) return;
 
     const channel = supabase
-      .channel(`my-candidates-realtime-${user.id}`)
+      .channel('my-candidates-team-sync')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'my_candidates',
-          filter: `recruiter_id=eq.${user.id}`,
         },
         (payload: any) => {
           // Don't apply realtime changes during drag/drop optimistic updates
@@ -191,9 +190,10 @@ export function useMyCandidatesData() {
           // For the common case (stage change), update cache in-place to avoid
           // refetch jitter that makes drag/drop feel "laggy".
           if (payload?.eventType === 'UPDATE' && payload?.new?.id) {
-            const next = payload.new as { id: string; stage?: CandidateStage };
+            const next = payload.new as { id: string; stage?: CandidateStage; recruiter_id?: string };
 
-            if (next.stage) {
+            // Only update if it's the current user's candidate
+            if (next.recruiter_id === user.id && next.stage) {
               queryClient.setQueryData(
                 ['my-candidates', user.id],
                 (old: MyCandidateData[] | undefined) => {
@@ -206,6 +206,7 @@ export function useMyCandidatesData() {
           }
 
           // Fallback: refetch for other changes (insert/delete/unknown updates)
+          // This catches changes made by colleagues that affect shared data
           queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
         }
       )
