@@ -73,25 +73,42 @@ const getActivityDescription = (activity: CandidateActivity) => {
 const formatTime = (date: string) => {
   const distance = formatDistanceToNow(new Date(date), { addSuffix: true, locale: sv });
   
-  // Convert Swedish number words to digits
-  const wordToNumber: Record<string, string> = {
-    'en': '1', 'ett': '1', 'två': '2', 'tre': '3', 'fyra': '4', 'fem': '5',
-    'sex': '6', 'sju': '7', 'åtta': '8', 'nio': '9', 'tio': '10',
-    'elva': '11', 'tolv': '12', 'tretton': '13', 'fjorton': '14', 'femton': '15',
-    'sexton': '16', 'sjutton': '17', 'arton': '18', 'nitton': '19', 'tjugo': '20',
-    'trettio': '30', 'fyrtio': '40', 'femtio': '50'
-  };
-  
-  // Replace "ungefär X" with just the number, and convert words to digits
+  // Remove "ungefär" and "mindre än" prefixes
   let formatted = distance
     .replace(/ungefär /g, '')
     .replace(/mindre än /g, '<');
   
-  // Replace word numbers with digits
-  Object.entries(wordToNumber).forEach(([word, num]) => {
-    const regex = new RegExp(`\\b${word}\\b`, 'gi');
-    formatted = formatted.replace(regex, num);
-  });
+  // Convert Swedish number words to digits (order matters - longer words first)
+  const replacements: [RegExp, string][] = [
+    [/\btjugo\b/gi, '20'],
+    [/\btrettio\b/gi, '30'],
+    [/\bfyrtio\b/gi, '40'],
+    [/\bfemtio\b/gi, '50'],
+    [/\bnitton\b/gi, '19'],
+    [/\barton\b/gi, '18'],
+    [/\bsjutton\b/gi, '17'],
+    [/\bsexton\b/gi, '16'],
+    [/\bfemton\b/gi, '15'],
+    [/\bfjorton\b/gi, '14'],
+    [/\btretton\b/gi, '13'],
+    [/\btolv\b/gi, '12'],
+    [/\belva\b/gi, '11'],
+    [/\btio\b/gi, '10'],
+    [/\bnio\b/gi, '9'],
+    [/\båtta\b/gi, '8'],
+    [/\bsju\b/gi, '7'],
+    [/\bsex\b/gi, '6'],
+    [/\bfem\b/gi, '5'],
+    [/\bfyra\b/gi, '4'],
+    [/\btre\b/gi, '3'],
+    [/\btvå\b/gi, '2'],
+    [/\bett\b/gi, '1'],
+    [/\ben\b/gi, '1'],
+  ];
+  
+  for (const [regex, replacement] of replacements) {
+    formatted = formatted.replace(regex, replacement);
+  }
   
   return formatted;
 };
