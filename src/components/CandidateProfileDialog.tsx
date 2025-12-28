@@ -454,7 +454,7 @@ export const CandidateProfileDialog = ({
       if (error) throw error;
       
       // Also delete related note activities
-      deleteNoteActivities.mutate({ applicantId: application.applicant_id });
+      await deleteNoteActivities.mutateAsync({ applicantId: application.applicant_id });
       
       toast.success('Anteckning borttagen');
       setNotes(notes.filter(n => n.id !== noteId));
