@@ -105,7 +105,8 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
     const date = new Date(activity.created_at).toLocaleDateString('sv-SE', {
       weekday: 'long',
       day: 'numeric',
-      month: 'short',
+      month: 'long',
+      year: 'numeric',
     });
     if (!groups[date]) {
       groups[date] = [];
