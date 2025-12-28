@@ -72,11 +72,13 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
     colorDebounceRef.current = setTimeout(async () => {
       try {
         await updateStageSetting.mutateAsync({ stageKey, color });
-        // Only clear live color AFTER the save is complete
-        setLiveColor(null);
-        onLiveColorChange?.(null);
+        // Don't clear liveColor here - let React Query update handle it naturally
+        // The liveColor will be cleared when the dropdown closes or user picks another color
       } catch (error) {
         toast.error('Kunde inte uppdatera färg');
+        // On error, revert to saved color
+        setLiveColor(null);
+        onLiveColorChange?.(null);
       }
     }, 500);
   };
@@ -156,7 +158,7 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
               <span className="flex-1">Välj färg</span>
               <div 
                 className="w-5 h-5 rounded-full border border-white/30 ml-2"
-                style={{ backgroundColor: displayColor }}
+                style={{ backgroundColor: `${displayColor}99` }}
               />
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
