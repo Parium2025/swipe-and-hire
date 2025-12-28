@@ -135,7 +135,7 @@ export function CandidatesTable({
               return (
                 <TableRow
                   key={application.id}
-                  className="group border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-all duration-150 active:bg-white/10 active:scale-[0.99] origin-center"
+                  className="group border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-all duration-150 active:bg-white/10"
                   onClick={() => handleRowClick(application)}
                 >
                   <TableCell>
