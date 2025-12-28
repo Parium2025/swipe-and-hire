@@ -1030,9 +1030,9 @@ const MyCandidates = () => {
             >
               Alla ({stats.total})
             </button>
-            {stageOrder.map(stage => {
-              const settings = stageConfig[stage];
-              const count = candidatesByStage[stage].length;
+            {activeStageOrder.map(stage => {
+              const settings = activeStageConfig[stage];
+              const count = candidatesByStage[stage]?.length || 0;
               const isActive = activeStageFilter === stage;
               return (
                 <button
@@ -1040,14 +1040,15 @@ const MyCandidates = () => {
                   onClick={() => setActiveStageFilter(isActive ? 'all' : stage)}
                   className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm"
                   style={{
-                    backgroundColor: isActive ? `${settings.color}66` : 'rgba(255,255,255,0.05)',
+                    backgroundColor: isActive ? `${settings?.color}66` : 'rgba(255,255,255,0.05)',
                   }}
                 >
-                  {settings.label} ({count})
+                  {settings?.label} ({count})
                 </button>
               );
             })}
-            <CreateStageDialog />
+            {/* Only show create stage button for own list */}
+            {!isViewingColleague && <CreateStageDialog />}
           </div>
 
           {/* Search results info */}
@@ -1091,11 +1092,12 @@ const MyCandidates = () => {
               <StageColumn
                 key={stage}
                 stage={stage}
-                candidates={filteredCandidatesByStage[stage]}
+                candidates={filteredCandidatesByStage[stage] || []}
                 onMoveCandidate={handleMoveCandidate}
                 onRemoveCandidate={handleRemoveCandidate}
                 onOpenProfile={handleOpenProfile}
-                stageSettings={stageConfig[stage]}
+                stageSettings={activeStageConfig[stage] || { label: stage, color: '#6366F1', iconName: 'flag' }}
+                isReadOnly={isViewingColleague}
               />
             ))}
           </div>
