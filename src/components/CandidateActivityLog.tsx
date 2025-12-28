@@ -76,35 +76,37 @@ const formatTime = (date: string) => {
     return '0 minuter sedan';
   }
   
-  // Remove "ungefär" prefix
-  let formatted = distance.replace(/ungefär /g, '');
+  // Remove "ungefär" and "för" prefixes
+  let formatted = distance
+    .replace(/ungefär /gi, '')
+    .replace(/^för /gi, '');
   
   // Convert Swedish number words to digits (order matters - longer words first)
   const replacements: [RegExp, string][] = [
-    [/\btjugo\b/gi, '20'],
-    [/\btrettio\b/gi, '30'],
-    [/\bfyrtio\b/gi, '40'],
-    [/\bfemtio\b/gi, '50'],
-    [/\bnitton\b/gi, '19'],
-    [/\barton\b/gi, '18'],
-    [/\bsjutton\b/gi, '17'],
-    [/\bsexton\b/gi, '16'],
-    [/\bfemton\b/gi, '15'],
-    [/\bfjorton\b/gi, '14'],
-    [/\btretton\b/gi, '13'],
-    [/\btolv\b/gi, '12'],
-    [/\belva\b/gi, '11'],
-    [/\btio\b/gi, '10'],
-    [/\bnio\b/gi, '9'],
-    [/\båtta\b/gi, '8'],
-    [/\bsju\b/gi, '7'],
-    [/\bsex\b/gi, '6'],
-    [/\bfem\b/gi, '5'],
-    [/\bfyra\b/gi, '4'],
-    [/\btre\b/gi, '3'],
-    [/\btvå\b/gi, '2'],
-    [/\bett\b/gi, '1'],
-    [/\ben\b/gi, '1'],
+    [/tjugo/gi, '20'],
+    [/trettio/gi, '30'],
+    [/fyrtio/gi, '40'],
+    [/femtio/gi, '50'],
+    [/nitton/gi, '19'],
+    [/arton/gi, '18'],
+    [/sjutton/gi, '17'],
+    [/sexton/gi, '16'],
+    [/femton/gi, '15'],
+    [/fjorton/gi, '14'],
+    [/tretton/gi, '13'],
+    [/tolv/gi, '12'],
+    [/elva/gi, '11'],
+    [/tio/gi, '10'],
+    [/nio/gi, '9'],
+    [/åtta/gi, '8'],
+    [/sju/gi, '7'],
+    [/sex/gi, '6'],
+    [/fem/gi, '5'],
+    [/fyra/gi, '4'],
+    [/tre/gi, '3'],
+    [/två/gi, '2'],
+    [/ett/gi, '1'],
+    [/en /gi, '1 '],
   ];
   
   for (const [regex, replacement] of replacements) {
