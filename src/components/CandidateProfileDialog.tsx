@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -134,6 +135,7 @@ export const CandidateProfileDialog = ({
   const [savingNote, setSavingNote] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editingNoteText, setEditingNoteText] = useState('');
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const [cvOpen, setCvOpen] = useState(false);
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -451,10 +453,15 @@ export const CandidateProfileDialog = ({
       if (error) throw error;
       toast.success('Anteckning borttagen');
       setNotes(notes.filter(n => n.id !== noteId));
+      setDeletingNoteId(null);
     } catch (error) {
       console.error('Error deleting note:', error);
       toast.error('Kunde inte ta bort anteckning');
     }
+  };
+
+  const confirmDeleteNote = (noteId: string) => {
+    setDeletingNoteId(noteId);
   };
 
   const startEditingNote = (note: CandidateNote) => {
@@ -998,7 +1005,7 @@ export const CandidateProfileDialog = ({
                                     <Pencil className="h-3 w-3 text-white/50 hover:text-white" />
                                   </button>
                                   <button
-                                    onClick={() => deleteNote(note.id)}
+                                    onClick={() => confirmDeleteNote(note.id)}
                                     className="p-0.5 hover:bg-white/10 rounded"
                                   >
                                     <Trash2 className="h-3 w-3 text-white/50 hover:text-red-400" />
@@ -1035,6 +1042,29 @@ export const CandidateProfileDialog = ({
         )}
       </DialogContent>
     </Dialog>
+
+    {/* Delete note confirmation dialog */}
+    <AlertDialog open={!!deletingNoteId} onOpenChange={(open) => !open && setDeletingNoteId(null)}>
+      <AlertDialogContent className="bg-slate-900 border-white/10">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-white">Ta bort anteckning?</AlertDialogTitle>
+          <AlertDialogDescription className="text-white/70">
+            Är du säker på att du vill ta bort denna anteckning? Detta kan inte ångras.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+            Avbryt
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={() => deletingNoteId && deleteNote(deletingNoteId)}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            Ta bort
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </>
   );
 };
