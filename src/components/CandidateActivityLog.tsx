@@ -43,7 +43,7 @@ const getActivityDescription = (activity: CandidateActivity) => {
           <span className="font-medium text-white">{name}</span>
           <span className="text-white"> ändrade betyg från </span>
           <span className="text-white">{oldRating} </span>
-          <span className="text-white">★</span>
+          <span className="text-yellow-400">★</span>
           <span className="text-white"> till </span>
           <span className="text-white">{newRating} </span>
           <span className="text-yellow-400">★</span>
