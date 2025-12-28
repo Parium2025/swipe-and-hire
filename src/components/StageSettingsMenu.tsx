@@ -131,35 +131,21 @@ export function StageSettingsMenu({ stageKey, onDelete }: StageSettingsMenuProps
             Byt namn
           </DropdownMenuItem>
           
-          {/* Color submenu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="cursor-pointer">
-              <Palette className="h-4 w-4 mr-2" />
-              Välj färg
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <div className="grid grid-cols-5 gap-1 p-2">
-                  {AVAILABLE_COLORS.map((color) => (
-                    <button
-                      key={color.value}
-                      onClick={() => handleColorChange(color.value)}
-                      className="w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 relative"
-                      style={{ 
-                        backgroundColor: color.value,
-                        borderColor: currentConfig.color === color.value ? 'white' : 'transparent'
-                      }}
-                      title={color.label}
-                    >
-                      {currentConfig.color === color.value && (
-                        <Check className="h-3 w-3 text-white absolute inset-0 m-auto" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+          {/* Color picker */}
+          <DropdownMenuItem 
+            className="cursor-pointer"
+            onSelect={(e) => e.preventDefault()}
+          >
+            <Palette className="h-4 w-4 mr-2" />
+            <span className="flex-1">Välj färg</span>
+            <input
+              type="color"
+              value={currentConfig.color}
+              onChange={(e) => handleColorChange(e.target.value)}
+              className="w-6 h-6 rounded cursor-pointer border-0 p-0"
+              style={{ backgroundColor: 'transparent' }}
+            />
+          </DropdownMenuItem>
 
           {/* Icon submenu */}
           <DropdownMenuSub>
