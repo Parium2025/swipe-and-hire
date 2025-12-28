@@ -71,7 +71,29 @@ const getActivityDescription = (activity: CandidateActivity) => {
 };
 
 const formatTime = (date: string) => {
-  return formatDistanceToNow(new Date(date), { addSuffix: true, locale: sv });
+  const distance = formatDistanceToNow(new Date(date), { addSuffix: true, locale: sv });
+  
+  // Convert Swedish number words to digits
+  const wordToNumber: Record<string, string> = {
+    'en': '1', 'ett': '1', 'två': '2', 'tre': '3', 'fyra': '4', 'fem': '5',
+    'sex': '6', 'sju': '7', 'åtta': '8', 'nio': '9', 'tio': '10',
+    'elva': '11', 'tolv': '12', 'tretton': '13', 'fjorton': '14', 'femton': '15',
+    'sexton': '16', 'sjutton': '17', 'arton': '18', 'nitton': '19', 'tjugo': '20',
+    'trettio': '30', 'fyrtio': '40', 'femtio': '50'
+  };
+  
+  // Replace "ungefär X" with just the number, and convert words to digits
+  let formatted = distance
+    .replace(/ungefär /g, '')
+    .replace(/mindre än /g, '<');
+  
+  // Replace word numbers with digits
+  Object.entries(wordToNumber).forEach(([word, num]) => {
+    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+    formatted = formatted.replace(regex, num);
+  });
+  
+  return formatted;
 };
 
 export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps) {
