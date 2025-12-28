@@ -100,10 +100,34 @@ export function useCandidateActivities(applicantId: string | null) {
     },
   });
 
+  const deleteNoteActivities = useMutation({
+    mutationFn: async ({
+      applicantId,
+    }: {
+      applicantId: string;
+    }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      // Delete all note-related activities for this applicant by this user
+      const { error } = await supabase
+        .from('candidate_activities')
+        .delete()
+        .eq('applicant_id', applicantId)
+        .eq('user_id', user.id)
+        .in('activity_type', ['note_added', 'note_edited']);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['candidate-activities', variables.applicantId] });
+    },
+  });
+
   return {
     activities,
     isLoading,
     error,
     logActivity,
+    deleteNoteActivities,
   };
 }

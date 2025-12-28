@@ -152,7 +152,7 @@ export const CandidateProfileDialog = ({
   const [generatingSummary, setGeneratingSummary] = useState(false);
 
   // Activity logging
-  const { logActivity } = useCandidateActivities(application?.applicant_id || null);
+  const { logActivity, deleteNoteActivities } = useCandidateActivities(application?.applicant_id || null);
 
   // Determine the active application (selected job or default)
   const activeApplication = useMemo(() => {
@@ -444,6 +444,7 @@ export const CandidateProfileDialog = ({
   };
 
   const deleteNote = async (noteId: string) => {
+    if (!application) return;
     try {
       const { error } = await supabase
         .from('candidate_notes')
@@ -451,6 +452,10 @@ export const CandidateProfileDialog = ({
         .eq('id', noteId);
 
       if (error) throw error;
+      
+      // Also delete related note activities
+      deleteNoteActivities.mutate({ applicantId: application.applicant_id });
+      
       toast.success('Anteckning borttagen');
       setNotes(notes.filter(n => n.id !== noteId));
       setDeletingNoteId(null);
