@@ -58,13 +58,8 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
-
-const STAGE_ICONS = {
-  to_contact: Phone,
-  interview: Calendar,
-  offer: Gift,
-  hired: PartyPopper,
-};
+import { useStageSettings, getIconByName } from '@/hooks/useStageSettings';
+import { StageSettingsMenu } from '@/components/StageSettingsMenu';
 
 const STAGE_ORDER: CandidateStage[] = ['to_contact', 'interview', 'offer', 'hired'];
 
@@ -239,11 +234,11 @@ interface StageColumnProps {
   onMoveCandidate: (id: string, stage: CandidateStage) => void;
   onRemoveCandidate: (candidate: MyCandidateData) => void;
   onOpenProfile: (candidate: MyCandidateData) => void;
+  stageSettings: { label: string; color: string; iconName: string };
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile }: Omit<StageColumnProps, 'isOver'>) => {
-  const config = STAGE_CONFIG[stage];
-  const Icon = STAGE_ICONS[stage];
+const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings }: Omit<StageColumnProps, 'isOver'>) => {
+  const Icon = getIconByName(stageSettings.iconName);
 
   // Use useDroppable's own isOver for accurate column-level detection
   const { setNodeRef, isOver } = useDroppable({
@@ -253,16 +248,22 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors"
+      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors group"
       style={{ minHeight: 'calc(100vh - 280px)' }}
     >
-      <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? `ring-2 ring-inset ${config.hoverRing}` : ''}`}>
+      <div 
+        className={`rounded-md px-2 py-1.5 mb-2 transition-all ${isOver ? 'ring-2 ring-inset ring-white/40' : ''}`}
+        style={{ backgroundColor: stageSettings.color }}
+      >
         <div className="flex items-center gap-1.5">
-          <Icon className="h-3.5 w-3.5" />
-          <span className="font-medium text-xs">{config.label}</span>
-          <span className="ml-auto bg-white/20 text-white/90 text-[10px] px-1.5 py-0.5 rounded-full">
+          <Icon className="h-3.5 w-3.5 text-white" />
+          <span className="font-medium text-xs text-white">{stageSettings.label}</span>
+          <span className="bg-white/20 text-white/90 text-[10px] px-1.5 py-0.5 rounded-full">
             {candidates.length}
           </span>
+          <div className="ml-auto">
+            <StageSettingsMenu stageKey={stage} />
+          </div>
         </div>
       </div>
 
@@ -300,6 +301,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
 
 const MyCandidates = () => {
   const { user } = useAuth();
+  const { stageConfig } = useStageSettings();
   
   // Local state for candidates - like JobDetails pattern
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
@@ -896,19 +898,18 @@ const MyCandidates = () => {
               Alla ({stats.total})
             </button>
             {STAGE_ORDER.map(stage => {
-              const config = STAGE_CONFIG[stage];
+              const settings = stageConfig[stage];
               const count = candidatesByStage[stage].length;
               return (
                 <button
                   key={stage}
                   onClick={() => setActiveStageFilter(activeStageFilter === stage ? 'all' : stage)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
-                    activeStageFilter === stage
-                      ? config.color
-                      : 'bg-white/5 text-white hover:bg-white/10 hover:text-white'
-                  }`}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white`}
+                  style={{
+                    backgroundColor: activeStageFilter === stage ? settings.color : 'rgba(255,255,255,0.05)',
+                  }}
                 >
-                  {config.label} ({count})
+                  {settings.label} ({count})
                 </button>
               );
             })}
@@ -959,6 +960,7 @@ const MyCandidates = () => {
                 onMoveCandidate={handleMoveCandidate}
                 onRemoveCandidate={handleRemoveCandidate}
                 onOpenProfile={handleOpenProfile}
+                stageSettings={stageConfig[stage]}
               />
             ))}
           </div>

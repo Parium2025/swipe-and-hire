@@ -1247,6 +1247,39 @@ export type Database = {
           },
         ]
       }
+      user_stage_settings: {
+        Row: {
+          color: string | null
+          created_at: string
+          custom_label: string | null
+          icon_name: string | null
+          id: string
+          stage_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          custom_label?: string | null
+          icon_name?: string | null
+          id?: string
+          stage_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          custom_label?: string | null
+          icon_name?: string | null
+          id?: string
+          stage_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
