@@ -1163,7 +1163,16 @@ const MyCandidates = () => {
             },
           }}
         >
-          <div className={`flex gap-4 overflow-x-auto pb-4 pt-2 px-2 ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} style={{ height: 'calc(100vh - 300px)' }}>
+          <div 
+            className={`flex gap-4 pb-4 pt-2 px-2 ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} 
+            style={{ 
+              height: 'calc(100vh - 300px)',
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehaviorX: 'contain',
+            }}
+          >
             {stagesToDisplay.map(stage => (
               <StageColumn
                 key={stage}
