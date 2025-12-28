@@ -948,79 +948,100 @@ export const CandidateProfileDialog = ({
                   ) : notes.length === 0 ? (
                     <p className="text-xs text-white text-center py-4">Inga anteckningar ännu</p>
                   ) : (
-                    <div className="space-y-2">
-                      {notes.map((note) => (
-                        <div 
-                          key={note.id}
-                          className="bg-white/5 rounded-lg p-2.5 group relative"
-                        >
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-[10px] font-medium text-white">
-                              {note.author_name || 'Okänd'}
-                            </span>
-                          </div>
-                          
-                          {editingNoteId === note.id ? (
+                    <div className="space-y-3">
+                      {(() => {
+                        // Group notes by date
+                        const groupedNotes = notes.reduce((groups, note) => {
+                          const date = new Date(note.created_at).toLocaleDateString('sv-SE', {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          });
+                          if (!groups[date]) {
+                            groups[date] = [];
+                          }
+                          groups[date].push(note);
+                          return groups;
+                        }, {} as Record<string, typeof notes>);
+
+                        return Object.entries(groupedNotes).map(([date, dateNotes]) => (
+                          <div key={date}>
+                            <p className="text-xs text-white mb-2 capitalize">{date}</p>
                             <div className="space-y-2">
-                              <Textarea
-                                value={editingNoteText}
-                                onChange={(e) => setEditingNoteText(e.target.value)}
-                                className="min-h-[60px] text-xs bg-white/10 border-white/20 text-white resize-none"
-                                placeholder="Skriv din anteckning..."
-                              />
-                              <div className="flex gap-1.5">
-                                <Button
-                                  size="sm"
-                                  onClick={updateNote}
-                                  disabled={savingNote || !editingNoteText.trim()}
-                                  className="h-6 text-[10px] px-2 bg-green-600 hover:bg-green-700"
+                              {dateNotes.map((note) => (
+                                <div 
+                                  key={note.id}
+                                  className="bg-white/5 rounded-lg p-2.5 group relative"
                                 >
-                                  <Check className="h-3 w-3 mr-1" />
-                                  Spara
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={cancelEditingNote}
-                                  className="h-6 text-[10px] px-2 text-white/70 hover:text-white hover:bg-white/10"
-                                >
-                                  <X className="h-3 w-3 mr-1" />
-                                  Avbryt
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <p className="text-xs text-white whitespace-pre-wrap pr-10 leading-relaxed">{note.note}</p>
-                              <p className="text-[10px] text-white/70 mt-1">
-                                {new Date(note.created_at).toLocaleDateString('sv-SE', {
-                                  day: 'numeric',
-                                  month: 'long',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </p>
-                              {note.employer_id === user?.id && (
-                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                  <button
-                                    onClick={() => startEditingNote(note)}
-                                    className="p-0.5 hover:bg-white/10 rounded"
-                                  >
-                                    <Pencil className="h-3 w-3 text-white/50 hover:text-white" />
-                                  </button>
-                                  <button
-                                    onClick={() => confirmDeleteNote(note.id)}
-                                    className="p-0.5 hover:bg-white/10 rounded"
-                                  >
-                                    <Trash2 className="h-3 w-3 text-white/50 hover:text-red-400" />
-                                  </button>
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <span className="text-[10px] font-medium text-white">
+                                      {note.author_name || 'Okänd'}
+                                    </span>
+                                  </div>
+                                  
+                                  {editingNoteId === note.id ? (
+                                    <div className="space-y-2">
+                                      <Textarea
+                                        value={editingNoteText}
+                                        onChange={(e) => setEditingNoteText(e.target.value)}
+                                        className="min-h-[60px] text-xs bg-white/10 border-white/20 text-white resize-none"
+                                        placeholder="Skriv din anteckning..."
+                                      />
+                                      <div className="flex gap-1.5">
+                                        <Button
+                                          size="sm"
+                                          onClick={updateNote}
+                                          disabled={savingNote || !editingNoteText.trim()}
+                                          className="h-6 text-[10px] px-2 bg-green-600 hover:bg-green-700"
+                                        >
+                                          <Check className="h-3 w-3 mr-1" />
+                                          Spara
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={cancelEditingNote}
+                                          className="h-6 text-[10px] px-2 text-white/70 hover:text-white hover:bg-white/10"
+                                        >
+                                          <X className="h-3 w-3 mr-1" />
+                                          Avbryt
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <p className="text-xs text-white whitespace-pre-wrap pr-10 leading-relaxed">{note.note}</p>
+                                      <p className="text-[10px] text-white/70 mt-1">
+                                        {new Date(note.created_at).toLocaleTimeString('sv-SE', {
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}
+                                      </p>
+                                      {note.employer_id === user?.id && (
+                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                          <button
+                                            onClick={() => startEditingNote(note)}
+                                            className="p-0.5 hover:bg-white/10 rounded"
+                                          >
+                                            <Pencil className="h-3 w-3 text-white/50 hover:text-white" />
+                                          </button>
+                                          <button
+                                            onClick={() => confirmDeleteNote(note.id)}
+                                            className="p-0.5 hover:bg-white/10 rounded"
+                                          >
+                                            <Trash2 className="h-3 w-3 text-white/50 hover:text-red-400" />
+                                          </button>
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
                                 </div>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      ))}
+                              ))}
+                            </div>
+                          </div>
+                        ));
+                      })()}
                     </div>
                   )}
                 </div>
