@@ -206,10 +206,10 @@ const CandidateCardContent = ({
       {/* Remove button - shows on hover with smooth animation */}
       <button
         onClick={(e) => { e.stopPropagation(); onRemove(); }}
-        className="absolute right-1 bottom-1 h-5 w-5 rounded-full bg-destructive/80 border border-destructive flex items-center justify-center
-          opacity-0 group-hover:opacity-100 transition-all duration-200 scale-90 group-hover:scale-100 hover:bg-destructive"
+        className="absolute right-1 bottom-1 p-1 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full
+          opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100"
       >
-        <Trash2 className="h-2.5 w-2.5 text-white" />
+        <Trash2 className="h-3 w-3" />
       </button>
     </div>
   );

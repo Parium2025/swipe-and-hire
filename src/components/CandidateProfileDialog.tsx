@@ -1027,18 +1027,18 @@ export const CandidateProfileDialog = ({
                                         })}
                                       </p>
                                       {note.employer_id === user?.id && (
-                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
+                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
                                           <button
                                             onClick={() => startEditingNote(note)}
-                                            className="h-6 w-6 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
+                                            className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
                                           >
-                                            <Pencil className="h-3 w-3 text-white" />
+                                            <Pencil className="h-3.5 w-3.5" />
                                           </button>
                                           <button
                                             onClick={() => confirmDeleteNote(note.id)}
-                                            className="h-6 w-6 rounded-full bg-destructive/80 border border-destructive flex items-center justify-center hover:bg-destructive transition-colors"
+                                            className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300"
                                           >
-                                            <Trash2 className="h-3 w-3 text-white" />
+                                            <Trash2 className="h-3.5 w-3.5" />
                                           </button>
                                         </div>
                                       )}
