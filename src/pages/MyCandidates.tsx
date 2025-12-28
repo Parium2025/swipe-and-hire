@@ -13,6 +13,8 @@ import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useColleagueCandidates } from '@/hooks/useColleagueCandidates';
 import { useColleagueStageSettings } from '@/hooks/useColleagueStageSettings';
+import { useCriteriaResultsForCandidates, CandidateCriteriaResults } from '@/hooks/useCriteriaResults';
+import { CriteriaResultsBadges } from '@/components/CriteriaResultsBadges';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,7 +41,8 @@ import {
   Plus,
   Users,
   ChevronDown,
-  Eye
+  Eye,
+  Sparkles
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -76,12 +79,14 @@ import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 import { useStageSettings, getIconByName, DEFAULT_STAGE_KEYS, CandidateStage } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
+import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 
 interface CandidateCardProps {
   candidate: MyCandidateData;
   onRemove: () => void;
   onOpenProfile: () => void;
   isDragging?: boolean;
+  criteriaResults?: CandidateCriteriaResults;
 }
 
 // Format time in compact way like Teamtailor
@@ -158,10 +163,12 @@ const CandidateCardContent = ({
   onRemove, 
   onOpenProfile,
   isDragging,
+  criteriaResults,
 }: CandidateCardProps) => {
   const initials = `${candidate.first_name?.[0] || ''}${candidate.last_name?.[0] || ''}`.toUpperCase() || '?';
   const isUnread = !candidate.viewed_at;
   const appliedTime = formatCompactTime(candidate.applied_at);
+  const hasCriteriaResults = criteriaResults && criteriaResults.results.length > 0 && criteriaResults.status === 'completed';
   
   return (
     <div 
@@ -202,6 +209,11 @@ const CandidateCardContent = ({
           )}
         </div>
       </div>
+
+      {/* Criteria results badges - show check/cross for each criterion */}
+      {hasCriteriaResults && (
+        <CriteriaResultsBadges results={criteriaResults} maxDisplay={3} />
+      )}
 
       {/* Remove button - shows on hover with smooth animation */}
       <button
@@ -417,6 +429,22 @@ const MyCandidates = () => {
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStageFilter, setActiveStageFilter] = useState<string | 'all'>('all');
+  
+  // Selection criteria dialog state
+  const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
+  const [selectedJobIdForCriteria, setSelectedJobIdForCriteria] = useState<string | null>(null);
+  
+  // Fetch criteria results for all candidates
+  const { data: criteriaResultsMap = {} } = useCriteriaResultsForCandidates(
+    displayedCandidates.map(c => ({ applicant_id: c.applicant_id, job_id: c.job_id }))
+  );
+  
+  // Helper to get criteria results for a specific candidate
+  const getCriteriaResultsForCandidate = useCallback((candidate: MyCandidateData) => {
+    if (!candidate.job_id) return undefined;
+    const key = `${candidate.job_id}-${candidate.applicant_id}`;
+    return criteriaResultsMap[key];
+  }, [criteriaResultsMap]);
   
   // Fetch colleague's candidates when switching
   useEffect(() => {
@@ -1200,6 +1228,21 @@ const MyCandidates = () => {
           </AlertDialogFooter>
         </AlertDialogContentNoFocus>
       </AlertDialog>
+
+      {/* Selection Criteria Dialog */}
+      {selectedJobIdForCriteria && (
+        <SelectionCriteriaDialog
+          open={criteriaDialogOpen}
+          onOpenChange={(open) => {
+            setCriteriaDialogOpen(open);
+            if (!open) setSelectedJobIdForCriteria(null);
+          }}
+          jobId={selectedJobIdForCriteria}
+          onActivate={(count) => {
+            toast.success(`${count} urvalskriterier aktiverade - AI börjar utvärdera kandidater`);
+          }}
+        />
+      )}
     </div>
   );
 };
