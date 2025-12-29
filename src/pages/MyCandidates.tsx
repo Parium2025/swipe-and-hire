@@ -299,11 +299,11 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
         className={`rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
         style={{ backgroundColor: `${displayColor}33` }}
       >
-        <div className="flex items-center gap-1.5">
-          <Icon className="h-3.5 w-3.5 text-white" />
-          <span className="font-medium text-xs text-white">{stageSettings.label}</span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
+          <span className="font-medium text-xs text-white truncate">{stageSettings.label}</span>
           <span 
-            className="text-white text-[10px] px-1.5 py-0.5 rounded-full"
+            className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}66` }}
           >
             {candidates.length}

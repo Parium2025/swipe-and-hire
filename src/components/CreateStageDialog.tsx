@@ -123,13 +123,13 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
           <div className="space-y-2 pt-2 flex flex-col items-center">
             <Label className="text-white self-start">Förhandsvisning</Label>
             <div 
-              className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-sm inline-flex items-center gap-2 transition-colors"
+              className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-sm inline-flex items-center gap-2 transition-colors max-w-full"
               style={{ backgroundColor: `${selectedColor}33` }}
             >
-              <IconComponent className="h-4 w-4 text-white" />
-              <span className="font-medium text-sm text-white">{label || 'Nytt steg'}</span>
+              <IconComponent className="h-4 w-4 text-white flex-shrink-0" />
+              <span className="font-medium text-sm text-white truncate max-w-[200px]">{label || 'Nytt steg'}</span>
               <span 
-                className="text-white text-[10px] px-1.5 py-0.5 rounded-full transition-colors"
+                className="text-white text-[10px] px-1.5 py-0.5 rounded-full transition-colors flex-shrink-0"
                 style={{ backgroundColor: `${selectedColor}66` }}
               >
                 0
