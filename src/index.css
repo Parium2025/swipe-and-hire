@@ -283,27 +283,27 @@ All colors MUST be HSL.
   }
 
   /* GLOBAL: Enhanced contrast for better visibility on low-quality displays */
-  /* Boost background opacity from white/5 to white/8 */
+  /* Boost background opacity from white/5 to white/10 */
   .bg-white\/5 {
-    background-color: rgba(255, 255, 255, 0.08) !important;
+    background-color: rgba(255, 255, 255, 0.10) !important;
   }
   
-  /* Boost ring/border opacity from white/10 to white/18 */
+  /* Boost ring/border opacity from white/10 to white/22 */
   .ring-white\/10 {
-    --tw-ring-color: rgba(255, 255, 255, 0.18) !important;
+    --tw-ring-color: rgba(255, 255, 255, 0.22) !important;
   }
   
   .border-white\/10 {
-    border-color: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
   }
   
-  /* Boost from white/20 to white/25 for better definition */
+  /* Boost from white/20 to white/28 for better definition */
   .border-white\/20 {
-    border-color: rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
   }
   
   .ring-white\/20 {
-    --tw-ring-color: rgba(255, 255, 255, 0.25) !important;
+    --tw-ring-color: rgba(255, 255, 255, 0.28) !important;
   }
 
   /* Mobile fullscreen support - extend under status bar */
