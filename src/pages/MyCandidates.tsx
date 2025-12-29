@@ -128,12 +128,11 @@ const StarRating = ({
 
 // Wrapper component for CandidateAvatar with inline video playback
 const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => {
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const hasVideo = candidate.is_profile_video && candidate.video_url;
   
   return (
     <div 
-      className="h-8 w-8 flex-shrink-0 relative [&>*:first-child]:h-8 [&>*:first-child]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
+      className="h-8 w-8 flex-shrink-0 [&>*:first-child]:h-8 [&>*:first-child]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
       onClick={hasVideo ? (e) => {
         // Prevent opening profile dialog when clicking on video - let ProfileVideo handle playback
         e.stopPropagation();
@@ -145,14 +144,8 @@ const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => 
         isProfileVideo={candidate.is_profile_video}
         firstName={candidate.first_name}
         lastName={candidate.last_name}
-        onPlayingChange={setIsVideoPlaying}
+        stopPropagation={!!hasVideo}
       />
-      {/* Large play overlay for video avatars - hidden when video is playing */}
-      {hasVideo && !isVideoPlaying && (
-        <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center pointer-events-none">
-          <Play className="h-4 w-4 text-white drop-shadow-lg fill-white" />
-        </div>
-      )}
     </div>
   );
 };
