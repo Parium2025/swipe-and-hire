@@ -11,7 +11,7 @@ interface JobTitleCellProps {
 
 export function JobTitleCell({ title, employmentType, className }: JobTitleCellProps) {
   return (
-    <div className={cn("flex flex-col gap-1 items-center w-full overflow-hidden max-w-[140px] mx-auto h-[64px] justify-center", className)}>
+    <div className={cn("flex flex-col gap-1 items-center w-full overflow-hidden max-w-[140px] mx-auto", className)}>
       {/* Max 2 lines with ellipsis and forced word break for long words */}
       <TruncatedText 
         text={title} 
