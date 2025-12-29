@@ -282,6 +282,30 @@ All colors MUST be HSL.
     color: rgb(255, 255, 255) !important;
   }
 
+  /* GLOBAL: Enhanced contrast for better visibility on low-quality displays */
+  /* Boost background opacity from white/5 to white/8 */
+  .bg-white\/5 {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+  }
+  
+  /* Boost ring/border opacity from white/10 to white/18 */
+  .ring-white\/10 {
+    --tw-ring-color: rgba(255, 255, 255, 0.18) !important;
+  }
+  
+  .border-white\/10 {
+    border-color: rgba(255, 255, 255, 0.18) !important;
+  }
+  
+  /* Boost from white/20 to white/25 for better definition */
+  .border-white\/20 {
+    border-color: rgba(255, 255, 255, 0.25) !important;
+  }
+  
+  .ring-white\/20 {
+    --tw-ring-color: rgba(255, 255, 255, 0.25) !important;
+  }
+
   /* Mobile fullscreen support - extend under status bar */
   html, body, #root {
     padding: 0 !important;
