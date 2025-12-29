@@ -85,11 +85,11 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
           </div>
 
           {/* Color picker and Icon picker side by side */}
-          <div className="flex gap-6">
+          <div className="flex gap-4">
             {/* Color picker */}
             <div className="space-y-2">
               <Label className="text-white">Färg</Label>
-              <div className="[&_.react-colorful]:w-[120px] [&_.react-colorful]:h-[120px]">
+              <div className="[&_.react-colorful]:w-[150px] [&_.react-colorful]:h-[150px]">
                 <HexColorPicker 
                   color={selectedColor} 
                   onChange={setSelectedColor}
@@ -100,7 +100,7 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
             {/* Icon picker */}
             <div className="flex-1 space-y-2">
               <Label className="text-white">Ikon</Label>
-              <div className="grid grid-cols-5 gap-0.5">
+              <div className="grid grid-cols-5 gap-px">
                 {AVAILABLE_ICONS.map(({ name, Icon, label: iconLabel }) => (
                   <button
                     key={name}
@@ -108,7 +108,7 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
                     className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${
                       selectedIcon === name 
                         ? 'bg-white/20 text-white' 
-                        : 'hover:bg-white/10 text-white/70'
+                        : 'hover:bg-white/10 text-white'
                     }`}
                     title={iconLabel}
                   >
@@ -119,9 +119,9 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
             </div>
           </div>
 
-          {/* Preview */}
-          <div className="space-y-2 pt-2">
-            <Label className="text-white">Förhandsvisning</Label>
+          {/* Preview - centered */}
+          <div className="space-y-2 pt-2 flex flex-col items-center">
+            <Label className="text-white self-start">Förhandsvisning</Label>
             <div 
               className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-sm inline-flex items-center gap-2 transition-colors"
               style={{ backgroundColor: `${selectedColor}33` }}
