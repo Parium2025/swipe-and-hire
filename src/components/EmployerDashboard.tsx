@@ -280,7 +280,7 @@ const EmployerDashboard = memo(() => {
                                 </Badge>
                               )
                             ) : (
-                              <Badge variant="glass" className="text-sm transition-all duration-300 bg-amber-500/60 border-amber-500/60 text-white group-hover:backdrop-brightness-90 hover:bg-amber-500/70 hover:backdrop-brightness-110">
+                              <Badge variant="glass" className="text-sm transition-all duration-300 bg-yellow-500/60 border-yellow-500/60 text-white group-hover:backdrop-brightness-90 hover:bg-yellow-500/70 hover:backdrop-brightness-110">
                                 Utkast
                               </Badge>
                             )}
