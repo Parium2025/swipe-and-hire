@@ -307,7 +307,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
               <TooltipTrigger asChild>
                 <span className="font-medium text-xs text-white truncate cursor-default">{stageSettings.label}</span>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-xs">
+              <TooltipContent side="top" className="max-w-xs">
                 <p>{stageSettings.label}</p>
               </TooltipContent>
             </Tooltip>
