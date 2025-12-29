@@ -34,9 +34,17 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
     }
   };
 
+  const isDraft = !job.is_active;
+
   return (
     <Card 
-      className="group bg-transparent touch-border-white shadow-none min-h-[120px] cursor-pointer transition-all duration-150 hover:bg-white/5 hover:border-white/50 active:scale-[0.98] active:bg-white/10"
+      className={`group bg-transparent touch-border-white shadow-none min-h-[120px] cursor-pointer transition-all duration-150 active:scale-[0.98] ${
+        jobIsExpired 
+          ? "hover:bg-red-500/10 hover:border-red-500/30 active:bg-red-500/15" 
+          : isDraft 
+            ? "hover:bg-amber-500/10 hover:border-amber-500/30 active:bg-amber-500/15"
+            : "hover:bg-white/5 hover:border-white/50 active:bg-white/10"
+      }`}
       onClick={handleCardClick}
     >
       <div className="p-3 space-y-2">
