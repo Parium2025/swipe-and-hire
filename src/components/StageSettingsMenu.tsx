@@ -238,6 +238,7 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 placeholder={defaultConfig?.label || 'Ange namn'}
+                maxLength={20}
                 className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
                 onKeyDown={(e) => e.key === 'Enter' && handleRename()}
               />
