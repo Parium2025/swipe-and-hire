@@ -79,7 +79,7 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="T.ex. Referenskontroll"
-              maxLength={50}
+              maxLength={20}
               className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               autoFocus
