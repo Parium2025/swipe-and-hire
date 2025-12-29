@@ -72,7 +72,7 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
         <div className="space-y-4 py-2">
           {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="new-stage-label" className="text-white/70">Namn</Label>
+            <Label htmlFor="new-stage-label" className="text-white">Namn</Label>
             <Input
               id="new-stage-label"
               value={label}
@@ -85,11 +85,11 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
           </div>
 
           {/* Color picker and Icon picker side by side */}
-          <div className="flex gap-4">
+          <div className="flex gap-6">
             {/* Color picker */}
             <div className="space-y-2">
-              <Label className="text-white/70">Färg</Label>
-              <div className="[&_.react-colorful]:w-[140px] [&_.react-colorful]:h-[140px]">
+              <Label className="text-white">Färg</Label>
+              <div className="[&_.react-colorful]:w-[120px] [&_.react-colorful]:h-[120px]">
                 <HexColorPicker 
                   color={selectedColor} 
                   onChange={setSelectedColor}
@@ -99,20 +99,20 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
 
             {/* Icon picker */}
             <div className="flex-1 space-y-2">
-              <Label className="text-white/70">Ikon</Label>
-              <div className="grid grid-cols-5 gap-1">
+              <Label className="text-white">Ikon</Label>
+              <div className="grid grid-cols-5 gap-0.5">
                 {AVAILABLE_ICONS.map(({ name, Icon, label: iconLabel }) => (
                   <button
                     key={name}
                     onClick={() => setSelectedIcon(name)}
-                    className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
+                    className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${
                       selectedIcon === name 
                         ? 'bg-white/20 text-white' 
                         : 'hover:bg-white/10 text-white/70'
                     }`}
                     title={iconLabel}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-3.5 w-3.5" />
                   </button>
                 ))}
               </div>
@@ -121,7 +121,7 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
 
           {/* Preview */}
           <div className="space-y-2 pt-2">
-            <Label className="text-white/70">Förhandsvisning</Label>
+            <Label className="text-white">Förhandsvisning</Label>
             <div 
               className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-sm inline-flex items-center gap-2 transition-colors"
               style={{ backgroundColor: `${selectedColor}33` }}
@@ -137,18 +137,18 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
             </div>
           </div>
         </div>
-        <DialogFooter className="pt-2">
+        <DialogFooter className="flex justify-between gap-2 pt-2">
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => setOpen(false)}
-            className="text-white/70 hover:text-white hover:bg-white/10"
+            className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
             Avbryt
           </Button>
           <Button
             onClick={handleCreate}
             disabled={!label.trim() || createCustomStage.isPending}
-            className="bg-primary hover:bg-primary/90"
+            className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
             Skapa
           </Button>
