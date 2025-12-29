@@ -85,11 +85,11 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
           </div>
 
           {/* Color picker and Icon picker side by side */}
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             {/* Color picker */}
             <div className="space-y-2">
               <Label className="text-white">Färg</Label>
-              <div className="[&_.react-colorful]:w-[150px] [&_.react-colorful]:h-[150px]">
+              <div className="[&_.react-colorful]:w-[170px] [&_.react-colorful]:h-[170px]">
                 <HexColorPicker 
                   color={selectedColor} 
                   onChange={setSelectedColor}
@@ -100,7 +100,7 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
             {/* Icon picker */}
             <div className="flex-1 space-y-2">
               <Label className="text-white">Ikon</Label>
-              <div className="grid grid-cols-5 gap-px">
+              <div className="grid grid-cols-5 gap-0">
                 {AVAILABLE_ICONS.map(({ name, Icon, label: iconLabel }) => (
                   <button
                     key={name}
