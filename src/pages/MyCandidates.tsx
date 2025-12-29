@@ -52,6 +52,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNow, differenceInDays, differenceInHours } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import {
@@ -301,7 +302,16 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
       >
         <div className="flex items-center gap-1.5 min-w-0">
           <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-          <span className="font-medium text-xs text-white truncate">{stageSettings.label}</span>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="font-medium text-xs text-white truncate cursor-default">{stageSettings.label}</span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs">
+                <p>{stageSettings.label}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <span 
             className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}66` }}
