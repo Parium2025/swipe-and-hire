@@ -1102,16 +1102,26 @@ const MyCandidates = () => {
               const count = candidatesByStage[stage]?.length || 0;
               const isActive = activeStageFilter === stage;
               return (
-                <button
-                  key={stage}
-                  onClick={() => setActiveStageFilter(isActive ? 'all' : stage)}
-                  className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm"
-                  style={{
-                    backgroundColor: isActive ? `${settings?.color}66` : 'rgba(255,255,255,0.05)',
-                  }}
-                >
-                  {settings?.label} ({count})
-                </button>
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        key={stage}
+                        onClick={() => setActiveStageFilter(isActive ? 'all' : stage)}
+                        className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[240px] min-w-0 inline-flex items-center gap-1"
+                        style={{
+                          backgroundColor: isActive ? `${settings?.color}66` : 'rgba(255,255,255,0.05)',
+                        }}
+                      >
+                        <span className="truncate min-w-0">{settings?.label}</span>
+                        <span className="flex-shrink-0">({count})</span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p>{settings?.label} ({count})</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               );
             })}
             
