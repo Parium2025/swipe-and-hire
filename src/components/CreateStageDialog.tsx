@@ -12,7 +12,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   useStageSettings, 
   AVAILABLE_ICONS, 
@@ -50,6 +49,8 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
     }
   };
 
+  const IconComponent = AVAILABLE_ICONS.find(i => i.name === selectedIcon)?.Icon || AVAILABLE_ICONS[0].Icon;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -64,30 +65,31 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="bg-card-parium border-white/20 sm:max-w-md max-h-[90vh] flex flex-col">
+      <DialogContent className="bg-card-parium border-white/20 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-white">Skapa nytt steg</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="flex-1 pr-4 -mr-4">
-          <div className="space-y-6 py-4">
-            {/* Name */}
-            <div className="space-y-2">
-              <Label htmlFor="new-stage-label" className="text-white/70">Namn</Label>
-              <Input
-                id="new-stage-label"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                placeholder="T.ex. Referenskontroll"
-                className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
-                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-                autoFocus
-              />
-            </div>
+        <div className="space-y-4 py-2">
+          {/* Name */}
+          <div className="space-y-2">
+            <Label htmlFor="new-stage-label" className="text-white/70">Namn</Label>
+            <Input
+              id="new-stage-label"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="T.ex. Referenskontroll"
+              className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
+              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+              autoFocus
+            />
+          </div>
 
+          {/* Color picker and Icon picker side by side */}
+          <div className="flex gap-4">
             {/* Color picker */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label className="text-white/70">Färg</Label>
-              <div className="flex justify-center">
+              <div className="[&_.react-colorful]:w-[140px] [&_.react-colorful]:h-[140px]">
                 <HexColorPicker 
                   color={selectedColor} 
                   onChange={setSelectedColor}
@@ -96,9 +98,9 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
             </div>
 
             {/* Icon picker */}
-            <div className="space-y-2">
+            <div className="flex-1 space-y-2">
               <Label className="text-white/70">Ikon</Label>
-              <div className="grid grid-cols-10 gap-1">
+              <div className="grid grid-cols-5 gap-1">
                 {AVAILABLE_ICONS.map(({ name, Icon, label: iconLabel }) => (
                   <button
                     key={name}
@@ -115,30 +117,27 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
                 ))}
               </div>
             </div>
+          </div>
 
-            {/* Preview */}
-            <div className="space-y-2">
-              <Label className="text-white/70">Förhandsvisning</Label>
-              <div 
-                className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-sm inline-flex items-center gap-2"
-                style={{ backgroundColor: `${selectedColor}33` }}
+          {/* Preview */}
+          <div className="space-y-2 pt-2">
+            <Label className="text-white/70">Förhandsvisning</Label>
+            <div 
+              className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-sm inline-flex items-center gap-2 transition-colors"
+              style={{ backgroundColor: `${selectedColor}33` }}
+            >
+              <IconComponent className="h-4 w-4 text-white" />
+              <span className="font-medium text-sm text-white">{label || 'Nytt steg'}</span>
+              <span 
+                className="text-white text-[10px] px-1.5 py-0.5 rounded-full transition-colors"
+                style={{ backgroundColor: `${selectedColor}66` }}
               >
-                {(() => {
-                  const IconComponent = AVAILABLE_ICONS.find(i => i.name === selectedIcon)?.Icon || AVAILABLE_ICONS[0].Icon;
-                  return <IconComponent className="h-4 w-4 text-white" />;
-                })()}
-                <span className="font-medium text-sm text-white">{label || 'Nytt steg'}</span>
-                <span 
-                  className="text-white text-[10px] px-1.5 py-0.5 rounded-full"
-                  style={{ backgroundColor: `${selectedColor}66` }}
-                >
-                  0
-                </span>
-              </div>
+                0
+              </span>
             </div>
           </div>
-        </ScrollArea>
-        <DialogFooter className="pt-4">
+        </div>
+        <DialogFooter className="pt-2">
           <Button
             variant="ghost"
             onClick={() => setOpen(false)}
