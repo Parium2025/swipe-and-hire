@@ -16,9 +16,13 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground",
         outline: "text-foreground",
         glass:
-          "bg-white/10 backdrop-blur-[2px] border-white/25 text-white",
+          "bg-transparent border-transparent text-white/80",
         glassDestructive:
-          "bg-red-500/40 backdrop-blur-[2px] border-red-400/50 text-red-200",
+          "bg-transparent border-transparent text-red-400",
+        glassWarning:
+          "bg-transparent border-transparent text-amber-400",
+        glassSuccess:
+          "bg-transparent border-transparent text-emerald-400",
       },
     },
     defaultVariants: {
