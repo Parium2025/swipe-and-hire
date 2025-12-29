@@ -254,13 +254,19 @@ const EmployerDashboard = memo(() => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    pageJobs.map((job) => (
+                    pageJobs.map((job) => {
+                      const isExpired = job.is_active && isJobExpiredCheck(job.created_at, job.expires_at);
+                      const isDraft = !job.is_active;
+                      
+                      return (
                       <TableRow 
                         key={job.id}
                         className={`group border-white/10 cursor-pointer transition-colors ${
-                          job.is_active 
-                            ? "hover:bg-white/5" 
-                            : "hover:bg-amber-500/10"
+                          isExpired 
+                            ? "hover:bg-red-500/10" 
+                            : isDraft 
+                              ? "hover:bg-amber-500/10"
+                              : "hover:bg-white/5"
                         }`}
                         onClick={() => handleJobRowClick(job as JobPosting)}
                       >
@@ -367,7 +373,8 @@ const EmployerDashboard = memo(() => {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))
+                    );})
+
                   )}
                 </TableBody>
               </Table>
