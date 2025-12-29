@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Check } from 'lucide-react';
+import { HexColorPicker } from 'react-colorful';
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
   const [label, setLabel] = useState('');
   const [selectedColor, setSelectedColor] = useState(AVAILABLE_COLORS[4].value); // Red
   const [selectedIcon, setSelectedIcon] = useState('flag');
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   const handleCreate = async () => {
     if (!label.trim()) return;
@@ -42,14 +44,21 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
       setLabel('');
       setSelectedColor(AVAILABLE_COLORS[4].value);
       setSelectedIcon('flag');
+      setShowColorPicker(false);
       toast.success('Nytt steg skapat');
     } catch (error) {
       toast.error('Kunde inte skapa steg');
     }
   };
 
+  // Check if selected color is one of the presets
+  const isPresetColor = AVAILABLE_COLORS.some(c => c.value === selectedColor);
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) setShowColorPicker(false);
+    }}>
       <DialogTrigger asChild>
         {trigger || (
           <Button
@@ -88,7 +97,10 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
               {AVAILABLE_COLORS.map((color) => (
                 <button
                   key={color.value}
-                  onClick={() => setSelectedColor(color.value)}
+                  onClick={() => {
+                    setSelectedColor(color.value);
+                    setShowColorPicker(false);
+                  }}
                   className="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 relative"
                   style={{ 
                     backgroundColor: color.value,
@@ -101,7 +113,34 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
                   )}
                 </button>
               ))}
+              {/* Custom color button */}
+              <button
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 relative overflow-hidden ${
+                  showColorPicker || (!isPresetColor && selectedColor) ? 'border-white' : 'border-transparent'
+                }`}
+                style={{ 
+                  background: !isPresetColor && selectedColor 
+                    ? selectedColor 
+                    : 'conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)'
+                }}
+                title="Välj egen färg"
+              >
+                {!isPresetColor && selectedColor && (
+                  <Check className="h-4 w-4 text-white absolute inset-0 m-auto drop-shadow-md" />
+                )}
+              </button>
             </div>
+            
+            {/* HexColorPicker */}
+            {showColorPicker && (
+              <div className="mt-3 flex justify-center">
+                <HexColorPicker 
+                  color={selectedColor} 
+                  onChange={setSelectedColor}
+                />
+              </div>
+            )}
           </div>
 
           {/* Icon picker */}
