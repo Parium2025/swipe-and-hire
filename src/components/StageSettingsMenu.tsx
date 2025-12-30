@@ -233,12 +233,12 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
               )}
             </DropdownMenuItem>
           ) : (
-            <div className="px-2 py-1.5 text-white/40">
+            <div className="px-2 py-1.5 text-white">
               <div className="flex items-center gap-2 text-sm">
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 text-white" />
                 Ta bort steg
               </div>
-              <p className="text-xs text-white/30 mt-1 ml-6">
+              <p className="text-xs text-white mt-1 ml-6">
                 Det måste alltid finnas minst ett steg för att organisera dina kandidater.
               </p>
             </div>
