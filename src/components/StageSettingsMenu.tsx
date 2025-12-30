@@ -43,14 +43,18 @@ interface StageSettingsMenuProps {
   stageKey: string;
   candidateCount?: number;
   totalStageCount?: number;
+  firstStageKey?: string;
+  firstStageLabel?: string;
   onDelete?: () => void;
+  onMoveCandidatesAndDelete?: (fromStage: string, toStage: string) => Promise<void>;
   onLiveColorChange?: (color: string | null) => void;
 }
 
-export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, onDelete, onLiveColorChange }: StageSettingsMenuProps) {
+export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, firstStageKey, firstStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -114,29 +118,39 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
     }
   };
 
-  // Check if we can delete this stage
-  const canDelete = candidateCount === 0 && totalStageCount > 1;
+  // Check if we can delete this stage (must have at least 1 stage left)
+  const canDelete = totalStageCount > 1;
+  const hasCandidates = candidateCount > 0;
+  const isFirstStage = stageKey === firstStageKey;
   
   const handleDeleteClick = () => {
-    if (candidateCount > 0) {
-      toast.error('Flytta kandidaterna till ett annat steg först');
-      return;
-    }
     if (totalStageCount <= 1) {
       toast.error('Du måste ha minst ett steg kvar');
+      return;
+    }
+    if (hasCandidates && isFirstStage) {
+      toast.error('Flytta kandidaterna till ett annat steg först');
       return;
     }
     setDeleteDialogOpen(true);
   };
 
   const handleDelete = async () => {
+    setIsDeleting(true);
     try {
-      await deleteStage.mutateAsync(stageKey);
+      if (hasCandidates && onMoveCandidatesAndDelete && firstStageKey) {
+        // Move candidates to first stage before deleting
+        await onMoveCandidatesAndDelete(stageKey, firstStageKey);
+      } else {
+        await deleteStage.mutateAsync(stageKey);
+      }
       setDeleteDialogOpen(false);
       toast.success('Steg borttaget');
       onDelete?.();
     } catch (error) {
       toast.error('Kunde inte ta bort steg');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -214,8 +228,8 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
           
           <DropdownMenuItem 
             onClick={handleDeleteClick}
-            className={`cursor-pointer ${canDelete ? 'text-red-400 focus:text-red-400' : 'text-white/40 cursor-not-allowed'}`}
-            disabled={!canDelete}
+            className={`cursor-pointer ${canDelete && !isFirstStage ? (hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400') : (isFirstStage && hasCandidates) ? 'text-white/40 cursor-not-allowed' : !canDelete ? 'text-white/40 cursor-not-allowed' : 'text-red-400 focus:text-red-400'}`}
+            disabled={!canDelete || (isFirstStage && hasCandidates)}
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Ta bort steg
@@ -279,12 +293,22 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
               </AlertDialogTitle>
             </div>
             <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
-              Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{currentConfig?.label}"</span>? Denna åtgärd går inte att ångra.
+              {hasCandidates ? (
+                <>
+                  Det finns <span className="font-semibold text-orange-400">{candidateCount} kandidat{candidateCount > 1 ? 'er' : ''}</span> i detta steg. 
+                  De kommer att flyttas till <span className="font-semibold text-white">"{firstStageLabel}"</span> när du tar bort steget.
+                </>
+              ) : (
+                <>
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{currentConfig?.label}"</span>? Denna åtgärd går inte att ångra.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
             <AlertDialogCancel 
               onClick={() => setDeleteDialogOpen(false)}
+              disabled={isDeleting}
               style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
               className="flex-[0.6] mt-0 flex items-center justify-center bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
@@ -293,11 +317,12 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
             <AlertDialogAction
               onClick={handleDelete}
               variant="destructiveSoft"
+              disabled={isDeleting}
               style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
               className="flex-[0.4] text-sm flex items-center justify-center"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
-              Ta bort
+              {isDeleting ? 'Tar bort...' : 'Ta bort'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContentNoFocus>
