@@ -141,7 +141,7 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
                     </span>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
+                <TooltipContent side="top" className="max-w-xs">
                   <p>{label || 'Nytt steg'}</p>
                 </TooltipContent>
               </Tooltip>
