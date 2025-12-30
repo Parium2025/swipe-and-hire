@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { MoreVertical, Pencil, Palette, Image, RotateCcw, Trash2 } from 'lucide-react';
+import { MoreVertical, Pencil, Palette, Image, RotateCcw, Trash2, AlertTriangle } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import {
   DropdownMenu,
@@ -267,20 +267,25 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus className="bg-card-parium border-white/20">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Ta bort steg</AlertDialogTitle>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-full bg-gradient-to-br from-red-500/30 to-orange-500/20">
+                <AlertTriangle className="h-5 w-5 text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-white m-0">Ta bort steg</AlertDialogTitle>
+            </div>
             <AlertDialogDescription className="text-white/70">
-              Är du säker på att du vill ta bort steget "{currentConfig.label}"? 
-              Kandidater i detta steg kommer att flyttas till "Att kontakta".
+              Är du säker på att du vill ta bort "{currentConfig?.label}"? Denna åtgärd går inte att ångra.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+          <AlertDialogFooter className="flex gap-3 mt-4">
+            <AlertDialogCancel className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-500/80 hover:bg-red-500 text-white border-none"
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white border-none gap-2"
             >
+              <Trash2 className="h-4 w-4" />
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -291,14 +296,18 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
       <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
         <AlertDialogContentNoFocus className="bg-card-parium border-white/20">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Ta bort steg</AlertDialogTitle>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-full bg-gradient-to-br from-red-500/30 to-orange-500/20">
+                <AlertTriangle className="h-5 w-5 text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-white m-0">Ta bort steg</AlertDialogTitle>
+            </div>
             <AlertDialogDescription className="text-white/70">
-              Är du säker på att du vill ta bort anpassningarna för "{currentConfig?.label}"? 
-              Steget kommer att återställas till standardinställningar.
+              Är du säker på att du vill ta bort anpassningarna för "{currentConfig?.label}"? Denna åtgärd går inte att ångra.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+          <AlertDialogFooter className="flex gap-3 mt-4">
+            <AlertDialogCancel className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
@@ -306,8 +315,9 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
                 handleReset();
                 setResetDialogOpen(false);
               }}
-              className="bg-red-500/80 hover:bg-red-500 text-white border-none"
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white border-none gap-2"
             >
+              <Trash2 className="h-4 w-4" />
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
