@@ -257,9 +257,12 @@ interface StageColumnProps {
   stageSettings: { label: string; color: string; iconName: string };
   isReadOnly?: boolean;
   totalStageCount: number;
+  firstStageKey: string;
+  firstStageLabel: string;
+  onMoveCandidatesAndDelete: (fromStage: string, toStage: string) => Promise<void>;
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly, totalStageCount }: Omit<StageColumnProps, 'isOver'>) => {
+const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly, totalStageCount, firstStageKey, firstStageLabel, onMoveCandidatesAndDelete }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -327,6 +330,9 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
                 stageKey={stage} 
                 candidateCount={candidates.length}
                 totalStageCount={totalStageCount}
+                firstStageKey={firstStageKey}
+                firstStageLabel={firstStageLabel}
+                onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                 onLiveColorChange={setLiveColor}
               />
             </div>
@@ -388,7 +394,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
 
 const MyCandidates = () => {
   const { user } = useAuth();
-  const { stageConfig, stageOrder } = useStageSettings();
+  const { stageConfig, stageOrder, deleteStage } = useStageSettings();
   
   // Team members for colleague switching
   const { teamMembers, hasTeam, isLoading: loadingTeam } = useTeamMembers();
@@ -821,6 +827,45 @@ const MyCandidates = () => {
     }
   };
 
+  // Move all candidates from one stage to another and delete the stage
+  const handleMoveCandidatesAndDelete = useCallback(async (fromStage: string, toStage: string) => {
+    if (!user) return;
+    
+    // Get all candidate IDs in the source stage
+    const candidatesToMove = candidates.filter(c => c.stage === fromStage);
+    
+    if (candidatesToMove.length > 0) {
+      // Optimistic update - move all candidates immediately
+      const previousCandidates = [...candidates];
+      setCandidates(prev => prev.map(c => 
+        c.stage === fromStage 
+          ? { ...c, stage: toStage } 
+          : c
+      ));
+
+      try {
+        // Update all candidates in database
+        const candidateIds = candidatesToMove.map(c => c.id);
+        const { error } = await supabase
+          .from('my_candidates')
+          .update({ stage: toStage })
+          .in('id', candidateIds);
+
+        if (error) {
+          // Revert on error
+          setCandidates(previousCandidates);
+          throw error;
+        }
+      } catch (error: any) {
+        toast.error(error.message || 'Kunde inte flytta kandidaterna');
+        return;
+      }
+    }
+
+    // Now delete the stage
+    await deleteStage.mutateAsync(fromStage);
+  }, [user, candidates, deleteStage]);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -1212,6 +1257,9 @@ const MyCandidates = () => {
                 stageSettings={activeStageConfig[stage] || { label: stage, color: '#6366F1', iconName: 'flag' }}
                 isReadOnly={isViewingColleague}
                 totalStageCount={activeStageOrder.length}
+                firstStageKey={activeStageOrder[0]}
+                firstStageLabel={activeStageConfig[activeStageOrder[0]]?.label || 'Första steget'}
+                onMoveCandidatesAndDelete={handleMoveCandidatesAndDelete}
               />
             ))}
           </div>
