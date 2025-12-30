@@ -189,8 +189,8 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
                       onClick={() => handleIconChange(name)}
                       className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
                         currentConfig.iconName === name 
-                          ? 'bg-white/20 text-white' 
-                          : 'hover:bg-white/10 text-white/70'
+                          ? 'bg-white/30 text-white' 
+                          : 'hover:bg-white/20 text-white'
                       }`}
                       title={label}
                     >
