@@ -42,8 +42,11 @@ import {
   Users,
   ChevronDown,
   Eye,
-  AlertTriangle
+  AlertTriangle,
+  CheckSquare,
+  Square
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
@@ -88,6 +91,9 @@ interface CandidateCardProps {
   onOpenProfile: () => void;
   isDragging?: boolean;
   criteriaResults?: CandidateCriteriaResults;
+  isSelectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }
 
 // Format time in compact way like Teamtailor
@@ -158,30 +164,56 @@ const CandidateCardContent = ({
   onOpenProfile,
   isDragging,
   criteriaResults,
+  isSelectionMode,
+  isSelected,
+  onToggleSelect,
 }: CandidateCardProps) => {
   const initials = `${candidate.first_name?.[0] || ''}${candidate.last_name?.[0] || ''}`.toUpperCase() || '?';
   const isUnread = !candidate.viewed_at;
   const appliedTime = formatCompactTime(candidate.applied_at);
   const hasCriteriaResults = criteriaResults && criteriaResults.results.length > 0 && criteriaResults.status === 'completed';
   
+  const handleClick = () => {
+    if (isSelectionMode && onToggleSelect) {
+      onToggleSelect();
+    } else {
+      onOpenProfile();
+    }
+  };
+  
   return (
     <div 
-      className={`bg-white/5 ring-1 ring-inset ring-white/10 rounded-md px-2 py-1.5 cursor-grab active:cursor-grabbing group relative
+      className={`bg-white/5 ring-1 ring-inset rounded-md px-2 py-1.5 group relative
         transition-all duration-200 ease-out
-        ${isDragging 
-          ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
-          : 'hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
+        ${isSelectionMode ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
+        ${isSelected 
+          ? 'ring-2 ring-primary bg-primary/10' 
+          : isDragging 
+            ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
+            : 'ring-white/10 hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
         }`}
-      onClick={onOpenProfile}
+      onClick={handleClick}
     >
+      {/* Selection checkbox - shows in selection mode */}
+      {isSelectionMode && (
+        <div className="absolute left-1.5 top-1.5 z-10">
+          <Checkbox 
+            checked={isSelected}
+            onCheckedChange={() => onToggleSelect?.()}
+            className="h-4 w-4 border-white/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+      
       {/* Unread indicator dot - shows if application hasn't been viewed */}
-      {isUnread && (
+      {isUnread && !isSelectionMode && (
         <div className="absolute right-1.5 top-1.5">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
         </div>
       )}
       
-      <div className="flex items-center gap-2">
+      <div className={`flex items-center gap-2 ${isSelectionMode ? 'ml-5' : ''}`}>
         <SmallCandidateAvatar candidate={candidate} />
         
         <div className="flex-1 min-w-0 pr-4">
@@ -209,19 +241,21 @@ const CandidateCardContent = ({
         <CriteriaResultsBadges results={criteriaResults} maxDisplay={3} />
       )}
 
-      {/* Remove button - shows on hover with smooth animation */}
-      <button
-        onClick={(e) => { e.stopPropagation(); onRemove(); }}
-        className="absolute right-1 bottom-1 p-1 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full
-          opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100"
-      >
-        <Trash2 className="h-3 w-3" />
-      </button>
+      {/* Remove button - shows on hover with smooth animation (hidden in selection mode) */}
+      {!isSelectionMode && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          className="absolute right-1 bottom-1 p-1 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full
+            opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100"
+        >
+          <Trash2 className="h-3 w-3" />
+        </button>
+      )}
     </div>
   );
 };
 
-// Sortable wrapper for the card - entire card is draggable
+// Sortable wrapper for the card - entire card is draggable (disabled in selection mode)
 const SortableCandidateCard = (props: CandidateCardProps) => {
   const {
     attributes,
@@ -230,7 +264,10 @@ const SortableCandidateCard = (props: CandidateCardProps) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: props.candidate.id });
+  } = useSortable({ 
+    id: props.candidate.id,
+    disabled: props.isSelectionMode, // Disable drag in selection mode
+  });
 
   const style = {
     transform: transform ? CSS.Transform.toString(transform) : undefined,
@@ -238,8 +275,11 @@ const SortableCandidateCard = (props: CandidateCardProps) => {
     opacity: isDragging ? 0 : 1, // Fully hide while dragging (DragOverlay shows the visual)
   };
 
+  // In selection mode, don't apply drag listeners
+  const dragProps = props.isSelectionMode ? {} : { ...attributes, ...listeners };
+
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...dragProps}>
       <CandidateCardContent 
         {...props} 
         isDragging={isDragging}
@@ -260,9 +300,30 @@ interface StageColumnProps {
   targetStageKey: string; // Stage to move candidates to when deleting
   targetStageLabel: string;
   onMoveCandidatesAndDelete: (fromStage: string, toStage: string) => Promise<void>;
+  // Selection mode props
+  isSelectionMode?: boolean;
+  selectedCandidateIds?: Set<string>;
+  onToggleSelect?: (candidateId: string) => void;
+  getCriteriaResultsForCandidate?: (candidate: MyCandidateData) => CandidateCriteriaResults | undefined;
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly, totalStageCount, targetStageKey, targetStageLabel, onMoveCandidatesAndDelete }: Omit<StageColumnProps, 'isOver'>) => {
+const StageColumn = ({ 
+  stage, 
+  candidates, 
+  onMoveCandidate, 
+  onRemoveCandidate, 
+  onOpenProfile, 
+  stageSettings, 
+  isReadOnly, 
+  totalStageCount, 
+  targetStageKey, 
+  targetStageLabel, 
+  onMoveCandidatesAndDelete,
+  isSelectionMode,
+  selectedCandidateIds,
+  onToggleSelect,
+  getCriteriaResultsForCandidate,
+}: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -368,6 +429,10 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
                 candidate={candidate}
                 onRemove={() => onRemoveCandidate(candidate)}
                 onOpenProfile={() => onOpenProfile(candidate)}
+                isSelectionMode={isSelectionMode}
+                isSelected={selectedCandidateIds?.has(candidate.id)}
+                onToggleSelect={() => onToggleSelect?.(candidate.id)}
+                criteriaResults={getCriteriaResultsForCandidate?.(candidate)}
               />
             ))}
           </SortableContext>
@@ -441,6 +506,82 @@ const MyCandidates = () => {
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStageFilter, setActiveStageFilter] = useState<string | 'all'>('all');
+  
+  // Selection mode state
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState<Set<string>>(new Set());
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  
+  // Toggle selection of a candidate
+  const toggleCandidateSelection = useCallback((candidateId: string) => {
+    setSelectedCandidateIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(candidateId)) {
+        newSet.delete(candidateId);
+      } else {
+        newSet.add(candidateId);
+      }
+      return newSet;
+    });
+  }, []);
+  
+  // Exit selection mode
+  const exitSelectionMode = useCallback(() => {
+    setIsSelectionMode(false);
+    setSelectedCandidateIds(new Set());
+  }, []);
+  
+  // Handle ESC key to exit selection mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isSelectionMode) {
+        exitSelectionMode();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSelectionMode, exitSelectionMode]);
+  
+  // Get selected candidates data
+  const selectedCandidates = useMemo(() => {
+    return displayedCandidates.filter(c => selectedCandidateIds.has(c.id));
+  }, [displayedCandidates, selectedCandidateIds]);
+  
+  // Bulk delete selected candidates
+  const confirmBulkDelete = async () => {
+    const idsToDelete = Array.from(selectedCandidateIds);
+    
+    if (isViewingColleague) {
+      // Remove from colleague's list one by one
+      for (const id of idsToDelete) {
+        await removeCandidateFromColleagueList(id);
+      }
+      exitSelectionMode();
+      setShowBulkDeleteConfirm(false);
+      toast.success(`${idsToDelete.length} kandidater borttagna`);
+      return;
+    }
+    
+    // Optimistic remove
+    setCandidates(prev => prev.filter(c => !selectedCandidateIds.has(c.id)));
+    exitSelectionMode();
+    setShowBulkDeleteConfirm(false);
+    
+    try {
+      const { error } = await supabase
+        .from('my_candidates')
+        .delete()
+        .in('id', idsToDelete);
+        
+      if (error) throw error;
+      toast.success(`${idsToDelete.length} kandidater borttagna från din lista`);
+    } catch (error) {
+      // Refetch on error
+      fetchCandidates();
+      toast.error('Kunde inte ta bort kandidaterna');
+    }
+  };
   
   
   // Fetch criteria results for all candidates
@@ -1115,22 +1256,47 @@ const MyCandidates = () => {
       {/* Search and Stage Filters */}
       {stats.total > 0 && (
         <div className="mb-6 space-y-3">
-          {/* Search input */}
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
-            <Input
-              placeholder="Sök på namn, jobb eller anteckningar..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white transition-colors"
+          {/* Search input and Select button */}
+          <div className="flex items-center gap-2 max-w-lg mx-auto">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
+              <Input
+                placeholder="Sök på namn, jobb eller anteckningar..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            
+            {/* Select mode toggle button */}
+            {!isSelectionMode ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsSelectionMode(true)}
+                className="bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white flex-shrink-0"
               >
-                <X className="h-4 w-4" />
-              </button>
+                <CheckSquare className="h-4 w-4 mr-1.5" />
+                Välj
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exitSelectionMode}
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white flex-shrink-0"
+              >
+                <X className="h-4 w-4 mr-1.5" />
+                Avbryt
+              </Button>
             )}
           </div>
 
@@ -1268,6 +1434,10 @@ const MyCandidates = () => {
                   targetStageKey={targetKey}
                   targetStageLabel={targetLabel}
                   onMoveCandidatesAndDelete={handleMoveCandidatesAndDelete}
+                  isSelectionMode={isSelectionMode}
+                  selectedCandidateIds={selectedCandidateIds}
+                  onToggleSelect={toggleCandidateSelection}
+                  getCriteriaResultsForCandidate={getCriteriaResultsForCandidate}
                 />
               );
             })}
@@ -1345,6 +1515,74 @@ const MyCandidates = () => {
           </AlertDialogFooter>
         </AlertDialogContentNoFocus>
       </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={showBulkDeleteConfirm} onOpenChange={(open) => !open && setShowBulkDeleteConfirm(false)}>
+        <AlertDialogContentNoFocus 
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+        >
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort {selectedCandidateIds.size} kandidater
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-white text-sm leading-relaxed">
+              Är du säker på att du vill ta bort {selectedCandidateIds.size} valda kandidater? Denna åtgärd går inte att ångra.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+            <AlertDialogCancel 
+              onClick={() => setShowBulkDeleteConfirm(false)}
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-[0.6] mt-0 flex items-center justify-center bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
+              variant="destructiveSoft"
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-[0.4] text-sm flex items-center justify-center"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Ta bort alla
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
+
+      {/* Floating Action Bar for Selection Mode */}
+      {isSelectionMode && selectedCandidateIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="flex items-center gap-3 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 shadow-xl">
+            <span className="text-white text-sm font-medium">
+              {selectedCandidateIds.size} valda
+            </span>
+            <div className="w-px h-5 bg-white/20" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedCandidateIds(new Set())}
+              className="text-white/70 hover:text-white hover:bg-white/10"
+            >
+              Avmarkera
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowBulkDeleteConfirm(true)}
+              className="bg-red-500/80 hover:bg-red-500 text-white"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Ta bort
+            </Button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
