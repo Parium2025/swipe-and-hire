@@ -548,6 +548,42 @@ const MyCandidates = () => {
     return displayedCandidates.filter(c => selectedCandidateIds.has(c.id));
   }, [displayedCandidates, selectedCandidateIds]);
   
+  // Bulk move selected candidates to a new stage
+  const bulkMoveToStage = async (targetStage: CandidateStage) => {
+    const idsToMove = Array.from(selectedCandidateIds);
+    const count = idsToMove.length;
+    const targetLabel = activeStageConfig[targetStage]?.label || targetStage;
+    
+    if (isViewingColleague) {
+      // Move in colleague's list
+      for (const id of idsToMove) {
+        await moveCandidateInColleagueList(id, targetStage);
+      }
+      exitSelectionMode();
+      toast.success(`${count} kandidater flyttade till "${targetLabel}"`);
+      return;
+    }
+    
+    // Optimistic update
+    setCandidates(prev => prev.map(c => 
+      selectedCandidateIds.has(c.id) ? { ...c, stage: targetStage } : c
+    ));
+    exitSelectionMode();
+    
+    try {
+      const { error } = await supabase
+        .from('my_candidates')
+        .update({ stage: targetStage, updated_at: new Date().toISOString() })
+        .in('id', idsToMove);
+        
+      if (error) throw error;
+      toast.success(`${count} kandidater flyttade till "${targetLabel}"`);
+    } catch (error) {
+      fetchCandidates();
+      toast.error('Kunde inte flytta kandidaterna');
+    }
+  };
+  
   // Bulk delete selected candidates
   const confirmBulkDelete = async () => {
     const idsToDelete = Array.from(selectedCandidateIds);
@@ -1610,6 +1646,41 @@ const MyCandidates = () => {
             {selectedCandidateIds.size > 0 && (
               <>
                 <div className="w-px h-5 bg-white/20" />
+                
+                {/* Move to stage dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white/70 hover:text-white hover:bg-white/10"
+                    >
+                      <ArrowDown className="h-4 w-4 mr-1.5" />
+                      Flytta till
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[180px]">
+                    {activeStageOrder.map(stage => {
+                      const settings = activeStageConfig[stage];
+                      const Icon = getIconByName(settings?.iconName || 'flag');
+                      return (
+                        <DropdownMenuItem 
+                          key={stage}
+                          onClick={() => bulkMoveToStage(stage)}
+                          className="text-white hover:text-white cursor-pointer"
+                        >
+                          <div 
+                            className="h-2 w-2 rounded-full mr-2 flex-shrink-0" 
+                            style={{ backgroundColor: settings?.color || '#6366F1' }} 
+                          />
+                          <Icon className="h-4 w-4 mr-2 text-white/70" />
+                          <span className="truncate">{settings?.label || stage}</span>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
                 <Button
                   variant="destructive"
                   size="sm"
