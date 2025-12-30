@@ -108,8 +108,8 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
                     onClick={() => setSelectedIcon(name)}
                     className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${
                       selectedIcon === name 
-                        ? 'bg-white/20 text-white' 
-                        : 'hover:bg-white/10 text-white'
+                        ? 'bg-white/30 text-white' 
+                        : 'hover:bg-white/20 text-white'
                     }`}
                     title={iconLabel}
                   >
