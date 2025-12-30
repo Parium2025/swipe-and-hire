@@ -257,12 +257,12 @@ interface StageColumnProps {
   stageSettings: { label: string; color: string; iconName: string };
   isReadOnly?: boolean;
   totalStageCount: number;
-  firstStageKey: string;
-  firstStageLabel: string;
+  targetStageKey: string; // Stage to move candidates to when deleting
+  targetStageLabel: string;
   onMoveCandidatesAndDelete: (fromStage: string, toStage: string) => Promise<void>;
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly, totalStageCount, firstStageKey, firstStageLabel, onMoveCandidatesAndDelete }: Omit<StageColumnProps, 'isOver'>) => {
+const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly, totalStageCount, targetStageKey, targetStageLabel, onMoveCandidatesAndDelete }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -330,8 +330,8 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
                 stageKey={stage} 
                 candidateCount={candidates.length}
                 totalStageCount={totalStageCount}
-                firstStageKey={firstStageKey}
-                firstStageLabel={firstStageLabel}
+                targetStageKey={targetStageKey}
+                targetStageLabel={targetStageLabel}
                 onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                 onLiveColorChange={setLiveColor}
               />
@@ -1246,22 +1246,31 @@ const MyCandidates = () => {
               overscrollBehaviorX: 'contain',
             }}
           >
-            {stagesToDisplay.map(stage => (
-              <StageColumn
-                key={stage}
-                stage={stage}
-                candidates={filteredCandidatesByStage[stage] || []}
-                onMoveCandidate={handleMoveCandidate}
-                onRemoveCandidate={handleRemoveCandidate}
-                onOpenProfile={handleOpenProfile}
-                stageSettings={activeStageConfig[stage] || { label: stage, color: '#6366F1', iconName: 'flag' }}
-                isReadOnly={isViewingColleague}
-                totalStageCount={activeStageOrder.length}
-                firstStageKey={activeStageOrder[0]}
-                firstStageLabel={activeStageConfig[activeStageOrder[0]]?.label || 'Första steget'}
-                onMoveCandidatesAndDelete={handleMoveCandidatesAndDelete}
-              />
-            ))}
+            {stagesToDisplay.map((stage, index) => {
+              // Calculate target stage for moving candidates when deleting this stage
+              // If this is the first stage, move to second stage; otherwise move to first stage
+              const stageIndex = activeStageOrder.indexOf(stage);
+              const targetIndex = stageIndex === 0 ? 1 : 0;
+              const targetKey = activeStageOrder[targetIndex] || activeStageOrder[0];
+              const targetLabel = activeStageConfig[targetKey]?.label || 'Nästa steg';
+              
+              return (
+                <StageColumn
+                  key={stage}
+                  stage={stage}
+                  candidates={filteredCandidatesByStage[stage] || []}
+                  onMoveCandidate={handleMoveCandidate}
+                  onRemoveCandidate={handleRemoveCandidate}
+                  onOpenProfile={handleOpenProfile}
+                  stageSettings={activeStageConfig[stage] || { label: stage, color: '#6366F1', iconName: 'flag' }}
+                  isReadOnly={isViewingColleague}
+                  totalStageCount={activeStageOrder.length}
+                  targetStageKey={targetKey}
+                  targetStageLabel={targetLabel}
+                  onMoveCandidatesAndDelete={handleMoveCandidatesAndDelete}
+                />
+              );
+            })}
           </div>
 
           <DragOverlay modifiers={[snapCenterToCursor]} dropAnimation={null}>

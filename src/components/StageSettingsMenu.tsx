@@ -43,14 +43,14 @@ interface StageSettingsMenuProps {
   stageKey: string;
   candidateCount?: number;
   totalStageCount?: number;
-  firstStageKey?: string;
-  firstStageLabel?: string;
+  targetStageKey?: string; // The stage to move candidates to (next stage if first, first stage otherwise)
+  targetStageLabel?: string;
   onDelete?: () => void;
   onMoveCandidatesAndDelete?: (fromStage: string, toStage: string) => Promise<void>;
   onLiveColorChange?: (color: string | null) => void;
 }
 
-export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, firstStageKey, firstStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange }: StageSettingsMenuProps) {
+export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -121,15 +121,10 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   // Check if we can delete this stage (must have at least 1 stage left)
   const canDelete = totalStageCount > 1;
   const hasCandidates = candidateCount > 0;
-  const isFirstStage = stageKey === firstStageKey;
   
   const handleDeleteClick = () => {
     if (totalStageCount <= 1) {
       toast.error('Du måste ha minst ett steg kvar');
-      return;
-    }
-    if (hasCandidates && isFirstStage) {
-      toast.error('Flytta kandidaterna till ett annat steg först');
       return;
     }
     setDeleteDialogOpen(true);
@@ -138,9 +133,9 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      if (hasCandidates && onMoveCandidatesAndDelete && firstStageKey) {
-        // Move candidates to first stage before deleting
-        await onMoveCandidatesAndDelete(stageKey, firstStageKey);
+      if (hasCandidates && onMoveCandidatesAndDelete && targetStageKey) {
+        // Move candidates to target stage before deleting
+        await onMoveCandidatesAndDelete(stageKey, targetStageKey);
       } else {
         await deleteStage.mutateAsync(stageKey);
       }
@@ -228,8 +223,8 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
           
           <DropdownMenuItem 
             onClick={handleDeleteClick}
-            className={`cursor-pointer ${canDelete && !isFirstStage ? (hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400') : (isFirstStage && hasCandidates) ? 'text-white/40 cursor-not-allowed' : !canDelete ? 'text-white/40 cursor-not-allowed' : 'text-red-400 focus:text-red-400'}`}
-            disabled={!canDelete || (isFirstStage && hasCandidates)}
+            className={`cursor-pointer ${canDelete ? (hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400') : 'text-white/40 cursor-not-allowed'}`}
+            disabled={!canDelete}
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Ta bort steg
@@ -296,7 +291,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
               {hasCandidates ? (
                 <>
                   Det finns <span className="font-semibold text-orange-400">{candidateCount} kandidat{candidateCount > 1 ? 'er' : ''}</span> i detta steg. 
-                  De kommer att flyttas till <span className="font-semibold text-white">"{firstStageLabel}"</span> när du tar bort steget.
+                  De kommer att flyttas till <span className="font-semibold text-white">"{targetStageLabel}"</span> när du tar bort steget.
                 </>
               ) : (
                 <>
