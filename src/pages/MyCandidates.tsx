@@ -300,7 +300,7 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
         className={`rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
         style={{ backgroundColor: `${displayColor}33` }}
       >
-        <div className="group flex items-center gap-1.5 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
           <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
           <TooltipProvider delayDuration={300}>
             <Tooltip>
