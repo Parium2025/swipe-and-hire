@@ -44,9 +44,16 @@ export function useColleagueStageSettings(colleagueId: string | null) {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Get all stage keys in order (default + custom)
+  // Get deleted default stages (marked with __DELETED__)
+  const deletedDefaultStages = new Set(
+    (dbSettings || [])
+      .filter(s => s.custom_label === '__DELETED__' && !s.is_custom)
+      .map(s => s.stage_key)
+  );
+
+  // Get all stage keys in order (default + custom), excluding deleted stages
   const stageOrder: string[] = (() => {
-    const defaultKeys = [...DEFAULT_STAGE_KEYS];
+    const defaultKeys = [...DEFAULT_STAGE_KEYS].filter(k => !deletedDefaultStages.has(k));
     const customKeys = (dbSettings || [])
       .filter(s => s.is_custom)
       .sort((a, b) => a.order_index - b.order_index)
@@ -57,7 +64,7 @@ export function useColleagueStageSettings(colleagueId: string | null) {
     let customIdx = 0;
     
     for (let i = 0; i < defaultKeys.length + customKeys.length; i++) {
-      const dbSetting = dbSettings?.find(s => s.order_index === i);
+      const dbSetting = dbSettings?.find(s => s.order_index === i && s.is_custom);
       if (dbSetting?.is_custom) {
         allStages.push(dbSetting.stage_key);
         customIdx++;
@@ -80,13 +87,15 @@ export function useColleagueStageSettings(colleagueId: string | null) {
     return [...allStages, ...Array.from(allKeys)];
   })();
 
-  // Merge DB settings with defaults
+  // Merge DB settings with defaults (excluding deleted stages)
   const stageConfig: Record<string, StageSettings> = (() => {
     const config: Record<string, StageSettings> = {};
     
-    // Add default stages
+    // Add default stages (not deleted)
     Object.keys(DEFAULT_STAGES).forEach((key, idx) => {
-      const dbSetting = dbSettings?.find(s => s.stage_key === key);
+      if (deletedDefaultStages.has(key)) return; // Skip deleted stages
+      
+      const dbSetting = dbSettings?.find(s => s.stage_key === key && s.custom_label !== '__DELETED__');
       const defaultConfig = DEFAULT_STAGES[key];
       
       config[key] = {

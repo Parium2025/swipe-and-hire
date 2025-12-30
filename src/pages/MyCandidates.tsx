@@ -256,9 +256,10 @@ interface StageColumnProps {
   onOpenProfile: (candidate: MyCandidateData) => void;
   stageSettings: { label: string; color: string; iconName: string };
   isReadOnly?: boolean;
+  totalStageCount: number;
 }
 
-const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly }: Omit<StageColumnProps, 'isOver'>) => {
+const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, onOpenProfile, stageSettings, isReadOnly, totalStageCount }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -324,6 +325,8 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
             <div className="ml-auto">
               <StageSettingsMenu 
                 stageKey={stage} 
+                candidateCount={candidates.length}
+                totalStageCount={totalStageCount}
                 onLiveColorChange={setLiveColor}
               />
             </div>
@@ -1208,6 +1211,7 @@ const MyCandidates = () => {
                 onOpenProfile={handleOpenProfile}
                 stageSettings={activeStageConfig[stage] || { label: stage, color: '#6366F1', iconName: 'flag' }}
                 isReadOnly={isViewingColleague}
+                totalStageCount={activeStageOrder.length}
               />
             ))}
           </div>

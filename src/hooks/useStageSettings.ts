@@ -107,9 +107,16 @@ export function useStageSettings() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Get all stage keys in order (default + custom)
+  // Get deleted default stages (marked with __DELETED__)
+  const deletedDefaultStages = new Set(
+    (dbSettings || [])
+      .filter(s => s.custom_label === '__DELETED__' && !s.is_custom)
+      .map(s => s.stage_key)
+  );
+
+  // Get all stage keys in order (default + custom), excluding deleted stages
   const stageOrder: string[] = (() => {
-    const defaultKeys = [...DEFAULT_STAGE_KEYS];
+    const defaultKeys = [...DEFAULT_STAGE_KEYS].filter(k => !deletedDefaultStages.has(k));
     const customKeys = (dbSettings || [])
       .filter(s => s.is_custom)
       .sort((a, b) => a.order_index - b.order_index)
@@ -120,7 +127,7 @@ export function useStageSettings() {
     let customIdx = 0;
     
     for (let i = 0; i < defaultKeys.length + customKeys.length; i++) {
-      const dbSetting = dbSettings?.find(s => s.order_index === i);
+      const dbSetting = dbSettings?.find(s => s.order_index === i && s.is_custom);
       if (dbSetting?.is_custom) {
         allStages.push(dbSetting.stage_key);
         customIdx++;
@@ -143,13 +150,15 @@ export function useStageSettings() {
     return [...allStages, ...Array.from(allKeys)];
   })();
 
-  // Merge DB settings with defaults
+  // Merge DB settings with defaults (excluding deleted stages)
   const stageConfig: Record<string, StageSettings> = (() => {
     const config: Record<string, StageSettings> = {};
     
-    // Add default stages
+    // Add default stages (not deleted)
     Object.keys(DEFAULT_STAGES).forEach((key, idx) => {
-      const dbSetting = dbSettings?.find(s => s.stage_key === key);
+      if (deletedDefaultStages.has(key)) return; // Skip deleted stages
+      
+      const dbSetting = dbSettings?.find(s => s.stage_key === key && s.custom_label !== '__DELETED__');
       const defaultConfig = DEFAULT_STAGES[key];
       
       config[key] = {
@@ -287,6 +296,79 @@ export function useStageSettings() {
     },
   });
 
+  // Delete any stage (custom or default) - for when stage is empty
+  const deleteStage = useMutation({
+    mutationFn: async (stageKey: string) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const isDefault = DEFAULT_STAGE_KEYS.includes(stageKey as any);
+      
+      if (isDefault) {
+        // For default stages, we mark them as "deleted" by inserting a special setting
+        // We'll store a flag that indicates this stage should be hidden
+        const existingSetting = dbSettings?.find(s => s.stage_key === stageKey);
+        
+        if (existingSetting) {
+          // Delete the setting to mark it as removed
+          const { error } = await supabase
+            .from('user_stage_settings')
+            .delete()
+            .eq('id', existingSetting.id);
+          if (error) throw error;
+        }
+        
+        // Insert a marker setting to indicate this default stage is deleted
+        const { error } = await supabase
+          .from('user_stage_settings')
+          .insert({
+            user_id: user.id,
+            stage_key: stageKey,
+            custom_label: '__DELETED__',
+            color: null,
+            icon_name: null,
+            is_custom: false,
+            order_index: -1, // Special marker
+          });
+        
+        if (error) throw error;
+      } else {
+        // For custom stages, just delete
+        const setting = dbSettings?.find(s => s.stage_key === stageKey && s.is_custom);
+        if (!setting) throw new Error('Stage not found');
+
+        const { error } = await supabase
+          .from('user_stage_settings')
+          .delete()
+          .eq('id', setting.id);
+        
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stage-settings', user?.id] });
+    },
+  });
+
+  // Restore a deleted default stage
+  const restoreDefaultStage = useMutation({
+    mutationFn: async (stageKey: string) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      // Remove the deleted marker
+      const { error } = await supabase
+        .from('user_stage_settings')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('stage_key', stageKey)
+        .eq('custom_label', '__DELETED__');
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stage-settings', user?.id] });
+    },
+  });
+
   const resetStageSetting = useMutation({
     mutationFn: async (stageKey: string) => {
       if (!user) throw new Error('Not authenticated');
@@ -311,8 +393,11 @@ export function useStageSettings() {
     updateStageSetting,
     createCustomStage,
     deleteCustomStage,
+    deleteStage,
+    restoreDefaultStage,
     resetStageSetting,
     getDefaultConfig: (stageKey: string) => DEFAULT_STAGES[stageKey],
     isDefaultStage: (stageKey: string) => DEFAULT_STAGE_KEYS.includes(stageKey as any),
+    deletedDefaultStages,
   };
 }

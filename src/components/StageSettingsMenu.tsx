@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { MoreVertical, Pencil, Palette, Image, RotateCcw, Trash2, AlertTriangle } from 'lucide-react';
+import { MoreVertical, Pencil, Palette, Image, Trash2, AlertTriangle } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import {
   DropdownMenu,
@@ -41,15 +41,16 @@ import { toast } from 'sonner';
 
 interface StageSettingsMenuProps {
   stageKey: string;
+  candidateCount?: number;
+  totalStageCount?: number;
   onDelete?: () => void;
   onLiveColorChange?: (color: string | null) => void;
 }
 
-export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: StageSettingsMenuProps) {
-  const { stageConfig, updateStageSetting, resetStageSetting, deleteCustomStage, getDefaultConfig, isDefaultStage } = useStageSettings();
+export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, onDelete, onLiveColorChange }: StageSettingsMenuProps) {
+  const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -113,18 +114,24 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
     }
   };
 
-  const handleReset = async () => {
-    try {
-      await resetStageSetting.mutateAsync(stageKey);
-      toast.success('Återställt till standard');
-    } catch (error) {
-      toast.error('Kunde inte återställa');
+  // Check if we can delete this stage
+  const canDelete = candidateCount === 0 && totalStageCount > 1;
+  
+  const handleDeleteClick = () => {
+    if (candidateCount > 0) {
+      toast.error('Flytta kandidaterna till ett annat steg först');
+      return;
     }
+    if (totalStageCount <= 1) {
+      toast.error('Du måste ha minst ett steg kvar');
+      return;
+    }
+    setDeleteDialogOpen(true);
   };
 
   const handleDelete = async () => {
     try {
-      await deleteCustomStage.mutateAsync(stageKey);
+      await deleteStage.mutateAsync(stageKey);
       setDeleteDialogOpen(false);
       toast.success('Steg borttaget');
       onDelete?.();
@@ -205,23 +212,17 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
 
           <DropdownMenuSeparator />
           
-          {isCustom ? (
-            <DropdownMenuItem 
-              onClick={() => setDeleteDialogOpen(true)}
-              className="text-red-400 cursor-pointer focus:text-red-400"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Ta bort steg
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem 
-              onClick={() => setResetDialogOpen(true)}
-              className="text-red-400 cursor-pointer focus:text-red-400"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Ta bort steg
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem 
+            onClick={handleDeleteClick}
+            className={`cursor-pointer ${canDelete ? 'text-red-400 focus:text-red-400' : 'text-white/40 cursor-not-allowed'}`}
+            disabled={!canDelete}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Ta bort steg
+            {candidateCount > 0 && (
+              <span className="ml-auto text-xs text-white/40">({candidateCount})</span>
+            )}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -291,48 +292,6 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              variant="destructiveSoft"
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
-              className="flex-[0.4] text-sm flex items-center justify-center"
-            >
-              <Trash2 className="h-4 w-4 mr-1.5" />
-              Ta bort
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContentNoFocus>
-      </AlertDialog>
-
-      {/* Reset confirmation dialog for default stages */}
-      <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
-        <AlertDialogContentNoFocus 
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
-        >
-          <AlertDialogHeader className="space-y-4 text-center">
-            <div className="flex items-center justify-center gap-2.5">
-              <div className="bg-red-500/20 p-2 rounded-full">
-                <AlertTriangle className="h-4 w-4 text-red-400" />
-              </div>
-              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
-                Ta bort steg
-              </AlertDialogTitle>
-            </div>
-            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
-              Är du säker på att du vill ta bort anpassningarna för <span className="font-semibold text-white break-words">"{currentConfig?.label}"</span>? Denna åtgärd går inte att ångra.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
-            <AlertDialogCancel 
-              onClick={() => setResetDialogOpen(false)}
-              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
-              className="flex-[0.6] mt-0 flex items-center justify-center bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
-            >
-              Avbryt
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                handleReset();
-                setResetDialogOpen(false);
-              }}
               variant="destructiveSoft"
               style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
               className="flex-[0.4] text-sm flex items-center justify-center"
