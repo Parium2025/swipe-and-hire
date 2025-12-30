@@ -294,10 +294,10 @@ const StageColumn = ({ stage, candidates, onMoveCandidate, onRemoveCandidate, on
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors group h-full"
+      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors h-full"
     >
       <div 
-        className={`rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
         style={{ backgroundColor: `${displayColor}33` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
