@@ -49,6 +49,7 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
   const { stageConfig, updateStageSetting, resetStageSetting, deleteCustomStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -214,11 +215,11 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
             </DropdownMenuItem>
           ) : (
             <DropdownMenuItem 
-              onClick={handleReset}
-              className="text-white/70 cursor-pointer"
+              onClick={() => setResetDialogOpen(true)}
+              className="text-red-400 cursor-pointer focus:text-red-400"
             >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Återställ
+              <Trash2 className="h-4 w-4 mr-2" />
+              Ta bort steg
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -278,6 +279,33 @@ export function StageSettingsMenu({ stageKey, onDelete, onLiveColorChange }: Sta
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
+              className="bg-red-500/80 hover:bg-red-500 text-white border-none"
+            >
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
+
+      {/* Reset confirmation dialog for default stages */}
+      <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <AlertDialogContentNoFocus className="bg-card-parium border-white/20">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Ta bort steg</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/70">
+              Är du säker på att du vill ta bort anpassningarna för "{currentConfig?.label}"? 
+              Steget kommer att återställas till standardinställningar.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                handleReset();
+                setResetDialogOpen(false);
+              }}
               className="bg-red-500/80 hover:bg-red-500 text-white border-none"
             >
               Ta bort
