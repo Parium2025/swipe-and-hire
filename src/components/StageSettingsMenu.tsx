@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { MoreVertical, Pencil, Palette, Image, Trash2, AlertTriangle } from 'lucide-react';
+import { MoreVertical, Pencil, Palette, Image, Trash2, AlertTriangle, Info } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import {
   DropdownMenu,
@@ -221,17 +221,28 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
 
           <DropdownMenuSeparator />
           
-          <DropdownMenuItem 
-            onClick={handleDeleteClick}
-            className={`cursor-pointer ${canDelete ? (hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400') : 'text-white/40 cursor-not-allowed'}`}
-            disabled={!canDelete}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Ta bort steg
-            {candidateCount > 0 && (
-              <span className="ml-auto text-xs text-white/40">({candidateCount})</span>
-            )}
-          </DropdownMenuItem>
+          {canDelete ? (
+            <DropdownMenuItem 
+              onClick={handleDeleteClick}
+              className={`cursor-pointer ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Ta bort steg
+              {candidateCount > 0 && (
+                <span className="ml-auto text-xs text-white/40">({candidateCount})</span>
+              )}
+            </DropdownMenuItem>
+          ) : (
+            <div className="px-2 py-1.5 text-white/40">
+              <div className="flex items-center gap-2 text-sm">
+                <Trash2 className="h-4 w-4" />
+                Ta bort steg
+              </div>
+              <p className="text-xs text-white/30 mt-1 ml-6">
+                Det måste alltid finnas minst ett steg för att organisera dina kandidater.
+              </p>
+            </div>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
