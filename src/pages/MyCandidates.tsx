@@ -796,6 +796,26 @@ const MyCandidates = () => {
     return Object.values(filteredCandidatesByStage).reduce((sum, arr) => sum + arr.length, 0);
   }, [filteredCandidatesByStage]);
 
+  // Get all visible/filtered candidate IDs (for select all)
+  const allVisibleCandidateIds = useMemo(() => {
+    const ids: string[] = [];
+    Object.values(filteredCandidatesByStage).forEach(candidates => {
+      candidates.forEach(c => ids.push(c.id));
+    });
+    return ids;
+  }, [filteredCandidatesByStage]);
+  
+  // Check if all visible candidates are selected
+  const allVisibleSelected = useMemo(() => {
+    return allVisibleCandidateIds.length > 0 && 
+           allVisibleCandidateIds.every(id => selectedCandidateIds.has(id));
+  }, [allVisibleCandidateIds, selectedCandidateIds]);
+  
+  // Select all visible candidates
+  const selectAllVisible = useCallback(() => {
+    setSelectedCandidateIds(new Set(allVisibleCandidateIds));
+  }, [allVisibleCandidateIds]);
+
   // Stages to display based on filter
   const stagesToDisplay = useMemo(() => {
     if (activeStageFilter === 'all') return activeStageOrder;
@@ -1556,30 +1576,51 @@ const MyCandidates = () => {
       </AlertDialog>
 
       {/* Floating Action Bar for Selection Mode */}
-      {isSelectionMode && selectedCandidateIds.size > 0 && (
+      {isSelectionMode && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 duration-300">
           <div className="flex items-center gap-3 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 shadow-xl">
             <span className="text-white text-sm font-medium">
-              {selectedCandidateIds.size} valda
+              {selectedCandidateIds.size} av {allVisibleCandidateIds.length} valda
             </span>
             <div className="w-px h-5 bg-white/20" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedCandidateIds(new Set())}
-              className="text-white/70 hover:text-white hover:bg-white/10"
-            >
-              Avmarkera
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setShowBulkDeleteConfirm(true)}
-              className="bg-red-500/80 hover:bg-red-500 text-white"
-            >
-              <Trash2 className="h-4 w-4 mr-1.5" />
-              Ta bort
-            </Button>
+            
+            {/* Select All / Deselect All toggle */}
+            {!allVisibleSelected ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={selectAllVisible}
+                className="text-white/70 hover:text-white hover:bg-white/10"
+              >
+                <CheckSquare className="h-4 w-4 mr-1.5" />
+                Välj alla
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedCandidateIds(new Set())}
+                className="text-white/70 hover:text-white hover:bg-white/10"
+              >
+                <Square className="h-4 w-4 mr-1.5" />
+                Avmarkera alla
+              </Button>
+            )}
+            
+            {selectedCandidateIds.size > 0 && (
+              <>
+                <div className="w-px h-5 bg-white/20" />
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowBulkDeleteConfirm(true)}
+                  className="bg-red-500/80 hover:bg-red-500 text-white"
+                >
+                  <Trash2 className="h-4 w-4 mr-1.5" />
+                  Ta bort
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
