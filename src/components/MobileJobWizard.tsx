@@ -1864,6 +1864,38 @@ const MobileJobWizard = ({
       setEmploymentTypeSearchTerm('');
       setSalaryTypeSearchTerm('');
       setSalaryTransparencySearchTerm('');
+      setCitySearchTerm('');
+      setOccupationSearchTerm('');
+      setWorkLocationSearchTerm('');
+      setRemoteWorkSearchTerm('');
+      setQuestionSearchTerm('');
+      setQuestionTypeSearchTerm('');
+      setCustomBenefitInput('');
+      // Reset dropdown visibility states
+      setShowCityDropdown(false);
+      setShowOccupationDropdown(false);
+      setShowQuestionTypeDropdown(false);
+      setShowEmploymentTypeDropdown(false);
+      setShowSalaryTypeDropdown(false);
+      setShowSalaryTransparencyDropdown(false);
+      setShowBenefitsDropdown(false);
+      setShowWorkLocationDropdown(false);
+      setShowRemoteWorkDropdown(false);
+      // Reset question form states
+      setShowQuestionForm(false);
+      setShowQuestionTemplates(false);
+      setEditingQuestion(null);
+      // Reset preview states
+      setPreviewMode('mobile');
+      setShowHingePreview(false);
+      setShowApplicationForm(false);
+      setShowDesktopApplicationForm(false);
+      setPreviewAnswers({});
+      setDesktopPreviewAnswers({});
+      setHingeMode('ad');
+      // Reset company profile states
+      setShowCompanyProfile(false);
+      setShowCompanyTooltip(false);
       
       // Clear sessionStorage when closing without changes
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
@@ -1931,6 +1963,38 @@ const MobileJobWizard = ({
     setEmploymentTypeSearchTerm('');
     setSalaryTypeSearchTerm('');
     setSalaryTransparencySearchTerm('');
+    setCitySearchTerm('');
+    setOccupationSearchTerm('');
+    setWorkLocationSearchTerm('');
+    setRemoteWorkSearchTerm('');
+    setQuestionSearchTerm('');
+    setQuestionTypeSearchTerm('');
+    setCustomBenefitInput('');
+    // Reset dropdown visibility states
+    setShowCityDropdown(false);
+    setShowOccupationDropdown(false);
+    setShowQuestionTypeDropdown(false);
+    setShowEmploymentTypeDropdown(false);
+    setShowSalaryTypeDropdown(false);
+    setShowSalaryTransparencyDropdown(false);
+    setShowBenefitsDropdown(false);
+    setShowWorkLocationDropdown(false);
+    setShowRemoteWorkDropdown(false);
+    // Reset question form states
+    setShowQuestionForm(false);
+    setShowQuestionTemplates(false);
+    setEditingQuestion(null);
+    // Reset preview states
+    setPreviewMode('mobile');
+    setShowHingePreview(false);
+    setShowApplicationForm(false);
+    setShowDesktopApplicationForm(false);
+    setPreviewAnswers({});
+    setDesktopPreviewAnswers({});
+    setHingeMode('ad');
+    // Reset company profile states
+    setShowCompanyProfile(false);
+    setShowCompanyTooltip(false);
     
     // Clear sessionStorage when user confirms close
     sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
