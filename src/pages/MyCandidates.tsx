@@ -1601,7 +1601,7 @@ const MyCandidates = () => {
                 variant="ghost"
                 size="sm"
                 onClick={selectAllVisible}
-                className="text-white/80 [&_svg]:text-white/80 md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200"
+                className="text-white/80 [&_svg]:text-white/80 md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white focus:ring-0 focus:border-transparent focus-visible:ring-0 transition-all duration-200"
               >
                 <CheckSquare className="h-4 w-4 mr-1.5" />
                 Välj alla
@@ -1611,7 +1611,7 @@ const MyCandidates = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedCandidateIds(new Set())}
-                className="text-white/80 [&_svg]:text-white/80 md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200"
+                className="text-white/80 [&_svg]:text-white/80 md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white focus:ring-0 focus:border-transparent focus-visible:ring-0 transition-all duration-200"
               >
                 <Square className="h-4 w-4 mr-1.5" />
                 Avmarkera alla
@@ -1628,7 +1628,7 @@ const MyCandidates = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-white/80 [&_svg]:text-white/80 md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200"
+                      className="text-white/80 [&_svg]:text-white/80 md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white focus:ring-0 focus:border-transparent focus-visible:ring-0 transition-all duration-200"
                     >
                       <ArrowDown className="h-4 w-4 mr-1.5" />
                       Flytta till
