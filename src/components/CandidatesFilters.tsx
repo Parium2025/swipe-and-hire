@@ -6,7 +6,7 @@ interface CandidatesFiltersProps {
     total: number;
     new: number;
     reviewing: number;
-    accepted: number;
+    hired: number;
     rejected: number;
   };
   selectedFilter: string;
@@ -18,7 +18,7 @@ export const CandidatesFilters = ({ stats, selectedFilter, onFilterChange }: Can
     { id: 'all', label: 'Alla kandidater', count: stats.total, icon: Users },
     { id: 'pending', label: 'Nya ansökningar', count: stats.new, icon: Briefcase },
     { id: 'reviewing', label: 'Under granskning', count: stats.reviewing, icon: Clock },
-    { id: 'accepted', label: 'Accepterade', count: stats.accepted, icon: CheckCircle },
+    { id: 'hired', label: 'Anställda', count: stats.hired, icon: CheckCircle },
     { id: 'rejected', label: 'Avvisade', count: stats.rejected, icon: XCircle },
   ];
 

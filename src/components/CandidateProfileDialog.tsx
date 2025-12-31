@@ -866,12 +866,12 @@ export const CandidateProfileDialog = ({
                 Granska
               </Button>
               <Button
-                onClick={() => updateStatus('accepted')}
+                onClick={() => updateStatus('hired')}
                 variant="glassGreen"
-                disabled={displayApp.status === 'accepted'}
+                disabled={displayApp.status === 'hired'}
                 size="lg"
               >
-                Acceptera
+                Anställ
               </Button>
               <Button
                 onClick={() => updateStatus('rejected')}
