@@ -1601,7 +1601,7 @@ const MyCandidates = () => {
                 variant="ghost"
                 size="sm"
                 onClick={selectAllVisible}
-                className="text-white hover:text-white hover:bg-transparent border border-transparent hover:border-white/40 transition-all duration-200"
+                className="text-white/70 hover:text-white hover:bg-transparent border border-transparent hover:border-white/40 transition-all duration-200"
               >
                 <CheckSquare className="h-4 w-4 mr-1.5" />
                 Välj alla
@@ -1611,7 +1611,7 @@ const MyCandidates = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedCandidateIds(new Set())}
-                className="text-white hover:text-white hover:bg-transparent border border-transparent hover:border-white/40 transition-all duration-200"
+                className="text-white/70 hover:text-white hover:bg-transparent border border-transparent hover:border-white/40 transition-all duration-200"
               >
                 <Square className="h-4 w-4 mr-1.5" />
                 Avmarkera alla
@@ -1628,7 +1628,7 @@ const MyCandidates = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-white hover:text-white hover:bg-transparent border border-transparent hover:border-white/40 transition-all duration-200"
+                      className="text-white/70 hover:text-white hover:bg-transparent border border-transparent hover:border-white/40 transition-all duration-200"
                     >
                       <ArrowDown className="h-4 w-4 mr-1.5" />
                       Flytta till
