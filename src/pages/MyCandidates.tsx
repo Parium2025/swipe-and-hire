@@ -1315,7 +1315,7 @@ const MyCandidates = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsSelectionMode(true)}
-                className="bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white flex-shrink-0"
+                className="bg-white/5 border-white/20 text-white hover:bg-white/5 hover:text-white hover:border-white/50 transition-all duration-200 flex-shrink-0"
               >
                 <CheckSquare className="h-4 w-4 mr-1.5" />
                 Välj
@@ -1325,9 +1325,8 @@ const MyCandidates = () => {
                 variant="outline"
                 size="sm"
                 onClick={exitSelectionMode}
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white flex-shrink-0"
+                className="bg-white/5 border-white/30 text-white hover:bg-white/5 hover:text-white hover:border-white/60 transition-all duration-200 flex-shrink-0"
               >
-                <X className="h-4 w-4 mr-1.5" />
                 Avbryt
               </Button>
             )}
@@ -1602,7 +1601,7 @@ const MyCandidates = () => {
                 variant="ghost"
                 size="sm"
                 onClick={selectAllVisible}
-                className="text-white/70 hover:text-white hover:bg-white/10"
+                className="text-white/70 hover:text-white hover:bg-transparent border border-transparent hover:border-white/40 transition-all duration-200"
               >
                 <CheckSquare className="h-4 w-4 mr-1.5" />
                 Välj alla
@@ -1612,7 +1611,7 @@ const MyCandidates = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedCandidateIds(new Set())}
-                className="text-white/70 hover:text-white hover:bg-white/10"
+                className="text-white/70 hover:text-white hover:bg-transparent border border-transparent hover:border-white/40 transition-all duration-200"
               >
                 <Square className="h-4 w-4 mr-1.5" />
                 Avmarkera alla
@@ -1629,7 +1628,7 @@ const MyCandidates = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-white/70 hover:text-white hover:bg-white/10"
+                      className="text-white/70 hover:text-white hover:bg-transparent border border-transparent hover:border-white/40 transition-all duration-200"
                     >
                       <ArrowDown className="h-4 w-4 mr-1.5" />
                       Flytta till
