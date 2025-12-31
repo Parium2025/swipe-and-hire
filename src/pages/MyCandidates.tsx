@@ -13,8 +13,6 @@ import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useColleagueCandidates } from '@/hooks/useColleagueCandidates';
 import { useColleagueStageSettings } from '@/hooks/useColleagueStageSettings';
-import { useCriteriaResultsForCandidates, CandidateCriteriaResults } from '@/hooks/useCriteriaResults';
-import { CriteriaResultsBadges } from '@/components/CriteriaResultsBadges';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -90,7 +88,6 @@ interface CandidateCardProps {
   onRemove: () => void;
   onOpenProfile: () => void;
   isDragging?: boolean;
-  criteriaResults?: CandidateCriteriaResults;
   isSelectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: () => void;
@@ -163,7 +160,6 @@ const CandidateCardContent = ({
   onRemove, 
   onOpenProfile,
   isDragging,
-  criteriaResults,
   isSelectionMode,
   isSelected,
   onToggleSelect,
@@ -171,7 +167,6 @@ const CandidateCardContent = ({
   const initials = `${candidate.first_name?.[0] || ''}${candidate.last_name?.[0] || ''}`.toUpperCase() || '?';
   const isUnread = !candidate.viewed_at;
   const appliedTime = formatCompactTime(candidate.applied_at);
-  const hasCriteriaResults = criteriaResults && criteriaResults.results.length > 0 && criteriaResults.status === 'completed';
   
   const handleClick = () => {
     if (isSelectionMode && onToggleSelect) {
@@ -236,10 +231,6 @@ const CandidateCardContent = ({
         </div>
       </div>
 
-      {/* Criteria results badges - show check/cross for each criterion */}
-      {hasCriteriaResults && (
-        <CriteriaResultsBadges results={criteriaResults} maxDisplay={3} />
-      )}
 
       {/* Remove button - shows on hover with smooth animation (hidden in selection mode) */}
       {!isSelectionMode && (
@@ -304,7 +295,6 @@ interface StageColumnProps {
   isSelectionMode?: boolean;
   selectedCandidateIds?: Set<string>;
   onToggleSelect?: (candidateId: string) => void;
-  getCriteriaResultsForCandidate?: (candidate: MyCandidateData) => CandidateCriteriaResults | undefined;
 }
 
 const StageColumn = ({ 
@@ -322,7 +312,6 @@ const StageColumn = ({
   isSelectionMode,
   selectedCandidateIds,
   onToggleSelect,
-  getCriteriaResultsForCandidate,
 }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
@@ -432,7 +421,6 @@ const StageColumn = ({
                 isSelectionMode={isSelectionMode}
                 isSelected={selectedCandidateIds?.has(candidate.id)}
                 onToggleSelect={() => onToggleSelect?.(candidate.id)}
-                criteriaResults={getCriteriaResultsForCandidate?.(candidate)}
               />
             ))}
           </SortableContext>
@@ -620,17 +608,6 @@ const MyCandidates = () => {
   };
   
   
-  // Fetch criteria results for all candidates
-  const { data: criteriaResultsMap = {} } = useCriteriaResultsForCandidates(
-    displayedCandidates.map(c => ({ applicant_id: c.applicant_id, job_id: c.job_id }))
-  );
-  
-  // Helper to get criteria results for a specific candidate
-  const getCriteriaResultsForCandidate = useCallback((candidate: MyCandidateData) => {
-    if (!candidate.job_id) return undefined;
-    const key = `${candidate.job_id}-${candidate.applicant_id}`;
-    return criteriaResultsMap[key];
-  }, [criteriaResultsMap]);
   
   // Fetch colleague's candidates when switching
   useEffect(() => {
@@ -1493,7 +1470,6 @@ const MyCandidates = () => {
                   isSelectionMode={isSelectionMode}
                   selectedCandidateIds={selectedCandidateIds}
                   onToggleSelect={toggleCandidateSelection}
-                  getCriteriaResultsForCandidate={getCriteriaResultsForCandidate}
                 />
               );
             })}
