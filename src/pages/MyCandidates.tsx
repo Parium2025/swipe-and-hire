@@ -1315,7 +1315,7 @@ const MyCandidates = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsSelectionMode(true)}
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white flex-shrink-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                className="bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white flex-shrink-0"
               >
                 <CheckSquare className="h-4 w-4 mr-1.5" />
                 Välj
@@ -1325,7 +1325,7 @@ const MyCandidates = () => {
                 variant="outline"
                 size="sm"
                 onClick={exitSelectionMode}
-                className="bg-white/10 backdrop-blur-sm border-white/30 text-white px-4 transition-colors duration-150 hover:bg-white/20 md:hover:bg-white/20 hover:text-white md:hover:text-white flex-shrink-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white flex-shrink-0"
               >
                 <X className="h-4 w-4 mr-1.5" />
                 Avbryt
@@ -1602,7 +1602,7 @@ const MyCandidates = () => {
                 variant="ghost"
                 size="sm"
                 onClick={selectAllVisible}
-                className="bg-white/5 backdrop-blur-sm border border-white/20 text-white px-4 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                className="text-white/70 hover:text-white hover:bg-white/10"
               >
                 <CheckSquare className="h-4 w-4 mr-1.5" />
                 Välj alla
@@ -1612,7 +1612,7 @@ const MyCandidates = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedCandidateIds(new Set())}
-                className="bg-white/5 backdrop-blur-sm border border-white/20 text-white px-4 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                className="text-white/70 hover:text-white hover:bg-white/10"
               >
                 <Square className="h-4 w-4 mr-1.5" />
                 Avmarkera alla
@@ -1629,7 +1629,7 @@ const MyCandidates = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="bg-white/5 backdrop-blur-sm border border-white/20 text-white px-4 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                      className="text-white/70 hover:text-white hover:bg-white/10"
                     >
                       <ArrowDown className="h-4 w-4 mr-1.5" />
                       Flytta till
@@ -1661,7 +1661,7 @@ const MyCandidates = () => {
                   variant="destructive"
                   size="sm"
                   onClick={() => setShowBulkDeleteConfirm(true)}
-                  className="bg-red-500/80 hover:bg-red-500 md:hover:bg-red-500 text-white px-4 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                  className="bg-red-500/80 hover:bg-red-500 text-white"
                 >
                   <Trash2 className="h-4 w-4 mr-1.5" />
                   Ta bort
