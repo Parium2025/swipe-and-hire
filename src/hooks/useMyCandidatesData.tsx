@@ -240,6 +240,80 @@ export function useMyCandidatesData() {
     };
   }, [user, queryClient, isDragging]);
 
+  // Real-time subscription for activity updates (profiles.last_active_at and job_applications)
+  useEffect(() => {
+    if (!user || candidates.length === 0) return;
+
+    const applicantIds = [...new Set(candidates.map(c => c.applicant_id))];
+
+    // Listen for profile updates (last_active_at changes)
+    const profilesChannel = supabase
+      .channel('candidate-activity-profiles')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+        },
+        (payload: any) => {
+          const updatedUserId = payload.new?.user_id;
+          if (updatedUserId && applicantIds.includes(updatedUserId)) {
+            const newLastActiveAt = payload.new?.last_active_at;
+            // Update the specific candidate's last_active_at in cache
+            queryClient.setQueryData(
+              ['my-candidates', user.id],
+              (old: MyCandidateData[] | undefined) => {
+                if (!old) return old;
+                return old.map((c) =>
+                  c.applicant_id === updatedUserId
+                    ? { ...c, last_active_at: newLastActiveAt }
+                    : c
+                );
+              }
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    // Listen for new job applications (latest_application_at changes)
+    const applicationsChannel = supabase
+      .channel('candidate-activity-applications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'job_applications',
+        },
+        (payload: any) => {
+          const applicantId = payload.new?.applicant_id;
+          const appliedAt = payload.new?.applied_at;
+          if (applicantId && applicantIds.includes(applicantId) && appliedAt) {
+            // Update the specific candidate's latest_application_at in cache
+            queryClient.setQueryData(
+              ['my-candidates', user.id],
+              (old: MyCandidateData[] | undefined) => {
+                if (!old) return old;
+                return old.map((c) =>
+                  c.applicant_id === applicantId
+                    ? { ...c, latest_application_at: appliedAt }
+                    : c
+                );
+              }
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(profilesChannel);
+      supabase.removeChannel(applicationsChannel);
+    };
+  }, [user, candidates, queryClient]);
+
   // Add candidate to my list
   const addCandidate = useMutation({
     mutationFn: async ({ applicationId, applicantId, jobId }: { applicationId: string; applicantId: string; jobId?: string }) => {
