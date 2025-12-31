@@ -820,13 +820,21 @@ const MyCandidates = () => {
   
   // Check if all visible candidates are selected
   const allVisibleSelected = useMemo(() => {
-    return allVisibleCandidateIds.length > 0 && 
-           allVisibleCandidateIds.every(id => selectedCandidateIds.has(id));
+    return (
+      allVisibleCandidateIds.length > 0 &&
+      allVisibleCandidateIds.every((id) => selectedCandidateIds.has(id))
+    );
   }, [allVisibleCandidateIds, selectedCandidateIds]);
-  
-  // Select all visible candidates
-  const selectAllVisible = useCallback(() => {
-    setSelectedCandidateIds(new Set(allVisibleCandidateIds));
+
+  // Toggle select all visible candidates (keeps the same button mounted to avoid focus flicker)
+  const toggleAllVisible = useCallback(() => {
+    setSelectedCandidateIds((prev) => {
+      const allSelected =
+        allVisibleCandidateIds.length > 0 &&
+        allVisibleCandidateIds.every((id) => prev.has(id));
+
+      return allSelected ? new Set() : new Set(allVisibleCandidateIds);
+    });
   }, [allVisibleCandidateIds]);
 
   // Stages to display based on filter
@@ -1595,78 +1603,69 @@ const MyCandidates = () => {
             </span>
             <div className="w-px h-5 bg-white/20" />
             
-            {/* Select All / Deselect All toggle */}
-            {!allVisibleSelected ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={selectAllVisible}
-                className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200"
-              >
-                <CheckSquare className="h-4 w-4 mr-1.5" />
-                Välj alla
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedCandidateIds(new Set())}
-                className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200"
-              >
+            {/* Select All / Deselect All toggle (single mounted button to prevent flicker) */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleAllVisible}
+              className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200"
+            >
+              {allVisibleSelected ? (
                 <Square className="h-4 w-4 mr-1.5" />
-                Avmarkera alla
-              </Button>
-            )}
-            
-            {selectedCandidateIds.size > 0 && (
-              <>
-                <div className="w-px h-5 bg-white/20" />
-                
-                {/* Move to stage dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200"
-                    >
-                      <ArrowDown className="h-4 w-4 mr-1.5" />
-                      Flytta till
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[180px]">
-                    {activeStageOrder.map(stage => {
-                      const settings = activeStageConfig[stage];
-                      const Icon = getIconByName(settings?.iconName || 'flag');
-                      return (
-                        <DropdownMenuItem 
-                          key={stage}
-                          onClick={() => bulkMoveToStage(stage)}
-                          className="text-white hover:text-white cursor-pointer"
-                        >
-                          <div 
-                            className="h-2 w-2 rounded-full mr-2 flex-shrink-0" 
-                            style={{ backgroundColor: settings?.color || '#6366F1' }} 
-                          />
-                          <Icon className="h-4 w-4 mr-2 text-white/70" />
-                          <span className="truncate">{settings?.label || stage}</span>
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                
+              ) : (
+                <CheckSquare className="h-4 w-4 mr-1.5" />
+              )}
+              {allVisibleSelected ? 'Avmarkera alla' : 'Välj alla'}
+            </Button>
+
+            <div className="w-px h-5 bg-white/20" />
+
+            {/* Move to stage dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowBulkDeleteConfirm(true)}
-                  className="bg-red-500/20 text-white [&_svg]:text-red-400 md:hover:bg-red-500/30 md:hover:text-white md:hover:[&_svg]:text-red-400 transition-all duration-200"
+                  disabled={selectedCandidateIds.size === 0}
+                  aria-disabled={selectedCandidateIds.size === 0}
+                  className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200"
                 >
-                  <Trash2 className="h-4 w-4 mr-1.5" />
-                  Ta bort
+                  <ArrowDown className="h-4 w-4 mr-1.5" />
+                  Flytta till
                 </Button>
-              </>
-            )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[180px]">
+                {activeStageOrder.map(stage => {
+                  const settings = activeStageConfig[stage];
+                  const Icon = getIconByName(settings?.iconName || 'flag');
+                  return (
+                    <DropdownMenuItem 
+                      key={stage}
+                      onClick={() => bulkMoveToStage(stage)}
+                      className="text-white hover:text-white cursor-pointer"
+                    >
+                      <div 
+                        className="h-2 w-2 rounded-full mr-2 flex-shrink-0" 
+                        style={{ backgroundColor: settings?.color || '#6366F1' }} 
+                      />
+                      <Icon className="h-4 w-4 mr-2 text-white/70" />
+                      <span className="truncate">{settings?.label || stage}</span>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={selectedCandidateIds.size === 0}
+              onClick={() => setShowBulkDeleteConfirm(true)}
+              className="bg-red-500/20 text-white [&_svg]:text-red-400 md:hover:bg-red-500/30 md:hover:text-white md:hover:[&_svg]:text-red-400 transition-all duration-200"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Ta bort
+            </Button>
           </div>
         </div>
       )}
