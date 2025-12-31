@@ -1315,9 +1315,9 @@ const MyCandidates = () => {
                 variant="outlineNeutral"
                 size="sm"
                 onClick={() => setIsSelectionMode(true)}
-                className="bg-background/5 border-foreground/25 text-foreground md:hover:bg-background/5 md:hover:text-foreground md:hover:border-foreground/55 md:hover:ring-1 md:hover:ring-foreground/20 transition-all duration-200 flex-shrink-0"
+                className="bg-pure-white/5 border-pure-white/25 text-pure-white [&_svg]:text-pure-white md:hover:bg-pure-white/5 md:hover:text-pure-white md:hover:border-pure-white/55 md:hover:ring-1 md:hover:ring-pure-white/20 md:hover:[&_svg]:text-pure-white transition-all duration-200 flex-shrink-0"
               >
-                <CheckSquare className="h-4 w-4 mr-1.5 text-foreground md:hover:text-foreground" />
+                <CheckSquare className="h-4 w-4 mr-1.5" />
                 Välj
               </Button>
             ) : (
@@ -1325,7 +1325,7 @@ const MyCandidates = () => {
                 variant="outlineNeutral"
                 size="sm"
                 onClick={exitSelectionMode}
-                className="bg-background/5 border-foreground/30 text-foreground md:hover:bg-background/5 md:hover:text-foreground md:hover:border-foreground/60 md:hover:ring-1 md:hover:ring-foreground/20 transition-all duration-200 flex-shrink-0"
+                className="bg-pure-white/5 border-pure-white/30 text-pure-white [&_svg]:text-pure-white md:hover:bg-pure-white/5 md:hover:text-pure-white md:hover:border-pure-white/60 md:hover:ring-1 md:hover:ring-pure-white/20 md:hover:[&_svg]:text-pure-white transition-all duration-200 flex-shrink-0"
               >
                 Avbryt
               </Button>
