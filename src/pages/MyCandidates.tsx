@@ -166,7 +166,8 @@ const CandidateCardContent = ({
 }: CandidateCardProps) => {
   const initials = `${candidate.first_name?.[0] || ''}${candidate.last_name?.[0] || ''}`.toUpperCase() || '?';
   const isUnread = !candidate.viewed_at;
-  const appliedTime = formatCompactTime(candidate.applied_at);
+  const latestApplicationTime = formatCompactTime(candidate.latest_application_at);
+  const lastActiveTime = formatCompactTime(candidate.last_active_at);
   
   const handleClick = () => {
     if (isSelectionMode && onToggleSelect) {
@@ -225,16 +226,38 @@ const CandidateCardContent = ({
             </Tooltip>
           </TooltipProvider>
           <StarRating rating={candidate.rating} />
-          {appliedTime && (
+          {(latestApplicationTime || lastActiveTime) && (
             <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px] group-hover:text-white/80 transition-colors">
-              <span className="flex items-center gap-0.5">
-                <ArrowDown className="h-2.5 w-2.5" />
-                {appliedTime}
-              </span>
-              <span className="flex items-center gap-0.5">
-                <Clock className="h-2.5 w-2.5" />
-                {appliedTime}
-              </span>
+              {latestApplicationTime && (
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center gap-0.5 cursor-default">
+                        <ArrowDown className="h-2.5 w-2.5" />
+                        {latestApplicationTime}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      <p>Senaste ansökan i organisationen</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {lastActiveTime && (
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center gap-0.5 cursor-default">
+                        <Clock className="h-2.5 w-2.5" />
+                        {lastActiveTime}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      <p>Senast aktiv i appen</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
           )}
         </div>
@@ -703,10 +726,27 @@ const MyCandidates = () => {
         })
       );
 
+      // Fetch latest activity data (latest_application_at across org + last_active_at)
+      const activityMap: Record<string, { latest_application_at: string | null; last_active_at: string | null }> = {};
+      const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
+        p_applicant_ids: applicantIds,
+        p_employer_id: user.id,
+      });
+
+      if (activityData) {
+        activityData.forEach((item: any) => {
+          activityMap[item.applicant_id] = {
+            latest_application_at: item.latest_application_at,
+            last_active_at: item.last_active_at,
+          };
+        });
+      }
+
       // Combine the data
       const result: MyCandidateData[] = myCandidates.map(mc => {
         const app = appMap.get(mc.application_id);
         const media = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null };
+        const activity = activityMap[mc.applicant_id] || { latest_application_at: null, last_active_at: null };
 
         return {
           id: mc.id,
@@ -738,6 +778,8 @@ const MyCandidates = () => {
           is_profile_video: media.is_profile_video,
           applied_at: app?.applied_at || null,
           viewed_at: app?.viewed_at || null,
+          latest_application_at: activity.latest_application_at,
+          last_active_at: activity.last_active_at,
         };
       });
 

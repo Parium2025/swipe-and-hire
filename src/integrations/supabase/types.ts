@@ -1312,6 +1312,14 @@ export type Database = {
         Args: { p_job_id: string }
         Returns: boolean
       }
+      get_applicant_latest_activity: {
+        Args: { p_applicant_ids: string[]; p_employer_id: string }
+        Returns: {
+          applicant_id: string
+          last_active_at: string
+          latest_application_at: string
+        }[]
+      }
       get_applicant_profile_image: {
         Args: { p_applicant_id: string; p_employer_id: string }
         Returns: string
