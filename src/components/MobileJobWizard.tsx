@@ -1848,10 +1848,15 @@ const MobileJobWizard = ({
         job_image_desktop_url: ''
       });
       setCustomQuestions([]);
+      setInitialCustomQuestions([]);
       setJobImageDisplayUrl(null);
+      setJobImageDesktopDisplayUrl(null);
       setOriginalImageUrl(null);
+      setOriginalDesktopImageUrl(null);
       setOriginalStoragePath(null);
+      setOriginalDesktopStoragePath(null);
       setImageIsEdited(false);
+      setDesktopImageIsEdited(false);
       setCachedPostalCodeInfo(null);
       setInitialFormData(null);
       setHasUnsavedChanges(false);
@@ -1908,10 +1913,15 @@ const MobileJobWizard = ({
       job_image_desktop_url: ''
     });
     setCustomQuestions([]);
+    setInitialCustomQuestions([]);
     setJobImageDisplayUrl(null);
+    setJobImageDesktopDisplayUrl(null);
     setOriginalImageUrl(null);
+    setOriginalDesktopImageUrl(null);
     setOriginalStoragePath(null);
+    setOriginalDesktopStoragePath(null);
     setImageIsEdited(false);
+    setDesktopImageIsEdited(false);
     setCachedPostalCodeInfo(null);
     setInitialFormData(null);
     setHasUnsavedChanges(false);
