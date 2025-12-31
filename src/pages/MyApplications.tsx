@@ -54,8 +54,8 @@ const getStatusLabel = (status: string) => {
       return 'Under granskning';
     case 'reviewed':
       return 'Granskad';
-    case 'accepted':
-      return 'Godkänd';
+    case 'hired':
+      return 'Anställd';
     case 'rejected':
       return 'Nekad';
     case 'interview':
@@ -71,7 +71,7 @@ const getStatusIcon = (status: string) => {
       return <Hourglass className="h-3.5 w-3.5" />;
     case 'reviewed':
       return <Clock className="h-3.5 w-3.5" />;
-    case 'accepted':
+    case 'hired':
       return <CheckCircle2 className="h-3.5 w-3.5" />;
     case 'rejected':
       return <XCircle className="h-3.5 w-3.5" />;
@@ -88,7 +88,7 @@ const getStatusColor = (status: string) => {
       return 'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 transition-colors';
     case 'reviewed':
       return 'bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30 transition-colors';
-    case 'accepted':
+    case 'hired':
       return 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30 transition-colors';
     case 'rejected':
       return 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30 transition-colors';

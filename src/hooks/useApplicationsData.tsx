@@ -391,7 +391,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
     total: enrichedApplications.length,
     new: enrichedApplications.filter(app => app.status === 'pending').length,
     reviewing: enrichedApplications.filter(app => app.status === 'reviewing').length,
-    accepted: enrichedApplications.filter(app => app.status === 'accepted').length,
+    hired: enrichedApplications.filter(app => app.status === 'hired').length,
     rejected: enrichedApplications.filter(app => app.status === 'rejected').length,
   }), [enrichedApplications]);
 
