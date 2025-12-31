@@ -1312,20 +1312,20 @@ const MyCandidates = () => {
             {/* Select mode toggle button */}
             {!isSelectionMode ? (
               <Button
-                variant="outline"
+                variant="outlineNeutral"
                 size="sm"
                 onClick={() => setIsSelectionMode(true)}
-                className="bg-white/5 border-white/20 !text-white hover:bg-white/5 hover:!text-white hover:border-white/50 transition-all duration-200 flex-shrink-0"
+                className="bg-background/5 border-foreground/25 text-foreground md:hover:bg-background/5 md:hover:text-foreground md:hover:border-foreground/55 md:hover:ring-1 md:hover:ring-foreground/20 transition-all duration-200 flex-shrink-0"
               >
-                <CheckSquare className="h-4 w-4 mr-1.5" />
+                <CheckSquare className="h-4 w-4 mr-1.5 text-foreground md:hover:text-foreground" />
                 Välj
               </Button>
             ) : (
               <Button
-                variant="outline"
+                variant="outlineNeutral"
                 size="sm"
                 onClick={exitSelectionMode}
-                className="bg-white/5 border-white/30 !text-white hover:bg-white/5 hover:!text-white hover:border-white/60 transition-all duration-200 flex-shrink-0"
+                className="bg-background/5 border-foreground/30 text-foreground md:hover:bg-background/5 md:hover:text-foreground md:hover:border-foreground/60 md:hover:ring-1 md:hover:ring-foreground/20 transition-all duration-200 flex-shrink-0"
               >
                 Avbryt
               </Button>
