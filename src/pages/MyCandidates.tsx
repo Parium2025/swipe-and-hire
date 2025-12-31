@@ -212,9 +212,18 @@ const CandidateCardContent = ({
         <SmallCandidateAvatar candidate={candidate} />
         
         <div className="flex-1 min-w-0 pr-4">
-          <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors">
-            {candidate.first_name} {candidate.last_name}
-          </p>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors cursor-default">
+                  {candidate.first_name} {candidate.last_name}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                <p>{candidate.first_name} {candidate.last_name}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <StarRating rating={candidate.rating} />
           {appliedTime && (
             <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px] group-hover:text-white/80 transition-colors">
