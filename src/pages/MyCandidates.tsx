@@ -227,7 +227,7 @@ const CandidateCardContent = ({
           </TooltipProvider>
           <StarRating rating={candidate.rating} />
           {(latestApplicationTime || lastActiveTime) && (
-            <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px] group-hover:text-white/80 transition-colors">
+            <div className="flex items-center gap-1.5 mt-0.5 text-white text-[10px]">
               {latestApplicationTime && (
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
