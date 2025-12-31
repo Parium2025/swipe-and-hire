@@ -182,7 +182,7 @@ const CandidateCardContent = ({
         transition-all duration-200 ease-out
         ${isSelectionMode ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
         ${isSelected 
-          ? 'ring-2 ring-primary bg-primary/10' 
+          ? 'ring-1 ring-white/30 bg-white/[0.08]' 
           : isDragging 
             ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
             : 'ring-white/10 hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
