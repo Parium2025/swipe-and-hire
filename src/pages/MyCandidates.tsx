@@ -1623,7 +1623,7 @@ const MyCandidates = () => {
                   Flytta till
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[180px]">
+              <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
                 {activeStageOrder.map(stage => {
                   const settings = activeStageConfig[stage];
                   const Icon = getIconByName(settings?.iconName || 'flag');
