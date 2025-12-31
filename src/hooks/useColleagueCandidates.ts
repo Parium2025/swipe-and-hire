@@ -94,10 +94,27 @@ export function useColleagueCandidates(colleagueId: string | null) {
         })
       );
 
+      // Fetch latest activity data (latest_application_at across org + last_active_at)
+      const activityMap: Record<string, { latest_application_at: string | null; last_active_at: string | null }> = {};
+      const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
+        p_applicant_ids: applicantIds,
+        p_employer_id: user.id,
+      });
+
+      if (activityData) {
+        activityData.forEach((item: any) => {
+          activityMap[item.applicant_id] = {
+            latest_application_at: item.latest_application_at,
+            last_active_at: item.last_active_at,
+          };
+        });
+      }
+
       // Combine the data
       const result: MyCandidateData[] = myCandidates.map(mc => {
         const app = appMap.get(mc.application_id);
         const media = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null };
+        const activity = activityMap[mc.applicant_id] || { latest_application_at: null, last_active_at: null };
 
         return {
           id: mc.id,
@@ -129,6 +146,8 @@ export function useColleagueCandidates(colleagueId: string | null) {
           is_profile_video: media.is_profile_video,
           applied_at: app?.applied_at || null,
           viewed_at: app?.viewed_at || null,
+          latest_application_at: activity.latest_application_at,
+          last_active_at: activity.last_active_at,
         };
       });
 
