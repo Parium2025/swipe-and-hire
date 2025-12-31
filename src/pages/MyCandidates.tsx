@@ -1312,20 +1312,20 @@ const MyCandidates = () => {
             {/* Select mode toggle button */}
             {!isSelectionMode ? (
               <Button
-                variant="outlineNeutral"
+                variant="ghost"
                 size="sm"
                 onClick={() => setIsSelectionMode(true)}
-                className="bg-pure-white/5 border-pure-white/25 text-pure-white [&_svg]:text-pure-white md:hover:bg-pure-white/5 md:hover:text-pure-white md:hover:border-pure-white/55 md:hover:ring-1 md:hover:ring-pure-white/20 md:hover:[&_svg]:text-pure-white transition-all duration-200 flex-shrink-0"
+                className="bg-white/5 border border-white/20 text-white [&_svg]:text-white md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200 flex-shrink-0"
               >
                 <CheckSquare className="h-4 w-4 mr-1.5" />
                 Välj
               </Button>
             ) : (
               <Button
-                variant="outlineNeutral"
+                variant="ghost"
                 size="sm"
                 onClick={exitSelectionMode}
-                className="bg-pure-white/5 border-pure-white/30 text-pure-white [&_svg]:text-pure-white md:hover:bg-pure-white/5 md:hover:text-pure-white md:hover:border-pure-white/60 md:hover:ring-1 md:hover:ring-pure-white/20 md:hover:[&_svg]:text-pure-white transition-all duration-200 flex-shrink-0"
+                className="bg-white/5 border border-white/20 text-white [&_svg]:text-white md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200 flex-shrink-0"
               >
                 Avbryt
               </Button>
@@ -1598,20 +1598,20 @@ const MyCandidates = () => {
             {/* Select All / Deselect All toggle */}
             {!allVisibleSelected ? (
               <Button
-                variant="outlineNeutral"
+                variant="ghost"
                 size="sm"
                 onClick={selectAllVisible}
-                className="bg-pure-white/5 border-pure-white/25 text-pure-white [&_svg]:text-pure-white md:hover:bg-pure-white/5 md:hover:text-pure-white md:hover:border-pure-white/55 md:hover:ring-1 md:hover:ring-pure-white/20 md:hover:[&_svg]:text-pure-white transition-all duration-200"
+                className="text-white/80 [&_svg]:text-white/80 md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200"
               >
                 <CheckSquare className="h-4 w-4 mr-1.5" />
                 Välj alla
               </Button>
             ) : (
               <Button
-                variant="outlineNeutral"
+                variant="ghost"
                 size="sm"
                 onClick={() => setSelectedCandidateIds(new Set())}
-                className="bg-pure-white/5 border-pure-white/25 text-pure-white [&_svg]:text-pure-white md:hover:bg-pure-white/5 md:hover:text-pure-white md:hover:border-pure-white/55 md:hover:ring-1 md:hover:ring-pure-white/20 md:hover:[&_svg]:text-pure-white transition-all duration-200"
+                className="text-white/80 [&_svg]:text-white/80 md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200"
               >
                 <Square className="h-4 w-4 mr-1.5" />
                 Avmarkera alla
@@ -1626,9 +1626,9 @@ const MyCandidates = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      variant="outlineNeutral"
+                      variant="ghost"
                       size="sm"
-                      className="bg-pure-white/5 border-pure-white/25 text-pure-white [&_svg]:text-pure-white md:hover:bg-pure-white/5 md:hover:text-pure-white md:hover:border-pure-white/55 md:hover:ring-1 md:hover:ring-pure-white/20 md:hover:[&_svg]:text-pure-white transition-all duration-200"
+                      className="text-white/80 [&_svg]:text-white/80 md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200"
                     >
                       <ArrowDown className="h-4 w-4 mr-1.5" />
                       Flytta till
@@ -1657,10 +1657,10 @@ const MyCandidates = () => {
                 </DropdownMenu>
                 
                 <Button
-                  variant="outlineNeutral"
+                  variant="ghost"
                   size="sm"
                   onClick={() => setShowBulkDeleteConfirm(true)}
-                  className="bg-red-500/20 border-red-400/40 text-pure-white [&_svg]:text-red-400 md:hover:bg-red-500/30 md:hover:text-pure-white md:hover:border-red-400/60 md:hover:ring-1 md:hover:ring-red-400/30 md:hover:[&_svg]:text-red-400 transition-all duration-200"
+                  className="bg-red-500/20 text-white [&_svg]:text-red-400 md:hover:bg-red-500/30 md:hover:text-white md:hover:[&_svg]:text-red-400 transition-all duration-200"
                 >
                   <Trash2 className="h-4 w-4 mr-1.5" />
                   Ta bort
