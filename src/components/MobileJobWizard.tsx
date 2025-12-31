@@ -1548,27 +1548,27 @@ const MobileJobWizard = ({
     setShowSalaryTypeDropdown(!isCurrentlyOpen);
   };
 
-  // Salary Transparency options (EU directive 2026)
+  // Salary Transparency options (EU directive 2026) - matching CreateTemplateWizard & EditJobDialog format
   const salaryTransparencyOptions = [
-    { value: '0-5', label: '0 - 5 000 kr' },
-    { value: '5-10', label: '5 000 - 10 000 kr' },
-    { value: '10-15', label: '10 000 - 15 000 kr' },
-    { value: '15-20', label: '15 000 - 20 000 kr' },
-    { value: '20-25', label: '20 000 - 25 000 kr' },
-    { value: '25-30', label: '25 000 - 30 000 kr' },
-    { value: '30-40', label: '30 000 - 40 000 kr' },
-    { value: '40-45', label: '40 000 - 45 000 kr' },
-    { value: '45-50', label: '45 000 - 50 000 kr' },
-    { value: '50-55', label: '50 000 - 55 000 kr' },
-    { value: '55-60', label: '55 000 - 60 000 kr' },
-    { value: '60-65', label: '60 000 - 65 000 kr' },
-    { value: '65-70', label: '65 000 - 70 000 kr' },
-    { value: '70-75', label: '70 000 - 75 000 kr' },
-    { value: '75-80', label: '75 000 - 80 000 kr' },
-    { value: '80-85', label: '80 000 - 85 000 kr' },
-    { value: '85-90', label: '85 000 - 90 000 kr' },
-    { value: '90-100', label: '90 000 - 100 000 kr' },
-    { value: '100+', label: '100 000+ kr' },
+    { value: '0-5000', label: '0 - 5 000 kr' },
+    { value: '5000-10000', label: '5 000 - 10 000 kr' },
+    { value: '10000-15000', label: '10 000 - 15 000 kr' },
+    { value: '15000-20000', label: '15 000 - 20 000 kr' },
+    { value: '20000-25000', label: '20 000 - 25 000 kr' },
+    { value: '25000-30000', label: '25 000 - 30 000 kr' },
+    { value: '30000-40000', label: '30 000 - 40 000 kr' },
+    { value: '40000-45000', label: '40 000 - 45 000 kr' },
+    { value: '45000-50000', label: '45 000 - 50 000 kr' },
+    { value: '50000-55000', label: '50 000 - 55 000 kr' },
+    { value: '55000-60000', label: '55 000 - 60 000 kr' },
+    { value: '60000-65000', label: '60 000 - 65 000 kr' },
+    { value: '65000-70000', label: '65 000 - 70 000 kr' },
+    { value: '70000-75000', label: '70 000 - 75 000 kr' },
+    { value: '75000-80000', label: '75 000 - 80 000 kr' },
+    { value: '80000-85000', label: '80 000 - 85 000 kr' },
+    { value: '85000-90000', label: '85 000 - 90 000 kr' },
+    { value: '90000-100000', label: '90 000 - 100 000 kr' },
+    { value: '100000+', label: '100 000+ kr' },
   ];
 
   const filteredSalaryTransparencyOptions = salaryTransparencyOptions.filter(option =>
