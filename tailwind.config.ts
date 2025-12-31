@@ -84,7 +84,11 @@ export default {
 				// Parium brand colors
 				'parium-navy': 'hsl(215 100% 12%)',
 				'parium-blue': 'hsl(200 100% 60%)',
-				'parium-light': 'hsl(200 100% 95%)'
+				'parium-light': 'hsl(200 100% 95%)',
+				// Semantic pure colors (from design tokens)
+				pure: {
+					white: 'hsl(var(--pure-white))'
+				}
 			},
 			backgroundImage: {
 				'gradient-parium': 'var(--gradient-parium)',
