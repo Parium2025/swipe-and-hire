@@ -195,7 +195,7 @@ const CandidateCardContent = ({
           <Checkbox 
             checked={isSelected}
             onCheckedChange={() => onToggleSelect?.()}
-            className="h-4 w-4 border-white/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+            className="h-5 w-5 border-2 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white hover:border-white/70"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
