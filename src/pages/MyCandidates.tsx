@@ -1317,27 +1317,16 @@ const MyCandidates = () => {
               )}
             </div>
             
-            {/* Select mode toggle button */}
-            {!isSelectionMode ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSelectionMode(true)}
-                className="bg-white/5 border border-white/20 text-white [&_svg]:text-white md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200 flex-shrink-0"
-              >
-                <CheckSquare className="h-4 w-4 mr-1.5" />
-                Välj
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={exitSelectionMode}
-                className="bg-white/5 border border-white/20 text-white [&_svg]:text-white md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200 flex-shrink-0"
-              >
-                Avbryt
-              </Button>
-            )}
+            {/* Select mode toggle button (single button to prevent focus flicker) */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)}
+              className="bg-white/5 border border-white/20 text-white [&_svg]:text-white md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200 flex-shrink-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
+            >
+              {isSelectionMode ? null : <CheckSquare className="h-4 w-4 mr-1.5" />}
+              {isSelectionMode ? 'Avbryt' : 'Välj'}
+            </Button>
           </div>
 
           {/* Stage filters */}
