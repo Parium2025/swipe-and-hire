@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
@@ -13,6 +12,7 @@ import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { useJobStageSettings, getJobStageIconByName, DEFAULT_JOB_STAGE_KEYS } from '@/hooks/useJobStageSettings';
+import { useJobDetailsData, type JobApplication } from '@/hooks/useJobDetailsData';
 import { 
   Clock, 
   X,
@@ -21,8 +21,6 @@ import {
   Play,
   Star,
   ArrowDown,
-  Trash2,
-  Phone as PhoneIcon,
   Calendar,
   Gift,
   PartyPopper,
@@ -34,7 +32,6 @@ import {
 import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays, differenceInHours } from 'date-fns';
-import EmployerLayout from '@/components/EmployerLayout';
 import {
   DndContext,
   DragOverlay,
@@ -63,30 +60,6 @@ interface CriterionResult {
   result: 'match' | 'no_match' | 'no_data';
   reasoning?: string;
   title: string;
-}
-
-interface JobApplication {
-  id: string;
-  applicant_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  age: number;
-  location: string;
-  bio: string;
-  cv_url: string;
-  employment_status: string;
-  availability: string;
-  applied_at: string;
-  status: 'pending' | 'reviewing' | 'interview' | 'offered' | 'hired' | 'rejected';
-  custom_answers: any;
-  viewed_at: string | null;
-  profile_image_url: string | null;
-  video_url: string | null;
-  is_profile_video: boolean;
-  rating: number;
-  criterionResults?: CriterionResult[];
 }
 
 // Format time in compact way like MyCandidates
@@ -128,16 +101,6 @@ const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxStars?: 
     </div>
   );
 };
-
-interface JobPosting {
-  id: string;
-  title: string;
-  location: string;
-  is_active: boolean;
-  views_count: number;
-  applications_count: number;
-  created_at: string;
-}
 
 type ApplicationStatus = 'pending' | 'reviewing' | 'interview' | 'offered' | 'hired' | 'rejected';
 
@@ -419,18 +382,46 @@ const JobDetails = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [job, setJob] = useState<JobPosting | null>(null);
-  const [applications, setApplications] = useState<JobApplication[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Use cached data hook
+  const { 
+    job, 
+    applications, 
+    isLoading: dataLoading, 
+    updateApplicationLocally, 
+    updateJobLocally,
+    refetch 
+  } = useJobDetailsData(jobId);
+  
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [myCandidatesMap, setMyCandidatesMap] = useState<Map<string, string>>(new Map()); // applicant_id -> my_candidate_id
+  const [myCandidatesMap, setMyCandidatesMap] = useState<Map<string, string>>(new Map());
   const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
 
   // Use job-specific stage settings
   const { stageSettings, orderedStages, isLoading: stagesLoading } = useJobStageSettings(jobId);
+
+  // Load my_candidates map for ratings
+  useEffect(() => {
+    if (!user || applications.length === 0) return;
+    
+    const loadMyCandidatesMap = async () => {
+      const applicantIds = applications.map(a => a.applicant_id);
+      const { data } = await supabase
+        .from('my_candidates')
+        .select('id, applicant_id')
+        .eq('recruiter_id', user.id)
+        .in('applicant_id', applicantIds);
+      
+      const candidateIdsMap = new Map<string, string>();
+      (data || []).forEach(mc => candidateIdsMap.set(mc.applicant_id, mc.id));
+      setMyCandidatesMap(candidateIdsMap);
+    };
+    
+    loadMyCandidatesMap();
+  }, [user, applications]);
 
   // DnD sensors
   const sensors = useSensors(
@@ -450,137 +441,9 @@ const JobDetails = () => {
     [activeStages]
   );
 
-  useEffect(() => {
-    if (!jobId || !user) return;
-    fetchJobData();
-  }, [jobId, user]);
-
-  const fetchJobData = async () => {
-    try {
-      // Fetch job details
-      const { data: jobData, error: jobError } = await supabase
-        .from('job_postings')
-        .select('*')
-        .eq('id', jobId)
-        .eq('employer_id', user?.id)
-        .single();
-
-      if (jobError) throw jobError;
-      setJob(jobData);
-
-      // Fetch applications
-      const { data: applicationsData, error: applicationsError } = await supabase
-        .from('job_applications')
-        .select('*')
-        .eq('job_id', jobId)
-        .order('applied_at', { ascending: false });
-
-      if (applicationsError) throw applicationsError;
-      
-      // Fetch my_candidates ratings and IDs for this recruiter
-      const { data: myCandidatesData } = await supabase
-        .from('my_candidates')
-        .select('id, applicant_id, rating')
-        .eq('recruiter_id', user?.id);
-      
-      const ratingsByApplicant = new Map<string, number>();
-      const candidateIdsMap = new Map<string, string>();
-      (myCandidatesData || []).forEach(mc => {
-        ratingsByApplicant.set(mc.applicant_id, mc.rating || 0);
-        candidateIdsMap.set(mc.applicant_id, mc.id);
-      });
-      setMyCandidatesMap(candidateIdsMap);
-
-      // Fetch criteria for this job
-      const { data: criteriaData } = await supabase
-        .from('job_criteria')
-        .select('id, title')
-        .eq('job_id', jobId);
-      
-      const criteriaMap = new Map<string, string>();
-      (criteriaData || []).forEach(c => criteriaMap.set(c.id, c.title));
-
-      // Fetch criterion results for all applicants
-      const applicantIds = (applicationsData || []).map(a => a.applicant_id);
-      const { data: evaluationsData } = await supabase
-        .from('candidate_evaluations')
-        .select('id, applicant_id')
-        .eq('job_id', jobId)
-        .in('applicant_id', applicantIds.length > 0 ? applicantIds : ['']);
-
-      const evaluationIds = (evaluationsData || []).map(e => e.id);
-      const evaluationByApplicant = new Map<string, string>();
-      (evaluationsData || []).forEach(e => evaluationByApplicant.set(e.applicant_id, e.id));
-
-      const { data: criterionResultsData } = await supabase
-        .from('criterion_results')
-        .select('evaluation_id, criterion_id, result, reasoning')
-        .in('evaluation_id', evaluationIds.length > 0 ? evaluationIds : ['']);
-
-      // Group results by evaluation_id
-      const resultsByEvaluation = new Map<string, CriterionResult[]>();
-      (criterionResultsData || []).forEach(cr => {
-        const title = criteriaMap.get(cr.criterion_id) || 'Okänt kriterium';
-        const result: CriterionResult = {
-          criterion_id: cr.criterion_id,
-          result: cr.result as 'match' | 'no_match' | 'no_data',
-          reasoning: cr.reasoning || undefined,
-          title,
-        };
-        const existing = resultsByEvaluation.get(cr.evaluation_id) || [];
-        existing.push(result);
-        resultsByEvaluation.set(cr.evaluation_id, existing);
-      });
-
-      // Fetch profile media for each applicant using RPC
-      const applicationsWithMedia = await Promise.all(
-        (applicationsData || []).map(async (app) => {
-          const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
-            p_applicant_id: app.applicant_id,
-            p_employer_id: user?.id
-          });
-          
-          const media = (mediaData?.[0] || {}) as {
-            profile_image_url?: string;
-            video_url?: string;
-            is_profile_video?: boolean;
-          };
-
-          // Get criterion results for this applicant
-          const evalId = evaluationByApplicant.get(app.applicant_id);
-          const criterionResults = evalId ? resultsByEvaluation.get(evalId) || [] : [];
-
-          return {
-            ...app,
-            profile_image_url: media.profile_image_url || null,
-            video_url: media.video_url || null,
-            is_profile_video: media.is_profile_video || false,
-            rating: ratingsByApplicant.get(app.applicant_id) || 0,
-            criterionResults,
-          };
-        })
-      );
-      
-      setApplications(applicationsWithMedia as JobApplication[]);
-    } catch (error: any) {
-      toast({
-        title: 'Fel',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const updateApplicationStatus = async (applicationId: string, newStatus: string) => {
-    // Optimistic update - move card immediately
-    const previousApplications = [...applications];
-    setApplications(prev => prev.map(app => 
-      app.id === applicationId 
-        ? { ...app, status: newStatus as JobApplication['status'] } 
-        : app
-    ));
+    // Optimistic update via React Query cache
+    updateApplicationLocally(applicationId, { status: newStatus as JobApplication['status'] });
 
     try {
       const { error } = await supabase
@@ -589,8 +452,8 @@ const JobDetails = () => {
         .eq('id', applicationId);
 
       if (error) {
-        // Revert on error
-        setApplications(previousApplications);
+        // Refetch on error to restore correct state
+        refetch();
         throw error;
       }
     } catch (error: any) {
@@ -608,70 +471,40 @@ const JobDetails = () => {
       toast({ title: 'Info', description: 'Lägg först till kandidaten i din lista för att ge betyg' });
       return;
     }
-    setApplications(prev => prev.map(app => app.applicant_id === applicantId ? { ...app, rating: newRating } : app));
+    
+    // Optimistic update
+    updateApplicationLocally(
+      applications.find(a => a.applicant_id === applicantId)?.id || '',
+      { rating: newRating }
+    );
     if (selectedApplication?.applicant_id === applicantId) {
       setSelectedApplication(prev => prev ? { ...prev, rating: newRating } : null);
     }
+    
     try {
       const { error } = await supabase.from('my_candidates').update({ rating: newRating }).eq('id', myCandidateId);
       if (error) throw error;
     } catch {
       toast({ title: 'Fel', description: 'Kunde inte uppdatera betyg', variant: 'destructive' });
-      fetchJobData();
+      refetch();
     }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40';
-      case 'reviewing':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/40';
-      case 'interview':
-        return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
-      case 'offered':
-        return 'bg-green-500/20 text-green-300 border-green-500/40';
-      case 'hired':
-        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-      case 'rejected':
-        return 'bg-red-500/20 text-red-300 border-red-500/40';
-      default:
-        return 'bg-white/10 text-white border-white/20';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'pending': return 'Inkorg';
-      case 'reviewing': return 'Granskar';
-      case 'interview': return 'Intervju';
-      case 'offered': return 'Erbjuden';
-      case 'hired': return 'Anställd';
-      case 'rejected': return 'Avvisad';
-      default: return status;
-    }
-  };
-
-  const filterApplicationsByStatus = (status: string) => {
-    return applications.filter(app => app.status === status);
   };
 
   const markApplicationAsViewed = async (applicationId: string) => {
+    // Optimistic update
+    updateApplicationLocally(applicationId, { viewed_at: new Date().toISOString() });
+    
     try {
       await supabase
         .from('job_applications')
         .update({ viewed_at: new Date().toISOString() })
         .eq('id', applicationId)
         .is('viewed_at', null);
-      
-      // Update local state
-      setApplications(prev => prev.map(app => 
-        app.id === applicationId ? { ...app, viewed_at: new Date().toISOString() } : app
-      ));
     } catch (error) {
       console.error('Error marking as viewed:', error);
     }
   };
+
 
   // Memoize applications by status to prevent unnecessary re-renders
   const applicationsByStatus = useMemo(() => {
@@ -759,9 +592,7 @@ const JobDetails = () => {
   const activeApplication = activeId ? applications.find(a => a.id === activeId) : null;
 
   // Show skeleton while loading job data OR stage settings
-  const isFullyLoaded = !loading && !stagesLoading;
-
-  if (loading || stagesLoading) {
+  if (dataLoading || stagesLoading) {
     return (
       <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 py-4 pb-safe min-h-screen animate-fade-in">
         {/* Header skeleton */}
@@ -864,7 +695,8 @@ const JobDetails = () => {
                         description: job.is_active ? 'Jobbet är nu inaktivt.' : 'Jobbet är nu aktivt.',
                       });
 
-                      fetchJobData();
+                      updateJobLocally({ is_active: !job.is_active });
+                      refetch();
                     } catch (error: any) {
                       toast({
                         title: 'Fel',
@@ -908,7 +740,7 @@ const JobDetails = () => {
 
         {/* AI Criteria Manager */}
         {jobId && (
-          <JobCriteriaManager jobId={jobId} onCriteriaChange={fetchJobData} />
+          <JobCriteriaManager jobId={jobId} onCriteriaChange={refetch} />
         )}
 
         {/* Kanban View with Drag and Drop */}
@@ -999,7 +831,7 @@ const JobDetails = () => {
             }
           }}
           onStatusUpdate={() => {
-            fetchJobData();
+            refetch();
           }}
           candidateRating={selectedApplication?.rating}
           onRatingChange={(rating) => {
