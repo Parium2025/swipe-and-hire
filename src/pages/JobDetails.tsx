@@ -119,7 +119,6 @@ const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string; h
 
 // Small Candidate Avatar Wrapper - MUST be outside JobDetails to prevent recreation
 const SmallCandidateAvatarWrapper = ({ application }: { application: JobApplication }) => {
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const hasVideo = application.is_profile_video && application.video_url;
   
   return (
@@ -136,13 +135,7 @@ const SmallCandidateAvatarWrapper = ({ application }: { application: JobApplicat
         firstName={application.first_name}
         lastName={application.last_name}
         stopPropagation={!!hasVideo}
-        onPlayingChange={setIsVideoPlaying}
       />
-      {hasVideo && !isVideoPlaying && (
-        <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center pointer-events-none">
-          <Play className="h-3 w-3 md:h-4 md:w-4 text-white drop-shadow-lg fill-white" />
-        </div>
-      )}
     </div>
   );
 };
@@ -161,6 +154,7 @@ const ApplicationCardContent = ({
 }) => {
   const isUnread = !application.viewed_at;
   const appliedTime = formatCompactTime(application.applied_at);
+  const lastActiveTime = formatCompactTime(application.last_active_at);
   const criterionResults = application.criterionResults || [];
   
   const handleClick = () => {
@@ -203,21 +197,38 @@ const ApplicationCardContent = ({
             </Tooltip>
           </TooltipProvider>
           <StarRating rating={application.rating} />
-          {appliedTime && (
+          {(appliedTime || lastActiveTime) && (
             <div className="flex items-center gap-1.5 mt-0.5 text-white text-[10px]">
-              <TooltipProvider delayDuration={300}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="flex items-center gap-0.5 cursor-default">
-                      <ArrowDown className="h-2.5 w-2.5" />
-                      {appliedTime}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">
-                    <p>Ansökt till detta jobb</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              {appliedTime && (
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center gap-0.5 cursor-default">
+                        <ArrowDown className="h-2.5 w-2.5" />
+                        {appliedTime}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      <p>Ansökt till detta jobb</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {lastActiveTime && (
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center gap-0.5 cursor-default">
+                        <Clock className="h-2.5 w-2.5" />
+                        {lastActiveTime}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      <p>Senast aktiv i appen</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
           )}
         </div>

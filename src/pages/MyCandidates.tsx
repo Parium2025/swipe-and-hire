@@ -133,7 +133,6 @@ const StarRating = ({
 
 // Wrapper component for CandidateAvatar with inline video playback
 const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => {
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const hasVideo = candidate.is_profile_video && candidate.video_url;
   
   return (
@@ -151,13 +150,7 @@ const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => 
         firstName={candidate.first_name}
         lastName={candidate.last_name}
         stopPropagation={!!hasVideo}
-        onPlayingChange={setIsVideoPlaying}
       />
-      {hasVideo && !isVideoPlaying && (
-        <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center pointer-events-none">
-          <Play className="h-3 w-3 md:h-4 md:w-4 text-white drop-shadow-lg fill-white" />
-        </div>
-      )}
     </div>
   );
 };
