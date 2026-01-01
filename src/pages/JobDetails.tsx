@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,7 @@ import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { useJobStageSettings, getJobStageIconByName, DEFAULT_JOB_STAGE_KEYS } from '@/hooks/useJobStageSettings';
 import { useJobDetailsData, type JobApplication } from '@/hooks/useJobDetailsData';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Clock, 
   X,
@@ -27,7 +28,8 @@ import {
   Inbox,
   MapPin,
   Sparkles,
-  Plus
+  Plus,
+  ChevronDown
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
@@ -187,20 +189,47 @@ const ApplicationCardContent = ({
         <SmallCandidateAvatarWrapper application={application} />
         
         <div className="flex-1 min-w-0 pr-4">
-          <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors">
-            {application.first_name} {application.last_name}
-          </p>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors cursor-default">
+                  {application.first_name} {application.last_name}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                <p>{application.first_name} {application.last_name}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <StarRating rating={application.rating} />
           {appliedTime && (
-            <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px] group-hover:text-white/80 transition-colors">
-              <span className="flex items-center gap-0.5">
-                <ArrowDown className="h-2.5 w-2.5" />
-                {appliedTime}
-              </span>
-              <span className="flex items-center gap-0.5">
-                <Clock className="h-2.5 w-2.5" />
-                {appliedTime}
-              </span>
+            <div className="flex items-center gap-1.5 mt-0.5 text-white text-[10px]">
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="flex items-center gap-0.5 cursor-default">
+                      <ArrowDown className="h-2.5 w-2.5" />
+                      {appliedTime}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    <p>Ansökt till detta jobb</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="flex items-center gap-0.5 cursor-default">
+                      <Clock className="h-2.5 w-2.5" />
+                      {appliedTime}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    <p>Senast aktiv i appen</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           )}
         </div>
@@ -291,6 +320,9 @@ const StatusColumn = ({
   totalStageCount
 }: StatusColumnProps) => {
   const [liveColor, setLiveColor] = useState<string | null>(null);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const displayColor = liveColor || stageConfig.color;
   const Icon = getJobStageIconByName(stageConfig.iconName);
   
@@ -299,11 +331,28 @@ const StatusColumn = ({
     id: status,
   });
 
+  // Check scroll position to show/hide indicators
+  const checkScroll = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    
+    const hasScrollableContent = el.scrollHeight > el.clientHeight;
+    const isAtTop = el.scrollTop <= 5;
+    const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
+    
+    setCanScrollUp(hasScrollableContent && !isAtTop);
+    setCanScrollDown(hasScrollableContent && !isAtBottom);
+  }, []);
+
+  // Check scroll on mount and when applications change
+  useEffect(() => {
+    checkScroll();
+  }, [applications.length, checkScroll]);
+
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors"
-      style={{ minHeight: 'calc(100vh - 280px)' }}
+      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors h-full"
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -311,7 +360,16 @@ const StatusColumn = ({
       >
         <div className="flex items-center gap-1.5 min-w-0">
           <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-          <span className="font-medium text-xs text-white truncate flex-1 min-w-0">{stageConfig.label}</span>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="font-medium text-xs text-white truncate cursor-default flex-1 min-w-0">{stageConfig.label}</span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                <p>{stageConfig.label}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <span 
             className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}66` }}
@@ -342,7 +400,16 @@ const StatusColumn = ({
 
       {/* Content area - with background container like MyCandidates */}
       <div className="relative flex-1 min-h-0 bg-white/[0.03] rounded-lg ring-1 ring-inset ring-white/10 backdrop-blur-sm">
-        <div className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
+        {/* Scroll up indicator */}
+        {canScrollUp && (
+          <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-white/5 to-transparent z-10 pointer-events-none rounded-t-lg" />
+        )}
+        
+        <div 
+          ref={scrollContainerRef}
+          onScroll={checkScroll}
+          className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
+        >
           {/* Drop indicator at top */}
           {isOver && (
             <div className="mb-2 flex items-center justify-center">
@@ -369,6 +436,15 @@ const StatusColumn = ({
             </div>
           )}
         </div>
+
+        {/* Scroll down indicator */}
+        {canScrollDown && (
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/5 to-transparent z-10 pointer-events-none rounded-b-lg flex items-end justify-center pb-1">
+            <div className="animate-bounce">
+              <ChevronDown className="h-3.5 w-3.5 text-white/60" />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
