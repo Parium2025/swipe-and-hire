@@ -340,33 +340,35 @@ const StatusColumn = ({
         </div>
       </div>
 
-      {/* Content area */}
-      <div className="flex-1 space-y-1 overflow-y-auto p-1 pr-2">
-        {/* Drop indicator at top */}
-        {isOver && (
-          <div className="mb-2 flex items-center justify-center">
-            <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
-              Släpp här
+      {/* Content area - with background container like MyCandidates */}
+      <div className="relative flex-1 min-h-0 bg-white/[0.03] rounded-lg ring-1 ring-inset ring-white/10 backdrop-blur-sm">
+        <div className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
+          {/* Drop indicator at top */}
+          {isOver && (
+            <div className="mb-2 flex items-center justify-center">
+              <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
+                Släpp här
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <SortableContext items={applications.map(a => a.id)} strategy={verticalListSortingStrategy}>
-          {applications.map((app) => (
-            <SortableApplicationCard 
-              key={app.id} 
-              application={app} 
-              onOpenProfile={() => onOpenProfile(app)}
-              onMarkAsViewed={onMarkAsViewed}
-            />
-          ))}
-        </SortableContext>
+          <SortableContext items={applications.map(a => a.id)} strategy={verticalListSortingStrategy}>
+            {applications.map((app) => (
+              <SortableApplicationCard 
+                key={app.id} 
+                application={app} 
+                onOpenProfile={() => onOpenProfile(app)}
+                onMarkAsViewed={onMarkAsViewed}
+              />
+            ))}
+          </SortableContext>
 
-        {applications.length === 0 && !isOver && (
-          <div className="text-center py-8 text-xs text-white">
-            Inga kandidater i detta steg
-          </div>
-        )}
+          {applications.length === 0 && !isOver && (
+            <div className="text-center py-8 text-xs text-white">
+              Inga kandidater i detta steg
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
