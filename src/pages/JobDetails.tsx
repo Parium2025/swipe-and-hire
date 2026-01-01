@@ -746,7 +746,16 @@ const JobDetails = () => {
             },
           }}
         >
-          <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2" style={{ minHeight: 'calc(100vh - 300px)' }}>
+          <div 
+            className="flex gap-4 pb-4 pt-2 px-2" 
+            style={{ 
+              height: 'calc(100vh - 300px)',
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehaviorX: 'contain',
+            }}
+          >
             {activeStages.map((status) => {
               const config = stageSettings[status] || { label: status, color: '#0EA5E9', iconName: 'inbox', isCustom: false };
               return (
