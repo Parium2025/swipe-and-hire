@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { Plus, Edit, Trash2, Calendar, Loader2, Star, StarOff } from 'lucide-react';
@@ -442,7 +443,7 @@ const JobTemplatesOverview = () => {
           resetForm();
         }
       }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white">
+        <DialogContentNoFocus className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white">
           <DialogHeader>
             <DialogTitle>
               {editingTemplate ? 'Redigera mall' : 'Skapa ny jobbmall'}
@@ -641,7 +642,7 @@ const JobTemplatesOverview = () => {
               </Button>
             </div>
           </div>
-        </DialogContent>
+        </DialogContentNoFocus>
       </Dialog>
     </div>
   );

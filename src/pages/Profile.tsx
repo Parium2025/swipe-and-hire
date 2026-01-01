@@ -15,7 +15,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw, ExternalLink } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { CvViewer } from '@/components/CvViewer';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
@@ -1997,7 +1998,7 @@ const Profile = () => {
 
       {/* CV Dialog */}
       <Dialog open={cvOpen} onOpenChange={setCvOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-transparent border-none shadow-none p-8">
+        <DialogContentNoFocus className="max-w-4xl max-h-[90vh] overflow-hidden bg-transparent border-none shadow-none p-8">
           <DialogHeader className="mb-4">
             <DialogTitle className="text-white text-2xl">{cvFileName || 'CV'}</DialogTitle>
           </DialogHeader>
@@ -2009,7 +2010,7 @@ const Profile = () => {
               onClose={() => setCvOpen(false)}
             />
           )}
-        </DialogContent>
+        </DialogContentNoFocus>
       </Dialog>
     </div>
   );
