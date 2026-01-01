@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,7 +18,7 @@ import {
   X,
   Users,
   Eye,
-  
+  ChevronDown,
   Star,
   ArrowDown,
   Calendar,
@@ -318,6 +318,9 @@ const StatusColumn = ({
   totalStageCount
 }: StatusColumnProps) => {
   const [liveColor, setLiveColor] = useState<string | null>(null);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const displayColor = liveColor || stageConfig.color;
   const Icon = getJobStageIconByName(stageConfig.iconName);
   
@@ -326,11 +329,28 @@ const StatusColumn = ({
     id: status,
   });
 
+  // Check scroll position to show/hide indicators
+  const checkScroll = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    
+    const hasScrollableContent = el.scrollHeight > el.clientHeight;
+    const isAtTop = el.scrollTop <= 5;
+    const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
+    
+    setCanScrollUp(hasScrollableContent && !isAtTop);
+    setCanScrollDown(hasScrollableContent && !isAtBottom);
+  }, []);
+
+  // Check scroll on mount and when applications change
+  useEffect(() => {
+    checkScroll();
+  }, [applications.length, checkScroll]);
+
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors"
-      style={{ minHeight: 'calc(100vh - 280px)' }}
+      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors h-full"
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -369,7 +389,16 @@ const StatusColumn = ({
 
       {/* Content area - with background container like MyCandidates */}
       <div className="relative flex-1 min-h-0 bg-white/[0.03] rounded-lg ring-1 ring-inset ring-white/10 backdrop-blur-sm">
-        <div className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
+        {/* Scroll up indicator */}
+        {canScrollUp && (
+          <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-white/5 to-transparent z-10 pointer-events-none rounded-t-lg" />
+        )}
+
+        <div 
+          ref={scrollContainerRef}
+          onScroll={checkScroll}
+          className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
+        >
           {/* Drop indicator at top */}
           {isOver && (
             <div className="mb-2 flex items-center justify-center">
@@ -396,6 +425,15 @@ const StatusColumn = ({
             </div>
           )}
         </div>
+
+        {/* Scroll down indicator */}
+        {canScrollDown && (
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/5 to-transparent z-10 pointer-events-none rounded-b-lg flex items-end justify-center pb-1">
+            <div className="animate-bounce">
+              <ChevronDown className="h-3.5 w-3.5 text-white/60" />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
