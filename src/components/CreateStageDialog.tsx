@@ -3,12 +3,12 @@ import { Plus } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -66,7 +66,7 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="bg-card-parium border-white/20 sm:max-w-lg">
+      <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-white">Skapa nytt steg</DialogTitle>
         </DialogHeader>
@@ -163,7 +163,7 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
             Skapa
           </Button>
         </DialogFooter>
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
   );
 }
