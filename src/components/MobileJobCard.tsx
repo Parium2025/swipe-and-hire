@@ -14,6 +14,7 @@ interface MobileJobCardProps {
   onEdit: (job: JobPosting) => void;
   onDelete: (job: JobPosting) => void;
   onEditDraft?: (job: JobPosting) => void;
+  onPrefetch?: (jobId: string) => void;
 }
 
 // Check if job has expired (using effective expiration date)
@@ -21,7 +22,7 @@ const isJobExpired = (job: JobPosting): boolean => {
   return isJobExpiredCheck(job.created_at, job.expires_at);
 };
 
-export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch }: MobileJobCardProps) => {
   const navigate = useNavigate();
   const jobIsExpired = isJobExpired(job);
 
@@ -31,6 +32,13 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
       onEditDraft(job);
     } else {
       navigate(`/job-details/${job.id}`);
+    }
+  };
+
+  // Prefetch on touch start for mobile (before click)
+  const handleTouchStart = () => {
+    if (job.is_active && onPrefetch) {
+      onPrefetch(job.id);
     }
   };
 
@@ -46,6 +54,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft }: Mobil
             : "hover:bg-white/5 hover:border-white/50 active:bg-white/10"
       }`}
       onClick={handleCardClick}
+      onTouchStart={handleTouchStart}
     >
       <div className="p-3 space-y-2">
         {/* Titel + Switch */}
