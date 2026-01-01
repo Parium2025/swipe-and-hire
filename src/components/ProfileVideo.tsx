@@ -271,7 +271,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           {isPlaying ? (
             <Pause className="h-8 w-8 text-white" />
           ) : (
-            <Play className="h-8 w-8 text-white" />
+            <Play className="h-8 w-8 text-white" fill="none" />
           )}
         </div>
       )}
@@ -279,7 +279,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       {/* Video indicator - always visible when not playing */}
       {!isPlaying && (
         <div className="absolute inset-0 bg-black/20 flex items-center justify-center cursor-pointer">
-          <Play className="h-6 w-6 text-white drop-shadow-lg" />
+          <Play className="h-6 w-6 text-white drop-shadow-lg" fill="none" />
         </div>
       )}
 
