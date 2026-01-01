@@ -121,7 +121,7 @@ const SmallCandidateAvatarWrapper = ({ application }: { application: JobApplicat
 
   return (
     <div 
-      className="h-7 w-7 md:h-8 md:w-8 flex-shrink-0 [&>*:first-child]:h-7 [&>*:first-child]:w-7 md:[&>*:first-child]:h-8 md:[&>*:first-child]:w-8 [&_.h-10]:h-7 [&_.w-10]:w-7 md:[&_.h-10]:h-8 md:[&_.w-10]:w-8 [&_.ring-2]:ring-1"
+      className="h-8 w-8 flex-shrink-0 [&>*:first-child]:h-8 [&>*:first-child]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
       onClick={hasVideo ? (e) => {
         e.stopPropagation();
       } : undefined}
