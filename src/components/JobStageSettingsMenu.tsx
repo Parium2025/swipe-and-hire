@@ -119,7 +119,7 @@ export function JobStageSettingsMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="w-48 bg-card-parium border-white/20 text-white"
+          className="w-48 border-white/20"
         >
           <DropdownMenuItem 
             onClick={() => setRenameDialogOpen(true)}
