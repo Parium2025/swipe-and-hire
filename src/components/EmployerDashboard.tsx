@@ -39,6 +39,7 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import MobileJobWizard from '@/components/MobileJobWizard';
+import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
@@ -49,6 +50,9 @@ const EmployerDashboard = memo(() => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { user, profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const { toast } = useToast();
+  
+  // Prefetch job details on hover for instant navigation
+  const { handleMouseEnter: prefetchJob, handleMouseLeave: cancelPrefetch } = useJobPrefetch();
   
   // State for editing drafts in wizard
   const [draftToEdit, setDraftToEdit] = useState<JobPosting | null>(null);
@@ -269,6 +273,8 @@ const EmployerDashboard = memo(() => {
                               : "hover:bg-white/5"
                         }`}
                         onClick={() => handleJobRowClick(job as JobPosting)}
+                        onMouseEnter={() => job.is_active && prefetchJob(job.id)}
+                        onMouseLeave={cancelPrefetch}
                       >
                         <TableCell className="font-medium text-white text-center px-2 py-3 overflow-hidden">
                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
@@ -441,6 +447,7 @@ const EmployerDashboard = memo(() => {
                           onEdit={handleEditJob}
                           onDelete={handleDeleteClick}
                           onEditDraft={(j) => handleEditDraft(j as JobPosting)}
+                          onPrefetch={prefetchJob}
                         />
                       ))}
                     </div>
