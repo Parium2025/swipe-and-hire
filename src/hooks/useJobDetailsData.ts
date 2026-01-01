@@ -33,6 +33,7 @@ export interface JobApplication {
   is_profile_video: boolean;
   rating: number;
   criterionResults?: CriterionResult[];
+  last_active_at: string | null;
 }
 
 export interface JobPosting {
@@ -137,6 +138,17 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
   );
   const mediaResults = await Promise.all(mediaPromises);
 
+  // Fetch last_active_at for all applicants using the activity RPC
+  const activityResult = await supabase.rpc('get_applicant_latest_activity', {
+    p_applicant_ids: applicantIds,
+    p_employer_id: userId
+  });
+  
+  const activityByApplicant = new Map<string, { last_active_at: string | null }>();
+  (activityResult.data || []).forEach((a: { applicant_id: string; last_active_at: string | null }) => {
+    activityByApplicant.set(a.applicant_id, { last_active_at: a.last_active_at });
+  });
+
   // Combine all data
   return applicationsData.map((app, index) => {
     const media = (mediaResults[index].data?.[0] || {}) as {
@@ -146,6 +158,7 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
     };
     const evalId = evaluationByApplicant.get(app.applicant_id);
     const criterionResults = evalId ? resultsByEvaluation.get(evalId) || [] : [];
+    const activity = activityByApplicant.get(app.applicant_id);
 
     return {
       ...app,
@@ -154,6 +167,7 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
       is_profile_video: media.is_profile_video || false,
       rating: ratingsByApplicant.get(app.applicant_id) || 0,
       criterionResults,
+      last_active_at: activity?.last_active_at || null,
     } as JobApplication;
   });
 }
