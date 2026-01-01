@@ -14,11 +14,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -248,7 +248,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
 
       {/* Rename dialog */}
       <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-        <DialogContent className="bg-card-parium border-white/20 sm:max-w-md">
+        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">Byt namn på steg</DialogTitle>
           </DialogHeader>
@@ -281,7 +281,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
               Spara
             </Button>
           </DialogFooter>
-        </DialogContent>
+        </DialogContentNoFocus>
       </Dialog>
 
       {/* Delete confirmation dialog */}
