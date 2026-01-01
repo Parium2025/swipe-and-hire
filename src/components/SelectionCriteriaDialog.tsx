@@ -18,12 +18,12 @@ import {
 } from 'lucide-react';
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 
 interface JobCriterion {
   id: string;
@@ -293,7 +293,7 @@ export function SelectionCriteriaDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl bg-card-parium backdrop-blur-md border-white/20 text-white max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContentNoFocus className="sm:max-w-2xl bg-card-parium backdrop-blur-md border-white/20 text-white max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-white flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -460,7 +460,7 @@ export function SelectionCriteriaDialog({
             )}
           </Button>
         </DialogFooter>
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
   );
 }

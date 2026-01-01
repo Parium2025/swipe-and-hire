@@ -9,7 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // ... keep existing imports
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -2337,7 +2338,7 @@ const MobileJobWizard = ({
       }
       onOpenChange(isOpen);
     }}>
-      <DialogContent 
+      <DialogContentNoFocus 
         className="parium-panel max-w-none w-[min(92vw,400px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-200"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -4680,7 +4681,7 @@ const MobileJobWizard = ({
             companyId={user.id}
           />
         )}
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
   );
 };
