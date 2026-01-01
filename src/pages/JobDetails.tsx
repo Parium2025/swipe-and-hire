@@ -18,7 +18,7 @@ import {
   X,
   Users,
   Eye,
-  Play,
+  
   Star,
   ArrowDown,
   Calendar,
@@ -117,12 +117,11 @@ const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string; h
 
 // Small Candidate Avatar Wrapper - MUST be outside JobDetails to prevent recreation
 const SmallCandidateAvatarWrapper = ({ application }: { application: JobApplication }) => {
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const hasVideo = application.is_profile_video && application.video_url;
-  
+
   return (
     <div 
-      className="h-7 w-7 md:h-8 md:w-8 flex-shrink-0 relative [&>*:first-child]:h-7 [&>*:first-child]:w-7 md:[&>*:first-child]:h-8 md:[&>*:first-child]:w-8 [&_.h-10]:h-7 [&_.w-10]:w-7 md:[&_.h-10]:h-8 md:[&_.w-10]:w-8 [&_.ring-2]:ring-1"
+      className="h-7 w-7 md:h-8 md:w-8 flex-shrink-0 [&>*:first-child]:h-7 [&>*:first-child]:w-7 md:[&>*:first-child]:h-8 md:[&>*:first-child]:w-8 [&_.h-10]:h-7 [&_.w-10]:w-7 md:[&_.h-10]:h-8 md:[&_.w-10]:w-8 [&_.ring-2]:ring-1"
       onClick={hasVideo ? (e) => {
         e.stopPropagation();
       } : undefined}
@@ -133,13 +132,8 @@ const SmallCandidateAvatarWrapper = ({ application }: { application: JobApplicat
         isProfileVideo={application.is_profile_video}
         firstName={application.first_name}
         lastName={application.last_name}
-        onPlayingChange={setIsVideoPlaying}
+        stopPropagation={!!hasVideo}
       />
-      {hasVideo && !isVideoPlaying && (
-        <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center pointer-events-none">
-          <Play className="h-3 w-3 md:h-4 md:w-4 text-white drop-shadow-lg fill-white" />
-        </div>
-      )}
     </div>
   );
 };
