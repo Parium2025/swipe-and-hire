@@ -19,12 +19,12 @@ import {
 } from 'lucide-react';
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 
 interface JobCriterion {
   id: string;
@@ -278,7 +278,7 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
 
       {/* Dialog - matching app's glass style */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-card-parium backdrop-blur-md border-white/20 text-white">
+        <DialogContentNoFocus className="sm:max-w-md bg-card-parium backdrop-blur-md border-white/20 text-white">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editingCriterion ? 'Redigera kriterium' : 'Nytt urvalskriterium'}
@@ -376,7 +376,7 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
               )}
             </Button>
           </DialogFooter>
-        </DialogContent>
+        </DialogContentNoFocus>
       </Dialog>
     </>
   );

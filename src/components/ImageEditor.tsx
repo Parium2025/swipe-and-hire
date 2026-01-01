@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { ZoomIn, ZoomOut, RotateCcw, Loader2 } from 'lucide-react';
 
 interface ImageEditorProps {
@@ -333,7 +334,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !isSaving && !open && onClose()}>
-      <DialogContent className="max-w-md bg-white/5 border-white/20 backdrop-blur-sm">
+      <DialogContentNoFocus className="max-w-md bg-white/5 border-white/20 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-center text-white">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
@@ -435,7 +436,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
             </Button>
           </div>
         </div>
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
   );
 };

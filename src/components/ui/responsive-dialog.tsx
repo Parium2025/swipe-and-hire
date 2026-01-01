@@ -1,6 +1,7 @@
 import * as React from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./dialog"
+import { DialogContentNoFocus } from "./dialog-no-focus"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "./drawer"
 
 interface ResponsiveDialogProps {
@@ -44,9 +45,9 @@ export function ResponsiveDialogContent({
   }
   
   return (
-    <DialogContent className={className} {...props}>
+    <DialogContentNoFocus className={className} {...props}>
       {children}
-    </DialogContent>
+    </DialogContentNoFocus>
   );
 }
 

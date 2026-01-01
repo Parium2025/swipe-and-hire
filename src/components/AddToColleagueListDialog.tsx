@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TeamMember } from '@/hooks/useTeamMembers';
@@ -69,7 +69,7 @@ export function AddToColleagueListDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card-parium border-white/20 max-w-sm">
+      <DialogContentNoFocus className="bg-card-parium border-white/20 max-w-sm">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -125,7 +125,7 @@ export function AddToColleagueListDialog({
             </Button>
           ))}
         </div>
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
   );
 }

@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedTitle } from '@/components/ui/truncated-title';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -1419,9 +1420,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   if (open && isInitializing) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="parium-panel max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden">
+        <DialogContentNoFocus className="parium-panel max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden">
           <AnimatedBackground showBubbles={false} variant="card" />
-        </DialogContent>
+        </DialogContentNoFocus>
       </Dialog>
     );
   }
@@ -1429,7 +1430,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent 
+        <DialogContentNoFocus 
           className="parium-panel max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
@@ -3585,7 +3586,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               />
             )}
           </div>
-        </DialogContent>
+        </DialogContentNoFocus>
       </Dialog>
 
       <UnsavedChangesDialog
