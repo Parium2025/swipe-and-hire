@@ -30,6 +30,7 @@ import {
   Plus
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays, differenceInHours } from 'date-fns';
 import {
@@ -152,6 +153,7 @@ const ApplicationCardContent = ({
 }) => {
   const isUnread = !application.viewed_at;
   const appliedTime = formatCompactTime(application.applied_at);
+  const lastActiveTime = formatCompactTime(application.last_active_at);
   const criterionResults = application.criterionResults || [];
   
   const handleClick = () => {
@@ -181,20 +183,51 @@ const ApplicationCardContent = ({
         <SmallCandidateAvatarWrapper application={application} />
         
         <div className="flex-1 min-w-0 pr-4">
-          <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors">
-            {application.first_name} {application.last_name}
-          </p>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors cursor-default">
+                  {application.first_name} {application.last_name}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                <p>{application.first_name} {application.last_name}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <StarRating rating={application.rating} />
-          {appliedTime && (
-            <div className="flex items-center gap-1.5 mt-0.5 text-white/70 text-[10px] group-hover:text-white/80 transition-colors">
-              <span className="flex items-center gap-0.5">
-                <ArrowDown className="h-2.5 w-2.5" />
-                {appliedTime}
-              </span>
-              <span className="flex items-center gap-0.5">
-                <Clock className="h-2.5 w-2.5" />
-                {appliedTime}
-              </span>
+          {(appliedTime || lastActiveTime) && (
+            <div className="flex items-center gap-1.5 mt-0.5 text-white text-[10px]">
+              {appliedTime && (
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center gap-0.5 cursor-default">
+                        <ArrowDown className="h-2.5 w-2.5" />
+                        {appliedTime}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      <p>Ansökte till detta jobb</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {lastActiveTime && (
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center gap-0.5 cursor-default">
+                        <Clock className="h-2.5 w-2.5" />
+                        {lastActiveTime}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      <p>Senast aktiv i appen</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
           )}
         </div>
