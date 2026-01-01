@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import FileUpload from './FileUpload';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -384,7 +385,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
+      <DialogContentNoFocus className="max-w-md max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
         <div className="relative flex flex-col max-h-[90vh]">
           {/* Header */}
           <div className="p-2 md:p-4 border-b border-white/20 bg-background/10 rounded-t-[24px] flex-shrink-0">
@@ -429,7 +430,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
             </Button>
           </div>
         </div>
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
   );
 };

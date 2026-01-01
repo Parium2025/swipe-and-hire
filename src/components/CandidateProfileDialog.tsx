@@ -1,4 +1,5 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -539,7 +540,7 @@ export const CandidateProfileDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="max-w-[950px] max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0">
+      <DialogContentNoFocus hideClose className="max-w-[950px] max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
           <DialogDescription>Visa kandidatens profilinformation och ansökan</DialogDescription>
@@ -1056,12 +1057,12 @@ export const CandidateProfileDialog = ({
             </div>
           </div>
         </div>
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
 
     {/* CV Dialog - matching profile page exactly */}
     <Dialog open={cvOpen} onOpenChange={setCvOpen}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-transparent border-none shadow-none p-8">
+      <DialogContentNoFocus className="max-w-4xl max-h-[90vh] overflow-hidden bg-transparent border-none shadow-none p-8">
         <DialogHeader className="mb-4">
           <DialogTitle className="text-white text-2xl">CV</DialogTitle>
         </DialogHeader>
@@ -1073,7 +1074,7 @@ export const CandidateProfileDialog = ({
             onClose={() => setCvOpen(false)}
           />
         )}
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
 
     {/* Delete note confirmation dialog */}

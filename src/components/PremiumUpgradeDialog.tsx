@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Crown, ExternalLink, Info } from 'lucide-react';
 
@@ -47,7 +48,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-parium-gradient backdrop-blur-sm border-2 border-primary/40 text-white max-w-sm mx-auto left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <DialogContentNoFocus className="bg-parium-gradient backdrop-blur-sm border-2 border-primary/40 text-white max-w-sm mx-auto left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
             <Crown className="h-6 w-6 text-white" />
@@ -115,7 +116,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
             </Button>
           )}
         </div>
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
   );
 };

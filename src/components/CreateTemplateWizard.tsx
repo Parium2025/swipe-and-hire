@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
@@ -1185,7 +1186,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
           handleClose();
         }
       }}>
-      <DialogContent 
+      <DialogContentNoFocus 
         forceMount
         className="parium-panel max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-200"
         style={{ display: (!open || !isReady) ? 'none' : undefined }}
@@ -2175,7 +2176,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             />
           )}
         </div>
-      </DialogContent>
+      </DialogContentNoFocus>
       </Dialog>
       
       <UnsavedChangesDialog
