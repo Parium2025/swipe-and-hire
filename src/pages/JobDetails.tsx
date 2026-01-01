@@ -306,19 +306,14 @@ const StatusColumn = ({
       style={{ minHeight: 'calc(100vh - 280px)' }}
     >
       <div 
-        className="rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset"
-        style={{ 
-          backgroundColor: `${displayColor}33`,
-          color: displayColor,
-          borderColor: `${displayColor}80`,
-          ...(isOver && { ringWidth: '2px', ringColor: displayColor })
-        }}
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
+        style={{ backgroundColor: `${displayColor}33` }}
       >
-        <div className="flex items-center gap-1.5">
-          <Icon className="h-3.5 w-3.5" />
-          <span className="font-medium text-xs">{stageConfig.label}</span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
+          <span className="font-medium text-xs text-white truncate flex-1 min-w-0">{stageConfig.label}</span>
           <span 
-            className="text-white/90 text-[10px] px-1.5 py-0.5 rounded-full"
+            className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}66` }}
           >
             {applications.length}
