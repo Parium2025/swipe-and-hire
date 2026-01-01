@@ -207,74 +207,26 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-3">
-        <Loader2 className="h-4 w-4 animate-spin text-white/50" />
-      </div>
-    );
+    return null;
   }
 
   return (
     <>
-      {/* Slim inline section - matches app design */}
-      <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-3.5 w-3.5 text-white" />
-            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
-              AI-Urvalskriterier
-            </h3>
-            {criteria.length > 0 && (
-              <span className="text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full">
-                {criteria.length}
-              </span>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={openNewCriterionDialog}
-            className="h-7 px-2 text-xs text-white hover:bg-white/10"
-          >
-            <Plus className="h-3.5 w-3.5 mr-1" />
-            Lägg till
-          </Button>
-        </div>
-
-        {criteria.length === 0 ? (
-          <p className="text-xs text-white/60 text-center py-2">
-            Inga kriterier. AI:n utvärderar kandidater automatiskt.
-          </p>
-        ) : (
-          <div className="space-y-1.5">
-            {criteria.map((criterion) => (
-              <div
-                key={criterion.id}
-                className="flex items-center gap-2 py-1.5 px-2 rounded-lg bg-white/5 group hover:bg-white/10 transition-colors"
-              >
-                <GripVertical className="h-3 w-3 text-white/30 cursor-grab shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm text-white">{criterion.title}</span>
-                </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => openEditCriterionDialog(criterion)}
-                    className="p-1 hover:bg-white/10 rounded text-white/60 hover:text-white"
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(criterion.id)}
-                    className="p-1 hover:bg-white/10 rounded text-white/60 hover:text-red-400"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Simple button instead of card */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={openNewCriterionDialog}
+        className="h-8 px-3 text-xs text-white/70 hover:text-white hover:bg-white/10 gap-2"
+      >
+        <Sparkles className="h-3.5 w-3.5" />
+        AI-kriterier
+        {criteria.length > 0 && (
+          <span className="text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full ml-1">
+            {criteria.length}
+          </span>
         )}
-      </div>
+      </Button>
 
       {/* Dialog - matching app's glass style */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

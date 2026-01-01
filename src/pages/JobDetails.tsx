@@ -708,6 +708,10 @@ const JobDetails = () => {
                 >
                   {job.is_active ? 'Aktiv' : 'Inaktiv'}
                 </Badge>
+                {/* AI Criteria - compact button in header */}
+                {jobId && (
+                  <JobCriteriaManager jobId={jobId} onCriteriaChange={refetch} />
+                )}
               </div>
             </div>
             <Button
@@ -737,11 +741,6 @@ const JobDetails = () => {
             </div>
           </div>
         </div>
-
-        {/* AI Criteria Manager */}
-        {jobId && (
-          <JobCriteriaManager jobId={jobId} onCriteriaChange={refetch} />
-        )}
 
         {/* Kanban View with Drag and Drop */}
         <DndContext
