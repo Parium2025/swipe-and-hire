@@ -10,6 +10,9 @@ import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { JobCriteriaManager, CriterionResultBadge } from '@/components/JobCriteriaManager';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
+import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
+import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
+import { useJobStageSettings, getJobStageIconByName, DEFAULT_JOB_STAGE_KEYS } from '@/hooks/useJobStageSettings';
 import { 
   Clock, 
   X,
@@ -25,7 +28,8 @@ import {
   PartyPopper,
   Inbox,
   MapPin,
-  Sparkles
+  Sparkles,
+  Plus
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
@@ -298,16 +302,34 @@ const SortableApplicationCard = ({
 
 // Status Column - MUST be outside JobDetails to stabilize useDroppable hook
 interface StatusColumnProps {
-  status: ApplicationStatus;
+  jobId: string;
+  status: string;
   applications: JobApplication[];
   onOpenProfile: (app: JobApplication) => void;
   onMarkAsViewed: (id: string) => void;
   onOpenCriteriaDialog?: () => void;
+  stageConfig: {
+    label: string;
+    color: string;
+    iconName: string;
+    isCustom: boolean;
+  };
+  totalStageCount: number;
 }
 
-const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed, onOpenCriteriaDialog }: StatusColumnProps) => {
-  const config = STATUS_CONFIG[status];
-  const Icon = STATUS_ICONS[status] || Inbox;
+const StatusColumn = ({ 
+  jobId,
+  status, 
+  applications, 
+  onOpenProfile, 
+  onMarkAsViewed, 
+  onOpenCriteriaDialog,
+  stageConfig,
+  totalStageCount
+}: StatusColumnProps) => {
+  const [liveColor, setLiveColor] = useState<string | null>(null);
+  const displayColor = liveColor || stageConfig.color;
+  const Icon = getJobStageIconByName(stageConfig.iconName);
   
   // Use useDroppable's own isOver for accurate detection
   const { setNodeRef, isOver } = useDroppable({
@@ -320,11 +342,22 @@ const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed, onO
       className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors"
       style={{ minHeight: 'calc(100vh - 280px)' }}
     >
-      <div className={`rounded-md ${config.color} px-2 py-1.5 mb-2 transition-all ${isOver ? `ring-2 ring-inset ${config.hoverRing}` : ''}`}>
+      <div 
+        className="rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset"
+        style={{ 
+          backgroundColor: `${displayColor}33`,
+          color: displayColor,
+          borderColor: `${displayColor}80`,
+          ...(isOver && { ringWidth: '2px', ringColor: displayColor })
+        }}
+      >
         <div className="flex items-center gap-1.5">
           <Icon className="h-3.5 w-3.5" />
-          <span className="font-medium text-xs">{config.label}</span>
-          <span className="ml-auto bg-white/20 text-white/90 text-[10px] px-1.5 py-0.5 rounded-full">
+          <span className="font-medium text-xs">{stageConfig.label}</span>
+          <span 
+            className="text-white/90 text-[10px] px-1.5 py-0.5 rounded-full"
+            style={{ backgroundColor: `${displayColor}66` }}
+          >
             {applications.length}
           </span>
           {/* AI Criteria button - only show on Inkorg (pending) */}
@@ -337,6 +370,15 @@ const StatusColumn = ({ status, applications, onOpenProfile, onMarkAsViewed, onO
               <Sparkles className="h-3.5 w-3.5" />
             </button>
           )}
+          <div className="ml-auto">
+            <JobStageSettingsMenu 
+              jobId={jobId}
+              stageKey={status}
+              candidateCount={applications.length}
+              totalStageCount={totalStageCount}
+              onLiveColorChange={setLiveColor}
+            />
+          </div>
         </div>
       </div>
 
@@ -387,6 +429,9 @@ const JobDetails = () => {
   const [myCandidatesMap, setMyCandidatesMap] = useState<Map<string, string>>(new Map()); // applicant_id -> my_candidate_id
   const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
 
+  // Use job-specific stage settings
+  const { stageSettings, orderedStages, isLoading: stagesLoading } = useJobStageSettings(jobId);
+
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -397,9 +442,12 @@ const JobDetails = () => {
     useSensor(KeyboardSensor)
   );
 
+  // Use orderedStages if available, otherwise default
+  const activeStages = orderedStages.length > 0 ? orderedStages : [...DEFAULT_JOB_STAGE_KEYS];
+
   const collisionDetectionStrategy = useMemo(
-    () => columnXCollisionDetection(STATUS_ORDER),
-    []
+    () => columnXCollisionDetection(activeStages),
+    [activeStages]
   );
 
   useEffect(() => {
@@ -627,21 +675,21 @@ const JobDetails = () => {
 
   // Memoize applications by status to prevent unnecessary re-renders
   const applicationsByStatus = useMemo(() => {
-    const result: Record<ApplicationStatus, JobApplication[]> = {
-      pending: [],
-      reviewing: [],
-      interview: [],
-      offered: [],
-      hired: [],
-      rejected: [],
-    };
+    const result: Record<string, JobApplication[]> = {};
+    // Initialize all active stages
+    activeStages.forEach(stage => {
+      result[stage] = [];
+    });
+    // Also add rejected in case there are any
+    result['rejected'] = [];
+    
     applications.forEach(app => {
       if (result[app.status]) {
         result[app.status].push(app);
       }
     });
     return result;
-  }, [applications]);
+  }, [applications, activeStages]);
 
   const handleOpenProfile = useCallback((app: JobApplication) => {
     setSelectedApplication(app);
@@ -818,16 +866,34 @@ const JobDetails = () => {
           }}
         >
           <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2" style={{ minHeight: 'calc(100vh - 300px)' }}>
-            {STATUS_ORDER.map((status) => (
-              <StatusColumn 
-                key={status} 
-                status={status}
-                applications={applicationsByStatus[status]}
-                onOpenProfile={handleOpenProfile}
-                onMarkAsViewed={markApplicationAsViewed}
-                onOpenCriteriaDialog={status === 'pending' ? () => setCriteriaDialogOpen(true) : undefined}
+            {activeStages.map((status) => {
+              const config = stageSettings[status] || { label: status, color: '#0EA5E9', iconName: 'inbox', isCustom: false };
+              return (
+                <StatusColumn 
+                  key={status}
+                  jobId={jobId || ''}
+                  status={status}
+                  applications={applicationsByStatus[status] || []}
+                  onOpenProfile={handleOpenProfile}
+                  onMarkAsViewed={markApplicationAsViewed}
+                  onOpenCriteriaDialog={status === 'pending' ? () => setCriteriaDialogOpen(true) : undefined}
+                  stageConfig={config}
+                  totalStageCount={activeStages.length}
+                />
+              );
+            })}
+            {/* Add new stage button */}
+            <div className="flex-shrink-0 flex items-start pt-1">
+              <CreateJobStageDialog 
+                jobId={jobId || ''}
+                trigger={
+                  <button className="px-3 py-1.5 text-xs font-medium rounded-md transition-all text-white ring-1 ring-inset ring-primary/40 bg-primary/10 hover:bg-primary/20 backdrop-blur-sm flex items-center gap-1.5">
+                    <Plus className="h-3.5 w-3.5" />
+                    Nytt steg
+                  </button>
+                }
               />
-            ))}
+            </div>
           </div>
 
           {/* Drag Overlay */}

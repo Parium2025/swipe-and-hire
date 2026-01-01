@@ -715,6 +715,53 @@ export type Database = {
           },
         ]
       }
+      job_stage_settings: {
+        Row: {
+          color: string | null
+          created_at: string
+          custom_label: string | null
+          icon_name: string | null
+          id: string
+          is_custom: boolean
+          job_id: string
+          order_index: number
+          stage_key: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          custom_label?: string | null
+          icon_name?: string | null
+          id?: string
+          is_custom?: boolean
+          job_id: string
+          order_index?: number
+          stage_key: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          custom_label?: string | null
+          icon_name?: string | null
+          id?: string
+          is_custom?: boolean
+          job_id?: string
+          order_index?: number
+          stage_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_stage_settings_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_templates: {
         Row: {
           application_instructions: string | null
