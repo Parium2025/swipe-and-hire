@@ -32,6 +32,7 @@ export interface JobApplication {
   video_url: string | null;
   is_profile_video: boolean;
   rating: number;
+  last_active_at: string | null;
   criterionResults?: CriterionResult[];
 }
 
@@ -73,7 +74,7 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
   const applicantIds = applicationsData.map(a => a.applicant_id);
 
   // Parallel fetch all related data
-  const [myCandidatesResult, criteriaResult, evaluationsResult] = await Promise.all([
+  const [myCandidatesResult, criteriaResult, evaluationsResult, profilesResult] = await Promise.all([
     // Fetch ratings
     supabase
       .from('my_candidates')
@@ -91,6 +92,11 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
       .select('id, applicant_id')
       .eq('job_id', jobId)
       .in('applicant_id', applicantIds),
+    // Fetch last_active_at from profiles
+    supabase
+      .from('profiles')
+      .select('user_id, last_active_at')
+      .in('user_id', applicantIds),
   ]);
 
   const ratingsByApplicant = new Map<string, number>();
@@ -103,6 +109,12 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
 
   const evaluationByApplicant = new Map<string, string>();
   (evaluationsResult.data || []).forEach(e => evaluationByApplicant.set(e.applicant_id, e.id));
+
+  // Build last_active_at map
+  const lastActiveMap = new Map<string, string | null>();
+  (profilesResult.data || []).forEach((p: { user_id: string; last_active_at: string | null }) => {
+    lastActiveMap.set(p.user_id, p.last_active_at);
+  });
 
   // Fetch criterion results if we have evaluations
   const evaluationIds = (evaluationsResult.data || []).map(e => e.id);
@@ -153,6 +165,7 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
       video_url: media.video_url || null,
       is_profile_video: media.is_profile_video || false,
       rating: ratingsByApplicant.get(app.applicant_id) || 0,
+      last_active_at: lastActiveMap.get(app.applicant_id) || null,
       criterionResults,
     } as JobApplication;
   });
