@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -236,7 +237,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-full max-h-full h-screen w-screen p-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 border-none overflow-hidden">
+      <DialogContentNoFocus className="max-w-full max-h-full h-screen w-screen p-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 border-none overflow-hidden">
         <div className="sr-only">
           <DialogHeader>
             <DialogTitle>Jobbförhandsvisning</DialogTitle>
@@ -393,7 +394,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             );
           })}
         </div>
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
   );
 };
