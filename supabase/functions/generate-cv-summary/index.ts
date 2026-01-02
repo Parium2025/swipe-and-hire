@@ -167,48 +167,67 @@ serve(async (req) => {
       );
     }
 
-    // This is a PURE CV summary function - completely separate from criteria evaluation
-    const systemPrompt = `Du är en rekryteringsassistent som ENDAST analyserar och sammanfattar CV-dokument.
+    // ROBUST CV classification prompt - handles ALL languages and document types
+    const systemPrompt = `Du är en expert på dokumentklassificering för rekrytering.
 
-KRITISKT: Din uppgift är att identifiera dokumenttyp och ge en FAKTABASERAD sammanfattning.
-Du ska INTE utvärdera kandidaten mot några kriterier - det görs av en annan AI.
+PRIMÄR UPPGIFT: Avgör om dokumentet är ett CV/resume eller något annat.
 
-OM dokumentet INTE är ett CV, identifiera typen:
+ETT CV INNEHÅLLER TYPISKT:
+- Personens namn och kontaktuppgifter
+- Arbetslivserfarenhet med datum och arbetsgivare
+- Utbildningshistorik
+- Färdigheter eller kompetenser
+- Eventuellt: certifikat, språkkunskaper, referenser
+
+DESSA ÄR INTE CV:n (returnera is_valid_cv: false):
+- Foton på personer, barn, familj, husdjur
+- Skärmdumpar från appar eller webbsidor
+- Fakturor, kvitton, räkningar
+- Skattebesked, deklarationer, kontrolluppgifter från Skatteverket
+- Anställningsavtal, anställningsintyg
+- Lönespecifikationer
+- Betyg från skolor (utan CV-kontext)
+- ID-handlingar: pass, körkort, ID-kort
+- Diplom eller certifikat (ensamma, utan CV)
+- Brev, meddelanden, chatloggar
+- Tomma dokument eller oläsbara filer
+- Slumpmässiga bilder eller memes
+- Videofiler (kan inte analyseras)
+- Dokument på språk du inte kan läsa (markera som "oläsbart dokument")
+
+FLERSPRÅKIGT STÖD:
+- CV kan vara på ALLA språk: svenska, engelska, kinesiska, arabiska, ryska, etc.
+- Om du kan identifiera struktur som liknar ett CV (jobb + utbildning), godkänn det
+- Om du inte kan läsa språket alls, markera som "oläsbart dokument"
+
+SVARSFORMAT (ALLTID JSON):
+
+Om det INTE är ett CV:
 {
   "is_valid_cv": false,
-  "document_type": "[typ]",
+  "document_type": "[specifik typ, t.ex. 'foto', 'faktura', 'anställningsintyg', 'oläsbart dokument']",
+  "rejection_reason": "[kort förklaring för användaren]",
   "summary_text": "",
   "key_points": []
 }
 
-DOKUMENTTYPER:
-- "anställningsavtal", "anställningsintyg", "lönespecifikation", "kvitto", "faktura"
-- "skattebesked", "deklaration", "kontrolluppgift", "bild", "skärmdump"
-- "brev", "intyg", "diplom", "betyg", "pass", "körkort", "id-kort", "okänt dokument"
-
-OM det är ett CV, ge en NEUTRAL sammanfattning med 3-5 punkter om:
-- Arbetslivserfarenhet (vilka jobb, var, hur länge)
-- Utbildning (skolor, program, examen)
-- Certifikat och behörigheter som nämns i CV:t
-- Språkkunskaper om det nämns
-
-SVARSFORMAT FÖR CV:
+Om det ÄR ett CV:
 {
   "is_valid_cv": true,
   "document_type": "CV",
-  "summary_text": "Kort sammanfattning av kandidatens bakgrund",
+  "rejection_reason": null,
+  "summary_text": "[2-3 meningar som sammanfattar kandidatens bakgrund]",
   "key_points": [
-    "Arbetat som X på Y i Z år",
-    "Utbildning: [specifik utbildning]",
-    "Nämner: [certifikat/behörigheter från CV]"
+    "Erfarenhet: [huvudsakliga roller och branscher]",
+    "Utbildning: [högsta/relevanta utbildning]",
+    "Övrigt: [certifikat, språk, eller andra nyckelkompetenser]"
   ]
 }
 
-REGLER:
-- ENDAST fakta från CV:t - inga bedömningar eller rekommendationer
-- Nämn inte "urvalskriterier" eller "krav för rollen"
-- Skriv på svenska
-- Svara ENDAST med JSON`;
+VIKTIGT:
+- Svara ENDAST med JSON, ingen annan text
+- Om osäker, luta åt att markera som icke-CV (bättre att be om rätt dokument än att analysera fel)
+- Skriv rejection_reason på svenska, professionellt och hjälpsamt`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -217,11 +236,12 @@ REGLER:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
+        model: 'openai/gpt-5',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userContent },
         ],
+        max_completion_tokens: 2000,
       }),
     });
 
@@ -285,8 +305,12 @@ REGLER:
     };
 
     const documentType = summary.is_valid_cv === false 
-      ? (summary.document_type || 'ett dokument som inte är ett CV')
+      ? (summary.document_type || 'okänt dokument')
       : 'CV';
+    
+    // Professional rejection message - use AI's reason or fallback
+    const rejectionReason = summary.rejection_reason || 
+      `Det uppladdade dokumentet verkar vara ${documentType}. Ladda upp ett CV för att få en sammanfattning.`;
     
     const docPoint = { 
       text: `Dokumenttyp: ${documentType}`, 
@@ -300,8 +324,9 @@ REGLER:
           .filter((p: any) => typeof p?.text === 'string' && p.text.trim().length > 0)
       : [];
 
+    // User-friendly message for non-CV documents
     const summaryText = summary.is_valid_cv === false
-      ? `Det uppladdade dokumentet är ${documentType}. Kan inte läsa av ett CV.`
+      ? rejectionReason
       : (summary.summary_text || '');
 
     // ALWAYS save to profile_cv_summaries for proactive analysis (background pre-analysis)
