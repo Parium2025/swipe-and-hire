@@ -1442,9 +1442,10 @@ const MyCandidates = () => {
               );
             })}
             
-            {/* Nytt steg button */}
-            {!isViewingColleague && (
+            {/* Nytt steg button - only show if less than max stages */}
+            {!isViewingColleague && activeStageOrder.length < 5 && (
               <CreateStageDialog 
+                currentStageCount={activeStageOrder.length}
                 trigger={
                   <button
                     className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center gap-1.5 border border-white/20"
