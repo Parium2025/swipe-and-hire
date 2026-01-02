@@ -1006,17 +1006,36 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
         <div className="flex flex-col items-center space-y-4">
           <FileUpload 
-            onFileUploaded={(url, fileName) => {
+            onFileUploaded={async (url, fileName) => {
               handleInputChange('cvUrl', url);
               handleInputChange('cvFileName', fileName);
               // Clear cached URL så den regenereras vid nästa visning
               setCachedCvUrl(null);
+              
+              // 🚀 TRIGGER PROACTIVE AI ANALYSIS IMMEDIATELY in background
+              // So the summary is ready before employer or user views the profile
+              if (user?.id && url) {
+                console.log('🤖 Triggering proactive CV analysis in background...');
+                supabase.functions.invoke('generate-cv-summary', {
+                  body: {
+                    applicant_id: user.id,
+                    cv_url_override: url,
+                    proactive: true
+                  }
+                }).then(({ data, error }) => {
+                  if (error) {
+                    console.error('Background CV analysis error:', error);
+                  } else {
+                    console.log('✅ Background CV analysis complete:', data?.is_valid_cv ? 'Valid CV' : data?.document_type);
+                  }
+                }).catch(err => console.error('CV analysis failed:', err));
+              }
             }} 
             onFileRemoved={() => {
               handleInputChange('cvUrl', '');
               handleInputChange('cvFileName', '');
               setCachedCvUrl(null); // Clear cache när CV tas bort
-            }} 
+            }}
             acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']} 
             maxFileSize={10 * 1024 * 1024} 
             currentFile={formData.cvUrl ? { 
