@@ -757,79 +757,123 @@ const JobDetails = () => {
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 py-4 pb-safe min-h-screen animate-fade-in">
-        {/* Job Title and Stats */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-6">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex-1 min-w-0 pr-4">
+        {/* Job Title and Stats - Compact */}
+        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
               <TruncatedText 
                 text={job.title}
-                className="text-xl font-bold text-white mb-2 two-line-ellipsis block"
+                className="text-lg font-bold text-white mb-1.5 two-line-ellipsis block"
               />
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1 text-white">
-                  <MapPin className="h-4 w-4" />
+              <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm">
+                <div className="flex items-center gap-1 text-white/80">
+                  <MapPin className="h-3.5 w-3.5" />
                   {job.location}
                 </div>
-                <Badge
-                  className={`text-sm whitespace-nowrap cursor-pointer transition-colors ${
-                    job.is_active
-                      ? "bg-green-500/20 text-green-300 border border-green-500/30 hover:bg-green-500/30"
-                      : "bg-gray-500/20 text-gray-300 border border-gray-500/30 hover:bg-gray-500/30"
-                  }`}
-                  onClick={async () => {
-                    try {
-                      const { error } = await supabase
-                        .from('job_postings')
-                        .update({ is_active: !job.is_active })
-                        .eq('id', jobId);
+                {(() => {
+                  const isExpired = job.expires_at && new Date(job.expires_at) < new Date();
+                  const statusLabel = isExpired ? 'Utgången' : (job.is_active ? 'Aktiv' : 'Inaktiv');
+                  const statusColor = isExpired 
+                    ? 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30'
+                    : job.is_active 
+                      ? 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30'
+                      : 'bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30';
+                  
+                  return (
+                    <Badge
+                      className={`text-xs whitespace-nowrap cursor-pointer transition-colors border ${statusColor}`}
+                      onClick={async () => {
+                        try {
+                          const { error } = await supabase
+                            .from('job_postings')
+                            .update({ is_active: !job.is_active })
+                            .eq('id', jobId);
 
-                      if (error) throw error;
+                          if (error) throw error;
 
-                      toast({
-                        title: job.is_active ? 'Jobb inaktiverat' : 'Jobb aktiverat',
-                        description: job.is_active ? 'Jobbet är nu inaktivt.' : 'Jobbet är nu aktivt.',
-                      });
+                          toast({
+                            title: job.is_active ? 'Jobb inaktiverat' : 'Jobb aktiverat',
+                            description: job.is_active ? 'Jobbet är nu inaktivt.' : 'Jobbet är nu aktivt.',
+                          });
 
-                      updateJobLocally({ is_active: !job.is_active });
-                      refetch();
-                    } catch (error: any) {
-                      toast({
-                        title: 'Fel',
-                        description: error.message,
-                        variant: 'destructive',
-                      });
+                          updateJobLocally({ is_active: !job.is_active });
+                          refetch();
+                        } catch (error: any) {
+                          toast({
+                            title: 'Fel',
+                            description: error.message,
+                            variant: 'destructive',
+                          });
+                        }
+                      }}
+                    >
+                      {statusLabel}
+                    </Badge>
+                  );
+                })()}
+                {job.expires_at && (
+                  <span className="text-white/60 text-xs">
+                    {new Date(job.expires_at) < new Date() 
+                      ? `Gick ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
+                      : `Går ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
                     }
-                  }}
-                >
-                  {job.is_active ? 'Aktiv' : 'Inaktiv'}
-                </Badge>
+                  </span>
+                )}
               </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate(-1)}
-              className="text-white h-8 w-8 p-0 hover:bg-transparent focus-visible:ring-0 focus:outline-none"
+              className="text-white h-7 w-7 p-0 hover:bg-transparent focus-visible:ring-0 focus:outline-none shrink-0"
             >
-              <X className="h-7 w-7" />
+              <X className="h-6 w-6" />
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-            <div className="bg-white/5 rounded-lg p-2 md:p-3">
-              <div className="flex items-center gap-1 md:gap-2 text-white text-xs md:text-sm mb-1">
-                <Eye className="h-3 w-3 md:h-4 md:w-4" />
-                Visningar
+          <div className="flex items-center gap-3 mt-3">
+            {/* Stats */}
+            <div className="flex items-center gap-3 flex-1">
+              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                <Eye className="h-3.5 w-3.5 text-white/70" />
+                <span className="text-white text-sm font-medium">{job.views_count}</span>
+                <span className="text-white/60 text-xs hidden md:inline">Visningar</span>
               </div>
-              <div className="text-lg md:text-xl font-bold text-white">{job.views_count}</div>
-            </div>
-            <div className="bg-white/5 rounded-lg p-2 md:p-3">
-              <div className="flex items-center gap-1 md:gap-2 text-white text-xs md:text-sm mb-1">
-                <Users className="h-3 w-3 md:h-4 md:w-4" />
-                Ansökningar
+              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                <Users className="h-3.5 w-3.5 text-white/70" />
+                <span className="text-white text-sm font-medium">{job.applications_count}</span>
+                <span className="text-white/60 text-xs hidden md:inline">Ansökningar</span>
               </div>
-              <div className="text-lg md:text-xl font-bold text-white">{job.applications_count}</div>
             </div>
+            
+            {/* Recruiter */}
+            {job.employer_profile && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2 bg-white/5 rounded-lg px-2 py-1 cursor-default">
+                      <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-xs text-white font-medium shrink-0">
+                        {job.employer_profile.profile_image_url ? (
+                          <img 
+                            src={job.employer_profile.profile_image_url} 
+                            alt="" 
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          `${job.employer_profile.first_name?.[0] || ''}${job.employer_profile.last_name?.[0] || ''}`
+                        )}
+                      </div>
+                      <span className="text-white/80 text-xs hidden md:inline truncate max-w-[100px]">
+                        {job.employer_profile.first_name} {job.employer_profile.last_name}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Rekryterare: {job.employer_profile.first_name} {job.employer_profile.last_name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
         </div>
 
