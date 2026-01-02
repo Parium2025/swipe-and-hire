@@ -241,19 +241,16 @@ const ApplicationCardContent = ({
         </div>
       </div>
 
-      {/* Criterion Results - show badges with circular icons */}
+      {/* Criterion Results - show title + icon like Team Tailor */}
       {hasResults && (
-        <div className="flex flex-wrap gap-1 mt-1.5 pt-1.5 border-t border-white/5">
-          {criterionResults.slice(0, 3).map((cr) => (
+        <div className="flex flex-col gap-0.5 mt-1.5 pt-1.5 border-t border-white/5">
+          {criterionResults.map((cr) => (
             <CriterionIconBadge
               key={cr.criterion_id}
               result={cr.result}
               title={cr.title}
             />
           ))}
-          {criterionResults.length > 3 && (
-            <span className="text-[10px] text-white/50">+{criterionResults.length - 3}</span>
-          )}
         </div>
       )}
       

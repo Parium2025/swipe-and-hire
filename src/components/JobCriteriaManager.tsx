@@ -379,7 +379,7 @@ export function CriterionResultBadge({ result, title, reasoning }: CriterionResu
   );
 }
 
-// Compact badge showing just icon in a circle (for smaller spaces)
+// Badge showing criterion title + icon (Team Tailor style)
 interface CriterionIconBadgeProps {
   result: 'match' | 'no_match' | 'no_data';
   title: string;
@@ -389,32 +389,24 @@ export function CriterionIconBadge({ result, title }: CriterionIconBadgeProps) {
   const config = {
     match: { 
       icon: Check, 
-      iconColor: 'text-green-400', 
-      ringColor: 'ring-green-500/50',
-      bg: 'bg-green-500/20' 
+      iconColor: 'text-green-500', 
     },
     no_match: { 
       icon: X, 
-      iconColor: 'text-red-400', 
-      ringColor: 'ring-red-500/50',
-      bg: 'bg-red-500/20' 
+      iconColor: 'text-red-500', 
     },
     no_data: { 
       icon: AlertCircle, 
-      iconColor: 'text-yellow-400', 
-      ringColor: 'ring-yellow-500/50',
-      bg: 'bg-yellow-500/20' 
+      iconColor: 'text-yellow-500', 
     },
   };
   
-  const { icon: Icon, iconColor, ringColor, bg } = config[result];
+  const { icon: Icon, iconColor } = config[result];
 
   return (
-    <span 
-      className={`inline-flex items-center justify-center h-4 w-4 rounded-full ring-1 ${ringColor} ${bg}`}
-      title={title}
-    >
-      <Icon className={`h-2.5 w-2.5 ${iconColor}`} />
+    <span className="inline-flex items-center gap-1 text-[10px] text-white/80">
+      <Icon className={`h-3 w-3 ${iconColor} flex-shrink-0`} />
+      <span className="truncate">{title}</span>
     </span>
   );
 }
