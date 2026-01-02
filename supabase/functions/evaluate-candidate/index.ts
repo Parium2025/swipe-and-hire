@@ -234,22 +234,8 @@ serve(async (req) => {
       }
     }
 
-    // Save summary
-    if (aiResponse.summary) {
-      await supabase
-        .from('candidate_summaries')
-        .upsert({
-          job_id,
-          applicant_id,
-          application_id: application?.id,
-          summary_text: aiResponse.summary.text,
-          key_points: aiResponse.summary.key_points,
-          generated_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'job_id,applicant_id',
-        });
-    }
+    // NOTE: Summary is NOT saved here - CV summary is handled by generate-cv-summary
+    // This function ONLY handles criteria evaluation results
 
     // Update evaluation as completed
     await supabase
@@ -372,26 +358,14 @@ async function callLovableAI(
     // Summary = independent CV/profile analysis (like Teamtailor Co-pilot)
     // Criteria = yes/no matching for quick filtering on Kanban cards
     
-    const systemPrompt = `Du är en professionell rekryteringsassistent. Du har TVÅ uppgifter:
+    // This function ONLY evaluates criteria - CV summary is handled separately by generate-cv-summary
+    const systemPrompt = `Du är en professionell rekryteringsassistent som ENDAST utvärderar urvalskriterier.
 
-## UPPGIFT 1: SAMMANFATTNING (OBEROENDE AV KRITERIER)
-Analysera kandidatens CV, profil och svar och ge en sammanfattning med 4-6 punkter.
-Fokusera på:
-- Relevant arbetslivserfarenhet
-- Utbildning och certifieringar (körkort, truckkort, etc.)
-- Tillgänglighet och arbetstider
-- Styrkor och eventuella saknade kvalifikationer för rollen
-
-Varje punkt ska vara en konkret observation, t.ex.:
-- "Erfarenhet av lagerarbete: praktik hos Tvättex och stationärt arbete på Stora Coop Port73"
-- "Innehav av B-körkort uppfyller ett av de meriterande kraven"
-- "Ingen uttryckt truckkort (A+B) — viktig merit saknas för rollen"
-
-## UPPGIFT 2: KRITERIERESULTAT (OM KRITERIER FINNS)
-Om det finns kriterier att utvärdera, ge resultat för varje:
-- "match" (✅) = konkret bevis hittades
+DIN ENDA UPPGIFT: Utvärdera varje urvalskriterium och ge resultat:
+- "match" (✅) = konkret bevis hittades att kandidaten uppfyller kriteriet
 - "no_match" (❌) = bevis för motsatsen eller tydligt saknas
-- "no_data" (⚠️) = ingen information att basera bedömningen på
+
+VIKTIGT: Om du inte hittar information för ett kriterium, sätt result till "no_match" (inte "no_data").
 
 SVAR FORMAT (giltig JSON):
 {
@@ -399,24 +373,21 @@ SVAR FORMAT (giltig JSON):
     {
       "criterion_id": "uuid",
       "title": "Kriteriets titel", 
-      "result": "match" | "no_match" | "no_data",
+      "result": "match" | "no_match",
       "confidence": 0.0-1.0,
-      "reasoning": "Förklaring på svenska",
+      "reasoning": "Kort förklaring på svenska",
       "source": "profile" | "application" | "answer" | "cv"
     }
-  ],
-  "summary": {
-    "text": "Kort övergripande sammanfattning (1-2 meningar)",
-    "key_points": [
-      { "text": "Erfarenhet av X: konkret beskrivning", "type": "positive" },
-      { "text": "Saknar Y som är viktigt för rollen", "type": "negative" },
-      { "text": "Kan arbeta helger och kvällar", "type": "positive" },
-      { "text": "Har 2 års erfarenhet inom branschen", "type": "neutral" }
-    ]
-  }
-}`;
+  ]
+}
 
-    const userPrompt = `${jobContext}\n\n${candidateContext}\n\nGe en sammanfattning av kandidaten och utvärdera eventuella kriterier. Svara ENDAST med JSON.`;
+REGLER:
+- Svara ENDAST med JSON
+- Utvärdera ENDAST de kriterier som anges
+- Var strikt - om information saknas = no_match
+- Skriv korta resonemang (max 1 mening)`;
+
+    const userPrompt = `${jobContext}\n\n${candidateContext}\n\nUtvärdera urvalskriterierna nedan. Svara ENDAST med JSON.`;
 
     // Add criteria info for the response (if any exist)
     const criteriaInfo = criteria.map(c => ({
@@ -425,9 +396,12 @@ SVAR FORMAT (giltig JSON):
       prompt: c.prompt,
     }));
 
-    const criteriaSection = criteria.length > 0 
-      ? `\n\nKriterier att utvärdera:\n${JSON.stringify(criteriaInfo, null, 2)}`
-      : '\n\nInga specifika kriterier att utvärdera, fokusera på sammanfattningen.';
+    // If no criteria, return early - nothing to evaluate
+    if (criteria.length === 0) {
+      return { criteria_results: [] };
+    }
+
+    const criteriaSection = `\n\nKriterier att utvärdera:\n${JSON.stringify(criteriaInfo, null, 2)}`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
