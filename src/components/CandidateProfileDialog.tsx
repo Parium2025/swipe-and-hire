@@ -219,22 +219,56 @@ export const CandidateProfileDialog = ({
 
   // Fetch AI summary for this candidate/job combination
   const fetchAiSummary = async () => {
-    if (!activeApplication?.job_id || !activeApplication?.applicant_id) return;
+    if (!activeApplication?.applicant_id) return;
     setLoadingSummary(true);
 
     try {
-      const { data, error } = await supabase
-        .from('candidate_summaries')
-        .select('summary_text, key_points')
-        .eq('job_id', activeApplication.job_id)
-        .eq('applicant_id', activeApplication.applicant_id)
-        .order('generated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // First try job-specific summary
+      let data: { summary_text: string; key_points: any[] | null } | null = null;
+      
+      if (activeApplication?.job_id) {
+        const { data: jobSummary, error } = await supabase
+          .from('candidate_summaries')
+          .select('summary_text, key_points')
+          .eq('job_id', activeApplication.job_id)
+          .eq('applicant_id', activeApplication.applicant_id)
+          .order('generated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-      if (error) throw error;
+        if (error) throw error;
+        if (jobSummary) {
+          data = {
+            summary_text: jobSummary.summary_text,
+            key_points: (jobSummary.key_points as any[] | null) || null
+          };
+        }
+      }
 
-      // No existing summary
+      // If no job-specific summary, try proactive profile summary as fallback
+      if (!data) {
+        const { data: profileSummary, error: profileError } = await supabase
+          .from('profile_cv_summaries')
+          .select('summary_text, key_points, is_valid_cv, document_type, cv_url')
+          .eq('user_id', activeApplication.applicant_id)
+          .maybeSingle();
+
+        if (!profileError && profileSummary) {
+          // Check if the proactive summary matches current CV
+          const currentCvUrl = activeApplication.cv_url || null;
+          if (!currentCvUrl || profileSummary.cv_url === currentCvUrl) {
+            setAiSummary({
+              summary_text: profileSummary.summary_text || '',
+              key_points: (profileSummary.key_points as any[] | null) || [],
+              document_type: profileSummary.document_type,
+              is_valid_cv: profileSummary.is_valid_cv,
+            });
+            return { shouldAutoGenerate: false };
+          }
+        }
+      }
+
+      // No existing summary - trigger generation
       if (!data) {
         setAiSummary(null);
         return { shouldAutoGenerate: true };

@@ -1231,6 +1231,28 @@ const Profile = () => {
       const result = await updateProfile(updates);
       
       if (!result.error) {
+        // 🚀 Trigger proactive CV analysis in background if CV was updated
+        const cvWasUpdated = cvUrl && cvUrl !== originalValues.cvUrl;
+        if (cvWasUpdated && user?.id) {
+          console.log('CV updated, triggering proactive analysis in background');
+          // Fire and forget - don't wait for this to complete
+          supabase.functions.invoke('generate-cv-summary', {
+            body: {
+              applicant_id: user.id,
+              cv_url_override: cvUrl,
+              proactive: true
+            }
+          }).then(res => {
+            if (res.error) {
+              console.error('Proactive CV analysis error:', res.error);
+            } else {
+              console.log('Proactive CV analysis triggered successfully');
+            }
+          }).catch(err => {
+            console.error('Proactive CV analysis failed:', err);
+          });
+        }
+        
         // Refresh profile to ensure sidebar is updated immediately
         await refreshProfile();
         

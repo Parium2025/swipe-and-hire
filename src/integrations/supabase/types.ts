@@ -974,6 +974,45 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_cv_summaries: {
+        Row: {
+          analyzed_at: string
+          created_at: string
+          cv_url: string
+          document_type: string | null
+          id: string
+          is_valid_cv: boolean
+          key_points: Json | null
+          summary_text: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analyzed_at?: string
+          created_at?: string
+          cv_url: string
+          document_type?: string | null
+          id?: string
+          is_valid_cv?: boolean
+          key_points?: Json | null
+          summary_text?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analyzed_at?: string
+          created_at?: string
+          cv_url?: string
+          document_type?: string | null
+          id?: string
+          is_valid_cv?: boolean
+          key_points?: Json | null
+          summary_text?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_view_permissions: {
         Row: {
           created_at: string
