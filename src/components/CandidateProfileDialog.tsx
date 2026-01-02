@@ -200,10 +200,28 @@ export const CandidateProfileDialog = ({
     }
   }, [open, activeApplication?.id, user?.id]);
 
+  // Helpers: parse stored summary JSON into UI state + meta
+  const extractSummaryMeta = (keyPoints: any[] | null | undefined) => {
+    const docPoint = (keyPoints || []).find(
+      (p: any) => typeof p?.text === 'string' && p.text.startsWith('Dokumenttyp:')
+    );
+
+    const documentType = typeof docPoint?.text === 'string'
+      ? docPoint.text.replace('Dokumenttyp:', '').trim()
+      : null;
+
+    const isValidCv = documentType ? documentType.toLowerCase() === 'cv' : undefined;
+
+    const sourceCvUrl = docPoint?.meta?.source_cv_url as string | undefined;
+
+    return { documentType, isValidCv, sourceCvUrl };
+  };
+
   // Fetch AI summary for this candidate/job combination
   const fetchAiSummary = async () => {
     if (!activeApplication?.job_id || !activeApplication?.applicant_id) return;
     setLoadingSummary(true);
+
     try {
       const { data, error } = await supabase
         .from('candidate_summaries')
@@ -215,47 +233,47 @@ export const CandidateProfileDialog = ({
         .maybeSingle();
 
       if (error) throw error;
-      
-      if (data) {
-        // Parse key_points to extract document_type if present
-        const keyPoints = data.key_points as { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
-        
-        // Check if first key_point contains document type info (non-CV indicator)
-        let documentType: string | null = null;
-        let isValidCv = true;
-        
-        if (keyPoints && keyPoints.length > 0) {
-          const firstPoint = keyPoints[0];
-          if (firstPoint.text.startsWith('Dokumenttyp:')) {
-            documentType = firstPoint.text.replace('Dokumenttyp:', '').trim();
-            // It's valid if document type is specifically "CV", otherwise it's not a CV
-            isValidCv = documentType.toLowerCase() === 'cv';
-          }
-        }
-        
-        // Also check summary_text for "Kan inte läsa av ett CV" indicator
-        if (data.summary_text.includes('Kan inte läsa av ett CV')) {
-          isValidCv = false;
-          // Extract document type from summary text if not already set
-          if (!documentType) {
-            const match = data.summary_text.match(/dokumentet är (.+?)\./);
-            if (match) {
-              documentType = match[1];
-            }
-          }
-        }
-        
-        setAiSummary({
-          summary_text: data.summary_text,
-          key_points: keyPoints,
-          document_type: documentType,
-          is_valid_cv: isValidCv,
-        });
-      } else {
-        // No existing summary - auto-generate if CV exists
+
+      // No existing summary
+      if (!data) {
         setAiSummary(null);
         return { shouldAutoGenerate: true };
       }
+
+      const keyPoints = (data.key_points as any[] | null) || null;
+      const meta = extractSummaryMeta(keyPoints);
+
+      // If we have a current CV file but the stored summary is missing meta,
+      // or was generated for a different uploaded document, treat as stale and regenerate.
+      const currentCvUrl = activeApplication.cv_url || null;
+      const isStale = !!currentCvUrl && (!meta.sourceCvUrl || meta.sourceCvUrl !== currentCvUrl);
+
+      if (isStale) {
+        setAiSummary(null);
+        return { shouldAutoGenerate: true };
+      }
+
+      // Determine CV validity:
+      // - Prefer explicit doc type from key points
+      // - Fallback to legacy string check
+      let isValidCv = meta.isValidCv;
+      let documentType = meta.documentType;
+
+      if (typeof isValidCv !== 'boolean') {
+        isValidCv = !data.summary_text.includes('Kan inte läsa av ett CV');
+      }
+      if (!documentType && data.summary_text.includes('Kan inte läsa av ett CV')) {
+        const match = data.summary_text.match(/dokumentet är (.+?)\./);
+        if (match) documentType = match[1];
+      }
+
+      setAiSummary({
+        summary_text: data.summary_text,
+        key_points: keyPoints as any,
+        document_type: documentType,
+        is_valid_cv: isValidCv,
+      });
+
       return { shouldAutoGenerate: false };
     } catch (error) {
       console.error('Error fetching AI summary:', error);
@@ -265,39 +283,42 @@ export const CandidateProfileDialog = ({
     }
   };
 
-  // Generate AI summary on-demand - based ONLY on CV/profile data
+  // Generate AI summary on-demand - based ONLY on the uploaded document
   const generateAiSummary = async (silent = false) => {
     if (!activeApplication?.applicant_id) return;
     setGeneratingSummary(true);
+
     try {
-      // Use the new CV-focused summary function
       const { data, error } = await supabase.functions.invoke('generate-cv-summary', {
         body: {
           applicant_id: activeApplication.applicant_id,
           application_id: activeApplication.id,
           job_id: activeApplication.job_id,
+          cv_url_override: activeApplication.cv_url,
         },
       });
 
       if (error) throw error;
-      
+
       if (data?.error) {
         if (!silent) toast.error(data.error);
         return;
       }
-      
-      if (!silent) toast.success('Sammanfattning genererad från CV');
-      
-      // Update the summary directly from response instead of refetching
+
+      if (!silent) {
+        if (data?.is_valid_cv === false) {
+          toast.message('Dokumentet är inte ett CV');
+        } else {
+          toast.success('Sammanfattning genererad från CV');
+        }
+      }
+
       if (data?.summary) {
-        const isValidCv = data.is_valid_cv !== false;
-        const docType = data.summary.document_type || (isValidCv ? 'CV' : null);
-        
         setAiSummary({
           summary_text: data.summary.summary_text,
           key_points: data.summary.key_points,
-          document_type: docType,
-          is_valid_cv: isValidCv,
+          document_type: data.document_type || data.summary.document_type || null,
+          is_valid_cv: data.is_valid_cv,
         });
       }
     } catch (error) {
@@ -328,10 +349,10 @@ export const CandidateProfileDialog = ({
   // Polling: Check for summary updates every 3 seconds if no summary exists
   useEffect(() => {
     if (!open || !activeApplication || aiSummary || loadingSummary) return;
-    
+
     const pollInterval = setInterval(async () => {
       if (!activeApplication.cv_url) return;
-      
+
       try {
         const { data } = await supabase
           .from('candidate_summaries')
@@ -343,10 +364,8 @@ export const CandidateProfileDialog = ({
           .maybeSingle();
 
         if (data) {
-          setAiSummary({
-            summary_text: data.summary_text,
-            key_points: data.key_points as { text: string; type: 'positive' | 'negative' | 'neutral' }[] | null,
-          });
+          // Reuse the main fetch parser logic by calling fetchAiSummary (which also handles staleness)
+          await fetchAiSummary();
         }
       } catch (error) {
         console.error('Polling error:', error);
@@ -779,24 +798,34 @@ export const CandidateProfileDialog = ({
                 ) : aiSummary ? (
                   <div>
                     {/* Key points as bullet list */}
-                    {aiSummary.key_points && aiSummary.key_points.length > 0 ? (
-                      <ul className="space-y-1">
-                        {aiSummary.key_points
-                          .filter(point => !point.text.startsWith('Dokumenttyp:'))
-                          .map((point, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-sm text-white">
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
-                              point.type === 'negative' ? 'bg-red-400' : 'bg-white'
-                            }`} />
-                            <span>{point.text}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-white leading-relaxed">
-                        {aiSummary.summary_text}
-                      </p>
-                    )}
+                    {(() => {
+                      const displayPoints = (aiSummary.key_points || []).filter(
+                        (point: any) => typeof point?.text === 'string' && !point.text.startsWith('Dokumenttyp:')
+                      );
+
+                      if (displayPoints.length > 0) {
+                        return (
+                          <ul className="space-y-1">
+                            {displayPoints.map((point: any, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2 text-sm text-white">
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
+                                    point.type === 'negative' ? 'bg-red-400' : 'bg-white'
+                                  }`}
+                                />
+                                <span>{point.text}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        );
+                      }
+
+                      return (
+                        <p className="text-sm text-white leading-relaxed">
+                          {aiSummary.summary_text}
+                        </p>
+                      );
+                    })()}
                   </div>
                 ) : (
                   <div className="text-center py-3">

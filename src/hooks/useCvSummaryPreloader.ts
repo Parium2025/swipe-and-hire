@@ -30,24 +30,39 @@ export const useCvSummaryPreloader = (candidates: CandidateWithCv[]) => {
       isProcessingRef.current = true;
 
       try {
-        // Hämta befintliga sammanfattningar
+        // Hämta befintliga sammanfattningar (inkl meta för att kunna upptäcka "stale" när kandidaten laddat upp nytt dokument)
         const jobIds = [...new Set(candidatesWithCv.map(c => c.job_id).filter(Boolean))] as string[];
         const applicantIds = [...new Set(candidatesWithCv.map(c => c.applicant_id))];
 
         const { data: existingSummaries } = await supabase
           .from('candidate_summaries')
-          .select('applicant_id, job_id')
+          .select('applicant_id, job_id, key_points')
           .in('job_id', jobIds)
           .in('applicant_id', applicantIds);
 
-        const existingSet = new Set(
-          (existingSummaries || []).map(s => `${s.applicant_id}-${s.job_id}`)
+        const existingMap = new Map(
+          (existingSummaries || []).map((s: any) => [`${s.applicant_id}-${s.job_id}`, s.key_points])
         );
 
-        // Filtrera bort kandidater som redan har sammanfattning
-        const candidatesNeedingSummary = candidatesWithCv.filter(
-          c => !existingSet.has(`${c.applicant_id}-${c.job_id}`)
-        );
+        const extractSourceCvUrl = (keyPoints: any) => {
+          if (!Array.isArray(keyPoints)) return undefined;
+          const docPoint = keyPoints.find(
+            (p: any) => typeof p?.text === 'string' && p.text.startsWith('Dokumenttyp:')
+          );
+          return docPoint?.meta?.source_cv_url as string | undefined;
+        };
+
+        // Filtrera bort kandidater som redan har en aktuell sammanfattning
+        const candidatesNeedingSummary = candidatesWithCv.filter((c) => {
+          const key = `${c.applicant_id}-${c.job_id}`;
+          const existingKeyPoints = existingMap.get(key);
+          if (!existingKeyPoints) return true; // saknar helt
+
+          const sourceCvUrl = extractSourceCvUrl(existingKeyPoints);
+          if (!sourceCvUrl) return true; // äldre format utan meta => regenerera
+
+          return sourceCvUrl !== c.cv_url; // nytt dokument uppladdat => regenerera
+        });
 
         // Generera sammanfattningar i bakgrunden (max 3 samtidigt för att inte överbelasta)
         const batchSize = 3;
