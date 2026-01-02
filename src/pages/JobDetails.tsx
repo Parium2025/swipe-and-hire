@@ -29,8 +29,19 @@ import {
   Inbox,
   MapPin,
   Sparkles,
-  Plus
+  Plus,
+  CheckSquare,
+  Square,
+  Trash2
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { TruncatedText } from '@/components/TruncatedText';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
@@ -147,13 +158,19 @@ const ApplicationCardContent = ({
   isDragging, 
   onOpenProfile,
   onMarkAsViewed,
-  criteriaCount = 0
+  criteriaCount = 0,
+  isSelectionMode,
+  isSelected,
+  onToggleSelect,
 }: { 
   application: JobApplication; 
   isDragging?: boolean; 
   onOpenProfile?: () => void;
   onMarkAsViewed?: (id: string) => void;
   criteriaCount?: number;
+  isSelectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }) => {
   const isUnread = !application.viewed_at;
   const appliedTime = formatCompactTime(application.applied_at);
@@ -166,29 +183,48 @@ const ApplicationCardContent = ({
   const needsEvaluation = hasCriteria && !hasResults;
   
   const handleClick = () => {
-    if (isUnread && onMarkAsViewed) {
-      onMarkAsViewed(application.id);
+    if (isSelectionMode && onToggleSelect) {
+      onToggleSelect();
+    } else {
+      if (isUnread && onMarkAsViewed) {
+        onMarkAsViewed(application.id);
+      }
+      onOpenProfile?.();
     }
-    onOpenProfile?.();
   };
   
   return (
     <div 
-      className={`bg-white/5 ring-1 ring-inset ring-white/10 rounded-md px-2 py-1.5 cursor-grab active:cursor-grabbing group relative
+      className={`bg-white/5 ring-1 ring-inset rounded-md px-2 py-1.5 group relative
         transition-all duration-200 ease-out
-        ${isDragging 
-          ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
-          : 'hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
+        ${isSelectionMode ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
+        ${isSelected 
+          ? 'ring-1 ring-white/30 bg-white/[0.08]' 
+          : isDragging 
+            ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
+            : 'ring-white/10 hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
         }`}
       onClick={handleClick}
     >
-      {isUnread && (
+      {/* Selection checkbox */}
+      {isSelectionMode && (
+        <div className="absolute left-1.5 top-1.5 z-10">
+          <Checkbox 
+            checked={isSelected}
+            onCheckedChange={() => onToggleSelect?.()}
+            className="h-5 w-5 border-2 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white hover:border-white/70"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
+      {isUnread && !isSelectionMode && (
         <div className="absolute right-1.5 top-1.5">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
         </div>
       )}
       
-      <div className="flex items-center gap-2">
+      <div className={`flex items-center gap-2 ${isSelectionMode ? 'ml-5' : ''}`}>
         <SmallCandidateAvatarWrapper application={application} />
         
         <div className="flex-1 min-w-0 pr-4">
@@ -282,12 +318,18 @@ const SortableApplicationCard = ({
   application, 
   onOpenProfile,
   onMarkAsViewed,
-  criteriaCount = 0
+  criteriaCount = 0,
+  isSelectionMode,
+  isSelected,
+  onToggleSelect,
 }: { 
   application: JobApplication; 
   onOpenProfile: () => void;
   onMarkAsViewed?: (id: string) => void;
   criteriaCount?: number;
+  isSelectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }) => {
   const {
     attributes,
@@ -296,7 +338,10 @@ const SortableApplicationCard = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: application.id });
+  } = useSortable({ 
+    id: application.id,
+    disabled: isSelectionMode, // Disable drag in selection mode
+  });
 
   const style = {
     transform: transform ? CSS.Transform.toString(transform) : undefined,
@@ -304,14 +349,20 @@ const SortableApplicationCard = ({
     opacity: isDragging ? 0 : 1,
   };
 
+  // In selection mode, don't apply drag listeners
+  const dragProps = isSelectionMode ? {} : { ...attributes, ...listeners };
+
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...dragProps}>
       <ApplicationCardContent 
         application={application} 
         isDragging={isDragging} 
         onOpenProfile={onOpenProfile}
         onMarkAsViewed={onMarkAsViewed}
         criteriaCount={criteriaCount}
+        isSelectionMode={isSelectionMode}
+        isSelected={isSelected}
+        onToggleSelect={onToggleSelect}
       />
     </div>
   );
@@ -333,7 +384,10 @@ interface StatusColumnProps {
   };
   totalStageCount: number;
   criteriaCount?: number;
-  
+  // Selection mode props
+  isSelectionMode?: boolean;
+  selectedApplicationIds?: Set<string>;
+  onToggleSelect?: (applicationId: string) => void;
 }
 
 const StatusColumn = ({ 
@@ -346,6 +400,9 @@ const StatusColumn = ({
   stageConfig,
   totalStageCount,
   criteriaCount = 0,
+  isSelectionMode,
+  selectedApplicationIds,
+  onToggleSelect,
 }: StatusColumnProps) => {
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -446,6 +503,9 @@ const StatusColumn = ({
                 onOpenProfile={() => onOpenProfile(app)}
                 onMarkAsViewed={onMarkAsViewed}
                 criteriaCount={criteriaCount}
+                isSelectionMode={isSelectionMode}
+                isSelected={selectedApplicationIds?.has(app.id)}
+                onToggleSelect={() => onToggleSelect?.(app.id)}
               />
             ))}
           </SortableContext>
@@ -495,6 +555,41 @@ const JobDetails = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [myCandidatesMap, setMyCandidatesMap] = useState<Map<string, string>>(new Map());
   const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
+  
+  // Selection mode state
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedApplicationIds, setSelectedApplicationIds] = useState<Set<string>>(new Set());
+  
+  // Toggle selection of an application
+  const toggleApplicationSelection = useCallback((applicationId: string) => {
+    setSelectedApplicationIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(applicationId)) {
+        newSet.delete(applicationId);
+      } else {
+        newSet.add(applicationId);
+      }
+      return newSet;
+    });
+  }, []);
+  
+  // Exit selection mode
+  const exitSelectionMode = useCallback(() => {
+    setIsSelectionMode(false);
+    setSelectedApplicationIds(new Set());
+  }, []);
+  
+  // Handle ESC key to exit selection mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isSelectionMode) {
+        exitSelectionMode();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSelectionMode, exitSelectionMode]);
 
   // Use job-specific stage settings
   const { stageSettings, orderedStages, isLoading: stagesLoading } = useJobStageSettings(jobId);
@@ -628,6 +723,56 @@ const JobDetails = () => {
     });
     return result;
   }, [applications, activeStages]);
+
+  // Get all visible application IDs (for select all)
+  const allVisibleApplicationIds = useMemo(() => {
+    return applications.map(app => app.id);
+  }, [applications]);
+  
+  // Check if all visible applications are selected
+  const allVisibleSelected = useMemo(() => {
+    return (
+      allVisibleApplicationIds.length > 0 &&
+      allVisibleApplicationIds.every((id) => selectedApplicationIds.has(id))
+    );
+  }, [allVisibleApplicationIds, selectedApplicationIds]);
+
+  // Toggle select all visible applications
+  const toggleAllVisible = useCallback(() => {
+    setSelectedApplicationIds((prev) => {
+      const allSelected =
+        allVisibleApplicationIds.length > 0 &&
+        allVisibleApplicationIds.every((id) => prev.has(id));
+
+      return allSelected ? new Set() : new Set(allVisibleApplicationIds);
+    });
+  }, [allVisibleApplicationIds]);
+
+  // Bulk move selected applications to a new stage
+  const bulkMoveToStage = async (targetStage: string) => {
+    const idsToMove = Array.from(selectedApplicationIds);
+    const count = idsToMove.length;
+    const targetLabel = stageSettings[targetStage]?.label || targetStage;
+    
+    // Optimistic update
+    idsToMove.forEach(id => {
+      updateApplicationLocally(id, { status: targetStage as JobApplication['status'] });
+    });
+    exitSelectionMode();
+    
+    try {
+      const { error } = await supabase
+        .from('job_applications')
+        .update({ status: targetStage })
+        .in('id', idsToMove);
+        
+      if (error) throw error;
+      toast({ title: `${count} kandidater flyttade till "${targetLabel}"` });
+    } catch (error) {
+      refetch();
+      toast({ title: 'Kunde inte flytta kandidaterna', variant: 'destructive' });
+    }
+  };
 
   const handleOpenProfile = useCallback((app: JobApplication) => {
     setSelectedApplication(app);
@@ -854,6 +999,19 @@ const JobDetails = () => {
                 <span className="text-white text-sm font-medium">{job.applications_count}</span>
                 <span className="text-white text-xs hidden md:inline">Ansökningar</span>
               </div>
+              
+              {/* Välj button for selection mode */}
+              {applications.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)}
+                  className="bg-white/5 border border-white/20 text-white [&_svg]:text-white md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200 flex-shrink-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
+                >
+                  {isSelectionMode ? null : <CheckSquare className="h-4 w-4 mr-1.5" />}
+                  {isSelectionMode ? 'Avbryt' : 'Välj'}
+                </Button>
+              )}
             </div>
             
             {/* Recruiter */}
@@ -922,6 +1080,9 @@ const JobDetails = () => {
                   stageConfig={config}
                   totalStageCount={activeStages.length}
                   criteriaCount={criteriaCount}
+                  isSelectionMode={isSelectionMode}
+                  selectedApplicationIds={selectedApplicationIds}
+                  onToggleSelect={toggleApplicationSelection}
                 />
               );
             })}
@@ -1011,6 +1172,71 @@ const JobDetails = () => {
               refetch();
             }}
           />
+        )}
+
+        {/* Floating Action Bar for Selection Mode */}
+        {isSelectionMode && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 duration-300">
+            <div className="flex items-center gap-3 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 shadow-xl">
+              <span className="text-white text-sm font-medium whitespace-nowrap">
+                {selectedApplicationIds.size} av {allVisibleApplicationIds.length} valda
+              </span>
+              <div className="w-px h-5 bg-white/20" />
+              
+              {/* Select All / Deselect All toggle */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleAllVisible}
+                className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200"
+              >
+                {allVisibleSelected ? (
+                  <Square className="h-4 w-4 mr-1.5" />
+                ) : (
+                  <CheckSquare className="h-4 w-4 mr-1.5" />
+                )}
+                {allVisibleSelected ? 'Avmarkera alla' : 'Välj alla'}
+              </Button>
+
+              <div className="w-px h-5 bg-white/20" />
+
+              {/* Move to stage dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={selectedApplicationIds.size === 0}
+                    aria-disabled={selectedApplicationIds.size === 0}
+                    className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200"
+                  >
+                    <ArrowDown className="h-4 w-4 mr-1.5" />
+                    Flytta till
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
+                  {activeStages.map(stage => {
+                    const settings = stageSettings[stage];
+                    const Icon = getJobStageIconByName(settings?.iconName || 'inbox');
+                    return (
+                      <DropdownMenuItem 
+                        key={stage}
+                        onClick={() => bulkMoveToStage(stage)}
+                        className="text-white hover:text-white cursor-pointer"
+                      >
+                        <div 
+                          className="h-2 w-2 rounded-full mr-2 flex-shrink-0" 
+                          style={{ backgroundColor: settings?.color || '#0EA5E9' }} 
+                        />
+                        <Icon className="h-4 w-4 mr-2 text-white/70" />
+                        <span className="truncate">{settings?.label || stage}</span>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         )}
       </div>
   );
