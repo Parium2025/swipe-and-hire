@@ -1,4 +1,5 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import EmployerSidebar from '@/components/EmployerSidebar';
@@ -22,6 +23,16 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
   const { invalidateJobs } = useJobsData();
   const queryClient = useQueryClient();
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
+  const location = useLocation();
+  
+  // Auto-collapse sidebar on pages that need more horizontal space (Kanban views)
+  const isKanbanPage = location.pathname.startsWith('/job-details/') || location.pathname === '/my-candidates';
+  const [sidebarOpen, setSidebarOpen] = useState(!isKanbanPage);
+  
+  // Update sidebar state when route changes
+  useEffect(() => {
+    setSidebarOpen(!isKanbanPage);
+  }, [isKanbanPage]);
   
   // Track user activity for "last seen" feature
   useActivityTracker();
@@ -252,7 +263,7 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
   }, [user, queryClient]);
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
