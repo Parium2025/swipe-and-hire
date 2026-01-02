@@ -1285,71 +1285,73 @@ const MyCandidates = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-3 md:px-12 animate-fade-in">
-      {/* Header */}
-      <div className="text-center mb-4">
-        <div className="flex items-center justify-center gap-2">
-          {hasTeam ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-white tracking-tight hover:text-white/80 transition-colors">
-                  {isViewingColleague ? (
-                    <>
-                      <Eye className="h-5 w-5 text-fuchsia-400" />
-                      {viewingColleague?.firstName} {viewingColleague?.lastName}s kandidater
-                    </>
-                  ) : (
-                    <>Mina kandidater</>
-                  )}
-                  <span className="text-white/60">({stats.total})</span>
-                  <ChevronDown className="h-4 w-4 text-white/60" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[200px]">
-                <DropdownMenuItem 
-                  onClick={() => setViewingColleagueId(null)}
-                  className={`text-white hover:text-white ${!isViewingColleague ? 'bg-white/10' : ''}`}
-                >
-                  <UserCheck className="h-4 w-4 mr-2" />
-                  Mina kandidater
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-white/10" />
-                <div className="px-2 py-1.5 text-xs text-white/50 font-medium">Kollegors listor</div>
-                {teamMembers.map(member => (
+      {/* Header with Search and Stage Filters */}
+      <div className="mb-6 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4">
+        {/* Title and description */}
+        <div className="text-center mb-4">
+          <div className="flex items-center justify-center gap-2">
+            {hasTeam ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 text-xl md:text-2xl font-semibold text-white tracking-tight hover:text-white/80 transition-colors">
+                    {isViewingColleague ? (
+                      <>
+                        <Eye className="h-5 w-5 text-fuchsia-400" />
+                        {viewingColleague?.firstName} {viewingColleague?.lastName}s kandidater
+                      </>
+                    ) : (
+                      <>Mina kandidater</>
+                    )}
+                    <span className="text-white/60">({stats.total})</span>
+                    <ChevronDown className="h-4 w-4 text-white/60" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" className="bg-card-parium border-white/20 min-w-[200px]">
                   <DropdownMenuItem 
-                    key={member.userId}
-                    onClick={() => setViewingColleagueId(member.userId)}
-                    className={`text-white hover:text-white ${viewingColleagueId === member.userId ? 'bg-white/10' : ''}`}
+                    onClick={() => setViewingColleagueId(null)}
+                    className={`text-white hover:text-white ${!isViewingColleague ? 'bg-white/10' : ''}`}
                   >
-                    <Avatar className="h-5 w-5 mr-2">
-                      <AvatarImage src={member.profileImageUrl || undefined} />
-                      <AvatarFallback className="text-[10px] bg-white/20">
-                        {member.firstName?.[0]}{member.lastName?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    {member.firstName} {member.lastName}
+                    <UserCheck className="h-4 w-4 mr-2" />
+                    Mina kandidater
                   </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
-              Mina kandidater ({stats.total})
-            </h1>
-          )}
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <div className="px-2 py-1.5 text-xs text-white/50 font-medium">Kollegors listor</div>
+                  {teamMembers.map(member => (
+                    <DropdownMenuItem 
+                      key={member.userId}
+                      onClick={() => setViewingColleagueId(member.userId)}
+                      className={`text-white hover:text-white ${viewingColleagueId === member.userId ? 'bg-white/10' : ''}`}
+                    >
+                      <Avatar className="h-5 w-5 mr-2">
+                        <AvatarImage src={member.profileImageUrl || undefined} />
+                        <AvatarFallback className="text-[10px] bg-white/20">
+                          {member.firstName?.[0]}{member.lastName?.[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      {member.firstName} {member.lastName}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
+                Mina kandidater ({stats.total})
+              </h1>
+            )}
+          </div>
+          <p className="text-sm text-white/90 mt-1">
+            {isViewingColleague 
+              ? `Visar ${viewingColleague?.firstName}s rekryteringspipeline - du kan flytta och ta bort kandidater`
+              : 'Din personliga rekryteringspipeline - dra kandidater mellan steg'
+            }
+          </p>
         </div>
-        <p className="text-sm text-white/90 mt-1">
-          {isViewingColleague 
-            ? `Visar ${viewingColleague?.firstName}s rekryteringspipeline - du kan flytta och ta bort kandidater`
-            : 'Din personliga rekryteringspipeline - dra kandidater mellan steg'
-          }
-        </p>
-      </div>
 
-      {/* Search and Stage Filters */}
-      {stats.total > 0 && (
-        <div className="mb-6 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4 space-y-3">
-          {/* Search input and Select button */}
-          <div className="flex items-center gap-2 max-w-lg mx-auto">
+        {/* Search and Stage Filters */}
+        {stats.total > 0 && (
+          <div className="space-y-3">
+            {/* Search input and Select button */}
+            <div className="flex items-center gap-2 max-w-lg mx-auto">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
               <Input
@@ -1455,7 +1457,8 @@ const MyCandidates = () => {
             </p>
           )}
         </div>
-      )}
+        )}
+      </div>
 
       {stats.total === 0 ? (
         <Card className="bg-white/5 border-white/10">
