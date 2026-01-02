@@ -8,9 +8,11 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
+  DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogHeader,
@@ -28,7 +30,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { MoreVertical, Pencil, Palette, Trash2, Image } from 'lucide-react';
+import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS, getJobStageIconByName } from '@/hooks/useJobStageSettings';
@@ -59,10 +61,14 @@ export function JobStageSettingsMenu({
   
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [newLabel, setNewLabel] = useState(settings?.label || '');
   const [liveColor, setLiveColor] = useState<string | null>(null);
   
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Use liveColor while dragging, fall back to saved color
+  const displayColor = liveColor ?? settings?.color ?? '#0EA5E9';
   
   // Update newLabel when settings change
   useEffect(() => {
@@ -70,6 +76,11 @@ export function JobStageSettingsMenu({
       setNewLabel(settings.label);
     }
   }, [settings?.label]);
+
+  const handleOpenRenameDialog = () => {
+    setNewLabel(settings?.label || '');
+    setRenameDialogOpen(true);
+  };
 
   const handleRename = () => {
     if (newLabel.trim()) {
@@ -97,17 +108,33 @@ export function JobStageSettingsMenu({
     toast.success('Ikon uppdaterad');
   };
 
-  const handleDelete = async () => {
-    if (onMoveCandidatesAndDelete && candidateCount > 0) {
-      await onMoveCandidatesAndDelete();
+  // Check if we can delete this stage (must have at least 1 stage left)
+  const canDelete = totalStageCount > 1;
+  const hasCandidates = candidateCount > 0;
+
+  const handleDeleteClick = () => {
+    if (totalStageCount <= 1) {
+      toast.error('Du måste ha minst ett steg kvar');
+      return;
     }
-    deleteStage(stageKey);
-    setDeleteDialogOpen(false);
-    toast.success('Steg borttaget');
+    setDeleteDialogOpen(true);
   };
 
-  // Only custom stages can be deleted, and only if there's more than one stage
-  const canDelete = settings?.isCustom && totalStageCount > 1;
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      if (onMoveCandidatesAndDelete && candidateCount > 0) {
+        await onMoveCandidatesAndDelete();
+      }
+      deleteStage(stageKey);
+      setDeleteDialogOpen(false);
+      toast.success('Steg borttaget');
+    } catch (error) {
+      toast.error('Kunde inte ta bort steg');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <>
@@ -122,7 +149,7 @@ export function JobStageSettingsMenu({
           className="w-48 border-white/20"
         >
           <DropdownMenuItem 
-            onClick={() => setRenameDialogOpen(true)}
+            onClick={handleOpenRenameDialog}
             className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer"
           >
             <Pencil className="h-4 w-4 mr-2" />
@@ -132,16 +159,23 @@ export function JobStageSettingsMenu({
           <DropdownMenuSub>
             <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
               <Palette className="h-4 w-4 mr-2" />
-              Välj färg
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent 
-              className="p-3 bg-card-parium border-white/20"
-            >
-              <HexColorPicker 
-                color={liveColor || settings?.color || '#0EA5E9'} 
-                onChange={handleColorChange}
+              <span className="flex-1">Välj färg</span>
+              <div 
+                className="w-5 h-5 rounded-full border border-white/30 ml-2"
+                style={{ backgroundColor: `${displayColor}99` }}
               />
-            </DropdownMenuSubContent>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent 
+                className="p-3 bg-card-parium border-white/20"
+                sideOffset={8}
+              >
+                <HexColorPicker 
+                  color={displayColor} 
+                  onChange={handleColorChange}
+                />
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
           </DropdownMenuSub>
           
           <DropdownMenuSub>
@@ -149,40 +183,53 @@ export function JobStageSettingsMenu({
               <Image className="h-4 w-4 mr-2" />
               Välj ikon
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent 
-              className="bg-card-parium border-white/20 p-2 w-56"
-            >
-              <div className="grid grid-cols-5 gap-1">
-                {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
-                  <button
-                    key={name}
-                    onClick={() => handleIconChange(name)}
-                    className={`p-2 rounded hover:bg-white/20 transition-colors ${
-                      settings?.iconName === name ? 'bg-white/20 ring-1 ring-white/40' : ''
-                    }`}
-                    title={label}
-                  >
-                    <Icon className="h-4 w-4 text-white" />
-                  </button>
-                ))}
-              </div>
-            </DropdownMenuSubContent>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent 
+                className="bg-card-parium border-white/20 w-56"
+              >
+                <div className="grid grid-cols-5 gap-1 p-2">
+                  {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
+                    <button
+                      key={name}
+                      onClick={() => handleIconChange(name)}
+                      className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
+                        settings?.iconName === name 
+                          ? 'bg-white/30 text-white' 
+                          : 'hover:bg-white/20 text-white'
+                      }`}
+                      title={label}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </button>
+                  ))}
+                </div>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
           </DropdownMenuSub>
           
-          {canDelete && (
-            <>
-              <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem 
-                onClick={() => setDeleteDialogOpen(true)}
-                className="text-red-400 hover:bg-red-500/10 focus:bg-red-500/10 cursor-pointer"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
+          <DropdownMenuSeparator className="bg-white/10" />
+          
+          {canDelete ? (
+            <DropdownMenuItem 
+              onClick={handleDeleteClick}
+              className={`cursor-pointer ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Ta bort steg
+              {candidateCount > 0 && (
+                <span className="ml-auto text-xs text-white/40">({candidateCount})</span>
+              )}
+            </DropdownMenuItem>
+          ) : (
+            <div className="px-2 py-1.5">
+              <div className="flex items-center gap-2 text-sm text-white/40">
+                <Trash2 className="h-4 w-4" />
                 Ta bort steg
-                {candidateCount > 0 && (
-                  <span className="ml-auto text-xs text-white/50">({candidateCount})</span>
-                )}
-              </DropdownMenuItem>
-            </>
+              </div>
+              <p className="text-xs text-white mt-1 ml-6">
+                Det måste alltid finnas minst ett steg för att organisera kandidater.
+              </p>
+            </div>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -193,26 +240,31 @@ export function JobStageSettingsMenu({
           <DialogHeader>
             <DialogTitle className="text-white">Byt namn på steg</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
-            <Input
-              value={newLabel}
-              onChange={(e) => setNewLabel(e.target.value)}
-              placeholder="Stegnamn"
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              onKeyDown={(e) => e.key === 'Enter' && handleRename()}
-            />
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="stage-label" className="text-white/70">Nytt namn</Label>
+              <Input
+                id="stage-label"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                placeholder="Ange namn"
+                className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
+                onKeyDown={(e) => e.key === 'Enter' && handleRename()}
+              />
+            </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex justify-between gap-2">
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setRenameDialogOpen(false)}
-              className="text-white hover:bg-white/10"
+              className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Avbryt
             </Button>
             <Button
               onClick={handleRename}
-              className="bg-primary hover:bg-primary/90"
+              disabled={!newLabel.trim()}
+              className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Spara
             </Button>
@@ -222,24 +274,49 @@ export function JobStageSettingsMenu({
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContentNoFocus className="bg-card-parium border-white/20 text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Ta bort steg?</AlertDialogTitle>
-            <AlertDialogDescription className="text-white/70">
-              {candidateCount > 0 && targetStageLabel
-                ? `${candidateCount} kandidat(er) kommer flyttas till "${targetStageLabel}".`
-                : 'Detta steg kommer tas bort permanent.'}
+        <AlertDialogContentNoFocus 
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+        >
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort steg
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
+              {hasCandidates ? (
+                <>
+                  Det finns <span className="font-semibold text-orange-400">{candidateCount} kandidat{candidateCount > 1 ? 'er' : ''}</span> i detta steg. 
+                  De kommer att flyttas till <span className="font-semibold text-white">"{targetStageLabel}"</span> när du tar bort steget.
+                </>
+              ) : (
+                <>
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{settings?.label}"</span>? Denna åtgärd går inte att ångra.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+            <AlertDialogCancel 
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={isDeleting}
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-[0.6] mt-0 flex items-center justify-center bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              variant="destructiveSoft"
+              disabled={isDeleting}
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-[0.4] text-sm flex items-center justify-center"
             >
-              Ta bort
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              {isDeleting ? 'Tar bort...' : 'Ta bort'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContentNoFocus>
