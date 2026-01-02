@@ -343,20 +343,78 @@ interface CriterionResultBadgeProps {
 
 export function CriterionResultBadge({ result, title, reasoning }: CriterionResultBadgeProps) {
   const config = {
-    match: { icon: Check, color: 'text-green-400', bg: 'bg-green-500/10' },
-    no_match: { icon: X, color: 'text-red-400', bg: 'bg-red-500/10' },
-    no_data: { icon: AlertCircle, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+    match: { 
+      icon: Check, 
+      iconColor: 'text-green-400', 
+      ringColor: 'ring-green-500/50',
+      bg: 'bg-green-500/10' 
+    },
+    no_match: { 
+      icon: X, 
+      iconColor: 'text-red-400', 
+      ringColor: 'ring-red-500/50',
+      bg: 'bg-red-500/10' 
+    },
+    no_data: { 
+      icon: AlertCircle, 
+      iconColor: 'text-yellow-400', 
+      ringColor: 'ring-yellow-500/50',
+      bg: 'bg-yellow-500/10' 
+    },
   };
   
-  const { icon: Icon, color, bg } = config[result];
+  const { icon: Icon, iconColor, ringColor, bg } = config[result];
 
   return (
     <div
       className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${bg}`}
       title={reasoning}
     >
-      <Icon className={`h-2.5 w-2.5 ${color}`} />
+      {/* Circular icon with ring - matching Tim Taylor reference */}
+      <span className={`flex items-center justify-center h-3.5 w-3.5 rounded-full ring-1 ${ringColor} ${bg}`}>
+        <Icon className={`h-2 w-2 ${iconColor}`} />
+      </span>
       <span className="text-white/80 truncate max-w-[60px]">{title}</span>
     </div>
+  );
+}
+
+// Compact badge showing just icon in a circle (for smaller spaces)
+interface CriterionIconBadgeProps {
+  result: 'match' | 'no_match' | 'no_data';
+  title: string;
+}
+
+export function CriterionIconBadge({ result, title }: CriterionIconBadgeProps) {
+  const config = {
+    match: { 
+      icon: Check, 
+      iconColor: 'text-green-400', 
+      ringColor: 'ring-green-500/50',
+      bg: 'bg-green-500/20' 
+    },
+    no_match: { 
+      icon: X, 
+      iconColor: 'text-red-400', 
+      ringColor: 'ring-red-500/50',
+      bg: 'bg-red-500/20' 
+    },
+    no_data: { 
+      icon: AlertCircle, 
+      iconColor: 'text-yellow-400', 
+      ringColor: 'ring-yellow-500/50',
+      bg: 'bg-yellow-500/20' 
+    },
+  };
+  
+  const { icon: Icon, iconColor, ringColor, bg } = config[result];
+
+  return (
+    <span 
+      className={`inline-flex items-center justify-center h-4 w-4 rounded-full ring-1 ${ringColor} ${bg}`}
+      title={title}
+    >
+      <Icon className={`h-2.5 w-2.5 ${iconColor}`} />
+    </span>
   );
 }

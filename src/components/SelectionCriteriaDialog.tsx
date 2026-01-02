@@ -24,6 +24,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
+import { useEvaluateAllCandidates } from '@/hooks/useCriteriaResults';
 
 interface JobCriterion {
   id: string;
@@ -41,6 +42,7 @@ interface SelectionCriteriaDialogProps {
   onOpenChange: (open: boolean) => void;
   jobId: string;
   onActivate?: (criteriaCount: number) => void;
+  candidates?: { applicant_id: string; application_id?: string }[];
 }
 
 // Discrimination keywords to check
@@ -70,12 +72,14 @@ export function SelectionCriteriaDialog({
   open, 
   onOpenChange, 
   jobId,
-  onActivate 
+  onActivate,
+  candidates = []
 }: SelectionCriteriaDialogProps) {
   const { user } = useAuth();
   const [criteria, setCriteria] = useState<JobCriterion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const evaluateAllCandidates = useEvaluateAllCandidates();
   
   // Inline editing state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -279,6 +283,13 @@ export function SelectionCriteriaDialog({
       }
 
       toast.success(`${validCriteria.length} kriterier sparade och aktiverade`);
+      
+      // Trigger evaluation for all candidates
+      if (candidates.length > 0) {
+        toast.info('AI börjar utvärdera kandidater...');
+        evaluateAllCandidates.mutate({ jobId, candidates });
+      }
+      
       onActivate?.(validCriteria.length);
       onOpenChange(false);
     } catch (error) {

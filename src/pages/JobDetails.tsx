@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { JobCriteriaManager, CriterionResultBadge } from '@/components/JobCriteriaManager';
+import { JobCriteriaManager, CriterionResultBadge, CriterionIconBadge } from '@/components/JobCriteriaManager';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { useJobStageSettings, getJobStageIconByName, DEFAULT_JOB_STAGE_KEYS } from '@/hooks/useJobStageSettings';
 import { useJobDetailsData, type JobApplication } from '@/hooks/useJobDetailsData';
+import { useJobCriteria } from '@/hooks/useCriteriaResults';
 import { 
   Clock, 
   X,
@@ -144,17 +145,24 @@ const ApplicationCardContent = ({
   application, 
   isDragging, 
   onOpenProfile,
-  onMarkAsViewed
+  onMarkAsViewed,
+  criteriaCount = 0
 }: { 
   application: JobApplication; 
   isDragging?: boolean; 
   onOpenProfile?: () => void;
   onMarkAsViewed?: (id: string) => void;
+  criteriaCount?: number;
 }) => {
   const isUnread = !application.viewed_at;
   const appliedTime = formatCompactTime(application.applied_at);
   const lastActiveTime = formatCompactTime(application.last_active_at);
   const criterionResults = application.criterionResults || [];
+  
+  // Check if criteria exist but candidate not evaluated
+  const hasCriteria = criteriaCount > 0;
+  const hasResults = criterionResults.length > 0;
+  const needsEvaluation = hasCriteria && !hasResults;
   
   const handleClick = () => {
     if (isUnread && onMarkAsViewed) {
@@ -233,20 +241,38 @@ const ApplicationCardContent = ({
         </div>
       </div>
 
-      {/* Criterion Results */}
-      {criterionResults.length > 0 && (
+      {/* Criterion Results - show badges with circular icons */}
+      {hasResults && (
         <div className="flex flex-wrap gap-1 mt-1.5 pt-1.5 border-t border-white/5">
           {criterionResults.slice(0, 3).map((cr) => (
-            <CriterionResultBadge
+            <CriterionIconBadge
               key={cr.criterion_id}
               result={cr.result}
               title={cr.title}
-              reasoning={cr.reasoning}
             />
           ))}
           {criterionResults.length > 3 && (
             <span className="text-[10px] text-white/50">+{criterionResults.length - 3}</span>
           )}
+        </div>
+      )}
+      
+      {/* Show "Not evaluated" indicator when criteria exist but no results */}
+      {needsEvaluation && (
+        <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-white/5">
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-white/5 text-white/50 cursor-default">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  Väntar på AI...
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs max-w-[200px]">
+                <p>AI-utvärdering startar automatiskt. Uppdatera sidan om det tar lång tid.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       )}
     </div>
@@ -257,11 +283,13 @@ const ApplicationCardContent = ({
 const SortableApplicationCard = ({ 
   application, 
   onOpenProfile,
-  onMarkAsViewed
+  onMarkAsViewed,
+  criteriaCount = 0
 }: { 
   application: JobApplication; 
   onOpenProfile: () => void;
   onMarkAsViewed?: (id: string) => void;
+  criteriaCount?: number;
 }) => {
   const {
     attributes,
@@ -285,6 +313,7 @@ const SortableApplicationCard = ({
         isDragging={isDragging} 
         onOpenProfile={onOpenProfile}
         onMarkAsViewed={onMarkAsViewed}
+        criteriaCount={criteriaCount}
       />
     </div>
   );
@@ -305,6 +334,7 @@ interface StatusColumnProps {
     isCustom: boolean;
   };
   totalStageCount: number;
+  criteriaCount?: number;
 }
 
 const StatusColumn = ({ 
@@ -315,7 +345,8 @@ const StatusColumn = ({
   onMarkAsViewed, 
   onOpenCriteriaDialog,
   stageConfig,
-  totalStageCount
+  totalStageCount,
+  criteriaCount = 0
 }: StatusColumnProps) => {
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -415,6 +446,7 @@ const StatusColumn = ({
                 application={app} 
                 onOpenProfile={() => onOpenProfile(app)}
                 onMarkAsViewed={onMarkAsViewed}
+                criteriaCount={criteriaCount}
               />
             ))}
           </SortableContext>
@@ -464,6 +496,10 @@ const JobDetails = () => {
 
   // Use job-specific stage settings
   const { stageSettings, orderedStages, isLoading: stagesLoading } = useJobStageSettings(jobId);
+  
+  // Fetch criteria count for this job
+  const { data: jobCriteria } = useJobCriteria(jobId || null);
+  const criteriaCount = jobCriteria?.length || 0;
 
   // Load my_candidates map for ratings
   useEffect(() => {
@@ -840,6 +876,7 @@ const JobDetails = () => {
                   onOpenCriteriaDialog={status === 'pending' ? () => setCriteriaDialogOpen(true) : undefined}
                   stageConfig={config}
                   totalStageCount={activeStages.length}
+                  criteriaCount={criteriaCount}
                 />
               );
             })}
@@ -917,8 +954,13 @@ const JobDetails = () => {
             open={criteriaDialogOpen}
             onOpenChange={setCriteriaDialogOpen}
             jobId={jobId}
+            candidates={applications.map(app => ({ 
+              applicant_id: app.applicant_id, 
+              application_id: app.id 
+            }))}
             onActivate={(count) => {
               toast({ title: `${count} urvalskriterier aktiverade`, description: 'AI börjar utvärdera kandidater' });
+              refetch();
             }}
           />
         )}
