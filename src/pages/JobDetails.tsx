@@ -14,6 +14,7 @@ import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { useJobStageSettings, getJobStageIconByName, DEFAULT_JOB_STAGE_KEYS } from '@/hooks/useJobStageSettings';
 import { useJobDetailsData, type JobApplication } from '@/hooks/useJobDetailsData';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
+import { useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { 
   Clock, 
   X,
@@ -332,6 +333,7 @@ interface StatusColumnProps {
   };
   totalStageCount: number;
   criteriaCount?: number;
+  columnWidth: { min: string; max: string };
 }
 
 const StatusColumn = ({ 
@@ -343,7 +345,8 @@ const StatusColumn = ({
   onOpenCriteriaDialog,
   stageConfig,
   totalStageCount,
-  criteriaCount = 0
+  criteriaCount = 0,
+  columnWidth
 }: StatusColumnProps) => {
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -378,7 +381,8 @@ const StatusColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 min-w-[160px] max-w-[240px] flex flex-col transition-colors h-full"
+      className="flex-1 flex flex-col transition-colors h-full"
+      style={{ minWidth: columnWidth.min, maxWidth: columnWidth.max }}
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -474,6 +478,9 @@ const JobDetails = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   
+  // Get kanban layout context for dynamic column widths
+  const { setStageCount, columnWidth } = useKanbanLayout();
+  
   // Use cached data hook
   const { 
     job, 
@@ -530,6 +537,11 @@ const JobDetails = () => {
 
   // Use orderedStages if available, otherwise default
   const activeStages = orderedStages.length > 0 ? orderedStages : [...DEFAULT_JOB_STAGE_KEYS];
+
+  // Update stage count in layout context for smart sidebar behavior
+  useEffect(() => {
+    setStageCount(activeStages.length);
+  }, [activeStages.length, setStageCount]);
 
   const collisionDetectionStrategy = useMemo(
     () => columnXCollisionDetection(activeStages),
@@ -914,6 +926,7 @@ const JobDetails = () => {
                   stageConfig={config}
                   totalStageCount={activeStages.length}
                   criteriaCount={criteriaCount}
+                  columnWidth={columnWidth}
                 />
               );
             })}
