@@ -922,7 +922,7 @@ const JobDetails = () => {
               <CreateJobStageDialog 
                 jobId={jobId || ''}
                 trigger={
-                  <button className="px-3 py-1.5 text-xs font-medium rounded-md transition-all text-white ring-1 ring-inset ring-primary/40 bg-primary/10 hover:bg-primary/20 backdrop-blur-sm flex items-center gap-1.5">
+                  <button className="px-3 py-1.5 text-xs font-medium rounded-md transition-all text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
                     <Plus className="h-3.5 w-3.5" />
                     Nytt steg
                   </button>
