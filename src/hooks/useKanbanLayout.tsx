@@ -1,8 +1,15 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { useDevice } from './use-device';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Max 5 stages allowed
 export const MAX_KANBAN_STAGES = 5;
+
+// Minimum column width to prevent truncation (in pixels)
+const MIN_COLUMN_WIDTH = 280;
+// Sidebar widths
+const SIDEBAR_OPEN_WIDTH = 256; // 16rem = 256px
+const SIDEBAR_COLLAPSED_WIDTH = 56; // ~3.5rem
+// Extra padding/gaps in the layout
+const LAYOUT_PADDING = 48; // gaps between columns + container padding
 
 interface KanbanLayoutContextType {
   stageCount: number;
@@ -14,21 +21,52 @@ const KanbanLayoutContext = createContext<KanbanLayoutContextType | null>(null);
 
 export function KanbanLayoutProvider({ children }: { children: ReactNode }) {
   const [stageCount, setStageCount] = useState(0);
-  const device = useDevice();
+  const [windowWidth, setWindowWidth] = useState(() => 
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
 
-  // Smart sidebar collapse based on stage count and device
-  // Goal: fit all columns without horizontal scrolling
+  // Track window width for smart calculations
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Smart sidebar collapse based on actual screen width and stage count
+  // Goal: NEVER truncate columns - collapse sidebar proactively instead
   const shouldCollapseSidebar = (() => {
-    if (device === 'mobile') return true; // Always collapsed on mobile
-    if (stageCount === 0) return false; // No stages loaded yet
+    // Mobile: always collapsed
+    if (windowWidth < 768) return true;
     
-    // Tablet: collapse with 4+ stages
-    if (device === 'tablet') {
-      return stageCount >= 4;
+    // No stages loaded yet - keep sidebar open
+    if (stageCount === 0) return false;
+    
+    // Calculate available width for columns with sidebar OPEN
+    const availableWithSidebarOpen = windowWidth - SIDEBAR_OPEN_WIDTH - LAYOUT_PADDING;
+    const requiredWidth = stageCount * MIN_COLUMN_WIDTH;
+    
+    // If columns won't fit with sidebar open, collapse it
+    if (requiredWidth > availableWithSidebarOpen) {
+      return true;
     }
     
-    // Desktop: collapse with 5 stages, open with 4 or fewer
-    return stageCount >= 5;
+    // Extra safety margin for smaller screens - be more aggressive about collapsing
+    // On screens under 1400px, collapse earlier to ensure comfortable viewing
+    if (windowWidth < 1400 && stageCount >= 4) {
+      return true;
+    }
+    
+    // On screens under 1200px, collapse with 3+ stages
+    if (windowWidth < 1200 && stageCount >= 3) {
+      return true;
+    }
+    
+    // On screens under 1024px (tablet), collapse with 2+ stages
+    if (windowWidth < 1024 && stageCount >= 2) {
+      return true;
+    }
+    
+    return false;
   })();
 
   return (
