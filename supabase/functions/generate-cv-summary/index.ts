@@ -183,61 +183,47 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `Du är en rekryteringsassistent som sammanfattar kandidaters CV.
+    // This is a PURE CV summary function - completely separate from criteria evaluation
+    const systemPrompt = `Du är en rekryteringsassistent som ENDAST analyserar och sammanfattar CV-dokument.
 
-KRITISKT: Du ska ENDAST analysera CV-dokument. Om det uppladdade dokumentet INTE är ett CV, identifiera dokumenttypen och svara med:
+KRITISKT: Din uppgift är att identifiera dokumenttyp och ge en FAKTABASERAD sammanfattning.
+Du ska INTE utvärdera kandidaten mot några kriterier - det görs av en annan AI.
+
+OM dokumentet INTE är ett CV, identifiera typen:
 {
   "is_valid_cv": false,
-  "document_type": "[specifik dokumenttyp på svenska]",
+  "document_type": "[typ]",
   "summary_text": "",
   "key_points": []
 }
 
-VANLIGA DOKUMENTTYPER ATT IDENTIFIERA:
-- "anställningsavtal" - kontrakt mellan arbetsgivare och anställd
-- "anställningsintyg" - bekräftelse på anställning
-- "lönespecifikation" - månatlig löneutbetalning
-- "kvitto" - betalningsbevis för köp
-- "faktura" - betalningskrav
-- "räkning" - betalningskrav för tjänst
-- "skattebesked" - dokument från Skatteverket
-- "deklaration" - skattedeklaration
-- "kontrolluppgift" - från Skatteverket
-- "bild" - foto eller bild utan textinnehåll
-- "skärmdump" - screenshot av skärm
-- "brev" - personligt eller formellt brev
-- "intyg" - generellt intyg eller bevis
-- "diplom" - utbildningsbevis
-- "betyg" - skolbetyg
-- "pass" - identitetshandling
-- "körkort" - identitetshandling
-- "id-kort" - identitetshandling
-- "okänt dokument" - om typen inte kan fastställas
+DOKUMENTTYPER:
+- "anställningsavtal", "anställningsintyg", "lönespecifikation", "kvitto", "faktura"
+- "skattebesked", "deklaration", "kontrolluppgift", "bild", "skärmdump"
+- "brev", "intyg", "diplom", "betyg", "pass", "körkort", "id-kort", "okänt dokument"
 
-OM det är ett giltigt CV, analysera och ge en KORT sammanfattning med 4-6 konkreta punkter.
+OM det är ett CV, ge en NEUTRAL sammanfattning med 3-5 punkter om:
+- Arbetslivserfarenhet (vilka jobb, var, hur länge)
+- Utbildning (skolor, program, examen)
+- Certifikat och behörigheter som nämns i CV:t
+- Språkkunskaper om det nämns
 
-FOKUSERA PÅ (om tillgängligt i CV:et):
-- Arbetslivserfarenhet (företag, roller, tid)
-- Utbildning
-- Körkort och certifieringar
-- Kompetenser och färdigheter
-
-SVARSFORMAT FÖR GILTIGT CV (JSON):
+SVARSFORMAT FÖR CV:
 {
   "is_valid_cv": true,
   "document_type": "CV",
-  "summary_text": "En mening som sammanfattar kandidaten",
+  "summary_text": "Kort sammanfattning av kandidatens bakgrund",
   "key_points": [
-    "Punkt 1: Konkret observation från CV",
-    "Punkt 2: Konkret observation från CV",
-    "Punkt 3: Konkret observation från CV"
+    "Arbetat som X på Y i Z år",
+    "Utbildning: [specifik utbildning]",
+    "Nämner: [certifikat/behörigheter från CV]"
   ]
 }
 
-VIKTIGT:
-- Varje punkt ska vara en konkret fakta ENDAST från CV:et
+REGLER:
+- ENDAST fakta från CV:t - inga bedömningar eller rekommendationer
+- Nämn inte "urvalskriterier" eller "krav för rollen"
 - Skriv på svenska
-- Var specifik med dokumenttypen - använd listan ovan
 - Svara ENDAST med JSON`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
