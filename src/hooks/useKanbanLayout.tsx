@@ -35,16 +35,17 @@ export function KanbanLayoutProvider({ children }: { children: ReactNode }) {
     }
     
     if (device === 'tablet') {
-      if (stageCount <= 3) return { min: '200px', max: '280px' };
-      if (stageCount <= 4) return { min: '180px', max: '240px' };
-      return { min: '160px', max: '220px' };
+      if (stageCount <= 3) return { min: '240px', max: '320px' };
+      if (stageCount <= 4) return { min: '200px', max: '280px' };
+      return { min: '180px', max: '240px' };
     }
     
-    // Desktop: more generous widths
-    if (stageCount <= 3) return { min: '260px', max: '360px' };
-    if (stageCount <= 4) return { min: '220px', max: '300px' };
-    if (stageCount <= 5) return { min: '180px', max: '260px' };
-    return { min: '160px', max: '240px' };
+    // Desktop: more generous widths to show full names
+    if (stageCount <= 3) return { min: '320px', max: '420px' };
+    if (stageCount <= 4) return { min: '280px', max: '360px' };
+    if (stageCount <= 5) return { min: '240px', max: '320px' };
+    if (stageCount <= 6) return { min: '200px', max: '280px' };
+    return { min: '180px', max: '260px' };
   })();
 
   return (
