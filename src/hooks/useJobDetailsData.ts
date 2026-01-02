@@ -195,7 +195,7 @@ export function useJobDetailsData(jobId: string | undefined) {
     refetchOnWindowFocus: false, // Don't refetch on tab switch
   });
 
-  // Real-time subscription for application updates
+  // Real-time subscription for application updates AND criterion results
   useEffect(() => {
     if (!jobId || !user) return;
 
@@ -222,6 +222,22 @@ export function useJobDetailsData(jobId: string | undefined) {
             });
           } else if (payload.eventType === 'INSERT') {
             // Refetch to get full data including profile media
+            queryClient.invalidateQueries({ queryKey: ['job-applications', jobId] });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'candidate_evaluations',
+          filter: `job_id=eq.${jobId}`,
+        },
+        (payload) => {
+          // When evaluation completes, refetch to get criterion results
+          if (payload.eventType === 'UPDATE' && payload.new.status === 'completed') {
+            console.log('Evaluation completed, refetching applications to show criteria results');
             queryClient.invalidateQueries({ queryKey: ['job-applications', jobId] });
           }
         }
