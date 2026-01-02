@@ -44,9 +44,16 @@ export interface JobPosting {
   views_count: number;
   applications_count: number;
   created_at: string;
+  expires_at: string | null;
+  employer_id: string;
+  employer_profile?: {
+    first_name: string | null;
+    last_name: string | null;
+    profile_image_url: string | null;
+  };
 }
 
-// Fetch job details
+// Fetch job details with employer profile
 async function fetchJobDetails(jobId: string, userId: string): Promise<JobPosting | null> {
   const { data, error } = await supabase
     .from('job_postings')
@@ -56,7 +63,19 @@ async function fetchJobDetails(jobId: string, userId: string): Promise<JobPostin
     .single();
   
   if (error) throw error;
-  return data;
+  if (!data) return null;
+
+  // Fetch employer profile
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('first_name, last_name, profile_image_url')
+    .eq('user_id', data.employer_id)
+    .single();
+
+  return {
+    ...data,
+    employer_profile: profileData || undefined
+  };
 }
 
 // Fetch applications with all related data
