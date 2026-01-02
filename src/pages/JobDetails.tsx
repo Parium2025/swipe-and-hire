@@ -774,7 +774,7 @@ const JobDetails = () => {
                   const isExpired = job.expires_at && new Date(job.expires_at) < new Date();
                   const statusLabel = isExpired ? 'Utgången' : (job.is_active ? 'Aktiv' : 'Inaktiv');
                   const statusColor = isExpired 
-                    ? 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30'
+                    ? 'bg-red-500/20 text-white border-red-500/30 hover:bg-red-500/30'
                     : job.is_active 
                       ? 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30'
                       : 'bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30';
