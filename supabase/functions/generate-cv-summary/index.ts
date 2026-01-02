@@ -60,115 +60,78 @@ serve(async (req) => {
 
     // Get CV URL - prioritize override, then application, then profile
     const cvUrl = cv_url_override || application?.cv_url || profile?.cv_url;
-    
+
     // For pre-analysis without job_id, we'll use a special "profile" summary
     const isPreAnalysis = !job_id && !application_id && cv_url_override;
-    
-    let cvText = '';
-    
+
+    let contentType = '';
+    let userContent: string | any[] | null = null;
+
     if (cvUrl) {
       console.log('CV URL found:', cvUrl);
-      
-      // Download and extract text from CV
+
       try {
         // Get signed URL for the CV
         const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from('job-applications')
           .createSignedUrl(cvUrl, 300); // 5 min expiry
-        
+
         if (signedUrlError) {
           console.error('Error getting signed URL:', signedUrlError);
         } else if (signedUrlData?.signedUrl) {
-          console.log('Got signed URL, downloading CV...');
-          
-          // Download the CV file
-          const cvResponse = await fetch(signedUrlData.signedUrl);
-          
-          if (cvResponse.ok) {
-            const contentType = cvResponse.headers.get('content-type') || '';
-            console.log('CV content type:', contentType);
-            
-            if (contentType.includes('pdf')) {
-               // For PDF files, we'll use the AI's vision capabilities
-               // or extract what we can from the binary
-               const buffer = await cvResponse.arrayBuffer();
-               const bytes = new Uint8Array(buffer);
+          console.log('Got signed URL, downloading document...');
 
-               // NOTE: Avoid spreading large arrays into String.fromCharCode (causes call stack overflow)
-               let binary = '';
-               const chunkSize = 0x8000;
-               for (let i = 0; i < bytes.length; i += chunkSize) {
-                 binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-               }
-               const base64Cv = btoa(binary);
-              
-              // Store the base64 for later use with AI vision
-              cvText = `[PDF CV UPPLADDAD - ${buffer.byteLength} bytes]`;
-              
-              // Use AI with PDF parsing capability
-              const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-              if (LOVABLE_API_KEY) {
-                try {
-                  // Use Gemini's multimodal capabilities to read the PDF
-                  const visionResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      model: 'google/gemini-2.5-flash',
-                      messages: [
-                        {
-                          role: 'user',
-                          content: [
-                            {
-                              type: 'text',
-                              text: 'Extrahera all text från detta CV-dokument. Ge mig en strukturerad sammanfattning av personens: 1) Arbetslivserfarenhet, 2) Utbildning, 3) Certifieringar/körkort, 4) Kompetenser. Svara på svenska.'
-                            },
-                            {
-                              type: 'image_url',
-                              image_url: {
-                                url: `data:application/pdf;base64,${base64Cv}`
-                              }
-                            }
-                          ]
-                        }
-                      ],
-                    }),
-                  });
-                  
-                  if (visionResponse.ok) {
-                    const visionData = await visionResponse.json();
-                    cvText = visionData.choices?.[0]?.message?.content || cvText;
-                    console.log('Extracted CV text via AI vision');
-                  } else {
-                    console.error('Vision API error:', await visionResponse.text());
-                  }
-                } catch (visionError) {
-                  console.error('Vision extraction error:', visionError);
-                }
+          const docResponse = await fetch(signedUrlData.signedUrl);
+
+          if (docResponse.ok) {
+            contentType = docResponse.headers.get('content-type') || '';
+            console.log('Document content type:', contentType);
+
+            // For PDFs/images we send the binary directly to the model (no pre-summarization!)
+            if (contentType.includes('pdf') || contentType.startsWith('image/')) {
+              const buffer = await docResponse.arrayBuffer();
+              const bytes = new Uint8Array(buffer);
+
+              let binary = '';
+              const chunkSize = 0x8000;
+              for (let i = 0; i < bytes.length; i += chunkSize) {
+                binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
               }
-            } else if (contentType.includes('text') || contentType.includes('plain')) {
-              // Plain text CV
-              cvText = await cvResponse.text();
+              const base64Doc = btoa(binary);
+
+              const mime = contentType.includes('pdf') ? 'application/pdf' : (contentType || 'image/png');
+
+              userContent = [
+                {
+                  type: 'text',
+                  text: 'Analysera dokumentet enligt instruktionerna och returnera ENDAST JSON.',
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:${mime};base64,${base64Doc}`,
+                  },
+                },
+              ];
+            } else {
+              // Text-based documents
+              userContent = await docResponse.text();
             }
           }
         }
       } catch (cvError) {
-        console.error('Error processing CV:', cvError);
+        console.error('Error processing document:', cvError);
       }
     }
 
-    // ONLY use CV content - not profile or application info
-    // The summary should be based PURELY on the uploaded CV document
-    
-    // Check if we have CV data to analyze
-    if (!cvText || cvText.length < 50) {
+    // ONLY use uploaded document content - not profile or application info
+    // The summary should be based PURELY on the uploaded document
+
+    if (!userContent) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Inget CV uppladdad för denna kandidat' 
+        JSON.stringify({
+          success: false,
+          error: 'Inget dokument uppladdat för denna kandidat',
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -236,7 +199,7 @@ REGLER:
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: cvText },
+          { role: 'user', content: userContent },
         ],
       }),
     });
@@ -293,10 +256,18 @@ REGLER:
       };
     }
 
+    // Meta to detect stale summaries when candidates upload a new document
+    const meta = {
+      source_cv_url: cvUrl || null,
+      content_type: contentType || null,
+      analyzed_at: new Date().toISOString(),
+    };
+
     // Check if the document is NOT a CV
     if (summary.is_valid_cv === false) {
       const documentType = summary.document_type || 'ett dokument som inte är ett CV';
-      
+      const docPoint = { text: `Dokumenttyp: ${documentType}`, type: 'negative', meta };
+
       // Save a special summary indicating this is not a CV (only if we have a job_id)
       const saveJobId = job_id || application?.job_id;
       if (saveJobId) {
@@ -307,7 +278,7 @@ REGLER:
             applicant_id,
             application_id: application?.id || application_id,
             summary_text: `Det uppladdade dokumentet är ${documentType}. Kan inte läsa av ett CV.`,
-            key_points: [{ text: `Dokumenttyp: ${documentType}`, type: 'negative' }],
+            key_points: [docPoint],
             generated_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           }, {
@@ -322,10 +293,8 @@ REGLER:
           document_type: documentType,
           summary: {
             summary_text: `Det uppladdade dokumentet är ${documentType}. Kan inte läsa av ett CV.`,
-            key_points: [{ text: `Dokumenttyp: ${documentType}`, type: 'negative' }],
+            key_points: [docPoint],
           },
-          // Return extracted text for caching even if not a CV
-          cv_text_cached: cvText.substring(0, 5000),
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -334,6 +303,14 @@ REGLER:
     // Save valid CV summary to database (only if we have a job_id)
     const saveJobId = job_id || application?.job_id;
     if (saveJobId) {
+      const docPoint = { text: 'Dokumenttyp: CV', type: 'neutral', meta };
+
+      const normalizedPoints = Array.isArray(summary.key_points)
+        ? summary.key_points
+            .map((p: any) => (typeof p === 'string' ? { text: p, type: 'neutral' } : p))
+            .filter((p: any) => typeof p?.text === 'string' && p.text.trim().length > 0)
+        : [];
+
       const { error: saveError } = await supabase
         .from('candidate_summaries')
         .upsert({
@@ -341,11 +318,7 @@ REGLER:
           applicant_id,
           application_id: application?.id || application_id,
           summary_text: summary.summary_text || '',
-          key_points: Array.isArray(summary.key_points) 
-            ? summary.key_points.map((p: string | { text: string }) => 
-                typeof p === 'string' ? { text: p, type: 'neutral' } : p
-              )
-            : [],
+          key_points: [docPoint, ...normalizedPoints],
           generated_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }, {
@@ -365,10 +338,8 @@ REGLER:
         is_valid_cv: true,
         summary: {
           summary_text: summary.summary_text,
-          key_points: summary.key_points,
+          key_points: [{ text: 'Dokumenttyp: CV', type: 'neutral', meta }, ...(Array.isArray(summary.key_points) ? summary.key_points : [])],
         },
-        // Return extracted text for future use (e.g., pre-analysis)
-        cv_text_cached: isPreAnalysis ? cvText.substring(0, 5000) : undefined,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
