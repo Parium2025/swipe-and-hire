@@ -1347,7 +1347,7 @@ const MyCandidates = () => {
 
       {/* Search and Stage Filters */}
       {stats.total > 0 && (
-        <div className="mb-6 space-y-3">
+        <div className="mb-6 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4 space-y-3">
           {/* Search input and Select button */}
           <div className="flex items-center gap-2 max-w-lg mx-auto">
             <div className="relative flex-1">
