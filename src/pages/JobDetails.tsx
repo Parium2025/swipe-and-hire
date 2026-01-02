@@ -333,7 +333,7 @@ interface StatusColumnProps {
   };
   totalStageCount: number;
   criteriaCount?: number;
-  columnMinWidth: string;
+  
 }
 
 const StatusColumn = ({ 
@@ -346,7 +346,6 @@ const StatusColumn = ({
   stageConfig,
   totalStageCount,
   criteriaCount = 0,
-  columnMinWidth
 }: StatusColumnProps) => {
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -381,8 +380,7 @@ const StatusColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 flex flex-col transition-colors h-full"
-      style={{ minWidth: columnMinWidth }}
+      className="flex-1 flex flex-col transition-colors h-full min-w-0"
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -479,7 +477,7 @@ const JobDetails = () => {
   const { toast } = useToast();
   
   // Get kanban layout context for dynamic column widths
-  const { setStageCount, columnMinWidth } = useKanbanLayout();
+  const { setStageCount } = useKanbanLayout();
   
   // Use cached data hook
   const { 
@@ -903,13 +901,11 @@ const JobDetails = () => {
           }}
         >
           <div 
-            className="flex gap-4 pb-4 pt-2 px-2" 
+            className="flex gap-3 pb-4 pt-2 px-2 w-full" 
             style={{ 
               height: 'calc(100vh - 300px)',
-              overflowX: 'auto',
+              overflowX: 'hidden',
               overflowY: 'hidden',
-              WebkitOverflowScrolling: 'touch',
-              overscrollBehaviorX: 'contain',
             }}
           >
             {activeStages.map((status) => {
@@ -926,7 +922,6 @@ const JobDetails = () => {
                   stageConfig={config}
                   totalStageCount={activeStages.length}
                   criteriaCount={criteriaCount}
-                  columnMinWidth={columnMinWidth}
                 />
               );
             })}
