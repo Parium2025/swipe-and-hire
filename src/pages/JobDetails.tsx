@@ -416,7 +416,7 @@ const StatusColumn = ({
       </div>
 
       {/* Content area - with background container like MyCandidates */}
-      <div className="relative flex-1 min-h-0 bg-white/[0.03] rounded-lg ring-1 ring-inset ring-white/10 backdrop-blur-sm">
+      <div className="relative flex-1 min-h-0 bg-white/5 rounded-lg ring-1 ring-inset ring-white/10 backdrop-blur-sm">
         {/* Scroll up indicator */}
         {canScrollUp && (
           <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-white/5 to-transparent z-10 pointer-events-none rounded-t-lg" />
