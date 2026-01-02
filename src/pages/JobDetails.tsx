@@ -766,7 +766,7 @@ const JobDetails = () => {
                 className="text-lg font-bold text-white mb-1.5 two-line-ellipsis block"
               />
               <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm">
-                <div className="flex items-center gap-1 text-white/80">
+                <div className="flex items-center gap-1 text-white">
                   <MapPin className="h-3.5 w-3.5" />
                   {job.location}
                 </div>
@@ -812,7 +812,7 @@ const JobDetails = () => {
                   );
                 })()}
                 {job.expires_at && (
-                  <span className="text-white/60 text-xs">
+                  <span className="text-white text-xs">
                     {new Date(job.expires_at) < new Date() 
                       ? `Gick ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
                       : `Går ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
@@ -835,14 +835,14 @@ const JobDetails = () => {
             {/* Stats */}
             <div className="flex items-center gap-3 flex-1">
               <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <Eye className="h-3.5 w-3.5 text-white/70" />
+                <Eye className="h-3.5 w-3.5 text-white" />
                 <span className="text-white text-sm font-medium">{job.views_count}</span>
-                <span className="text-white/60 text-xs hidden md:inline">Visningar</span>
+                <span className="text-white text-xs hidden md:inline">Visningar</span>
               </div>
               <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <Users className="h-3.5 w-3.5 text-white/70" />
+                <Users className="h-3.5 w-3.5 text-white" />
                 <span className="text-white text-sm font-medium">{job.applications_count}</span>
-                <span className="text-white/60 text-xs hidden md:inline">Ansökningar</span>
+                <span className="text-white text-xs hidden md:inline">Ansökningar</span>
               </div>
             </div>
             
