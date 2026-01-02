@@ -1496,7 +1496,7 @@ const MyCandidates = () => {
           }}
         >
           <div 
-            className={`flex gap-3 pb-4 pt-2 px-2 w-full ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} 
+            className={`flex gap-3 pb-4 pt-2 w-full ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} 
             style={{ 
               height: 'calc(100vh - 300px)',
               overflowX: 'hidden',
