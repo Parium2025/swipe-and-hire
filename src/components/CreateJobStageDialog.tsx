@@ -8,21 +8,33 @@ import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS } from '@/hooks/useJobStageSettings';
 
+const MAX_STAGES = 6;
+
 interface CreateJobStageDialogProps {
   jobId: string;
   trigger?: React.ReactNode;
+  currentStageCount?: number;
 }
 
-export function CreateJobStageDialog({ jobId, trigger }: CreateJobStageDialogProps) {
-  const { createStage, isCreating } = useJobStageSettings(jobId);
+export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: CreateJobStageDialogProps) {
+  const { createStage, isCreating, orderedStages } = useJobStageSettings(jobId);
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState('');
   const [color, setColor] = useState('#0EA5E9');
   const [iconName, setIconName] = useState('phone');
 
+  // Use passed count or get from hook
+  const stageCount = currentStageCount || orderedStages.length;
+  const canCreateMore = stageCount < MAX_STAGES;
+
   const handleCreate = async () => {
     if (!label.trim()) {
       toast.error('Ange ett namn för steget');
+      return;
+    }
+
+    if (!canCreateMore) {
+      toast.error(`Max ${MAX_STAGES} steg tillåtna`);
       return;
     }
 
@@ -38,6 +50,11 @@ export function CreateJobStageDialog({ jobId, trigger }: CreateJobStageDialogPro
       toast.error('Kunde inte skapa steg');
     }
   };
+
+  // Don't render if max stages reached
+  if (!canCreateMore) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
