@@ -8,7 +8,6 @@ interface KanbanLayoutContextType {
   stageCount: number;
   setStageCount: (count: number) => void;
   shouldCollapseSidebar: boolean;
-  columnMinWidth: string;
 }
 
 const KanbanLayoutContext = createContext<KanbanLayoutContextType | null>(null);
@@ -32,27 +31,8 @@ export function KanbanLayoutProvider({ children }: { children: ReactNode }) {
     return stageCount >= 5;
   })();
 
-  // Minimum column width - columns will expand with flex-1 to fill space
-  // This ensures names are readable while columns expand to fit
-  const columnMinWidth = (() => {
-    if (device === 'mobile') {
-      return '280px';
-    }
-    
-    if (device === 'tablet') {
-      if (stageCount <= 3) return '220px';
-      if (stageCount <= 4) return '200px';
-      return '180px';
-    }
-    
-    // Desktop: generous minimum widths, flex-1 will expand them
-    if (stageCount <= 3) return '280px';
-    if (stageCount <= 4) return '240px';
-    return '200px'; // 5 stages
-  })();
-
   return (
-    <KanbanLayoutContext.Provider value={{ stageCount, setStageCount, shouldCollapseSidebar, columnMinWidth }}>
+    <KanbanLayoutContext.Provider value={{ stageCount, setStageCount, shouldCollapseSidebar }}>
       {children}
     </KanbanLayoutContext.Provider>
   );
@@ -66,7 +46,6 @@ export function useKanbanLayout() {
       stageCount: 0,
       setStageCount: () => {},
       shouldCollapseSidebar: false,
-      columnMinWidth: '200px',
     };
   }
   return context;
