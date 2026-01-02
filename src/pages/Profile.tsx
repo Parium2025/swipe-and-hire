@@ -14,7 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw, ExternalLink } from 'lucide-react';
+import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw, ExternalLink, Bot, AlertTriangle, Loader2 } from 'lucide-react';
 import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { CvViewer } from '@/components/CvViewer';
@@ -31,6 +31,140 @@ import { cn } from '@/lib/utils';
 import { isValidSwedishPhone } from '@/lib/phoneValidation';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCachedImage } from '@/hooks/useCachedImage';
+
+interface CvSummary {
+  summary_text: string | null;
+  is_valid_cv: boolean;
+  document_type: string | null;
+  key_points: Record<string, unknown> | null;
+  analyzed_at: string;
+  cv_url: string;
+}
+
+// Component to display the user's CV summary
+const CvSummarySection = ({ userId, cvUrl }: { userId?: string; cvUrl?: string }) => {
+  const [summary, setSummary] = useState<CvSummary | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isStale, setIsStale] = useState(false);
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      if (!userId) return;
+      
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('profile_cv_summaries')
+          .select('summary_text, is_valid_cv, document_type, key_points, analyzed_at, cv_url')
+          .eq('user_id', userId)
+          .order('analyzed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Error fetching CV summary:', error);
+          return;
+        }
+        
+        if (data) {
+          setSummary(data as CvSummary);
+          // Check if summary is for a different CV (stale)
+          if (cvUrl && data.cv_url !== cvUrl) {
+            setIsStale(true);
+          } else {
+            setIsStale(false);
+          }
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSummary();
+  }, [userId, cvUrl]);
+
+  if (!cvUrl) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
+        <div className="flex items-center gap-2 mb-4">
+          <Bot className="h-4 w-4 text-white" />
+          <Label className="text-base font-medium text-white">AI-analys av ditt CV</Label>
+        </div>
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 flex items-center gap-2 text-white/70">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="text-sm">Laddar sammanfattning...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!summary) {
+    return (
+      <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
+        <div className="flex items-center gap-2 mb-4">
+          <Bot className="h-4 w-4 text-white" />
+          <Label className="text-base font-medium text-white">AI-analys av ditt CV</Label>
+        </div>
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 text-white/70 text-sm">
+          <p>Ingen AI-analys tillgänglig ännu. Spara din profil så analyseras ditt CV automatiskt.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
+      <div className="flex items-center gap-2 mb-4">
+        <Bot className="h-4 w-4 text-white" />
+        <Label className="text-base font-medium text-white">AI-analys av ditt CV</Label>
+        {isStale && (
+          <Badge variant="outline" className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 text-xs">
+            <AlertTriangle className="h-3 w-3 mr-1" />
+            Gammal analys
+          </Badge>
+        )}
+      </div>
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 space-y-3">
+        {/* Document type indicator */}
+        {!summary.is_valid_cv && (
+          <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
+            <AlertTriangle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-yellow-200">
+              <p className="font-medium">Dokumentet verkar inte vara ett CV</p>
+              {summary.document_type && (
+                <p className="text-yellow-300/80 mt-1">Upptäckt typ: {summary.document_type}</p>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Summary text */}
+        {summary.summary_text ? (
+          <div className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap">
+            {summary.summary_text}
+          </div>
+        ) : (
+          <p className="text-white/60 text-sm italic">Ingen sammanfattning tillgänglig.</p>
+        )}
+        
+        {/* Analysis timestamp */}
+        <p className="text-white/40 text-xs pt-2 border-t border-white/10">
+          Analyserad: {format(new Date(summary.analyzed_at), 'd MMMM yyyy, HH:mm', { locale: sv })}
+        </p>
+      </div>
+      
+      {isStale && (
+        <p className="text-white/50 text-xs">
+          💡 Spara din profil igen för att uppdatera AI-analysen med ditt nya CV.
+        </p>
+      )}
+    </div>
+  );
+};
 
 const Profile = () => {
   const { profile, userRole, updateProfile, refreshProfile, user, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
@@ -1943,6 +2077,9 @@ const Profile = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* CV Summary Section */}
+                  <CvSummarySection userId={user?.id} cvUrl={cvUrl || (profile as any)?.cv_url} />
                 </>
               )}
 
