@@ -220,7 +220,7 @@ export const CandidateProfileDialog = ({
         // Parse key_points to extract document_type if present
         const keyPoints = data.key_points as { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
         
-        // Check if first key_point contains document type info
+        // Check if first key_point contains document type info (non-CV indicator)
         let documentType: string | null = null;
         let isValidCv = true;
         
@@ -228,7 +228,20 @@ export const CandidateProfileDialog = ({
           const firstPoint = keyPoints[0];
           if (firstPoint.text.startsWith('Dokumenttyp:')) {
             documentType = firstPoint.text.replace('Dokumenttyp:', '').trim();
+            // It's valid if document type is specifically "CV", otherwise it's not a CV
             isValidCv = documentType.toLowerCase() === 'cv';
+          }
+        }
+        
+        // Also check summary_text for "Kan inte läsa av ett CV" indicator
+        if (data.summary_text.includes('Kan inte läsa av ett CV')) {
+          isValidCv = false;
+          // Extract document type from summary text if not already set
+          if (!documentType) {
+            const match = data.summary_text.match(/dokumentet är (.+?)\./);
+            if (match) {
+              documentType = match[1];
+            }
           }
         }
         
@@ -745,72 +758,74 @@ export const CandidateProfileDialog = ({
               </div>
             )}
 
-            {/* AI Summary Section */}
-            <div className="bg-white/10 border border-white/20 rounded-lg p-3">
-              <div className="flex items-center gap-1.5 mb-2">
-                <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="h-3 w-3" />
-                  Sammanfattning
-                  <span className="text-[9px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
-                    Baserat på CV
-                  </span>
-                </h3>
-              </div>
+            {/* AI Summary Section - Only show if it's a valid CV */}
+            {aiSummary?.is_valid_cv !== false && (
+              <div className="bg-white/10 border border-white/20 rounded-lg p-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="h-3 w-3" />
+                    Sammanfattning
+                    <span className="text-[9px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
+                      Baserat på CV
+                    </span>
+                  </h3>
+                </div>
 
-              {loadingSummary || generatingSummary ? (
-                <div className="flex items-center justify-center py-3">
-                  <Loader2 className="h-4 w-4 animate-spin text-white/50" />
-                  <span className="ml-2 text-sm text-white/50">Analyserar CV...</span>
+                {loadingSummary || generatingSummary ? (
+                  <div className="flex items-center justify-center py-3">
+                    <Loader2 className="h-4 w-4 animate-spin text-white/50" />
+                    <span className="ml-2 text-sm text-white/50">Analyserar CV...</span>
+                  </div>
+                ) : aiSummary ? (
+                  <div>
+                    {/* Key points as bullet list */}
+                    {aiSummary.key_points && aiSummary.key_points.length > 0 ? (
+                      <ul className="space-y-1">
+                        {aiSummary.key_points
+                          .filter(point => !point.text.startsWith('Dokumenttyp:'))
+                          .map((point, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-white">
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
+                              point.type === 'negative' ? 'bg-red-400' : 'bg-white'
+                            }`} />
+                            <span>{point.text}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-white leading-relaxed">
+                        {aiSummary.summary_text}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-3">
+                    {signedCvUrl ? (
+                      <div className="flex items-center justify-center">
+                        <Loader2 className="h-4 w-4 animate-spin text-white/50" />
+                        <span className="ml-2 text-sm text-white/50">Genererar sammanfattning...</span>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-white/50">
+                        Kandidaten har inte laddat upp något CV
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Not a CV indicator */}
+            {aiSummary?.is_valid_cv === false && (
+              <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-orange-400" />
+                  <span className="text-sm text-orange-300">
+                    Dokumentet är {aiSummary.document_type || 'inte ett CV'} – ingen sammanfattning tillgänglig
+                  </span>
                 </div>
-              ) : aiSummary ? (
-                <div>
-                  {/* Document type indicator */}
-                  {aiSummary.document_type && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        aiSummary.is_valid_cv !== false ? 'bg-green-400' : 'bg-orange-400'
-                      }`} />
-                      <span className="text-sm text-white">
-                        Dokumenttyp: {aiSummary.document_type.charAt(0).toUpperCase() + aiSummary.document_type.slice(1)}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Key points as bullet list */}
-                  {aiSummary.key_points && aiSummary.key_points.length > 0 ? (
-                    <ul className="space-y-1">
-                      {aiSummary.key_points
-                        .filter(point => !point.text.startsWith('Dokumenttyp:'))
-                        .map((point, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-white">
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
-                            point.type === 'negative' ? 'bg-red-400' : 'bg-white'
-                          }`} />
-                          <span>{point.text}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-white leading-relaxed">
-                      {aiSummary.summary_text}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-3">
-                  {signedCvUrl ? (
-                    <div className="flex items-center justify-center">
-                      <Loader2 className="h-4 w-4 animate-spin text-white/50" />
-                      <span className="ml-2 text-sm text-white/50">Genererar sammanfattning...</span>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-white/50">
-                      Kandidaten har inte laddat upp något CV
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* CV Section */}
             {displayApp.cv_url && (

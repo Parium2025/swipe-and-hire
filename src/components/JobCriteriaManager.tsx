@@ -386,6 +386,7 @@ interface CriterionIconBadgeProps {
 }
 
 export function CriterionIconBadge({ result, title }: CriterionIconBadgeProps) {
+  // Treat no_data same as no_match - binary results only
   const config = {
     match: { 
       icon: Check, 
@@ -398,9 +399,9 @@ export function CriterionIconBadge({ result, title }: CriterionIconBadgeProps) {
       label: title,
     },
     no_data: { 
-      icon: AlertCircle, 
-      iconColor: 'text-yellow-500',
-      label: `${title} (ej angivet)`,
+      icon: X, 
+      iconColor: 'text-red-500',
+      label: title,
     },
   };
   
