@@ -20,19 +20,31 @@ import {
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
 
+const MAX_STAGES = 6;
+
 interface CreateStageDialogProps {
   trigger?: React.ReactNode;
+  currentStageCount?: number;
 }
 
-export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
-  const { createCustomStage } = useStageSettings();
+export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStageDialogProps) {
+  const { createCustomStage, stageOrder } = useStageSettings();
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState('');
   const [selectedColor, setSelectedColor] = useState(AVAILABLE_COLORS[4].value); // Red
   const [selectedIcon, setSelectedIcon] = useState('flag');
 
+  // Use passed count or get from hook
+  const stageCount = currentStageCount || stageOrder.length;
+  const canCreateMore = stageCount < MAX_STAGES;
+
   const handleCreate = async () => {
     if (!label.trim()) return;
+    
+    if (!canCreateMore) {
+      toast.error(`Max ${MAX_STAGES} steg tillåtna`);
+      return;
+    }
     
     try {
       await createCustomStage.mutateAsync({
@@ -51,6 +63,11 @@ export function CreateStageDialog({ trigger }: CreateStageDialogProps) {
   };
 
   const IconComponent = AVAILABLE_ICONS.find(i => i.name === selectedIcon)?.Icon || AVAILABLE_ICONS[0].Icon;
+
+  // Don't render if max stages reached
+  if (!canCreateMore) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

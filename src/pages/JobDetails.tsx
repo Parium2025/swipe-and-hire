@@ -378,7 +378,7 @@ const StatusColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors h-full"
+      className="flex-1 min-w-[160px] max-w-[240px] flex flex-col transition-colors h-full"
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -723,7 +723,7 @@ const JobDetails = () => {
         {/* Kanban skeleton */}
         <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2">
           {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="flex-1 min-w-[220px] max-w-[280px] flex flex-col">
+            <div key={i} className="flex-1 min-w-[160px] max-w-[240px] flex flex-col">
               <div className="rounded-md px-2 py-1.5 mb-2 bg-white/10 animate-pulse">
                 <div className="h-4 w-24 bg-white/20 rounded" />
               </div>

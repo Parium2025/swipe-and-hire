@@ -381,7 +381,7 @@ const StageColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 min-w-[220px] max-w-[280px] flex flex-col transition-colors h-full"
+      className="flex-1 min-w-[160px] max-w-[240px] flex flex-col transition-colors h-full"
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -1270,7 +1270,7 @@ const MyCandidates = () => {
         </div>
         <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2">
           {DEFAULT_STAGE_KEYS.map(stage => (
-            <div key={stage} className="flex-1 min-w-[280px] max-w-[350px]">
+            <div key={stage} className="flex-1 min-w-[160px] max-w-[240px]">
               <Skeleton className="h-12 w-full bg-white/10 rounded-lg mb-3" />
               <div className="space-y-2">
                 <Skeleton className="h-24 w-full bg-white/10 rounded-lg" />
