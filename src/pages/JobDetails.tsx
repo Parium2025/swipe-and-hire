@@ -333,7 +333,7 @@ interface StatusColumnProps {
   };
   totalStageCount: number;
   criteriaCount?: number;
-  columnWidth: { min: string; max: string };
+  columnMinWidth: string;
 }
 
 const StatusColumn = ({ 
@@ -346,7 +346,7 @@ const StatusColumn = ({
   stageConfig,
   totalStageCount,
   criteriaCount = 0,
-  columnWidth
+  columnMinWidth
 }: StatusColumnProps) => {
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -382,7 +382,7 @@ const StatusColumn = ({
     <div 
       ref={setNodeRef}
       className="flex-1 flex flex-col transition-colors h-full"
-      style={{ minWidth: columnWidth.min, maxWidth: columnWidth.max }}
+      style={{ minWidth: columnMinWidth }}
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -479,7 +479,7 @@ const JobDetails = () => {
   const { toast } = useToast();
   
   // Get kanban layout context for dynamic column widths
-  const { setStageCount, columnWidth } = useKanbanLayout();
+  const { setStageCount, columnMinWidth } = useKanbanLayout();
   
   // Use cached data hook
   const { 
@@ -926,7 +926,7 @@ const JobDetails = () => {
                   stageConfig={config}
                   totalStageCount={activeStages.length}
                   criteriaCount={criteriaCount}
-                  columnWidth={columnWidth}
+                  columnMinWidth={columnMinWidth}
                 />
               );
             })}

@@ -1,11 +1,14 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { useDevice } from './use-device';
+
+// Max 5 stages allowed
+export const MAX_KANBAN_STAGES = 5;
 
 interface KanbanLayoutContextType {
   stageCount: number;
   setStageCount: (count: number) => void;
   shouldCollapseSidebar: boolean;
-  columnWidth: { min: string; max: string };
+  columnMinWidth: string;
 }
 
 const KanbanLayoutContext = createContext<KanbanLayoutContextType | null>(null);
@@ -14,42 +17,42 @@ export function KanbanLayoutProvider({ children }: { children: ReactNode }) {
   const [stageCount, setStageCount] = useState(0);
   const device = useDevice();
 
-  // Calculate if sidebar should be collapsed based on stage count and screen size
+  // Smart sidebar collapse based on stage count and device
+  // Goal: fit all columns without horizontal scrolling
   const shouldCollapseSidebar = (() => {
     if (device === 'mobile') return true; // Always collapsed on mobile
-    if (stageCount === 0) return false; // No stages loaded yet, keep open
+    if (stageCount === 0) return false; // No stages loaded yet
     
-    // Desktop/tablet logic based on stage count
+    // Tablet: collapse with 4+ stages
     if (device === 'tablet') {
-      return stageCount >= 4; // Collapse on tablet with 4+ stages
+      return stageCount >= 4;
     }
     
-    // Desktop: collapse with 5+ stages
+    // Desktop: collapse with 5 stages, open with 4 or fewer
     return stageCount >= 5;
   })();
 
-  // Dynamic column widths based on stage count and screen size
-  const columnWidth = (() => {
+  // Minimum column width - columns will expand with flex-1 to fill space
+  // This ensures names are readable while columns expand to fit
+  const columnMinWidth = (() => {
     if (device === 'mobile') {
-      return { min: '280px', max: '320px' };
+      return '280px';
     }
     
     if (device === 'tablet') {
-      if (stageCount <= 3) return { min: '240px', max: '320px' };
-      if (stageCount <= 4) return { min: '200px', max: '280px' };
-      return { min: '180px', max: '240px' };
+      if (stageCount <= 3) return '220px';
+      if (stageCount <= 4) return '200px';
+      return '180px';
     }
     
-    // Desktop: more generous widths to show full names
-    if (stageCount <= 3) return { min: '320px', max: '420px' };
-    if (stageCount <= 4) return { min: '280px', max: '360px' };
-    if (stageCount <= 5) return { min: '240px', max: '320px' };
-    if (stageCount <= 6) return { min: '200px', max: '280px' };
-    return { min: '180px', max: '260px' };
+    // Desktop: generous minimum widths, flex-1 will expand them
+    if (stageCount <= 3) return '280px';
+    if (stageCount <= 4) return '240px';
+    return '200px'; // 5 stages
   })();
 
   return (
-    <KanbanLayoutContext.Provider value={{ stageCount, setStageCount, shouldCollapseSidebar, columnWidth }}>
+    <KanbanLayoutContext.Provider value={{ stageCount, setStageCount, shouldCollapseSidebar, columnMinWidth }}>
       {children}
     </KanbanLayoutContext.Provider>
   );
@@ -63,7 +66,7 @@ export function useKanbanLayout() {
       stageCount: 0,
       setStageCount: () => {},
       shouldCollapseSidebar: false,
-      columnWidth: { min: '180px', max: '260px' },
+      columnMinWidth: '200px',
     };
   }
   return context;

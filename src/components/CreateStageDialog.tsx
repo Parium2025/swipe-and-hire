@@ -19,8 +19,7 @@ import {
   AVAILABLE_COLORS,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
-
-const MAX_STAGES = 6;
+import { MAX_KANBAN_STAGES } from '@/hooks/useKanbanLayout';
 
 interface CreateStageDialogProps {
   trigger?: React.ReactNode;
@@ -34,15 +33,15 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
   const [selectedColor, setSelectedColor] = useState(AVAILABLE_COLORS[4].value); // Red
   const [selectedIcon, setSelectedIcon] = useState('flag');
 
-  // Use passed count or get from hook
+  // Use passed count or get from hook - max 5 stages
   const stageCount = currentStageCount || stageOrder.length;
-  const canCreateMore = stageCount < MAX_STAGES;
+  const canCreateMore = stageCount < MAX_KANBAN_STAGES;
 
   const handleCreate = async () => {
     if (!label.trim()) return;
     
     if (!canCreateMore) {
-      toast.error(`Max ${MAX_STAGES} steg tillåtna`);
+      toast.error(`Max ${MAX_KANBAN_STAGES} steg tillåtna`);
       return;
     }
     

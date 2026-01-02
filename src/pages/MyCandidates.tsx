@@ -328,7 +328,7 @@ interface StageColumnProps {
   isSelectionMode?: boolean;
   selectedCandidateIds?: Set<string>;
   onToggleSelect?: (candidateId: string) => void;
-  columnWidth: { min: string; max: string };
+  columnMinWidth: string;
 }
 
 const StageColumn = ({ 
@@ -346,7 +346,7 @@ const StageColumn = ({
   isSelectionMode,
   selectedCandidateIds,
   onToggleSelect,
-  columnWidth,
+  columnMinWidth,
 }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
@@ -385,7 +385,7 @@ const StageColumn = ({
     <div 
       ref={setNodeRef}
       className="flex-1 flex flex-col transition-colors h-full"
-      style={{ minWidth: columnWidth.min, maxWidth: columnWidth.max }}
+      style={{ minWidth: columnMinWidth }}
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -484,7 +484,7 @@ const StageColumn = ({
 const MyCandidates = () => {
   const { user } = useAuth();
   const { stageConfig, stageOrder, deleteStage } = useStageSettings();
-  const { setStageCount, columnWidth } = useKanbanLayout();
+  const { setStageCount, columnMinWidth } = useKanbanLayout();
   
   // Team members for colleague switching
   const { teamMembers, hasTeam, isLoading: loadingTeam } = useTeamMembers();
@@ -1530,7 +1530,7 @@ const MyCandidates = () => {
                   isSelectionMode={isSelectionMode}
                   selectedCandidateIds={selectedCandidateIds}
                   onToggleSelect={toggleCandidateSelection}
-                  columnWidth={columnWidth}
+                  columnMinWidth={columnMinWidth}
                 />
               );
             })}
