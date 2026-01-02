@@ -130,7 +130,8 @@ export function useJobCriteria(jobId: string | null) {
         .order('order_index');
 
       if (error) throw error;
-      return data || [];
+      // Filter out empty/incomplete criteria (must have title and prompt)
+      return (data || []).filter(c => c.title?.trim() && c.prompt?.trim());
     },
     enabled: !!jobId,
   });

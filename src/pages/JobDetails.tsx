@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { JobCriteriaManager, CriterionResultBadge, CriterionIconBadge } from '@/components/JobCriteriaManager';
+import { CriterionResultBadge, CriterionIconBadge } from '@/components/JobCriteriaManager';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
@@ -803,10 +803,6 @@ const JobDetails = () => {
                 >
                   {job.is_active ? 'Aktiv' : 'Inaktiv'}
                 </Badge>
-                {/* AI Criteria - compact button in header */}
-                {jobId && (
-                  <JobCriteriaManager jobId={jobId} onCriteriaChange={refetch} />
-                )}
               </div>
             </div>
             <Button
