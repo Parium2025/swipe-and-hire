@@ -158,7 +158,7 @@ const Dashboard = memo(() => {
         </div>
       )}
 
-      <Card className="bg-white/5 backdrop-blur-sm border-0">
+      <Card className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg">
         <CardHeader className="p-6 md:p-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <CardTitle className="text-sm text-white text-center md:text-left">
