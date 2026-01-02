@@ -1,5 +1,5 @@
 import React, { useEffect, useState, memo } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useQueryClient } from '@tanstack/react-query';
@@ -125,8 +125,44 @@ export function EmployerSidebar() {
   const collapsed = state === 'collapsed';
   const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const queryClient = useQueryClient();
+  
+  // Track where user came from when viewing job details
+  const [jobDetailsSource, setJobDetailsSource] = useState<string | null>(null);
+  
+  // Detect source when navigating to job-details
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const previousPath = sessionStorage.getItem('previousPath');
+    
+    if (currentPath.startsWith('/job-details/')) {
+      // If coming from my-jobs or dashboard, remember the source
+      if (previousPath === '/my-jobs' || previousPath?.startsWith('/my-jobs')) {
+        setJobDetailsSource('/my-jobs');
+        sessionStorage.setItem('jobDetailsSource', '/my-jobs');
+      } else if (previousPath === '/dashboard' || previousPath?.startsWith('/dashboard')) {
+        setJobDetailsSource('/dashboard');
+        sessionStorage.setItem('jobDetailsSource', '/dashboard');
+      } else {
+        // Check stored source
+        const storedSource = sessionStorage.getItem('jobDetailsSource');
+        if (storedSource) {
+          setJobDetailsSource(storedSource);
+        }
+      }
+    } else {
+      // Clear source when leaving job-details
+      if (!currentPath.startsWith('/job-details/')) {
+        sessionStorage.removeItem('jobDetailsSource');
+        setJobDetailsSource(null);
+      }
+    }
+    
+    // Store current path as previous for next navigation
+    sessionStorage.setItem('previousPath', currentPath);
+  }, [location.pathname]);
   
   // Konvertera storage-path till publik URL för company logos
   const getPublicLogoUrl = (url: string | null | undefined): string | null => {
@@ -245,8 +281,25 @@ export function EmployerSidebar() {
   };
 
   const isActiveUrl = (url: string) => {
-    return window.location.pathname === url || 
-           (url === "/" && window.location.pathname === "/");
+    const currentPath = location.pathname;
+    
+    // Exact match
+    if (currentPath === url || (url === "/" && currentPath === "/")) {
+      return true;
+    }
+    
+    // When on job-details page, highlight the source nav item
+    if (currentPath.startsWith('/job-details/')) {
+      const source = jobDetailsSource || sessionStorage.getItem('jobDetailsSource');
+      if (url === '/my-jobs' && source === '/my-jobs') {
+        return true;
+      }
+      if (url === '/dashboard' && source === '/dashboard') {
+        return true;
+      }
+    }
+    
+    return false;
   };
 
   // Prefetch applications data on hover/focus for instant navigation
