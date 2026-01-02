@@ -11,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
+import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 
 interface EmployerLayoutProps {
   children: ReactNode;
@@ -18,21 +19,32 @@ interface EmployerLayoutProps {
   onViewChange: (view: string) => void;
 }
 
-const EmployerLayout = memo(({ children, developerView, onViewChange }: EmployerLayoutProps) => {
+// Inner component that uses the KanbanLayout context
+const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: EmployerLayoutProps) => {
   const { user, profile } = useAuth();
   const { invalidateJobs } = useJobsData();
   const queryClient = useQueryClient();
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
+  const { shouldCollapseSidebar, stageCount } = useKanbanLayout();
   
   // Auto-collapse sidebar on pages that need more horizontal space (Kanban views)
   const isKanbanPage = location.pathname.startsWith('/job-details/') || location.pathname === '/my-candidates';
-  const [sidebarOpen, setSidebarOpen] = useState(!isKanbanPage);
   
-  // Update sidebar state when route changes
+  // Sidebar state: collapse based on stage count when on Kanban pages
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (!isKanbanPage) return true;
+    return !shouldCollapseSidebar;
+  });
+  
+  // Update sidebar state when route changes or stage count changes
   useEffect(() => {
-    setSidebarOpen(!isKanbanPage);
-  }, [isKanbanPage]);
+    if (isKanbanPage) {
+      setSidebarOpen(!shouldCollapseSidebar);
+    } else {
+      setSidebarOpen(true);
+    }
+  }, [isKanbanPage, shouldCollapseSidebar]);
   
   // Track user activity for "last seen" feature
   useActivityTracker();
@@ -335,6 +347,19 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
         </div>
       </div>
     </SidebarProvider>
+  );
+});
+
+EmployerLayoutInner.displayName = 'EmployerLayoutInner';
+
+// Wrapper component that provides the KanbanLayout context
+const EmployerLayout = memo(({ children, developerView, onViewChange }: EmployerLayoutProps) => {
+  return (
+    <KanbanLayoutProvider>
+      <EmployerLayoutInner developerView={developerView} onViewChange={onViewChange}>
+        {children}
+      </EmployerLayoutInner>
+    </KanbanLayoutProvider>
   );
 });
 

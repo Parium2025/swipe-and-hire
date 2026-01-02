@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { MyCandidateData } from '@/hooks/useMyCandidatesData';
+import { useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -327,6 +328,7 @@ interface StageColumnProps {
   isSelectionMode?: boolean;
   selectedCandidateIds?: Set<string>;
   onToggleSelect?: (candidateId: string) => void;
+  columnWidth: { min: string; max: string };
 }
 
 const StageColumn = ({ 
@@ -344,6 +346,7 @@ const StageColumn = ({
   isSelectionMode,
   selectedCandidateIds,
   onToggleSelect,
+  columnWidth,
 }: Omit<StageColumnProps, 'isOver'>) => {
   const Icon = getIconByName(stageSettings.iconName);
   const [liveColor, setLiveColor] = useState<string | null>(null);
@@ -381,7 +384,8 @@ const StageColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 min-w-[160px] max-w-[240px] flex flex-col transition-colors h-full"
+      className="flex-1 flex flex-col transition-colors h-full"
+      style={{ minWidth: columnWidth.min, maxWidth: columnWidth.max }}
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -480,6 +484,7 @@ const StageColumn = ({
 const MyCandidates = () => {
   const { user } = useAuth();
   const { stageConfig, stageOrder, deleteStage } = useStageSettings();
+  const { setStageCount, columnWidth } = useKanbanLayout();
   
   // Team members for colleague switching
   const { teamMembers, hasTeam, isLoading: loadingTeam } = useTeamMembers();
@@ -507,6 +512,11 @@ const MyCandidates = () => {
   // Use colleague's settings when viewing their list
   const activeStageConfig = isViewingColleague ? colleagueStageConfig : stageConfig;
   const activeStageOrder = isViewingColleague ? colleagueStageOrder : stageOrder;
+  
+  // Update stage count in layout context for smart sidebar behavior
+  useEffect(() => {
+    setStageCount(activeStageOrder.length);
+  }, [activeStageOrder.length, setStageCount]);
   
   // Local state for candidates - like JobDetails pattern
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
@@ -1520,6 +1530,7 @@ const MyCandidates = () => {
                   isSelectionMode={isSelectionMode}
                   selectedCandidateIds={selectedCandidateIds}
                   onToggleSelect={toggleCandidateSelection}
+                  columnWidth={columnWidth}
                 />
               );
             })}
