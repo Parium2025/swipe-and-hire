@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { applicant_id, application_id, job_id, cv_url_override } = await req.json();
+    const { applicant_id, application_id, job_id, cv_url_override, proactive } = await req.json();
     
     if (!applicant_id) {
       return new Response(
@@ -21,7 +21,9 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Generating CV summary for applicant ${applicant_id}`);
+    // proactive=true means this is a background pre-analysis when user uploads CV to their profile
+    const isProactiveAnalysis = proactive === true;
+    console.log(`Generating CV summary for applicant ${applicant_id}${isProactiveAnalysis ? ' (PROACTIVE)' : ''}`);
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -39,42 +41,61 @@ serve(async (req) => {
       console.error('Error fetching profile:', profileError);
     }
 
-    // Fetch application if provided
+    // For proactive analysis, check if we already have an up-to-date summary
+    const cvUrl = cv_url_override || profile?.cv_url;
+    
+    if (isProactiveAnalysis && cvUrl) {
+      const { data: existingSummary } = await supabase
+        .from('profile_cv_summaries')
+        .select('cv_url')
+        .eq('user_id', applicant_id)
+        .single();
+      
+      // Skip if CV hasn't changed
+      if (existingSummary?.cv_url === cvUrl) {
+        console.log('CV unchanged, skipping proactive analysis');
+        return new Response(
+          JSON.stringify({ success: true, skipped: true, reason: 'CV unchanged' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Fetch application if provided (not for proactive analysis)
     let application = null;
-    if (application_id) {
-      const { data, error } = await supabase
-        .from('job_applications')
-        .select('*')
-        .eq('id', application_id)
-        .single();
-      if (!error) application = data;
-    } else if (job_id) {
-      const { data, error } = await supabase
-        .from('job_applications')
-        .select('*')
-        .eq('job_id', job_id)
-        .eq('applicant_id', applicant_id)
-        .single();
-      if (!error) application = data;
+    if (!isProactiveAnalysis) {
+      if (application_id) {
+        const { data, error } = await supabase
+          .from('job_applications')
+          .select('*')
+          .eq('id', application_id)
+          .single();
+        if (!error) application = data;
+      } else if (job_id) {
+        const { data, error } = await supabase
+          .from('job_applications')
+          .select('*')
+          .eq('job_id', job_id)
+          .eq('applicant_id', applicant_id)
+          .single();
+        if (!error) application = data;
+      }
     }
 
     // Get CV URL - prioritize override, then application, then profile
-    const cvUrl = cv_url_override || application?.cv_url || profile?.cv_url;
-
-    // For pre-analysis without job_id, we'll use a special "profile" summary
-    const isPreAnalysis = !job_id && !application_id && cv_url_override;
+    const finalCvUrl = cv_url_override || application?.cv_url || profile?.cv_url;
 
     let contentType = '';
     let userContent: string | any[] | null = null;
 
-    if (cvUrl) {
-      console.log('CV URL found:', cvUrl);
+    if (finalCvUrl) {
+      console.log('CV URL found:', finalCvUrl);
 
       try {
         // Get signed URL for the CV
         const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from('job-applications')
-          .createSignedUrl(cvUrl, 300); // 5 min expiry
+          .createSignedUrl(finalCvUrl, 300); // 5 min expiry
 
         if (signedUrlError) {
           console.error('Error getting signed URL:', signedUrlError);
@@ -258,66 +279,66 @@ REGLER:
 
     // Meta to detect stale summaries when candidates upload a new document
     const meta = {
-      source_cv_url: cvUrl || null,
+      source_cv_url: finalCvUrl || null,
       content_type: contentType || null,
       analyzed_at: new Date().toISOString(),
     };
 
-    // Check if the document is NOT a CV
-    if (summary.is_valid_cv === false) {
-      const documentType = summary.document_type || 'ett dokument som inte är ett CV';
-      const docPoint = { text: `Dokumenttyp: ${documentType}`, type: 'negative', meta };
+    const documentType = summary.is_valid_cv === false 
+      ? (summary.document_type || 'ett dokument som inte är ett CV')
+      : 'CV';
+    
+    const docPoint = { 
+      text: `Dokumenttyp: ${documentType}`, 
+      type: summary.is_valid_cv === false ? 'negative' : 'neutral', 
+      meta 
+    };
 
-      // Save a special summary indicating this is not a CV (only if we have a job_id)
-      const saveJobId = job_id || application?.job_id;
-      if (saveJobId) {
-        await supabase
-          .from('candidate_summaries')
-          .upsert({
-            job_id: saveJobId,
-            applicant_id,
-            application_id: application?.id || application_id,
-            summary_text: `Det uppladdade dokumentet är ${documentType}. Kan inte läsa av ett CV.`,
-            key_points: [docPoint],
-            generated_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }, {
-            onConflict: 'job_id,applicant_id',
-          });
-      }
+    const normalizedPoints = Array.isArray(summary.key_points)
+      ? summary.key_points
+          .map((p: any) => (typeof p === 'string' ? { text: p, type: 'neutral' } : p))
+          .filter((p: any) => typeof p?.text === 'string' && p.text.trim().length > 0)
+      : [];
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          is_valid_cv: false,
+    const summaryText = summary.is_valid_cv === false
+      ? `Det uppladdade dokumentet är ${documentType}. Kan inte läsa av ett CV.`
+      : (summary.summary_text || '');
+
+    // ALWAYS save to profile_cv_summaries for proactive analysis (background pre-analysis)
+    if (isProactiveAnalysis && finalCvUrl) {
+      console.log('Saving proactive CV summary to profile_cv_summaries');
+      const { error: profileSaveError } = await supabase
+        .from('profile_cv_summaries')
+        .upsert({
+          user_id: applicant_id,
+          cv_url: finalCvUrl,
+          is_valid_cv: summary.is_valid_cv !== false,
           document_type: documentType,
-          summary: {
-            summary_text: `Det uppladdade dokumentet är ${documentType}. Kan inte läsa av ett CV.`,
-            key_points: [docPoint],
-          },
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+          summary_text: summaryText,
+          key_points: [docPoint, ...normalizedPoints],
+          analyzed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id',
+        });
+
+      if (profileSaveError) {
+        console.error('Error saving proactive summary:', profileSaveError);
+      } else {
+        console.log('Proactive CV summary saved successfully');
+      }
     }
 
-    // Save valid CV summary to database (only if we have a job_id)
+    // Save to candidate_summaries if we have a job_id (job-specific analysis)
     const saveJobId = job_id || application?.job_id;
     if (saveJobId) {
-      const docPoint = { text: 'Dokumenttyp: CV', type: 'neutral', meta };
-
-      const normalizedPoints = Array.isArray(summary.key_points)
-        ? summary.key_points
-            .map((p: any) => (typeof p === 'string' ? { text: p, type: 'neutral' } : p))
-            .filter((p: any) => typeof p?.text === 'string' && p.text.trim().length > 0)
-        : [];
-
       const { error: saveError } = await supabase
         .from('candidate_summaries')
         .upsert({
           job_id: saveJobId,
           applicant_id,
           application_id: application?.id || application_id,
-          summary_text: summary.summary_text || '',
+          summary_text: summaryText,
           key_points: [docPoint, ...normalizedPoints],
           generated_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -326,7 +347,7 @@ REGLER:
         });
 
       if (saveError) {
-        console.error('Error saving summary:', saveError);
+        console.error('Error saving job-specific summary:', saveError);
       }
     }
 
@@ -335,10 +356,11 @@ REGLER:
     return new Response(
       JSON.stringify({
         success: true,
-        is_valid_cv: true,
+        is_valid_cv: summary.is_valid_cv !== false,
+        document_type: documentType,
         summary: {
-          summary_text: summary.summary_text,
-          key_points: [{ text: 'Dokumenttyp: CV', type: 'neutral', meta }, ...(Array.isArray(summary.key_points) ? summary.key_points : [])],
+          summary_text: summaryText,
+          key_points: [docPoint, ...normalizedPoints],
         },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
