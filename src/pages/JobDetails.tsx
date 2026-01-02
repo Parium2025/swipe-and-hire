@@ -863,7 +863,7 @@ const JobDetails = () => {
                           `${job.employer_profile.first_name?.[0] || ''}${job.employer_profile.last_name?.[0] || ''}`
                         )}
                       </div>
-                      <span className="text-white/80 text-xs hidden md:inline truncate max-w-[100px]">
+                      <span className="text-white text-xs hidden md:inline truncate max-w-[100px]">
                         {job.employer_profile.first_name} {job.employer_profile.last_name}
                       </span>
                     </div>
