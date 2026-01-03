@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Clock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 
@@ -164,9 +164,14 @@ export function CandidatesTable({
                     {formatTimeAgo(new Date(application.applied_at))}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {application.last_active_at 
-                      ? formatTimeAgo(new Date(application.last_active_at))
-                      : '-'}
+                    {application.last_active_at ? (
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5" />
+                        {formatTimeAgo(new Date(application.last_active_at))}
+                      </span>
+                    ) : (
+                      '-'
+                    )}
                   </TableCell>
                   <TableCell>
                     {!isAlreadyAdded && (
