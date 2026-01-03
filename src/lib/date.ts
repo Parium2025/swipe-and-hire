@@ -1,5 +1,59 @@
-import { format, differenceInDays, differenceInHours, differenceInMinutes, addDays } from 'date-fns';
+import { format, differenceInDays, differenceInHours, differenceInMinutes, differenceInMonths, differenceInYears, addDays } from 'date-fns';
 import { sv } from 'date-fns/locale';
+
+/**
+ * Format time ago in Swedish: hours → days → months → years
+ * No minutes to avoid feeling "surveilled"
+ */
+export function formatTimeAgo(input: Date | string | null | undefined): string {
+  if (!input) return '-';
+  
+  try {
+    const date = typeof input === 'string' ? new Date(input) : input;
+    if (isNaN(date.getTime())) return '-';
+    
+    const now = new Date();
+    const hours = differenceInHours(now, date);
+    const days = differenceInDays(now, date);
+    const months = differenceInMonths(now, date);
+    const years = differenceInYears(now, date);
+    
+    if (hours < 1) return 'Just nu';
+    if (hours < 24) return `${hours} ${hours === 1 ? 'timme' : 'timmar'} sedan`;
+    if (days < 30) return `${days} ${days === 1 ? 'dag' : 'dagar'} sedan`;
+    if (months < 12) return `${months} ${months === 1 ? 'månad' : 'månader'} sedan`;
+    return `${years} ${years === 1 ? 'år' : 'år'} sedan`;
+  } catch {
+    return '-';
+  }
+}
+
+/**
+ * Format time in compact way: "2tim", "5dag", "3mån", "1år"
+ * For UI elements with limited space
+ */
+export function formatCompactTime(input: Date | string | null | undefined): string | null {
+  if (!input) return null;
+  
+  try {
+    const date = typeof input === 'string' ? new Date(input) : input;
+    if (isNaN(date.getTime())) return null;
+    
+    const now = new Date();
+    const hours = differenceInHours(now, date);
+    const days = differenceInDays(now, date);
+    const months = differenceInMonths(now, date);
+    const years = differenceInYears(now, date);
+    
+    if (hours < 1) return 'nu';
+    if (hours < 24) return `${hours}tim`;
+    if (days < 30) return `${days}dag`;
+    if (months < 12) return `${months}mån`;
+    return `${years}år`;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Format a date to Swedish short format: "19 okt. 2025"

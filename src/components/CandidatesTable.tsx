@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { differenceInMinutes, differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from 'date-fns';
+import { formatTimeAgo } from '@/lib/date';
 import { CandidateProfileDialog } from './CandidateProfileDialog';
 import { CandidateAvatar } from './CandidateAvatar';
 import { Button } from '@/components/ui/button';
@@ -12,23 +12,6 @@ import { AddToColleagueListDialog } from './AddToColleagueListDialog';
 import { UserPlus, Clock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
-
-// Format time with numbers instead of words
-const formatTimeAgo = (date: Date): string => {
-  const now = new Date();
-  const minutes = differenceInMinutes(now, date);
-  const hours = differenceInHours(now, date);
-  const days = differenceInDays(now, date);
-  const weeks = differenceInWeeks(now, date);
-  const months = differenceInMonths(now, date);
-
-  if (minutes < 1) return 'Just nu';
-  if (minutes < 60) return `${minutes} min sedan`;
-  if (hours < 24) return `${hours} tim sedan`;
-  if (days < 7) return `${days} ${days === 1 ? 'dag' : 'dagar'} sedan`;
-  if (weeks < 4) return `${weeks} ${weeks === 1 ? 'vecka' : 'veckor'} sedan`;
-  return `${months} ${months === 1 ? 'månad' : 'månader'} sedan`;
-};
 
 interface CandidatesTableProps {
   applications: ApplicationData[];
@@ -161,13 +144,13 @@ export function CandidatesTable({
                     {application.job_title || 'Okänd tjänst'}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {formatTimeAgo(new Date(application.applied_at))}
+                    {formatTimeAgo(application.applied_at)}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {application.last_active_at ? (
                       <span className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5" />
-                        {formatTimeAgo(new Date(application.last_active_at))}
+                        {formatTimeAgo(application.last_active_at)}
                       </span>
                     ) : (
                       '-'

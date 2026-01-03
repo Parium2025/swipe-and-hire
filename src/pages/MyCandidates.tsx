@@ -56,8 +56,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatDistanceToNow, differenceInDays, differenceInHours } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { formatCompactTime } from '@/lib/date';
 import {
   DndContext,
   DragOverlay,
@@ -93,20 +94,6 @@ interface CandidateCardProps {
   isSelected?: boolean;
   onToggleSelect?: () => void;
 }
-
-// Format time in compact way like Teamtailor
-const formatCompactTime = (date: string | null) => {
-  if (!date) return null;
-  const now = new Date();
-  const d = new Date(date);
-  const days = differenceInDays(now, d);
-  const hours = differenceInHours(now, d);
-  
-  if (days >= 1) {
-    return `${days}dag`;
-  }
-  return `${hours}tim`;
-};
 
 // Star rating component - read-only for cards
 const StarRating = ({ 
