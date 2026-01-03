@@ -387,7 +387,7 @@ function EmployerTopNav() {
                     className="h-7 w-7 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-xs font-semibold text-white">
+                  <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white">
                     {getUserInitials()}
                   </div>
                 )}
@@ -405,7 +405,7 @@ function EmployerTopNav() {
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-sm font-semibold text-white">
+                    <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold text-white">
                       {getUserInitials()}
                     </div>
                   )}
