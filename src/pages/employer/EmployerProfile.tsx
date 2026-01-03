@@ -56,6 +56,7 @@ const EmployerProfile = () => {
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const didInitRef = useRef(false);
 
   const [formData, setFormData] = useState({
     first_name: profile?.first_name || '',
@@ -79,22 +80,27 @@ const EmployerProfile = () => {
 
   // Update form data when profile changes
   useEffect(() => {
-    if (profile) {
-      const values = {
-        first_name: profile.first_name || '',
-        last_name: profile.last_name || '',
-        bio: profile.bio || '',
-        location: profile.location || '',
-        phone: profile.phone || '',
-        profile_image_url: profile.profile_image_url || '',
-        social_media_links: (profile as any)?.social_media_links || [],
-      };
-      
-      setFormData(values);
-      setOriginalValues(values);
-      setHasUnsavedChanges(false);
-    }
-  }, [profile, setHasUnsavedChanges]);
+    if (!profile) return;
+
+    // Viktigt: skriv inte över lokala (osparade) ändringar, annars "kommer bilden tillbaka"
+    // om profilen råkar uppdateras i bakgrunden.
+    if (didInitRef.current && hasUnsavedChanges) return;
+
+    const values = {
+      first_name: profile.first_name || '',
+      last_name: profile.last_name || '',
+      bio: profile.bio || '',
+      location: profile.location || '',
+      phone: profile.phone || '',
+      profile_image_url: profile.profile_image_url || '',
+      social_media_links: (profile as any)?.social_media_links || [],
+    };
+
+    setFormData(values);
+    setOriginalValues(values);
+    setHasUnsavedChanges(false);
+    didInitRef.current = true;
+  }, [profile, hasUnsavedChanges, setHasUnsavedChanges]);
 
   const checkForChanges = useCallback(() => {
     if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone && !originalValues.social_media_links) return false;
@@ -462,11 +468,13 @@ const EmployerProfile = () => {
                 {profileImageUrl && (
                   <button
                     type="button"
+                    aria-label="Ta bort profilbild"
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       handleRemoveProfileImage();
                     }}
-                    className="absolute -top-3 -right-3 bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                    className="absolute -top-3 -right-3 z-20 pointer-events-auto bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
