@@ -2,6 +2,7 @@ import { memo, useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useJobsData } from '@/hooks/useJobsData';
+import { useCountUp } from '@/hooks/useCountUp';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -11,7 +12,8 @@ import {
   Eye, 
   Plus,
   ArrowRight,
-  Clock
+  Clock,
+  Sparkles
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { isJobExpiredCheck } from '@/lib/date';
@@ -35,28 +37,49 @@ interface StatCardProps {
   title: string;
   value: number;
   subtitle?: string;
-  color: string;
+  gradient: string;
+  glowColor: string;
   delay: number;
 }
 
-const StatCard = memo(({ icon: Icon, title, value, subtitle, color, delay }: StatCardProps) => (
+const AnimatedNumber = memo(({ value, delay }: { value: number; delay: number }) => {
+  const count = useCountUp(value, { duration: 1200, delay: delay * 1000 + 200 });
+  return <>{count.toLocaleString('sv-SE')}</>;
+});
+
+AnimatedNumber.displayName = 'AnimatedNumber';
+
+const StatCard = memo(({ icon: Icon, title, value, subtitle, gradient, glowColor, delay }: StatCardProps) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay }}
+    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+    className="group"
   >
-    <Card className={`bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 transition-all duration-300 group cursor-default`}>
-      <CardContent className="p-5">
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-xl cursor-default`}>
+      {/* Glow effect */}
+      <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${glowColor} blur-xl`} />
+      
+      {/* Glass overlay */}
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+      
+      {/* Decorative elements */}
+      <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
+      <div className="absolute -left-4 -bottom-4 w-16 h-16 bg-white/5 rounded-full blur-xl" />
+      
+      <CardContent className="relative p-5 md:p-6">
         <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-sm text-white/70">{title}</p>
-            <p className="text-3xl font-bold text-white">{value}</p>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-white/80 tracking-wide uppercase">{title}</p>
+            <p className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+              <AnimatedNumber value={value} delay={delay} />
+            </p>
             {subtitle && (
-              <p className="text-xs text-white/50">{subtitle}</p>
+              <p className="text-xs text-white/60 font-medium">{subtitle}</p>
             )}
           </div>
-          <div className={`p-3 rounded-xl ${color} transition-transform duration-300 group-hover:scale-110`}>
-            <Icon className="h-5 w-5 text-white" />
+          <div className="p-3 md:p-4 rounded-2xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
+            <Icon className="h-6 w-6 md:h-7 md:w-7 text-white" strokeWidth={1.5} />
           </div>
         </div>
       </CardContent>
@@ -85,9 +108,6 @@ const EmployerHome = memo(() => {
     const activeJobs = jobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
     const pendingApplications = activeJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0);
     const totalViews = activeJobs.reduce((sum, job) => sum + (job.views_count || 0), 0);
-    
-    // Get recent applications (last 7 days) - this is simplified, would need actual application data
-    const recentApplications = pendingApplications; // Placeholder
 
     return {
       activeJobs: isLoading ? preloadedEmployerActiveJobs : activeJobs.length,
@@ -122,24 +142,29 @@ const EmployerHome = memo(() => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="text-center md:text-left"
       >
-        <h1 className="text-2xl md:text-3xl font-bold text-white">
+        <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+          <Sparkles className="h-5 w-5 text-primary/80" />
+          <span className="text-sm font-medium text-white/60 uppercase tracking-widest">Dashboard</span>
+        </div>
+        <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
           {greeting}, {firstName} {emoji}
         </h1>
-        <p className="text-white/60 mt-1 text-sm md:text-base">
+        <p className="text-white/50 mt-2 text-base">
           Här är en översikt över din rekrytering
         </p>
       </motion.div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         <StatCard
           icon={TrendingUp}
           title="Aktiva annonser"
           value={stats.activeJobs}
-          color="bg-green-500/20"
+          gradient="from-emerald-500/90 via-emerald-600/80 to-teal-700/90"
+          glowColor="bg-emerald-500/30"
           delay={0.1}
         />
         <StatCard
@@ -147,14 +172,16 @@ const EmployerHome = memo(() => {
           title="Nya ansökningar"
           value={stats.totalApplications}
           subtitle="Senaste 7 dagarna"
-          color="bg-blue-500/20"
+          gradient="from-blue-500/90 via-blue-600/80 to-indigo-700/90"
+          glowColor="bg-blue-500/30"
           delay={0.15}
         />
         <StatCard
           icon={Eye}
           title="Totala visningar"
           value={stats.totalViews}
-          color="bg-purple-500/20"
+          gradient="from-violet-500/90 via-purple-600/80 to-purple-700/90"
+          glowColor="bg-violet-500/30"
           delay={0.2}
         />
         <StatCard
@@ -162,7 +189,8 @@ const EmployerHome = memo(() => {
           title="Väntar på feedback"
           value={stats.totalApplications}
           subtitle="Kandidater att granska"
-          color="bg-amber-500/20"
+          gradient="from-amber-500/90 via-orange-500/80 to-orange-600/90"
+          glowColor="bg-amber-500/30"
           delay={0.25}
         />
       </div>
@@ -171,12 +199,12 @@ const EmployerHome = memo(() => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.35 }}
         className="flex flex-col sm:flex-row gap-3"
       >
         <Button
           onClick={() => navigate('/my-jobs?create=true')}
-          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground h-12 text-base font-medium"
+          className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground h-13 text-base font-semibold shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01]"
         >
           <Plus className="mr-2 h-5 w-5" />
           Skapa ny annons
@@ -184,7 +212,7 @@ const EmployerHome = memo(() => {
         <Button
           onClick={() => navigate('/my-candidates')}
           variant="outline"
-          className="flex-1 border-white/20 bg-white/5 hover:bg-white/10 text-white h-12 text-base font-medium"
+          className="flex-1 border-white/20 bg-white/5 hover:bg-white/10 text-white h-13 text-base font-semibold backdrop-blur-sm transition-all duration-300 hover:scale-[1.01]"
         >
           <Users className="mr-2 h-5 w-5" />
           Granska kandidater
@@ -196,10 +224,10 @@ const EmployerHome = memo(() => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
+          transition={{ duration: 0.5, delay: 0.45 }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-white">Jobb med nya ansökningar</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-white">Jobb med nya ansökningar</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -210,34 +238,34 @@ const EmployerHome = memo(() => {
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {jobsNeedingAttention.map((job, index) => (
               <motion.div
                 key={job.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
+                transition={{ duration: 0.4, delay: 0.55 + index * 0.08 }}
               >
                 <Card 
-                  className="bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 transition-all duration-200 cursor-pointer group"
+                  className="bg-gradient-to-r from-white/[0.08] to-white/[0.04] backdrop-blur-sm border-white/10 hover:from-white/[0.12] hover:to-white/[0.08] transition-all duration-300 cursor-pointer group hover:scale-[1.01]"
                   onClick={() => navigate(`/job-details/${job.id}`)}
                 >
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-blue-500/20">
-                        <Briefcase className="h-4 w-4 text-blue-400" />
+                  <CardContent className="p-4 md:p-5 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/30 to-blue-600/20 group-hover:from-blue-500/40 group-hover:to-blue-600/30 transition-all duration-300">
+                        <Briefcase className="h-5 w-5 text-blue-300" strokeWidth={1.5} />
                       </div>
                       <div>
-                        <p className="font-medium text-white text-sm md:text-base">{job.title}</p>
-                        <p className="text-xs text-white/50">{job.location || 'Ingen plats angiven'}</p>
+                        <p className="font-semibold text-white text-base md:text-lg">{job.title}</p>
+                        <p className="text-sm text-white/50">{job.location || 'Ingen plats angiven'}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-lg font-bold text-blue-400">{job.applications_count || 0}</p>
+                        <p className="text-2xl font-bold text-blue-400">{job.applications_count || 0}</p>
                         <p className="text-xs text-white/50">ansökningar</p>
                       </div>
-                      <ArrowRight className="h-4 w-4 text-white/30 group-hover:text-white/60 transition-colors" />
+                      <ArrowRight className="h-5 w-5 text-white/30 group-hover:text-white/60 group-hover:translate-x-1 transition-all duration-300" />
                     </div>
                   </CardContent>
                 </Card>
@@ -252,22 +280,22 @@ const EmployerHome = memo(() => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
         >
-          <Card className="bg-white/5 backdrop-blur-sm border-white/10 border-dashed">
-            <CardContent className="p-8 text-center">
-              <div className="p-4 rounded-full bg-primary/10 w-fit mx-auto mb-4">
-                <Briefcase className="h-8 w-8 text-primary" />
+          <Card className="bg-gradient-to-br from-white/[0.08] to-white/[0.04] backdrop-blur-sm border-white/10 border-dashed">
+            <CardContent className="p-10 text-center">
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 w-fit mx-auto mb-5">
+                <Briefcase className="h-10 w-10 text-primary" strokeWidth={1.5} />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <h3 className="text-xl font-semibold text-white mb-3">
                 Välkommen till Parium!
               </h3>
-              <p className="text-white/60 mb-4 max-w-md mx-auto">
+              <p className="text-white/60 mb-6 max-w-md mx-auto">
                 Du har inga annonser ännu. Skapa din första jobbannons för att börja ta emot ansökningar.
               </p>
               <Button
                 onClick={() => navigate('/my-jobs?create=true')}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg shadow-primary/25"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Skapa din första annons
