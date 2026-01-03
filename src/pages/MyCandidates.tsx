@@ -384,7 +384,7 @@ const StageColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 flex flex-col transition-colors h-full min-w-0"
+      className="flex flex-col transition-colors h-full min-w-[180px] max-w-[260px] w-full"
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -1496,10 +1496,10 @@ const MyCandidates = () => {
           }}
         >
           <div 
-            className={`flex gap-3 pb-4 pt-2 w-full ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} 
+            className={`flex gap-3 pb-4 pt-2 ${activeStageFilter !== 'all' ? 'justify-center' : 'justify-center'}`} 
             style={{ 
               height: 'calc(100vh - 300px)',
-              overflowX: 'hidden',
+              overflowX: 'auto',
               overflowY: 'hidden',
             }}
           >
