@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import EmployerSidebar from '@/components/EmployerSidebar';
+import EmployerTopNav from '@/components/EmployerTopNav';
 import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
@@ -12,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
+import { useDevice } from '@/hooks/use-device';
 
 interface EmployerLayoutProps {
   children: ReactNode;
@@ -27,6 +29,10 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const { shouldCollapseSidebar, stageCount } = useKanbanLayout();
+  const device = useDevice();
+  
+  // Desktop uses top nav, mobile/tablet uses sidebar
+  const isDesktop = device === 'desktop';
   
   // Auto-collapse sidebar on pages that need more horizontal space (Kanban views)
   const isKanbanPage = location.pathname.startsWith('/job-details/') || location.pathname === '/my-candidates';
@@ -274,6 +280,58 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
     });
   }, [user, queryClient]);
 
+  // Desktop layout with top navigation
+  if (isDesktop) {
+    return (
+      <>
+        {/* Fixed gradient background */}
+        <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
+        
+        <div className="min-h-screen flex flex-col w-full overflow-x-hidden relative">
+          <AnimatedBackground showBubbles={false} />
+          
+          {/* Top Navigation for Desktop */}
+          <header className="sticky top-0 z-40">
+            <EmployerTopNav />
+            {/* Developer controls and Create Job button */}
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
+              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && (
+                <DeveloperControls 
+                  onViewChange={onViewChange}
+                  currentView={developerView}
+                />
+              )}
+              <CreateJobSimpleDialog
+                onJobCreated={() => {
+                  invalidateJobs();
+                }}
+                triggerRef={createJobButtonRef}
+              />
+            </div>
+          </header>
+          
+          {/* Bubbles - positioned below header */}
+          <div className="fixed left-0 right-0 top-14 pointer-events-none z-20" style={{ height: 'calc(100vh - 3.5rem)' }}>
+            <div className="absolute top-12 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2s', animationDelay: '-0.3s' }}></div>
+            <div className="absolute top-24 left-16 w-2 h-2 bg-accent/40 rounded-full animate-soft-bounce" style={{ animationDuration: '2.5s', animationDelay: '-1.2s' }}></div>
+            <div className="absolute top-16 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-soft-bounce" style={{ animationDuration: '3s', animationDelay: '-0.7s' }}></div>
+            <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2.2s', animationDelay: '-0.8s' }}></div>
+            <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-soft-bounce" style={{ animationDuration: '2.8s', animationDelay: '-1.5s' }}></div>
+            <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-soft-bounce" style={{ animationDuration: '2.3s', animationDelay: '-0.5s' }}></div>
+            <div className="absolute top-4 left-8 w-3 h-3 bg-accent/40 rounded-full animate-pulse" style={{ animationDuration: '1.8s', animationDelay: '-0.6s' }}></div>
+            <div className="absolute top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse" style={{ animationDuration: '1.5s', animationDelay: '-0.4s' }}></div>
+            <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s', animationDelay: '-1.0s' }}></div>
+          </div>
+          
+          <main className="flex-1 overflow-hidden p-3 relative z-10">
+            {children}
+          </main>
+        </div>
+      </>
+    );
+  }
+
+  // Mobile/Tablet layout with sidebar
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
       {/* Fixed gradient background - covers viewport */}
@@ -294,14 +352,6 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && (
-                <div className="hidden md:block">
-                  <DeveloperControls 
-                    onViewChange={onViewChange}
-                    currentView={developerView}
-                  />
-                </div>
-              )}
               <CreateJobSimpleDialog
                 onJobCreated={() => {
                   invalidateJobs();
@@ -313,29 +363,18 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
           
           {/* Bubbles positioned below header */}
           <div className="absolute left-0 right-0 top-14 pointer-events-none z-20" style={{ height: 'calc(100vh - 3.5rem)' }}>
-            {/* Left-side bubbles (top corner) - more spread out like auth page */}
             <div className="absolute top-12 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2s', animationDelay: '-0.3s', animationFillMode: 'backwards' }}></div>
             <div className="absolute top-24 left-16 w-2 h-2 bg-accent/40 rounded-full animate-soft-bounce" style={{ animationDuration: '2.5s', animationDelay: '-1.2s', animationFillMode: 'backwards' }}></div>
             <div className="absolute top-16 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-soft-bounce" style={{ animationDuration: '3s', animationDelay: '-0.7s', animationFillMode: 'backwards' }}></div>
-            
-            {/* Right-side bubbles (bottom corner) */}
             <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2.2s', animationDelay: '-0.8s', animationFillMode: 'backwards' }}></div>
             <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-soft-bounce" style={{ animationDuration: '2.8s', animationDelay: '-1.5s', animationFillMode: 'backwards' }}></div>
             <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-soft-bounce" style={{ animationDuration: '2.3s', animationDelay: '-0.5s', animationFillMode: 'backwards' }}></div>
-            
-            {/* Pulsing lights (left) - moved higher up for more spacing */}
             <div className="absolute top-4 left-8 w-3 h-3 bg-accent/40 rounded-full animate-pulse" style={{ animationDuration: '1.8s', animationDelay: '-0.6s', animationFillMode: 'backwards' }}></div>
-            
-            {/* Pulsing lights (right) */}
             <div className="absolute top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse" style={{ animationDuration: '1.5s', animationDelay: '-0.4s', animationFillMode: 'backwards' }}></div>
             <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s', animationDelay: '-1.0s', animationFillMode: 'backwards' }}></div>
-            
-            {/* Small star (left area) */}
             <div className="absolute top-32 left-1/4 w-1 h-1 bg-accent/60 rounded-full animate-pulse" style={{ animationDuration: '3s', animationDelay: '-0.9s', animationFillMode: 'backwards' }}>
               <div className="absolute inset-0 bg-accent/40 rounded-full animate-ping" style={{ animationDuration: '3s', animationDelay: '-0.9s', animationFillMode: 'backwards' }}></div>
             </div>
-            
-            {/* Small star (right area) */}
             <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-secondary/60 rounded-full animate-pulse" style={{ animationDuration: '2.5s', animationDelay: '-1.3s', animationFillMode: 'backwards' }}>
               <div className="absolute inset-0 bg-secondary/40 rounded-full animate-ping" style={{ animationDuration: '2.5s', animationDelay: '-1.3s', animationFillMode: 'backwards' }}></div>
             </div>
