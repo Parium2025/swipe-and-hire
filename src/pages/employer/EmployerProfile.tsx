@@ -55,6 +55,7 @@ const EmployerProfile = () => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
+  const [originalProfileImageUrl, setOriginalProfileImageUrl] = useState<string>(''); // Storage path för original
   const fileInputRef = useRef<HTMLInputElement>(null);
   const didInitRef = useRef(false);
   
@@ -165,8 +166,9 @@ const EmployerProfile = () => {
     }
   };
 
-  // Redigera befintlig bild
+  // Redigera befintlig bild - ALLTID använd originalet om det finns
   const handleEditExistingImage = async () => {
+    // 1. Om vi har originalfilen i minnet (just uppladdad), använd den
     if (originalProfileImageFile) {
       const blobUrl = URL.createObjectURL(originalProfileImageFile);
       setPendingImageSrc(blobUrl);
@@ -174,7 +176,22 @@ const EmployerProfile = () => {
       return;
     }
 
-    // Hämta signerad URL för befintlig bild
+    // 2. Om vi har sparad original i storage, använd den
+    if (originalProfileImageUrl) {
+      try {
+        const signedUrl = await getMediaUrl(originalProfileImageUrl, 'profile-image', 3600);
+        if (signedUrl) {
+          setPendingImageSrc(signedUrl);
+          setImageEditorOpen(true);
+          return;
+        }
+      } catch (error) {
+        console.error('Error loading original image:', error);
+        // Fallback till beskuren bild
+      }
+    }
+
+    // 3. Fallback: Hämta den beskurna bilden (om ingen original finns)
     if (formData.profile_image_url) {
       try {
         const signedUrl = await getMediaUrl(formData.profile_image_url, 'profile-image', 3600);
@@ -201,7 +218,7 @@ const EmployerProfile = () => {
       // Skapa File från Blob
       const editedFile = new File([editedBlob], 'profile-image.webp', { type: 'image/webp' });
 
-      // Ladda upp via mediaManager
+      // Ladda upp redigerad bild via mediaManager
       const { storagePath, error: uploadError } = await uploadMedia(
         editedFile,
         'profile-image',
@@ -209,6 +226,27 @@ const EmployerProfile = () => {
       );
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
+
+      // Om vi har originalfilen, spara den också i storage för framtida redigeringar
+      if (originalProfileImageFile && !originalProfileImageUrl) {
+        try {
+          // Skapa en unik fil med "original" prefix för att skilja från den beskurna versionen
+          const fileExt = originalProfileImageFile.name.split('.').pop() || 'jpg';
+          const timestamp = Date.now();
+          const originalFileName = `${user.id}/original-${timestamp}.${fileExt}`;
+          
+          const { error: origError } = await supabase.storage
+            .from('job-applications')
+            .upload(originalFileName, originalProfileImageFile);
+          
+          if (!origError) {
+            setOriginalProfileImageUrl(originalFileName);
+          }
+        } catch (origErr) {
+          console.error('Failed to save original image:', origErr);
+          // Non-critical, continue
+        }
+      }
 
       // Uppdatera formData
       setFormData(prev => ({ ...prev, profile_image_url: storagePath }));
