@@ -351,8 +351,19 @@ function EmployerTopNav() {
                   }
                 `}
               >
-                <HelpCircle className="h-4 w-4" />
-                <span>Support</span>
+                {preloadedCompanyLogoUrl ? (
+                  <img 
+                    src={preloadedCompanyLogoUrl} 
+                    alt="Företagslogo" 
+                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30"
+                  />
+                ) : profile?.company_name ? (
+                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white">
+                    {profile.company_name.substring(0, 2).toUpperCase()}
+                  </div>
+                ) : (
+                  <HelpCircle className="h-4 w-4" />
+                )}
                 <ChevronDown className="h-3 w-3 opacity-70" />
               </button>
             </DropdownMenuTrigger>
