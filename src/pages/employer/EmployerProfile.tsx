@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -22,9 +23,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown, AlertTriangle, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import FileUpload from '@/components/FileUpload';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -52,6 +54,7 @@ const EmployerProfile = () => {
     bio: profile?.bio || '',
     location: profile?.location || '',
     phone: profile?.phone || '',
+    profile_image_url: profile?.profile_image_url || '',
     social_media_links: (profile as any)?.social_media_links || [] as SocialMediaLink[],
   });
 
@@ -71,6 +74,7 @@ const EmployerProfile = () => {
         bio: profile.bio || '',
         location: profile.location || '',
         phone: profile.phone || '',
+        profile_image_url: profile.profile_image_url || '',
         social_media_links: (profile as any)?.social_media_links || [],
       };
       
@@ -291,6 +295,37 @@ const EmployerProfile = () => {
 
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
+            {/* Profilbild-sektion */}
+            <div className="flex flex-col items-center gap-4 pb-5 border-b border-white/10">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={formData.profile_image_url} alt="Profilbild" />
+                <AvatarFallback className="text-xl bg-gradient-to-br from-primary/80 to-primary text-white">
+                  {formData.first_name?.[0]?.toUpperCase() || ''}{formData.last_name?.[0]?.toUpperCase() || ''}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="w-full max-w-xs">
+                <FileUpload
+                  onFileUploaded={(url) => {
+                    setFormData({...formData, profile_image_url: url});
+                    setHasUnsavedChanges(true);
+                  }}
+                  onFileRemoved={() => {
+                    setFormData({...formData, profile_image_url: ''});
+                    setHasUnsavedChanges(true);
+                  }}
+                  acceptedFileTypes={['image/*']}
+                  maxFileSize={5 * 1024 * 1024}
+                  currentFile={formData.profile_image_url ? { url: formData.profile_image_url, name: 'Profilbild' } : undefined}
+                  mediaType="profile-image"
+                  uploadType="image"
+                />
+                <p className="text-xs text-white/50 text-center mt-2">
+                  Max 5MB. JPG, PNG eller WebP
+                </p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="first_name" className="text-sm text-white">Förnamn</Label>
