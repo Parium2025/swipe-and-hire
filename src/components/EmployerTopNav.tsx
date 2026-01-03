@@ -405,9 +405,9 @@ function EmployerTopNav() {
                       {getUserInitials()}
                     </div>
                   )}
-                  <div className="flex flex-col">
-                    <span className="text-white font-medium text-sm">{getUserDisplayName()}</span>
-                    <span className="text-white/50 text-xs">{user?.email || ''}</span>
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-white font-medium text-sm truncate max-w-[140px]">{getUserDisplayName()}</span>
+                    <span className="text-white/50 text-xs truncate max-w-[140px]">{user?.email || ''}</span>
                   </div>
                 </div>
               </div>
