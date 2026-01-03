@@ -1518,14 +1518,14 @@ const MyCandidates = () => {
                 />
               );
             })}
-            {/* Nytt steg button - inline with columns, only show if less than max stages */}
+            {/* Nytt steg button - inline with columns as a column-sized card, only show if less than max stages */}
             {!isViewingColleague && activeStageOrder.length < 5 && activeStageFilter === 'all' && (
-              <div className="flex-shrink-0 flex items-start pt-1">
+              <div className="flex-none w-[calc((100%-3rem)/5)] flex flex-col items-center justify-start pt-12">
                 <CreateStageDialog 
                   currentStageCount={activeStageOrder.length}
                   trigger={
-                    <button className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
-                      <Plus className="h-3.5 w-3.5" />
+                    <button className="px-4 py-2 text-sm font-medium rounded-lg transition-all text-white/70 hover:text-white bg-white/5 hover:bg-white/10 backdrop-blur-sm flex items-center gap-2 border border-dashed border-white/20 hover:border-white/40">
+                      <Plus className="h-4 w-4" />
                       Nytt steg
                     </button>
                   }
