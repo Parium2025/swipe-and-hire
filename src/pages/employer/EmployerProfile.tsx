@@ -459,7 +459,7 @@ const EmployerProfile = () => {
                 </div>
 
                 {/* Soptunna-knapp som på jobbsökarsidan */}
-                {formData.profile_image_url && (
+                {profileImageUrl && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -483,7 +483,7 @@ const EmployerProfile = () => {
                 </label>
                 
                 {/* Anpassa din bild-knapp om bild finns */}
-                {formData.profile_image_url && (
+                {profileImageUrl && (
                   <div className="flex flex-col items-center space-y-2">
                     <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
                       Bild uppladdad!
