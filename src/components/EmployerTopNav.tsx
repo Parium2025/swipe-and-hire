@@ -233,7 +233,7 @@ function EmployerTopNav() {
                 `}
               >
                 <LayoutDashboard className="h-4 w-4" />
-                <span>Jobb</span>
+                <span>Annonser</span>
                 {getDashboardCount() && (
                   <span className="text-white/60 text-xs">({getDashboardCount()})</span>
                 )}
