@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { CriterionResultBadge, CriterionIconBadge } from '@/components/JobCriteriaManager';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
@@ -597,6 +598,9 @@ const JobDetails = () => {
   // Fetch criteria count for this job
   const { data: jobCriteria } = useJobCriteria(jobId || null);
   const criteriaCount = jobCriteria?.length || 0;
+  
+  // Resolve employer profile image URL
+  const employerProfileImageUrl = useMediaUrl(job?.employer_profile?.profile_image_url, 'profile-image');
 
   // Load my_candidates map for ratings
   useEffect(() => {
@@ -1021,9 +1025,9 @@ const JobDetails = () => {
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-2 bg-white/5 rounded-lg px-2 py-1 cursor-default">
                       <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-xs text-white font-medium shrink-0">
-                        {job.employer_profile.profile_image_url ? (
+                        {employerProfileImageUrl ? (
                           <img 
-                            src={job.employer_profile.profile_image_url} 
+                            src={employerProfileImageUrl} 
                             alt="" 
                             className="h-full w-full object-cover"
                           />
