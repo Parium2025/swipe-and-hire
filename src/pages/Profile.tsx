@@ -2121,8 +2121,8 @@ const Profile = () => {
                 <div className="flex justify-center">
                   <Button 
                     type="submit" 
-                    variant="glass"
-                    className="h-9 px-6 text-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                    variant="glassGreen"
+                    className="h-10 px-8 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed" 
                     disabled={loading || isUploadingMedia || isUploadingCover}
                   >
                     {loading ? 'Sparar...' : 'Spara ändringar'}
