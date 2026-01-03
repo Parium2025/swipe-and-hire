@@ -6,7 +6,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { CompanyAvatar } from "@/components/CompanyAvatar";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,17 +27,24 @@ import {
   Star,
   UserCircle,
   UserCheck,
-  ChevronDown
+  ChevronDown,
+  LayoutDashboard
 } from "lucide-react";
 
-// Main navigation items (direct links)
-const mainNavItems = [
+// Dashboard dropdown items
+const dashboardItems = [
   { title: "Dashboard", url: "/dashboard", icon: BarChart3 },
   { title: "Mina Annonser", url: "/my-jobs", icon: Briefcase },
-  { title: "Kandidater", url: "/candidates", icon: Users },
-  { title: "Mina Kandidater", url: "/my-candidates", icon: UserCheck },
-  { title: "Meddelanden", url: "/messages", icon: MessageCircle },
 ];
+
+// Kandidater dropdown items
+const candidateItems = [
+  { title: "Alla Kandidater", url: "/candidates", icon: Users },
+  { title: "Mina Kandidater", url: "/my-candidates", icon: UserCheck },
+];
+
+// Meddelanden - single item (stays as direct link)
+const messagesItem = { title: "Meddelanden", url: "/messages", icon: MessageCircle };
 
 // Företag dropdown items
 const businessItems = [
@@ -55,6 +61,11 @@ const supportItems = [
   { title: "Hjälp & Support", url: "/support", icon: HelpCircle },
 ];
 
+// Dropdown styling matching the sort dropdown
+const dropdownContentClass = "min-w-[180px] bg-[#0a2540]/95 backdrop-blur-md border border-white/20 shadow-xl z-50 rounded-xl p-1.5";
+const dropdownItemClass = "flex items-center gap-2.5 cursor-pointer text-white/90 hover:text-white hover:bg-white/10 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors";
+const dropdownItemActiveClass = "bg-white/15 text-white";
+
 function EmployerTopNav() {
   const { profile, signOut, user, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedMyCandidates, preloadedCompanyLogoUrl } = useAuth();
   const navigate = useNavigate();
@@ -62,6 +73,8 @@ function EmployerTopNav() {
   const { checkBeforeNavigation } = useUnsavedChanges();
   const queryClient = useQueryClient();
   
+  const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [candidatesOpen, setCandidatesOpen] = useState(false);
   const [businessOpen, setBusinessOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
 
@@ -179,10 +192,22 @@ function EmployerTopNav() {
     }
   };
 
+  const getDashboardCount = () => {
+    const dashboardCount = preloadedEmployerDashboardJobs || 0;
+    const jobsCount = preloadedEmployerMyJobs || 0;
+    return dashboardCount + jobsCount > 0 ? dashboardCount + jobsCount : null;
+  };
+
+  const getCandidatesCount = () => {
+    const candidates = preloadedEmployerCandidates || 0;
+    const myCandidates = preloadedMyCandidates || 0;
+    return candidates + myCandidates > 0 ? candidates + myCandidates : null;
+  };
+
   return (
     <nav className="h-14 flex items-center justify-between px-4 border-b border-white/20 bg-transparent">
       {/* Left side: Logo + Main Nav */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-3">
         {/* Logo/Company */}
         <div className="flex items-center gap-2">
           <div className="h-8 w-8">
@@ -195,49 +220,117 @@ function EmployerTopNav() {
           <span className="text-white font-bold text-lg hidden xl:inline">Parium</span>
         </div>
 
-        {/* Main Navigation Links */}
+        {/* Main Navigation Dropdowns */}
         <div className="flex items-center gap-1">
-          {mainNavItems.map((item) => {
-            const count = getCount(item.url);
-            const isActive = isActiveUrl(item.url);
-            
-            return (
+          {/* Dashboard Dropdown */}
+          <DropdownMenu open={dashboardOpen} onOpenChange={setDashboardOpen}>
+            <DropdownMenuTrigger asChild>
               <button
-                key={item.url}
-                onClick={() => handleNavigation(item.url)}
-                onMouseEnter={item.url === '/candidates' ? prefetchApplications : undefined}
                 className={`
-                  flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                  ${isActive 
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                  ${isDropdownActive(dashboardItems) 
                     ? 'bg-white/20 text-white' 
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
                   }
                 `}
               >
-                <item.icon className="h-4 w-4" />
-                <span className="hidden lg:inline">{item.title}</span>
-                {count && (
-                  <span className="text-white/70 text-xs">({count})</span>
+                <LayoutDashboard className="h-4 w-4" />
+                <span>Jobb</span>
+                {getDashboardCount() && (
+                  <span className="text-white/60 text-xs">({getDashboardCount()})</span>
                 )}
-                {item.url === '/messages' && preloadedUnreadMessages > 0 && (
-                  <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                    {preloadedUnreadMessages}
-                  </span>
-                )}
+                <ChevronDown className="h-3 w-3 opacity-70" />
               </button>
-            );
-          })}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className={dropdownContentClass}>
+              {dashboardItems.map((item) => {
+                const count = getCount(item.url);
+                const isActive = isActiveUrl(item.url);
+                return (
+                  <DropdownMenuItem
+                    key={item.url}
+                    onClick={() => { handleNavigation(item.url); setDashboardOpen(false); }}
+                    className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span className="flex-1">{item.title}</span>
+                    {count && <span className="text-white/50 text-xs">({count})</span>}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Kandidater Dropdown */}
+          <DropdownMenu open={candidatesOpen} onOpenChange={setCandidatesOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                onMouseEnter={prefetchApplications}
+                className={`
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                  ${isDropdownActive(candidateItems) 
+                    ? 'bg-white/20 text-white' 
+                    : 'text-white/80 hover:bg-white/10 hover:text-white'
+                  }
+                `}
+              >
+                <Users className="h-4 w-4" />
+                <span>Kandidater</span>
+                {getCandidatesCount() && (
+                  <span className="text-white/60 text-xs">({getCandidatesCount()})</span>
+                )}
+                <ChevronDown className="h-3 w-3 opacity-70" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className={dropdownContentClass}>
+              {candidateItems.map((item) => {
+                const count = getCount(item.url);
+                const isActive = isActiveUrl(item.url);
+                return (
+                  <DropdownMenuItem
+                    key={item.url}
+                    onClick={() => { handleNavigation(item.url); setCandidatesOpen(false); }}
+                    className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span className="flex-1">{item.title}</span>
+                    {count && <span className="text-white/50 text-xs">({count})</span>}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Meddelanden - Direct link */}
+          <button
+            onClick={() => handleNavigation(messagesItem.url)}
+            className={`
+              flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+              ${isActiveUrl(messagesItem.url) 
+                ? 'bg-white/20 text-white' 
+                : 'text-white/80 hover:bg-white/10 hover:text-white'
+              }
+            `}
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span>Meddelanden</span>
+            {preloadedUnreadMessages > 0 && (
+              <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                {preloadedUnreadMessages}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Right side: Dropdowns + User Menu */}
-      <div className="flex items-center gap-2">
+      {/* Right side: Dropdowns */}
+      <div className="flex items-center gap-1">
         {/* Företag Dropdown */}
         <DropdownMenu open={businessOpen} onOpenChange={setBusinessOpen}>
           <DropdownMenuTrigger asChild>
             <button
               className={`
-                flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
                 ${isDropdownActive(businessItems) 
                   ? 'bg-white/20 text-white' 
                   : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -245,21 +338,24 @@ function EmployerTopNav() {
               `}
             >
               <Building className="h-4 w-4" />
-              <span className="hidden lg:inline">Företag</span>
-              <ChevronDown className="h-3 w-3" />
+              <span>Företag</span>
+              <ChevronDown className="h-3 w-3 opacity-70" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 bg-background border border-border shadow-lg z-50">
-            {businessItems.map((item) => (
-              <DropdownMenuItem
-                key={item.url}
-                onClick={() => { handleNavigation(item.url); setBusinessOpen(false); }}
-                className={`flex items-center gap-2 cursor-pointer ${location.pathname === item.url ? 'bg-muted' : ''}`}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.title}
-              </DropdownMenuItem>
-            ))}
+          <DropdownMenuContent align="end" className={dropdownContentClass}>
+            {businessItems.map((item) => {
+              const isActive = isActiveUrl(item.url);
+              return (
+                <DropdownMenuItem
+                  key={item.url}
+                  onClick={() => { handleNavigation(item.url); setBusinessOpen(false); }}
+                  className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.title}
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -268,7 +364,7 @@ function EmployerTopNav() {
           <DropdownMenuTrigger asChild>
             <button
               className={`
-                flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
                 ${isDropdownActive(supportItems) 
                   ? 'bg-white/20 text-white' 
                   : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -276,35 +372,34 @@ function EmployerTopNav() {
               `}
             >
               <HelpCircle className="h-4 w-4" />
-              <span className="hidden lg:inline">Support</span>
-              <ChevronDown className="h-3 w-3" />
+              <span>Support</span>
+              <ChevronDown className="h-3 w-3 opacity-70" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 bg-background border border-border shadow-lg z-50">
-            {supportItems.map((item) => (
-              <DropdownMenuItem
-                key={item.url}
-                onClick={() => { handleNavigation(item.url); setSupportOpen(false); }}
-                className={`flex items-center gap-2 cursor-pointer ${location.pathname === item.url ? 'bg-muted' : ''}`}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.title}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 cursor-pointer text-destructive">
+          <DropdownMenuContent align="end" className={dropdownContentClass}>
+            {supportItems.map((item) => {
+              const isActive = isActiveUrl(item.url);
+              return (
+                <DropdownMenuItem
+                  key={item.url}
+                  onClick={() => { handleNavigation(item.url); setSupportOpen(false); }}
+                  className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.title}
+                </DropdownMenuItem>
+              );
+            })}
+            <DropdownMenuSeparator className="bg-white/10 my-1.5" />
+            <DropdownMenuItem 
+              onClick={signOut} 
+              className={`${dropdownItemClass} text-red-400 hover:text-red-300 hover:bg-red-500/10`}
+            >
               <LogOut className="h-4 w-4" />
               Logga ut
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* User Avatar */}
-        <div className="hidden xl:flex items-center gap-2 pl-2 border-l border-white/20">
-          <span className="text-white/80 text-sm">
-            {profile?.first_name} {profile?.last_name}
-          </span>
-        </div>
       </div>
     </nav>
   );
