@@ -214,50 +214,78 @@ export const useApplicationsData = (searchQuery: string = '') => {
         return { items: [], hasMore: false };
       }
 
-      // Fetch profile media (image, video, is_profile_video, last_active_at) via secure RPC function for each applicant
-      const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
-      const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; last_active_at: string | null }> = {};
-      
-      // Batch fetch profile media via RPC (security definer function) - now includes last_active_at
-      await Promise.all(
-        applicantIds.map(async (applicantId) => {
-          const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
-            p_applicant_id: applicantId,
-            p_employer_id: user.id
-          });
-          if (mediaData && mediaData.length > 0) {
-            profileMediaMap[applicantId] = {
-              profile_image_url: mediaData[0].profile_image_url,
-              video_url: mediaData[0].video_url,
-              is_profile_video: mediaData[0].is_profile_video,
-              last_active_at: mediaData[0].last_active_at || null
-            };
-          } else {
-            profileMediaMap[applicantId] = { 
-              profile_image_url: null, 
-              video_url: null, 
-              is_profile_video: null,
-              last_active_at: null
-            };
-          }
-        })
-      );
 
-      // Transform data to flatten job_postings and add profile media
-      const items = baseData.map((item: any) => {
-        const media = profileMediaMap[item.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null };
-        return {
-          ...item,
-          job_title: item.job_postings?.title || 'Okänt jobb',
-          profile_image_url: media.profile_image_url,
-          video_url: media.video_url,
-          is_profile_video: media.is_profile_video,
-          last_active_at: media.last_active_at,
-          viewed_at: item.viewed_at,
-          job_postings: undefined
-        };
-      }) as ApplicationData[];
-      
+       // Fetch profile media (image, video, is_profile_video, last_active_at) via secure RPC function for each applicant
+       const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
+       const profileMediaMap: Record<
+         string,
+         {
+           profile_image_url: string | null;
+           video_url: string | null;
+           is_profile_video: boolean | null;
+           last_active_at: string | null;
+         }
+       > = {};
+
+       // Batch fetch profile media via RPC (security definer function)
+       await Promise.all(
+         applicantIds.map(async (applicantId) => {
+           const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
+             p_applicant_id: applicantId,
+             p_employer_id: user.id,
+           });
+           if (mediaData && mediaData.length > 0) {
+             profileMediaMap[applicantId] = {
+               profile_image_url: mediaData[0].profile_image_url,
+               video_url: mediaData[0].video_url,
+               is_profile_video: mediaData[0].is_profile_video,
+               last_active_at: mediaData[0].last_active_at || null,
+             };
+           } else {
+             profileMediaMap[applicantId] = {
+               profile_image_url: null,
+               video_url: null,
+               is_profile_video: null,
+               last_active_at: null,
+             };
+           }
+         })
+       );
+
+       // Fetch latest activity (SAME source as "Mina kandidater") in one batch
+       const activityMap: Record<string, { last_active_at: string | null }> = {};
+       const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
+         p_applicant_ids: applicantIds,
+         p_employer_id: user.id,
+       });
+
+       if (activityData) {
+         activityData.forEach((row: any) => {
+           activityMap[row.applicant_id] = { last_active_at: row.last_active_at ?? null };
+         });
+       }
+
+       // Transform data to flatten job_postings and add profile media + last_active_at
+       const items = baseData.map((item: any) => {
+         const media =
+           profileMediaMap[item.applicant_id] ||
+           ({ profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null } as const);
+
+         const activityLastActive = activityMap[item.applicant_id]?.last_active_at ?? null;
+
+         return {
+           ...item,
+           job_title: item.job_postings?.title || 'Okänt jobb',
+           profile_image_url: media.profile_image_url,
+           video_url: media.video_url,
+           is_profile_video: media.is_profile_video,
+           // Prefer activity RPC to stay 1:1 with "Mina kandidater"
+           last_active_at: activityLastActive ?? media.last_active_at,
+           viewed_at: item.viewed_at,
+           job_postings: undefined,
+         };
+       }) as ApplicationData[];
+
       const hasMore = items.length === PAGE_SIZE;
 
       // Write snapshot on first page
@@ -303,6 +331,82 @@ export const useApplicationsData = (searchQuery: string = '') => {
 
   // Flatten all pages
   const applications = data?.pages.flatMap(page => page.items) || [];
+
+  // Håll "Senaste aktivitet" synkad med exakt samma källa som i "Mina kandidater"
+  // (viktigt när listan initialt kommer från localStorage-snapshot och queryn inte refetchar direkt)
+  const lastActiveRefreshStateRef = useRef<{ key: string; lastAt: number; inFlight: boolean }>({
+    key: '',
+    lastAt: 0,
+    inFlight: false,
+  });
+
+  const applicantIdsKey = useMemo(() => {
+    const ids = [...new Set(applications.map((a) => a.applicant_id))].filter(Boolean) as string[];
+    ids.sort();
+    return ids.join('|');
+  }, [applications]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (!applicantIdsKey) return;
+
+    const applicantIds = applicantIdsKey.split('|').filter(Boolean);
+
+    const fetchLatestActivity = async () => {
+      const state = lastActiveRefreshStateRef.current;
+      if (state.inFlight) return;
+
+      const now = Date.now();
+      // Max 1 gång/minut per identisk kandidat-set (och alltid första gången)
+      if (state.key === applicantIdsKey && now - state.lastAt < 60_000) return;
+
+      state.inFlight = true;
+      try {
+        const { data: activityData, error } = await supabase.rpc('get_applicant_latest_activity', {
+          p_applicant_ids: applicantIds,
+          p_employer_id: user.id,
+        });
+
+        if (error || !activityData) return;
+
+        const activityMap = new Map<string, string | null>();
+        (activityData as any[]).forEach((row) => {
+          activityMap.set(row.applicant_id, row.last_active_at ?? null);
+        });
+
+        let updatedItems: ApplicationData[] | null = null;
+        queryClient.setQueryData(['applications', user.id, searchQuery], (old: any) => {
+          if (!old?.pages) return old;
+
+          const pages = old.pages.map((page: any) => ({
+            ...page,
+            items: (page.items || []).map((app: ApplicationData) => {
+              const next = activityMap.get(app.applicant_id);
+              if (next === undefined) return app;
+              if (app.last_active_at === next) return app;
+              return { ...app, last_active_at: next };
+            }),
+          }));
+
+          updatedItems = pages.flatMap((p: any) => p.items || []);
+          return { ...old, pages };
+        });
+
+        state.key = applicantIdsKey;
+        state.lastAt = Date.now();
+
+        if (updatedItems && updatedItems.length > 0) {
+          writeSnapshot(user.id, updatedItems);
+        }
+      } finally {
+        lastActiveRefreshStateRef.current.inFlight = false;
+      }
+    };
+
+    void fetchLatestActivity();
+    const interval = window.setInterval(fetchLatestActivity, 60_000);
+    return () => window.clearInterval(interval);
+  }, [user, applicantIdsKey, searchQuery, queryClient]);
 
   // Real-time subscription for job_applications changes
   useEffect(() => {
