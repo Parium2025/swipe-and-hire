@@ -771,40 +771,7 @@ const Auth = () => {
     );
   }
 
-  if (device === 'tablet') {
-    return (
-      <div className="min-h-screen w-full overflow-x-hidden relative">
-        {/* Pull-to-refresh spinner */}
-        <div 
-          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
-          style={{ 
-            opacity: pullProgress,
-            pointerEvents: 'none'
-          }}
-        >
-          <Loader2 
-            className={`w-8 h-8 text-primary-foreground ${isRefreshing ? 'animate-spin' : ''}`}
-            style={{
-              transform: isRefreshing ? 'none' : `rotate(${pullProgress * 360}deg)`,
-              transition: isRefreshing ? 'none' : 'transform 0.1s linear'
-            }}
-          />
-        </div>
-        <AuthTablet
-          isPasswordReset={isPasswordReset}
-          newPassword={newPassword}
-          setNewPassword={setNewPassword}
-          confirmPassword={confirmPassword}
-          setConfirmPassword={setConfirmPassword}
-          handlePasswordReset={handlePasswordReset}
-          onBackToLogin={handleBackToLogin}
-          onAuthModeChange={setIsLoginMode}
-          initialMode={initialMode}
-          initialRole={initialRole}
-        />
-      </div>
-    );
-  }
+  // Desktop layout (includes former tablet layout)
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden relative">

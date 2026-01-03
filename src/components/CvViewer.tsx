@@ -18,7 +18,6 @@ interface CvViewerProps {
 export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }: CvViewerProps) {
   const device = useDevice();
   const isMobile = device === 'mobile';
-  const isTablet = device === 'tablet';
   
   // Same scale for all devices to maintain consistent rendering
   const initialScale = 0.9;
@@ -319,14 +318,14 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
 
         {/* Sidebar for page navigation - hidden on mobile */}
         {numPages > 0 && !isMobile && (
-          <div className={`${isTablet ? 'w-8' : 'w-10'} overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-1.5 flex flex-col gap-1.5`}>
+          <div className="w-10 overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-1.5 flex flex-col gap-1.5">
             {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
               <button
                 key={pageNum}
                 type="button"
                 onClick={() => scrollToPage(pageNum)}
                 className={`
-                  ${isTablet ? 'h-8 text-xs' : 'h-9 text-xs'} rounded flex items-center justify-center font-medium
+                  h-9 text-xs rounded flex items-center justify-center font-medium
                   transition-all duration-200
                   ${pageNum === currentPage
                     ? 'bg-white/20 text-white border border-white/40'
