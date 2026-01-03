@@ -384,7 +384,7 @@ const StageColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-1 flex flex-col transition-colors h-full min-w-0"
+      className="flex-1 flex flex-col transition-colors h-full min-w-0 max-w-[280px]"
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
