@@ -44,18 +44,18 @@ const candidateItems = [
   { title: "Meddelanden", url: "/messages", icon: MessageCircle },
 ];
 
-// Företag dropdown items
+// Företag dropdown items (inkl inställningar)
 const businessItems = [
   { title: "Företagsprofil", url: "/company-profile", icon: Building },
   { title: "Recensioner", url: "/reviews", icon: Star },
   { title: "Fakturering", url: "/billing", icon: CreditCard },
   { title: "Rapporter", url: "/reports", icon: FileText },
+  { title: "Inställningar", url: "/settings", icon: Settings },
 ];
 
-// Support dropdown items  
-const supportItems = [
+// Profil dropdown items (ersätter Support)
+const profileItems = [
   { title: "Min Profil", url: "/profile", icon: UserCircle },
-  { title: "Inställningar", url: "/settings", icon: Settings },
   { title: "Hjälp & Support", url: "/support", icon: HelpCircle },
 ];
 
@@ -74,7 +74,7 @@ function EmployerTopNav() {
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [candidatesOpen, setCandidatesOpen] = useState(false);
   const [businessOpen, setBusinessOpen] = useState(false);
-  const [supportOpen, setSupportOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {
@@ -178,6 +178,24 @@ function EmployerTopNav() {
   const getCompanyInitials = () => {
     if (!profile?.company_name) return 'FA';
     return profile.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getUserInitials = () => {
+    const firstName = profile?.first_name || '';
+    const lastName = profile?.last_name || '';
+    if (firstName && lastName) {
+      return (firstName[0] + lastName[0]).toUpperCase();
+    }
+    if (firstName) return firstName.substring(0, 2).toUpperCase();
+    return 'ME';
+  };
+
+  const getUserDisplayName = () => {
+    const firstName = profile?.first_name || '';
+    const lastName = profile?.last_name || '';
+    if (firstName && lastName) return `${firstName} ${lastName}`;
+    if (firstName) return firstName;
+    return 'Min Profil';
   };
 
   const getCount = (url: string) => {
@@ -352,30 +370,58 @@ function EmployerTopNav() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Support Dropdown */}
-          <DropdownMenu open={supportOpen} onOpenChange={setSupportOpen}>
+          {/* Profil Dropdown (ersätter Support) */}
+          <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>
               <button
                 className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                  ${isDropdownActive(supportItems) 
-                    ? 'bg-white/20 text-white' 
-                    : 'text-white/80 hover:bg-white/10 hover:text-white'
+                  flex items-center gap-1 p-1 rounded-full transition-all
+                  ${isDropdownActive(profileItems) 
+                    ? 'ring-2 ring-white/40' 
+                    : 'hover:ring-2 hover:ring-white/20'
                   }
                 `}
               >
-                <HelpCircle className="h-4 w-4" />
-                <span>Support</span>
-                <ChevronDown className="h-3 w-3 opacity-70" />
+                {profile?.profile_image_url ? (
+                  <img 
+                    src={profile.profile_image_url} 
+                    alt={getUserDisplayName()} 
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-xs font-semibold text-white">
+                    {getUserInitials()}
+                  </div>
+                )}
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className={dropdownContentClass}>
-              {supportItems.map((item) => {
+            <DropdownMenuContent align="center" className={dropdownContentClass + " min-w-[180px]"}>
+              {/* Profilhuvud med namn */}
+              <div className="px-2.5 py-2 border-b border-white/10 mb-1">
+                <div className="flex items-center gap-2.5">
+                  {profile?.profile_image_url ? (
+                    <img 
+                      src={profile.profile_image_url} 
+                      alt={getUserDisplayName()} 
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-sm font-semibold text-white">
+                      {getUserInitials()}
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-white font-medium text-sm">{getUserDisplayName()}</span>
+                    <span className="text-white/50 text-xs">{user?.email || ''}</span>
+                  </div>
+                </div>
+              </div>
+              {profileItems.map((item) => {
                 const isActive = isActiveUrl(item.url);
                 return (
                   <DropdownMenuItem
                     key={item.url}
-                    onClick={() => { handleNavigation(item.url); setSupportOpen(false); }}
+                    onClick={() => { handleNavigation(item.url); setProfileOpen(false); }}
                     className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
                   >
                     <item.icon className="h-4 w-4" />
