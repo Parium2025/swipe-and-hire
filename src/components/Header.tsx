@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import pariumLogoRings from "@/assets/parium-logo-rings.png";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ export const Header = () => {
           className="flex items-center gap-3 p-2 hover:bg-accent/50 rounded-lg transition-colors"
         >
           <img 
-            src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
+            src={pariumLogoRings}
             alt="Parium" 
             className="h-8 w-auto"
             width="128"
