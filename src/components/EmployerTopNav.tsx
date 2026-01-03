@@ -37,14 +37,12 @@ const dashboardItems = [
   { title: "Mina Annonser", url: "/my-jobs", icon: Briefcase },
 ];
 
-// Kandidater dropdown items
+// Kandidater dropdown items (inkl meddelanden)
 const candidateItems = [
   { title: "Alla Kandidater", url: "/candidates", icon: Users },
   { title: "Mina Kandidater", url: "/my-candidates", icon: UserCheck },
+  { title: "Meddelanden", url: "/messages", icon: MessageCircle },
 ];
-
-// Meddelanden - single item (stays as direct link)
-const messagesItem = { title: "Meddelanden", url: "/messages", icon: MessageCircle };
 
 // Företag dropdown items
 const businessItems = [
@@ -286,6 +284,7 @@ function EmployerTopNav() {
               {candidateItems.map((item) => {
                 const count = getCount(item.url);
                 const isActive = isActiveUrl(item.url);
+                const isMessages = item.url === '/messages';
                 return (
                   <DropdownMenuItem
                     key={item.url}
@@ -295,111 +294,93 @@ function EmployerTopNav() {
                     <item.icon className="h-4 w-4" />
                     <span className="flex-1">{item.title}</span>
                     {count && <span className="text-white/50 text-xs">({count})</span>}
+                    {isMessages && preloadedUnreadMessages > 0 && (
+                      <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                        {preloadedUnreadMessages}
+                      </span>
+                    )}
                   </DropdownMenuItem>
                 );
               })}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Meddelanden - Direct link */}
-          <button
-            onClick={() => handleNavigation(messagesItem.url)}
-            className={`
-              flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-              ${isActiveUrl(messagesItem.url) 
-                ? 'bg-white/20 text-white' 
-                : 'text-white/80 hover:bg-white/10 hover:text-white'
-              }
-            `}
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span>Meddelanden</span>
-            {preloadedUnreadMessages > 0 && (
-              <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                {preloadedUnreadMessages}
-              </span>
-            )}
-          </button>
+          {/* Företag Dropdown */}
+          <DropdownMenu open={businessOpen} onOpenChange={setBusinessOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={`
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                  ${isDropdownActive(businessItems) 
+                    ? 'bg-white/20 text-white' 
+                    : 'text-white/80 hover:bg-white/10 hover:text-white'
+                  }
+                `}
+              >
+                <Building className="h-4 w-4" />
+                <span>Företag</span>
+                <ChevronDown className="h-3 w-3 opacity-70" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className={dropdownContentClass}>
+              {businessItems.map((item) => {
+                const isActive = isActiveUrl(item.url);
+                return (
+                  <DropdownMenuItem
+                    key={item.url}
+                    onClick={() => { handleNavigation(item.url); setBusinessOpen(false); }}
+                    className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.title}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Support Dropdown */}
+          <DropdownMenu open={supportOpen} onOpenChange={setSupportOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={`
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                  ${isDropdownActive(supportItems) 
+                    ? 'bg-white/20 text-white' 
+                    : 'text-white/80 hover:bg-white/10 hover:text-white'
+                  }
+                `}
+              >
+                <HelpCircle className="h-4 w-4" />
+                <span>Support</span>
+                <ChevronDown className="h-3 w-3 opacity-70" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className={dropdownContentClass}>
+              {supportItems.map((item) => {
+                const isActive = isActiveUrl(item.url);
+                return (
+                  <DropdownMenuItem
+                    key={item.url}
+                    onClick={() => { handleNavigation(item.url); setSupportOpen(false); }}
+                    className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.title}
+                  </DropdownMenuItem>
+                );
+              })}
+              <DropdownMenuSeparator className="bg-white/10 my-1.5" />
+              <DropdownMenuItem 
+                onClick={signOut} 
+                className={`${dropdownItemClass} text-red-400 hover:text-red-300 hover:bg-red-500/10`}
+              >
+                <LogOut className="h-4 w-4" />
+                Logga ut
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </div>
-
-      {/* Right side: Dropdowns */}
-      <div className="flex items-center gap-1">
-        {/* Företag Dropdown */}
-        <DropdownMenu open={businessOpen} onOpenChange={setBusinessOpen}>
-          <DropdownMenuTrigger asChild>
-            <button
-              className={`
-                flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                ${isDropdownActive(businessItems) 
-                  ? 'bg-white/20 text-white' 
-                  : 'text-white/80 hover:bg-white/10 hover:text-white'
-                }
-              `}
-            >
-              <Building className="h-4 w-4" />
-              <span>Företag</span>
-              <ChevronDown className="h-3 w-3 opacity-70" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className={dropdownContentClass}>
-            {businessItems.map((item) => {
-              const isActive = isActiveUrl(item.url);
-              return (
-                <DropdownMenuItem
-                  key={item.url}
-                  onClick={() => { handleNavigation(item.url); setBusinessOpen(false); }}
-                  className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Support Dropdown */}
-        <DropdownMenu open={supportOpen} onOpenChange={setSupportOpen}>
-          <DropdownMenuTrigger asChild>
-            <button
-              className={`
-                flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                ${isDropdownActive(supportItems) 
-                  ? 'bg-white/20 text-white' 
-                  : 'text-white/80 hover:bg-white/10 hover:text-white'
-                }
-              `}
-            >
-              <HelpCircle className="h-4 w-4" />
-              <span>Support</span>
-              <ChevronDown className="h-3 w-3 opacity-70" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className={dropdownContentClass}>
-            {supportItems.map((item) => {
-              const isActive = isActiveUrl(item.url);
-              return (
-                <DropdownMenuItem
-                  key={item.url}
-                  onClick={() => { handleNavigation(item.url); setSupportOpen(false); }}
-                  className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </DropdownMenuItem>
-              );
-            })}
-            <DropdownMenuSeparator className="bg-white/10 my-1.5" />
-            <DropdownMenuItem 
-              onClick={signOut} 
-              className={`${dropdownItemClass} text-red-400 hover:text-red-300 hover:bg-red-500/10`}
-            >
-              <LogOut className="h-4 w-4" />
-              Logga ut
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </nav>
   );
