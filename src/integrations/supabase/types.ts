@@ -1414,6 +1414,7 @@ export type Database = {
         Args: { p_applicant_id: string; p_employer_id: string }
         Returns: {
           is_profile_video: boolean
+          last_active_at: string
           profile_image_url: string
           video_url: string
         }[]
