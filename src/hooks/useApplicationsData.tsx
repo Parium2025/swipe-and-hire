@@ -109,7 +109,8 @@ const readSnapshot = (userId: string): ApplicationData[] => {
         'cv_url' in first &&
         'profile_image_url' in first &&
         'video_url' in first &&
-        'is_profile_video' in first);
+        'is_profile_video' in first &&
+        'last_active_at' in first);
 
     if (!hasRequiredFields) {
       localStorage.removeItem(key);
@@ -339,7 +340,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
     const first: any = applications[0];
     const hasMediaFields =
       !first ||
-      ('profile_image_url' in first && 'video_url' in first && 'is_profile_video' in first);
+      ('profile_image_url' in first && 'video_url' in first && 'is_profile_video' in first && 'last_active_at' in first);
 
     if (!hasMediaFields) {
       fixedLegacyCacheRef.current = true;
