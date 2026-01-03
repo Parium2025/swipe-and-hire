@@ -243,7 +243,6 @@ const Profile = () => {
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
   const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
   
-  
   // Undo state - store deleted media for restore
   const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
     profileImageUrl: string;
@@ -827,9 +826,7 @@ const Profile = () => {
         user.data.user.id
       );
 
-      if (uploadError || !storagePath) {
-        throw uploadError || new Error('Upload failed');
-      }
+      if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
 
       // Förladda den signerade URL:en i bakgrunden (utan att blockera UI)
       import('@/lib/serviceWorkerManager').then(async ({ preloadSingleFile }) => {
@@ -849,7 +846,7 @@ const Profile = () => {
       setDeletedProfileMedia(null);
       
       setImageEditorOpen(false);
-      // Cleanup pendingImageSrc blob URL (NOT the preview URL - that's still in use)
+      // Cleanup blob URL
       if (pendingImageSrc) {
         URL.revokeObjectURL(pendingImageSrc);
       }

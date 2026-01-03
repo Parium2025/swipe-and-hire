@@ -73,7 +73,7 @@ function EmployerTopNav() {
   const queryClient = useQueryClient();
   
   // Resolve signed URL for profile image
-  const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url || null, 'profile-image');
+  const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
   
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [candidatesOpen, setCandidatesOpen] = useState(false);

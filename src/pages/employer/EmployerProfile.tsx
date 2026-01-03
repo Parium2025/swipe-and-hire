@@ -55,7 +55,6 @@ const EmployerProfile = () => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
-  const [tempImagePreview, setTempImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -64,20 +63,12 @@ const EmployerProfile = () => {
     bio: profile?.bio || '',
     location: profile?.location || '',
     phone: profile?.phone || '',
-    profile_image_url: profile?.profile_image_url || null,
+    profile_image_url: profile?.profile_image_url || '',
     social_media_links: (profile as any)?.social_media_links || [] as SocialMediaLink[],
   });
 
   // Konvertera storage path till signerad URL för visning
   const profileImageUrl = useMediaUrl(formData.profile_image_url, 'profile-image');
-  
-  // Rensa temp preview när signerad URL är klar
-  useEffect(() => {
-    if (tempImagePreview && profileImageUrl && !profileImageUrl.includes('undefined')) {
-      URL.revokeObjectURL(tempImagePreview);
-      setTempImagePreview(null);
-    }
-  }, [tempImagePreview, profileImageUrl]);
 
   const [newSocialLink, setNewSocialLink] = useState({
     platform: '' as SocialMediaLink['platform'] | '',
@@ -95,7 +86,7 @@ const EmployerProfile = () => {
         bio: profile.bio || '',
         location: profile.location || '',
         phone: profile.phone || '',
-        profile_image_url: profile.profile_image_url || null,
+        profile_image_url: profile.profile_image_url || '',
         social_media_links: (profile as any)?.social_media_links || [],
       };
       
@@ -106,7 +97,7 @@ const EmployerProfile = () => {
   }, [profile, setHasUnsavedChanges]);
 
   const checkForChanges = useCallback(() => {
-    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone && !originalValues.profile_image_url && !originalValues.social_media_links) return false;
+    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone && !originalValues.social_media_links) return false;
     
     const hasChanges = Object.keys(formData).some(key => {
       if (key === 'social_media_links') {
@@ -198,10 +189,6 @@ const EmployerProfile = () => {
     try {
       if (!user?.id) throw new Error('User not authenticated');
 
-      // Skapa preview URL omedelbart för instant feedback
-      const previewUrl = URL.createObjectURL(editedBlob);
-      setTempImagePreview(previewUrl);
-
       // Skapa File från Blob
       const editedFile = new File([editedBlob], 'profile-image.webp', { type: 'image/webp' });
 
@@ -212,12 +199,7 @@ const EmployerProfile = () => {
         user.id
       );
 
-      if (uploadError || !storagePath) {
-        // Rensa preview vid fel
-        URL.revokeObjectURL(previewUrl);
-        setTempImagePreview(null);
-        throw uploadError || new Error('Upload failed');
-      }
+      if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
 
       // Uppdatera formData
       setFormData(prev => ({ ...prev, profile_image_url: storagePath }));
@@ -245,12 +227,7 @@ const EmployerProfile = () => {
 
   // Ta bort profilbild
   const handleRemoveProfileImage = () => {
-    // Rensa temp preview om den finns
-    if (tempImagePreview) {
-      URL.revokeObjectURL(tempImagePreview);
-      setTempImagePreview(null);
-    }
-    setFormData(prev => ({ ...prev, profile_image_url: null }));
+    setFormData(prev => ({ ...prev, profile_image_url: '' }));
     setOriginalProfileImageFile(null);
     setHasUnsavedChanges(true);
     toast({
@@ -388,19 +365,12 @@ const EmployerProfile = () => {
 
     try {
       setLoading(true);
-
-      const payload = {
-        ...formData,
-        // Viktigt: tom sträng kan ge "hängande" cache i media-URL; använd null när bilden är borttagen
-        profile_image_url: formData.profile_image_url || null,
-      };
-
-      await updateProfile(payload as any);
+      await updateProfile(formData as any);
 
       // Deep clone to ensure proper comparison
       const updatedValues = {
-        ...payload,
-        social_media_links: JSON.parse(JSON.stringify(payload.social_media_links)),
+        ...formData,
+        social_media_links: JSON.parse(JSON.stringify(formData.social_media_links)),
       };
 
       // Sync form with saved values to avoid second click
@@ -433,10 +403,6 @@ const EmployerProfile = () => {
     const platformData = SOCIAL_PLATFORMS.find(p => p.value === platform);
     return platformData?.label || 'Okänd plattform';
   };
-
-  const hasProfileImage = Boolean(formData.profile_image_url) || Boolean(tempImagePreview);
-  // Visa temp preview först, sedan signerad URL
-  const displayedProfileImageUrl = tempImagePreview || (formData.profile_image_url ? profileImageUrl : null);
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto animate-fade-in">
@@ -473,9 +439,9 @@ const EmployerProfile = () => {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10">
-                    {displayedProfileImageUrl ? (
+                    {profileImageUrl ? (
                       <AvatarImage 
-                        src={displayedProfileImageUrl} 
+                        src={profileImageUrl} 
                         alt="Profilbild" 
                         className="object-cover"
                         decoding="sync"
@@ -484,7 +450,7 @@ const EmployerProfile = () => {
                         draggable={false}
                       />
                     ) : null}
-                    {!displayedProfileImageUrl && (
+                    {!profileImageUrl && (
                       <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
                         {(formData.first_name?.trim()?.[0]?.toUpperCase() || '') + (formData.last_name?.trim()?.[0]?.toUpperCase() || '') || '?'}
                       </AvatarFallback>
@@ -493,9 +459,8 @@ const EmployerProfile = () => {
                 </div>
 
                 {/* Soptunna-knapp som på jobbsökarsidan */}
-                {hasProfileImage && (
+                {profileImageUrl && (
                   <button
-                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveProfileImage();
@@ -518,7 +483,7 @@ const EmployerProfile = () => {
                 </label>
                 
                 {/* Anpassa din bild-knapp om bild finns */}
-                {hasProfileImage && (
+                {profileImageUrl && (
                   <div className="flex flex-col items-center space-y-2">
                     <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
                       Bild uppladdad!
