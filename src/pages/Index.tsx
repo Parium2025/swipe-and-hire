@@ -13,6 +13,7 @@ import EmployerLayout from "@/components/EmployerLayout";
 import JobSeekerLayout from "@/components/JobSeekerLayout";
 import Dashboard from '@/components/Dashboard';
 import EmployerDashboard from '@/components/EmployerDashboard';
+import EmployerHome from '@/components/EmployerHome';
 import JobSwipe from '@/components/JobSwipe';
 // ProfileSetup removed - employers use EmployerWelcomeTunnel only
 import ProfileSelector from '@/components/ProfileSelector';
@@ -357,6 +358,8 @@ const Index = () => {
       }
       
       switch (path) {
+        case '/home':
+          return <EmployerHome />;
         case '/dashboard':
           return <Dashboard />;
         case '/my-jobs':
@@ -387,7 +390,7 @@ const Index = () => {
             return <Support />;
           }
         default:
-          return <Dashboard />;
+          return <EmployerHome />;
       }
     };
 
