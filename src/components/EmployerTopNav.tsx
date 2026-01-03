@@ -374,25 +374,20 @@ function EmployerTopNav() {
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className={`
-                  flex items-center gap-1 p-1 rounded-full transition-all
-                  ${isDropdownActive(profileItems) 
-                    ? 'ring-2 ring-white/40' 
-                    : 'hover:ring-2 hover:ring-white/20'
-                  }
-                `}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors"
               >
                 {profile?.profile_image_url ? (
                   <img 
                     src={profile.profile_image_url} 
                     alt={getUserDisplayName()} 
-                    className="h-8 w-8 rounded-full object-cover"
+                    className="h-7 w-7 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-xs font-semibold text-white">
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-xs font-semibold text-white">
                     {getUserInitials()}
                   </div>
                 )}
+                <ChevronDown className="h-3.5 w-3.5 text-white/70" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass + " min-w-[180px]"}>
