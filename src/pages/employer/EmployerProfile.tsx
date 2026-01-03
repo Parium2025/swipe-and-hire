@@ -467,7 +467,7 @@ const EmployerProfile = () => {
                   className="cursor-pointer" 
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <Avatar className="h-32 w-32 border-4 border-white/10">
+                  <Avatar key={formData.profile_image_url || 'no-profile-image'} className="h-32 w-32 border-4 border-white/10">
                     {profileImageUrl ? (
                       <AvatarImage 
                         src={profileImageUrl} 
