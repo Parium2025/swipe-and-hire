@@ -21,6 +21,7 @@ import {
 import { AlertDialogContentNoFocus } from "@/components/ui/alert-dialog-no-focus";
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown, AlertTriangle, Camera } from 'lucide-react';
@@ -57,6 +58,9 @@ const EmployerProfile = () => {
     profile_image_url: profile?.profile_image_url || '',
     social_media_links: (profile as any)?.social_media_links || [] as SocialMediaLink[],
   });
+
+  // Konvertera storage path till signerad URL för visning
+  const profileImageUrl = useMediaUrl(formData.profile_image_url, 'profile-image');
 
   const [newSocialLink, setNewSocialLink] = useState({
     platform: '' as SocialMediaLink['platform'] | '',
@@ -298,7 +302,7 @@ const EmployerProfile = () => {
             {/* Profilbild-sektion */}
             <div className="flex flex-col items-center gap-4 pb-5 border-b border-white/10">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={formData.profile_image_url} alt="Profilbild" />
+                <AvatarImage src={profileImageUrl || undefined} alt="Profilbild" />
                 <AvatarFallback className="text-xl bg-gradient-to-br from-primary/80 to-primary text-white">
                   {formData.first_name?.[0]?.toUpperCase() || ''}{formData.last_name?.[0]?.toUpperCase() || ''}
                 </AvatarFallback>
