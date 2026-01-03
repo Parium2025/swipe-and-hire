@@ -231,7 +231,7 @@ function EmployerTopNav() {
       <div className="flex items-center gap-3">
         {/* Parium Logo - Home Button */}
         <button
-          onClick={() => handleNavigation('/dashboard')}
+          onClick={() => handleNavigation('/home')}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           aria-label="Gå till dashboard"
         >
