@@ -573,9 +573,8 @@ const EmployerProfile = () => {
                     <Button 
                       type="button"
                       variant="outline" 
-                      size="sm"
                       onClick={handleEditExistingImage}
-                      className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                      className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 h-auto px-3 py-1 text-sm font-medium"
                     >
                       Anpassa din bild
                     </Button>
