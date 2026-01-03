@@ -63,7 +63,7 @@ const EmployerProfile = () => {
     bio: profile?.bio || '',
     location: profile?.location || '',
     phone: profile?.phone || '',
-    profile_image_url: profile?.profile_image_url || '',
+    profile_image_url: profile?.profile_image_url || null,
     social_media_links: (profile as any)?.social_media_links || [] as SocialMediaLink[],
   });
 
@@ -86,7 +86,7 @@ const EmployerProfile = () => {
         bio: profile.bio || '',
         location: profile.location || '',
         phone: profile.phone || '',
-        profile_image_url: profile.profile_image_url || '',
+        profile_image_url: profile.profile_image_url || null,
         social_media_links: (profile as any)?.social_media_links || [],
       };
       
@@ -97,7 +97,7 @@ const EmployerProfile = () => {
   }, [profile, setHasUnsavedChanges]);
 
   const checkForChanges = useCallback(() => {
-    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone && !originalValues.social_media_links) return false;
+    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone && !originalValues.profile_image_url && !originalValues.social_media_links) return false;
     
     const hasChanges = Object.keys(formData).some(key => {
       if (key === 'social_media_links') {
@@ -227,7 +227,7 @@ const EmployerProfile = () => {
 
   // Ta bort profilbild
   const handleRemoveProfileImage = () => {
-    setFormData(prev => ({ ...prev, profile_image_url: '' }));
+    setFormData(prev => ({ ...prev, profile_image_url: null }));
     setOriginalProfileImageFile(null);
     setHasUnsavedChanges(true);
     toast({
@@ -365,12 +365,19 @@ const EmployerProfile = () => {
 
     try {
       setLoading(true);
-      await updateProfile(formData as any);
+
+      const payload = {
+        ...formData,
+        // Viktigt: tom sträng kan ge "hängande" cache i media-URL; använd null när bilden är borttagen
+        profile_image_url: formData.profile_image_url || null,
+      };
+
+      await updateProfile(payload as any);
 
       // Deep clone to ensure proper comparison
       const updatedValues = {
-        ...formData,
-        social_media_links: JSON.parse(JSON.stringify(formData.social_media_links)),
+        ...payload,
+        social_media_links: JSON.parse(JSON.stringify(payload.social_media_links)),
       };
 
       // Sync form with saved values to avoid second click
@@ -403,6 +410,9 @@ const EmployerProfile = () => {
     const platformData = SOCIAL_PLATFORMS.find(p => p.value === platform);
     return platformData?.label || 'Okänd plattform';
   };
+
+  const hasProfileImage = Boolean(formData.profile_image_url);
+  const displayedProfileImageUrl = hasProfileImage ? profileImageUrl : null;
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto animate-fade-in">
@@ -439,9 +449,9 @@ const EmployerProfile = () => {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10">
-                    {profileImageUrl ? (
+                    {displayedProfileImageUrl ? (
                       <AvatarImage 
-                        src={profileImageUrl} 
+                        src={displayedProfileImageUrl} 
                         alt="Profilbild" 
                         className="object-cover"
                         decoding="sync"
@@ -450,7 +460,7 @@ const EmployerProfile = () => {
                         draggable={false}
                       />
                     ) : null}
-                    {!profileImageUrl && (
+                    {!displayedProfileImageUrl && (
                       <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
                         {(formData.first_name?.trim()?.[0]?.toUpperCase() || '') + (formData.last_name?.trim()?.[0]?.toUpperCase() || '') || '?'}
                       </AvatarFallback>
@@ -459,8 +469,9 @@ const EmployerProfile = () => {
                 </div>
 
                 {/* Soptunna-knapp som på jobbsökarsidan */}
-                {profileImageUrl && (
+                {hasProfileImage && (
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveProfileImage();
@@ -483,7 +494,7 @@ const EmployerProfile = () => {
                 </label>
                 
                 {/* Anpassa din bild-knapp om bild finns */}
-                {profileImageUrl && (
+                {hasProfileImage && (
                   <div className="flex flex-col items-center space-y-2">
                     <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
                       Bild uppladdad!

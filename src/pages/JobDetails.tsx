@@ -600,7 +600,7 @@ const JobDetails = () => {
   const criteriaCount = jobCriteria?.length || 0;
   
   // Resolve employer profile image URL
-  const employerProfileImageUrl = useMediaUrl(job?.employer_profile?.profile_image_url, 'profile-image');
+  const employerProfileImageUrl = useMediaUrl(job?.employer_profile?.profile_image_url || null, 'profile-image');
 
   // Load my_candidates map for ratings
   useEffect(() => {
