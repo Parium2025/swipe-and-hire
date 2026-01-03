@@ -59,9 +59,9 @@ const supportItems = [
   { title: "Hjälp & Support", url: "/support", icon: HelpCircle },
 ];
 
-// Dropdown styling matching the sort dropdown (bg-slate-900/85)
-const dropdownContentClass = "min-w-[180px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-xl p-1.5";
-const dropdownItemClass = "flex items-center gap-2.5 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors";
+// Dropdown styling matching the sort dropdown - compact and centered
+const dropdownContentClass = "min-w-[160px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-1";
+const dropdownItemClass = "flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors";
 const dropdownItemActiveClass = "bg-white/15 text-white";
 
 function EmployerTopNav() {
@@ -241,7 +241,7 @@ function EmployerTopNav() {
                 <ChevronDown className="h-3 w-3 opacity-70" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className={dropdownContentClass}>
+            <DropdownMenuContent align="center" className={dropdownContentClass}>
               {dashboardItems.map((item) => {
                 const count = getCount(item.url);
                 const isActive = isActiveUrl(item.url);
@@ -281,7 +281,7 @@ function EmployerTopNav() {
                 <ChevronDown className="h-3 w-3 opacity-70" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className={dropdownContentClass}>
+            <DropdownMenuContent align="center" className={dropdownContentClass}>
               {candidateItems.map((item) => {
                 const count = getCount(item.url);
                 const isActive = isActiveUrl(item.url);
@@ -335,7 +335,7 @@ function EmployerTopNav() {
                 <ChevronDown className="h-3 w-3 opacity-70" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className={dropdownContentClass}>
+            <DropdownMenuContent align="center" className={dropdownContentClass}>
               {businessItems.map((item) => {
                 const isActive = isActiveUrl(item.url);
                 return (
@@ -369,7 +369,7 @@ function EmployerTopNav() {
                 <ChevronDown className="h-3 w-3 opacity-70" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className={dropdownContentClass}>
+            <DropdownMenuContent align="center" className={dropdownContentClass}>
               {supportItems.map((item) => {
                 const isActive = isActiveUrl(item.url);
                 return (
