@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   DropdownMenu, 
@@ -411,7 +412,7 @@ const EmployerProfile = () => {
 
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
-            {/* Profilbild-sektion */}
+            {/* Profilbild-sektion - matchar jobbsökarsidans stil */}
             <div className="flex flex-col items-center gap-4 pb-5 border-b border-white/10">
               {/* Hidden file input */}
               <input
@@ -422,57 +423,96 @@ const EmployerProfile = () => {
                 className="hidden"
               />
               
-              {/* Klickbar avatar för att ladda upp/redigera */}
-              <div className="relative group">
-                <div 
-                  className="relative cursor-pointer"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Avatar className="h-32 w-32 ring-4 ring-white/20 transition-all duration-300 group-hover:ring-primary/50">
-                    <AvatarImage src={profileImageUrl || undefined} alt="Profilbild" className="object-cover" />
-                    <AvatarFallback className="text-3xl bg-gradient-to-br from-primary/80 to-primary text-white">
-                      {formData.first_name?.[0]?.toUpperCase() || ''}{formData.last_name?.[0]?.toUpperCase() || ''}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  {/* Overlay på hover */}
-                  <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <Camera className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                
-                {/* Redigera-knapp om bild finns */}
-                {formData.profile_image_url && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleEditExistingImage}
-                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white/10 border-white/20 text-white text-xs h-7 px-2 transition-all duration-300 md:hover:bg-white/20"
-                  >
-                    <Pencil className="h-3 w-3 mr-1" />
-                    Justera
-                  </Button>
-                )}
-              </div>
-              
-              <p className="text-xs text-white/70 text-center">
-                Klicka för att ladda upp • Max 5MB
+              {/* Rubrik */}
+              <h3 className="text-base font-semibold text-white text-center">
+                Profilbild
+              </h3>
+              <p className="text-white text-center text-sm -mt-2">
+                Ladda upp en profilbild som syns för kandidater
               </p>
               
-              {/* Ta bort-knapp om bild finns */}
-              {formData.profile_image_url && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRemoveProfileImage}
-                  className="text-white/50 hover:text-red-400 text-xs h-7 px-2 transition-all duration-300"
+              {/* Kamera-ikon i samma stil som jobbsökarsidan */}
+              <div className="flex items-center justify-center">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
+                    <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                      <Camera className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                  <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                    <Camera className="h-2 w-2 text-primary" />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Avatar med klickbar uppladdning och soptunna */}
+              <div className="relative">
+                <div 
+                  className="cursor-pointer" 
+                  onClick={() => fileInputRef.current?.click()}
                 >
-                  <Trash2 className="h-3 w-3 mr-1" />
-                  Ta bort bild
-                </Button>
-              )}
+                  <Avatar className="h-32 w-32 border-4 border-white/10">
+                    {profileImageUrl ? (
+                      <AvatarImage 
+                        src={profileImageUrl} 
+                        alt="Profilbild" 
+                        className="object-cover"
+                        decoding="sync"
+                        loading="eager"
+                        fetchPriority="high"
+                        draggable={false}
+                      />
+                    ) : null}
+                    {!profileImageUrl && (
+                      <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
+                        {(formData.first_name?.trim()?.[0]?.toUpperCase() || '') + (formData.last_name?.trim()?.[0]?.toUpperCase() || '') || '?'}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                </div>
+
+                {/* Soptunna-knapp som på jobbsökarsidan */}
+                {formData.profile_image_url && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveProfileImage();
+                    }}
+                    className="absolute -top-3 -right-3 bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Text och knappar under avataren */}
+              <div className="space-y-2 text-center">
+                <label 
+                  htmlFor="profile-image-employer" 
+                  className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Klicka för att ladda upp • Max 5MB
+                </label>
+                
+                {/* Anpassa din bild-knapp om bild finns */}
+                {formData.profile_image_url && (
+                  <div className="flex flex-col items-center space-y-2">
+                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
+                      Bild uppladdad!
+                    </Badge>
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleEditExistingImage}
+                      className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                    >
+                      Anpassa din bild
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
