@@ -217,7 +217,20 @@ export const useApplicationsData = (searchQuery: string = '') => {
       const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
       const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; last_active_at: string | null }> = {};
       
-      // Batch fetch profile media via RPC (security definer function) - now includes last_active_at
+      // Fetch last_active_at from profiles
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, last_active_at')
+        .in('user_id', applicantIds);
+      
+      const lastActiveMap: Record<string, string | null> = {};
+      if (profilesData) {
+        profilesData.forEach((p: any) => {
+          lastActiveMap[p.user_id] = p.last_active_at;
+        });
+      }
+      
+      // Batch fetch profile media via RPC (security definer function)
       await Promise.all(
         applicantIds.map(async (applicantId) => {
           const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
@@ -229,14 +242,14 @@ export const useApplicationsData = (searchQuery: string = '') => {
               profile_image_url: mediaData[0].profile_image_url,
               video_url: mediaData[0].video_url,
               is_profile_video: mediaData[0].is_profile_video,
-              last_active_at: mediaData[0].last_active_at || null
+              last_active_at: lastActiveMap[applicantId] || null
             };
           } else {
             profileMediaMap[applicantId] = { 
               profile_image_url: null, 
               video_url: null, 
               is_profile_video: null,
-              last_active_at: null
+              last_active_at: lastActiveMap[applicantId] || null
             };
           }
         })
@@ -318,31 +331,6 @@ export const useApplicationsData = (searchQuery: string = '') => {
         },
         (payload) => {
           // Invalidate queries to refetch with updated data
-          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, queryClient]);
-
-  // Real-time subscription for profiles.last_active_at changes
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('profiles-activity-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles'
-        },
-        (payload) => {
-          // Invalidate queries to refetch with updated last_active_at
           queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
         }
       )
