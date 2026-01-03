@@ -238,7 +238,7 @@ function EmployerTopNav() {
           <img 
             src={pariumLogoRings}
             alt="Parium" 
-            className="h-[42px] w-auto"
+            className="h-10 w-auto"
           />
         </button>
 
