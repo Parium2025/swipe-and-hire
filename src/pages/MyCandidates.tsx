@@ -56,7 +56,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatDistanceToNow, differenceInDays, differenceInHours } from 'date-fns';
+import { formatDistanceToNow, differenceInDays, differenceInHours, differenceInMinutes } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import {
   DndContext,
@@ -94,18 +94,25 @@ interface CandidateCardProps {
   onToggleSelect?: () => void;
 }
 
-// Format time in compact way like Teamtailor
+// Format time in compact way like Teamtailor, including time of day
 const formatCompactTime = (date: string | null) => {
   if (!date) return null;
   const now = new Date();
   const d = new Date(date);
   const days = differenceInDays(now, d);
   const hours = differenceInHours(now, d);
+  const minutes = differenceInMinutes(now, d);
+  
+  // Format time as HH:mm
+  const timeStr = d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
   
   if (days >= 1) {
-    return `${days}dag`;
+    return `${days}dag (${timeStr})`;
   }
-  return `${hours}tim`;
+  if (hours >= 1) {
+    return `${hours}tim (${timeStr})`;
+  }
+  return `${minutes}min`;
 };
 
 // Star rating component - read-only for cards

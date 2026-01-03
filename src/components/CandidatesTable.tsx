@@ -13,7 +13,7 @@ import { UserPlus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 
-// Format time with numbers instead of words
+// Format time with numbers instead of words, including time of day
 const formatTimeAgo = (date: Date): string => {
   const now = new Date();
   const minutes = differenceInMinutes(now, date);
@@ -22,10 +22,13 @@ const formatTimeAgo = (date: Date): string => {
   const weeks = differenceInWeeks(now, date);
   const months = differenceInMonths(now, date);
 
+  // Format time as HH:mm
+  const timeStr = date.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+
   if (minutes < 1) return 'Just nu';
-  if (minutes < 60) return `${minutes} min sedan`;
-  if (hours < 24) return `${hours} tim sedan`;
-  if (days < 7) return `${days} ${days === 1 ? 'dag' : 'dagar'} sedan`;
+  if (minutes < 60) return `${minutes} min sedan (${timeStr})`;
+  if (hours < 24) return `${hours} tim sedan (${timeStr})`;
+  if (days < 7) return `${days} ${days === 1 ? 'dag' : 'dagar'} sedan (${timeStr})`;
   if (weeks < 4) return `${weeks} ${weeks === 1 ? 'vecka' : 'veckor'} sedan`;
   return `${months} ${months === 1 ? 'månad' : 'månader'} sedan`;
 };

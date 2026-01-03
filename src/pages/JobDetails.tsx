@@ -46,7 +46,7 @@ import {
 import { TruncatedText } from '@/components/TruncatedText';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
-import { differenceInDays, differenceInHours } from 'date-fns';
+import { differenceInDays, differenceInHours, differenceInMinutes } from 'date-fns';
 import {
   DndContext,
   DragOverlay,
@@ -77,18 +77,25 @@ interface CriterionResult {
   title: string;
 }
 
-// Format time in compact way like MyCandidates
+// Format time in compact way like MyCandidates, including time of day
 const formatCompactTime = (date: string | null) => {
   if (!date) return null;
   const now = new Date();
   const d = new Date(date);
   const days = differenceInDays(now, d);
   const hours = differenceInHours(now, d);
+  const minutes = differenceInMinutes(now, d);
+  
+  // Format time as HH:mm
+  const timeStr = d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
   
   if (days >= 1) {
-    return `${days}dag`;
+    return `${days}dag (${timeStr})`;
   }
-  return `${hours}tim`;
+  if (hours >= 1) {
+    return `${hours}tim (${timeStr})`;
+  }
+  return `${minutes}min`;
 };
 
 const STATUS_ICONS = {
