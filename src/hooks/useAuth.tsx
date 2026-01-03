@@ -1541,12 +1541,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check if realtime connection is restored
         if (supabase.realtime.isConnected()) {
           // Connection restored!
-          if (hasShownConnectionError.current) {
+        if (hasShownConnectionError.current) {
             hasShownConnectionError.current = false;
-            toast({
-              title: "Anslutningen återupprättad",
-              duration: 3000,
-            });
+            // Silent reconnection - no toast notification
             // Re-sync data after reconnection
             refreshSidebarCounts();
             refreshEmployerStats();
@@ -1572,10 +1569,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // If we previously showed an error, show reconnection success
         if (hasShownConnectionError.current) {
           hasShownConnectionError.current = false;
-          toast({
-            title: "Anslutningen återupprättad",
-            duration: 3000,
-          });
+          // Silent reconnection - no toast notification
           // Re-sync data after reconnection
           refreshSidebarCounts();
           refreshEmployerStats();
@@ -1591,11 +1585,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const timeout = setTimeout(() => {
             if (!hasShownConnectionError.current) {
               hasShownConnectionError.current = true;
-              toast({
-                title: "Anslutningsproblem",
-                description: "Live-uppdateringar är tillfälligt otillgängliga. Försöker återansluta...",
-                duration: 5000,
-              });
+              // Silent connection error - no toast notification
               // Start polling for reconnection
               startReconnectionPolling();
             }
