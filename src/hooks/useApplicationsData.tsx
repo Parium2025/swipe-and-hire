@@ -328,6 +328,31 @@ export const useApplicationsData = (searchQuery: string = '') => {
     };
   }, [user, queryClient]);
 
+  // Real-time subscription for profiles.last_active_at changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('profiles-activity-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          // Invalidate queries to refetch with updated last_active_at
+          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
+
   // Om vi råkar ha en gammal cache (prefetch utan media-fält) → tvinga refetch en gång.
   // Detta eliminerar behovet av manuell refresh för att avatar/video ska dyka upp.
   const fixedLegacyCacheRef = useRef(false);
