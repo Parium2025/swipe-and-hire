@@ -285,10 +285,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
       
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-3 sm:p-4 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-lg p-3 sm:p-4 text-center cursor-pointer transition-all duration-300 ${
           isDragActive
             ? 'border-primary bg-primary/5'
-            : 'border-border hover:border-muted-foreground bg-white/5 backdrop-blur-sm'
+            : 'border-white/20 md:hover:border-white/40 md:hover:bg-white/10 bg-white/5 backdrop-blur-sm'
         } ${uploading ? 'pointer-events-none' : ''}`}
         onClick={(e) => {
           e.preventDefault();

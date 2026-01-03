@@ -320,7 +320,7 @@ const EmployerProfile = () => {
                   mediaType="profile-image"
                   uploadType="image"
                 />
-                <p className="text-xs text-white/50 text-center mt-2">
+                <p className="text-xs text-white text-center mt-2">
                   Max 5MB. JPG, PNG eller WebP
                 </p>
               </div>
