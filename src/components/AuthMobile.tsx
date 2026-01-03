@@ -21,6 +21,7 @@ import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { searchAddresses } from '@/lib/addressSearch';
 import { cn } from '@/lib/utils';
+import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
 
 interface AuthMobileProps {
   isPasswordReset: boolean;
@@ -91,7 +92,7 @@ const AuthMobile = ({
   const [resendLoading, setResendLoading] = useState(false);
   const [hasRegistered, setHasRegistered] = useState(false);
   const [rememberMe, setRememberMe] = useState(() => {
-    return localStorage.getItem('parium-remember-me') === 'true';
+    return shouldRememberUser();
   });
 
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -726,7 +727,7 @@ const AuthMobile = ({
                           onChange={(e) => {
                             const checked = e.target.checked;
                             setRememberMe(checked);
-                            localStorage.setItem('parium-remember-me', checked.toString());
+                            setRememberMePersistence(checked);
                           }}
                           className="sr-only peer"
                         />

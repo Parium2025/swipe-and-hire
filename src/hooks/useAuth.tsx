@@ -6,6 +6,7 @@ import { Database } from '@/integrations/supabase/types';
 import { getMediaUrl } from '@/lib/mediaManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { preloadImages } from '@/lib/serviceWorkerManager';
+import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -1749,6 +1750,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     confirmEmail,
     cleanupExpiredConfirmations
   };
+
+  // Track user activity for 24-hour inactivity timeout
+  useInactivityTimeout(!!user);
 
   return (
     <AuthContext.Provider value={value}>
