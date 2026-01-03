@@ -243,8 +243,6 @@ const Profile = () => {
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
   const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
   
-  // Temporary preview URL for newly uploaded profile image (before signed URL is ready)
-  const [tempProfileImagePreview, setTempProfileImagePreview] = useState<string | null>(null);
   
   // Undo state - store deleted media for restore
   const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
@@ -287,22 +285,12 @@ const Profile = () => {
   const signedCvUrl = useMediaUrl(cvUrl || (profile as any)?.cv_url, 'cv');
   
   // Använd förladdade URLs från useAuth om tillgängliga, men respektera lokala borttagningar
-  // 🎯 Prioritera tempProfileImagePreview för nyss uppladdade bilder (innan signed URL är klar)
-  const signedProfileImageUrl = tempProfileImagePreview || (effectiveProfileImagePath ? (preloadedAvatarUrl || fallbackProfileImageUrl) : null);
+  const signedProfileImageUrl = effectiveProfileImagePath ? (preloadedAvatarUrl || fallbackProfileImageUrl) : null;
   const signedCoverUrl = effectiveCoverImagePath ? (preloadedCoverUrl || fallbackCoverUrl) : null;
   
   // Cache images to prevent blinking during re-renders
   const { cachedUrl: cachedProfileImageUrl } = useCachedImage(signedProfileImageUrl);
   const { cachedUrl: cachedCoverUrl } = useCachedImage(signedCoverUrl);
-  
-  // Clear temp preview once signed URL is ready
-  useEffect(() => {
-    if (tempProfileImagePreview && fallbackProfileImageUrl && !fallbackProfileImageUrl.includes('undefined')) {
-      // Signed URL is ready, revoke the temp blob URL and clear it
-      URL.revokeObjectURL(tempProfileImagePreview);
-      setTempProfileImagePreview(null);
-    }
-  }, [tempProfileImagePreview, fallbackProfileImageUrl]);
   
   // Extended profile fields - using correct database field names
   const [employmentStatus, setEmploymentStatus] = useState(''); // Maps to employment_type
@@ -823,10 +811,6 @@ const Profile = () => {
       setIsUploadingMedia(true);
       setUploadingMediaType('image');
       
-      // 🎯 Skapa preview URL direkt från blob för instant feedback
-      const previewUrl = URL.createObjectURL(editedBlob);
-      setTempProfileImagePreview(previewUrl);
-      
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
@@ -844,9 +828,6 @@ const Profile = () => {
       );
 
       if (uploadError || !storagePath) {
-        // Clear preview on error
-        URL.revokeObjectURL(previewUrl);
-        setTempProfileImagePreview(null);
         throw uploadError || new Error('Upload failed');
       }
 
@@ -990,12 +971,6 @@ const Profile = () => {
         isProfileVideo: originalValues.isProfileVideo || isProfileVideo,
         videoUrl: originalValues.videoUrl || videoUrl,
       });
-      
-      // Clear temp preview if exists
-      if (tempProfileImagePreview) {
-        URL.revokeObjectURL(tempProfileImagePreview);
-        setTempProfileImagePreview(null);
-      }
       
       // När vi raderar video med en cover-bild, gör cover-bilden till profilbilden
       let newProfileImageUrl = '';

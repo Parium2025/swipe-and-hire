@@ -55,6 +55,7 @@ const EmployerProfile = () => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
+  const [tempImagePreview, setTempImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -69,6 +70,14 @@ const EmployerProfile = () => {
 
   // Konvertera storage path till signerad URL för visning
   const profileImageUrl = useMediaUrl(formData.profile_image_url, 'profile-image');
+  
+  // Rensa temp preview när signerad URL är klar
+  useEffect(() => {
+    if (tempImagePreview && profileImageUrl && !profileImageUrl.includes('undefined')) {
+      URL.revokeObjectURL(tempImagePreview);
+      setTempImagePreview(null);
+    }
+  }, [tempImagePreview, profileImageUrl]);
 
   const [newSocialLink, setNewSocialLink] = useState({
     platform: '' as SocialMediaLink['platform'] | '',
@@ -189,6 +198,10 @@ const EmployerProfile = () => {
     try {
       if (!user?.id) throw new Error('User not authenticated');
 
+      // Skapa preview URL omedelbart för instant feedback
+      const previewUrl = URL.createObjectURL(editedBlob);
+      setTempImagePreview(previewUrl);
+
       // Skapa File från Blob
       const editedFile = new File([editedBlob], 'profile-image.webp', { type: 'image/webp' });
 
@@ -199,7 +212,12 @@ const EmployerProfile = () => {
         user.id
       );
 
-      if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
+      if (uploadError || !storagePath) {
+        // Rensa preview vid fel
+        URL.revokeObjectURL(previewUrl);
+        setTempImagePreview(null);
+        throw uploadError || new Error('Upload failed');
+      }
 
       // Uppdatera formData
       setFormData(prev => ({ ...prev, profile_image_url: storagePath }));
@@ -227,6 +245,11 @@ const EmployerProfile = () => {
 
   // Ta bort profilbild
   const handleRemoveProfileImage = () => {
+    // Rensa temp preview om den finns
+    if (tempImagePreview) {
+      URL.revokeObjectURL(tempImagePreview);
+      setTempImagePreview(null);
+    }
     setFormData(prev => ({ ...prev, profile_image_url: null }));
     setOriginalProfileImageFile(null);
     setHasUnsavedChanges(true);
@@ -411,8 +434,9 @@ const EmployerProfile = () => {
     return platformData?.label || 'Okänd plattform';
   };
 
-  const hasProfileImage = Boolean(formData.profile_image_url);
-  const displayedProfileImageUrl = hasProfileImage ? profileImageUrl : null;
+  const hasProfileImage = Boolean(formData.profile_image_url) || Boolean(tempImagePreview);
+  // Visa temp preview först, sedan signerad URL
+  const displayedProfileImageUrl = tempImagePreview || (formData.profile_image_url ? profileImageUrl : null);
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto animate-fade-in">
