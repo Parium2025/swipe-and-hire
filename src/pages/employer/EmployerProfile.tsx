@@ -431,19 +431,6 @@ const EmployerProfile = () => {
                 Ladda upp en profilbild som syns för kandidater
               </p>
               
-              {/* Kamera-ikon i samma stil som jobbsökarsidan */}
-              <div className="flex items-center justify-center">
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
-                    <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                      <Camera className="h-5 w-5 text-white" />
-                    </div>
-                  </div>
-                  <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
-                    <Camera className="h-2 w-2 text-primary" />
-                  </div>
-                </div>
-              </div>
               
               {/* Avatar med klickbar uppladdning och soptunna */}
               <div className="relative">
