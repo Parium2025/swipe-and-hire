@@ -1,4 +1,5 @@
 import React, { memo, useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -406,8 +407,22 @@ function EmployerTopNav() {
                     </div>
                   )}
                   <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-white font-medium text-sm truncate max-w-[140px]">{getUserDisplayName()}</span>
-                    <span className="text-white/50 text-xs truncate max-w-[140px]">{user?.email || ''}</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="text-white font-medium text-sm truncate max-w-[140px] cursor-default">{getUserDisplayName()}</span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="bg-gray-900 text-white border-gray-700">
+                        {getUserDisplayName()}
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="text-white/50 text-xs truncate max-w-[140px] cursor-default">{user?.email || ''}</span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="bg-gray-900 text-white border-gray-700">
+                        {user?.email || ''}
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
               </div>
