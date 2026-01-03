@@ -193,7 +193,7 @@ export function AppSidebar() {
                   />
                 )}
                 {!avatarUrl && (
-                  <AvatarFallback className="bg-white/20 text-white font-semibold">
+                  <AvatarFallback className="bg-white/40 text-white font-semibold">
                     {profile?.first_name?.[0]}{profile?.last_name?.[0]}
                   </AvatarFallback>
                 )}
