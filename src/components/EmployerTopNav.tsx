@@ -31,6 +31,7 @@ import {
   ChevronDown,
   LayoutDashboard
 } from "lucide-react";
+import pariumLogoRings from "@/assets/parium-logo-rings.png";
 
 // Dashboard dropdown items
 const dashboardItems = [
@@ -235,7 +236,7 @@ function EmployerTopNav() {
           aria-label="Gå till dashboard"
         >
           <img 
-            src="/lovable-uploads/parium-logo-rings.png" 
+            src={pariumLogoRings}
             alt="Parium" 
             className="h-8 w-auto"
           />
