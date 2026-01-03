@@ -25,7 +25,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown, AlertTriangle, Camera, Pencil } from 'lucide-react';
+import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown, AlertTriangle, Camera, Pencil, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ImageEditor from '@/components/ImageEditor';
@@ -57,6 +57,9 @@ const EmployerProfile = () => {
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const didInitRef = useRef(false);
+  
+  // Undo state - spara borttagen bild för återställning
+  const [deletedProfileImage, setDeletedProfileImage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     first_name: profile?.first_name || '',
@@ -209,6 +212,7 @@ const EmployerProfile = () => {
 
       // Uppdatera formData
       setFormData(prev => ({ ...prev, profile_image_url: storagePath }));
+      setDeletedProfileImage(null); // Rensa undo-state
       setHasUnsavedChanges(true);
       
       setImageEditorOpen(false);
@@ -233,11 +237,30 @@ const EmployerProfile = () => {
 
   // Ta bort profilbild
   const handleRemoveProfileImage = () => {
+    // Spara nuvarande bild för undo
+    const currentImage = formData.profile_image_url || originalValues.profile_image_url;
+    if (currentImage) {
+      setDeletedProfileImage(currentImage);
+    }
+    
     setFormData(prev => ({ ...prev, profile_image_url: '' }));
     setOriginalProfileImageFile(null);
     setHasUnsavedChanges(true);
     toast({
       title: "Profilbild borttagen",
+      description: "Tryck på \"Spara ändringar\" för att bekräfta."
+    });
+  };
+
+  // Återställ borttagen profilbild
+  const restoreProfileImage = () => {
+    if (!deletedProfileImage) return;
+    
+    setFormData(prev => ({ ...prev, profile_image_url: deletedProfileImage }));
+    setDeletedProfileImage(null);
+    setHasUnsavedChanges(true);
+    toast({
+      title: "Profilbild återställd",
       description: "Tryck på \"Spara ändringar\" för att bekräfta."
     });
   };
@@ -464,8 +487,22 @@ const EmployerProfile = () => {
                   </Avatar>
                 </div>
 
-                {/* Soptunna-knapp som på jobbsökarsidan */}
-                {profileImageUrl && (
+                {/* Soptunna/Undo-knapp som på jobbsökarsidan */}
+                {deletedProfileImage && !profileImageUrl ? (
+                  <button
+                    type="button"
+                    aria-label="Återställ profilbild"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      restoreProfileImage();
+                    }}
+                    className="absolute -top-3 -right-3 z-20 pointer-events-auto bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                    title="Återställ profilbild"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </button>
+                ) : profileImageUrl ? (
                   <button
                     type="button"
                     aria-label="Ta bort profilbild"
@@ -478,7 +515,7 @@ const EmployerProfile = () => {
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
-                )}
+                ) : null}
               </div>
 
               {/* Text och knappar under avataren */}
