@@ -22,12 +22,13 @@ import { AlertDialogContentNoFocus } from "@/components/ui/alert-dialog-no-focus
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown, AlertTriangle, Camera } from 'lucide-react';
+import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown, AlertTriangle, Camera, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
-import FileUpload from '@/components/FileUpload';
+import ImageEditor from '@/components/ImageEditor';
+import { uploadMedia, getMediaUrl } from '@/lib/mediaManager';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -48,6 +49,12 @@ const EmployerProfile = () => {
   const [originalValues, setOriginalValues] = useState<any>({});
   const [linkToDelete, setLinkToDelete] = useState<{ link: SocialMediaLink; index: number } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  
+  // Image editor states
+  const [imageEditorOpen, setImageEditorOpen] = useState(false);
+  const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
+  const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     first_name: profile?.first_name || '',
@@ -122,6 +129,111 @@ const EmployerProfile = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [hasUnsavedChanges]);
+
+  // Hantera bildval och öppna editor
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type.startsWith('image/')) {
+      // Spara originalfilen för framtida redigeringar
+      setOriginalProfileImageFile(file);
+      const imageUrl = URL.createObjectURL(file);
+      setPendingImageSrc(imageUrl);
+      setImageEditorOpen(true);
+    } else {
+      toast({
+        title: "Fel filtyp",
+        description: "Vänligen välj en bildfil (JPG, PNG eller WebP).",
+        variant: "destructive"
+      });
+    }
+    
+    // Reset input så samma fil kan väljas igen
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Redigera befintlig bild
+  const handleEditExistingImage = async () => {
+    if (originalProfileImageFile) {
+      const blobUrl = URL.createObjectURL(originalProfileImageFile);
+      setPendingImageSrc(blobUrl);
+      setImageEditorOpen(true);
+      return;
+    }
+
+    // Hämta signerad URL för befintlig bild
+    if (formData.profile_image_url) {
+      try {
+        const signedUrl = await getMediaUrl(formData.profile_image_url, 'profile-image', 3600);
+        if (signedUrl) {
+          setPendingImageSrc(signedUrl);
+          setImageEditorOpen(true);
+        }
+      } catch (error) {
+        console.error('Error loading image for editing:', error);
+        toast({
+          title: "Kunde inte ladda bilden",
+          description: "Försök ladda upp en ny bild istället.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  // Spara redigerad bild
+  const handleProfileImageSave = async (editedBlob: Blob) => {
+    try {
+      if (!user?.id) throw new Error('User not authenticated');
+
+      // Skapa File från Blob
+      const editedFile = new File([editedBlob], 'profile-image.webp', { type: 'image/webp' });
+
+      // Ladda upp via mediaManager
+      const { storagePath, error: uploadError } = await uploadMedia(
+        editedFile,
+        'profile-image',
+        user.id
+      );
+
+      if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
+
+      // Uppdatera formData
+      setFormData(prev => ({ ...prev, profile_image_url: storagePath }));
+      setHasUnsavedChanges(true);
+      
+      setImageEditorOpen(false);
+      if (pendingImageSrc) {
+        URL.revokeObjectURL(pendingImageSrc);
+      }
+      setPendingImageSrc('');
+
+      toast({
+        title: "Profilbild uppladdad!",
+        description: "Tryck på \"Spara ändringar\" för att spara din profilbild."
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Fel vid uppladdning",
+        description: "Kunde inte ladda upp profilbilden.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Ta bort profilbild
+  const handleRemoveProfileImage = () => {
+    setFormData(prev => ({ ...prev, profile_image_url: '' }));
+    setOriginalProfileImageFile(null);
+    setHasUnsavedChanges(true);
+    toast({
+      title: "Profilbild borttagen",
+      description: "Tryck på \"Spara ändringar\" för att bekräfta."
+    });
+  };
 
   // Reset form to original values when user confirms leaving without saving
   useEffect(() => {
@@ -301,33 +413,66 @@ const EmployerProfile = () => {
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
             {/* Profilbild-sektion */}
             <div className="flex flex-col items-center gap-4 pb-5 border-b border-white/10">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={profileImageUrl || undefined} alt="Profilbild" />
-                <AvatarFallback className="text-xl bg-gradient-to-br from-primary/80 to-primary text-white">
-                  {formData.first_name?.[0]?.toUpperCase() || ''}{formData.last_name?.[0]?.toUpperCase() || ''}
-                </AvatarFallback>
-              </Avatar>
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
               
-              <div className="w-full max-w-xs">
-                <FileUpload
-                  onFileUploaded={(url) => {
-                    setFormData({...formData, profile_image_url: url});
-                    setHasUnsavedChanges(true);
-                  }}
-                  onFileRemoved={() => {
-                    setFormData({...formData, profile_image_url: ''});
-                    setHasUnsavedChanges(true);
-                  }}
-                  acceptedFileTypes={['image/*']}
-                  maxFileSize={5 * 1024 * 1024}
-                  currentFile={formData.profile_image_url ? { url: formData.profile_image_url, name: 'Profilbild' } : undefined}
-                  mediaType="profile-image"
-                  uploadType="image"
-                />
-                <p className="text-xs text-white text-center mt-2">
-                  Max 5MB. JPG, PNG eller WebP
-                </p>
+              {/* Klickbar avatar för att ladda upp/redigera */}
+              <div className="relative group">
+                <div 
+                  className="relative cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Avatar className="h-32 w-32 ring-4 ring-white/20 transition-all duration-300 group-hover:ring-primary/50">
+                    <AvatarImage src={profileImageUrl || undefined} alt="Profilbild" className="object-cover" />
+                    <AvatarFallback className="text-3xl bg-gradient-to-br from-primary/80 to-primary text-white">
+                      {formData.first_name?.[0]?.toUpperCase() || ''}{formData.last_name?.[0]?.toUpperCase() || ''}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  {/* Overlay på hover */}
+                  <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Camera className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                
+                {/* Redigera-knapp om bild finns */}
+                {formData.profile_image_url && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEditExistingImage}
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white/10 border-white/20 text-white text-xs h-7 px-2 transition-all duration-300 md:hover:bg-white/20"
+                  >
+                    <Pencil className="h-3 w-3 mr-1" />
+                    Justera
+                  </Button>
+                )}
               </div>
+              
+              <p className="text-xs text-white/70 text-center">
+                Klicka för att ladda upp • Max 5MB
+              </p>
+              
+              {/* Ta bort-knapp om bild finns */}
+              {formData.profile_image_url && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemoveProfileImage}
+                  className="text-white/50 hover:text-red-400 text-xs h-7 px-2 transition-all duration-300"
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Ta bort bild
+                </Button>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
@@ -602,6 +747,21 @@ const EmployerProfile = () => {
           </AlertDialogFooter>
         </AlertDialogContentNoFocus>
       </AlertDialog>
+
+      {/* Image Editor */}
+      <ImageEditor
+        isOpen={imageEditorOpen}
+        onClose={() => {
+          setImageEditorOpen(false);
+          if (pendingImageSrc) {
+            URL.revokeObjectURL(pendingImageSrc);
+          }
+          setPendingImageSrc('');
+        }}
+        imageSrc={pendingImageSrc}
+        onSave={handleProfileImageSave}
+        isCircular={true}
+      />
     </div>
   );
 };
