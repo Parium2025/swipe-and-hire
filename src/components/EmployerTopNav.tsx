@@ -235,7 +235,7 @@ function EmployerTopNav() {
           aria-label="Gå till dashboard"
         >
           <img 
-            src="/lovable-uploads/parium-logo-transparent.png" 
+            src="/lovable-uploads/parium-logo-rings.png" 
             alt="Parium" 
             className="h-8 w-auto"
           />
