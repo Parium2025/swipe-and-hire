@@ -59,9 +59,9 @@ const supportItems = [
   { title: "Hjälp & Support", url: "/support", icon: HelpCircle },
 ];
 
-// Dropdown styling matching the sort dropdown
-const dropdownContentClass = "min-w-[180px] bg-[#0a2540]/95 backdrop-blur-md border border-white/20 shadow-xl z-50 rounded-xl p-1.5";
-const dropdownItemClass = "flex items-center gap-2.5 cursor-pointer text-white/90 hover:text-white hover:bg-white/10 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors";
+// Dropdown styling matching the sort dropdown (bg-slate-900/85)
+const dropdownContentClass = "min-w-[180px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-xl p-1.5";
+const dropdownItemClass = "flex items-center gap-2.5 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors";
 const dropdownItemActiveClass = "bg-white/15 text-white";
 
 function EmployerTopNav() {
