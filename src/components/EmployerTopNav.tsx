@@ -206,18 +206,6 @@ function EmployerTopNav() {
     <nav className="h-14 flex items-center justify-between px-4 border-b border-white/20 bg-transparent">
       {/* Left side: Logo + Main Nav */}
       <div className="flex items-center gap-3">
-        {/* Logo/Company */}
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8">
-            <CompanyAvatar
-              companyLogoUrl={preloadedCompanyLogoUrl}
-              companyName={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
-              initials={getCompanyInitials()}
-            />
-          </div>
-          <span className="text-white font-bold text-lg hidden xl:inline">Parium</span>
-        </div>
-
         {/* Main Navigation Dropdowns */}
         <div className="flex items-center gap-1">
           {/* Dashboard Dropdown */}
@@ -317,7 +305,19 @@ function EmployerTopNav() {
                   }
                 `}
               >
-                <Building className="h-4 w-4" />
+                {preloadedCompanyLogoUrl ? (
+                  <img 
+                    src={preloadedCompanyLogoUrl} 
+                    alt="Företagslogo" 
+                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30"
+                  />
+                ) : profile?.company_name ? (
+                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white">
+                    {profile.company_name.substring(0, 2).toUpperCase()}
+                  </div>
+                ) : (
+                  <Building className="h-4 w-4" />
+                )}
                 <span>Företag</span>
                 <ChevronDown className="h-3 w-3 opacity-70" />
               </button>
@@ -351,19 +351,8 @@ function EmployerTopNav() {
                   }
                 `}
               >
-                {preloadedCompanyLogoUrl ? (
-                  <img 
-                    src={preloadedCompanyLogoUrl} 
-                    alt="Företagslogo" 
-                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30"
-                  />
-                ) : profile?.company_name ? (
-                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white">
-                    {profile.company_name.substring(0, 2).toUpperCase()}
-                  </div>
-                ) : (
-                  <HelpCircle className="h-4 w-4" />
-                )}
+                <HelpCircle className="h-4 w-4" />
+                <span>Support</span>
                 <ChevronDown className="h-3 w-3 opacity-70" />
               </button>
             </DropdownMenuTrigger>
