@@ -461,6 +461,7 @@ const EmployerProfile = () => {
                 {/* Soptunna-knapp som på jobbsökarsidan */}
                 {profileImageUrl && (
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveProfileImage();
