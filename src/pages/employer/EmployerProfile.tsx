@@ -479,11 +479,9 @@ const EmployerProfile = () => {
                         draggable={false}
                       />
                     ) : null}
-                    {!profileImageUrl && (
-                      <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
-                        {(formData.first_name?.trim()?.[0]?.toUpperCase() || '') + (formData.last_name?.trim()?.[0]?.toUpperCase() || '') || '?'}
-                      </AvatarFallback>
-                    )}
+                  <AvatarFallback className="text-4xl font-semibold bg-white/20 text-white">
+                    {(formData.first_name?.trim()?.[0]?.toUpperCase() || '') + (formData.last_name?.trim()?.[0]?.toUpperCase() || '') || '?'}
+                  </AvatarFallback>
                   </Avatar>
                 </div>
 
