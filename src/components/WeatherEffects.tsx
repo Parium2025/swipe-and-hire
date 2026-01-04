@@ -56,16 +56,16 @@ const WeatherEffects = memo(({ weatherCode, isLoading }: WeatherEffectsProps) =>
 
 WeatherEffects.displayName = 'WeatherEffects';
 
-// Rain Effect
+// Rain Effect - Subtle and slow
 const RainEffect = memo(() => {
   const drops = useMemo(() => 
-    Array.from({ length: 50 }).map((_, i) => ({
+    Array.from({ length: 25 }).map((_, i) => ({
       id: i,
-      left: (i / 50) * 100 + Math.random() * 2 - 1,
-      delay: Math.random() * 2,
-      duration: 0.6 + Math.random() * 0.4,
-      height: 15 + Math.random() * 15,
-      opacity: 0.3 + Math.random() * 0.4,
+      left: (i / 25) * 100 + Math.random() * 4 - 2,
+      delay: Math.random() * 5,
+      duration: 2.5 + Math.random() * 1.5,
+      height: 8 + Math.random() * 8,
+      opacity: 0.15 + Math.random() * 0.15,
     })),
   []);
 
@@ -74,11 +74,11 @@ const RainEffect = memo(() => {
       {drops.map((drop) => (
         <motion.div
           key={drop.id}
-          className="absolute bg-blue-300/40 rounded-full"
+          className="absolute bg-blue-300/30 rounded-full"
           style={{
             left: `${drop.left}%`,
-            top: -30,
-            width: 2,
+            top: -20,
+            width: 1.5,
             height: drop.height,
             opacity: drop.opacity,
           }}
@@ -99,17 +99,17 @@ const RainEffect = memo(() => {
 
 RainEffect.displayName = 'RainEffect';
 
-// Snow Effect
+// Snow Effect - Gentle and slow
 const SnowEffect = memo(() => {
   const flakes = useMemo(() => 
-    Array.from({ length: 35 }).map((_, i) => ({
+    Array.from({ length: 20 }).map((_, i) => ({
       id: i,
-      left: (i / 35) * 100 + Math.random() * 3 - 1.5,
-      delay: Math.random() * 4,
-      duration: 5 + Math.random() * 4,
-      size: 4 + Math.random() * 5,
-      opacity: 0.5 + Math.random() * 0.4,
-      swayAmount: 20 + Math.random() * 30,
+      left: (i / 20) * 100 + Math.random() * 5 - 2.5,
+      delay: Math.random() * 8,
+      duration: 12 + Math.random() * 8,
+      size: 3 + Math.random() * 4,
+      opacity: 0.3 + Math.random() * 0.25,
+      swayAmount: 10 + Math.random() * 15,
     })),
   []);
 
@@ -121,7 +121,7 @@ const SnowEffect = memo(() => {
           className="absolute bg-white rounded-full"
           style={{
             left: `${flake.left}%`,
-            top: -20,
+            top: -15,
             width: flake.size,
             height: flake.size,
             opacity: flake.opacity,
@@ -130,7 +130,7 @@ const SnowEffect = memo(() => {
           animate={{
             y: ['0vh', '105vh'],
             x: [0, flake.swayAmount, 0, -flake.swayAmount, 0],
-            rotate: [0, 360],
+            rotate: [0, 180],
           }}
           transition={{
             duration: flake.duration,
@@ -138,7 +138,7 @@ const SnowEffect = memo(() => {
             repeat: Infinity,
             ease: 'linear',
             x: {
-              duration: flake.duration * 0.5,
+              duration: flake.duration * 0.6,
               repeat: Infinity,
               repeatType: 'reverse',
               ease: 'easeInOut',
@@ -152,68 +152,68 @@ const SnowEffect = memo(() => {
 
 SnowEffect.displayName = 'SnowEffect';
 
-// Sun Effect - Animated sun rays
+// Sun Effect - Soft and subtle glow
 const SunEffect = memo(() => {
   const rays = useMemo(() => 
-    Array.from({ length: 12 }).map((_, i) => ({
+    Array.from({ length: 8 }).map((_, i) => ({
       id: i,
-      rotation: (i * 30),
-      delay: i * 0.1,
+      rotation: (i * 45),
+      delay: i * 0.3,
     })),
   []);
 
   return (
-    <div className="absolute -top-32 -right-32 w-80 h-80">
-      {/* Sun glow */}
+    <div className="absolute -top-40 -right-40 w-96 h-96">
+      {/* Sun glow - very subtle */}
       <motion.div
-        className="absolute inset-0 rounded-full bg-gradient-radial from-yellow-300/30 via-orange-300/15 to-transparent"
-        animate={{
-          scale: [1, 1.1, 1],
-          opacity: [0.6, 0.8, 0.6],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
-      
-      {/* Sun core */}
-      <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-yellow-200/40 to-orange-300/30"
+        className="absolute inset-0 rounded-full bg-gradient-radial from-yellow-200/15 via-orange-200/8 to-transparent"
         animate={{
           scale: [1, 1.05, 1],
+          opacity: [0.4, 0.5, 0.4],
         }}
         transition={{
-          duration: 3,
+          duration: 8,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
       />
       
-      {/* Rays */}
+      {/* Sun core - softer */}
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-gradient-to-br from-yellow-100/25 to-orange-200/15"
+        animate={{
+          scale: [1, 1.03, 1],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+      
+      {/* Rays - fewer and more subtle */}
       {rays.map((ray) => (
         <motion.div
           key={ray.id}
-          className="absolute top-1/2 left-1/2 w-1 h-32 origin-bottom"
+          className="absolute top-1/2 left-1/2 w-0.5 h-28 origin-bottom"
           style={{
             rotate: `${ray.rotation}deg`,
             translateX: '-50%',
             translateY: '-100%',
           }}
-          initial={{ opacity: 0.2, scaleY: 0.8 }}
+          initial={{ opacity: 0.1, scaleY: 0.9 }}
           animate={{
-            opacity: [0.2, 0.5, 0.2],
-            scaleY: [0.8, 1, 0.8],
+            opacity: [0.1, 0.25, 0.1],
+            scaleY: [0.9, 1, 0.9],
           }}
           transition={{
-            duration: 2,
+            duration: 5,
             delay: ray.delay,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
         >
-          <div className="w-full h-full bg-gradient-to-t from-yellow-300/40 to-transparent rounded-full" />
+          <div className="w-full h-full bg-gradient-to-t from-yellow-200/20 to-transparent rounded-full" />
         </motion.div>
       ))}
     </div>
@@ -222,14 +222,12 @@ const SunEffect = memo(() => {
 
 SunEffect.displayName = 'SunEffect';
 
-// Clouds Effect - Floating clouds
+// Clouds Effect - Slow drifting clouds
 const CloudsEffect = memo(() => {
   const clouds = useMemo(() => [
-    { id: 1, top: '5%', size: 120, duration: 35, delay: 0, opacity: 0.15 },
-    { id: 2, top: '12%', size: 90, duration: 28, delay: 5, opacity: 0.12 },
-    { id: 3, top: '8%', size: 150, duration: 40, delay: 12, opacity: 0.1 },
-    { id: 4, top: '18%', size: 80, duration: 32, delay: 8, opacity: 0.14 },
-    { id: 5, top: '3%', size: 100, duration: 38, delay: 20, opacity: 0.11 },
+    { id: 1, top: '5%', size: 140, duration: 80, delay: 0, opacity: 0.08 },
+    { id: 2, top: '12%', size: 100, duration: 65, delay: 10, opacity: 0.06 },
+    { id: 3, top: '8%', size: 180, duration: 95, delay: 25, opacity: 0.05 },
   ], []);
 
   return (
@@ -243,9 +241,9 @@ const CloudsEffect = memo(() => {
             width: cloud.size,
             height: cloud.size * 0.5,
           }}
-          initial={{ x: '-20%' }}
+          initial={{ x: '-30%' }}
           animate={{
-            x: ['calc(-20%)', 'calc(100vw + 20%)'],
+            x: ['calc(-30%)', 'calc(100vw + 30%)'],
           }}
           transition={{
             duration: cloud.duration,
@@ -255,7 +253,7 @@ const CloudsEffect = memo(() => {
           }}
         >
           <div 
-            className="w-full h-full bg-white rounded-full blur-xl"
+            className="w-full h-full bg-white rounded-full blur-2xl"
             style={{ opacity: cloud.opacity }}
           />
         </motion.div>
@@ -266,12 +264,11 @@ const CloudsEffect = memo(() => {
 
 CloudsEffect.displayName = 'CloudsEffect';
 
-// Fog Effect - Layered moving fog
+// Fog Effect - Very subtle moving layers
 const FogEffect = memo(() => {
   const fogLayers = useMemo(() => [
-    { id: 1, y: '30%', duration: 20, opacity: 0.15, blur: 40 },
-    { id: 2, y: '50%', duration: 25, opacity: 0.12, blur: 50 },
-    { id: 3, y: '70%', duration: 18, opacity: 0.18, blur: 35 },
+    { id: 1, y: '35%', duration: 40, opacity: 0.06, blur: 60 },
+    { id: 2, y: '55%', duration: 50, opacity: 0.05, blur: 70 },
   ], []);
 
   return (
@@ -279,14 +276,14 @@ const FogEffect = memo(() => {
       {fogLayers.map((layer) => (
         <motion.div
           key={layer.id}
-          className="absolute inset-x-0 h-64"
+          className="absolute inset-x-0 h-72"
           style={{
             top: layer.y,
             background: `linear-gradient(90deg, transparent, rgba(200, 200, 200, ${layer.opacity}), transparent)`,
             filter: `blur(${layer.blur}px)`,
           }}
           animate={{
-            x: ['-50%', '50%', '-50%'],
+            x: ['-30%', '30%', '-30%'],
           }}
           transition={{
             duration: layer.duration,
@@ -301,30 +298,30 @@ const FogEffect = memo(() => {
 
 FogEffect.displayName = 'FogEffect';
 
-// Thunder Effect - Lightning flashes with rain
+// Thunder Effect - Subtle lightning with gentle rain
 const ThunderEffect = memo(() => {
   const drops = useMemo(() => 
-    Array.from({ length: 60 }).map((_, i) => ({
+    Array.from({ length: 30 }).map((_, i) => ({
       id: i,
-      left: (i / 60) * 100 + Math.random() * 2 - 1,
-      delay: Math.random() * 1.5,
-      duration: 0.5 + Math.random() * 0.3,
-      height: 20 + Math.random() * 20,
-      opacity: 0.4 + Math.random() * 0.3,
+      left: (i / 30) * 100 + Math.random() * 3 - 1.5,
+      delay: Math.random() * 4,
+      duration: 2 + Math.random() * 1,
+      height: 10 + Math.random() * 10,
+      opacity: 0.2 + Math.random() * 0.15,
     })),
   []);
 
   return (
     <>
-      {/* Heavy rain */}
+      {/* Gentle rain */}
       {drops.map((drop) => (
         <motion.div
           key={drop.id}
-          className="absolute bg-blue-200/50 rounded-full"
+          className="absolute bg-blue-200/30 rounded-full"
           style={{
             left: `${drop.left}%`,
-            top: -40,
-            width: 2,
+            top: -30,
+            width: 1.5,
             height: drop.height,
             opacity: drop.opacity,
           }}
@@ -340,42 +337,42 @@ const ThunderEffect = memo(() => {
         />
       ))}
       
-      {/* Lightning flash */}
+      {/* Subtle lightning flash - less frequent */}
       <motion.div
-        className="absolute inset-0 bg-white/10"
+        className="absolute inset-0 bg-white/5"
         animate={{
-          opacity: [0, 0, 0, 0.3, 0, 0.15, 0, 0, 0, 0, 0, 0],
+          opacity: [0, 0, 0, 0, 0, 0, 0.15, 0, 0.08, 0, 0, 0, 0, 0, 0, 0],
         }}
         transition={{
-          duration: 4,
+          duration: 8,
           repeat: Infinity,
           ease: 'linear',
-          times: [0, 0.2, 0.21, 0.22, 0.24, 0.25, 0.27, 0.5, 0.7, 0.8, 0.9, 1],
+          times: [0, 0.1, 0.2, 0.3, 0.35, 0.36, 0.37, 0.38, 0.39, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
         }}
       />
       
-      {/* Lightning bolt */}
+      {/* Subtle lightning bolt */}
       <motion.div
         className="absolute top-0 left-1/3"
         animate={{
-          opacity: [0, 0, 0, 1, 0, 0.6, 0, 0, 0, 0, 0, 0],
+          opacity: [0, 0, 0, 0, 0, 0, 0.6, 0, 0.3, 0, 0, 0, 0, 0, 0, 0],
         }}
         transition={{
-          duration: 4,
+          duration: 8,
           repeat: Infinity,
           ease: 'linear',
-          times: [0, 0.2, 0.21, 0.22, 0.24, 0.25, 0.27, 0.5, 0.7, 0.8, 0.9, 1],
+          times: [0, 0.1, 0.2, 0.3, 0.35, 0.36, 0.37, 0.38, 0.39, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
         }}
       >
-        <svg width="40" height="120" viewBox="0 0 40 120" fill="none">
+        <svg width="30" height="90" viewBox="0 0 40 120" fill="none">
           <path
             d="M20 0L5 50H18L8 120L35 45H20L30 0H20Z"
             fill="url(#lightning-gradient)"
           />
           <defs>
             <linearGradient id="lightning-gradient" x1="20" y1="0" x2="20" y2="120" gradientUnits="userSpaceOnUse">
-              <stop stopColor="white" stopOpacity="0.9" />
-              <stop offset="1" stopColor="#60A5FA" stopOpacity="0.5" />
+              <stop stopColor="white" stopOpacity="0.6" />
+              <stop offset="1" stopColor="#60A5FA" stopOpacity="0.3" />
             </linearGradient>
           </defs>
         </svg>
