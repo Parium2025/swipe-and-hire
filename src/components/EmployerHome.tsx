@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { isJobExpiredCheck } from '@/lib/date';
+import WeatherEffects from '@/components/WeatherEffects';
 
 const getGreeting = (): string => {
   const hour = new Date().getHours();
@@ -130,7 +131,9 @@ const EmployerHome = memo(() => {
   }
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto px-4 md:px-8 py-6 animate-fade-in">
+    <>
+      <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} />
+      <div className="space-y-8 max-w-5xl mx-auto px-4 md:px-8 py-6 animate-fade-in relative z-10">
       {/* Personal greeting */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -275,7 +278,8 @@ const EmployerHome = memo(() => {
           </Card>
         </motion.div>
       )}
-    </div>
+      </div>
+    </>
   );
 });
 
