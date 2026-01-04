@@ -7,17 +7,14 @@ interface WeatherEffectsProps {
   isEvening?: boolean;
 }
 
-type EffectType = 'rain' | 'rain_showers' | 'snow' | 'snow_showers' | 'thunder' | 'cloudy' | 'fog' | null;
+type EffectType = 'rain' | 'rain_showers' | 'snow' | 'snow_showers' | 'thunder' | 'cloudy' | null;
 
 const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: WeatherEffectsProps) => {
   // Determine effect type based on weather code
   const effectType = useMemo((): EffectType => {
     if (!weatherCode || isLoading) return null;
     
-    // Fog: 45, 48
-    if (weatherCode === 45 || weatherCode === 48) {
-      return 'fog';
-    }
+    // Fog: 45, 48 - No visual effect, just cloud emoji
     // Cloudy: 3 (overcast)
     if (weatherCode === 3) {
       return 'cloudy';
@@ -51,7 +48,7 @@ const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: Weat
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {showStars && <StarsEffect />}
-      {effectType === 'fog' && <FogEffect />}
+      
       {effectType === 'cloudy' && <CloudyEffect />}
       {effectType === 'rain' && <RainEffect />}
       {effectType === 'rain_showers' && <RainShowersEffect />}
@@ -161,46 +158,6 @@ const StarsEffect = memo(() => {
 
 StarsEffect.displayName = 'StarsEffect';
 
-// Fog Effect - Slow drifting fog layers
-const FogEffect = memo(() => {
-  const fogLayers = useMemo(() => 
-    Array.from({ length: 3 }).map((_, i) => ({
-      id: i,
-      top: 20 + i * 25,
-      opacity: 0.15 + i * 0.05,
-      duration: 40 + i * 20,
-      delay: i * 5,
-    })),
-  []);
-
-  return (
-    <>
-      {fogLayers.map((layer) => (
-        <motion.div
-          key={layer.id}
-          className="absolute w-[200vw] h-32 bg-gradient-to-r from-transparent via-white/30 to-transparent blur-3xl"
-          style={{
-            top: `${layer.top}%`,
-            opacity: layer.opacity,
-          }}
-          animate={{
-            x: ['-100vw', '0vw'],
-          }}
-          transition={{
-            duration: layer.duration,
-            delay: layer.delay,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        />
-      ))}
-      {/* Overall fog overlay */}
-      <div className="absolute inset-0 bg-white/[0.08] pointer-events-none" />
-    </>
-  );
-});
-
-FogEffect.displayName = 'FogEffect';
 
 // Cloudy Effect - Drifting clouds
 const CloudyEffect = memo(() => {

@@ -170,7 +170,7 @@ const EmployerHome = memo(() => {
       if (code === 1) return '🌤️'; // Mostly clear
       if (code === 2) return '⛅'; // Partly cloudy
       if (code === 3) return '☁️'; // Overcast
-      if (code === 45 || code === 48) return '🌫️'; // Fog
+      if (code === 45 || code === 48) return '☁️'; // Fog - uses cloud emoji as agreed
       if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return '🌧️'; // Rain
       if ([71, 73, 75, 77, 85, 86].includes(code)) return '❄️'; // Snow
       if ([95, 96, 99].includes(code)) return '⛈️'; // Thunderstorm
@@ -202,7 +202,7 @@ const EmployerHome = memo(() => {
     { code: 1, label: 'Mestadels klart', emoji: '🌤️' },
     { code: 2, label: 'Delvis molnigt', emoji: '⛅' },
     { code: 3, label: 'Mulet', emoji: '☁️' },
-    { code: 45, label: 'Dimma', emoji: '🌫️' },
+    { code: 45, label: 'Dimma', emoji: '☁️' },
     { code: 61, label: 'Regn', emoji: '🌧️' },
     { code: 71, label: 'Snö', emoji: '❄️' },
     { code: 95, label: 'Åska', emoji: '⛈️' },
