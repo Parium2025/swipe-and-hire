@@ -7,7 +7,7 @@ interface WeatherEffectsProps {
   isEvening?: boolean;
 }
 
-type EffectType = 'rain' | 'rain_showers' | 'snow' | 'snow_showers' | 'thunder' | 'cloudy' | null;
+type EffectType = 'rain' | 'snow' | 'thunder' | 'cloudy' | null;
 
 const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: WeatherEffectsProps) => {
   // Determine effect type based on weather code
@@ -19,20 +19,12 @@ const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: Weat
     if (weatherCode === 3) {
       return 'cloudy';
     }
-    // Rain showers: 80-82 (moderate, like current)
-    if (weatherCode >= 80 && weatherCode <= 82) {
-      return 'rain_showers';
-    }
-    // Regular rain: 51-67 (more visible drops)
-    if (weatherCode >= 51 && weatherCode <= 67) {
+    // All rain types: 51-67 (drizzle/rain), 80-82 (showers)
+    if ((weatherCode >= 51 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) {
       return 'rain';
     }
-    // Snow showers: 85-86 (slightly faster)
-    if (weatherCode >= 85 && weatherCode <= 86) {
-      return 'snow_showers';
-    }
-    // Regular snow: 71-77 (gentle)
-    if (weatherCode >= 71 && weatherCode <= 77) {
+    // All snow types: 71-77 (snow), 85-86 (snow showers)
+    if ((weatherCode >= 71 && weatherCode <= 77) || (weatherCode >= 85 && weatherCode <= 86)) {
       return 'snow';
     }
     // Thunder: 95-99
@@ -51,9 +43,7 @@ const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: Weat
       
       {effectType === 'cloudy' && <CloudyEffect />}
       {effectType === 'rain' && <RainEffect />}
-      {effectType === 'rain_showers' && <RainShowersEffect />}
       {effectType === 'snow' && <SnowEffect />}
-      {effectType === 'snow_showers' && <SnowShowersEffect />}
       {effectType === 'thunder' && <ThunderEffect />}
     </div>
   );
@@ -254,52 +244,6 @@ const RainEffect = memo(() => {
 
 RainEffect.displayName = 'RainEffect';
 
-// Rain Showers Effect - Moderate with light wind, appears already in progress
-const RainShowersEffect = memo(() => {
-  const drops = useMemo(() => 
-    Array.from({ length: 28 }).map((_, i) => {
-      const duration = 1.5 + Math.random() * 0.8;
-      const initialY = Math.random() * 112;
-      return {
-        id: i,
-        left: (i / 28) * 115 - 5,
-        duration,
-        height: 12 + Math.random() * 10,
-        opacity: 0.25 + Math.random() * 0.2,
-        initialY,
-      };
-    }),
-  []);
-
-  return (
-    <>
-      {drops.map((drop) => (
-        <motion.div
-          key={drop.id}
-          className="absolute bg-blue-300/40 rounded-full"
-          style={{
-            left: `${drop.left}%`,
-            width: 1.5,
-            height: drop.height,
-            opacity: drop.opacity,
-          }}
-          initial={{ y: `${drop.initialY}vh` }}
-          animate={{
-            y: [`${drop.initialY}vh`, '112vh', '-5vh', '112vh'],
-          }}
-          transition={{
-            duration: drop.duration,
-            times: [0, (112 - drop.initialY) / 117, (112 - drop.initialY) / 117, 1],
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        />
-      ))}
-    </>
-  );
-});
-
-RainShowersEffect.displayName = 'RainShowersEffect';
 
 // Snow Effect - Continuous gentle snow, appears already in progress
 const SnowEffect = memo(() => {
@@ -360,62 +304,6 @@ const SnowEffect = memo(() => {
 
 SnowEffect.displayName = 'SnowEffect';
 
-// Snow Showers Effect - Slightly faster and more intense, appears already in progress
-const SnowShowersEffect = memo(() => {
-  const flakes = useMemo(() => 
-    Array.from({ length: 50 }).map((_, i) => {
-      const duration = 8 + Math.random() * 3;
-      const initialProgress = Math.random() * 100;
-      return {
-        id: i,
-        left: Math.random() * 100,
-        duration,
-        size: 3 + Math.random() * 5,
-        opacity: 0.35 + Math.random() * 0.3,
-        swayAmount: 12 + Math.random() * 18,
-        initialY: initialProgress,
-      };
-    }),
-  []);
-
-  return (
-    <>
-      {flakes.map((flake) => (
-        <motion.div
-          key={flake.id}
-          className="absolute bg-white rounded-full"
-          style={{
-            left: `${flake.left}%`,
-            width: flake.size,
-            height: flake.size,
-            opacity: flake.opacity,
-            filter: 'blur(0.5px)',
-          }}
-          initial={{ y: `${flake.initialY}vh` }}
-          animate={{
-            y: [`${flake.initialY}vh`, '105vh', '-5vh', '105vh'],
-            x: [0, flake.swayAmount, 0, -flake.swayAmount, 0],
-            rotate: [0, 180, 360],
-          }}
-          transition={{
-            duration: flake.duration,
-            times: [0, (105 - flake.initialY) / 110, (105 - flake.initialY) / 110, 1],
-            repeat: Infinity,
-            ease: 'linear',
-            x: {
-              duration: flake.duration * 0.5,
-              repeat: Infinity,
-              repeatType: 'reverse',
-              ease: 'easeInOut',
-            },
-          }}
-        />
-      ))}
-    </>
-  );
-});
-
-SnowShowersEffect.displayName = 'SnowShowersEffect';
 
 // Thunder Effect - Single lightning bolt at random position
 const ThunderEffect = memo(() => {
