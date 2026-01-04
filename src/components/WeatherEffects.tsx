@@ -74,37 +74,29 @@ const StarsEffect = memo(() => {
   []);
 
   // Shooting star state
-  const [shootingStar, setShootingStar] = useState<{
-    active: boolean;
-    startX: number;
-    startY: number;
-  }>({ active: false, startX: 0, startY: 0 });
+  const [shootingStarActive, setShootingStarActive] = useState(false);
 
   useEffect(() => {
     const triggerShootingStar = () => {
-      // Random start position (top-right quadrant usually)
-      const startX = 20 + Math.random() * 60;
-      const startY = 5 + Math.random() * 25;
-      
-      setShootingStar({ active: true, startX, startY });
+      setShootingStarActive(true);
       
       // Hide after animation completes
       setTimeout(() => {
-        setShootingStar(s => ({ ...s, active: false }));
-      }, 800);
+        setShootingStarActive(false);
+      }, 600);
     };
 
-    // Random interval between shooting stars (15-40 seconds)
+    // Random interval between shooting stars (20-45 seconds)
     const scheduleNext = () => {
-      const delay = 15000 + Math.random() * 25000;
+      const delay = 20000 + Math.random() * 25000;
       return setTimeout(() => {
         triggerShootingStar();
         scheduleNext();
       }, delay);
     };
 
-    // First shooting star after 5-10 seconds
-    const initialTimeout = setTimeout(triggerShootingStar, 5000 + Math.random() * 5000);
+    // First shooting star after 8-15 seconds
+    const initialTimeout = setTimeout(triggerShootingStar, 8000 + Math.random() * 7000);
     const intervalId = scheduleNext();
 
     return () => {
@@ -138,39 +130,25 @@ const StarsEffect = memo(() => {
         />
       ))}
 
-      {/* Shooting star */}
-      {shootingStar.active && (
+      {/* Shooting star - simple white dot from top-right going down-left */}
+      {shootingStarActive && (
         <motion.div
-          className="absolute"
+          className="absolute w-2 h-2 bg-white rounded-full"
           style={{
-            left: `${shootingStar.startX}%`,
-            top: `${shootingStar.startY}%`,
+            right: '5%',
+            top: '3%',
           }}
-          initial={{ opacity: 0, x: 0, y: 0 }}
+          initial={{ opacity: 0 }}
           animate={{ 
-            opacity: [0, 1, 1, 0],
-            x: [0, 150],
-            y: [0, 100],
+            opacity: [0, 1, 1, 0.8, 0],
+            x: [0, -250, -500],
+            y: [0, 200, 400],
           }}
           transition={{
-            duration: 0.7,
-            ease: 'easeOut',
+            duration: 0.5,
+            ease: 'linear',
           }}
-        >
-          {/* Shooting star head */}
-          <div 
-            className="absolute w-1.5 h-1.5 bg-white rounded-full"
-            style={{ boxShadow: '0 0 4px 1px rgba(255,255,255,0.6)' }}
-          />
-          {/* Shooting star tail */}
-          <div 
-            className="absolute w-12 h-0.5 bg-gradient-to-r from-white/60 to-transparent rounded-full"
-            style={{ 
-              transform: 'rotate(-35deg) translateX(-100%)',
-              transformOrigin: 'right center',
-            }}
-          />
-        </motion.div>
+        />
       )}
     </>
   );
