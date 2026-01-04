@@ -67,19 +67,19 @@ const StatCard = memo(({ icon: Icon, title, value, subtitle, gradient, glowColor
       <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
       <div className="absolute -left-4 -bottom-4 w-16 h-16 bg-white/5 rounded-full blur-xl" />
       
-      <CardContent className="relative p-5 md:p-6">
+      <CardContent className="relative p-4">
         <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-white/80 tracking-wide uppercase">{title}</p>
-            <p className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-white/80 tracking-wide uppercase">{title}</p>
+            <p className="text-3xl md:text-4xl font-bold text-white tracking-tight">
               <AnimatedNumber value={value} delay={delay} />
             </p>
             {subtitle && (
               <p className="text-xs text-white/60 font-medium">{subtitle}</p>
             )}
           </div>
-          <div className="p-3 md:p-4 rounded-2xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
-            <Icon className="h-6 w-6 md:h-7 md:w-7 text-white" strokeWidth={1.5} />
+          <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
+            <Icon className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
         </div>
       </CardContent>
@@ -190,30 +190,6 @@ const EmployerHome = memo(() => {
           delay={0.25}
         />
       </div>
-
-      {/* Quick actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.35 }}
-        className="flex flex-col sm:flex-row gap-3"
-      >
-        <Button
-          onClick={() => navigate('/my-jobs?create=true')}
-          className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground h-13 text-base font-semibold shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01]"
-        >
-          <Plus className="mr-2 h-5 w-5" />
-          Skapa ny annons
-        </Button>
-        <Button
-          onClick={() => navigate('/my-candidates')}
-          variant="outline"
-          className="flex-1 border-white/20 bg-white/5 hover:bg-white/10 text-white h-13 text-base font-semibold backdrop-blur-sm transition-all duration-300 hover:scale-[1.01]"
-        >
-          <Users className="mr-2 h-5 w-5" />
-          Granska kandidater
-        </Button>
-      </motion.div>
 
       {/* Jobs needing attention */}
       {jobsNeedingAttention.length > 0 && (
