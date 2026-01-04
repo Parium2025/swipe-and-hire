@@ -140,16 +140,16 @@ SnowEffect.displayName = 'SnowEffect';
 
 // Thunder Effect - Dramatic with random lightning positions
 const ThunderEffect = memo(() => {
-  // Heavy rain drops - larger and more visible
+  // Rain drops - more intense than regular rain but still balanced
   const drops = useMemo(() => 
-    Array.from({ length: 100 }).map((_, i) => ({
+    Array.from({ length: 40 }).map((_, i) => ({
       id: i,
-      left: (i / 100) * 100 + Math.random() * 2 - 1,
-      delay: Math.random() * 2,
-      duration: 0.6 + Math.random() * 0.3,
-      height: 20 + Math.random() * 25,
-      width: 2.5 + Math.random() * 1.5,
-      opacity: 0.5 + Math.random() * 0.3,
+      left: (i / 40) * 100 + Math.random() * 3 - 1.5,
+      delay: Math.random() * 3,
+      duration: 1.2 + Math.random() * 0.6,
+      height: 15 + Math.random() * 12,
+      width: 2,
+      opacity: 0.35 + Math.random() * 0.25,
     })),
   []);
 
