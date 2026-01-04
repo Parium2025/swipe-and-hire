@@ -145,14 +145,10 @@ const EmployerHome = memo(() => {
         transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="text-center md:text-left"
       >
-        <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-          <Sparkles className="h-5 w-5 text-primary/80" />
-          <span className="text-sm font-medium text-white/60 uppercase tracking-widest">Dashboard</span>
-        </div>
         <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
           {greeting}, {firstName} {emoji}
         </h1>
-        <p className="text-white/50 mt-2 text-base">
+        <p className="text-white mt-2 text-base">
           Här är en översikt över din rekrytering
         </p>
       </motion.div>
