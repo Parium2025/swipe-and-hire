@@ -27,7 +27,17 @@ interface UseWeatherOptions {
 
 const DEFAULT_REFRESH_MS = 15 * 60 * 1000;
 const LOCATION_CACHE_KEY = 'parium_weather_location';
+const WEATHER_CACHE_KEY = 'parium_weather_data';
 const MOVEMENT_THRESHOLD_KM = 10; // If moved more than 10km, update location
+
+interface CachedWeather {
+  temperature: number;
+  weatherCode: number;
+  description: string;
+  emoji: string;
+  city: string;
+  timestamp: number;
+}
 
 interface CachedLocation {
   lat: number;
@@ -81,6 +91,28 @@ const setCachedLocation = (location: Omit<CachedLocation, 'timestamp'>) => {
   try {
     const data: CachedLocation = { ...location, timestamp: Date.now() };
     localStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // Silent fail
+  }
+};
+
+const getCachedWeather = (): CachedWeather | null => {
+  try {
+    const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+    if (!cached) return null;
+    const data = JSON.parse(cached);
+    // Weather cache valid for 15 minutes
+    if (Date.now() - data.timestamp > 15 * 60 * 1000) return null;
+    return data;
+  } catch {
+    return null;
+  }
+};
+
+const setCachedWeather = (weather: Omit<CachedWeather, 'timestamp'>) => {
+  try {
+    const data: CachedWeather = { ...weather, timestamp: Date.now() };
+    localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(data));
   } catch {
     // Silent fail
   }
@@ -193,13 +225,28 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const mountedRef = useRef(true);
 
   const [weather, setWeather] = useState<WeatherData>(() => {
-    const cached = getCachedLocation();
+    // Try to use cached weather first for instant display
+    const cachedWeather = getCachedWeather();
+    if (cachedWeather) {
+      return {
+        temperature: cachedWeather.temperature,
+        weatherCode: cachedWeather.weatherCode,
+        description: cachedWeather.description,
+        emoji: cachedWeather.emoji,
+        city: cachedWeather.city,
+        isLoading: false, // Already have data!
+        error: null,
+      };
+    }
+    
+    // Fall back to location cache for city name
+    const cachedLocation = getCachedLocation();
     return {
       temperature: 0,
       weatherCode: 0,
       description: '',
       emoji: getTimeBasedEmoji(),
-      city: cached?.city || '',
+      city: cachedLocation?.city || '',
       isLoading: true,
       error: null,
     };
@@ -217,12 +264,19 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       const { temperature, weatherCode } = await fetchCurrentWeather(lat, lon);
       const info = getWeatherInfo(weatherCode);
       
-      updateWeather({
+      const weatherData = {
         temperature,
         weatherCode,
         description: info.description,
         emoji: info.emoji,
         city,
+      };
+      
+      // Cache weather data for instant display on next visit
+      setCachedWeather(weatherData);
+      
+      updateWeather({
+        ...weatherData,
         isLoading: false,
         error: null,
       });
@@ -365,20 +419,25 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 };
 
 /**
- * Preload location and cache it for instant weather display.
- * Call this during login to have location ready before user reaches home page.
+ * Preload location AND weather data for instant display.
+ * Call this during login to have everything ready before user reaches home page.
  * Returns the cached location or null if all methods fail.
  */
 export const preloadWeatherLocation = async (): Promise<CachedLocation | null> => {
-  // Check if we already have a recent cache
-  const existing = getCachedLocation();
-  if (existing) {
-    const age = Date.now() - existing.timestamp;
-    // If cache is less than 1 hour old and from GPS, it's fresh enough
-    if (age < 60 * 60 * 1000 && existing.source === 'gps') {
-      return existing;
+  // Check if we already have fresh weather cache (less than 5 min)
+  const existingWeather = getCachedWeather();
+  const existingLocation = getCachedLocation();
+  
+  if (existingWeather && existingLocation) {
+    const weatherAge = Date.now() - existingWeather.timestamp;
+    const locationAge = Date.now() - existingLocation.timestamp;
+    // If both caches are fresh (weather < 5min, location < 30min GPS), skip preload
+    if (weatherAge < 5 * 60 * 1000 && locationAge < 30 * 60 * 1000 && existingLocation.source === 'gps') {
+      return existingLocation;
     }
   }
+
+  let location: CachedLocation | null = null;
 
   // Try GPS first (most accurate)
   if (navigator.geolocation) {
@@ -392,20 +451,41 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
 
     if (gpsResult) {
       const city = await getCityName(gpsResult.lat, gpsResult.lon);
-      const location: CachedLocation = { ...gpsResult, city, source: 'gps', timestamp: Date.now() };
+      location = { ...gpsResult, city, source: 'gps', timestamp: Date.now() };
       setCachedLocation(location);
-      return location;
     }
   }
 
-  // Try IP geolocation
-  const ipLocation = await getLocationByIP();
-  if (ipLocation) {
-    const location: CachedLocation = { ...ipLocation, source: 'ip', timestamp: Date.now() };
-    setCachedLocation(location);
-    return location;
+  // Try IP geolocation if GPS failed
+  if (!location) {
+    const ipLocation = await getLocationByIP();
+    if (ipLocation) {
+      location = { ...ipLocation, source: 'ip', timestamp: Date.now() };
+      setCachedLocation(location);
+    }
   }
 
-  // Return existing cache if we have one (even if older)
-  return existing;
+  // Use existing cache if nothing else worked
+  if (!location && existingLocation) {
+    location = existingLocation;
+  }
+
+  // Now fetch and cache the actual weather data
+  if (location) {
+    try {
+      const { temperature, weatherCode } = await fetchCurrentWeather(location.lat, location.lon);
+      const info = getWeatherInfo(weatherCode);
+      setCachedWeather({
+        temperature,
+        weatherCode,
+        description: info.description,
+        emoji: info.emoji,
+        city: location.city,
+      });
+    } catch (err) {
+      console.warn('Weather preload fetch failed:', err);
+    }
+  }
+
+  return location;
 };
