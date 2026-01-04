@@ -421,7 +421,7 @@ function EmployerTopNav() {
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="text-white/50 text-xs truncate max-w-[140px] cursor-default">{user?.email || ''}</span>
+                        <span className="text-white text-xs truncate max-w-[140px] cursor-default">{user?.email || ''}</span>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="bg-gray-900 text-white border-gray-700">
                         {user?.email || ''}
