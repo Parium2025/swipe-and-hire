@@ -61,19 +61,29 @@ const getDistanceKm = (lat1: number, lon1: number, lat2: number, lon2: number): 
   return R * c;
 };
 
-// Weather codes from Open-Meteo API - now takes isNight as parameter
+// Weather codes from Open-Meteo API - combines moon with weather when appropriate
 const getWeatherInfo = (code: number, isNight: boolean): { description: string; emoji: string } => {
+  // Clear sky
   if (code === 0) return { description: 'Klart', emoji: isNight ? '🌙' : '☀️' };
+  
+  // Partly cloudy - combine moon with clouds at night
   if (code === 1) return { description: 'Mestadels klart', emoji: isNight ? '🌙' : '🌤️' };
-  if (code === 2) return { description: 'Halvklart', emoji: isNight ? '🌙' : '⛅' };
+  if (code === 2) return { description: 'Halvklart', emoji: isNight ? '🌙☁️' : '⛅' };
+  
+  // Overcast - no moon visible through thick clouds
   if (code === 3) return { description: 'Molnigt', emoji: '☁️' };
+  
+  // Fog - no moon visible
   if (code === 45 || code === 48) return { description: 'Dimma', emoji: '🌁' };
+  
+  // Precipitation - weather takes priority, no moon
   if (code >= 51 && code <= 57) return { description: 'Duggregn', emoji: '🌧️' };
   if (code >= 61 && code <= 67) return { description: 'Regn', emoji: '🌧️' };
   if (code >= 71 && code <= 77) return { description: 'Snö', emoji: '❄️' };
   if (code >= 80 && code <= 82) return { description: 'Regnskurar', emoji: '🌦️' };
   if (code >= 85 && code <= 86) return { description: 'Snöbyar', emoji: '🌨️' };
   if (code >= 95 && code <= 99) return { description: 'Åska', emoji: '⛈️' };
+  
   return { description: 'Okänt', emoji: '🌡️' };
 };
 
