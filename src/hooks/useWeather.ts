@@ -36,6 +36,7 @@ interface CachedWeather {
   description: string;
   emoji: string;
   city: string;
+  isNight: boolean;
   timestamp: number;
 }
 
@@ -60,21 +61,13 @@ const getDistanceKm = (lat1: number, lon1: number, lat2: number, lon2: number): 
   return R * c;
 };
 
-// Check if it's nighttime (between 21:00 and 06:00)
-const isNightTime = (): boolean => {
-  const hour = new Date().getHours();
-  return hour >= 21 || hour < 6;
-};
-
-// Weather codes from Open-Meteo API
-const getWeatherInfo = (code: number): { description: string; emoji: string } => {
-  const night = isNightTime();
-  
-  if (code === 0) return { description: 'Klart', emoji: night ? '🌙' : '☀️' };
-  if (code === 1) return { description: 'Mestadels klart', emoji: night ? '🌙' : '🌤️' };
-  if (code === 2) return { description: 'Halvklart', emoji: night ? '🌙' : '⛅' };
+// Weather codes from Open-Meteo API - now takes isNight as parameter
+const getWeatherInfo = (code: number, isNight: boolean): { description: string; emoji: string } => {
+  if (code === 0) return { description: 'Klart', emoji: isNight ? '🌙' : '☀️' };
+  if (code === 1) return { description: 'Mestadels klart', emoji: isNight ? '🌙' : '🌤️' };
+  if (code === 2) return { description: 'Halvklart', emoji: isNight ? '🌙' : '⛅' };
   if (code === 3) return { description: 'Molnigt', emoji: '☁️' };
-  if (code === 45 || code === 48) return { description: 'Dimma', emoji: '☁️' };
+  if (code === 45 || code === 48) return { description: 'Dimma', emoji: '🌁' };
   if (code >= 51 && code <= 57) return { description: 'Duggregn', emoji: '🌧️' };
   if (code >= 61 && code <= 67) return { description: 'Regn', emoji: '🌧️' };
   if (code >= 71 && code <= 77) return { description: 'Snö', emoji: '❄️' };
@@ -109,8 +102,8 @@ const getCachedWeather = (): CachedWeather | null => {
     const cached = localStorage.getItem(WEATHER_CACHE_KEY);
     if (!cached) return null;
     const data = JSON.parse(cached);
-    // Weather cache valid for 15 minutes
-    if (Date.now() - data.timestamp > 15 * 60 * 1000) return null;
+    // Weather cache valid for 5 minutes only (was 15)
+    if (Date.now() - data.timestamp > 5 * 60 * 1000) return null;
     return data;
   } catch {
     return null;
@@ -127,15 +120,33 @@ const setCachedWeather = (weather: Omit<CachedWeather, 'timestamp'>) => {
 };
 
 const fetchCurrentWeather = async (lat: number, lon: number) => {
+  // Include daily sunrise/sunset to determine if it's night
   const res = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=sunrise,sunset&timezone=auto`
   );
   const data = await res.json();
   const current = data?.current_weather;
   if (!current) throw new Error('Missing current_weather');
+  
+  // Check if current time is between sunrise and sunset
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const dailyIndex = data.daily?.time?.indexOf(todayStr) ?? 0;
+  const sunrise = data.daily?.sunrise?.[dailyIndex];
+  const sunset = data.daily?.sunset?.[dailyIndex];
+  
+  let isNight = false;
+  if (sunrise && sunset) {
+    const sunriseTime = new Date(sunrise).getTime();
+    const sunsetTime = new Date(sunset).getTime();
+    const nowTime = now.getTime();
+    isNight = nowTime < sunriseTime || nowTime > sunsetTime;
+  }
+  
   return {
     temperature: Math.round(current.temperature),
     weatherCode: current.weathercode as number,
+    isNight,
   };
 };
 
@@ -269,8 +280,8 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     try {
       if (showLoading) updateWeather({ isLoading: true });
       
-      const { temperature, weatherCode } = await fetchCurrentWeather(lat, lon);
-      const info = getWeatherInfo(weatherCode);
+      const { temperature, weatherCode, isNight } = await fetchCurrentWeather(lat, lon);
+      const info = getWeatherInfo(weatherCode, isNight);
       
       const weatherData = {
         temperature,
@@ -278,6 +289,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         description: info.description,
         emoji: info.emoji,
         city,
+        isNight,
       };
       
       // Cache weather data for instant display on next visit
@@ -481,14 +493,15 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
   // Now fetch and cache the actual weather data
   if (location) {
     try {
-      const { temperature, weatherCode } = await fetchCurrentWeather(location.lat, location.lon);
-      const info = getWeatherInfo(weatherCode);
+      const { temperature, weatherCode, isNight } = await fetchCurrentWeather(location.lat, location.lon);
+      const info = getWeatherInfo(weatherCode, isNight);
       setCachedWeather({
         temperature,
         weatherCode,
         description: info.description,
         emoji: info.emoji,
         city: location.city,
+        isNight,
       });
     } catch (err) {
       console.warn('Weather preload fetch failed:', err);
