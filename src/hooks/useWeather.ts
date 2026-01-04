@@ -61,28 +61,55 @@ const getDistanceKm = (lat1: number, lon1: number, lat2: number, lon2: number): 
   return R * c;
 };
 
-// Weather codes from Open-Meteo API - combines moon with weather when appropriate
+// Weather codes from Open-Meteo API - detailed descriptions
 const getWeatherInfo = (code: number, isNight: boolean): { description: string; emoji: string } => {
   // Clear sky
   if (code === 0) return { description: 'Klart', emoji: isNight ? '🌙' : '☀️' };
   
-  // Partly cloudy - combine moon with clouds at night
+  // Partly cloudy
   if (code === 1) return { description: 'Mestadels klart', emoji: isNight ? '🌙' : '🌤️' };
   if (code === 2) return { description: 'Halvklart', emoji: isNight ? '🌙☁️' : '⛅' };
   
-  // Overcast - no moon visible through thick clouds
+  // Overcast
   if (code === 3) return { description: 'Molnigt', emoji: '☁️' };
   
-  // Fog - no moon visible
-  if (code === 45 || code === 48) return { description: 'Dimma', emoji: '🌁' };
+  // Fog
+  if (code === 45) return { description: 'Dimma', emoji: '🌁' };
+  if (code === 48) return { description: 'Rimfrost', emoji: '🌁' };
   
-  // Precipitation - weather takes priority, no moon
-  if (code >= 51 && code <= 57) return { description: 'Duggregn', emoji: '🌧️' };
-  if (code >= 61 && code <= 67) return { description: 'Regn', emoji: '🌧️' };
-  if (code >= 71 && code <= 77) return { description: 'Snö', emoji: '❄️' };
-  if (code >= 80 && code <= 82) return { description: 'Regnskurar', emoji: '🌦️' };
-  if (code >= 85 && code <= 86) return { description: 'Snöbyar', emoji: '🌨️' };
-  if (code >= 95 && code <= 99) return { description: 'Åska', emoji: '⛈️' };
+  // Drizzle
+  if (code === 51) return { description: 'Lätt duggregn', emoji: '🌧️' };
+  if (code === 53) return { description: 'Duggregn', emoji: '🌧️' };
+  if (code === 55) return { description: 'Kraftigt duggregn', emoji: '🌧️' };
+  if (code === 56) return { description: 'Lätt underkylt regn', emoji: '🌧️' };
+  if (code === 57) return { description: 'Underkylt regn', emoji: '🌧️' };
+  
+  // Rain
+  if (code === 61) return { description: 'Lätt regn', emoji: '🌧️' };
+  if (code === 63) return { description: 'Regn', emoji: '🌧️' };
+  if (code === 65) return { description: 'Kraftigt regn', emoji: '🌧️' };
+  if (code === 66) return { description: 'Lätt isregn', emoji: '🌧️' };
+  if (code === 67) return { description: 'Isregn', emoji: '🌧️' };
+  
+  // Snow
+  if (code === 71) return { description: 'Lätt snö', emoji: '❄️' };
+  if (code === 73) return { description: 'Snö', emoji: '❄️' };
+  if (code === 75) return { description: 'Kraftigt snöfall', emoji: '❄️' };
+  if (code === 77) return { description: 'Snöhagel', emoji: '❄️' };
+  
+  // Rain showers
+  if (code === 80) return { description: 'Lätta regnskurar', emoji: '🌦️' };
+  if (code === 81) return { description: 'Regnskurar', emoji: '🌦️' };
+  if (code === 82) return { description: 'Skyfall', emoji: '🌦️' };
+  
+  // Snow showers
+  if (code === 85) return { description: 'Lätta snöbyar', emoji: '🌨️' };
+  if (code === 86) return { description: 'Kraftiga snöbyar', emoji: '🌨️' };
+  
+  // Thunderstorm
+  if (code === 95) return { description: 'Åska', emoji: '⛈️' };
+  if (code === 96) return { description: 'Åska med hagel', emoji: '⛈️' };
+  if (code === 99) return { description: 'Kraftig åska', emoji: '⛈️' };
   
   return { description: 'Okänt', emoji: '🌡️' };
 };
