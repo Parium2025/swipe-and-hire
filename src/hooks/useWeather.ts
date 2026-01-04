@@ -13,14 +13,13 @@ interface WeatherData {
 interface UseWeatherOptions {
   /** Used when all location methods fail */
   fallbackCity?: string;
-  /** How often to refresh weather (not location), default 15 min */
+  /** How often to refresh weather, default 15 min */
   refreshMs?: number;
 }
 
 const DEFAULT_REFRESH_MS = 15 * 60 * 1000;
 const LOCATION_CACHE_KEY = 'parium_weather_location';
-const LOCATION_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-const GPS_MAX_AGE = 30 * 60 * 1000; // 30 minutes - reuse GPS for longer
+const MOVEMENT_THRESHOLD_KM = 10; // If moved more than 10km, update location
 
 interface CachedLocation {
   lat: number;
@@ -29,6 +28,19 @@ interface CachedLocation {
   timestamp: number;
   source: 'gps' | 'ip' | 'fallback';
 }
+
+// Calculate distance between two coordinates in km (Haversine formula)
+const getDistanceKm = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
 
 // Weather codes from Open-Meteo API
 const getWeatherInfo = (code: number): { description: string; emoji: string } => {
@@ -51,18 +63,7 @@ const getCachedLocation = (): CachedLocation | null => {
   try {
     const cached = localStorage.getItem(LOCATION_CACHE_KEY);
     if (!cached) return null;
-    
-    const data: CachedLocation = JSON.parse(cached);
-    const age = Date.now() - data.timestamp;
-    
-    // GPS cache is valid longer than IP cache
-    const maxAge = data.source === 'gps' ? LOCATION_CACHE_DURATION : LOCATION_CACHE_DURATION / 2;
-    if (age > maxAge) {
-      localStorage.removeItem(LOCATION_CACHE_KEY);
-      return null;
-    }
-    
-    return data;
+    return JSON.parse(cached);
   } catch {
     return null;
   }
@@ -115,7 +116,6 @@ const getCityName = async (lat: number, lon: number): Promise<string> => {
 
 // IP-based geolocation (no permission required, less accurate)
 const getLocationByIP = async (): Promise<{ lat: number; lon: number; city: string } | null> => {
-  // Try multiple IP geolocation services for redundancy (all HTTPS)
   const services = [
     async () => {
       const response = await fetch('https://ipapi.co/json/');
@@ -180,13 +180,11 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const refreshMs = options.refreshMs ?? DEFAULT_REFRESH_MS;
   const fallbackCity = options.fallbackCity?.trim();
 
-  // Use refs to avoid re-renders and keep stable references
   const locationRef = useRef<CachedLocation | null>(null);
   const initializedRef = useRef(false);
   const mountedRef = useRef(true);
 
   const [weather, setWeather] = useState<WeatherData>(() => {
-    // Initialize with cached data if available for instant display
     const cached = getCachedLocation();
     return {
       temperature: 0,
@@ -204,8 +202,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     setWeather(prev => ({ ...prev, ...data }));
   }, []);
 
-  const fetchWeatherOnly = useCallback(async (lat: number, lon: number, city: string) => {
+  const fetchWeatherOnly = useCallback(async (lat: number, lon: number, city: string, showLoading = false) => {
     try {
+      if (showLoading) updateWeather({ isLoading: true });
+      
       const { temperature, weatherCode } = await fetchCurrentWeather(lat, lon);
       const info = getWeatherInfo(weatherCode);
       
@@ -224,104 +224,112 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     }
   }, [updateWeather]);
 
+  const updateLocation = useCallback(async (newLat: number, newLon: number, knownCity: string | null, source: 'gps' | 'ip' | 'fallback') => {
+    const city = knownCity || await getCityName(newLat, newLon);
+    const newLocation: CachedLocation = { lat: newLat, lon: newLon, city, source, timestamp: Date.now() };
+    setCachedLocation(newLocation);
+    locationRef.current = newLocation;
+    await fetchWeatherOnly(newLat, newLon, city);
+  }, [fetchWeatherOnly]);
+
+  const checkForLocationChange = useCallback(async (silent = true) => {
+    const cached = locationRef.current || getCachedLocation();
+    
+    // Always try GPS first - it's always accurate and real-time
+    if (navigator.geolocation) {
+      const gpsResult = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
+          () => resolve(null),
+          { timeout: 8000, enableHighAccuracy: false, maximumAge: 5 * 60 * 1000 } // 5 min cache for GPS
+        );
+      });
+
+      if (gpsResult && mountedRef.current) {
+        // If we have cached location, check if we've moved significantly
+        if (cached) {
+          const distance = getDistanceKm(cached.lat, cached.lon, gpsResult.lat, gpsResult.lon);
+          if (distance < MOVEMENT_THRESHOLD_KM && cached.source === 'gps') {
+            // Haven't moved much and already have GPS - just update weather
+            await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+            return;
+          }
+        }
+        // New location or moved significantly
+        await updateLocation(gpsResult.lat, gpsResult.lon, null, 'gps');
+        return;
+      }
+    }
+
+    // No GPS available - try IP and compare with cache
+    const ipLocation = await getLocationByIP();
+    if (ipLocation && mountedRef.current) {
+      if (cached) {
+        const distance = getDistanceKm(cached.lat, cached.lon, ipLocation.lat, ipLocation.lon);
+        if (distance < MOVEMENT_THRESHOLD_KM) {
+          // Haven't moved much - use cached location for stability
+          await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+          return;
+        }
+        // Moved significantly - update to new location
+        console.log(`Location changed: moved ${distance.toFixed(1)}km`);
+      }
+      await updateLocation(ipLocation.lat, ipLocation.lon, ipLocation.city, 'ip');
+      return;
+    }
+
+    // If we have cache and nothing else worked, use cache
+    if (cached && mountedRef.current) {
+      await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+      return;
+    }
+
+    // Try fallback city
+    if (fallbackCity && mountedRef.current) {
+      try {
+        const geo = await geocodeCity(fallbackCity);
+        await updateLocation(geo.lat, geo.lon, geo.name, 'fallback');
+        return;
+      } catch {
+        // Fallback city geocoding failed
+      }
+    }
+
+    // All methods failed
+    if (mountedRef.current) {
+      updateWeather({ 
+        isLoading: false, 
+        error: 'unavailable',
+        emoji: getTimeBasedEmoji(),
+      });
+    }
+  }, [fallbackCity, fetchWeatherOnly, updateLocation, updateWeather]);
+
   useEffect(() => {
     mountedRef.current = true;
     
-    const loadLocation = async () => {
-      // Check cache first for instant display
-      const cached = getCachedLocation();
-      if (cached) {
-        locationRef.current = cached;
-        // Fetch weather with cached location immediately (no loading state flicker)
-        await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
-        
-        // If we have GPS and cache is from IP, try to upgrade in background
-        if (cached.source === 'ip' && navigator.geolocation) {
-          // Don't show loading, just try GPS silently
-          navigator.geolocation.getCurrentPosition(
-            async (position) => {
-              const { latitude: lat, longitude: lon } = position.coords;
-              const city = await getCityName(lat, lon);
-              const newLocation: CachedLocation = { lat, lon, city, source: 'gps', timestamp: Date.now() };
-              setCachedLocation(newLocation);
-              locationRef.current = newLocation;
-              // Update weather with new location
-              await fetchWeatherOnly(lat, lon, city);
-            },
-            () => {}, // Silent fail - keep using cached
-            { timeout: 10000, enableHighAccuracy: false, maximumAge: GPS_MAX_AGE }
-          );
-        }
-        return;
-      }
-
-      // No cache - need to get location
-      updateWeather({ isLoading: true });
-
-      // Try GPS first
-      if (navigator.geolocation) {
-        const gpsResult = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
-          navigator.geolocation.getCurrentPosition(
-            (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
-            () => resolve(null),
-            { timeout: 8000, enableHighAccuracy: false, maximumAge: GPS_MAX_AGE }
-          );
-        });
-
-        if (gpsResult && mountedRef.current) {
-          const city = await getCityName(gpsResult.lat, gpsResult.lon);
-          const location: CachedLocation = { ...gpsResult, city, source: 'gps', timestamp: Date.now() };
-          setCachedLocation(location);
-          locationRef.current = location;
-          await fetchWeatherOnly(gpsResult.lat, gpsResult.lon, city);
-          return;
-        }
-      }
-
-      // Try IP geolocation
-      const ipLocation = await getLocationByIP();
-      if (ipLocation && mountedRef.current) {
-        const location: CachedLocation = { ...ipLocation, source: 'ip', timestamp: Date.now() };
-        setCachedLocation(location);
-        locationRef.current = location;
-        await fetchWeatherOnly(ipLocation.lat, ipLocation.lon, ipLocation.city);
-        return;
-      }
-
-      // Try fallback city
-      if (fallbackCity && mountedRef.current) {
-        try {
-          const geo = await geocodeCity(fallbackCity);
-          const location: CachedLocation = { lat: geo.lat, lon: geo.lon, city: geo.name, source: 'fallback', timestamp: Date.now() };
-          setCachedLocation(location);
-          locationRef.current = location;
-          await fetchWeatherOnly(geo.lat, geo.lon, geo.name);
-          return;
-        } catch {
-          // Fallback city geocoding failed
-        }
-      }
-
-      // All methods failed
-      if (mountedRef.current) {
-        updateWeather({ 
-          isLoading: false, 
-          error: 'unavailable',
-          emoji: getTimeBasedEmoji(),
-        });
-      }
-    };
-
     // Initial load
     if (!initializedRef.current) {
       initializedRef.current = true;
-      loadLocation();
+      
+      // Show cached data immediately if available
+      const cached = getCachedLocation();
+      if (cached) {
+        locationRef.current = cached;
+        // Fetch weather with cache first, then check for location change in background
+        fetchWeatherOnly(cached.lat, cached.lon, cached.city).then(() => {
+          // After showing cached, check if we've moved
+          checkForLocationChange(true);
+        });
+      } else {
+        // No cache - do full location check
+        checkForLocationChange(false);
+      }
     }
 
-    // Refresh weather periodically (not location - that's cached)
-    const interval = setInterval(() => {
+    // Refresh weather periodically
+    const weatherInterval = setInterval(() => {
       if (locationRef.current && mountedRef.current) {
-        // Silent refresh - no loading state
         fetchWeatherOnly(
           locationRef.current.lat, 
           locationRef.current.lon, 
@@ -330,11 +338,20 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       }
     }, refreshMs);
 
+    // Listen for network changes - user might have moved to new wifi/location
+    const handleOnline = () => {
+      console.log('Network changed - checking location...');
+      checkForLocationChange(true);
+    };
+
+    window.addEventListener('online', handleOnline);
+
     return () => {
       mountedRef.current = false;
-      clearInterval(interval);
+      clearInterval(weatherInterval);
+      window.removeEventListener('online', handleOnline);
     };
-  }, [fallbackCity, refreshMs, fetchWeatherOnly, updateWeather]);
+  }, [fallbackCity, refreshMs, fetchWeatherOnly, checkForLocationChange]);
 
   return weather;
 };
