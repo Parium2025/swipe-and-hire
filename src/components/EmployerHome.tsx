@@ -214,7 +214,15 @@ const EmployerHome = memo(() => {
       >
         <div className="flex items-center gap-2 justify-center md:justify-start">
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-            {greetingText}, {firstName} {displayEmoji}
+            {greetingText}, {firstName}{' '}
+            {displayEmoji.includes('✨') ? (
+              <>
+                {displayEmoji.replace('✨', '')}
+                <span className="animate-sparkle">✨</span>
+              </>
+            ) : (
+              displayEmoji
+            )}
           </h1>
         </div>
         <DateTimeDisplay />

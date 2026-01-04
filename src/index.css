@@ -1150,3 +1150,20 @@ All colors MUST be HSL.
   }
 }
 
+/* Sparkle/glitter animation for stars */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle 1.5s ease-in-out infinite;
+  display: inline-block;
+}
+
