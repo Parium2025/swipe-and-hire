@@ -203,7 +203,7 @@ const EmployerHome = memo(() => {
     }
     if (weatherCode === 2) {
       // Partly cloudy evening - moon with clouds
-      return '🌙☁️';
+      return '🌙 ☁️';
     }
     // Overcast, rain, snow, etc. - just show weather (moon not visible)
     return getEmojiForCode(weatherCode);
