@@ -287,14 +287,15 @@ const RainShowersEffect = memo(() => {
 
 RainShowersEffect.displayName = 'RainShowersEffect';
 
-// Snow Effect - Gentle and slow
+// Snow Effect - Continuous gentle snow
 const SnowEffect = memo(() => {
   const flakes = useMemo(() => 
-    Array.from({ length: 20 }).map((_, i) => ({
+    Array.from({ length: 40 }).map((_, i) => ({
       id: i,
-      left: (i / 20) * 100 + Math.random() * 5 - 2.5,
-      delay: Math.random() * 8,
-      duration: 12 + Math.random() * 8,
+      left: (i / 40) * 100 + Math.random() * 5 - 2.5,
+      // Spread delays evenly across the duration so there's always snow falling
+      delay: (i / 40) * 12,
+      duration: 12 + Math.random() * 4,
       size: 3 + Math.random() * 4,
       opacity: 0.3 + Math.random() * 0.25,
       swayAmount: 10 + Math.random() * 15,
@@ -340,14 +341,15 @@ const SnowEffect = memo(() => {
 
 SnowEffect.displayName = 'SnowEffect';
 
-// Snow Showers Effect - Slightly faster and more intense
+// Snow Showers Effect - Slightly faster and more intense, continuous
 const SnowShowersEffect = memo(() => {
   const flakes = useMemo(() => 
-    Array.from({ length: 30 }).map((_, i) => ({
+    Array.from({ length: 50 }).map((_, i) => ({
       id: i,
-      left: (i / 30) * 100 + Math.random() * 4 - 2,
-      delay: Math.random() * 5,
-      duration: 8 + Math.random() * 5,
+      left: (i / 50) * 100 + Math.random() * 4 - 2,
+      // Spread delays evenly across the duration
+      delay: (i / 50) * 8,
+      duration: 8 + Math.random() * 3,
       size: 3 + Math.random() * 5,
       opacity: 0.35 + Math.random() * 0.3,
       swayAmount: 12 + Math.random() * 18,
