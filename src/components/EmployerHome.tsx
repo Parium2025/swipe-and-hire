@@ -170,7 +170,38 @@ const EmployerHome = memo(() => {
   }, [jobs]);
 
   const firstName = profile?.first_name || 'du';
-  const { text: greetingText, isEvening } = getGreeting();
+  
+  // Reactive greeting that updates automatically
+  const [greeting, setGreeting] = useState(() => getGreeting());
+  
+  useEffect(() => {
+    // Calculate ms until next minute (sync with clock)
+    const now = new Date();
+    const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+    
+    // First sync to the exact minute change
+    const syncTimeout = setTimeout(() => {
+      setGreeting(getGreeting());
+      
+      // Then update every 60 seconds exactly on the minute
+      const interval = setInterval(() => {
+        setGreeting(getGreeting());
+      }, 60000);
+      
+      // Store interval for cleanup
+      (window as any).__greetingInterval = interval;
+    }, msUntilNextMinute);
+    
+    return () => {
+      clearTimeout(syncTimeout);
+      if ((window as any).__greetingInterval) {
+        clearInterval((window as any).__greetingInterval);
+      }
+    };
+  }, []);
+  
+  const { text: greetingText, isEvening } = greeting;
+  
   const weather = useWeather({
     fallbackCity: profile?.location || profile?.home_location || profile?.address || 'Stockholm',
   });
