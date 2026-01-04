@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface WeatherData {
   temperature: number;
@@ -13,11 +13,22 @@ interface WeatherData {
 interface UseWeatherOptions {
   /** Used when all location methods fail */
   fallbackCity?: string;
-  /** How often to refresh, without re-requesting geolocation permission */
+  /** How often to refresh weather (not location), default 15 min */
   refreshMs?: number;
 }
 
 const DEFAULT_REFRESH_MS = 15 * 60 * 1000;
+const LOCATION_CACHE_KEY = 'parium_weather_location';
+const LOCATION_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+const GPS_MAX_AGE = 30 * 60 * 1000; // 30 minutes - reuse GPS for longer
+
+interface CachedLocation {
+  lat: number;
+  lon: number;
+  city: string;
+  timestamp: number;
+  source: 'gps' | 'ip' | 'fallback';
+}
 
 // Weather codes from Open-Meteo API
 const getWeatherInfo = (code: number): { description: string; emoji: string } => {
@@ -33,6 +44,37 @@ const getWeatherInfo = (code: number): { description: string; emoji: string } =>
   if (code >= 85 && code <= 86) return { description: 'snöbyar', emoji: '🌨️' };
   if (code >= 95 && code <= 99) return { description: 'åska', emoji: '⛈️' };
   return { description: 'okänt', emoji: '🌡️' };
+};
+
+// Cache helpers
+const getCachedLocation = (): CachedLocation | null => {
+  try {
+    const cached = localStorage.getItem(LOCATION_CACHE_KEY);
+    if (!cached) return null;
+    
+    const data: CachedLocation = JSON.parse(cached);
+    const age = Date.now() - data.timestamp;
+    
+    // GPS cache is valid longer than IP cache
+    const maxAge = data.source === 'gps' ? LOCATION_CACHE_DURATION : LOCATION_CACHE_DURATION / 2;
+    if (age > maxAge) {
+      localStorage.removeItem(LOCATION_CACHE_KEY);
+      return null;
+    }
+    
+    return data;
+  } catch {
+    return null;
+  }
+};
+
+const setCachedLocation = (location: Omit<CachedLocation, 'timestamp'>) => {
+  try {
+    const data: CachedLocation = { ...location, timestamp: Date.now() };
+    localStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // Silent fail
+  }
 };
 
 const fetchCurrentWeather = async (lat: number, lon: number) => {
@@ -126,136 +168,6 @@ const geocodeCity = async (city: string): Promise<{ lat: number; lon: number; na
   };
 };
 
-export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
-  const refreshMs = options.refreshMs ?? DEFAULT_REFRESH_MS;
-  const fallbackCity = options.fallbackCity?.trim();
-
-  const coordsRef = useRef<{ lat: number; lon: number } | null>(null);
-  const cityRef = useRef<string>('');
-
-  const [weather, setWeather] = useState<WeatherData>({
-    temperature: 0,
-    weatherCode: 0,
-    description: '',
-    emoji: getTimeBasedEmoji(),
-    city: '',
-    isLoading: true,
-    error: null,
-  });
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const applyWeather = (payload: { temperature: number; weatherCode: number; city: string }) => {
-      const info = getWeatherInfo(payload.weatherCode);
-      cityRef.current = payload.city;
-      setWeather({
-        temperature: payload.temperature,
-        weatherCode: payload.weatherCode,
-        description: info.description,
-        emoji: info.emoji,
-        city: payload.city,
-        isLoading: false,
-        error: null,
-      });
-    };
-
-    const fail = () => {
-      setWeather({
-        temperature: 0,
-        weatherCode: 0,
-        description: '',
-        emoji: getTimeBasedEmoji(),
-        city: '',
-        isLoading: false,
-        error: 'unavailable',
-      });
-    };
-
-    const fetchByCoords = async (lat: number, lon: number, knownCity?: string) => {
-      const [{ temperature, weatherCode }, city] = await Promise.all([
-        fetchCurrentWeather(lat, lon),
-        knownCity ? Promise.resolve(knownCity) : getCityName(lat, lon),
-      ]);
-      coordsRef.current = { lat, lon };
-      applyWeather({ temperature, weatherCode, city });
-    };
-
-    const fetchByCity = async (city: string) => {
-      const geo = await geocodeCity(city);
-      const { temperature, weatherCode } = await fetchCurrentWeather(geo.lat, geo.lon);
-      coordsRef.current = { lat: geo.lat, lon: geo.lon };
-      applyWeather({ temperature, weatherCode, city: geo.name });
-    };
-
-    const load = async ({ cacheOnly }: { cacheOnly?: boolean } = {}) => {
-      if (!cacheOnly) {
-        setWeather(prev => ({ ...prev, isLoading: true, error: null }));
-      }
-
-      try {
-        // If we already have coords from a previous successful fetch, just refresh weather
-        if (coordsRef.current) {
-          await fetchByCoords(coordsRef.current.lat, coordsRef.current.lon, cityRef.current);
-          return;
-        }
-
-        // Try GPS geolocation first (will prompt for permission only if not already granted)
-        if (!cacheOnly && navigator.geolocation) {
-          const gpsResult = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
-            navigator.geolocation.getCurrentPosition(
-              (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
-              () => resolve(null), // Permission denied or error - silent fail
-              { timeout: 5000, enableHighAccuracy: false, maximumAge: 10 * 60 * 1000 }
-            );
-          });
-
-          if (gpsResult && !cancelled) {
-            await fetchByCoords(gpsResult.lat, gpsResult.lon);
-            return;
-          }
-        }
-
-        // Fallback: IP-based geolocation (no permission required)
-        if (!cacheOnly) {
-          const ipLocation = await getLocationByIP();
-          if (ipLocation && !cancelled) {
-            await fetchByCoords(ipLocation.lat, ipLocation.lon, ipLocation.city);
-            return;
-          }
-        }
-
-        // Fallback: use configured fallback city
-        if (fallbackCity) {
-          await fetchByCity(fallbackCity);
-          return;
-        }
-
-        // All methods failed
-        throw new Error('No location available');
-      } catch (err) {
-        if (cancelled) return;
-        console.error('Weather load error:', err);
-        fail();
-      }
-    };
-
-    void load();
-
-    const interval = window.setInterval(() => {
-      if (cancelled) return;
-      void load({ cacheOnly: true });
-    }, refreshMs);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, [fallbackCity, refreshMs]);
-
-  return weather;
-};
-
 // Fallback emoji based on time of day
 function getTimeBasedEmoji(): string {
   const hour = new Date().getHours();
@@ -263,3 +175,166 @@ function getTimeBasedEmoji(): string {
   if (hour >= 12 && hour < 18) return '👋';
   return '🌙';
 }
+
+export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
+  const refreshMs = options.refreshMs ?? DEFAULT_REFRESH_MS;
+  const fallbackCity = options.fallbackCity?.trim();
+
+  // Use refs to avoid re-renders and keep stable references
+  const locationRef = useRef<CachedLocation | null>(null);
+  const initializedRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  const [weather, setWeather] = useState<WeatherData>(() => {
+    // Initialize with cached data if available for instant display
+    const cached = getCachedLocation();
+    return {
+      temperature: 0,
+      weatherCode: 0,
+      description: '',
+      emoji: getTimeBasedEmoji(),
+      city: cached?.city || '',
+      isLoading: true,
+      error: null,
+    };
+  });
+
+  const updateWeather = useCallback((data: Partial<WeatherData>) => {
+    if (!mountedRef.current) return;
+    setWeather(prev => ({ ...prev, ...data }));
+  }, []);
+
+  const fetchWeatherOnly = useCallback(async (lat: number, lon: number, city: string) => {
+    try {
+      const { temperature, weatherCode } = await fetchCurrentWeather(lat, lon);
+      const info = getWeatherInfo(weatherCode);
+      
+      updateWeather({
+        temperature,
+        weatherCode,
+        description: info.description,
+        emoji: info.emoji,
+        city,
+        isLoading: false,
+        error: null,
+      });
+    } catch (err) {
+      console.error('Weather fetch error:', err);
+      updateWeather({ isLoading: false, error: 'unavailable' });
+    }
+  }, [updateWeather]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    
+    const loadLocation = async () => {
+      // Check cache first for instant display
+      const cached = getCachedLocation();
+      if (cached) {
+        locationRef.current = cached;
+        // Fetch weather with cached location immediately (no loading state flicker)
+        await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+        
+        // If we have GPS and cache is from IP, try to upgrade in background
+        if (cached.source === 'ip' && navigator.geolocation) {
+          // Don't show loading, just try GPS silently
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const { latitude: lat, longitude: lon } = position.coords;
+              const city = await getCityName(lat, lon);
+              const newLocation: CachedLocation = { lat, lon, city, source: 'gps', timestamp: Date.now() };
+              setCachedLocation(newLocation);
+              locationRef.current = newLocation;
+              // Update weather with new location
+              await fetchWeatherOnly(lat, lon, city);
+            },
+            () => {}, // Silent fail - keep using cached
+            { timeout: 10000, enableHighAccuracy: false, maximumAge: GPS_MAX_AGE }
+          );
+        }
+        return;
+      }
+
+      // No cache - need to get location
+      updateWeather({ isLoading: true });
+
+      // Try GPS first
+      if (navigator.geolocation) {
+        const gpsResult = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
+          navigator.geolocation.getCurrentPosition(
+            (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
+            () => resolve(null),
+            { timeout: 8000, enableHighAccuracy: false, maximumAge: GPS_MAX_AGE }
+          );
+        });
+
+        if (gpsResult && mountedRef.current) {
+          const city = await getCityName(gpsResult.lat, gpsResult.lon);
+          const location: CachedLocation = { ...gpsResult, city, source: 'gps', timestamp: Date.now() };
+          setCachedLocation(location);
+          locationRef.current = location;
+          await fetchWeatherOnly(gpsResult.lat, gpsResult.lon, city);
+          return;
+        }
+      }
+
+      // Try IP geolocation
+      const ipLocation = await getLocationByIP();
+      if (ipLocation && mountedRef.current) {
+        const location: CachedLocation = { ...ipLocation, source: 'ip', timestamp: Date.now() };
+        setCachedLocation(location);
+        locationRef.current = location;
+        await fetchWeatherOnly(ipLocation.lat, ipLocation.lon, ipLocation.city);
+        return;
+      }
+
+      // Try fallback city
+      if (fallbackCity && mountedRef.current) {
+        try {
+          const geo = await geocodeCity(fallbackCity);
+          const location: CachedLocation = { lat: geo.lat, lon: geo.lon, city: geo.name, source: 'fallback', timestamp: Date.now() };
+          setCachedLocation(location);
+          locationRef.current = location;
+          await fetchWeatherOnly(geo.lat, geo.lon, geo.name);
+          return;
+        } catch {
+          // Fallback city geocoding failed
+        }
+      }
+
+      // All methods failed
+      if (mountedRef.current) {
+        updateWeather({ 
+          isLoading: false, 
+          error: 'unavailable',
+          emoji: getTimeBasedEmoji(),
+        });
+      }
+    };
+
+    // Initial load
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      loadLocation();
+    }
+
+    // Refresh weather periodically (not location - that's cached)
+    const interval = setInterval(() => {
+      if (locationRef.current && mountedRef.current) {
+        // Silent refresh - no loading state
+        fetchWeatherOnly(
+          locationRef.current.lat, 
+          locationRef.current.lon, 
+          locationRef.current.city
+        );
+      }
+    }, refreshMs);
+
+    return () => {
+      mountedRef.current = false;
+      clearInterval(interval);
+    };
+  }, [fallbackCity, refreshMs, fetchWeatherOnly, updateWeather]);
+
+  return weather;
+};
