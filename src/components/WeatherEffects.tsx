@@ -126,8 +126,6 @@ const RainEffect = memo(() => {
           }}
           animate={{
             y: ['0vh', '115vh'],
-            x: ['0vw', '20vw'], // Wind pushing rain to the right
-            rotate: 20, // Constant slant angle
           }}
           transition={{
             duration: drop.duration,
@@ -171,8 +169,6 @@ const RainShowersEffect = memo(() => {
           }}
           animate={{
             y: ['0vh', '112vh'],
-            x: ['0vw', '12vw'], // Lighter wind
-            rotate: 15, // Lighter slant
           }}
           transition={{
             duration: drop.duration,
@@ -363,8 +359,6 @@ const ThunderEffect = memo(() => {
           }}
           animate={{
             y: ['0vh', '115vh'],
-            x: ['0vw', '25vw'], // Strong storm wind
-            rotate: 25, // Strong slant for storm
           }}
           transition={{
             duration: drop.duration,
