@@ -74,10 +74,10 @@ const Particle = memo(({ type, index, total }: ParticleProps) => {
     );
   }
 
-  // Snow
+  // Snow - kritvit
   return (
     <motion.div
-      className="absolute bg-foreground/20 rounded-full"
+      className="absolute bg-white rounded-full"
       style={{
         left: `${startX}%`,
         top: -20,
