@@ -73,37 +73,43 @@ const getCityName = async (lat: number, lon: number): Promise<string> => {
 
 // IP-based geolocation (no permission required, less accurate)
 const getLocationByIP = async (): Promise<{ lat: number; lon: number; city: string } | null> => {
-  try {
-    // Using ip-api.com (free, no API key required)
-    const response = await fetch('http://ip-api.com/json/?fields=status,city,lat,lon&lang=sv');
-    const data = await response.json();
-    
-    if (data.status === 'success' && data.lat && data.lon) {
-      return {
-        lat: data.lat,
-        lon: data.lon,
-        city: data.city || '',
-      };
-    }
-    return null;
-  } catch {
-    // Fallback to ipapi.co (HTTPS, also free)
-    try {
+  // Try multiple IP geolocation services for redundancy (all HTTPS)
+  const services = [
+    async () => {
       const response = await fetch('https://ipapi.co/json/');
       const data = await response.json();
-      
       if (data.latitude && data.longitude) {
-        return {
-          lat: data.latitude,
-          lon: data.longitude,
-          city: data.city || '',
-        };
+        return { lat: data.latitude, lon: data.longitude, city: data.city || '' };
       }
+      return null;
+    },
+    async () => {
+      const response = await fetch('https://ipwho.is/');
+      const data = await response.json();
+      if (data.success && data.latitude && data.longitude) {
+        return { lat: data.latitude, lon: data.longitude, city: data.city || '' };
+      }
+      return null;
+    },
+    async () => {
+      const response = await fetch('https://freeipapi.com/api/json');
+      const data = await response.json();
+      if (data.latitude && data.longitude) {
+        return { lat: data.latitude, lon: data.longitude, city: data.cityName || '' };
+      }
+      return null;
+    },
+  ];
+
+  for (const service of services) {
+    try {
+      const result = await service();
+      if (result) return result;
     } catch {
-      // Silent fail
+      // Try next service
     }
-    return null;
   }
+  return null;
 };
 
 const geocodeCity = async (city: string): Promise<{ lat: number; lon: number; name: string }> => {
