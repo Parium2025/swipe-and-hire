@@ -151,6 +151,7 @@ const EmployerHome = memo(() => {
   }, [jobs]);
 
   const firstName = profile?.first_name || 'du';
+  const [showPreview, setShowPreview] = useState(false);
   const [previewEvening, setPreviewEvening] = useState(false);
   const [previewWeatherCode, setPreviewWeatherCode] = useState<number | null>(null);
   const { text: greetingText, isEvening: realIsEvening } = getGreeting();
@@ -251,38 +252,73 @@ const EmployerHome = memo(() => {
           </p>
         )}
         {/* Temporary preview controls - REMOVE AFTER TESTING */}
-        <div className="mt-3 p-3 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20 max-w-md">
-          <p className="text-xs text-white/70 mb-2 font-medium">🛠️ Förhandsgranska väder & tid:</p>
-          
-          {/* Evening toggle */}
-          <button 
-            onClick={() => setPreviewEvening(!previewEvening)}
-            className={`px-3 py-1.5 text-xs rounded-md mr-2 mb-2 transition-all ${
-              previewEvening 
-                ? 'bg-indigo-500 text-white' 
-                : 'bg-white/20 text-white/80 hover:bg-white/30'
-            }`}
-          >
-            {previewEvening ? '🌙 Kväll PÅ' : '☀️ Dag'}
-          </button>
-          
-          {/* Weather options */}
-          <div className="flex flex-wrap gap-1">
-            {weatherOptions.map((option) => (
-              <button
-                key={option.code ?? 'real'}
-                onClick={() => setPreviewWeatherCode(option.code)}
-                className={`px-2 py-1 text-xs rounded-md transition-all ${
-                  previewWeatherCode === option.code
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white/20 text-white/80 hover:bg-white/30'
+        <button 
+          onClick={() => setShowPreview(!showPreview)}
+          className="mt-2 text-xs text-white/50 hover:text-white/80 underline"
+        >
+          {showPreview ? '✕ Stäng förhandsgranskning' : '🛠️ Förhandsgranska väder'}
+        </button>
+        
+        {showPreview && (
+          <div className="mt-3 p-4 bg-black/40 rounded-xl backdrop-blur-md border border-white/20 max-w-lg animate-fade-in">
+            <p className="text-sm text-white/90 mb-3 font-medium">Välj väder att förhandsgranska:</p>
+            
+            {/* Time of day toggle */}
+            <div className="flex gap-2 mb-3">
+              <button 
+                onClick={() => setPreviewEvening(false)}
+                className={`flex-1 px-4 py-2 text-sm rounded-lg transition-all ${
+                  !previewEvening 
+                    ? 'bg-amber-500 text-white shadow-lg' 
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
                 }`}
               >
-                {option.emoji} {option.label}
+                ☀️ Dag
               </button>
-            ))}
+              <button 
+                onClick={() => setPreviewEvening(true)}
+                className={`flex-1 px-4 py-2 text-sm rounded-lg transition-all ${
+                  previewEvening 
+                    ? 'bg-indigo-500 text-white shadow-lg' 
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                🌙 Kväll
+              </button>
+            </div>
+            
+            {/* Weather options grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {weatherOptions.map((option) => (
+                <button
+                  key={option.code ?? 'real'}
+                  onClick={() => setPreviewWeatherCode(option.code)}
+                  className={`px-3 py-2 text-sm rounded-lg transition-all flex flex-col items-center gap-1 ${
+                    previewWeatherCode === option.code
+                      ? 'bg-blue-500 text-white shadow-lg ring-2 ring-blue-300'
+                      : 'bg-white/10 text-white/80 hover:bg-white/20'
+                  }`}
+                >
+                  <span className="text-xl">{option.emoji}</span>
+                  <span className="text-xs">{option.label}</span>
+                </button>
+              ))}
+            </div>
+            
+            {/* Reset button */}
+            {(previewWeatherCode !== null || previewEvening) && (
+              <button
+                onClick={() => {
+                  setPreviewWeatherCode(null);
+                  setPreviewEvening(false);
+                }}
+                className="mt-3 w-full px-3 py-2 text-xs rounded-lg bg-white/10 text-white/70 hover:bg-white/20 transition-all"
+              >
+                ↩️ Återställ till verkligt väder
+              </button>
+            )}
           </div>
-        </div>
+        )}
       </motion.div>
 
       {/* Stats grid */}
