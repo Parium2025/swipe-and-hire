@@ -97,7 +97,7 @@ const StatCard = memo(({ icon: Icon, title, value, subtitle, gradient, glowColor
 StatCard.displayName = 'StatCard';
 
 const DateTimeDisplay = memo(() => {
-  const [dateTime, setDateTime] = useState(formatDateTime);
+  const [dateTime, setDateTime] = useState(() => formatDateTime());
   
   useEffect(() => {
     // Calculate ms until next minute (sync with clock)
