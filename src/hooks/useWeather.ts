@@ -68,7 +68,7 @@ const getWeatherInfo = (code: number, isNight: boolean): { description: string; 
   
   // Partly cloudy
   if (code === 1) return { description: 'Mestadels klart', emoji: isNight ? '🌙' : '🌤️' };
-  if (code === 2) return { description: 'Halvklart', emoji: isNight ? '🌙☁️' : '⛅' };
+  if (code === 2) return { description: 'Halvklart', emoji: isNight ? '🌙 ☁️' : '⛅' };
   
   // Overcast
   if (code === 3) return { description: 'Molnigt', emoji: '☁️' };
