@@ -18,12 +18,12 @@ export interface StageSettings {
   orderIndex: number;
 }
 
-// Default settings for built-in stages
+// Default settings for built-in stages (using gradient IDs instead of hex colors)
 const DEFAULT_STAGES: Record<string, StageSettings> = {
-  to_contact: { label: 'Att kontakta', color: '#0EA5E9', iconName: 'phone', isCustom: false, orderIndex: 0 },
-  interview: { label: 'Intervju', color: '#8B5CF6', iconName: 'calendar', isCustom: false, orderIndex: 1 },
-  offer: { label: 'Erbjudande', color: '#F59E0B', iconName: 'gift', isCustom: false, orderIndex: 2 },
-  hired: { label: 'Anställd', color: '#10B981', iconName: 'star', isCustom: false, orderIndex: 3 },
+  to_contact: { label: 'Att kontakta', color: 'ocean', iconName: 'phone', isCustom: false, orderIndex: 0 },
+  interview: { label: 'Intervju', color: 'violet', iconName: 'calendar', isCustom: false, orderIndex: 1 },
+  offer: { label: 'Erbjudande', color: 'sunset', iconName: 'gift', isCustom: false, orderIndex: 2 },
+  hired: { label: 'Anställd', color: 'emerald', iconName: 'star', isCustom: false, orderIndex: 3 },
 };
 
 export const DEFAULT_STAGE_KEYS = ['to_contact', 'interview', 'offer', 'hired'] as const;
@@ -52,19 +52,96 @@ export const AVAILABLE_ICONS: { name: string; Icon: LucideIcon; label: string }[
   { name: 'trophy', Icon: Trophy, label: 'Trofé' },
 ];
 
-// Available colors for selection
-export const AVAILABLE_COLORS = [
-  { value: '#0EA5E9', label: 'Blå' },
-  { value: '#8B5CF6', label: 'Lila' },
-  { value: '#F59E0B', label: 'Orange' },
-  { value: '#10B981', label: 'Grön' },
-  { value: '#EF4444', label: 'Röd' },
-  { value: '#EC4899', label: 'Rosa' },
-  { value: '#6366F1', label: 'Indigo' },
-  { value: '#14B8A6', label: 'Turkos' },
-  { value: '#84CC16', label: 'Lime' },
-  { value: '#F97316', label: 'Mörk orange' },
+// Premium gradient presets - matching the Home page stat cards
+export interface GradientPreset {
+  id: string;
+  label: string;
+  // CSS gradient for column header backgrounds
+  gradient: string;
+  // Solid color fallback for badges, borders etc.
+  solidColor: string;
+  // Glow color for hover effects
+  glowColor: string;
+}
+
+export const PREMIUM_GRADIENTS: GradientPreset[] = [
+  {
+    id: 'emerald',
+    label: 'Smaragd',
+    gradient: 'linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(13, 148, 136, 0.85) 50%, rgba(15, 118, 110, 0.9) 100%)',
+    solidColor: '#10B981',
+    glowColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  {
+    id: 'ocean',
+    label: 'Ocean',
+    gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(79, 70, 229, 0.85) 50%, rgba(99, 102, 241, 0.9) 100%)',
+    solidColor: '#3B82F6',
+    glowColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  {
+    id: 'violet',
+    label: 'Violett',
+    gradient: 'linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(147, 51, 234, 0.85) 50%, rgba(126, 34, 206, 0.9) 100%)',
+    solidColor: '#8B5CF6',
+    glowColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  {
+    id: 'sunset',
+    label: 'Solnedgång',
+    gradient: 'linear-gradient(135deg, rgba(251, 191, 36, 0.9) 0%, rgba(245, 158, 11, 0.85) 50%, rgba(234, 88, 12, 0.9) 100%)',
+    solidColor: '#F59E0B',
+    glowColor: 'rgba(251, 191, 36, 0.3)',
+  },
+  {
+    id: 'rose',
+    label: 'Ros',
+    gradient: 'linear-gradient(135deg, rgba(244, 114, 182, 0.9) 0%, rgba(236, 72, 153, 0.85) 50%, rgba(219, 39, 119, 0.9) 100%)',
+    solidColor: '#EC4899',
+    glowColor: 'rgba(244, 114, 182, 0.3)',
+  },
+  {
+    id: 'coral',
+    label: 'Korall',
+    gradient: 'linear-gradient(135deg, rgba(251, 113, 133, 0.9) 0%, rgba(244, 63, 94, 0.85) 50%, rgba(225, 29, 72, 0.9) 100%)',
+    solidColor: '#F43F5E',
+    glowColor: 'rgba(251, 113, 133, 0.3)',
+  },
+  {
+    id: 'cyan',
+    label: 'Cyan',
+    gradient: 'linear-gradient(135deg, rgba(34, 211, 238, 0.9) 0%, rgba(6, 182, 212, 0.85) 50%, rgba(8, 145, 178, 0.9) 100%)',
+    solidColor: '#06B6D4',
+    glowColor: 'rgba(34, 211, 238, 0.3)',
+  },
+  {
+    id: 'lime',
+    label: 'Lime',
+    gradient: 'linear-gradient(135deg, rgba(163, 230, 53, 0.9) 0%, rgba(132, 204, 22, 0.85) 50%, rgba(101, 163, 13, 0.9) 100%)',
+    solidColor: '#84CC16',
+    glowColor: 'rgba(163, 230, 53, 0.3)',
+  },
 ];
+
+// Get gradient preset by ID or solid color
+export function getGradientPreset(colorOrId: string): GradientPreset | null {
+  // First try to find by ID
+  const byId = PREMIUM_GRADIENTS.find(g => g.id === colorOrId);
+  if (byId) return byId;
+  
+  // Then try to find by solid color (for legacy support)
+  const byColor = PREMIUM_GRADIENTS.find(g => g.solidColor.toLowerCase() === colorOrId.toLowerCase());
+  if (byColor) return byColor;
+  
+  return null;
+}
+
+// Legacy support: old AVAILABLE_COLORS for backwards compatibility
+export const AVAILABLE_COLORS = PREMIUM_GRADIENTS.map(g => ({
+  value: g.id,
+  label: g.label,
+  solidColor: g.solidColor,
+}));
 
 // Get icon component by name
 export function getIconByName(iconName: string): LucideIcon {

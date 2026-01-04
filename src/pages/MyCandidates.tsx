@@ -80,7 +80,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
-import { useStageSettings, getIconByName, DEFAULT_STAGE_KEYS, CandidateStage } from '@/hooks/useStageSettings';
+import { useStageSettings, getIconByName, DEFAULT_STAGE_KEYS, CandidateStage, getGradientPreset, PREMIUM_GRADIENTS } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
 
@@ -347,8 +347,14 @@ const StageColumn = ({
     disabled: isReadOnly,
   });
 
-  // Use live color while dragging, fall back to saved color
-  const displayColor = liveColor ?? stageSettings.color;
+  // Get gradient preset for the color - use live color while dragging
+  const colorValue = liveColor ?? stageSettings.color;
+  const gradientPreset = getGradientPreset(colorValue);
+  
+  // Fallback for legacy hex colors
+  const displayGradient = gradientPreset?.gradient || `linear-gradient(135deg, ${colorValue}cc 0%, ${colorValue}99 100%)`;
+  const displaySolidColor = gradientPreset?.solidColor || colorValue;
+  const displayGlowColor = gradientPreset?.glowColor || `${colorValue}4d`;
 
   // Check scroll position to show/hide indicators
   const checkScroll = useCallback(() => {
@@ -374,15 +380,30 @@ const StageColumn = ({
       className="flex-none w-[calc((100%-3rem)/5)] flex flex-col transition-colors h-full min-w-0"
     >
       <div 
-        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
-        style={{ backgroundColor: `${displayColor}33` }}
+        className={`group relative overflow-hidden rounded-xl px-3 py-2.5 mb-2 transition-all flex-shrink-0 ${isOver ? 'ring-2 ring-white/50' : 'ring-1 ring-inset ring-white/20'}`}
+        style={{ background: displayGradient }}
       >
-        <div className="flex items-center gap-1.5 min-w-0">
-          <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
+        {/* Glass overlay */}
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        
+        {/* Glow effect on hover */}
+        <div 
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"
+          style={{ backgroundColor: displayGlowColor }}
+        />
+        
+        {/* Decorative elements */}
+        <div className="absolute -right-2 -top-2 w-12 h-12 bg-white/10 rounded-full blur-xl" />
+        <div className="absolute -left-2 -bottom-2 w-8 h-8 bg-white/10 rounded-full blur-lg" />
+        
+        <div className="relative flex items-center gap-1.5 min-w-0">
+          <div className="p-1.5 rounded-lg bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
+            <Icon className="h-3.5 w-3.5 text-white" strokeWidth={1.5} />
+          </div>
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="font-medium text-xs text-white truncate cursor-default flex-1 min-w-0">{stageSettings.label}</span>
+                <span className="font-semibold text-xs text-white truncate cursor-default flex-1 min-w-0 drop-shadow-sm">{stageSettings.label}</span>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs">
                 <p>{stageSettings.label}</p>
@@ -390,8 +411,7 @@ const StageColumn = ({
             </Tooltip>
           </TooltipProvider>
           <span 
-            className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: `${displayColor}66` }}
+            className="text-white text-[10px] px-2 py-0.5 rounded-full flex-shrink-0 font-medium bg-white/20 backdrop-blur-sm"
           >
             {candidates.length}
           </span>
