@@ -14,12 +14,10 @@ import {
   Plus,
   ArrowRight,
   Clock,
-  CloudSun,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { isJobExpiredCheck } from '@/lib/date';
 import WeatherEffects from '@/components/WeatherEffects';
-import WeatherPreview from '@/components/WeatherPreview';
 
 const getGreeting = (): string => {
   const hour = new Date().getHours();
@@ -123,8 +121,6 @@ const EmployerHome = memo(() => {
   const { jobs, isLoading } = useJobsData({ scope: 'personal' });
   
   const [showContent, setShowContent] = useState(false);
-  const [showWeatherPreview, setShowWeatherPreview] = useState(false);
-  const [previewEmoji, setPreviewEmoji] = useState<string | null>(null);
   
   useEffect(() => {
     if (!isLoading) {
@@ -170,17 +166,7 @@ const EmployerHome = memo(() => {
 
   return (
     <>
-      {showWeatherPreview ? (
-        <WeatherPreview 
-          onClose={() => {
-            setShowWeatherPreview(false);
-            setPreviewEmoji(null);
-          }} 
-          onEmojiChange={setPreviewEmoji}
-        />
-      ) : (
-        <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} />
-      )}
+      <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} />
       <div className="space-y-8 max-w-5xl mx-auto px-4 md:px-8 py-6 animate-fade-in relative z-10">
       {/* Personal greeting */}
       <motion.div
@@ -191,15 +177,8 @@ const EmployerHome = memo(() => {
       >
         <div className="flex items-center gap-2 justify-center md:justify-start">
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-            {greeting}, {firstName} {showWeatherPreview && previewEmoji ? previewEmoji : weather.emoji}
+            {greeting}, {firstName} {weather.emoji}
           </h1>
-          <button
-            onClick={() => setShowWeatherPreview(true)}
-            className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors opacity-50 hover:opacity-100"
-            title="Förhandsgranska väderanimationer"
-          >
-            <CloudSun className="h-4 w-4 text-white" />
-          </button>
         </div>
         <DateTimeDisplay />
         {!weather.isLoading && !weather.error && weather.description ? (
