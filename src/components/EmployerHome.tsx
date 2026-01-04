@@ -26,6 +26,19 @@ const getGreeting = (): string => {
   return 'God kväll';
 };
 
+const formatDateTime = (): { time: string; date: string } => {
+  const now = new Date();
+  const time = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  const date = now.toLocaleDateString('sv-SE', { 
+    weekday: 'long', 
+    day: 'numeric', 
+    month: 'long' 
+  });
+  // Capitalize first letter
+  const capitalizedDate = date.charAt(0).toUpperCase() + date.slice(1);
+  return { time, date: capitalizedDate };
+};
+
 interface StatCardProps {
   icon: React.ElementType;
   title: string;
@@ -82,6 +95,25 @@ const StatCard = memo(({ icon: Icon, title, value, subtitle, gradient, glowColor
 ));
 
 StatCard.displayName = 'StatCard';
+
+const DateTimeDisplay = memo(() => {
+  const [dateTime, setDateTime] = useState(formatDateTime);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDateTime(formatDateTime());
+    }, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
+  
+  return (
+    <p className="text-sm text-white/70 font-medium">
+      {dateTime.date} · {dateTime.time}
+    </p>
+  );
+});
+
+DateTimeDisplay.displayName = 'DateTimeDisplay';
 
 const EmployerHome = memo(() => {
   const navigate = useNavigate();
@@ -143,7 +175,8 @@ const EmployerHome = memo(() => {
         transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="text-center md:text-left"
       >
-        <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+        <DateTimeDisplay />
+        <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight mt-1">
           {greeting}, {firstName} {weather.emoji}
         </h1>
         {!weather.isLoading && !weather.error && weather.description ? (
