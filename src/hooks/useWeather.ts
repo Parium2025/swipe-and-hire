@@ -409,7 +409,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       }
     }
 
-    // Refresh weather periodically
+    // Refresh weather every 5 minutes automatically in background
     const weatherInterval = setInterval(() => {
       if (locationRef.current && mountedRef.current) {
         fetchWeatherOnly(
@@ -418,7 +418,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           locationRef.current.city
         );
       }
-    }, refreshMs);
+    }, 5 * 60 * 1000); // 5 minutes
 
     // Listen for network changes - user might have moved to new wifi/location
     const handleOnline = () => {
@@ -426,12 +426,27 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       checkForLocationChange(true);
     };
 
+    // Update weather when user comes back to tab/app
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && locationRef.current && mountedRef.current) {
+        // Check if weather cache is stale (older than 5 min)
+        const cached = getCachedWeather();
+        const isStale = !cached || (Date.now() - cached.timestamp > 5 * 60 * 1000);
+        if (isStale) {
+          console.log('Tab visible + stale cache - updating weather...');
+          fetchWeatherOnly(locationRef.current.lat, locationRef.current.lon, locationRef.current.city);
+        }
+      }
+    };
+
     window.addEventListener('online', handleOnline);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       mountedRef.current = false;
       clearInterval(weatherInterval);
       window.removeEventListener('online', handleOnline);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fallbackCity, refreshMs, fetchWeatherOnly, checkForLocationChange]);
 
