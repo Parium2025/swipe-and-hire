@@ -203,6 +203,7 @@ const EmployerHome = memo(() => {
     { code: 3, label: 'Mulet', emoji: '☁️' },
     { code: 61, label: 'Regn', emoji: '🌧️' },
     { code: 71, label: 'Snö', emoji: '❄️' },
+    { code: 95, label: 'Åska', emoji: '⛈️' },
   ];
 
   if (isLoading || !showContent) {
