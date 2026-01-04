@@ -277,9 +277,9 @@ const ThunderEffect = memo(() => {
       setTimeout(() => setLightningState(s => ({ ...s, flash: false })), 100);
     };
     
-    // Variable interval between lightning strikes (3-7 seconds)
+    // Variable interval between lightning strikes (4-7 seconds)
     const scheduleNext = () => {
-      const delay = 3000 + Math.random() * 4000;
+      const delay = 4000 + Math.random() * 3000;
       return setTimeout(() => {
         flash();
         scheduleNext();
@@ -287,7 +287,7 @@ const ThunderEffect = memo(() => {
     };
     
     // Initial flash after short delay
-    const initialTimeout = setTimeout(flash, 800);
+    const initialTimeout = setTimeout(flash, 1500);
     const intervalId = scheduleNext();
     
     return () => {
@@ -322,11 +322,11 @@ const ThunderEffect = memo(() => {
         />
       ))}
       
-      {/* Lightning flash - screen flash */}
+      {/* Lightning flash - screen flash (softer) */}
       <motion.div
         className="absolute inset-0 bg-white pointer-events-none"
         animate={{
-          opacity: lightningState.flash ? 0.3 : 0,
+          opacity: lightningState.flash ? 0.15 : 0,
         }}
         transition={{
           duration: 0.05,
