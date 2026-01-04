@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useCountUp } from '@/hooks/useCountUp';
+import { useWeather } from '@/hooks/useWeather';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -13,7 +14,6 @@ import {
   Plus,
   ArrowRight,
   Clock,
-  Sparkles
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { isJobExpiredCheck } from '@/lib/date';
@@ -23,13 +23,6 @@ const getGreeting = (): string => {
   if (hour >= 5 && hour < 12) return 'God morgon';
   if (hour >= 12 && hour < 18) return 'God eftermiddag';
   return 'God kväll';
-};
-
-const getGreetingEmoji = (): string => {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return '☀️';
-  if (hour >= 12 && hour < 18) return '👋';
-  return '🌙';
 };
 
 interface StatCardProps {
@@ -126,7 +119,7 @@ const EmployerHome = memo(() => {
 
   const firstName = profile?.first_name || 'du';
   const greeting = getGreeting();
-  const emoji = getGreetingEmoji();
+  const weather = useWeather();
 
   if (isLoading || !showContent) {
     return (
@@ -146,11 +139,17 @@ const EmployerHome = memo(() => {
         className="text-center md:text-left"
       >
         <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-          {greeting}, {firstName} {emoji}
+          {greeting}, {firstName} {weather.emoji}
         </h1>
-        <p className="text-white mt-2 text-base">
-          Här är en översikt över din rekrytering
-        </p>
+        {weather.city && !weather.isLoading && !weather.error ? (
+          <p className="text-white mt-2 text-base">
+            {weather.city}, {weather.temperature}° – {weather.description}
+          </p>
+        ) : (
+          <p className="text-white mt-2 text-base">
+            Här är en översikt över din rekrytering
+          </p>
+        )}
       </motion.div>
 
       {/* Stats grid */}
