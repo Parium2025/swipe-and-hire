@@ -259,9 +259,9 @@ function EmployerTopNav() {
                 <LayoutDashboard className="h-4 w-4" />
                 <span>Annonser</span>
                 {getDashboardCount() && (
-                  <span className="text-white/60 text-xs">({getDashboardCount()})</span>
+                  <span className="text-white text-xs">({getDashboardCount()})</span>
                 )}
-                <ChevronDown className="h-3 w-3 opacity-70" />
+                <ChevronDown className="h-3 w-3 text-white" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
@@ -299,9 +299,9 @@ function EmployerTopNav() {
                 <Users className="h-4 w-4" />
                 <span>Kandidater</span>
                 {getCandidatesCount() && (
-                  <span className="text-white/60 text-xs">({getCandidatesCount()})</span>
+                  <span className="text-white text-xs">({getCandidatesCount()})</span>
                 )}
-                <ChevronDown className="h-3 w-3 opacity-70" />
+                <ChevronDown className="h-3 w-3 text-white" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
@@ -355,7 +355,7 @@ function EmployerTopNav() {
                   <Building className="h-4 w-4" />
                 )}
                 <span>Företag</span>
-                <ChevronDown className="h-3 w-3 opacity-70" />
+                <ChevronDown className="h-3 w-3 text-white" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
@@ -392,7 +392,7 @@ function EmployerTopNav() {
                     {getUserInitials()}
                   </div>
                 )}
-                <ChevronDown className="h-3.5 w-3.5 text-white/70" />
+                <ChevronDown className="h-3.5 w-3.5 text-white" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass + " min-w-[180px]"}>
