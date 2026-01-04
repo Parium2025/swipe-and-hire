@@ -6,13 +6,17 @@ interface WeatherEffectsProps {
   isLoading: boolean;
 }
 
-type EffectType = 'rain' | 'rain_showers' | 'snow' | 'snow_showers' | 'thunder' | null;
+type EffectType = 'rain' | 'rain_showers' | 'snow' | 'snow_showers' | 'thunder' | 'cloudy' | null;
 
 const WeatherEffects = memo(({ weatherCode, isLoading }: WeatherEffectsProps) => {
   // Determine effect type based on weather code
   const effectType = useMemo((): EffectType => {
     if (!weatherCode || isLoading) return null;
     
+    // Cloudy: 3 (overcast)
+    if (weatherCode === 3) {
+      return 'cloudy';
+    }
     // Rain showers: 80-82 (moderate, like current)
     if (weatherCode >= 80 && weatherCode <= 82) {
       return 'rain_showers';
@@ -40,6 +44,7 @@ const WeatherEffects = memo(({ weatherCode, isLoading }: WeatherEffectsProps) =>
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      {effectType === 'cloudy' && <CloudyEffect />}
       {effectType === 'rain' && <RainEffect />}
       {effectType === 'rain_showers' && <RainShowersEffect />}
       {effectType === 'snow' && <SnowEffect />}
@@ -51,15 +56,57 @@ const WeatherEffects = memo(({ weatherCode, isLoading }: WeatherEffectsProps) =>
 
 WeatherEffects.displayName = 'WeatherEffects';
 
-// Rain Effect - More visible drops
+// Cloudy Effect - Drifting clouds
+const CloudyEffect = memo(() => {
+  const clouds = useMemo(() => 
+    Array.from({ length: 4 }).map((_, i) => ({
+      id: i,
+      top: 5 + i * 18 + Math.random() * 10,
+      size: 80 + Math.random() * 60,
+      opacity: 0.06 + Math.random() * 0.04,
+      duration: 60 + Math.random() * 40,
+      delay: i * 8,
+    })),
+  []);
+
+  return (
+    <>
+      {clouds.map((cloud) => (
+        <motion.div
+          key={cloud.id}
+          className="absolute bg-white rounded-full blur-3xl"
+          style={{
+            top: `${cloud.top}%`,
+            width: cloud.size,
+            height: cloud.size * 0.5,
+            opacity: cloud.opacity,
+          }}
+          animate={{
+            x: ['-20vw', '120vw'],
+          }}
+          transition={{
+            duration: cloud.duration,
+            delay: cloud.delay,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+      ))}
+    </>
+  );
+});
+
+CloudyEffect.displayName = 'CloudyEffect';
+
+// Rain Effect - Slanted with wind
 const RainEffect = memo(() => {
   const drops = useMemo(() => 
-    Array.from({ length: 30 }).map((_, i) => ({
+    Array.from({ length: 35 }).map((_, i) => ({
       id: i,
-      left: (i / 30) * 100 + Math.random() * 4 - 2,
-      delay: Math.random() * 4,
-      duration: 1.5 + Math.random() * 1,
-      height: 14 + Math.random() * 12,
+      left: (i / 35) * 120 - 10, // Start further left to account for wind drift
+      delay: Math.random() * 3,
+      duration: 1.2 + Math.random() * 0.6,
+      height: 16 + Math.random() * 14,
       opacity: 0.35 + Math.random() * 0.25,
     })),
   []);
@@ -72,13 +119,15 @@ const RainEffect = memo(() => {
           className="absolute bg-blue-300/50 rounded-full"
           style={{
             left: `${drop.left}%`,
-            top: -20,
+            top: -30,
             width: 2,
             height: drop.height,
             opacity: drop.opacity,
+            transform: 'rotate(15deg)', // Slanted for wind effect
           }}
           animate={{
-            y: ['0vh', '110vh'],
+            y: ['0vh', '115vh'],
+            x: ['0vw', '15vw'], // Wind pushing rain to the right
           }}
           transition={{
             duration: drop.duration,
@@ -94,14 +143,14 @@ const RainEffect = memo(() => {
 
 RainEffect.displayName = 'RainEffect';
 
-// Rain Showers Effect - Moderate, balanced
+// Rain Showers Effect - Moderate with light wind
 const RainShowersEffect = memo(() => {
   const drops = useMemo(() => 
-    Array.from({ length: 25 }).map((_, i) => ({
+    Array.from({ length: 28 }).map((_, i) => ({
       id: i,
-      left: (i / 25) * 100 + Math.random() * 4 - 2,
-      delay: Math.random() * 5,
-      duration: 1.8 + Math.random() * 1.2,
+      left: (i / 28) * 115 - 5,
+      delay: Math.random() * 4,
+      duration: 1.5 + Math.random() * 0.8,
       height: 12 + Math.random() * 10,
       opacity: 0.25 + Math.random() * 0.2,
     })),
@@ -115,13 +164,15 @@ const RainShowersEffect = memo(() => {
           className="absolute bg-blue-300/40 rounded-full"
           style={{
             left: `${drop.left}%`,
-            top: -20,
+            top: -25,
             width: 1.5,
             height: drop.height,
             opacity: drop.opacity,
+            transform: 'rotate(10deg)', // Lighter slant
           }}
           animate={{
-            y: ['0vh', '110vh'],
+            y: ['0vh', '112vh'],
+            x: ['0vw', '10vw'], // Lighter wind
           }}
           transition={{
             duration: drop.duration,
@@ -298,7 +349,7 @@ const ThunderEffect = memo(() => {
 
   return (
     <>
-      {/* Rain */}
+      {/* Rain with wind */}
       {drops.map((drop) => (
         <motion.div
           key={drop.id}
@@ -309,9 +360,11 @@ const ThunderEffect = memo(() => {
             width: drop.width,
             height: drop.height,
             opacity: drop.opacity,
+            transform: 'rotate(18deg)', // Strong wind slant for storm
           }}
           animate={{
-            y: ['0vh', '110vh'],
+            y: ['0vh', '115vh'],
+            x: ['0vw', '18vw'], // Strong wind
           }}
           transition={{
             duration: drop.duration,
