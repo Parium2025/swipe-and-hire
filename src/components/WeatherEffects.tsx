@@ -123,11 +123,11 @@ const RainEffect = memo(() => {
             width: 2,
             height: drop.height,
             opacity: drop.opacity,
-            transform: 'rotate(15deg)', // Slanted for wind effect
           }}
           animate={{
             y: ['0vh', '115vh'],
-            x: ['0vw', '15vw'], // Wind pushing rain to the right
+            x: ['0vw', '20vw'], // Wind pushing rain to the right
+            rotate: 20, // Constant slant angle
           }}
           transition={{
             duration: drop.duration,
@@ -168,11 +168,11 @@ const RainShowersEffect = memo(() => {
             width: 1.5,
             height: drop.height,
             opacity: drop.opacity,
-            transform: 'rotate(10deg)', // Lighter slant
           }}
           animate={{
             y: ['0vh', '112vh'],
-            x: ['0vw', '10vw'], // Lighter wind
+            x: ['0vw', '12vw'], // Lighter wind
+            rotate: 15, // Lighter slant
           }}
           transition={{
             duration: drop.duration,
@@ -296,13 +296,13 @@ SnowShowersEffect.displayName = 'SnowShowersEffect';
 
 // Thunder Effect - Single lightning bolt at random position
 const ThunderEffect = memo(() => {
-  // Rain drops - moderate intensity
+  // Rain drops - moderate intensity with strong wind
   const drops = useMemo(() => 
     Array.from({ length: 40 }).map((_, i) => ({
       id: i,
-      left: (i / 40) * 100 + Math.random() * 3 - 1.5,
+      left: (i / 40) * 130 - 15, // Start further left for wind drift
       delay: Math.random() * 3,
-      duration: 1.2 + Math.random() * 0.6,
+      duration: 1.0 + Math.random() * 0.5,
       height: 15 + Math.random() * 12,
       width: 2,
       opacity: 0.35 + Math.random() * 0.25,
@@ -349,7 +349,7 @@ const ThunderEffect = memo(() => {
 
   return (
     <>
-      {/* Rain with wind */}
+      {/* Rain with strong wind */}
       {drops.map((drop) => (
         <motion.div
           key={drop.id}
@@ -360,11 +360,11 @@ const ThunderEffect = memo(() => {
             width: drop.width,
             height: drop.height,
             opacity: drop.opacity,
-            transform: 'rotate(18deg)', // Strong wind slant for storm
           }}
           animate={{
             y: ['0vh', '115vh'],
-            x: ['0vw', '18vw'], // Strong wind
+            x: ['0vw', '25vw'], // Strong storm wind
+            rotate: 25, // Strong slant for storm
           }}
           transition={{
             duration: drop.duration,

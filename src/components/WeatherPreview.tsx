@@ -20,6 +20,7 @@ const weatherTypes: WeatherType[] = [
   { code: 80, name: 'Regnskurar', emoji: '🌦️' },
   { code: 85, name: 'Snöbyar', emoji: '🌨️' },
   { code: 95, name: 'Åska', emoji: '⛈️' },
+  { code: 100, name: 'Natt (klart)', emoji: '🌙' }, // Special code for night preview
 ];
 
 interface WeatherPreviewProps {
