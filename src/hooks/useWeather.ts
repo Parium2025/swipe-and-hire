@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface WeatherData {
   temperature: number;
@@ -10,30 +10,42 @@ interface WeatherData {
   error: string | null;
 }
 
+interface UseWeatherOptions {
+  /** Used when location permission is denied/unavailable (e.g. "Stockholm") */
+  fallbackCity?: string;
+  /** How often to refresh, without re-requesting geolocation permission */
+  refreshMs?: number;
+}
+
+const DEFAULT_REFRESH_MS = 15 * 60 * 1000;
+
 // Weather codes from Open-Meteo API
 const getWeatherInfo = (code: number): { description: string; emoji: string } => {
-  // Clear sky
   if (code === 0) return { description: 'klart', emoji: '☀️' };
-  // Mainly clear, partly cloudy
   if (code === 1) return { description: 'mestadels klart', emoji: '🌤️' };
   if (code === 2) return { description: 'halvklart', emoji: '⛅' };
   if (code === 3) return { description: 'molnigt', emoji: '☁️' };
-  // Fog
   if (code === 45 || code === 48) return { description: 'dimma', emoji: '🌫️' };
-  // Drizzle
   if (code >= 51 && code <= 57) return { description: 'duggregn', emoji: '🌧️' };
-  // Rain
   if (code >= 61 && code <= 67) return { description: 'regn', emoji: '🌧️' };
-  // Snow
   if (code >= 71 && code <= 77) return { description: 'snö', emoji: '❄️' };
-  // Rain showers
   if (code >= 80 && code <= 82) return { description: 'regnskurar', emoji: '🌦️' };
-  // Snow showers
   if (code >= 85 && code <= 86) return { description: 'snöbyar', emoji: '🌨️' };
-  // Thunderstorm
   if (code >= 95 && code <= 99) return { description: 'åska', emoji: '⛈️' };
-  
   return { description: 'okänt', emoji: '🌡️' };
+};
+
+const fetchCurrentWeather = async (lat: number, lon: number) => {
+  const res = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+  );
+  const data = await res.json();
+  const current = data?.current_weather;
+  if (!current) throw new Error('Missing current_weather');
+  return {
+    temperature: Math.round(current.temperature),
+    weatherCode: current.weathercode as number,
+  };
 };
 
 // Reverse geocoding to get city name
@@ -43,23 +55,43 @@ const getCityName = async (lat: number, lon: number): Promise<string> => {
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=sv`
     );
     const data = await response.json();
-    
-    // Try to get the most specific location name
-    const city = data.address?.city || 
-                 data.address?.town || 
-                 data.address?.municipality ||
-                 data.address?.village ||
-                 data.address?.suburb ||
-                 data.address?.county ||
-                 'din plats';
-    
+
+    const city =
+      data.address?.city ||
+      data.address?.town ||
+      data.address?.municipality ||
+      data.address?.village ||
+      data.address?.suburb ||
+      data.address?.county ||
+      'din plats';
+
     return city;
   } catch {
     return 'din plats';
   }
 };
 
-export const useWeather = (): WeatherData => {
+const geocodeCity = async (city: string): Promise<{ lat: number; lon: number; name: string }> => {
+  const res = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=sv&format=json`
+  );
+  const data = await res.json();
+  const best = data?.results?.[0];
+  if (!best) throw new Error('No geocoding result');
+  return {
+    lat: best.latitude,
+    lon: best.longitude,
+    name: best.name ?? city,
+  };
+};
+
+export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
+  const refreshMs = options.refreshMs ?? DEFAULT_REFRESH_MS;
+  const fallbackCity = options.fallbackCity?.trim();
+
+  const coordsRef = useRef<{ lat: number; lon: number } | null>(null);
+  const permissionDeniedRef = useRef(false);
+
   const [weather, setWeather] = useState<WeatherData>({
     temperature: 0,
     weatherCode: 0,
@@ -71,69 +103,111 @@ export const useWeather = (): WeatherData => {
   });
 
   useEffect(() => {
-    const fetchWeather = async () => {
-      // Check if geolocation is available
-      if (!navigator.geolocation) {
-        setWeather(prev => ({
-          ...prev,
-          isLoading: false,
-          emoji: getTimeBasedEmoji(),
-          error: 'Geolocation not supported',
-        }));
-        return;
-      }
+    let cancelled = false;
 
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          
-          try {
-            // Fetch weather and city name in parallel
-            const [weatherResponse, city] = await Promise.all([
-              fetch(
-                `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
-              ),
-              getCityName(latitude, longitude),
-            ]);
-
-            const weatherData = await weatherResponse.json();
-            const currentWeather = weatherData.current_weather;
-            const weatherInfo = getWeatherInfo(currentWeather.weathercode);
-
-            setWeather({
-              temperature: Math.round(currentWeather.temperature),
-              weatherCode: currentWeather.weathercode,
-              description: weatherInfo.description,
-              emoji: weatherInfo.emoji,
-              city,
-              isLoading: false,
-              error: null,
-            });
-          } catch (error) {
-            console.error('Weather fetch error:', error);
-            setWeather(prev => ({
-              ...prev,
-              isLoading: false,
-              emoji: getTimeBasedEmoji(),
-              error: 'Failed to fetch weather',
-            }));
-          }
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-          setWeather(prev => ({
-            ...prev,
-            isLoading: false,
-            emoji: getTimeBasedEmoji(),
-            error: 'Location access denied',
-          }));
-        },
-        { timeout: 10000, enableHighAccuracy: false }
-      );
+    const applyWeather = (payload: { temperature: number; weatherCode: number; city: string }) => {
+      const info = getWeatherInfo(payload.weatherCode);
+      setWeather({
+        temperature: payload.temperature,
+        weatherCode: payload.weatherCode,
+        description: info.description,
+        emoji: info.emoji,
+        city: payload.city,
+        isLoading: false,
+        error: null,
+      });
     };
 
-    fetchWeather();
-  }, []);
+    const fail = (message: string) => {
+      setWeather(prev => ({
+        ...prev,
+        isLoading: false,
+        emoji: getTimeBasedEmoji(),
+        error: message,
+      }));
+    };
+
+    const fetchByCoords = async (lat: number, lon: number) => {
+      const [{ temperature, weatherCode }, city] = await Promise.all([
+        fetchCurrentWeather(lat, lon),
+        getCityName(lat, lon),
+      ]);
+      coordsRef.current = { lat, lon };
+      applyWeather({ temperature, weatherCode, city });
+    };
+
+    const fetchByCity = async (city: string) => {
+      const geo = await geocodeCity(city);
+      const { temperature, weatherCode } = await fetchCurrentWeather(geo.lat, geo.lon);
+      coordsRef.current = { lat: geo.lat, lon: geo.lon };
+      applyWeather({ temperature, weatherCode, city: geo.name });
+    };
+
+    const load = async ({ cacheOnly }: { cacheOnly?: boolean } = {}) => {
+      setWeather(prev => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        // Refresh without prompting for location again
+        if (coordsRef.current) {
+          await fetchByCoords(coordsRef.current.lat, coordsRef.current.lon);
+          return;
+        }
+
+        if (!cacheOnly && navigator.geolocation && !permissionDeniedRef.current) {
+          await new Promise<void>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                void fetchByCoords(position.coords.latitude, position.coords.longitude)
+                  .then(() => resolve())
+                  .catch(reject);
+              },
+              (err: any) => {
+                // 1 = PERMISSION_DENIED
+                if (typeof err?.code === 'number' && err.code === 1) permissionDeniedRef.current = true;
+                reject(err);
+              },
+              { timeout: 7000, enableHighAccuracy: false, maximumAge: 5 * 60 * 1000 }
+            );
+          });
+          return;
+        }
+
+        if (fallbackCity) {
+          await fetchByCity(fallbackCity);
+          return;
+        }
+
+        throw new Error('No location available');
+      } catch (err) {
+        if (cancelled) return;
+        console.error('Weather load error:', err);
+
+        // If geolocation failed but we have a fallback city, try that once
+        if (fallbackCity && !coordsRef.current) {
+          try {
+            await fetchByCity(fallbackCity);
+            return;
+          } catch (fallbackErr) {
+            console.error('Weather fallback error:', fallbackErr);
+          }
+        }
+
+        fail('Weather unavailable');
+      }
+    };
+
+    void load();
+
+    const interval = window.setInterval(() => {
+      if (cancelled) return;
+      void load({ cacheOnly: true });
+    }, refreshMs);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [fallbackCity, refreshMs]);
 
   return weather;
 };
