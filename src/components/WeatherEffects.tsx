@@ -287,19 +287,24 @@ const RainShowersEffect = memo(() => {
 
 RainShowersEffect.displayName = 'RainShowersEffect';
 
-// Snow Effect - Continuous gentle snow
+// Snow Effect - Continuous gentle snow, appears already in progress
 const SnowEffect = memo(() => {
   const flakes = useMemo(() => 
-    Array.from({ length: 40 }).map((_, i) => ({
-      id: i,
-      left: (i / 40) * 100 + Math.random() * 5 - 2.5,
-      // Spread delays evenly across the duration so there's always snow falling
-      delay: (i / 40) * 12,
-      duration: 12 + Math.random() * 4,
-      size: 3 + Math.random() * 4,
-      opacity: 0.3 + Math.random() * 0.25,
-      swayAmount: 10 + Math.random() * 15,
-    })),
+    Array.from({ length: 40 }).map((_, i) => {
+      const duration = 12 + Math.random() * 4;
+      // Give each flake a random starting progress (0-100% of screen height)
+      const initialProgress = Math.random() * 100;
+      return {
+        id: i,
+        left: Math.random() * 100,
+        delay: 0, // No delay - start immediately
+        duration,
+        size: 3 + Math.random() * 4,
+        opacity: 0.3 + Math.random() * 0.25,
+        swayAmount: 10 + Math.random() * 15,
+        initialY: initialProgress, // Start at random position on screen
+      };
+    }),
   []);
 
   return (
@@ -310,20 +315,20 @@ const SnowEffect = memo(() => {
           className="absolute bg-white rounded-full"
           style={{
             left: `${flake.left}%`,
-            top: -15,
             width: flake.size,
             height: flake.size,
             opacity: flake.opacity,
             filter: 'blur(0.5px)',
           }}
+          initial={{ y: `${flake.initialY}vh` }}
           animate={{
-            y: ['0vh', '105vh'],
+            y: [`${flake.initialY}vh`, '105vh', '-5vh', '105vh'],
             x: [0, flake.swayAmount, 0, -flake.swayAmount, 0],
-            rotate: [0, 180],
+            rotate: [0, 180, 360],
           }}
           transition={{
             duration: flake.duration,
-            delay: flake.delay,
+            times: [0, (100 - flake.initialY) / 110, (100 - flake.initialY) / 110, 1],
             repeat: Infinity,
             ease: 'linear',
             x: {
