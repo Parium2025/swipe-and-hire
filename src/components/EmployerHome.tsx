@@ -19,11 +19,11 @@ import { motion } from 'framer-motion';
 import { isJobExpiredCheck } from '@/lib/date';
 import WeatherEffects from '@/components/WeatherEffects';
 
-const getGreeting = (): string => {
+const getGreeting = (): { text: string; isEvening: boolean } => {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return 'God morgon';
-  if (hour >= 12 && hour < 18) return 'God eftermiddag';
-  return 'God kväll';
+  if (hour >= 5 && hour < 12) return { text: 'God morgon', isEvening: false };
+  if (hour >= 12 && hour < 18) return { text: 'God eftermiddag', isEvening: false };
+  return { text: 'God kväll', isEvening: true };
 };
 
 const formatDateTime = (): { time: string; date: string } => {
@@ -151,10 +151,24 @@ const EmployerHome = memo(() => {
   }, [jobs]);
 
   const firstName = profile?.first_name || 'du';
-  const greeting = getGreeting();
+  const { text: greetingText, isEvening } = getGreeting();
   const weather = useWeather({
     fallbackCity: profile?.location || profile?.home_location || profile?.address || 'Stockholm',
   });
+  
+  // Only show moon emoji if it's evening/night (after 18:00) - otherwise show weather emoji
+  // This prevents showing moon during "God eftermiddag" even if sun has set
+  const displayEmoji = useMemo(() => {
+    const hasMoon = weather.emoji.includes('🌙');
+    if (hasMoon && !isEvening) {
+      // It's dark but still afternoon - show clouds or just skip moon
+      if (weather.weatherCode === 0) return ''; // Clear but afternoon, no emoji
+      if (weather.weatherCode === 1) return '☁️'; // Mostly clear → clouds
+      if (weather.weatherCode === 2) return '☁️'; // Partly cloudy → clouds
+      return weather.emoji.replace('🌙', ''); // Remove moon from combo emojis
+    }
+    return weather.emoji;
+  }, [weather.emoji, weather.weatherCode, isEvening]);
 
   if (isLoading || !showContent) {
     return (
@@ -177,7 +191,7 @@ const EmployerHome = memo(() => {
       >
         <div className="flex items-center gap-2 justify-center md:justify-start">
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-            {greeting}, {firstName} {weather.emoji}
+            {greetingText}, {firstName} {displayEmoji}
           </h1>
         </div>
         <DateTimeDisplay />
