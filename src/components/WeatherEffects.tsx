@@ -324,17 +324,17 @@ const ThunderEffect = memo(() => {
       setTimeout(() => setLightningState(s => ({ ...s, flash: false })), 100);
     };
     
-    // Variable interval between lightning strikes (4-7 seconds)
+    // Variable interval between lightning strikes (6-12 seconds - less frequent)
     const scheduleNext = () => {
-      const delay = 4000 + Math.random() * 3000;
+      const delay = 6000 + Math.random() * 6000;
       return setTimeout(() => {
         flash();
         scheduleNext();
       }, delay);
     };
     
-    // Initial flash after short delay
-    const initialTimeout = setTimeout(flash, 1500);
+    // Initial flash after longer delay
+    const initialTimeout = setTimeout(flash, 3000);
     const intervalId = scheduleNext();
     
     return () => {
@@ -369,14 +369,14 @@ const ThunderEffect = memo(() => {
         />
       ))}
       
-      {/* Lightning flash - screen flash (softer) */}
+      {/* Lightning flash - very subtle screen flash */}
       <motion.div
-        className="absolute inset-0 bg-white pointer-events-none"
+        className="absolute inset-0 bg-white/50 pointer-events-none"
         animate={{
-          opacity: lightningState.flash ? 0.15 : 0,
+          opacity: lightningState.flash ? 0.08 : 0,
         }}
         transition={{
-          duration: 0.05,
+          duration: 0.08,
         }}
       />
       
@@ -392,11 +392,11 @@ const ThunderEffect = memo(() => {
           duration: 0.05,
         }}
       >
-        <svg width="24" height="70" viewBox="0 0 40 120" fill="none">
+        <svg width="16" height="45" viewBox="0 0 40 120" fill="none">
           <path
             d="M20 0L5 50H18L8 120L35 45H20L30 0H20Z"
-            fill="white"
-            filter="drop-shadow(0 0 10px rgba(255,255,255,0.8))"
+            fill="rgba(255,255,255,0.7)"
+            filter="drop-shadow(0 0 6px rgba(255,255,255,0.5))"
           />
         </svg>
       </motion.div>
