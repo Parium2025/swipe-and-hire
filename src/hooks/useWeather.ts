@@ -70,18 +70,18 @@ const isNightTime = (): boolean => {
 const getWeatherInfo = (code: number): { description: string; emoji: string } => {
   const night = isNightTime();
   
-  if (code === 0) return { description: 'klart', emoji: night ? '🌙' : '☀️' };
-  if (code === 1) return { description: 'mestadels klart', emoji: night ? '🌙' : '🌤️' };
-  if (code === 2) return { description: 'halvklart', emoji: night ? '🌙' : '⛅' };
-  if (code === 3) return { description: 'molnigt', emoji: '☁️' };
-  if (code === 45 || code === 48) return { description: 'dimma', emoji: '☁️' };
-  if (code >= 51 && code <= 57) return { description: 'duggregn', emoji: '🌧️' };
-  if (code >= 61 && code <= 67) return { description: 'regn', emoji: '🌧️' };
-  if (code >= 71 && code <= 77) return { description: 'snö', emoji: '❄️' };
-  if (code >= 80 && code <= 82) return { description: 'regnskurar', emoji: '🌦️' };
-  if (code >= 85 && code <= 86) return { description: 'snöbyar', emoji: '🌨️' };
-  if (code >= 95 && code <= 99) return { description: 'åska', emoji: '⛈️' };
-  return { description: 'okänt', emoji: '🌡️' };
+  if (code === 0) return { description: 'Klart', emoji: night ? '🌙' : '☀️' };
+  if (code === 1) return { description: 'Mestadels klart', emoji: night ? '🌙' : '🌤️' };
+  if (code === 2) return { description: 'Halvklart', emoji: night ? '🌙' : '⛅' };
+  if (code === 3) return { description: 'Molnigt', emoji: '☁️' };
+  if (code === 45 || code === 48) return { description: 'Dimma', emoji: '☁️' };
+  if (code >= 51 && code <= 57) return { description: 'Duggregn', emoji: '🌧️' };
+  if (code >= 61 && code <= 67) return { description: 'Regn', emoji: '🌧️' };
+  if (code >= 71 && code <= 77) return { description: 'Snö', emoji: '❄️' };
+  if (code >= 80 && code <= 82) return { description: 'Regnskurar', emoji: '🌦️' };
+  if (code >= 85 && code <= 86) return { description: 'Snöbyar', emoji: '🌨️' };
+  if (code >= 95 && code <= 99) return { description: 'Åska', emoji: '⛈️' };
+  return { description: 'Okänt', emoji: '🌡️' };
 };
 
 // Cache helpers
