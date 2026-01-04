@@ -107,7 +107,7 @@ const DateTimeDisplay = memo(() => {
   }, []);
   
   return (
-    <p className="text-sm text-white/70 font-medium">
+    <p className="text-sm text-white font-medium mt-1">
       {dateTime.date} · {dateTime.time}
     </p>
   );
@@ -175,10 +175,10 @@ const EmployerHome = memo(() => {
         transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="text-center md:text-left"
       >
-        <DateTimeDisplay />
-        <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight mt-1">
+        <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
           {greeting}, {firstName} {weather.emoji}
         </h1>
+        <DateTimeDisplay />
         {!weather.isLoading && !weather.error && weather.description ? (
           <p className="text-white mt-2 text-base">
             {weather.city ? `${weather.city}, ` : ''}{weather.temperature}° – {weather.description}
