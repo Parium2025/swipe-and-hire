@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { MoreVertical, Pencil, Palette, Image, Trash2, AlertTriangle, Info } from 'lucide-react';
-import { HexColorPicker } from 'react-colorful';
+import React, { useState } from 'react';
+import { MoreVertical, Pencil, Palette, Image, Trash2, AlertTriangle, Check } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +35,8 @@ import {
   useStageSettings, 
   AVAILABLE_ICONS, 
   getIconByName,
+  PREMIUM_GRADIENTS,
+  getGradientPreset,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
 
@@ -57,36 +58,28 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   const [isDeleting, setIsDeleting] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   const [liveColor, setLiveColor] = useState<string | null>(null);
-  const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
   const isCustom = currentConfig?.isCustom ?? false;
   
-  // Use liveColor while dragging, fall back to saved color
-  const displayColor = liveColor ?? currentConfig?.color ?? '#0EA5E9';
+  // Get current color/gradient ID
+  const currentColorId = currentConfig?.color ?? 'ocean';
+  const currentGradient = getGradientPreset(currentColorId);
 
-  const handleColorPickerChange = (color: string) => {
-    // Update display immediately - both local and parent
-    setLiveColor(color);
-    onLiveColorChange?.(color);
+  const handleColorSelect = async (gradientId: string) => {
+    // Update display immediately
+    setLiveColor(gradientId);
+    onLiveColorChange?.(gradientId);
     
-    // Debounce the save to avoid too many API calls while dragging
-    if (colorDebounceRef.current) {
-      clearTimeout(colorDebounceRef.current);
+    try {
+      await updateStageSetting.mutateAsync({ stageKey, color: gradientId });
+      toast.success('Färg uppdaterad');
+    } catch (error) {
+      toast.error('Kunde inte uppdatera färg');
+      setLiveColor(null);
+      onLiveColorChange?.(null);
     }
-    colorDebounceRef.current = setTimeout(async () => {
-      try {
-        await updateStageSetting.mutateAsync({ stageKey, color });
-        // Don't clear liveColor here - let React Query update handle it naturally
-        // The liveColor will be cleared when the dropdown closes or user picks another color
-      } catch (error) {
-        toast.error('Kunde inte uppdatera färg');
-        // On error, revert to saved color
-        setLiveColor(null);
-        onLiveColorChange?.(null);
-      }
-    }, 500);
   };
 
   const handleOpenRenameDialog = () => {
@@ -168,25 +161,45 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
             Byt namn
           </DropdownMenuItem>
           
-          {/* Color picker as submenu */}
+          {/* Premium gradient picker as submenu */}
           <DropdownMenuSub>
             <DropdownMenuSubTrigger className="cursor-pointer">
               <Palette className="h-4 w-4 mr-2" />
               <span className="flex-1">Välj färg</span>
               <div 
-                className="w-5 h-5 rounded-full border border-white/30 ml-2"
-                style={{ backgroundColor: `${displayColor}99` }}
+                className="w-5 h-5 rounded-full border border-white/30 ml-2 overflow-hidden"
+                style={{ background: currentGradient?.gradient || currentColorId }}
               />
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent 
-                className="p-3"
+                className="p-2 w-56"
                 sideOffset={8}
               >
-                <HexColorPicker 
-                  color={displayColor} 
-                  onChange={handleColorPickerChange}
-                />
+                <div className="grid grid-cols-4 gap-1.5">
+                  {PREMIUM_GRADIENTS.map((preset) => {
+                    const isSelected = currentColorId === preset.id || currentColorId === preset.solidColor;
+                    return (
+                      <button
+                        key={preset.id}
+                        onClick={() => handleColorSelect(preset.id)}
+                        className={`relative w-10 h-10 rounded-lg transition-all duration-200 ${
+                          isSelected 
+                            ? 'ring-2 ring-white scale-110 shadow-lg' 
+                            : 'ring-1 ring-white/20 hover:ring-white/40 hover:scale-105'
+                        }`}
+                        style={{ background: preset.gradient }}
+                        title={preset.label}
+                      >
+                        {isSelected && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Check className="h-4 w-4 text-white drop-shadow-md" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
