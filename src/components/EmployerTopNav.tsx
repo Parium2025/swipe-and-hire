@@ -252,7 +252,7 @@ function EmployerTopNav() {
                   flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
                   ${isDropdownActive(dashboardItems) 
                     ? 'bg-white/20 text-white' 
-                    : 'text-white/80 hover:bg-white/10 hover:text-white'
+                    : 'text-white hover:bg-white/10'
                   }
                 `}
               >
@@ -292,7 +292,7 @@ function EmployerTopNav() {
                   flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
                   ${isDropdownActive(candidateItems) 
                     ? 'bg-white/20 text-white' 
-                    : 'text-white/80 hover:bg-white/10 hover:text-white'
+                    : 'text-white hover:bg-white/10'
                   }
                 `}
               >
@@ -337,7 +337,7 @@ function EmployerTopNav() {
                   flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
                   ${isDropdownActive(businessItems) 
                     ? 'bg-white/20 text-white' 
-                    : 'text-white/80 hover:bg-white/10 hover:text-white'
+                    : 'text-white hover:bg-white/10'
                   }
                 `}
               >
