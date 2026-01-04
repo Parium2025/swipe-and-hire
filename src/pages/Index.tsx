@@ -159,7 +159,7 @@ const Index = () => {
     if (user && profile && location.pathname === '/') {
       const role = (profile as any)?.role;
       if (role === 'employer') {
-        navigate('/dashboard', { replace: true });
+        navigate('/home', { replace: true });
       } else {
         navigate('/search-jobs', { replace: true });
       }
@@ -221,7 +221,7 @@ const Index = () => {
 
   if (location.pathname === '/') {
     if ((userRole?.role as string) === 'employer') {
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to="/home" replace />;
     } else {
       return <Navigate to="/search-jobs" replace />;
     }
@@ -348,7 +348,7 @@ const Index = () => {
   if (role === 'employer') {
     // Redirect employer from job seeker routes
     if (location.pathname === '/search-jobs') {
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to="/home" replace />;
     }
 
     const renderEmployerContent = (path: string) => {
