@@ -151,17 +151,10 @@ const EmployerHome = memo(() => {
   }, [jobs]);
 
   const firstName = profile?.first_name || 'du';
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewEvening, setPreviewEvening] = useState(false);
-  const [previewWeatherCode, setPreviewWeatherCode] = useState<number | null>(null);
-  const { text: greetingText, isEvening: realIsEvening } = getGreeting();
-  const isEvening = previewEvening || realIsEvening;
+  const { text: greetingText, isEvening } = getGreeting();
   const weather = useWeather({
     fallbackCity: profile?.location || profile?.home_location || profile?.address || 'Stockholm',
   });
-  
-  // Use preview weather code if set, otherwise use real weather
-  const activeWeatherCode = previewWeatherCode !== null ? previewWeatherCode : weather.weatherCode;
   
   // Emoji logic based on time of day and weather
   const displayEmoji = useMemo(() => {
@@ -177,36 +170,25 @@ const EmployerHome = memo(() => {
       return '☀️';
     };
     
+    const weatherCode = weather.weatherCode;
+    
     if (!isEvening) {
       // DAYTIME - show weather emoji
-      return getEmojiForCode(activeWeatherCode);
+      return getEmojiForCode(weatherCode);
     }
     
     // EVENING (after 18:00) - show moon when appropriate
-    if (activeWeatherCode === 0 || activeWeatherCode === 1) {
+    if (weatherCode === 0 || weatherCode === 1) {
       // Clear or mostly clear evening sky - just moon (stars are in background)
       return '🌙';
     }
-    if (activeWeatherCode === 2) {
+    if (weatherCode === 2) {
       // Partly cloudy evening - moon with clouds
       return '🌙☁️';
     }
     // Overcast, rain, snow, etc. - just show weather (moon not visible)
-    return getEmojiForCode(activeWeatherCode);
-  }, [activeWeatherCode, isEvening]);
-  
-  // Weather preview options
-  const weatherOptions = [
-    { code: null, label: 'Verkligt väder', emoji: weather.emoji },
-    { code: 0, label: 'Klart', emoji: '☀️' },
-    { code: 1, label: 'Mestadels klart', emoji: '🌤️' },
-    { code: 2, label: 'Delvis molnigt', emoji: '⛅' },
-    { code: 3, label: 'Mulet', emoji: '☁️' },
-    { code: 45, label: 'Dimma', emoji: '☁️' },
-    { code: 61, label: 'Regn', emoji: '🌧️' },
-    { code: 71, label: 'Snö', emoji: '❄️' },
-    { code: 95, label: 'Åska', emoji: '⛈️' },
-  ];
+    return getEmojiForCode(weatherCode);
+  }, [weather.weatherCode, isEvening]);
 
   if (isLoading || !showContent) {
     return (
@@ -218,7 +200,7 @@ const EmployerHome = memo(() => {
 
   return (
     <>
-      <WeatherEffects weatherCode={activeWeatherCode} isLoading={weather.isLoading} isEvening={isEvening} />
+      <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />
       <div className="space-y-8 max-w-5xl mx-auto px-4 md:px-8 py-6 animate-fade-in relative z-10">
       {/* Personal greeting */}
       <motion.div
@@ -241,74 +223,6 @@ const EmployerHome = memo(() => {
           <p className="text-white mt-2 text-base">
             Här är en översikt över din rekrytering
           </p>
-        )}
-        {/* Temporary preview controls - REMOVE AFTER TESTING */}
-        <button 
-          onClick={() => setShowPreview(!showPreview)}
-          className="mt-2 text-xs text-white/50 hover:text-white/80 underline"
-        >
-          {showPreview ? '✕ Stäng förhandsgranskning' : '🛠️ Förhandsgranska väder'}
-        </button>
-        
-        {showPreview && (
-          <div className="mt-3 p-4 bg-black/40 rounded-xl backdrop-blur-md border border-white/20 max-w-lg animate-fade-in">
-            <p className="text-sm text-white/90 mb-3 font-medium">Välj väder att förhandsgranska:</p>
-            
-            {/* Time of day toggle */}
-            <div className="flex gap-2 mb-3">
-              <button 
-                onClick={() => setPreviewEvening(false)}
-                className={`flex-1 px-4 py-2 text-sm rounded-lg transition-all ${
-                  !previewEvening 
-                    ? 'bg-amber-500 text-white shadow-lg' 
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                ☀️ Dag
-              </button>
-              <button 
-                onClick={() => setPreviewEvening(true)}
-                className={`flex-1 px-4 py-2 text-sm rounded-lg transition-all ${
-                  previewEvening 
-                    ? 'bg-indigo-500 text-white shadow-lg' 
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                🌙 Kväll
-              </button>
-            </div>
-            
-            {/* Weather options grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {weatherOptions.map((option) => (
-                <button
-                  key={option.code ?? 'real'}
-                  onClick={() => setPreviewWeatherCode(option.code)}
-                  className={`px-3 py-2 text-sm rounded-lg transition-all flex flex-col items-center gap-1 ${
-                    previewWeatherCode === option.code
-                      ? 'bg-blue-500 text-white shadow-lg ring-2 ring-blue-300'
-                      : 'bg-white/10 text-white/80 hover:bg-white/20'
-                  }`}
-                >
-                  <span className="text-xl">{option.emoji}</span>
-                  <span className="text-xs">{option.label}</span>
-                </button>
-              ))}
-            </div>
-            
-            {/* Reset button */}
-            {(previewWeatherCode !== null || previewEvening) && (
-              <button
-                onClick={() => {
-                  setPreviewWeatherCode(null);
-                  setPreviewEvening(false);
-                }}
-                className="mt-3 w-full px-3 py-2 text-xs rounded-lg bg-white/10 text-white/70 hover:bg-white/20 transition-all"
-              >
-                ↩️ Återställ till verkligt väder
-              </button>
-            )}
-          </div>
         )}
       </motion.div>
 
