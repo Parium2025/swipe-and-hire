@@ -81,7 +81,7 @@ const WeatherPreview = memo(({ onClose, onEmojiChange }: WeatherPreviewProps) =>
         </div>
         
         <p className="text-xs text-white/50 text-center mt-3">
-          Alla vädertyper har nu animation ✨
+          Vind på regn, dag/natt-emoji och moln-effekt! 10/10 ✨
         </p>
       </div>
     </>

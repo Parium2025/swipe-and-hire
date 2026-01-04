@@ -60,11 +60,19 @@ const getDistanceKm = (lat1: number, lon1: number, lat2: number, lon2: number): 
   return R * c;
 };
 
+// Check if it's nighttime (between 21:00 and 06:00)
+const isNightTime = (): boolean => {
+  const hour = new Date().getHours();
+  return hour >= 21 || hour < 6;
+};
+
 // Weather codes from Open-Meteo API
 const getWeatherInfo = (code: number): { description: string; emoji: string } => {
-  if (code === 0) return { description: 'klart', emoji: '☀️' };
-  if (code === 1) return { description: 'mestadels klart', emoji: '🌤️' };
-  if (code === 2) return { description: 'halvklart', emoji: '⛅' };
+  const night = isNightTime();
+  
+  if (code === 0) return { description: 'klart', emoji: night ? '🌙' : '☀️' };
+  if (code === 1) return { description: 'mestadels klart', emoji: night ? '🌙' : '🌤️' };
+  if (code === 2) return { description: 'halvklart', emoji: night ? '🌙' : '⛅' };
   if (code === 3) return { description: 'molnigt', emoji: '☁️' };
   if (code === 45 || code === 48) return { description: 'dimma', emoji: '☁️' };
   if (code >= 51 && code <= 57) return { description: 'duggregn', emoji: '🌧️' };
