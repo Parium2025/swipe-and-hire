@@ -182,12 +182,8 @@ const EmployerHome = memo(() => {
     }
     
     // EVENING (after 18:00) - show moon when appropriate
-    if (activeWeatherCode === 0) {
-      // Clear evening sky - moon with stars! ✨
-      return '🌙✨';
-    }
-    if (activeWeatherCode === 1) {
-      // Mostly clear - just moon
+    if (activeWeatherCode === 0 || activeWeatherCode === 1) {
+      // Clear or mostly clear evening sky - just moon (stars are in background)
       return '🌙';
     }
     if (activeWeatherCode === 2) {
@@ -219,7 +215,7 @@ const EmployerHome = memo(() => {
 
   return (
     <>
-      <WeatherEffects weatherCode={activeWeatherCode} isLoading={weather.isLoading} />
+      <WeatherEffects weatherCode={activeWeatherCode} isLoading={weather.isLoading} isEvening={isEvening} />
       <div className="space-y-8 max-w-5xl mx-auto px-4 md:px-8 py-6 animate-fade-in relative z-10">
       {/* Personal greeting */}
       <motion.div
@@ -230,15 +226,7 @@ const EmployerHome = memo(() => {
       >
         <div className="flex items-center gap-2 justify-center md:justify-start">
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-            {greetingText}, {firstName}{' '}
-            {displayEmoji.includes('✨') ? (
-              <>
-                {displayEmoji.replace('✨', '')}
-                <span className="animate-sparkle">✨</span>
-              </>
-            ) : (
-              displayEmoji
-            )}
+            {greetingText}, {firstName} {displayEmoji}
           </h1>
         </div>
         <DateTimeDisplay />
