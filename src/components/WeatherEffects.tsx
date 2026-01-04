@@ -324,9 +324,9 @@ const ThunderEffect = memo(() => {
       setTimeout(() => setLightningState(s => ({ ...s, flash: false })), 100);
     };
     
-    // Variable interval between lightning strikes (6-12 seconds - less frequent)
+    // Variable interval between lightning strikes (5-10 seconds)
     const scheduleNext = () => {
-      const delay = 6000 + Math.random() * 6000;
+      const delay = 5000 + Math.random() * 5000;
       return setTimeout(() => {
         flash();
         scheduleNext();
