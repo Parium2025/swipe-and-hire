@@ -11,7 +11,7 @@ interface WeatherData {
 }
 
 interface UseWeatherOptions {
-  /** Used when location permission is denied/unavailable (e.g. "Stockholm") */
+  /** Used when all location methods fail */
   fallbackCity?: string;
   /** How often to refresh, without re-requesting geolocation permission */
   refreshMs?: number;
@@ -63,11 +63,46 @@ const getCityName = async (lat: number, lon: number): Promise<string> => {
       data.address?.village ||
       data.address?.suburb ||
       data.address?.county ||
-      'din plats';
+      '';
 
     return city;
   } catch {
-    return 'din plats';
+    return '';
+  }
+};
+
+// IP-based geolocation (no permission required, less accurate)
+const getLocationByIP = async (): Promise<{ lat: number; lon: number; city: string } | null> => {
+  try {
+    // Using ip-api.com (free, no API key required)
+    const response = await fetch('http://ip-api.com/json/?fields=status,city,lat,lon&lang=sv');
+    const data = await response.json();
+    
+    if (data.status === 'success' && data.lat && data.lon) {
+      return {
+        lat: data.lat,
+        lon: data.lon,
+        city: data.city || '',
+      };
+    }
+    return null;
+  } catch {
+    // Fallback to ipapi.co (HTTPS, also free)
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      
+      if (data.latitude && data.longitude) {
+        return {
+          lat: data.latitude,
+          lon: data.longitude,
+          city: data.city || '',
+        };
+      }
+    } catch {
+      // Silent fail
+    }
+    return null;
   }
 };
 
@@ -90,7 +125,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const fallbackCity = options.fallbackCity?.trim();
 
   const coordsRef = useRef<{ lat: number; lon: number } | null>(null);
-  const permissionDeniedRef = useRef(false);
+  const cityRef = useRef<string>('');
 
   const [weather, setWeather] = useState<WeatherData>({
     temperature: 0,
@@ -107,6 +142,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     const applyWeather = (payload: { temperature: number; weatherCode: number; city: string }) => {
       const info = getWeatherInfo(payload.weatherCode);
+      cityRef.current = payload.city;
       setWeather({
         temperature: payload.temperature,
         weatherCode: payload.weatherCode,
@@ -118,19 +154,22 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       });
     };
 
-    const fail = (message: string) => {
-      setWeather(prev => ({
-        ...prev,
-        isLoading: false,
+    const fail = () => {
+      setWeather({
+        temperature: 0,
+        weatherCode: 0,
+        description: '',
         emoji: getTimeBasedEmoji(),
-        error: message,
-      }));
+        city: '',
+        isLoading: false,
+        error: 'unavailable',
+      });
     };
 
-    const fetchByCoords = async (lat: number, lon: number) => {
+    const fetchByCoords = async (lat: number, lon: number, knownCity?: string) => {
       const [{ temperature, weatherCode }, city] = await Promise.all([
         fetchCurrentWeather(lat, lon),
-        getCityName(lat, lon),
+        knownCity ? Promise.resolve(knownCity) : getCityName(lat, lon),
       ]);
       coordsRef.current = { lat, lon };
       applyWeather({ temperature, weatherCode, city });
@@ -144,55 +183,54 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     };
 
     const load = async ({ cacheOnly }: { cacheOnly?: boolean } = {}) => {
-      setWeather(prev => ({ ...prev, isLoading: true, error: null }));
+      if (!cacheOnly) {
+        setWeather(prev => ({ ...prev, isLoading: true, error: null }));
+      }
 
       try {
-        // Refresh without prompting for location again
+        // If we already have coords from a previous successful fetch, just refresh weather
         if (coordsRef.current) {
-          await fetchByCoords(coordsRef.current.lat, coordsRef.current.lon);
+          await fetchByCoords(coordsRef.current.lat, coordsRef.current.lon, cityRef.current);
           return;
         }
 
-        if (!cacheOnly && navigator.geolocation && !permissionDeniedRef.current) {
-          await new Promise<void>((resolve, reject) => {
+        // Try GPS geolocation first (will prompt for permission only if not already granted)
+        if (!cacheOnly && navigator.geolocation) {
+          const gpsResult = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
             navigator.geolocation.getCurrentPosition(
-              (position) => {
-                void fetchByCoords(position.coords.latitude, position.coords.longitude)
-                  .then(() => resolve())
-                  .catch(reject);
-              },
-              (err: any) => {
-                // 1 = PERMISSION_DENIED
-                if (typeof err?.code === 'number' && err.code === 1) permissionDeniedRef.current = true;
-                reject(err);
-              },
-              { timeout: 7000, enableHighAccuracy: false, maximumAge: 5 * 60 * 1000 }
+              (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
+              () => resolve(null), // Permission denied or error - silent fail
+              { timeout: 5000, enableHighAccuracy: false, maximumAge: 10 * 60 * 1000 }
             );
           });
-          return;
+
+          if (gpsResult && !cancelled) {
+            await fetchByCoords(gpsResult.lat, gpsResult.lon);
+            return;
+          }
         }
 
+        // Fallback: IP-based geolocation (no permission required)
+        if (!cacheOnly) {
+          const ipLocation = await getLocationByIP();
+          if (ipLocation && !cancelled) {
+            await fetchByCoords(ipLocation.lat, ipLocation.lon, ipLocation.city);
+            return;
+          }
+        }
+
+        // Fallback: use configured fallback city
         if (fallbackCity) {
           await fetchByCity(fallbackCity);
           return;
         }
 
+        // All methods failed
         throw new Error('No location available');
       } catch (err) {
         if (cancelled) return;
         console.error('Weather load error:', err);
-
-        // If geolocation failed but we have a fallback city, try that once
-        if (fallbackCity && !coordsRef.current) {
-          try {
-            await fetchByCity(fallbackCity);
-            return;
-          } catch (fallbackErr) {
-            console.error('Weather fallback error:', fallbackErr);
-          }
-        }
-
-        fail('Weather unavailable');
+        fail();
       }
     };
 
