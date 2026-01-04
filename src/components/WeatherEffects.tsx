@@ -53,7 +53,7 @@ const Particle = memo(({ type, index, total }: ParticleProps) => {
   if (type === 'rain') {
     return (
       <motion.div
-        className="absolute bg-blue-300/60 rounded-full"
+        className="absolute bg-primary/20 rounded-full"
         style={{
           left: `${startX}%`,
           top: -20,
@@ -77,7 +77,7 @@ const Particle = memo(({ type, index, total }: ParticleProps) => {
   // Snow
   return (
     <motion.div
-      className="absolute bg-white rounded-full"
+      className="absolute bg-foreground/20 rounded-full"
       style={{
         left: `${startX}%`,
         top: -20,

@@ -120,7 +120,9 @@ const EmployerHome = memo(() => {
 
   const firstName = profile?.first_name || 'du';
   const greeting = getGreeting();
-  const weather = useWeather();
+  const weather = useWeather({
+    fallbackCity: profile?.location || profile?.home_location || profile?.address || 'Stockholm',
+  });
 
   if (isLoading || !showContent) {
     return (
@@ -144,9 +146,9 @@ const EmployerHome = memo(() => {
         <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
           {greeting}, {firstName} {weather.emoji}
         </h1>
-        {weather.city && !weather.isLoading && !weather.error ? (
+        {!weather.isLoading && !weather.error && weather.description ? (
           <p className="text-white mt-2 text-base">
-            {weather.city}, {weather.temperature}° – {weather.description}
+            {weather.city ? `${weather.city}, ` : ''}{weather.temperature}° – {weather.description}
           </p>
         ) : (
           <p className="text-white mt-2 text-base">
