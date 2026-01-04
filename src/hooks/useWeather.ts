@@ -10,6 +10,14 @@ interface WeatherData {
   error: string | null;
 }
 
+interface CachedLocation {
+  lat: number;
+  lon: number;
+  city: string;
+  timestamp: number;
+  source: 'gps' | 'ip' | 'fallback';
+}
+
 interface UseWeatherOptions {
   /** Used when all location methods fail */
   fallbackCity?: string;
@@ -354,4 +362,50 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   }, [fallbackCity, refreshMs, fetchWeatherOnly, checkForLocationChange]);
 
   return weather;
+};
+
+/**
+ * Preload location and cache it for instant weather display.
+ * Call this during login to have location ready before user reaches home page.
+ * Returns the cached location or null if all methods fail.
+ */
+export const preloadWeatherLocation = async (): Promise<CachedLocation | null> => {
+  // Check if we already have a recent cache
+  const existing = getCachedLocation();
+  if (existing) {
+    const age = Date.now() - existing.timestamp;
+    // If cache is less than 1 hour old and from GPS, it's fresh enough
+    if (age < 60 * 60 * 1000 && existing.source === 'gps') {
+      return existing;
+    }
+  }
+
+  // Try GPS first (most accurate)
+  if (navigator.geolocation) {
+    const gpsResult = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
+        () => resolve(null),
+        { timeout: 5000, enableHighAccuracy: false, maximumAge: 30 * 60 * 1000 }
+      );
+    });
+
+    if (gpsResult) {
+      const city = await getCityName(gpsResult.lat, gpsResult.lon);
+      const location: CachedLocation = { ...gpsResult, city, source: 'gps', timestamp: Date.now() };
+      setCachedLocation(location);
+      return location;
+    }
+  }
+
+  // Try IP geolocation
+  const ipLocation = await getLocationByIP();
+  if (ipLocation) {
+    const location: CachedLocation = { ...ipLocation, source: 'ip', timestamp: Date.now() };
+    setCachedLocation(location);
+    return location;
+  }
+
+  // Return existing cache if we have one (even if older)
+  return existing;
 };

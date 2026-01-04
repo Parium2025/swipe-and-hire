@@ -7,6 +7,7 @@ import { getMediaUrl } from '@/lib/mediaManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
+import { preloadWeatherLocation } from '@/hooks/useWeather';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -552,6 +553,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
               })();
             }
+            
+            // 🌤️ Preload weather location in background (for employer home page)
+            // This runs silently and caches the location so it's ready when user reaches home
+            preloadWeatherLocation().catch(err => {
+              console.warn('Weather location preload failed (non-blocking):', err);
+            });
           } catch (error) {
             console.error('Media preload error:', error);
             setPreloadedAvatarUrl(null);
