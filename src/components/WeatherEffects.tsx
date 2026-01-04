@@ -42,16 +42,16 @@ const WeatherEffects = memo(({ weatherCode, isLoading }: WeatherEffectsProps) =>
 
 WeatherEffects.displayName = 'WeatherEffects';
 
-// Rain Effect - Strong and visible
+// Rain Effect - Gentle and balanced with snow
 const RainEffect = memo(() => {
   const drops = useMemo(() => 
-    Array.from({ length: 80 }).map((_, i) => ({
+    Array.from({ length: 25 }).map((_, i) => ({
       id: i,
-      left: (i / 80) * 100 + Math.random() * 2 - 1,
-      delay: Math.random() * 3,
-      duration: 0.8 + Math.random() * 0.4,
-      height: 15 + Math.random() * 20,
-      opacity: 0.4 + Math.random() * 0.3,
+      left: (i / 25) * 100 + Math.random() * 4 - 2,
+      delay: Math.random() * 5,
+      duration: 1.8 + Math.random() * 1.2,
+      height: 12 + Math.random() * 10,
+      opacity: 0.25 + Math.random() * 0.2,
     })),
   []);
 
@@ -60,11 +60,11 @@ const RainEffect = memo(() => {
       {drops.map((drop) => (
         <motion.div
           key={drop.id}
-          className="absolute bg-blue-300/50 rounded-full"
+          className="absolute bg-blue-300/40 rounded-full"
           style={{
             left: `${drop.left}%`,
-            top: -30,
-            width: 2,
+            top: -20,
+            width: 1.5,
             height: drop.height,
             opacity: drop.opacity,
           }}
