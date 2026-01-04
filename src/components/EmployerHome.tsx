@@ -151,7 +151,9 @@ const EmployerHome = memo(() => {
   }, [jobs]);
 
   const firstName = profile?.first_name || 'du';
-  const { text: greetingText, isEvening } = getGreeting();
+  const [previewEvening, setPreviewEvening] = useState(false);
+  const { text: greetingText, isEvening: realIsEvening } = getGreeting();
+  const isEvening = previewEvening || realIsEvening;
   const weather = useWeather({
     fallbackCity: profile?.location || profile?.home_location || profile?.address || 'Stockholm',
   });
@@ -235,6 +237,13 @@ const EmployerHome = memo(() => {
             Här är en översikt över din rekrytering
           </p>
         )}
+        {/* Temporary preview toggle - REMOVE AFTER TESTING */}
+        <button 
+          onClick={() => setPreviewEvening(!previewEvening)}
+          className="mt-2 text-xs text-white/50 hover:text-white/80 underline"
+        >
+          {previewEvening ? '🌙 Kvällsläge PÅ - klicka för att stänga av' : '☀️ Klicka för att förhandsgranska kvällsläge'}
+        </button>
       </motion.div>
 
       {/* Stats grid */}
