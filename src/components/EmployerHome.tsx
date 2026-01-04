@@ -204,7 +204,6 @@ const EmployerHome = memo(() => {
           icon={Users}
           title="Nya ansökningar"
           value={stats.totalApplications}
-          subtitle="Senaste 7 dagarna"
           gradient="from-blue-500/90 via-blue-600/80 to-indigo-700/90"
           glowColor="bg-blue-500/30"
           delay={0.15}
@@ -221,7 +220,6 @@ const EmployerHome = memo(() => {
           icon={Clock}
           title="Väntar på feedback"
           value={stats.totalApplications}
-          subtitle="Kandidater att granska"
           gradient="from-amber-500/90 via-orange-500/80 to-orange-600/90"
           glowColor="bg-amber-500/30"
           delay={0.25}
