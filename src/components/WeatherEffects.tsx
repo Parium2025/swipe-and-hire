@@ -153,21 +153,58 @@ const ThunderEffect = memo(() => {
     })),
   []);
 
-  // Multiple lightning bolts with random positions
-  const [lightningPositions, setLightningPositions] = useState<number[]>([25, 50, 75]);
+  // Multiple lightning bolts with random positions - regenerate on each flash
+  const [lightningState, setLightningState] = useState({
+    positions: [15, 45, 75],
+    flash: false,
+  });
   
   useEffect(() => {
-    const updatePositions = () => {
-      setLightningPositions([
-        10 + Math.random() * 80,
-        10 + Math.random() * 80,
-        10 + Math.random() * 80,
-      ]);
+    // Create dramatic lightning pattern with variable timing
+    const flash = () => {
+      // Random positions for this flash
+      const newPositions = [
+        5 + Math.random() * 90,
+        5 + Math.random() * 90,
+        5 + Math.random() * 90,
+      ];
+      
+      // First flash
+      setLightningState({ positions: newPositions, flash: true });
+      
+      // Quick off
+      setTimeout(() => setLightningState(s => ({ ...s, flash: false })), 80);
+      
+      // Second flash (aftershock) - sometimes
+      if (Math.random() > 0.3) {
+        setTimeout(() => setLightningState(s => ({ ...s, flash: true })), 150);
+        setTimeout(() => setLightningState(s => ({ ...s, flash: false })), 200);
+      }
+      
+      // Third flash (rare double strike)
+      if (Math.random() > 0.7) {
+        setTimeout(() => setLightningState(s => ({ ...s, flash: true })), 300);
+        setTimeout(() => setLightningState(s => ({ ...s, flash: false })), 350);
+      }
     };
     
-    // Change lightning positions every flash cycle
-    const interval = setInterval(updatePositions, 5000);
-    return () => clearInterval(interval);
+    // Variable interval between lightning strikes (2-6 seconds)
+    const scheduleNext = () => {
+      const delay = 2000 + Math.random() * 4000;
+      return setTimeout(() => {
+        flash();
+        scheduleNext();
+      }, delay);
+    };
+    
+    // Initial flash after short delay
+    const initialTimeout = setTimeout(flash, 500);
+    const intervalId = scheduleNext();
+    
+    return () => {
+      clearTimeout(initialTimeout);
+      clearTimeout(intervalId);
+    };
   }, []);
 
   return (
@@ -196,48 +233,37 @@ const ThunderEffect = memo(() => {
         />
       ))}
       
-      {/* Lightning flash - more intense */}
+      {/* Lightning flash - screen flash */}
       <motion.div
-        className="absolute inset-0 bg-white/15"
+        className="absolute inset-0 bg-white pointer-events-none"
         animate={{
-          opacity: [0, 0, 0, 0.25, 0, 0.15, 0, 0, 0, 0],
+          opacity: lightningState.flash ? 0.35 : 0,
         }}
         transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: 'linear',
-          times: [0, 0.3, 0.35, 0.36, 0.38, 0.4, 0.42, 0.5, 0.8, 1],
+          duration: 0.05,
         }}
       />
       
-      {/* Multiple lightning bolts at random positions - smaller size */}
-      {lightningPositions.map((position, index) => (
+      {/* Multiple lightning bolts at random positions */}
+      {lightningState.positions.map((position, index) => (
         <motion.div
           key={index}
           className="absolute top-0"
-          style={{ left: `${position}%` }}
+          style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
           animate={{
-            opacity: [0, 0, 0, 0.8, 0, 0.5, 0, 0, 0, 0],
+            opacity: lightningState.flash ? 1 : 0,
+            scale: lightningState.flash ? 1 : 0.8,
           }}
           transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: 'linear',
-            times: [0, 0.3, 0.35, 0.36, 0.38, 0.4, 0.42, 0.5, 0.8, 1],
-            delay: index * 0.05,
+            duration: 0.05,
           }}
         >
-          <svg width="20" height="60" viewBox="0 0 40 120" fill="none">
+          <svg width="24" height="70" viewBox="0 0 40 120" fill="none">
             <path
               d="M20 0L5 50H18L8 120L35 45H20L30 0H20Z"
-              fill="url(#lightning-gradient)"
+              fill="white"
+              filter="drop-shadow(0 0 10px rgba(255,255,255,0.8))"
             />
-            <defs>
-              <linearGradient id="lightning-gradient" x1="20" y1="0" x2="20" y2="120" gradientUnits="userSpaceOnUse">
-                <stop stopColor="white" stopOpacity="0.9" />
-                <stop offset="1" stopColor="#60A5FA" stopOpacity="0.4" />
-              </linearGradient>
-            </defs>
           </svg>
         </motion.div>
       ))}
