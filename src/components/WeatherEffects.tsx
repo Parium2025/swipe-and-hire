@@ -133,20 +133,20 @@ const StarsEffect = memo(() => {
       {/* Shooting star - simple white dot from top-right going down-left */}
       {shootingStarActive && (
         <motion.div
-          className="absolute w-2 h-2 bg-white rounded-full"
+          className="absolute w-1 h-1 bg-white rounded-full"
           style={{
             right: '5%',
             top: '3%',
           }}
           initial={{ opacity: 0 }}
           animate={{ 
-            opacity: [0, 1, 1, 0.8, 0],
-            x: [0, -250, -500],
-            y: [0, 200, 400],
+            opacity: [0, 0.9, 0.9, 0.7, 0],
+            x: [0, -200, -400],
+            y: [0, 160, 320],
           }}
           transition={{
-            duration: 0.5,
-            ease: 'linear',
+            duration: 1.2,
+            ease: 'easeOut',
           }}
         />
       )}
