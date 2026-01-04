@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 interface WeatherEffectsProps {
   weatherCode: number | null;
   isLoading: boolean;
+  isEvening?: boolean;
 }
 
 type EffectType = 'rain' | 'rain_showers' | 'snow' | 'snow_showers' | 'thunder' | 'cloudy' | null;
 
-const WeatherEffects = memo(({ weatherCode, isLoading }: WeatherEffectsProps) => {
+const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: WeatherEffectsProps) => {
   // Determine effect type based on weather code
   const effectType = useMemo((): EffectType => {
     if (!weatherCode || isLoading) return null;
@@ -40,10 +41,12 @@ const WeatherEffects = memo(({ weatherCode, isLoading }: WeatherEffectsProps) =>
     return null;
   }, [weatherCode, isLoading]);
 
-  if (!effectType) return null;
+  // Show stars at evening when clear or mostly clear (codes 0, 1, 2)
+  const showStars = isEvening && (weatherCode === 0 || weatherCode === 1 || weatherCode === 2);
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      {showStars && <StarsEffect />}
       {effectType === 'cloudy' && <CloudyEffect />}
       {effectType === 'rain' && <RainEffect />}
       {effectType === 'rain_showers' && <RainShowersEffect />}
@@ -55,6 +58,125 @@ const WeatherEffects = memo(({ weatherCode, isLoading }: WeatherEffectsProps) =>
 });
 
 WeatherEffects.displayName = 'WeatherEffects';
+
+// Stars Effect - White dots like a night sky with occasional shooting star
+const StarsEffect = memo(() => {
+  const stars = useMemo(() => 
+    Array.from({ length: 50 }).map((_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 70, // Keep stars in upper portion
+      size: 1 + Math.random() * 2,
+      opacity: 0.3 + Math.random() * 0.5,
+      twinkleDelay: Math.random() * 5,
+      twinkleDuration: 2 + Math.random() * 3,
+    })),
+  []);
+
+  // Shooting star state
+  const [shootingStar, setShootingStar] = useState<{
+    active: boolean;
+    startX: number;
+    startY: number;
+  }>({ active: false, startX: 0, startY: 0 });
+
+  useEffect(() => {
+    const triggerShootingStar = () => {
+      // Random start position (top-right quadrant usually)
+      const startX = 20 + Math.random() * 60;
+      const startY = 5 + Math.random() * 25;
+      
+      setShootingStar({ active: true, startX, startY });
+      
+      // Hide after animation completes
+      setTimeout(() => {
+        setShootingStar(s => ({ ...s, active: false }));
+      }, 800);
+    };
+
+    // Random interval between shooting stars (15-40 seconds)
+    const scheduleNext = () => {
+      const delay = 15000 + Math.random() * 25000;
+      return setTimeout(() => {
+        triggerShootingStar();
+        scheduleNext();
+      }, delay);
+    };
+
+    // First shooting star after 5-10 seconds
+    const initialTimeout = setTimeout(triggerShootingStar, 5000 + Math.random() * 5000);
+    const intervalId = scheduleNext();
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearTimeout(intervalId);
+    };
+  }, []);
+
+  return (
+    <>
+      {/* Static stars with subtle twinkle */}
+      {stars.map((star) => (
+        <motion.div
+          key={star.id}
+          className="absolute bg-white rounded-full"
+          style={{
+            left: `${star.left}%`,
+            top: `${star.top}%`,
+            width: star.size,
+            height: star.size,
+          }}
+          animate={{
+            opacity: [star.opacity, star.opacity * 0.4, star.opacity],
+          }}
+          transition={{
+            duration: star.twinkleDuration,
+            delay: star.twinkleDelay,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+
+      {/* Shooting star */}
+      {shootingStar.active && (
+        <motion.div
+          className="absolute"
+          style={{
+            left: `${shootingStar.startX}%`,
+            top: `${shootingStar.startY}%`,
+          }}
+          initial={{ opacity: 0, x: 0, y: 0 }}
+          animate={{ 
+            opacity: [0, 1, 1, 0],
+            x: [0, 150],
+            y: [0, 100],
+          }}
+          transition={{
+            duration: 0.7,
+            ease: 'easeOut',
+          }}
+        >
+          {/* Shooting star head */}
+          <div 
+            className="absolute w-1.5 h-1.5 bg-white rounded-full"
+            style={{ boxShadow: '0 0 4px 1px rgba(255,255,255,0.6)' }}
+          />
+          {/* Shooting star tail */}
+          <div 
+            className="absolute w-12 h-0.5 bg-gradient-to-r from-white/60 to-transparent rounded-full"
+            style={{ 
+              transform: 'rotate(-35deg) translateX(-100%)',
+              transformOrigin: 'right center',
+            }}
+          />
+        </motion.div>
+      )}
+    </>
+  );
+});
+
+StarsEffect.displayName = 'StarsEffect';
 
 // Cloudy Effect - Drifting clouds
 const CloudyEffect = memo(() => {
