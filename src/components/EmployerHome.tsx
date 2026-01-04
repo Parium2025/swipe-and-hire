@@ -156,17 +156,40 @@ const EmployerHome = memo(() => {
     fallbackCity: profile?.location || profile?.home_location || profile?.address || 'Stockholm',
   });
   
-  // Only show moon emoji if it's evening/night (after 18:00) - otherwise show weather emoji
-  // This prevents showing moon during "God eftermiddag" even if sun has set
+  // Emoji logic based on time of day and weather
+  // - Morning/Afternoon: Show weather emoji (sun, clouds, rain, snow, etc.)
+  // - Evening (after 18:00) + Clear sky: Show moon with stars ✨🌙
+  // - Evening + Partly cloudy: Show moon with clouds 🌙☁️
+  // - Evening + Overcast/Rain/Snow: Just show weather (no moon visible)
   const displayEmoji = useMemo(() => {
     const hasMoon = weather.emoji.includes('🌙');
-    if (hasMoon && !isEvening) {
-      // It's dark but still afternoon - show clouds or just skip moon
-      if (weather.weatherCode === 0) return ''; // Clear but afternoon, no emoji
-      if (weather.weatherCode === 1) return '☁️'; // Mostly clear → clouds
-      if (weather.weatherCode === 2) return '☁️'; // Partly cloudy → clouds
-      return weather.emoji.replace('🌙', ''); // Remove moon from combo emojis
+    
+    if (!isEvening) {
+      // DAYTIME (before 18:00) - never show moon, even if sun has set
+      if (hasMoon) {
+        // It's dark but still afternoon - show appropriate weather
+        if (weather.weatherCode === 0) return '☀️'; // Clear → sun (even if dark)
+        if (weather.weatherCode === 1) return '🌤️'; // Mostly clear → sun with cloud
+        if (weather.weatherCode === 2) return '⛅'; // Partly cloudy
+        return weather.emoji.replace('🌙', '').replace('☁️', '☁️'); // Remove moon
+      }
+      return weather.emoji;
     }
+    
+    // EVENING (after 18:00) - show moon when appropriate
+    if (weather.weatherCode === 0) {
+      // Clear evening sky - moon with stars! ✨
+      return '🌙✨';
+    }
+    if (weather.weatherCode === 1) {
+      // Mostly clear - just moon
+      return '🌙';
+    }
+    if (weather.weatherCode === 2) {
+      // Partly cloudy evening - moon with clouds
+      return '🌙☁️';
+    }
+    // Overcast, rain, snow, etc. - just show weather (moon not visible)
     return weather.emoji;
   }, [weather.emoji, weather.weatherCode, isEvening]);
 
