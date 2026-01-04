@@ -159,17 +159,22 @@ const StarsEffect = memo(() => {
 StarsEffect.displayName = 'StarsEffect';
 
 
-// Cloudy Effect - Drifting clouds
+// Cloudy Effect - Drifting clouds, appears already in progress
 const CloudyEffect = memo(() => {
   const clouds = useMemo(() => 
-    Array.from({ length: 4 }).map((_, i) => ({
-      id: i,
-      top: 5 + i * 18 + Math.random() * 10,
-      size: 80 + Math.random() * 60,
-      opacity: 0.06 + Math.random() * 0.04,
-      duration: 60 + Math.random() * 40,
-      delay: i * 8,
-    })),
+    Array.from({ length: 4 }).map((_, i) => {
+      const duration = 60 + Math.random() * 40;
+      // Start clouds at random positions across the screen
+      const initialX = Math.random() * 140 - 20; // -20vw to 120vw
+      return {
+        id: i,
+        top: 5 + i * 18 + Math.random() * 10,
+        size: 80 + Math.random() * 60,
+        opacity: 0.06 + Math.random() * 0.04,
+        duration,
+        initialX,
+      };
+    }),
   []);
 
   return (
@@ -184,12 +189,13 @@ const CloudyEffect = memo(() => {
             height: cloud.size * 0.5,
             opacity: cloud.opacity,
           }}
+          initial={{ x: `${cloud.initialX}vw` }}
           animate={{
-            x: ['-20vw', '120vw'],
+            x: [`${cloud.initialX}vw`, '120vw', '-20vw', '120vw'],
           }}
           transition={{
             duration: cloud.duration,
-            delay: cloud.delay,
+            times: [0, (120 - cloud.initialX) / 140, (120 - cloud.initialX) / 140, 1],
             repeat: Infinity,
             ease: 'linear',
           }}
@@ -201,17 +207,21 @@ const CloudyEffect = memo(() => {
 
 CloudyEffect.displayName = 'CloudyEffect';
 
-// Rain Effect - Slanted with wind
+// Rain Effect - Slanted with wind, appears already in progress
 const RainEffect = memo(() => {
   const drops = useMemo(() => 
-    Array.from({ length: 35 }).map((_, i) => ({
-      id: i,
-      left: (i / 35) * 120 - 10, // Start further left to account for wind drift
-      delay: Math.random() * 3,
-      duration: 1.2 + Math.random() * 0.6,
-      height: 16 + Math.random() * 14,
-      opacity: 0.35 + Math.random() * 0.25,
-    })),
+    Array.from({ length: 35 }).map((_, i) => {
+      const duration = 1.2 + Math.random() * 0.6;
+      const initialY = Math.random() * 115; // Start at random position
+      return {
+        id: i,
+        left: (i / 35) * 120 - 10,
+        duration,
+        height: 16 + Math.random() * 14,
+        opacity: 0.35 + Math.random() * 0.25,
+        initialY,
+      };
+    }),
   []);
 
   return (
@@ -222,17 +232,17 @@ const RainEffect = memo(() => {
           className="absolute bg-blue-300/50 rounded-full"
           style={{
             left: `${drop.left}%`,
-            top: -30,
             width: 2,
             height: drop.height,
             opacity: drop.opacity,
           }}
+          initial={{ y: `${drop.initialY}vh` }}
           animate={{
-            y: ['0vh', '115vh'],
+            y: [`${drop.initialY}vh`, '115vh', '-5vh', '115vh'],
           }}
           transition={{
             duration: drop.duration,
-            delay: drop.delay,
+            times: [0, (115 - drop.initialY) / 120, (115 - drop.initialY) / 120, 1],
             repeat: Infinity,
             ease: 'linear',
           }}
@@ -244,17 +254,21 @@ const RainEffect = memo(() => {
 
 RainEffect.displayName = 'RainEffect';
 
-// Rain Showers Effect - Moderate with light wind
+// Rain Showers Effect - Moderate with light wind, appears already in progress
 const RainShowersEffect = memo(() => {
   const drops = useMemo(() => 
-    Array.from({ length: 28 }).map((_, i) => ({
-      id: i,
-      left: (i / 28) * 115 - 5,
-      delay: Math.random() * 4,
-      duration: 1.5 + Math.random() * 0.8,
-      height: 12 + Math.random() * 10,
-      opacity: 0.25 + Math.random() * 0.2,
-    })),
+    Array.from({ length: 28 }).map((_, i) => {
+      const duration = 1.5 + Math.random() * 0.8;
+      const initialY = Math.random() * 112;
+      return {
+        id: i,
+        left: (i / 28) * 115 - 5,
+        duration,
+        height: 12 + Math.random() * 10,
+        opacity: 0.25 + Math.random() * 0.2,
+        initialY,
+      };
+    }),
   []);
 
   return (
@@ -265,17 +279,17 @@ const RainShowersEffect = memo(() => {
           className="absolute bg-blue-300/40 rounded-full"
           style={{
             left: `${drop.left}%`,
-            top: -25,
             width: 1.5,
             height: drop.height,
             opacity: drop.opacity,
           }}
+          initial={{ y: `${drop.initialY}vh` }}
           animate={{
-            y: ['0vh', '112vh'],
+            y: [`${drop.initialY}vh`, '112vh', '-5vh', '112vh'],
           }}
           transition={{
             duration: drop.duration,
-            delay: drop.delay,
+            times: [0, (112 - drop.initialY) / 117, (112 - drop.initialY) / 117, 1],
             repeat: Infinity,
             ease: 'linear',
           }}
@@ -346,19 +360,22 @@ const SnowEffect = memo(() => {
 
 SnowEffect.displayName = 'SnowEffect';
 
-// Snow Showers Effect - Slightly faster and more intense, continuous
+// Snow Showers Effect - Slightly faster and more intense, appears already in progress
 const SnowShowersEffect = memo(() => {
   const flakes = useMemo(() => 
-    Array.from({ length: 50 }).map((_, i) => ({
-      id: i,
-      left: (i / 50) * 100 + Math.random() * 4 - 2,
-      // Spread delays evenly across the duration
-      delay: (i / 50) * 8,
-      duration: 8 + Math.random() * 3,
-      size: 3 + Math.random() * 5,
-      opacity: 0.35 + Math.random() * 0.3,
-      swayAmount: 12 + Math.random() * 18,
-    })),
+    Array.from({ length: 50 }).map((_, i) => {
+      const duration = 8 + Math.random() * 3;
+      const initialProgress = Math.random() * 100;
+      return {
+        id: i,
+        left: Math.random() * 100,
+        duration,
+        size: 3 + Math.random() * 5,
+        opacity: 0.35 + Math.random() * 0.3,
+        swayAmount: 12 + Math.random() * 18,
+        initialY: initialProgress,
+      };
+    }),
   []);
 
   return (
@@ -369,20 +386,20 @@ const SnowShowersEffect = memo(() => {
           className="absolute bg-white rounded-full"
           style={{
             left: `${flake.left}%`,
-            top: -15,
             width: flake.size,
             height: flake.size,
             opacity: flake.opacity,
             filter: 'blur(0.5px)',
           }}
+          initial={{ y: `${flake.initialY}vh` }}
           animate={{
-            y: ['0vh', '105vh'],
+            y: [`${flake.initialY}vh`, '105vh', '-5vh', '105vh'],
             x: [0, flake.swayAmount, 0, -flake.swayAmount, 0],
-            rotate: [0, 180],
+            rotate: [0, 180, 360],
           }}
           transition={{
             duration: flake.duration,
-            delay: flake.delay,
+            times: [0, (105 - flake.initialY) / 110, (105 - flake.initialY) / 110, 1],
             repeat: Infinity,
             ease: 'linear',
             x: {
