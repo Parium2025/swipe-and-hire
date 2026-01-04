@@ -124,6 +124,7 @@ const EmployerHome = memo(() => {
   
   const [showContent, setShowContent] = useState(false);
   const [showWeatherPreview, setShowWeatherPreview] = useState(false);
+  const [previewEmoji, setPreviewEmoji] = useState<string | null>(null);
   
   useEffect(() => {
     if (!isLoading) {
@@ -170,7 +171,13 @@ const EmployerHome = memo(() => {
   return (
     <>
       {showWeatherPreview ? (
-        <WeatherPreview onClose={() => setShowWeatherPreview(false)} />
+        <WeatherPreview 
+          onClose={() => {
+            setShowWeatherPreview(false);
+            setPreviewEmoji(null);
+          }} 
+          onEmojiChange={setPreviewEmoji}
+        />
       ) : (
         <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} />
       )}
@@ -184,7 +191,7 @@ const EmployerHome = memo(() => {
       >
         <div className="flex items-center gap-2 justify-center md:justify-start">
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-            {greeting}, {firstName} {weather.emoji}
+            {greeting}, {firstName} {showWeatherPreview && previewEmoji ? previewEmoji : weather.emoji}
           </h1>
           <button
             onClick={() => setShowWeatherPreview(true)}

@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import WeatherEffects from '@/components/WeatherEffects';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -7,28 +7,40 @@ interface WeatherType {
   code: number;
   name: string;
   emoji: string;
-  hasAnimation: boolean;
 }
 
 const weatherTypes: WeatherType[] = [
-  { code: 0, name: 'Klart', emoji: '☀️', hasAnimation: false },
-  { code: 1, name: 'Mestadels klart', emoji: '🌤️', hasAnimation: false },
-  { code: 2, name: 'Halvklart', emoji: '⛅', hasAnimation: false },
-  { code: 3, name: 'Molnigt', emoji: '☁️', hasAnimation: false },
-  { code: 45, name: 'Dimma', emoji: '🌫️', hasAnimation: false },
-  { code: 61, name: 'Regn', emoji: '🌧️', hasAnimation: true },
-  { code: 71, name: 'Snö', emoji: '❄️', hasAnimation: true },
-  { code: 80, name: 'Regnskurar', emoji: '🌦️', hasAnimation: true },
-  { code: 85, name: 'Snöbyar', emoji: '🌨️', hasAnimation: true },
-  { code: 95, name: 'Åska', emoji: '⛈️', hasAnimation: false },
+  { code: 0, name: 'Klart', emoji: '☀️' },
+  { code: 1, name: 'Mestadels klart', emoji: '🌤️' },
+  { code: 2, name: 'Halvklart', emoji: '⛅' },
+  { code: 3, name: 'Molnigt', emoji: '☁️' },
+  { code: 45, name: 'Dimma', emoji: '🌫️' },
+  { code: 61, name: 'Regn', emoji: '🌧️' },
+  { code: 71, name: 'Snö', emoji: '❄️' },
+  { code: 80, name: 'Regnskurar', emoji: '🌦️' },
+  { code: 85, name: 'Snöbyar', emoji: '🌨️' },
+  { code: 95, name: 'Åska', emoji: '⛈️' },
 ];
 
 interface WeatherPreviewProps {
   onClose: () => void;
+  onEmojiChange?: (emoji: string) => void;
 }
 
-const WeatherPreview = memo(({ onClose }: WeatherPreviewProps) => {
-  const [selectedCode, setSelectedCode] = useState<number | null>(71); // Start with snow
+const WeatherPreview = memo(({ onClose, onEmojiChange }: WeatherPreviewProps) => {
+  const [selectedCode, setSelectedCode] = useState<number>(71); // Start with snow
+
+  // Notify parent when emoji changes
+  useEffect(() => {
+    const selectedWeather = weatherTypes.find(w => w.code === selectedCode);
+    if (selectedWeather && onEmojiChange) {
+      onEmojiChange(selectedWeather.emoji);
+    }
+  }, [selectedCode, onEmojiChange]);
+
+  const handleSelect = (code: number) => {
+    setSelectedCode(code);
+  };
 
   return (
     <>
@@ -53,7 +65,7 @@ const WeatherPreview = memo(({ onClose }: WeatherPreviewProps) => {
           {weatherTypes.map((weather) => (
             <button
               key={weather.code}
-              onClick={() => setSelectedCode(weather.code)}
+              onClick={() => handleSelect(weather.code)}
               className={`
                 flex flex-col items-center gap-1 p-2 rounded-xl transition-all
                 ${selectedCode === weather.code 
@@ -64,18 +76,12 @@ const WeatherPreview = memo(({ onClose }: WeatherPreviewProps) => {
             >
               <span className="text-xl">{weather.emoji}</span>
               <span className="text-[10px] text-white/70 text-center leading-tight">{weather.name}</span>
-              {weather.hasAnimation && (
-                <span className="text-[8px] text-emerald-400 font-medium">ANIM</span>
-              )}
             </button>
           ))}
         </div>
         
         <p className="text-xs text-white/50 text-center mt-3">
-          {selectedCode !== null && weatherTypes.find(w => w.code === selectedCode)?.hasAnimation 
-            ? '✨ Denna vädertyp har animation' 
-            : 'Ingen animation för denna vädertyp'
-          }
+          Alla vädertyper har nu animation ✨
         </p>
       </div>
     </>
