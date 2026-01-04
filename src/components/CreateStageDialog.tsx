@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Check } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { HexColorPicker } from 'react-colorful';
 import {
   Dialog,
   DialogHeader,
@@ -15,8 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { 
   useStageSettings, 
   AVAILABLE_ICONS, 
-  PREMIUM_GRADIENTS,
-  getGradientPreset,
+  AVAILABLE_COLORS,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
 import { MAX_KANBAN_STAGES } from '@/hooks/useKanbanLayout';
@@ -30,14 +30,12 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
   const { createCustomStage, stageOrder } = useStageSettings();
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState('');
-  const [selectedColor, setSelectedColor] = useState('coral'); // Default to coral
+  const [selectedColor, setSelectedColor] = useState(AVAILABLE_COLORS[4].value); // Red
   const [selectedIcon, setSelectedIcon] = useState('flag');
 
   // Use passed count or get from hook - max 5 stages
   const stageCount = currentStageCount || stageOrder.length;
   const canCreateMore = stageCount < MAX_KANBAN_STAGES;
-
-  const selectedGradient = getGradientPreset(selectedColor);
 
   const handleCreate = async () => {
     if (!label.trim()) return;
@@ -55,7 +53,7 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
       });
       setOpen(false);
       setLabel('');
-      setSelectedColor('coral');
+      setSelectedColor(AVAILABLE_COLORS[4].value);
       setSelectedIcon('flag');
       toast.success('Nytt steg skapat');
     } catch (error) {
@@ -104,40 +102,22 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
           </div>
 
           {/* Color picker and Icon picker side by side */}
-          <div className="flex gap-4">
-            {/* Premium gradient picker */}
+          <div className="flex gap-3">
+            {/* Color picker */}
             <div className="space-y-2">
               <Label className="text-white">Färg</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {PREMIUM_GRADIENTS.map((preset) => {
-                  const isSelected = selectedColor === preset.id;
-                  return (
-                    <button
-                      key={preset.id}
-                      onClick={() => setSelectedColor(preset.id)}
-                      className={`relative w-10 h-10 rounded-lg transition-all duration-200 ${
-                        isSelected 
-                          ? 'ring-2 ring-white scale-110 shadow-lg' 
-                          : 'ring-1 ring-white/20 hover:ring-white/40 hover:scale-105'
-                      }`}
-                      style={{ background: preset.gradient }}
-                      title={preset.label}
-                    >
-                      {isSelected && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Check className="h-4 w-4 text-white drop-shadow-md" />
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
+              <div className="[&_.react-colorful]:w-[170px] [&_.react-colorful]:h-[170px]">
+                <HexColorPicker 
+                  color={selectedColor} 
+                  onChange={setSelectedColor}
+                />
               </div>
             </div>
 
             {/* Icon picker */}
             <div className="flex-1 space-y-2">
               <Label className="text-white">Ikon</Label>
-              <div className="grid grid-cols-5 gap-0.5">
+              <div className="grid grid-cols-5 gap-0">
                 {AVAILABLE_ICONS.map(({ name, Icon, label: iconLabel }) => (
                   <button
                     key={name}
@@ -163,25 +143,17 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div 
-                    className="relative overflow-hidden rounded-xl px-3 py-2.5 ring-1 ring-inset ring-white/20 inline-flex items-center gap-2 transition-colors max-w-full cursor-default group"
-                    style={{ background: selectedGradient?.gradient || selectedColor }}
+                    className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-sm inline-flex items-center gap-2 transition-colors max-w-full cursor-default"
+                    style={{ backgroundColor: `${selectedColor}33` }}
                   >
-                    {/* Glass overlay */}
-                    <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-                    
-                    {/* Decorative elements */}
-                    <div className="absolute -right-2 -top-2 w-8 h-8 bg-white/10 rounded-full blur-lg" />
-                    <div className="absolute -left-2 -bottom-2 w-6 h-6 bg-white/10 rounded-full blur-md" />
-                    
-                    <div className="relative flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-white/10 backdrop-blur-sm">
-                        <IconComponent className="h-3.5 w-3.5 text-white" strokeWidth={1.5} />
-                      </div>
-                      <span className="font-semibold text-sm text-white truncate max-w-[200px] drop-shadow-sm">{label || 'Nytt steg'}</span>
-                      <span className="text-white text-[10px] px-2 py-0.5 rounded-full font-medium bg-white/20 backdrop-blur-sm">
-                        0
-                      </span>
-                    </div>
+                    <IconComponent className="h-4 w-4 text-white flex-shrink-0" />
+                    <span className="font-medium text-sm text-white truncate max-w-[200px]">{label || 'Nytt steg'}</span>
+                    <span 
+                      className="text-white text-[10px] px-1.5 py-0.5 rounded-full transition-colors flex-shrink-0"
+                      style={{ backgroundColor: `${selectedColor}66` }}
+                    >
+                      0
+                    </span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-xs">

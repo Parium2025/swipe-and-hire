@@ -80,7 +80,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
-import { useStageSettings, getIconByName, DEFAULT_STAGE_KEYS, CandidateStage, getGradientPreset, PREMIUM_GRADIENTS } from '@/hooks/useStageSettings';
+import { useStageSettings, getIconByName, DEFAULT_STAGE_KEYS, CandidateStage } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
 
@@ -347,12 +347,8 @@ const StageColumn = ({
     disabled: isReadOnly,
   });
 
-  // Get gradient preset for the color - use live color while dragging
-  const colorValue = liveColor ?? stageSettings.color;
-  const gradientPreset = getGradientPreset(colorValue);
-  
-  // Fallback for legacy hex colors
-  const displayGradient = gradientPreset?.gradient || `linear-gradient(135deg, ${colorValue}cc 0%, ${colorValue}99 100%)`;
+  // Use live color while dragging, fall back to saved color
+  const displayColor = liveColor ?? stageSettings.color;
 
   // Check scroll position to show/hide indicators
   const checkScroll = useCallback(() => {
@@ -378,37 +374,42 @@ const StageColumn = ({
       className="flex-none w-[calc((100%-3rem)/5)] flex flex-col transition-colors h-full min-w-0"
     >
       <div 
-        className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 mb-2 transition-all flex-shrink-0 ${isOver ? 'ring-2 ring-white/50' : ''}`}
-        style={{ background: displayGradient }}
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
+        style={{ backgroundColor: `${displayColor}33` }}
       >
-        <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" strokeWidth={1.5} />
-        <TooltipProvider delayDuration={300}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="font-semibold text-xs text-white truncate cursor-default flex-1 min-w-0">{stageSettings.label}</span>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs">
-              <p>{stageSettings.label}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <span 
-          className="text-white text-[10px] px-2 py-0.5 rounded-full flex-shrink-0 font-medium bg-white/20"
-        >
-          {candidates.length}
-        </span>
-        {/* Only show settings menu for own list */}
-        {!isReadOnly && (
-          <StageSettingsMenu 
-            stageKey={stage} 
-            candidateCount={candidates.length}
-            totalStageCount={totalStageCount}
-            targetStageKey={targetStageKey}
-            targetStageLabel={targetStageLabel}
-            onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
-            onLiveColorChange={setLiveColor}
-          />
-        )}
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="font-medium text-xs text-white truncate cursor-default flex-1 min-w-0">{stageSettings.label}</span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                <p>{stageSettings.label}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <span 
+            className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
+            style={{ backgroundColor: `${displayColor}66` }}
+          >
+            {candidates.length}
+          </span>
+          {/* Only show settings menu for own list */}
+          {!isReadOnly && (
+            <div className="ml-auto">
+              <StageSettingsMenu 
+                stageKey={stage} 
+                candidateCount={candidates.length}
+                totalStageCount={totalStageCount}
+                targetStageKey={targetStageKey}
+                targetStageLabel={targetStageLabel}
+                onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
+                onLiveColorChange={setLiveColor}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content area - with background container like Teamtailor but Parium style */}
