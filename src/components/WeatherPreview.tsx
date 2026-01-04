@@ -14,7 +14,7 @@ const weatherTypes: WeatherType[] = [
   { code: 1, name: 'Mestadels klart', emoji: '🌤️' },
   { code: 2, name: 'Halvklart', emoji: '⛅' },
   { code: 3, name: 'Molnigt', emoji: '☁️' },
-  { code: 45, name: 'Dimma', emoji: '🌫️' },
+  { code: 45, name: 'Dimma', emoji: '☁️' },
   { code: 61, name: 'Regn', emoji: '🌧️' },
   { code: 71, name: 'Snö', emoji: '❄️' },
   { code: 80, name: 'Regnskurar', emoji: '🌦️' },

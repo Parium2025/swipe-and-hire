@@ -66,7 +66,7 @@ const getWeatherInfo = (code: number): { description: string; emoji: string } =>
   if (code === 1) return { description: 'mestadels klart', emoji: '🌤️' };
   if (code === 2) return { description: 'halvklart', emoji: '⛅' };
   if (code === 3) return { description: 'molnigt', emoji: '☁️' };
-  if (code === 45 || code === 48) return { description: 'dimma', emoji: '🌫️' };
+  if (code === 45 || code === 48) return { description: 'dimma', emoji: '☁️' };
   if (code >= 51 && code <= 57) return { description: 'duggregn', emoji: '🌧️' };
   if (code >= 61 && code <= 67) return { description: 'regn', emoji: '🌧️' };
   if (code >= 71 && code <= 77) return { description: 'snö', emoji: '❄️' };
