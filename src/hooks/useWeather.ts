@@ -131,6 +131,7 @@ const setCachedWeather = (weather: Omit<CachedWeather, 'timestamp'>) => {
 
 const fetchCurrentWeather = async (lat: number, lon: number) => {
   // Include daily sunrise/sunset to determine if it's night
+  // timezone=auto ensures times are in the location's local timezone
   const res = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=sunrise,sunset&timezone=auto`
   );
@@ -138,19 +139,20 @@ const fetchCurrentWeather = async (lat: number, lon: number) => {
   const current = data?.current_weather;
   if (!current) throw new Error('Missing current_weather');
   
-  // Check if current time is between sunrise and sunset
-  const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
+  // Use the API's reported time (which is in the location's timezone) for accurate comparison
+  // current_weather.time is in ISO format in the location's local timezone
+  const currentTimeStr = current.time; // e.g., "2026-01-04T16:30"
+  const todayStr = currentTimeStr?.split('T')[0];
+  
   const dailyIndex = data.daily?.time?.indexOf(todayStr) ?? 0;
   const sunrise = data.daily?.sunrise?.[dailyIndex];
   const sunset = data.daily?.sunset?.[dailyIndex];
   
   let isNight = false;
-  if (sunrise && sunset) {
-    const sunriseTime = new Date(sunrise).getTime();
-    const sunsetTime = new Date(sunset).getTime();
-    const nowTime = now.getTime();
-    isNight = nowTime < sunriseTime || nowTime > sunsetTime;
+  if (sunrise && sunset && currentTimeStr) {
+    // Compare times as strings since they're all in the same timezone from the API
+    // Format: "2026-01-04T07:30" - can be compared lexicographically
+    isNight = currentTimeStr < sunrise || currentTimeStr > sunset;
   }
   
   return {
