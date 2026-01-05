@@ -1177,7 +1177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!userRole) return '/';
     
     if (userRole.role === 'employer') {
-      return '/dashboard';
+      return '/home';
     } else if (userRole.role === 'job_seeker') {
       return '/search-jobs';
     }
