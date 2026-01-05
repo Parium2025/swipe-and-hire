@@ -17,7 +17,7 @@ const Landing = () => {
     if (user && profile) {
       const role = (profile as any)?.role;
       if (role) {
-        const target = role === 'employer' ? '/dashboard' : '/search-jobs';
+        const target = role === 'employer' ? '/home' : '/search-jobs';
         navigate(target, { replace: true });
       }
     }

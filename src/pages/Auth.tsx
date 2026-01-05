@@ -722,7 +722,7 @@ const Auth = () => {
   if (user && profile && !loading && confirmationStatus === 'none' && recoveryStatus === 'none' && !isPasswordReset) {
     const role = (profile as any)?.role;
     if (role) {
-      const target = role === 'employer' ? '/dashboard' : '/search-jobs';
+      const target = role === 'employer' ? '/home' : '/search-jobs';
       return <Navigate to={target} replace />;
     }
   }
