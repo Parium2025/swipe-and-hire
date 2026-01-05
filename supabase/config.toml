@@ -47,3 +47,6 @@ verify_jwt = true
 
 [functions.process-cv-queue]
 verify_jwt = false
+
+[functions.fetch-hr-news]
+verify_jwt = true
