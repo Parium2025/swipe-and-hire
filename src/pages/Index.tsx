@@ -273,8 +273,8 @@ const Index = () => {
         .update({ onboarding_completed: true })
         .eq('id', user.id);
       
-      // Navigate to dashboard
-      navigate('/dashboard');
+      // Navigate to home
+      navigate('/home');
     }} />;
   }
 
