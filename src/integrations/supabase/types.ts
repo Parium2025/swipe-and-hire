@@ -344,6 +344,51 @@ export type Database = {
           },
         ]
       }
+      daily_hr_news: {
+        Row: {
+          category: string
+          created_at: string
+          gradient: string | null
+          icon_name: string | null
+          id: string
+          news_date: string
+          order_index: number
+          source: string
+          source_url: string | null
+          summary: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          gradient?: string | null
+          icon_name?: string | null
+          id?: string
+          news_date?: string
+          order_index?: number
+          source: string
+          source_url?: string | null
+          summary: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          gradient?: string | null
+          icon_name?: string | null
+          id?: string
+          news_date?: string
+          order_index?: number
+          source?: string
+          source_url?: string | null
+          summary?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_confirmations: {
         Row: {
           confirmed_at: string | null

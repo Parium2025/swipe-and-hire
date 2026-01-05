@@ -10,13 +10,13 @@ import {
   Users, 
   Plus,
   ArrowRight,
-  BarChart3,
   FileText,
   Building2,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { isJobExpiredCheck } from '@/lib/date';
 import WeatherEffects from '@/components/WeatherEffects';
+import { HrNewsCards } from '@/components/HrNewsCards';
 
 const getGreeting = (): { text: string; isEvening: boolean } => {
   const hour = new Date().getHours();
@@ -38,48 +38,6 @@ const formatDateTime = (): { time: string; date: string } => {
   return { time, date: capitalizedDate };
 };
 
-interface QuickActionProps {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  onClick: () => void;
-  gradient: string;
-  delay: number;
-}
-
-const QuickAction = memo(({ icon: Icon, title, description, onClick, gradient, delay }: QuickActionProps) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
-    className="group"
-  >
-    <Card 
-      className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-xl cursor-pointer h-full`}
-      onClick={onClick}
-    >
-      {/* Glass overlay */}
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-      
-      {/* Decorative elements */}
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
-      
-      <CardContent className="relative p-5 flex flex-col h-full">
-        <div className="p-3 rounded-xl bg-white/10 backdrop-blur-sm w-fit mb-4 transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
-          <Icon className="h-6 w-6 text-white" strokeWidth={1.5} />
-        </div>
-        <h3 className="text-lg font-semibold text-white mb-1">{title}</h3>
-        <p className="text-sm text-white/70 flex-1">{description}</p>
-        <div className="flex items-center gap-1 mt-3 text-white/60 group-hover:text-white transition-colors">
-          <span className="text-sm font-medium">Gå dit</span>
-          <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-        </div>
-      </CardContent>
-    </Card>
-  </motion.div>
-));
-
-QuickAction.displayName = 'QuickAction';
 
 const DateTimeDisplay = memo(() => {
   const [dateTime, setDateTime] = useState(() => formatDateTime());
@@ -269,41 +227,8 @@ const EmployerHome = memo(() => {
           </motion.div>
         )}
 
-        {/* Quick actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-          <QuickAction
-            icon={Plus}
-            title="Skapa annons"
-            description="Publicera en ny jobbannons och börja ta emot ansökningar"
-            onClick={() => navigate('/my-jobs?create=true')}
-            gradient="from-emerald-500/90 via-emerald-600/80 to-teal-700/90"
-            delay={0.1}
-          />
-          <QuickAction
-            icon={Users}
-            title="Kandidater"
-            description="Granska och hantera dina sökande"
-            onClick={() => navigate('/candidates')}
-            gradient="from-blue-500/90 via-blue-600/80 to-indigo-700/90"
-            delay={0.15}
-          />
-          <QuickAction
-            icon={BarChart3}
-            title="Statistik"
-            description="Se detaljerad statistik och insikter"
-            onClick={() => navigate('/dashboard')}
-            gradient="from-violet-500/90 via-purple-600/80 to-purple-700/90"
-            delay={0.2}
-          />
-          <QuickAction
-            icon={FileText}
-            title="Mina annonser"
-            description="Hantera och redigera dina jobbannonser"
-            onClick={() => navigate('/my-jobs')}
-            gradient="from-amber-500/90 via-orange-500/80 to-orange-600/90"
-            delay={0.25}
-          />
-        </div>
+        {/* HR News Cards */}
+        <HrNewsCards />
 
         {/* Additional actions */}
         <motion.div
