@@ -29,8 +29,10 @@ export const setRememberMe = (value: boolean): void => {
 // Update last activity timestamp
 export const updateLastActivity = (): void => {
   try {
-    const storage = shouldRememberUser() ? localStorage : sessionStorage;
-    storage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
+    const timestamp = Date.now().toString();
+    // Always update in BOTH storages to prevent mismatch issues
+    localStorage.setItem(LAST_ACTIVITY_KEY, timestamp);
+    sessionStorage.setItem(LAST_ACTIVITY_KEY, timestamp);
   } catch (e) {
     console.warn('Failed to update last activity:', e);
   }
@@ -39,20 +41,43 @@ export const updateLastActivity = (): void => {
 // Check if session has expired due to inactivity
 export const hasSessionExpiredDueToInactivity = (): boolean => {
   try {
-    const storage = shouldRememberUser() ? localStorage : sessionStorage;
-    const lastActivity = storage.getItem(LAST_ACTIVITY_KEY);
+    // Check both storages for activity timestamp
+    const localActivity = localStorage.getItem(LAST_ACTIVITY_KEY);
+    const sessionActivity = sessionStorage.getItem(LAST_ACTIVITY_KEY);
     
-    if (!lastActivity) {
-      return false; // No activity recorded, don't expire
+    // Use the most recent activity from either storage
+    const lastActivityStr = localActivity || sessionActivity;
+    
+    if (!lastActivityStr) {
+      // No activity recorded yet - user just logged in, don't expire
+      // Instead, set the activity now to prevent future issues
+      updateLastActivity();
+      return false;
     }
     
-    const lastActivityTime = parseInt(lastActivity, 10);
+    const lastActivityTime = parseInt(lastActivityStr, 10);
+    
+    // Validate the parsed timestamp
+    if (isNaN(lastActivityTime) || lastActivityTime <= 0) {
+      console.warn('⚠️ Invalid activity timestamp, resetting');
+      updateLastActivity();
+      return false;
+    }
+    
     const now = Date.now();
     const timeSinceLastActivity = now - lastActivityTime;
     
+    // Sanity check: if timestamp is in the future, it's invalid
+    if (timeSinceLastActivity < 0) {
+      console.warn('⚠️ Activity timestamp is in the future, resetting');
+      updateLastActivity();
+      return false;
+    }
+    
     return timeSinceLastActivity > INACTIVITY_TIMEOUT_MS;
-  } catch {
-    return false;
+  } catch (e) {
+    console.warn('⚠️ Error checking inactivity:', e);
+    return false; // Never expire on error
   }
 };
 
@@ -113,20 +138,18 @@ export class AuthStorageAdapter implements Storage {
   }
 
   setItem(key: string, value: string): void {
-    const storage = this.getStorage();
-    storage.setItem(key, value);
-    
-    // Update activity on auth operations
+    // For supabase auth keys, always store in BOTH storages to prevent logout issues
     if (key.includes('supabase')) {
-      updateLastActivity();
-    }
-    
-    // Also remove from the other storage to avoid conflicts
-    if (key.includes('supabase')) {
-      const otherStorage = shouldRememberUser() ? sessionStorage : localStorage;
       try {
-        otherStorage.removeItem(key);
+        localStorage.setItem(key, value);
       } catch {}
+      try {
+        sessionStorage.setItem(key, value);
+      } catch {}
+      updateLastActivity();
+    } else {
+      // For non-auth keys, use preferred storage
+      this.getStorage().setItem(key, value);
     }
   }
 
