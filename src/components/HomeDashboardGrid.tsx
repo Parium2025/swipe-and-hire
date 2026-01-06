@@ -64,14 +64,14 @@ const NewsCard = memo(() => {
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg min-h-[180px]`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-        <CardContent className="relative p-5">
+        <CardContent className="relative p-6 h-full">
           <div className="flex items-center gap-2 mb-4">
-            <Skeleton className="h-8 w-8 rounded-lg bg-white/20" />
+            <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
             <Skeleton className="h-4 w-32 bg-white/20" />
           </div>
-          <Skeleton className="h-20 w-full bg-white/10 rounded-lg" />
+          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
         </CardContent>
       </Card>
     );
@@ -80,60 +80,70 @@ const NewsCard = memo(() => {
   const currentNews = newsItems[currentIndex];
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg min-h-[180px]`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-5 flex flex-col">
+      <CardContent className="relative p-6 h-full flex flex-col justify-between">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-white/10">
-              <Newspaper className="h-5 w-5 text-white" strokeWidth={1.5} />
-            </div>
-            <h3 className="text-base font-semibold text-white">Nyheter</h3>
+        <div className="flex items-center justify-between mb-auto">
+          <div className="p-2.5 rounded-xl bg-white/10">
+            <Newspaper className="h-6 w-6 text-white" strokeWidth={1.5} />
           </div>
-          <span className="text-[10px] text-white/50 uppercase tracking-wider">
-            {currentIndex + 1}/{newsItems.length || 1}
+          <span className="text-xs text-white/60 uppercase tracking-wider font-medium">
+            KÄLLA {currentNews?.source || ''}
           </span>
         </div>
         
-        {/* News carousel */}
-        <div className="min-h-[80px] flex items-center">
+        {/* News content */}
+        <div className="flex-1 flex flex-col justify-center py-4">
           <AnimatePresence mode="wait">
             {currentNews ? (
               <motion.div
                 key={currentNews.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
                 onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
-                className={`w-full p-4 rounded-lg bg-white/10 ${currentNews.source_url ? 'cursor-pointer hover:bg-white/15 transition-colors group' : ''}`}
+                className={currentNews.source_url ? 'cursor-pointer group' : ''}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white line-clamp-2">{currentNews.title}</p>
-                    <p className="text-xs text-white/50 mt-1">{currentNews.source}</p>
+                <h3 className="text-lg font-semibold text-white leading-snug mb-2">
+                  {currentNews.title}
+                </h3>
+                <p className="text-sm text-white/70 line-clamp-1 mb-3">
+                  {currentNews.summary || currentNews.title}
+                </p>
+                {currentNews.source_url && (
+                  <div className="flex items-center gap-1.5 text-white/50 group-hover:text-white/80 transition-colors">
+                    <span className="text-sm">Läs mer</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
                   </div>
-                  {currentNews.source_url && (
-                    <ExternalLink className="h-4 w-4 text-white/30 group-hover:text-white/70 flex-shrink-0 mt-0.5 transition-colors" />
-                  )}
-                </div>
+                )}
               </motion.div>
             ) : (
-              <p className="text-sm text-white/60 text-center w-full">Inga nyheter just nu</p>
+              <p className="text-sm text-white/60 text-center">Inga nyheter just nu</p>
             )}
           </AnimatePresence>
         </div>
         
         {/* Dot navigation */}
         {newsItems.length > 1 && (
-          <DotNavigation 
-            total={newsItems.length} 
-            current={currentIndex} 
-            onSelect={setCurrentIndex} 
-          />
+          <div className="flex items-center gap-2 mt-auto">
+            {newsItems.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className={cn(
+                  "w-2.5 h-2.5 rounded-full transition-all duration-300",
+                  i === currentIndex 
+                    ? "bg-white" 
+                    : "bg-white/30 hover:bg-white/50"
+                )}
+                aria-label={`Gå till nyhet ${i + 1}`}
+              />
+            ))}
+          </div>
         )}
       </CardContent>
     </Card>
@@ -177,11 +187,11 @@ const StatsCard = memo(() => {
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg min-h-[180px]`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-        <CardContent className="relative p-5">
-          <Skeleton className="h-8 w-32 bg-white/20 mb-4" />
-          <Skeleton className="h-20 w-full bg-white/10 rounded-lg" />
+        <CardContent className="relative p-6 h-full">
+          <Skeleton className="h-10 w-10 rounded-xl bg-white/20 mb-4" />
+          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
         </CardContent>
       </Card>
     );
@@ -191,51 +201,58 @@ const StatsCard = memo(() => {
   const Icon = currentStat.icon;
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg min-h-[180px]`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-5 flex flex-col">
+      <CardContent className="relative p-6 h-full flex flex-col justify-between">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-white/10">
-              <BarChart3 className="h-5 w-5 text-white" strokeWidth={1.5} />
-            </div>
-            <h3 className="text-base font-semibold text-white">Statistik</h3>
+        <div className="flex items-center justify-between mb-auto">
+          <div className="p-2.5 rounded-xl bg-white/10">
+            <Icon className="h-6 w-6 text-white" strokeWidth={1.5} />
           </div>
-          <span className="text-[10px] text-white/50 uppercase tracking-wider">
-            {currentIndex + 1}/{statsArray.length}
+          <span className="text-xs text-white/60 uppercase tracking-wider font-medium">
+            KÄLLA Parium
           </span>
         </div>
         
-        {/* Stats carousel */}
-        <div className="min-h-[80px] flex items-center">
+        {/* Stats content */}
+        <div className="flex-1 flex flex-col justify-center py-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="w-full p-4 rounded-lg bg-white/10"
             >
-              <div className="flex items-center gap-3 mb-2">
-                <Icon className="h-5 w-5 text-white/80" strokeWidth={1.5} />
-                <span className="text-sm text-white/80">{currentStat.label}</span>
-              </div>
-              <div className="text-3xl font-bold text-white mb-1">{currentStat.value}</div>
-              <p className="text-xs text-white/50">{currentStat.description}</p>
+              <h3 className="text-lg font-semibold text-white leading-snug mb-1">
+                {currentStat.label}
+              </h3>
+              <div className="text-3xl font-bold text-white mb-2">{currentStat.value}</div>
+              <p className="text-sm text-white/70">
+                {currentStat.description}
+              </p>
             </motion.div>
           </AnimatePresence>
         </div>
         
         {/* Dot navigation */}
-        <DotNavigation 
-          total={statsArray.length} 
-          current={currentIndex} 
-          onSelect={setCurrentIndex} 
-        />
+        <div className="flex items-center gap-2 mt-auto">
+          {statsArray.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentIndex(i)}
+              className={cn(
+                "w-2.5 h-2.5 rounded-full transition-all duration-300",
+                i === currentIndex 
+                  ? "bg-white" 
+                  : "bg-white/30 hover:bg-white/50"
+              )}
+              aria-label={`Gå till statistik ${i + 1}`}
+            />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
@@ -255,15 +272,15 @@ const PlaceholderCard = memo(({
   title: string; 
   description: string;
 }) => (
-  <Card className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg h-full`}>
+  <Card className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg min-h-[180px]`}>
     <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
     <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
     
-    <CardContent className="relative p-5 h-full flex flex-col items-center justify-center text-center">
+    <CardContent className="relative p-6 h-full flex flex-col items-center justify-center text-center">
       <div className="p-3 rounded-xl bg-white/10 mb-3">
-        <Icon className="h-6 w-6 text-white" strokeWidth={1.5} />
+        <Icon className="h-7 w-7 text-white" strokeWidth={1.5} />
       </div>
-      <h3 className="text-base font-semibold text-white mb-1">{title}</h3>
+      <h3 className="text-lg font-semibold text-white mb-1">{title}</h3>
       <p className="text-sm text-white/60">{description}</p>
     </CardContent>
   </Card>
