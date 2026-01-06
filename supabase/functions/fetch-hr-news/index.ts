@@ -7,13 +7,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// RSS sources - focused on HR, recruitment, leadership and labor market
+// RSS sources - focused on HR, recruitment, leadership, labor market, salary, career & business
 // TRUSTED_SOURCES get automatic pass without strict keyword filtering
 const TRUSTED_HR_SOURCES = [
+  // Swedish HR
   'HRnytt.se', 'Chef.se', 'Kollega', 'Motivation.se', 'Arbetsvärlden', 
   'Ledarna', 'Unionen', 'TCO', 'Almega', 'Svenskt Näringsliv',
+  // International HR
   'HR Dive', 'SHRM', 'People Management', 'Personnel Today', 'WorkLife',
-  'HR Executive', 'Teamtailor', 'LinkedIn Talent'
+  'HR Executive', 'Teamtailor', 'LinkedIn Talent',
+  // Swedish business/labor market
+  'Arbetsmarknadsnytt', 'Ekonomifakta', 'SCB', 'Arbetsförmedlingen',
+  // Career & salary
+  'Karriärguiden', 'Lönechecken'
 ];
 
 const RSS_SOURCES = [
@@ -30,6 +36,14 @@ const RSS_SOURCES = [
   { url: 'https://www.tco.se/feed/', name: 'TCO' },
   { url: 'https://www.almega.se/feed/', name: 'Almega' },
   { url: 'https://www.svensktnaringsliv.se/rss/', name: 'Svenskt Näringsliv' },
+  
+  // === SWEDISH LABOR MARKET & ECONOMY ===
+  { url: 'https://arbetsformedlingen.se/om-oss/press/nyheter.rss', name: 'Arbetsförmedlingen' },
+  { url: 'https://www.ekonomifakta.se/rss/', name: 'Ekonomifakta' },
+  { url: 'https://www.scb.se/rss/', name: 'SCB' },
+  { url: 'https://www.di.se/rss/nyheter/', name: 'Dagens Industri' },
+  { url: 'https://www.svd.se/rss/naringsliv', name: 'SvD Näringsliv' },
+  { url: 'https://www.dn.se/rss/ekonomi/', name: 'DN Ekonomi' },
   
   // === INTERNATIONAL HR (English - for AI/trends/strategy) ===
   { url: 'https://www.hrdive.com/feeds/news/', name: 'HR Dive' },
@@ -49,6 +63,16 @@ const RSS_SOURCES = [
   // === SWEDISH BUSINESS (labor market angles) ===
   { url: 'https://www.va.se/rss/', name: 'Veckans Affärer' },
   { url: 'https://www.breakit.se/feed/articles', name: 'Breakit' },
+  
+  // === SALARY & COMPENSATION ===
+  { url: 'https://www.payscale.com/feed/', name: 'PayScale' },
+  { url: 'https://www.compensationforce.com/feed/', name: 'Compensation Force' },
+  
+  // === CAREER & SELF-DEVELOPMENT ===
+  { url: 'https://hbr.org/feed', name: 'Harvard Business Review' },
+  { url: 'https://www.fastcompany.com/rss', name: 'Fast Company' },
+  { url: 'https://www.forbes.com/leadership/feed/', name: 'Forbes Leadership' },
+  { url: 'https://www.inc.com/rss', name: 'Inc.' },
 ];
 
 // Keywords to filter out truly negative/scandal content (not labor market statistics)
@@ -58,13 +82,13 @@ const NEGATIVE_KEYWORDS = [
   'mobbing', 'trakasser', 'hot', 'våld'
 ];
 
-// Keywords that indicate HR-relevant content (at least 2 must match)
+// Keywords that indicate HR-relevant content (at least 1 must match)
 const HR_RELEVANCE_KEYWORDS = [
   // Core HR terms
   'hr', 'rekryter', 'anställ', 'personal', 'medarbetar', 'arbetsplats', 'arbetsmiljö',
   'arbetsgivare', 'arbetstagare', 'arbetsmarknad', 'arbetsrätt', 'arbetsliv',
   // Leadership & Management
-  'chef', 'ledar', 'ledning', 'team', 'organisation', 'företagskultur',
+  'chef', 'ledar', 'ledning', 'team', 'organisation', 'företagskultur', 'vd', 'ceo',
   // Talent & Competence
   'talent', 'kompetens', 'utbildning', 'utveckling', 'karriär', 'lön', 'förmån',
   // Hiring process
@@ -73,13 +97,22 @@ const HR_RELEVANCE_KEYWORDS = [
   'hybridarbete', 'distansarbete', 'hemarbete', 'flexibel', 'work-life',
   // HR Tech
   'hr-tech', 'hrtech', 'ats', 'hris', 'lms',
-  // Wellbeing
-  'trivsel', 'engagemang', 'motivation', 'välmående',
+  // Wellbeing & motivation
+  'trivsel', 'engagemang', 'motivation', 'välmående', 'balans', 'stress', 'utbrändhet',
   // Employment types
   'heltid', 'deltid', 'konsult', 'vikarie', 'provanställ',
   // Labor market & employment
-  'arbetslöshet', 'arbetslös', 'sysselsättning', 'jobbmarknad', 'varsel',
-  'kollektivavtal', 'fackförening', 'fack', 'unionen', 'tjänstemän'
+  'arbetslöshet', 'arbetslös', 'sysselsättning', 'jobbmarknad', 'varsel', 'uppsägning',
+  'kollektivavtal', 'fackförening', 'fack', 'unionen', 'tjänstemän', 'neddragning',
+  // Salary & compensation
+  'lön', 'löneökning', 'lönerevision', 'bonus', 'ersättning', 'pension', 'förmåner',
+  'salary', 'compensation', 'pay', 'benefits', 'wages',
+  // Career & self-development
+  'karriär', 'befordran', 'utveckling', 'ledarskap', 'coaching', 'mentor',
+  'self-improvement', 'productivity', 'skills', 'growth', 'success',
+  // Business & economy (labor market angle)
+  'nyanställ', 'rekord', 'tillväxt', 'expansion', 'konkurs', 'omstrukturering',
+  'layoff', 'hiring', 'workforce', 'employees', 'jobs', 'employment'
 ];
 
 // BLOCKLIST - only truly irrelevant topics (NOT labor market related!)
@@ -109,6 +142,27 @@ const BLOCKLIST_KEYWORDS = [
 // Categories with their styling
 const CATEGORIES = [
   { 
+    key: 'labor_market', 
+    label: 'Arbetsmarknad',
+    icon: 'Briefcase',
+    gradient: 'from-rose-500/90 via-red-500/80 to-red-600/90',
+    keywords: ['arbetslös', 'varsel', 'uppsägning', 'neddragning', 'konkurs', 'layoff', 'unemployment', 'sysselsättning', 'jobbmarknad', 'arbetsförmedling']
+  },
+  { 
+    key: 'salary', 
+    label: 'Lön & Förmåner',
+    icon: 'Wallet',
+    gradient: 'from-green-500/90 via-emerald-500/80 to-emerald-600/90',
+    keywords: ['lön', 'löneökning', 'lönerevision', 'bonus', 'ersättning', 'pension', 'förmån', 'salary', 'compensation', 'pay', 'benefits', 'wages']
+  },
+  { 
+    key: 'career', 
+    label: 'Karriär & Utveckling',
+    icon: 'Rocket',
+    gradient: 'from-cyan-500/90 via-sky-500/80 to-blue-600/90',
+    keywords: ['karriär', 'befordran', 'utveckling', 'coaching', 'mentor', 'utbildning', 'kompetens', 'skills', 'growth', 'productivity', 'success']
+  },
+  { 
     key: 'hr_tech', 
     label: 'HR-Tech',
     icon: 'Cpu',
@@ -120,7 +174,7 @@ const CATEGORIES = [
     label: 'Trender',
     icon: 'TrendingUp',
     gradient: 'from-amber-500/90 via-orange-500/80 to-orange-600/90',
-    keywords: ['trend', 'framtid', '2026', '2025', 'förändring', 'utveckling', 'arbetsmarknad', 'statistik', 'ökning', 'tillväxt']
+    keywords: ['trend', 'framtid', '2026', '2025', 'förändring', 'arbetsmarknad', 'statistik', 'ökning', 'tillväxt']
   },
   { 
     key: 'leadership', 
@@ -134,7 +188,14 @@ const CATEGORIES = [
     label: 'Rekrytering',
     icon: 'UserPlus',
     gradient: 'from-violet-500/90 via-purple-600/80 to-purple-700/90',
-    keywords: ['rekryter', 'kandidat', 'anställ', 'intervju', 'urval', 'onboarding', 'talent', 'kompetens', 'lön', 'karriär', 'jobb']
+    keywords: ['rekryter', 'kandidat', 'anställ', 'intervju', 'urval', 'onboarding', 'talent', 'jobb', 'hiring']
+  },
+  { 
+    key: 'business', 
+    label: 'Näringsliv',
+    icon: 'Building2',
+    gradient: 'from-slate-500/90 via-gray-600/80 to-zinc-700/90',
+    keywords: ['bolag', 'företag', 'vd', 'ceo', 'resultat', 'vinst', 'förlust', 'expansion', 'omstrukturering', 'tillväxt', 'nyanställ']
   },
 ];
 
