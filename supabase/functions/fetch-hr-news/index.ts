@@ -10,68 +10,32 @@ const corsHeaders = {
 // RSS sources - focused on HR, recruitment, leadership, labor market, salary, career & business
 // TRUSTED_SOURCES get automatic pass without strict keyword filtering
 const TRUSTED_HR_SOURCES = [
-  // Swedish HR
-  'HRnytt.se', 'Chef.se', 'Kollega', 'Motivation.se', 'Arbetsvärlden', 
-  'Ledarna', 'Unionen', 'TCO', 'Almega', 'Svenskt Näringsliv',
-  // International HR
-  'HR Dive', 'SHRM', 'People Management', 'Personnel Today', 'WorkLife',
-  'HR Executive', 'Teamtailor', 'LinkedIn Talent',
-  // Swedish business/labor market
-  'Arbetsmarknadsnytt', 'Ekonomifakta', 'SCB', 'Arbetsförmedlingen',
-  // Career & salary
-  'Karriärguiden', 'Lönechecken'
+  // Swedish HR (verified working)
+  'HRnytt.se', 'Chef.se', 'Kollega', 'Arbetsvärlden',
+  // International HR (verified working)
+  'HR Dive', 'HR Executive', 'AIHR', 'People Management', 'Personnel Today',
+  // Business/Career (verified working)
+  'Fast Company', 'Inc.', 'DN Ekonomi'
 ];
 
 const RSS_SOURCES = [
-  // === SWEDISH HR & RECRUITMENT (PRIMARY) ===
+  // === SWEDISH HR & RECRUITMENT (VERIFIED WORKING) ===
   { url: 'https://hrnytt.se/feed/', name: 'HRnytt.se' },
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
-  { url: 'https://kollega.se/feed/', name: 'Kollega' },
-  { url: 'https://www.motivation.se/feed/', name: 'Motivation.se' },
   { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
   
-  // === SWEDISH UNIONS & ORGANIZATIONS ===
-  { url: 'https://www.ledarna.se/rss/', name: 'Ledarna' },
-  { url: 'https://www.unionen.se/rss.xml', name: 'Unionen' },
-  { url: 'https://www.tco.se/feed/', name: 'TCO' },
-  { url: 'https://www.almega.se/feed/', name: 'Almega' },
-  { url: 'https://www.svensktnaringsliv.se/rss/', name: 'Svenskt Näringsliv' },
-  
-  // === SWEDISH LABOR MARKET & ECONOMY ===
-  { url: 'https://arbetsformedlingen.se/om-oss/press/nyheter.rss', name: 'Arbetsförmedlingen' },
-  { url: 'https://www.ekonomifakta.se/rss/', name: 'Ekonomifakta' },
-  { url: 'https://www.scb.se/rss/', name: 'SCB' },
-  { url: 'https://www.di.se/rss/nyheter/', name: 'Dagens Industri' },
-  { url: 'https://www.svd.se/rss/naringsliv', name: 'SvD Näringsliv' },
+  // === SWEDISH NEWS (VERIFIED WORKING) ===
   { url: 'https://www.dn.se/rss/ekonomi/', name: 'DN Ekonomi' },
   
-  // === INTERNATIONAL HR (English - for AI/trends/strategy) ===
+  // === INTERNATIONAL HR (VERIFIED WORKING) ===
   { url: 'https://www.hrdive.com/feeds/news/', name: 'HR Dive' },
-  { url: 'https://www.shrm.org/rss/pages/rss.aspx', name: 'SHRM' },
+  { url: 'https://hrexecutive.com/feed/', name: 'HR Executive' },
+  { url: 'https://www.aihr.com/feed/', name: 'AIHR' },
   { url: 'https://www.peoplemanagement.co.uk/feed', name: 'People Management' },
   { url: 'https://www.personneltoday.com/feed/', name: 'Personnel Today' },
-  { url: 'https://www.worklife.news/feed/', name: 'WorkLife' },
-  { url: 'https://hrexecutive.com/feed/', name: 'HR Executive' },
-  { url: 'https://www.ere.net/feed/', name: 'ERE Recruiting' },
-  { url: 'https://recruitingdaily.com/feed/', name: 'Recruiting Daily' },
   
-  // === HR TECH & AI ===
-  { url: 'https://blog.teamtailor.com/rss.xml', name: 'Teamtailor' },
-  { url: 'https://www.aihr.com/feed/', name: 'AIHR' },
-  { url: 'https://www.tlnt.com/feed/', name: 'TLNT Talent' },
-  
-  // === SWEDISH BUSINESS (labor market angles) ===
-  { url: 'https://www.va.se/rss/', name: 'Veckans Affärer' },
-  { url: 'https://www.breakit.se/feed/articles', name: 'Breakit' },
-  
-  // === SALARY & COMPENSATION ===
-  { url: 'https://www.payscale.com/feed/', name: 'PayScale' },
-  { url: 'https://www.compensationforce.com/feed/', name: 'Compensation Force' },
-  
-  // === CAREER & SELF-DEVELOPMENT ===
-  { url: 'https://hbr.org/feed', name: 'Harvard Business Review' },
+  // === CAREER & BUSINESS (VERIFIED WORKING - high volume) ===
   { url: 'https://www.fastcompany.com/rss', name: 'Fast Company' },
-  { url: 'https://www.forbes.com/leadership/feed/', name: 'Forbes Leadership' },
   { url: 'https://www.inc.com/rss', name: 'Inc.' },
 ];
 
