@@ -13,6 +13,7 @@ export interface HrNewsItem {
   news_date: string;
   created_at: string;
   order_index: number;
+  published_at: string | null;
 }
 
 const fetchTodaysNews = async (): Promise<HrNewsItem[]> => {
@@ -23,7 +24,7 @@ const fetchTodaysNews = async (): Promise<HrNewsItem[]> => {
     .from('daily_hr_news')
     .select('*')
     .eq('news_date', today)
-    .order('order_index');
+    .order('published_at', { ascending: false, nullsFirst: false });
 
   const hasRealSources = !!cachedNews?.some((item) => item.source_url);
   

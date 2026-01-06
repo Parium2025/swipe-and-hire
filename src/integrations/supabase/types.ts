@@ -353,6 +353,7 @@ export type Database = {
           id: string
           news_date: string
           order_index: number
+          published_at: string | null
           source: string
           source_url: string | null
           summary: string
@@ -367,6 +368,7 @@ export type Database = {
           id?: string
           news_date?: string
           order_index?: number
+          published_at?: string | null
           source: string
           source_url?: string | null
           summary: string
@@ -381,6 +383,7 @@ export type Database = {
           id?: string
           news_date?: string
           order_index?: number
+          published_at?: string | null
           source?: string
           source_url?: string | null
           summary?: string
