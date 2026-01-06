@@ -22,21 +22,29 @@ import { isJobExpiredCheck } from '@/lib/date';
 import { cn } from '@/lib/utils';
 
 // Format relative time for news (e.g. "idag 08:30" or "igår 22:15")
-const formatNewsTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-  const newsDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+const formatNewsTime = (publishedAt: string | null): string => {
+  if (!publishedAt) return '';
   
-  const timeStr = date.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-  
-  if (newsDay.getTime() === today.getTime()) {
-    return `idag ${timeStr}`;
-  } else if (newsDay.getTime() === yesterday.getTime()) {
-    return `igår ${timeStr}`;
-  } else {
-    return date.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+  try {
+    const date = new Date(publishedAt);
+    if (isNaN(date.getTime())) return '';
+    
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    const newsDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    
+    const timeStr = date.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    
+    if (newsDay.getTime() === today.getTime()) {
+      return `idag ${timeStr}`;
+    } else if (newsDay.getTime() === yesterday.getTime()) {
+      return `igår ${timeStr}`;
+    } else {
+      return date.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+    }
+  } catch {
+    return '';
   }
 };
 
@@ -171,10 +179,12 @@ const NewsCard = memo(() => {
                 <p className="text-xs text-white/70 line-clamp-1 mb-1">
                   {currentNews.summary || currentNews.title}
                 </p>
-                <div className="flex items-center gap-1.5 text-white/50 text-[10px] mb-1">
-                  <Clock className="h-3 w-3" />
-                  <span>{formatNewsTime(currentNews.created_at)}</span>
-                </div>
+                {currentNews.published_at && (
+                  <div className="flex items-center gap-1.5 text-white/50 text-[10px] mb-1">
+                    <Clock className="h-3 w-3" />
+                    <span>{formatNewsTime(currentNews.published_at)}</span>
+                  </div>
+                )}
                 {currentNews.source_url && (
                   <div className="flex items-center gap-1 text-white/50 group-hover:text-white/80 transition-colors">
                     <span className="text-xs">Läs mer</span>
