@@ -23,6 +23,8 @@ interface UseWeatherOptions {
   fallbackCity?: string;
   /** How often to refresh weather, default 15 min */
   refreshMs?: number;
+  /** Whether to enable weather fetching, default true */
+  enabled?: boolean;
 }
 
 const DEFAULT_REFRESH_MS = 15 * 60 * 1000;
@@ -326,6 +328,7 @@ function getTimeBasedEmoji(): string {
 export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const refreshMs = options.refreshMs ?? DEFAULT_REFRESH_MS;
   const fallbackCity = options.fallbackCity?.trim();
+  const enabled = options.enabled ?? true;
 
   const locationRef = useRef<CachedLocation | null>(null);
   const initializedRef = useRef(false);
@@ -559,6 +562,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   useEffect(() => {
     mountedRef.current = true;
     
+    // If not enabled, skip weather fetching entirely
+    if (!enabled) {
+      return () => {
+        mountedRef.current = false;
+      };
+    }
+    
     // Initial load
     if (!initializedRef.current) {
       initializedRef.current = true;
@@ -617,7 +627,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       window.removeEventListener('online', handleOnline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [fallbackCity, refreshMs, fetchWeatherOnly, checkForLocationChange]);
+  }, [enabled, fallbackCity, refreshMs, fetchWeatherOnly, checkForLocationChange]);
 
   return weather;
 };
