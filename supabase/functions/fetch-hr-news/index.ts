@@ -238,25 +238,36 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const url = new URL(req.url);
-    const forceRefresh = url.searchParams.get('force') === 'true';
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Check for existing news (unless force refresh)
-    if (!forceRefresh) {
-      const { data: existingNews } = await supabase
-        .from('daily_hr_news')
-        .select('*')
-        .eq('news_date', today)
-        .order('order_index');
+     const url = new URL(req.url);
 
-      if (existingNews && existingNews.length >= 4) {
-        console.log('Returning cached news for today');
-        return new Response(JSON.stringify({ news: existingNews, cached: true, source: 'cache' }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
+     let forceRefresh = url.searchParams.get('force') === 'true';
+     try {
+       const body = await req.json();
+       if (typeof body?.force === 'boolean') {
+         forceRefresh = body.force;
+       }
+     } catch {
+       // Request had no JSON body
+     }
+
+     const today = new Date().toISOString().split('T')[0];
+     
+     // Check for existing REAL news (unless force refresh)
+     if (!forceRefresh) {
+       const { data: existingNews } = await supabase
+         .from('daily_hr_news')
+         .select('*')
+         .eq('news_date', today)
+         .order('order_index');
+
+       const hasRealSources = existingNews?.some((n) => n.source_url);
+       if (existingNews && existingNews.length > 0 && hasRealSources) {
+         console.log('Returning cached news for today (real sources)');
+         return new Response(JSON.stringify({ news: existingNews, cached: true, source: 'cache' }), {
+           headers: { ...corsHeaders, "Content-Type": "application/json" },
+         });
+       }
+     }
 
     console.log('Fetching fresh HR news from RSS...');
     
@@ -277,21 +288,12 @@ serve(async (req) => {
       }
     }
 
-    // Ensure we have at least 4 items
-    while (newsItems.length < 4) {
-      const idx = newsItems.length;
-      const cat = CATEGORIES[idx % 4];
-      newsItems.push({
-        title: cat.key === 'hr_tech' ? 'AI förändrar rekryteringsprocessen' :
-               cat.key === 'trends' ? 'Nya trender inom arbetsmarknaden' :
-               cat.key === 'leadership' ? 'Framtidens ledarskap i fokus' :
-               'Kompetensförsörjning i förändring',
-        summary: 'Läs mer om de senaste trenderna inom HR.',
-        source: 'HR Insight',
-        source_url: null,
-        category: cat.key,
-      });
-    }
+     if (newsItems.length === 0) {
+       console.log('No RSS items found, not updating cache');
+       return new Response(JSON.stringify({ news: [], cached: false, source: newsSource }), {
+         headers: { ...corsHeaders, "Content-Type": "application/json" },
+       });
+     }
 
     // Delete old news for today and insert new
     await supabase.from('daily_hr_news').delete().eq('news_date', today);

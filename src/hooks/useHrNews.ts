@@ -24,31 +24,29 @@ const fetchTodaysNews = async (): Promise<HrNewsItem[]> => {
     .eq('news_date', today)
     .order('order_index');
 
-  // Check if cached news has real sources (not AI-generated)
-  const hasRealSources = cachedNews?.some(item => item.source_url !== null);
+  const hasRealSources = !!cachedNews?.some((item) => item.source_url);
   
-  // If we have 4 cached news items with real sources, return them
-  if (!cacheError && cachedNews && cachedNews.length >= 4 && hasRealSources) {
+  // If we have cached news with real sources, return it
+  if (!cacheError && cachedNews && cachedNews.length > 0 && hasRealSources) {
     console.log('[HR News] Returning cached news with real sources');
     return cachedNews;
   }
 
-  // If no cached news, no real sources, or not enough items - fetch fresh
-  const needsRefresh = !cachedNews || cachedNews.length < 4 || !hasRealSources;
+  // Otherwise, fetch fresh
+  const needsRefresh = !cachedNews || cachedNews.length === 0 || !hasRealSources;
   console.log('[HR News] Fetching fresh news via edge function...', { needsRefresh, hasRealSources });
   
   try {
     const { data, error } = await supabase.functions.invoke('fetch-hr-news', {
-      body: { force: needsRefresh }
+      body: { force: needsRefresh },
     });
     
     if (error) {
       console.error('[HR News] Edge function error:', error);
-      // Return cached news if available, even if incomplete
-      if (cachedNews && cachedNews.length > 0) {
+      if (cachedNews && cachedNews.length > 0 && hasRealSources) {
         return cachedNews;
       }
-      throw error;
+      return [];
     }
 
     // The edge function returns { news: [...], cached: boolean, source: string }
@@ -57,21 +55,18 @@ const fetchTodaysNews = async (): Promise<HrNewsItem[]> => {
       return data.news;
     }
 
-    // If edge function returned but no news, return cached
-    if (cachedNews && cachedNews.length > 0) {
+    if (cachedNews && cachedNews.length > 0 && hasRealSources) {
       return cachedNews;
     }
-    
+
     return [];
   } catch (err) {
     console.error('[HR News] Error invoking fetch-hr-news:', err);
-    
-    // Return cached news if available
-    if (cachedNews && cachedNews.length > 0) {
+
+    if (cachedNews && cachedNews.length > 0 && hasRealSources) {
       return cachedNews;
     }
-    
-    // Final fallback: return empty array, the component will handle it
+
     return [];
   }
 };
