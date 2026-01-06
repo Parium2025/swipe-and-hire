@@ -17,7 +17,7 @@ export interface HrNewsItem {
   is_translated?: boolean;
 }
 
-const HOURS_WINDOW = 48;
+const HOURS_WINDOW = 120; // 5 days (Monday-Friday)
 
 function isWithinLastHours(dateStr: string, hours: number): boolean {
   const d = new Date(dateStr);
