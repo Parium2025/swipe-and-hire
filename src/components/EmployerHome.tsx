@@ -16,7 +16,7 @@ import {
 import { motion } from 'framer-motion';
 import { isJobExpiredCheck } from '@/lib/date';
 import WeatherEffects from '@/components/WeatherEffects';
-import { HrNewsCards } from '@/components/HrNewsCards';
+import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
 
 const getGreeting = (): { text: string; isEvening: boolean } => {
   const hour = new Date().getHours();
@@ -210,8 +210,8 @@ const EmployerHome = memo(() => {
           </motion.div>
         )}
 
-        {/* HR News Cards */}
-        <HrNewsCards />
+        {/* Dashboard Grid - News, Stats, and more */}
+        <HomeDashboardGrid />
 
 
         {/* Empty state if no jobs */}
