@@ -316,6 +316,54 @@ async function scrapeHRnyttDate(articleUrl: string): Promise<string | null> {
   }
 }
 
+// Cache for existing article dates (source_url -> published_at)
+let existingArticleDates: Map<string, string | null> = new Map();
+
+// Load existing article dates from database for caching
+async function loadExistingArticleDates(supabase: any): Promise<void> {
+  try {
+    const { data, error } = await supabase
+      .from('daily_hr_news')
+      .select('source_url, published_at')
+      .not('source_url', 'is', null);
+    
+    if (error) {
+      console.log('Failed to load cached dates:', error.message);
+      return;
+    }
+    
+    existingArticleDates = new Map();
+    for (const article of data || []) {
+      if (article.source_url) {
+        existingArticleDates.set(article.source_url, article.published_at);
+      }
+    }
+    console.log(`Loaded ${existingArticleDates.size} cached article dates`);
+  } catch (err) {
+    console.log('Error loading cached dates:', err);
+  }
+}
+
+// Get cached date or scrape if needed
+async function getCachedOrScrapedDate(articleUrl: string, sourceName: string): Promise<string | null> {
+  // Check cache first
+  if (existingArticleDates.has(articleUrl)) {
+    const cachedDate = existingArticleDates.get(articleUrl);
+    if (cachedDate) {
+      console.log(`Using cached date for: ${articleUrl}`);
+      return cachedDate;
+    }
+  }
+  
+  // Only scrape for HRnytt.se
+  if (sourceName === 'HRnytt.se') {
+    console.log(`Scraping date from HRnytt article: ${articleUrl}`);
+    return await scrapeHRnyttDate(articleUrl);
+  }
+  
+  return null;
+}
+
 // Fetch news from a single RSS source
 async function fetchRSSSource(source: { url: string; name: string }): Promise<NewsItem[]> {
   try {
@@ -365,12 +413,11 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
         }
       }
       
-      // Get publication date - if missing and HRnytt.se, try to scrape from article page
+      // Get publication date - try RSS first, then cache/scrape
       let publishedAt = item.pubDate ? new Date(item.pubDate).toISOString() : null;
       
-      if (!publishedAt && source.name === 'HRnytt.se' && item.link) {
-        console.log(`Scraping date from HRnytt article: ${item.link}`);
-        publishedAt = await scrapeHRnyttDate(item.link);
+      if (!publishedAt && item.link) {
+        publishedAt = await getCachedOrScrapedDate(item.link, source.name);
       }
       
       newsItems.push({
@@ -694,6 +741,9 @@ serve(async (req) => {
      }
 
     console.log('Fetching fresh HR news from multiple RSS sources...');
+    
+    // Load cached article dates before fetching (avoids scraping same articles)
+    await loadExistingArticleDates(supabase);
     
     // Fetch from all RSS sources
     let newsItems = await fetchAllRSSSources();
