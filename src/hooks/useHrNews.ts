@@ -24,18 +24,22 @@ const fetchTodaysNews = async (): Promise<HrNewsItem[]> => {
     .eq('news_date', today)
     .order('order_index');
 
-  // If we have 4 cached news items for today, return them
-  if (!cacheError && cachedNews && cachedNews.length >= 4) {
-    console.log('[HR News] Returning cached news for today');
+  // Check if cached news has real sources (not AI-generated)
+  const hasRealSources = cachedNews?.some(item => item.source_url !== null);
+  
+  // If we have 4 cached news items with real sources, return them
+  if (!cacheError && cachedNews && cachedNews.length >= 4 && hasRealSources) {
+    console.log('[HR News] Returning cached news with real sources');
     return cachedNews;
   }
 
-  // If no cached news or not enough, trigger the edge function to fetch fresh news
-  console.log('[HR News] Fetching fresh news via edge function...');
+  // If no cached news, no real sources, or not enough items - fetch fresh
+  const needsRefresh = !cachedNews || cachedNews.length < 4 || !hasRealSources;
+  console.log('[HR News] Fetching fresh news via edge function...', { needsRefresh, hasRealSources });
   
   try {
     const { data, error } = await supabase.functions.invoke('fetch-hr-news', {
-      body: { force: cachedNews?.length === 0 }
+      body: { force: needsRefresh }
     });
     
     if (error) {
