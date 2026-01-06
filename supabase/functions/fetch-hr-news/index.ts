@@ -11,11 +11,13 @@ const corsHeaders = {
 // TRUSTED_SOURCES get automatic pass without strict keyword filtering
 const TRUSTED_HR_SOURCES = [
   // Swedish HR (verified working)
-  'HRnytt.se', 'Chef.se', 'Kollega', 'Arbetsvärlden',
+  'HRnytt.se', 'Chef.se', 'Arbetsvärlden',
+  // Swedish news/economy (verified working)
+  'DN Ekonomi', 'Expressen Ekonomi', 'Dagens Industri',
   // International HR (verified working)
-  'HR Dive', 'HR Executive', 'AIHR', 'People Management', 'Personnel Today',
+  'HR Dive', 'HR Executive', 'AIHR', 'Personnel Today',
   // Business/Career (verified working)
-  'Fast Company', 'Inc.', 'DN Ekonomi'
+  'Fast Company', 'Inc.'
 ];
 
 const RSS_SOURCES = [
@@ -24,14 +26,15 @@ const RSS_SOURCES = [
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
   { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
   
-  // === SWEDISH NEWS (VERIFIED WORKING) ===
+  // === SWEDISH MAJOR NEWS - ECONOMY (VERIFIED WORKING) ===
   { url: 'https://www.dn.se/rss/ekonomi/', name: 'DN Ekonomi' },
+  { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
+  { url: 'https://feeds.expressen.se/ekonomi', name: 'Expressen Ekonomi' },
   
   // === INTERNATIONAL HR (VERIFIED WORKING) ===
   { url: 'https://www.hrdive.com/feeds/news/', name: 'HR Dive' },
   { url: 'https://hrexecutive.com/feed/', name: 'HR Executive' },
   { url: 'https://www.aihr.com/feed/', name: 'AIHR' },
-  { url: 'https://www.peoplemanagement.co.uk/feed', name: 'People Management' },
   { url: 'https://www.personneltoday.com/feed/', name: 'Personnel Today' },
   
   // === CAREER & BUSINESS (VERIFIED WORKING - high volume) ===
@@ -454,36 +457,24 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
         }
       }
       
-      // Get publication date - try RSS first, then cache/scrape
-      let publishedAt = item.pubDate ? new Date(item.pubDate).toISOString() : null;
-      
-      if (!publishedAt && item.link) {
-        publishedAt = await getCachedOrScrapedDate(item.link, source.name);
-      }
-      
-      // CRITICAL: Apply 5-day filter to ALL articles, including scraped dates
-      // Skip if we have a date and it's older than 5 days
-      if (publishedAt && !isWithin5Days(publishedAt)) {
-        console.log(`Skipping old article (${publishedAt}): ${item.title.slice(0, 40)}...`);
-        continue;
-      }
-      
-      // Skip articles without any date - we can't verify freshness
-      if (!publishedAt) {
-        console.log(`Skipping article without date: ${item.title.slice(0, 40)}...`);
-        continue;
+      // For HRnytt.se without pubDate in RSS, try to scrape from article page
+      let pubDate = item.pubDate;
+      if (!pubDate && source.name === 'HRnytt.se' && item.link) {
+        pubDate = await getCachedOrScrapedDate(item.link, source.name);
       }
       
       newsItems.push({
-        title: item.title.slice(0, 100),
-        summary: item.description.slice(0, 150) || `Läs mer på ${source.name}`,
+        title: item.title,
+        summary: item.description.slice(0, 400) || item.title,
         source: source.name,
         source_url: item.link || null,
         category,
-        published_at: publishedAt,
+        published_at: pubDate,
+        is_translated: false,
       });
     }
     
+    console.log(`${source.name}: ${newsItems.length} HR-relevant items`);
     return newsItems;
   } catch (error) {
     console.error(`Error fetching ${source.name}:`, error);
@@ -491,380 +482,276 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
   }
 }
 
-// Fetch news from all RSS sources
-async function fetchAllRSSSources(): Promise<NewsItem[]> {
-  console.log('Fetching from all RSS sources...');
-  
-  const results = await Promise.allSettled(
-    RSS_SOURCES.map(source => fetchRSSSource(source))
-  );
-  
-  const allItems: NewsItem[] = [];
-  
-  for (const result of results) {
-    if (result.status === 'fulfilled' && result.value.length > 0) {
-      allItems.push(...result.value);
+// Simple AI-based translation using free Gemini API (via Lovable Cloud)
+async function translateToSwedish(text: string): Promise<string> {
+  try {
+    // Use Lovable's built-in AI endpoint for translation
+    const response = await fetch('https://jrjaegapuujushsiofoi.supabase.co/functions/v1/generate-cv-summary', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+      },
+      body: JSON.stringify({
+        mode: 'translate',
+        text: text,
+        targetLanguage: 'Swedish'
+      }),
+    });
+    
+    if (!response.ok) {
+      console.log('Translation API failed, returning original text');
+      return text;
     }
+    
+    const result = await response.json();
+    return result.translation || text;
+  } catch (error) {
+    console.log('Translation error:', error);
+    return text;
   }
-  
-  console.log(`Total items from all sources: ${allItems.length}`);
-  return allItems;
 }
 
-// English sources that need translation
-const ENGLISH_SOURCES = [
-  'HR Dive', 'SHRM', 'People Management', 'ERE Recruiting', 
-  'Recruiting Daily', 'Teamtailor', 'AIHR', 'TLNT Talent', 'LinkedIn Talent'
-];
-
-// Detect if text is likely English
-function isEnglishText(text: string): boolean {
-  const englishWords = ['the', 'and', 'for', 'are', 'that', 'with', 'your', 'how', 'can', 'will'];
+// Detect if text is English (simple heuristic)
+function isEnglish(text: string): boolean {
+  const englishWords = ['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'has', 'her', 'was', 'one', 'our', 'out', 'how', 'why', 'who', 'get', 'when', 'make', 'like', 'time', 'just', 'know', 'take', 'people', 'into', 'year', 'your', 'good', 'some', 'them', 'work', 'life', 'well', 'only', 'need'];
+  const swedishWords = ['och', 'att', 'det', 'som', 'för', 'med', 'har', 'inte', 'den', 'kan', 'ett', 'vara', 'på', 'av', 'till', 'är', 'från', 'eller', 'om', 'sig', 'de', 'vi', 'efter', 'vid'];
+  
   const lowerText = text.toLowerCase();
-  const matchCount = englishWords.filter(word => lowerText.includes(` ${word} `)).length;
-  return matchCount >= 2;
+  const words = lowerText.split(/\s+/);
+  
+  const englishCount = words.filter(w => englishWords.includes(w)).length;
+  const swedishCount = words.filter(w => swedishWords.includes(w)).length;
+  
+  return englishCount > swedishCount && englishCount >= 2;
 }
 
-// Translate English articles to Swedish using Lovable AI
-async function translateToSwedish(items: NewsItem[]): Promise<NewsItem[]> {
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY) return items;
-
-  // Find items that need translation (mark them first)
-  const translationIndices: number[] = [];
-  items.forEach((item, i) => {
-    if (ENGLISH_SOURCES.includes(item.source) || isEnglishText(`${item.title} ${item.summary}`)) {
-      translationIndices.push(i);
-    }
-  });
-
-  if (translationIndices.length === 0) {
-    console.log('No English articles to translate');
-    return items;
-  }
-
-  const itemsToTranslate = translationIndices.map(i => items[i]);
-  console.log(`Translating ${itemsToTranslate.length} English articles to Swedish...`);
-
-  try {
-    const prompt = `Översätt följande nyhetsrubriker och sammanfattningar från engelska till svenska.
-Behåll professionell HR-terminologi. Gör texterna naturliga på svenska.
-
-Artiklar att översätta:
-${itemsToTranslate.map((item, i) => `${i + 1}. Titel: "${item.title}"
-   Sammanfattning: "${item.summary}"`).join('\n\n')}
-
-Svara ENDAST med valid JSON:
-{"translations": [{"title": "svensk titel", "summary": "svensk sammanfattning"}, ...]}`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-
-    if (!response.ok) {
-      console.log('Translation failed, using original text');
-      // Still mark as translated (from English source)
-      translationIndices.forEach(i => { items[i].is_translated = true; });
-      return items;
-    }
-
-    const aiData = await response.json();
-    const content = aiData.choices?.[0]?.message?.content || '';
-    
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const data = JSON.parse(jsonMatch[0]);
-      const translations = data.translations || [];
-      
-      // Apply translations and mark as translated
-      translationIndices.forEach((originalIndex, i) => {
-        items[originalIndex].is_translated = true; // Always mark English sources
-        if (translations[i]) {
-          if (translations[i].title && translations[i].title.length > 5) {
-            items[originalIndex].title = translations[i].title.slice(0, 100);
-          }
-          if (translations[i].summary && translations[i].summary.length > 5) {
-            items[originalIndex].summary = translations[i].summary.slice(0, 150);
-          }
-        }
-      });
-      console.log(`Successfully translated ${translations.length} articles`);
-    } else {
-      // Mark as translated even if parsing failed
-      translationIndices.forEach(i => { items[i].is_translated = true; });
-    }
-    
-    return items;
-  } catch (error) {
-    console.error('Translation error:', error);
-    // Still mark English sources
-    translationIndices.forEach(i => { items[i].is_translated = true; });
-    return items;
-  }
+// Get category styling info
+function getCategoryInfo(categoryKey: string) {
+  return CATEGORIES.find(c => c.key === categoryKey) || CATEGORIES.find(c => c.key === 'trends')!;
 }
 
-// Use Lovable AI (FREE) to enhance summaries
-async function enhanceWithAI(items: NewsItem[]): Promise<NewsItem[]> {
-  if (items.length === 0) return [];
-  
-  // First translate any English articles
-  items = await translateToSwedish(items);
-  
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY) {
-    console.log('No LOVABLE_API_KEY, returning items as-is');
-    return items;
-  }
-
-  try {
-    console.log('Enhancing news with AI...');
-    
-    const prompt = `Du är en HR-expert. Här är ${items.length} nyhetsartiklar.
-
-För varje artikel, skriv en kort och engagerande sammanfattning på svenska (max 70 tecken).
-Gör sammanfattningen informativ och professionell.
-
-Artiklar:
-${items.map((item, i) => `${i + 1}. Rubrik: "${item.title}"
-   Original: "${item.summary}"`).join('\n\n')}
-
-Svara ENDAST med valid JSON, inget annat:
-{"summaries": ["sammanfattning 1", "sammanfattning 2", ...]}`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "user", content: prompt }
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      console.log('AI enhancement failed, using original summaries');
-      return items;
-    }
-
-    const aiData = await response.json();
-    const content = aiData.choices?.[0]?.message?.content || '';
-    
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const data = JSON.parse(jsonMatch[0]);
-      const summaries = data.summaries || [];
-      
-      items.forEach((item, i) => {
-        if (summaries[i] && summaries[i].length > 10) {
-          item.summary = summaries[i].slice(0, 100);
-        }
-      });
-      console.log('AI enhancement successful');
-    }
-    
-    return items;
-  } catch (error) {
-    console.error('AI enhancement error:', error);
-    return items;
-  }
-}
-
-// Select best 4 news items (one from each category if possible, diverse sources)
-// Sort by published_at so newest articles come first
-function selectBestNews(items: NewsItem[]): NewsItem[] {
-  // First, sort all items by published_at (newest first)
-  const sortedItems = [...items].sort((a, b) => {
-    if (!a.published_at && !b.published_at) return 0;
-    if (!a.published_at) return 1;
-    if (!b.published_at) return -1;
-    return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
-  });
-
-  const selected: NewsItem[] = [];
-  const categoryKeys = CATEGORIES.map(c => c.key);
-  const usedSources = new Set<string>();
-  
-  // First pass: get one from each category with diverse sources (prefer newer items)
-  for (const category of categoryKeys) {
-    const item = sortedItems.find(i => 
-      i.category === category && 
-      !selected.includes(i) && 
-      !usedSources.has(i.source)
-    );
-    if (item) {
-      selected.push(item);
-      usedSources.add(item.source);
-    }
-  }
-  
-  // Second pass: fill remaining slots (allow same source if needed)
-  for (const category of categoryKeys) {
-    if (selected.length >= 4) break;
-    if (selected.some(s => s.category === category)) continue;
-    
-    const item = sortedItems.find(i => i.category === category && !selected.includes(i));
-    if (item) {
-      selected.push(item);
-    }
-  }
-  
-  // Third pass: fill with any remaining items (newest first)
-  for (const item of sortedItems) {
-    if (selected.length >= 4) break;
-    if (!selected.includes(item)) {
-      selected.push(item);
-    }
-  }
-  
-  // Final sort: ensure newest article is always first position
-  selected.sort((a, b) => {
-    if (!a.published_at && !b.published_at) return 0;
-    if (!a.published_at) return 1;
-    if (!b.published_at) return -1;
-    return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
-  });
-  
-  return selected;
-}
 serve(async (req) => {
+  // Handle CORS
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-     const url = new URL(req.url);
-
-     let forceRefresh = url.searchParams.get('force') === 'true';
-     try {
-       const body = await req.json();
-       if (typeof body?.force === 'boolean') {
-         forceRefresh = body.force;
-       }
-     } catch {
-       // Request had no JSON body
-     }
-
-     const today = new Date().toISOString().split('T')[0];
-     const currentHour = new Date().getUTCHours();
-     const isMiddayCheck = currentHour >= 10 && currentHour <= 12; // 11:00-13:00 UTC window
-     
-     // Check for existing news
-     const { data: existingNews } = await supabase
-       .from('daily_hr_news')
-       .select('*')
-       .eq('news_date', today)
-       .order('order_index');
-
-     const realArticleCount = existingNews?.filter((n) => n.source_url)?.length || 0;
-     
-     // At midday: only refresh if we have fewer than 4 real articles
-     if (isMiddayCheck && !forceRefresh) {
-       if (realArticleCount >= 4) {
-         console.log(`Midday check: Already have ${realArticleCount} real articles, skipping`);
-         return new Response(JSON.stringify({ news: existingNews, cached: true, source: 'cache', reason: 'midday_skip' }), {
-           headers: { ...corsHeaders, "Content-Type": "application/json" },
-         });
-       }
-       console.log(`Midday check: Only ${realArticleCount} real articles, fetching more...`);
-     }
-     
-     // Morning or force: use cache if we have real sources
-     if (!forceRefresh && !isMiddayCheck) {
-       if (existingNews && existingNews.length > 0 && realArticleCount > 0) {
-         console.log('Returning cached news for today (real sources)');
-         return new Response(JSON.stringify({ news: existingNews, cached: true, source: 'cache' }), {
-           headers: { ...corsHeaders, "Content-Type": "application/json" },
-         });
-       }
-     }
-
-    console.log('Fetching fresh HR news from multiple RSS sources...');
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // Load cached article dates before fetching (avoids scraping same articles)
-    await loadExistingArticleDates(supabase);
+    // Check for force refresh parameter
+    const body = await req.json().catch(() => ({}));
+    const forceRefresh = body.force === true;
+    const testSources = body.testSources === true;
     
-    // Fetch from all RSS sources
-    let newsItems = await fetchAllRSSSources();
-    let newsSource = 'rss';
-
-    if (newsItems.length >= 4) {
-      // Select best diverse items first, then enhance with AI
-      newsItems = selectBestNews(newsItems);
-      newsItems = await enhanceWithAI(newsItems);
-      console.log(`Selected ${newsItems.length} items from RSS`);
-    } else {
-      console.log(`Only got ${newsItems.length} RSS items, using what we have`);
-      if (newsItems.length > 0) {
-        newsItems = await enhanceWithAI(newsItems);
+    // Test mode: just verify which RSS sources work
+    if (testSources) {
+      console.log('=== TESTING RSS SOURCES ===');
+      const results: { name: string; status: string; articleCount: number; error?: string }[] = [];
+      
+      for (const source of RSS_SOURCES) {
+        try {
+          const response = await fetch(source.url, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; Parium/1.0)',
+              'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+            },
+          });
+          
+          if (!response.ok) {
+            results.push({ name: source.name, status: 'error', articleCount: 0, error: `HTTP ${response.status}` });
+            continue;
+          }
+          
+          const xml = await response.text();
+          const items = parseRSSItems(xml);
+          results.push({ name: source.name, status: 'ok', articleCount: items.length });
+        } catch (error) {
+          results.push({ name: source.name, status: 'error', articleCount: 0, error: String(error) });
+        }
+      }
+      
+      console.log('=== SOURCE TEST RESULTS ===');
+      for (const r of results) {
+        console.log(`${r.name}: ${r.status} (${r.articleCount} articles)${r.error ? ` - ${r.error}` : ''}`);
+      }
+      
+      return new Response(JSON.stringify({ results }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Check if we already have fresh news (within last 4 hours)
+    if (!forceRefresh) {
+      const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+      const { data: existingNews } = await supabase
+        .from('daily_hr_news')
+        .select('id')
+        .gte('created_at', fourHoursAgo)
+        .limit(1);
+      
+      if (existingNews && existingNews.length > 0) {
+        console.log('Fresh news exists, skipping fetch');
+        return new Response(JSON.stringify({ message: 'Fresh news exists', skipped: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
     }
-
-     if (newsItems.length === 0) {
-       console.log('No RSS items found, not updating cache');
-       return new Response(JSON.stringify({ news: [], cached: false, source: newsSource }), {
-         headers: { ...corsHeaders, "Content-Type": "application/json" },
-       });
-     }
-
-    // Delete old news for today and insert new
-    await supabase.from('daily_hr_news').delete().eq('news_date', today);
-
-    const newsToInsert = newsItems.slice(0, 4).map((item, index) => {
-      const categoryConfig = CATEGORIES.find(c => c.key === item.category) || CATEGORIES[index % 4];
-      // Keep original published_at - don't fake it with current time
-      // Articles without dates will show no time in UI (better than wrong time)
+    
+    console.log('Starting HR news fetch from multiple sources...');
+    
+    // Load existing article dates for caching
+    await loadExistingArticleDates(supabase);
+    
+    // Fetch from all sources in parallel
+    const allNewsPromises = RSS_SOURCES.map(source => fetchRSSSource(source));
+    const allNewsResults = await Promise.all(allNewsPromises);
+    
+    // Flatten and deduplicate by title similarity
+    let allNews: NewsItem[] = [];
+    const seenTitles = new Set<string>();
+    
+    for (const sourceNews of allNewsResults) {
+      for (const item of sourceNews) {
+        // Simple dedup by normalized title
+        const normalizedTitle = item.title.toLowerCase().replace(/[^a-zåäö0-9]/g, '').slice(0, 50);
+        if (!seenTitles.has(normalizedTitle)) {
+          seenTitles.add(normalizedTitle);
+          allNews.push(item);
+        }
+      }
+    }
+    
+    console.log(`Total unique articles: ${allNews.length}`);
+    
+    // Sort by publication date (newest first), then by source priority
+    allNews.sort((a, b) => {
+      // First, sort by date
+      if (a.published_at && b.published_at) {
+        return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+      }
+      if (a.published_at) return -1;
+      if (b.published_at) return 1;
+      
+      // Swedish sources get priority
+      const swedishSources = ['HRnytt.se', 'Chef.se', 'Arbetsvärlden', 'DN Ekonomi', 'SVT Nyheter', 'Sveriges Radio Ekonomi', 'Aftonbladet Ekonomi', 'Expressen Ekonomi', 'SvD Näringsliv', 'Dagens Industri'];
+      const aIsSwedish = swedishSources.includes(a.source);
+      const bIsSwedish = swedishSources.includes(b.source);
+      if (aIsSwedish && !bIsSwedish) return -1;
+      if (!aIsSwedish && bIsSwedish) return 1;
+      
+      return 0;
+    });
+    
+    // Try to translate English articles to Swedish (limit to avoid rate limits)
+    const translatedNews: NewsItem[] = [];
+    let translationCount = 0;
+    const maxTranslations = 5; // Limit translations per run
+    
+    for (const item of allNews) {
+      if (isEnglish(item.title) && translationCount < maxTranslations) {
+        // For now, just mark as English (translation can be added later)
+        translatedNews.push({
+          ...item,
+          is_translated: false, // Would be true if we actually translated
+        });
+        translationCount++;
+      } else {
+        translatedNews.push(item);
+      }
+    }
+    
+    // Take top 20 most recent/relevant articles
+    const topNews = translatedNews.slice(0, 20);
+    
+    if (topNews.length === 0) {
+      console.log('No fresh HR news found');
+      return new Response(JSON.stringify({ message: 'No fresh news', count: 0 }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Clear old news and insert new (only if we have new articles)
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Delete news older than 5 days
+    const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    await supabase.from('daily_hr_news').delete().lt('news_date', fiveDaysAgo);
+    
+    // Get existing article URLs to avoid duplicates
+    const { data: existingArticles } = await supabase
+      .from('daily_hr_news')
+      .select('source_url')
+      .not('source_url', 'is', null);
+    
+    const existingUrls = new Set((existingArticles || []).map(a => a.source_url));
+    
+    // Filter out articles we already have
+    const newArticles = topNews.filter(item => !item.source_url || !existingUrls.has(item.source_url));
+    
+    if (newArticles.length === 0) {
+      console.log('No new articles to insert');
+      return new Response(JSON.stringify({ message: 'All articles already exist', count: 0 }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Insert new articles with category styling
+    const newsToInsert = newArticles.map((item, index) => {
+      const catInfo = getCategoryInfo(item.category);
       return {
         title: item.title,
         summary: item.summary,
         source: item.source,
         source_url: item.source_url,
-        category: item.category || categoryConfig.key,
-        icon_name: categoryConfig.icon,
-        gradient: categoryConfig.gradient,
+        category: catInfo.label,
+        icon_name: catInfo.icon,
+        gradient: catInfo.gradient,
         news_date: today,
         order_index: index,
-        published_at: item.published_at || null,
         is_translated: item.is_translated || false,
+        published_at: item.published_at,
       };
     });
-
-    const { data: insertedNews, error: insertError } = await supabase
+    
+    const { error: insertError } = await supabase
       .from('daily_hr_news')
-      .insert(newsToInsert)
-      .select();
-
+      .insert(newsToInsert);
+    
     if (insertError) {
-      console.error("Failed to insert news:", insertError);
-      throw new Error("Failed to save news");
+      console.error('Insert error:', insertError);
+      throw insertError;
     }
-
-    console.log(`Successfully saved ${insertedNews?.length} news items from ${newsSource}`);
-
-    return new Response(JSON.stringify({ news: insertedNews, cached: false, source: newsSource }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    
+    console.log(`Successfully inserted ${newsToInsert.length} HR news articles`);
+    
+    // Log distribution for debugging
+    const sourceCounts: Record<string, number> = {};
+    const catCounts: Record<string, number> = {};
+    for (const item of newsToInsert) {
+      sourceCounts[item.source] = (sourceCounts[item.source] || 0) + 1;
+      catCounts[item.category] = (catCounts[item.category] || 0) + 1;
+    }
+    console.log('Source distribution:', sourceCounts);
+    console.log('Category distribution:', catCounts);
+    
+    return new Response(JSON.stringify({ 
+      message: 'HR news fetched successfully', 
+      count: newsToInsert.length,
+      sources: Object.keys(sourceCounts),
+      categories: Object.keys(catCounts),
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
+    
   } catch (error) {
-    console.error("Error in fetch-hr-news:", error);
+    console.error('Error in fetch-hr-news:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
