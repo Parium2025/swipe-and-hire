@@ -144,15 +144,15 @@ interface NewsItem {
   is_translated?: boolean;
 }
 
-// Check if a date is within the last 48 hours (allows more source diversity)
-function isWithin48Hours(dateStr: string): boolean {
+// Check if a date is within the last 5 days (120 hours) - covers Monday-Friday work week
+function isWithin5Days(dateStr: string): boolean {
   try {
     const pubDate = new Date(dateStr);
     if (isNaN(pubDate.getTime())) return false;
     
     const now = new Date();
     const hoursDiff = (now.getTime() - pubDate.getTime()) / (1000 * 60 * 60);
-    return hoursDiff <= 48;
+    return hoursDiff <= 120; // 5 days * 24 hours
   } catch {
     return false;
   }
@@ -184,8 +184,8 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
       pubDate = pubDateMatch[1].trim();
     }
     
-    // Skip articles older than 48 hours (only if we have a valid date)
-    if (pubDate && !isWithin48Hours(pubDate)) {
+    // Skip articles older than 5 days (only if we have a valid date)
+    if (pubDate && !isWithin5Days(pubDate)) {
       continue;
     }
     
@@ -432,9 +432,9 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
         publishedAt = await getCachedOrScrapedDate(item.link, source.name);
       }
       
-      // CRITICAL: Apply 48-hour filter to ALL articles, including scraped dates
-      // Skip if we have a date and it's older than 48 hours
-      if (publishedAt && !isWithin48Hours(publishedAt)) {
+      // CRITICAL: Apply 5-day filter to ALL articles, including scraped dates
+      // Skip if we have a date and it's older than 5 days
+      if (publishedAt && !isWithin5Days(publishedAt)) {
         console.log(`Skipping old article (${publishedAt}): ${item.title.slice(0, 40)}...`);
         continue;
       }
