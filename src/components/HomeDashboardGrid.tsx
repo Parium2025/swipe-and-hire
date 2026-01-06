@@ -180,13 +180,13 @@ const NewsCard = memo(() => {
                   {currentNews.summary || currentNews.title}
                 </p>
                 {currentNews.published_at && (
-                  <div className="flex items-center gap-1.5 text-white/50 text-[10px] mb-1">
+                  <div className="flex items-center gap-1.5 text-white text-[10px] mb-1">
                     <Clock className="h-3 w-3" />
                     <span>{formatNewsTime(currentNews.published_at)}</span>
                   </div>
                 )}
                 {currentNews.source_url && (
-                  <div className="flex items-center gap-1 text-white/50 group-hover:text-white/80 transition-colors">
+                  <div className="flex items-center gap-1 text-white transition-colors">
                     <span className="text-xs">Läs mer</span>
                     <ExternalLink className="h-3 w-3" />
                   </div>
@@ -218,11 +218,6 @@ const NewsCard = memo(() => {
               ))}
             </div>
           ) : <div />}
-          
-          {/* Update time indicator */}
-          <span className="text-[9px] text-white/40">
-            Uppdateras 06:00
-          </span>
         </div>
       </CardContent>
     </Card>
