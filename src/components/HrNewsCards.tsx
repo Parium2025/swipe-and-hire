@@ -23,12 +23,12 @@ const iconMap: Record<string, React.ElementType> = {
   Sparkles,
 };
 
-// Default gradients if not specified
+// Default gradients if not specified - order: green, blue, purple, orange (top-to-bottom, left-to-right)
 const defaultGradients = [
   'from-emerald-500/90 via-emerald-600/80 to-teal-700/90',
+  'from-amber-500/90 via-orange-500/80 to-orange-600/90',
   'from-blue-500/90 via-blue-600/80 to-indigo-700/90',
   'from-violet-500/90 via-purple-600/80 to-purple-700/90',
-  'from-amber-500/90 via-orange-500/80 to-orange-600/90',
 ];
 
 interface NewsCardProps {
@@ -105,7 +105,7 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
 NewsCard.displayName = 'NewsCard';
 
 const LoadingSkeleton = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
     {[0, 1, 2, 3].map((i) => (
       <Card key={i} className="bg-white/5 border-white/10">
         <CardContent className="p-5 space-y-3">
@@ -157,7 +157,7 @@ export const HrNewsCards = memo(() => {
         <h2 className="text-lg font-semibold text-white">Nytt inom rekrytering idag</h2>
       </motion.div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
         {news.slice(0, 4).map((item, index) => (
           <NewsCard key={item.id} news={item} index={index} />
         ))}
