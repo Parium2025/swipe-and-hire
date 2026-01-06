@@ -245,6 +245,77 @@ function isNegativeContent(text: string): boolean {
   return NEGATIVE_KEYWORDS.some(keyword => lowerText.includes(keyword));
 }
 
+// Scrape publication date from HRnytt.se article page
+async function scrapeHRnyttDate(articleUrl: string): Promise<string | null> {
+  try {
+    const response = await fetch(articleUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; Parium/1.0)',
+        'Accept': 'text/html',
+      },
+    });
+    
+    if (!response.ok) return null;
+    
+    const html = await response.text();
+    
+    // Try to find date in common patterns:
+    // 1. <time datetime="2026-01-06T10:00:00">
+    const timeMatch = html.match(/<time[^>]*datetime="([^"]+)"/i);
+    if (timeMatch) {
+      const date = new Date(timeMatch[1]);
+      if (!isNaN(date.getTime())) {
+        console.log(`Found date via <time>: ${date.toISOString()}`);
+        return date.toISOString();
+      }
+    }
+    
+    // 2. Meta tag: <meta property="article:published_time" content="2026-01-06T10:00:00">
+    const metaMatch = html.match(/<meta[^>]*property="article:published_time"[^>]*content="([^"]+)"/i) ||
+                      html.match(/<meta[^>]*content="([^"]+)"[^>]*property="article:published_time"/i);
+    if (metaMatch) {
+      const date = new Date(metaMatch[1]);
+      if (!isNaN(date.getTime())) {
+        console.log(`Found date via meta tag: ${date.toISOString()}`);
+        return date.toISOString();
+      }
+    }
+    
+    // 3. Swedish date format in text: "6 januari 2026" or "2026-01-06"
+    const swedishMonths: Record<string, number> = {
+      'januari': 0, 'februari': 1, 'mars': 2, 'april': 3, 'maj': 4, 'juni': 5,
+      'juli': 6, 'augusti': 7, 'september': 8, 'oktober': 9, 'november': 10, 'december': 11
+    };
+    
+    const swedishDateMatch = html.match(/(\d{1,2})\s+(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\s+(\d{4})/i);
+    if (swedishDateMatch) {
+      const day = parseInt(swedishDateMatch[1]);
+      const month = swedishMonths[swedishDateMatch[2].toLowerCase()];
+      const year = parseInt(swedishDateMatch[3]);
+      const date = new Date(year, month, day, 12, 0, 0);
+      if (!isNaN(date.getTime())) {
+        console.log(`Found Swedish date: ${date.toISOString()}`);
+        return date.toISOString();
+      }
+    }
+    
+    // 4. ISO date format in the HTML
+    const isoDateMatch = html.match(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/);
+    if (isoDateMatch) {
+      const date = new Date(isoDateMatch[1]);
+      if (!isNaN(date.getTime())) {
+        console.log(`Found ISO date: ${date.toISOString()}`);
+        return date.toISOString();
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.log(`Failed to scrape date from ${articleUrl}:`, error);
+    return null;
+  }
+}
+
 // Fetch news from a single RSS source
 async function fetchRSSSource(source: { url: string; name: string }): Promise<NewsItem[]> {
   try {
@@ -294,13 +365,21 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
         }
       }
       
+      // Get publication date - if missing and HRnytt.se, try to scrape from article page
+      let publishedAt = item.pubDate ? new Date(item.pubDate).toISOString() : null;
+      
+      if (!publishedAt && source.name === 'HRnytt.se' && item.link) {
+        console.log(`Scraping date from HRnytt article: ${item.link}`);
+        publishedAt = await scrapeHRnyttDate(item.link);
+      }
+      
       newsItems.push({
         title: item.title.slice(0, 100),
         summary: item.description.slice(0, 150) || `Läs mer på ${source.name}`,
         source: source.name,
         source_url: item.link || null,
         category,
-        published_at: item.pubDate ? new Date(item.pubDate).toISOString() : null,
+        published_at: publishedAt,
       });
     }
     
