@@ -100,21 +100,21 @@ interface NewsItem {
   category: string;
 }
 
-// Check if a date is within the last 24 hours
-function isWithin24Hours(dateStr: string): boolean {
+// Check if a date is within the last 48 hours (allows more source diversity)
+function isWithin48Hours(dateStr: string): boolean {
   try {
     const pubDate = new Date(dateStr);
     if (isNaN(pubDate.getTime())) return false;
     
     const now = new Date();
     const hoursDiff = (now.getTime() - pubDate.getTime()) / (1000 * 60 * 60);
-    return hoursDiff <= 24;
+    return hoursDiff <= 48;
   } catch {
     return false;
   }
 }
 
-// Parse RSS XML to extract news items (only from last 24 hours)
+// Parse RSS XML to extract news items (only from last 48 hours)
 function parseRSSItems(xml: string): { title: string; description: string; link: string; pubDate: string | null }[] {
   const items: { title: string; description: string; link: string; pubDate: string | null }[] = [];
   
@@ -130,8 +130,8 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
                          itemContent.match(/<published>([^<]*)<\/published>/i);
     const pubDate = pubDateMatch ? pubDateMatch[1].trim() : null;
     
-    // Skip articles older than 24 hours
-    if (pubDate && !isWithin24Hours(pubDate)) {
+    // Skip articles older than 48 hours
+    if (pubDate && !isWithin48Hours(pubDate)) {
       continue;
     }
     
