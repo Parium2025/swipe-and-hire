@@ -50,6 +50,6 @@ verify_jwt = false
 
 [functions.fetch-hr-news]
 verify_jwt = false
-# Kör kl 05:00 och 11:00 UTC = 06:00 och 12:00 svensk tid (vintertid)
-# 12:00-körningen är smart - kollar bara om vi behöver fler artiklar
-schedule = "0 5,11 * * *"
+# Kör kl 06:00 och 11:00 UTC = 07:00 och 12:00 svensk tid (vintertid)
+# 07:00 = huvuduppdatering, 12:00 = fallback om inga nya artiklar på morgonen
+schedule = "0 6,11 * * *"
