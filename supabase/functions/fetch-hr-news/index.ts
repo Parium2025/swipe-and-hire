@@ -9,18 +9,42 @@ const corsHeaders = {
 
 // RSS sources - focused on HR, recruitment, leadership and labor market
 // TRUSTED_SOURCES get automatic pass without strict keyword filtering
-const TRUSTED_HR_SOURCES = ['HRnytt.se', 'Chef.se', 'Kollega', 'Motivation.se', 'Arbetsvärlden', 'Personalnytt'];
+const TRUSTED_HR_SOURCES = [
+  'HRnytt.se', 'Chef.se', 'Kollega', 'Motivation.se', 'Arbetsvärlden', 
+  'Ledarna', 'Unionen', 'TCO', 'Almega', 'Svenskt Näringsliv',
+  'HR Dive', 'SHRM', 'People Management', 'Teamtailor', 'LinkedIn Talent'
+];
 
 const RSS_SOURCES = [
-  // PRIMARY: HR & Recruitment sources (TRUSTED - auto-pass filter)
+  // === SWEDISH HR & RECRUITMENT (PRIMARY) ===
   { url: 'https://hrnytt.se/feed/', name: 'HRnytt.se' },
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
   { url: 'https://kollega.se/feed/', name: 'Kollega' },
   { url: 'https://www.motivation.se/feed/', name: 'Motivation.se' },
   { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
-  // Swedish news with HR/labor focus
-  { url: 'https://www.svd.se/feed/rss/naringsliv', name: 'SvD Näringsliv' },
-  { url: 'https://www.dn.se/ekonomi/rss/', name: 'DN Ekonomi' },
+  
+  // === SWEDISH UNIONS & ORGANIZATIONS ===
+  { url: 'https://www.ledarna.se/rss/', name: 'Ledarna' },
+  { url: 'https://www.unionen.se/rss.xml', name: 'Unionen' },
+  { url: 'https://www.tco.se/feed/', name: 'TCO' },
+  { url: 'https://www.almega.se/feed/', name: 'Almega' },
+  { url: 'https://www.svensktnaringsliv.se/rss/', name: 'Svenskt Näringsliv' },
+  
+  // === INTERNATIONAL HR (English - for AI/trends/strategy) ===
+  { url: 'https://www.hrdive.com/feeds/news/', name: 'HR Dive' },
+  { url: 'https://www.shrm.org/rss/pages/rss.aspx', name: 'SHRM' },
+  { url: 'https://www.peoplemanagement.co.uk/feed', name: 'People Management' },
+  { url: 'https://www.ere.net/feed/', name: 'ERE Recruiting' },
+  { url: 'https://recruitingdaily.com/feed/', name: 'Recruiting Daily' },
+  
+  // === HR TECH & AI ===
+  { url: 'https://blog.teamtailor.com/rss.xml', name: 'Teamtailor' },
+  { url: 'https://www.aihr.com/feed/', name: 'AIHR' },
+  { url: 'https://www.tlnt.com/feed/', name: 'TLNT Talent' },
+  
+  // === SWEDISH BUSINESS (labor market angles) ===
+  { url: 'https://www.va.se/rss/', name: 'Veckans Affärer' },
+  { url: 'https://www.breakit.se/feed/articles', name: 'Breakit' },
 ];
 
 // Keywords to filter out truly negative/scandal content (not labor market statistics)
