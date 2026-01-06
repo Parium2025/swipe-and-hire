@@ -69,7 +69,14 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
             <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
               <Icon className="h-5 w-5 text-white" strokeWidth={1.5} />
             </div>
-            <span className="text-xs text-white/50 font-medium">{news.source}</span>
+            <div className="flex items-center gap-1.5">
+              {news.source_url ? (
+                <span className="text-[10px] text-emerald-300/80 font-medium uppercase tracking-wider">Källa</span>
+              ) : (
+                <span className="text-[10px] text-amber-300/80 font-medium uppercase tracking-wider">AI</span>
+              )}
+              <span className="text-xs text-white/70 font-medium">{news.source}</span>
+            </div>
           </div>
           
           {/* Title */}
