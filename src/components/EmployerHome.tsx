@@ -19,11 +19,13 @@ import WeatherEffects from '@/components/WeatherEffects';
 import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
 
-const getGreeting = (): { text: string; isEvening: boolean } => {
+const getGreeting = (): { text: string; isEvening: boolean; isDaytime: boolean } => {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return { text: 'God morgon', isEvening: false };
-  if (hour >= 12 && hour < 18) return { text: 'God eftermiddag', isEvening: false };
-  return { text: 'God kväll', isEvening: true };
+  if (hour >= 5 && hour < 9) return { text: 'God morgon', isEvening: false, isDaytime: true };
+  if (hour >= 9 && hour < 12) return { text: 'God förmiddag', isEvening: false, isDaytime: true };
+  if (hour >= 12 && hour < 17) return { text: 'God eftermiddag', isEvening: false, isDaytime: true };
+  if (hour >= 17 && hour < 21) return { text: 'God kväll', isEvening: true, isDaytime: false };
+  return { text: 'God natt', isEvening: true, isDaytime: false };
 };
 
 const formatDateTime = (): { time: string; date: string } => {
@@ -113,14 +115,45 @@ const EmployerHome = memo(() => {
     };
   }, []);
   
-  const { text: greetingText, isEvening } = greeting;
+  const { text: greetingText, isEvening, isDaytime } = greeting;
   
+  // Check GPS permission status
+  const [gpsGranted, setGpsGranted] = useState<boolean | null>(null);
+  
+  useEffect(() => {
+    const checkGps = async () => {
+      try {
+        if ('permissions' in navigator) {
+          const result = await navigator.permissions.query({ name: 'geolocation' });
+          setGpsGranted(result.state === 'granted');
+          
+          // Listen for changes
+          result.addEventListener('change', () => {
+            setGpsGranted(result.state === 'granted');
+          });
+        } else {
+          setGpsGranted(false);
+        }
+      } catch {
+        setGpsGranted(false);
+      }
+    };
+    checkGps();
+  }, []);
+  
+  // Only fetch weather if GPS is granted
   const weather = useWeather({
-    fallbackCity: profile?.location || profile?.home_location || profile?.address || 'Stockholm',
+    fallbackCity: gpsGranted ? (profile?.location || profile?.home_location || profile?.address || 'Stockholm') : undefined,
+    enabled: gpsGranted === true,
   });
   
   // Emoji logic based on time of day and weather
   const displayEmoji = useMemo(() => {
+    // If GPS not granted, use simple time-based icons
+    if (!gpsGranted) {
+      return isDaytime ? '☀️' : '🌙';
+    }
+    
     const getEmojiForCode = (code: number) => {
       if (code === 0) return '☀️'; // Clear
       if (code === 1) return '🌤️'; // Mostly clear
@@ -146,7 +179,7 @@ const EmployerHome = memo(() => {
       return '🌙 ☁️';
     }
     return getEmojiForCode(weatherCode);
-  }, [weather.weatherCode, isEvening]);
+  }, [weather.weatherCode, isEvening, gpsGranted, isDaytime]);
 
   if (isLoading || !showContent) {
     return (
@@ -174,15 +207,11 @@ const EmployerHome = memo(() => {
             </h1>
           </div>
           <DateTimeDisplay />
-          {!weather.isLoading && !weather.error && weather.description ? (
+          {gpsGranted && !weather.isLoading && !weather.error && weather.description ? (
             <p className="text-white mt-2 text-base">
               {weather.city ? `${weather.city}, ` : ''}{weather.temperature}° – {weather.description}
             </p>
-          ) : (
-            <p className="text-white mt-2 text-base">
-              Välkommen till din rekryteringsportal
-            </p>
-          )}
+          ) : null}
         </motion.div>
 
         {/* Quick summary */}
