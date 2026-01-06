@@ -78,15 +78,40 @@ interface NewsItem {
   category: string;
 }
 
-// Parse RSS XML to extract news items
-function parseRSSItems(xml: string): { title: string; description: string; link: string }[] {
-  const items: { title: string; description: string; link: string }[] = [];
+// Check if a date is within the last 24 hours
+function isWithin24Hours(dateStr: string): boolean {
+  try {
+    const pubDate = new Date(dateStr);
+    if (isNaN(pubDate.getTime())) return false;
+    
+    const now = new Date();
+    const hoursDiff = (now.getTime() - pubDate.getTime()) / (1000 * 60 * 60);
+    return hoursDiff <= 24;
+  } catch {
+    return false;
+  }
+}
+
+// Parse RSS XML to extract news items (only from last 24 hours)
+function parseRSSItems(xml: string): { title: string; description: string; link: string; pubDate: string | null }[] {
+  const items: { title: string; description: string; link: string; pubDate: string | null }[] = [];
   
   // Extract <item> blocks
   const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/gi);
   
   for (const match of itemMatches) {
     const itemContent = match[1];
+    
+    // Extract pubDate
+    const pubDateMatch = itemContent.match(/<pubDate>([^<]*)<\/pubDate>/i) ||
+                         itemContent.match(/<dc:date>([^<]*)<\/dc:date>/i) ||
+                         itemContent.match(/<published>([^<]*)<\/published>/i);
+    const pubDate = pubDateMatch ? pubDateMatch[1].trim() : null;
+    
+    // Skip articles older than 24 hours
+    if (pubDate && !isWithin24Hours(pubDate)) {
+      continue;
+    }
     
     // Extract title - handle CDATA
     let titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i);
@@ -111,7 +136,7 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
     const link = linkMatch ? linkMatch[1].trim() : '';
     
     if (title && title.length > 10) {
-      items.push({ title, description, link });
+      items.push({ title, description, link, pubDate });
     }
   }
   
