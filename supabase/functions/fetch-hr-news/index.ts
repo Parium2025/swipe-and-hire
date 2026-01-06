@@ -30,12 +30,13 @@ const RSS_SOURCES = [
   { url: 'https://www.svd.se/feed/naringsliv.rss', name: 'SvD Näringsliv' },
 ];
 
-// Keywords that indicate negative content to filter out
+// Keywords to filter out truly negative/scandal content (not labor market statistics)
 const NEGATIVE_KEYWORDS = [
-  'uppsägning', 'avsked', 'varsel', 'konkurs', 'nedskärning', 'kris', 
-  'skandal', 'misslyck', 'problem', 'strejk', 'konflikt', 'döm', 
+  'skandal', 'misslyck', 'strejk', 'konflikt', 'döm', 
   'åtal', 'brott', 'svek', 'fusk', 'bedrägeri', 'diskriminer',
-  'utbrändhet', 'sjukskriv', 'mobbing', 'trakasser', 'hot', 'våld'
+  'mobbing', 'trakasser', 'hot', 'våld'
+  // Removed: uppsägning, varsel, konkurs, nedskärning, kris, problem, utbrändhet, sjukskriv
+  // These are okay as labor market news
 ];
 
 // Keywords that indicate HR-relevant content (at least one must match)
