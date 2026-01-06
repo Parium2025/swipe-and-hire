@@ -259,18 +259,40 @@ async function scrapeHRnyttDate(articleUrl: string): Promise<string | null> {
     
     const html = await response.text();
     
-    // Try to find date in common patterns:
-    // 1. <time datetime="2026-01-06T10:00:00">
-    const timeMatch = html.match(/<time[^>]*datetime="([^"]+)"/i);
-    if (timeMatch) {
-      const date = new Date(timeMatch[1]);
+    // Swedish months for parsing
+    const swedishMonths: Record<string, number> = {
+      'januari': 0, 'februari': 1, 'mars': 2, 'april': 3, 'maj': 4, 'juni': 5,
+      'juli': 6, 'augusti': 7, 'september': 8, 'oktober': 9, 'november': 10, 'december': 11
+    };
+    
+    // PRIORITY 1: Look for "PUBLICERAD" text followed by date (HRnytt.se specific pattern)
+    // Format: "PUBLICERAD 19/12/2025" or "PUBLICERAD 19 december 2025"
+    const publicedMatch = html.match(/PUBLICERAD\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/i);
+    if (publicedMatch) {
+      const day = parseInt(publicedMatch[1]);
+      const month = parseInt(publicedMatch[2]) - 1; // 0-indexed
+      const year = parseInt(publicedMatch[3]);
+      const date = new Date(year, month, day, 12, 0, 0);
       if (!isNaN(date.getTime())) {
-        console.log(`Found date via <time>: ${date.toISOString()}`);
+        console.log(`Found PUBLICERAD date: ${date.toISOString()}`);
         return date.toISOString();
       }
     }
     
-    // 2. Meta tag: <meta property="article:published_time" content="2026-01-06T10:00:00">
+    // PRIORITY 2: "PUBLICERAD" followed by Swedish month format
+    const publicedSwedishMatch = html.match(/PUBLICERAD\s*(\d{1,2})\s+(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\s+(\d{4})/i);
+    if (publicedSwedishMatch) {
+      const day = parseInt(publicedSwedishMatch[1]);
+      const month = swedishMonths[publicedSwedishMatch[2].toLowerCase()];
+      const year = parseInt(publicedSwedishMatch[3]);
+      const date = new Date(year, month, day, 12, 0, 0);
+      if (!isNaN(date.getTime())) {
+        console.log(`Found PUBLICERAD Swedish date: ${date.toISOString()}`);
+        return date.toISOString();
+      }
+    }
+    
+    // PRIORITY 3: Meta tag (reliable, set by CMS)
     const metaMatch = html.match(/<meta[^>]*property="article:published_time"[^>]*content="([^"]+)"/i) ||
                       html.match(/<meta[^>]*content="([^"]+)"[^>]*property="article:published_time"/i);
     if (metaMatch) {
@@ -281,33 +303,17 @@ async function scrapeHRnyttDate(articleUrl: string): Promise<string | null> {
       }
     }
     
-    // 3. Swedish date format in text: "6 januari 2026" or "2026-01-06"
-    const swedishMonths: Record<string, number> = {
-      'januari': 0, 'februari': 1, 'mars': 2, 'april': 3, 'maj': 4, 'juni': 5,
-      'juli': 6, 'augusti': 7, 'september': 8, 'oktober': 9, 'november': 10, 'december': 11
-    };
-    
-    const swedishDateMatch = html.match(/(\d{1,2})\s+(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\s+(\d{4})/i);
-    if (swedishDateMatch) {
-      const day = parseInt(swedishDateMatch[1]);
-      const month = swedishMonths[swedishDateMatch[2].toLowerCase()];
-      const year = parseInt(swedishDateMatch[3]);
-      const date = new Date(year, month, day, 12, 0, 0);
+    // PRIORITY 4: <time datetime> (usually in article header, not body)
+    const timeMatch = html.match(/<time[^>]*datetime="([^"]+)"/i);
+    if (timeMatch) {
+      const date = new Date(timeMatch[1]);
       if (!isNaN(date.getTime())) {
-        console.log(`Found Swedish date: ${date.toISOString()}`);
+        console.log(`Found date via <time>: ${date.toISOString()}`);
         return date.toISOString();
       }
     }
     
-    // 4. ISO date format in the HTML
-    const isoDateMatch = html.match(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/);
-    if (isoDateMatch) {
-      const date = new Date(isoDateMatch[1]);
-      if (!isNaN(date.getTime())) {
-        console.log(`Found ISO date: ${date.toISOString()}`);
-        return date.toISOString();
-      }
-    }
+    // DO NOT use generic date patterns from article body - they catch event dates!
     
     return null;
   } catch (error) {
@@ -389,6 +395,12 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
     
     for (const item of rssItems.slice(0, 15)) { // Check more items to find relevant ones
       const fullText = `${item.title} ${item.description}`;
+      
+      // Skip event pages from HRnytt.se (they have /event/ in URL and show future dates)
+      if (source.name === 'HRnytt.se' && item.link && item.link.includes('/event/')) {
+        console.log(`Skipping HRnytt event: ${item.title.slice(0, 40)}...`);
+        continue;
+      }
       
       // Skip non-HR content (pass source name for trusted source check)
       if (!isHRRelevant(fullText, source.name)) {
