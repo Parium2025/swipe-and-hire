@@ -114,17 +114,17 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
           </h3>
           
           {/* Summary */}
-          <p className="text-sm text-white/90 flex-1 line-clamp-2">
+          <p className="text-sm text-white flex-1 line-clamp-2">
             {news.summary}
           </p>
           
           {/* Published time and link */}
           <div className="flex items-center justify-between mt-3">
             {publishedTime && (
-              <span className="text-xs text-white/80">{publishedTime}</span>
+              <span className="text-xs text-white">{publishedTime}</span>
             )}
             {news.source_url && (
-              <div className="flex items-center gap-1 text-white/70 group-hover:text-white transition-colors ml-auto">
+              <div className="flex items-center gap-1 text-white transition-colors ml-auto">
                 <span className="text-xs font-medium">Läs mer</span>
                 <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </div>
