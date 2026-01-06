@@ -14,6 +14,7 @@ export interface HrNewsItem {
   created_at: string;
   order_index: number;
   published_at: string | null;
+  is_translated?: boolean;
 }
 
 const fetchTodaysNews = async (): Promise<HrNewsItem[]> => {

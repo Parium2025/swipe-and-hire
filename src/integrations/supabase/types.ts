@@ -351,6 +351,7 @@ export type Database = {
           gradient: string | null
           icon_name: string | null
           id: string
+          is_translated: boolean | null
           news_date: string
           order_index: number
           published_at: string | null
@@ -366,6 +367,7 @@ export type Database = {
           gradient?: string | null
           icon_name?: string | null
           id?: string
+          is_translated?: boolean | null
           news_date?: string
           order_index?: number
           published_at?: string | null
@@ -381,6 +383,7 @@ export type Database = {
           gradient?: string | null
           icon_name?: string | null
           id?: string
+          is_translated?: boolean | null
           news_date?: string
           order_index?: number
           published_at?: string | null
