@@ -151,10 +151,13 @@ export const HrNewsCards = memo(() => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="flex items-center gap-2"
+        className="flex items-center justify-between"
       >
-        <Sparkles className="h-5 w-5 text-secondary" />
-        <h2 className="text-lg font-semibold text-white">Nytt inom rekrytering idag</h2>
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-secondary" />
+          <h2 className="text-lg font-semibold text-white">Nytt inom rekrytering idag</h2>
+        </div>
+        <span className="text-xs text-white/40">Uppdateras 00:00 CET</span>
       </motion.div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
