@@ -91,10 +91,17 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
         <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
         
         <CardContent className="relative p-5 flex flex-col h-full min-h-[160px]">
-          {/* Icon and source */}
+          {/* Icon, translation badge, and source */}
           <div className="flex items-center justify-between mb-3">
-            <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
-              <Icon className="h-5 w-5 text-white" strokeWidth={1.5} />
+            <div className="flex items-center gap-2">
+              <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
+                <Icon className="h-5 w-5 text-white" strokeWidth={1.5} />
+              </div>
+              {news.is_translated && (
+                <span className="text-[10px] text-white/60 bg-white/10 px-1.5 py-0.5 rounded font-medium">
+                  (EN)
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-1.5">
               {news.source_url ? (

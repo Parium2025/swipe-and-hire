@@ -141,6 +141,7 @@ interface NewsItem {
   source_url: string | null;
   category: string;
   published_at: string | null;
+  is_translated?: boolean;
 }
 
 // Check if a date is within the last 48 hours (allows more source diversity)
@@ -339,16 +340,20 @@ async function translateToSwedish(items: NewsItem[]): Promise<NewsItem[]> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return items;
 
-  // Find items that need translation
-  const itemsToTranslate = items.filter(item => 
-    ENGLISH_SOURCES.includes(item.source) || isEnglishText(`${item.title} ${item.summary}`)
-  );
+  // Find items that need translation (mark them first)
+  const translationIndices: number[] = [];
+  items.forEach((item, i) => {
+    if (ENGLISH_SOURCES.includes(item.source) || isEnglishText(`${item.title} ${item.summary}`)) {
+      translationIndices.push(i);
+    }
+  });
 
-  if (itemsToTranslate.length === 0) {
+  if (translationIndices.length === 0) {
     console.log('No English articles to translate');
     return items;
   }
 
+  const itemsToTranslate = translationIndices.map(i => items[i]);
   console.log(`Translating ${itemsToTranslate.length} English articles to Swedish...`);
 
   try {
@@ -376,6 +381,8 @@ Svara ENDAST med valid JSON:
 
     if (!response.ok) {
       console.log('Translation failed, using original text');
+      // Still mark as translated (from English source)
+      translationIndices.forEach(i => { items[i].is_translated = true; });
       return items;
     }
 
@@ -387,26 +394,29 @@ Svara ENDAST med valid JSON:
       const data = JSON.parse(jsonMatch[0]);
       const translations = data.translations || [];
       
-      // Apply translations to original items
-      itemsToTranslate.forEach((item, i) => {
+      // Apply translations and mark as translated
+      translationIndices.forEach((originalIndex, i) => {
+        items[originalIndex].is_translated = true; // Always mark English sources
         if (translations[i]) {
-          const originalIndex = items.findIndex(it => it === item);
-          if (originalIndex !== -1) {
-            if (translations[i].title && translations[i].title.length > 5) {
-              items[originalIndex].title = translations[i].title.slice(0, 100);
-            }
-            if (translations[i].summary && translations[i].summary.length > 5) {
-              items[originalIndex].summary = translations[i].summary.slice(0, 150);
-            }
+          if (translations[i].title && translations[i].title.length > 5) {
+            items[originalIndex].title = translations[i].title.slice(0, 100);
+          }
+          if (translations[i].summary && translations[i].summary.length > 5) {
+            items[originalIndex].summary = translations[i].summary.slice(0, 150);
           }
         }
       });
       console.log(`Successfully translated ${translations.length} articles`);
+    } else {
+      // Mark as translated even if parsing failed
+      translationIndices.forEach(i => { items[i].is_translated = true; });
     }
     
     return items;
   } catch (error) {
     console.error('Translation error:', error);
+    // Still mark English sources
+    translationIndices.forEach(i => { items[i].is_translated = true; });
     return items;
   }
 }
@@ -624,6 +634,8 @@ serve(async (req) => {
 
     const newsToInsert = newsItems.slice(0, 4).map((item, index) => {
       const categoryConfig = CATEGORIES.find(c => c.key === item.category) || CATEGORIES[index % 4];
+      // If no published_at, use current time (ensures all articles have a time)
+      const publishedAt = item.published_at || new Date().toISOString();
       return {
         title: item.title,
         summary: item.summary,
@@ -634,7 +646,8 @@ serve(async (req) => {
         gradient: categoryConfig.gradient,
         news_date: today,
         order_index: index,
-        published_at: item.published_at,
+        published_at: publishedAt,
+        is_translated: item.is_translated || false,
       };
     });
 
