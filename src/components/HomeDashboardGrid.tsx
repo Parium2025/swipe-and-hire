@@ -81,6 +81,7 @@ const GRADIENTS = {
 const NewsCard = memo(() => {
   const { data: news, isLoading } = useHrNews();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const newsItems = news?.slice(0, 4) || [];
 
   const goNext = useCallback(() => {
@@ -95,16 +96,16 @@ const NewsCard = memo(() => {
     }
   }, [newsItems.length]);
 
-  // Auto-rotation every 10 seconds
+  // Auto-rotation every 10 seconds (pauses on hover)
   useEffect(() => {
-    if (newsItems.length <= 1) return;
+    if (newsItems.length <= 1 || isPaused) return;
     
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % newsItems.length);
     }, 10000);
     
     return () => clearInterval(interval);
-  }, [newsItems.length]);
+  }, [newsItems.length, isPaused]);
 
   const swipeHandlers = useSwipeGesture({
     onSwipeLeft: goNext,
@@ -131,6 +132,8 @@ const NewsCard = memo(() => {
   return (
     <Card 
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg h-[200px] touch-pan-y`}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
       {...swipeHandlers}
     >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
