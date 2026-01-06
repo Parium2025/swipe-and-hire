@@ -168,13 +168,23 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
   for (const match of itemMatches) {
     const itemContent = match[1];
     
-    // Extract pubDate
-    const pubDateMatch = itemContent.match(/<pubDate>([^<]*)<\/pubDate>/i) ||
-                         itemContent.match(/<dc:date>([^<]*)<\/dc:date>/i) ||
-                         itemContent.match(/<published>([^<]*)<\/published>/i);
-    const pubDate = pubDateMatch ? pubDateMatch[1].trim() : null;
+    // Extract pubDate - try multiple formats (some RSS feeds use different tags or CDATA)
+    let pubDate: string | null = null;
     
-    // Skip articles older than 48 hours
+    // Try standard pubDate
+    let pubDateMatch = itemContent.match(/<pubDate><!\[CDATA\[(.*?)\]\]><\/pubDate>/i);
+    if (!pubDateMatch) pubDateMatch = itemContent.match(/<pubDate>([^<]*)<\/pubDate>/i);
+    if (!pubDateMatch) pubDateMatch = itemContent.match(/<dc:date>([^<]*)<\/dc:date>/i);
+    if (!pubDateMatch) pubDateMatch = itemContent.match(/<published>([^<]*)<\/published>/i);
+    if (!pubDateMatch) pubDateMatch = itemContent.match(/<updated>([^<]*)<\/updated>/i);
+    // WordPress uses wp:post_date
+    if (!pubDateMatch) pubDateMatch = itemContent.match(/<wp:post_date>([^<]*)<\/wp:post_date>/i);
+    
+    if (pubDateMatch) {
+      pubDate = pubDateMatch[1].trim();
+    }
+    
+    // Skip articles older than 48 hours (only if we have a valid date)
     if (pubDate && !isWithin48Hours(pubDate)) {
       continue;
     }
@@ -634,8 +644,8 @@ serve(async (req) => {
 
     const newsToInsert = newsItems.slice(0, 4).map((item, index) => {
       const categoryConfig = CATEGORIES.find(c => c.key === item.category) || CATEGORIES[index % 4];
-      // If no published_at, use current time (ensures all articles have a time)
-      const publishedAt = item.published_at || new Date().toISOString();
+      // Keep original published_at - don't fake it with current time
+      // Articles without dates will show no time in UI (better than wrong time)
       return {
         title: item.title,
         summary: item.summary,
@@ -646,7 +656,7 @@ serve(async (req) => {
         gradient: categoryConfig.gradient,
         news_date: today,
         order_index: index,
-        published_at: publishedAt,
+        published_at: item.published_at || null,
         is_translated: item.is_translated || false,
       };
     });
