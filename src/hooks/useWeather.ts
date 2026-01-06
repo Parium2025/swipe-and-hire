@@ -439,47 +439,34 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   }, [fetchWeatherOnly]);
 
   const checkForLocationChange = useCallback(async (silent = true) => {
-    const cached = locationRef.current || getCachedLocation();
-    
     // Always try GPS first - it's always accurate and real-time
     if (navigator.geolocation) {
       const gpsResult = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
         navigator.geolocation.getCurrentPosition(
           (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
           () => resolve(null),
-          { timeout: 8000, enableHighAccuracy: true, maximumAge: 60 * 1000 } // 1 min max age for GPS
+          { timeout: 8000, enableHighAccuracy: true, maximumAge: 0 } // Always get fresh GPS
         );
       });
 
       if (gpsResult && mountedRef.current) {
-        // Always get fresh city name from GPS coordinates
-        // Don't rely on cached city names as they may be stale
+        // Always get fresh city name from GPS coordinates - never trust cache
         const freshCity = await getCityName(gpsResult.lat, gpsResult.lon);
         
-        // If we have cached location, check if city changed or we moved
-        if (cached && cached.source === 'gps') {
-          const distance = getDistanceKm(cached.lat, cached.lon, gpsResult.lat, gpsResult.lon);
-          const cityChanged = freshCity && cached.city && 
-            freshCity.toLowerCase() !== cached.city.toLowerCase();
-          
-          if (distance < 1 && !cityChanged) {
-            // Very close (< 1km) and same city - just update weather with cached city
-            await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
-            return;
-          }
-          
-          // City changed or moved - log it for debugging
-          if (cityChanged) {
-            console.log(`GPS city changed: ${cached.city} → ${freshCity}`);
-          }
+        if (freshCity) {
+          // We have fresh GPS coordinates and fresh city name - use them
+          await updateLocation(gpsResult.lat, gpsResult.lon, freshCity, 'gps');
+          return;
         }
         
-        // Update to fresh GPS location with fresh city name
-        const cityToUse = freshCity || cached?.city || '';
-        await updateLocation(gpsResult.lat, gpsResult.lon, cityToUse, 'gps');
+        // If reverse geocoding failed, still use GPS coords but try to get city name
+        await updateLocation(gpsResult.lat, gpsResult.lon, null, 'gps');
         return;
       }
     }
+
+    // GPS not available - fall back to cached location or IP
+    const cached = locationRef.current || getCachedLocation();
 
     // No GPS available - try IP and compare with cache
     const ipLocation = await getLocationByIP();
@@ -598,23 +585,31 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       };
     }
     
-    // Initial load
+    // Initial load - always do a fresh GPS check, but show cached weather immediately
     if (!initializedRef.current) {
       initializedRef.current = true;
       
-      // Show cached data immediately if available
-      const cached = getCachedLocation();
-      if (cached) {
-        locationRef.current = cached;
-        // Fetch weather with cache first, then check for location change in background
-        fetchWeatherOnly(cached.lat, cached.lon, cached.city).then(() => {
-          // After showing cached, check if we've moved
-          checkForLocationChange(true);
+      // Show cached weather data immediately while we get fresh GPS
+      const cachedWeather = getCachedWeather();
+      const cachedLocation = getCachedLocation();
+      
+      if (cachedWeather && cachedLocation) {
+        locationRef.current = cachedLocation;
+        // Show cached data immediately for instant UX
+        updateWeather({
+          temperature: cachedWeather.temperature,
+          feelsLike: cachedWeather.feelsLike,
+          weatherCode: cachedWeather.weatherCode,
+          description: cachedWeather.description,
+          emoji: cachedWeather.emoji,
+          city: cachedWeather.city,
+          isLoading: false,
+          error: null,
         });
-      } else {
-        // No cache - do full location check
-        checkForLocationChange(false);
       }
+      
+      // Always do fresh GPS check to ensure correct city
+      checkForLocationChange(true);
     }
 
     // Refresh weather every 5 minutes automatically in background
