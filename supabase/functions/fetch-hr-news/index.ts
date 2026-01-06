@@ -432,6 +432,19 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
         publishedAt = await getCachedOrScrapedDate(item.link, source.name);
       }
       
+      // CRITICAL: Apply 48-hour filter to ALL articles, including scraped dates
+      // Skip if we have a date and it's older than 48 hours
+      if (publishedAt && !isWithin48Hours(publishedAt)) {
+        console.log(`Skipping old article (${publishedAt}): ${item.title.slice(0, 40)}...`);
+        continue;
+      }
+      
+      // Skip articles without any date - we can't verify freshness
+      if (!publishedAt) {
+        console.log(`Skipping article without date: ${item.title.slice(0, 40)}...`);
+        continue;
+      }
+      
       newsItems.push({
         title: item.title.slice(0, 100),
         summary: item.description.slice(0, 150) || `Läs mer på ${source.name}`,
