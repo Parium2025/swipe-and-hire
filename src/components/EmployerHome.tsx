@@ -209,8 +209,25 @@ const EmployerHome = memo(() => {
           <DateTimeDisplay />
           {gpsGranted && !weather.isLoading && !weather.error && weather.description ? (
             <p className="text-white mt-2 text-base">
-              {weather.city ? `${weather.city}, ` : ''}{weather.temperature}° – {weather.description}
+              {weather.city ? `${weather.city}, ` : ''}{weather.temperature}°
+              {weather.feelsLike !== weather.temperature && (
+                <span className="text-white/70"> (känns som {weather.feelsLike}°)</span>
+              )}
+              {' – '}{weather.description}
             </p>
+          ) : !gpsGranted && gpsGranted !== null ? (
+            <button
+              onClick={() => {
+                navigator.geolocation.getCurrentPosition(
+                  () => window.location.reload(),
+                  () => {},
+                  { timeout: 10000 }
+                );
+              }}
+              className="text-white/60 hover:text-white/90 mt-2 text-sm underline underline-offset-2 transition-colors"
+            >
+              Aktivera plats för väder
+            </button>
           ) : null}
         </motion.div>
 
