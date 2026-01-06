@@ -7,14 +7,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// RSS sources for recruitment, HR and job market news
+// RSS sources for recruitment, HR and job market news (15+ sources for variety)
 const RSS_SOURCES = [
+  // HR & Recruitment
   { url: 'https://hrnytt.se/feed', name: 'HRnytt.se' },
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
   { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
   { url: 'https://arbetsmarknadsnytt.se/feed/', name: 'Arbetsmarknadsnytt' },
   { url: 'https://www.motivation.se/feed/', name: 'Motivation.se' },
   { url: 'https://www.arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
+  // Business & Career
+  { url: 'https://www.breakit.se/feed', name: 'Breakit' },
+  { url: 'https://www.va.se/rss/nyheter', name: 'Veckans Affärer' },
+  { url: 'https://www.resumé.se/feed/', name: 'Resumé' },
+  { url: 'https://www.dagensmedia.se/feed/', name: 'Dagens Media' },
+  // Tech & Innovation
+  { url: 'https://computersweden.se/feed/', name: 'Computer Sweden' },
+  { url: 'https://www.idg.se/rss/nyheter', name: 'IDG' },
+  { url: 'https://www.nyteknik.se/feed/', name: 'Ny Teknik' },
+  // General business news
+  { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
+  { url: 'https://www.svd.se/feed/naringsliv.rss', name: 'SvD Näringsliv' },
 ];
 
 // Keywords that indicate negative content to filter out
