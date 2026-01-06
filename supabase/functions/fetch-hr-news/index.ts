@@ -43,8 +43,9 @@ const RSS_SOURCES = [
 ];
 
 // Keywords to filter out truly negative/scandal content (not labor market statistics)
+// NOTE: 'strejk' (strike) is ALLOWED since it's labor market relevant
 const NEGATIVE_KEYWORDS = [
-  'skandal', 'misslyck', 'strejk', 'konflikt', 'döm', 
+  'skandal', 'misslyck', 'konflikt', 'döm', 
   'åtal', 'brott', 'svek', 'fusk', 'bedrägeri', 'diskriminer',
   'mobbing', 'trakasser', 'hot', 'våld'
 ];
@@ -93,6 +94,10 @@ const BLOCKLIST_KEYWORDS = [
   // === CRYPTO & PURE FINANCE ===
   'kryptovaluta', 'bitcoin', 'ethereum', 'börskurs', 'aktiekurs',
   'nvidia', 'amd', 'intel', 'aktieanalys', 'börsras',
+  
+  // === ENVIRONMENTAL DISASTERS & ACCIDENTS (not HR-related) ===
+  'oljespill', 'oljeutsläpp', 'mexikanska golfen', 'oil spill', 'oil leak',
+  'texas-företag', 'miljöbrott', 'utsläpp',
   
   // === SPORTS ===
   'fotboll', 'hockey', 'match', 'liga', 'mästerskap', 'allsvensk',
