@@ -148,24 +148,32 @@ const NewsCard = memo(() => {
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation */}
-        {newsItems.length > 1 && (
-          <div className="flex items-center gap-2 mt-auto">
-            {newsItems.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={cn(
-                  "w-2.5 h-2.5 rounded-full transition-all duration-300",
-                  i === currentIndex 
-                    ? "bg-white" 
-                    : "bg-white/30 hover:bg-white/50"
-                )}
-                aria-label={`Gå till nyhet ${i + 1}`}
-              />
-            ))}
-          </div>
-        )}
+        {/* Footer with dots and update time */}
+        <div className="flex items-center justify-between mt-auto">
+          {/* Dot navigation */}
+          {newsItems.length > 1 ? (
+            <div className="flex items-center gap-2">
+              {newsItems.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentIndex(i)}
+                  className={cn(
+                    "w-2.5 h-2.5 rounded-full transition-all duration-300",
+                    i === currentIndex 
+                      ? "bg-white" 
+                      : "bg-white/30 hover:bg-white/50"
+                  )}
+                  aria-label={`Gå till nyhet ${i + 1}`}
+                />
+              ))}
+            </div>
+          ) : <div />}
+          
+          {/* Update time indicator */}
+          <span className="text-[9px] text-white/40">
+            Uppdateras 06:00 & 12:00
+          </span>
+        </div>
       </CardContent>
     </Card>
   );
