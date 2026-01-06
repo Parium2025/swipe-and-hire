@@ -111,9 +111,11 @@ const NewsCard = memo(() => {
           <div className="p-2 rounded-xl bg-white/10">
             <Newspaper className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
-          <span className="text-[10px] text-white/60 uppercase tracking-wider font-medium">
-            KÄLLA {currentNews?.source || ''}
-          </span>
+          {currentNews?.source && (
+            <span className="px-2 py-0.5 rounded-full bg-white/15 text-[10px] text-white/80 font-medium truncate max-w-[120px]">
+              {currentNews.source}
+            </span>
+          )}
         </div>
         
         {/* News content */}
