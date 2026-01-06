@@ -209,11 +209,11 @@ const EmployerHome = memo(() => {
           <DateTimeDisplay />
           {gpsGranted && !weather.isLoading && !weather.error && weather.description ? (
             <p className="text-white mt-2 text-base">
-              {weather.city ? `${weather.city}, ` : ''}{weather.temperature}°
+            {weather.city ? `${weather.city}, ` : ''}{weather.temperature}°
               {weather.feelsLike !== weather.temperature && (
-                <span className="text-white/70"> (känns som {weather.feelsLike}°)</span>
+                <span className="text-white"> (känns som {weather.feelsLike}°)</span>
               )}
-              {' – '}{weather.description}
+              {' '}{weather.description}
             </p>
           ) : !gpsGranted && gpsGranted !== null ? (
             <button
