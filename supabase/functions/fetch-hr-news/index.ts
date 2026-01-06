@@ -8,20 +8,19 @@ const corsHeaders = {
 };
 
 // RSS sources - focused on HR, recruitment, leadership and labor market
+// TRUSTED_SOURCES get automatic pass without strict keyword filtering
+const TRUSTED_HR_SOURCES = ['HRnytt.se', 'Chef.se', 'Kollega', 'Motivation.se', 'Arbetsvärlden', 'Personalnytt'];
+
 const RSS_SOURCES = [
-  // PRIMARY: HR & Recruitment sources (most reliable)
-  { url: 'https://hrnytt.se/feed', name: 'HRnytt.se' },
+  // PRIMARY: HR & Recruitment sources (TRUSTED - auto-pass filter)
+  { url: 'https://hrnytt.se/feed/', name: 'HRnytt.se' },
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
-  { url: 'https://kollega.se/rss.xml', name: 'Kollega' },
+  { url: 'https://kollega.se/feed/', name: 'Kollega' },
   { url: 'https://www.motivation.se/feed/', name: 'Motivation.se' },
   { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
-  // Labor market & employment
-  { url: 'https://arbetsformedlingen.se/om-oss/press/nyheter.rss', name: 'Arbetsförmedlingen' },
-  { url: 'https://www.scb.se/rss/nyheter/', name: 'SCB Arbetsmarknad' },
-  // Leadership & management
-  { url: 'https://www.vd-tidningen.se/feed/', name: 'VD-tidningen' },
-  // Business news (for labor market angles)
-  { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
+  // Swedish news with HR/labor focus
+  { url: 'https://www.svd.se/feed/rss/naringsliv', name: 'SvD Näringsliv' },
+  { url: 'https://www.dn.se/ekonomi/rss/', name: 'DN Ekonomi' },
 ];
 
 // Keywords to filter out truly negative/scandal content (not labor market statistics)
@@ -55,46 +54,28 @@ const HR_RELEVANCE_KEYWORDS = [
   'kollektivavtal', 'fackförening', 'fack', 'unionen', 'tjänstemän'
 ];
 
-// STRICT BLOCKLIST - topics that are NOT HR-relevant
+// BLOCKLIST - only truly irrelevant topics (NOT labor market related!)
 const BLOCKLIST_KEYWORDS = [
-  // === GEOPOLITICS & WAR ===
-  'ukraina', 'ryssland', 'putin', 'zelensky', 'krig', 'invasion', 'missile',
-  'nato', 'militär', 'försvar', 'vapen', 'trupper', 'bombning', 'anfall',
+  // === GEOPOLITICS & WAR (pure politics, not labor) ===
+  'ukraina', 'ryssland', 'putin', 'zelensky', 'invasion', 'missile',
+  'nato', 'militär', 'vapen', 'trupper', 'bombning', 'anfall',
   'gaza', 'israel', 'hamas', 'mellanöstern', 'syrien', 'iran', 'taiwan',
-  'kina', 'beijing', 'trump', 'biden', 'vita huset', 'kongress',
+  'beijing', 'trump', 'biden', 'vita huset', 'kongress',
   
-  // === FINANCE & CRYPTO ===
-  'kreditkort', 'fond', 'fonder', 'aktie', 'aktier', 'börsen', 'investering',
-  'ränta', 'räntor', 'börsras', 'kryptovaluta', 'bitcoin', 'ethereum', 'valutor',
-  'aktiekurs', 'börskurs', 'nvidia', 'amd', 'intel', 'aktieanalys',
-  
-  // === IT SECURITY (not HR-tech) ===
-  'sårbarhet', 'brandvägg', 'hackare', 'cyberattack', 'malware', 'virus',
-  'ddos', 'ransomware', 'säkerhetshål', 'dataintrång', 'ciso', 'it-säkerhet',
-  
-  // === CONSUMER TECH ===
-  'iphone', 'samsung', 'apple card', 'tesla', 'android', 'ios', 'galaxy',
-  'pixel', 'macbook', 'airpods', 'playstation', 'xbox', 'nintendo',
-  'streaming', 'netflix', 'spotify', 'youtube',
+  // === CRYPTO & PURE FINANCE ===
+  'kryptovaluta', 'bitcoin', 'ethereum', 'börskurs', 'aktiekurs',
+  'nvidia', 'amd', 'intel', 'aktieanalys', 'börsras',
   
   // === SPORTS ===
-  'fotboll', 'hockey', 'sport', 'match', 'liga', 'mästerskap', 'allsvensk',
-  'premier league', 'champions league', 'vm', 'em', 'os', 'olympiska',
+  'fotboll', 'hockey', 'match', 'liga', 'mästerskap', 'allsvensk',
+  'premier league', 'champions league',
   
   // === ENTERTAINMENT ===
-  'film', 'musik', 'konsert', 'artist', 'kändis', 'hollywood', 'grammy',
-  'oscar', 'melodifestival', 'eurovision', 'tv-serie',
+  'konsert', 'artist', 'kändis', 'hollywood', 'grammy', 'oscar',
+  'melodifestival', 'eurovision',
   
-  // === POLITICS (non-labor) ===
-  'riksdag', 'val ', 'parti', 'minister', 'statsminister', 'opposition',
-  'högerparti', 'vänsterparti', 'moderat', 'socialdemokrat',
-  
-  // === DISASTERS & CRIME (non-workplace) ===
-  'olycka', 'krock', 'brottsling', 'misstänkt', 'polis', 'åklagare',
-  'jordbävning', 'tsunami', 'orkan', 'storm', 'översvämning',
-  
-  // === MISC IRRELEVANT ===
-  'recept', 'matlagning', 'träning', 'kosttillskott', 'diet'
+  // === DISASTERS & CRIME ===
+  'jordbävning', 'tsunami', 'orkan', 'översvämning',
 ];
 
 // Categories with their styling
@@ -203,8 +184,9 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
   return items;
 }
 
-// Check if content is HR-relevant (requires 2+ keyword matches and no blocklist hits)
-function isHRRelevant(text: string): boolean {
+// Check if content is HR-relevant
+// Trusted sources get automatic pass, others need keyword matches
+function isHRRelevant(text: string, sourceName: string): boolean {
   const lowerText = text.toLowerCase();
   
   // First check blocklist - if any match, reject immediately
@@ -212,9 +194,14 @@ function isHRRelevant(text: string): boolean {
     return false;
   }
   
-  // Count HR keyword matches - require at least 2
+  // Trusted HR sources: auto-pass (they're dedicated HR publications)
+  if (TRUSTED_HR_SOURCES.includes(sourceName)) {
+    return true;
+  }
+  
+  // For general news sources: require at least 1 HR keyword
   const matchCount = HR_RELEVANCE_KEYWORDS.filter(keyword => lowerText.includes(keyword)).length;
-  return matchCount >= 2;
+  return matchCount >= 1;
 }
 
 // Check if content contains negative keywords
@@ -246,11 +233,11 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
     
     const newsItems: NewsItem[] = [];
     
-    for (const item of rssItems.slice(0, 10)) { // Check more items to find relevant ones
+    for (const item of rssItems.slice(0, 15)) { // Check more items to find relevant ones
       const fullText = `${item.title} ${item.description}`;
       
-      // Skip non-HR content
-      if (!isHRRelevant(fullText)) {
+      // Skip non-HR content (pass source name for trusted source check)
+      if (!isHRRelevant(fullText, source.name)) {
         console.log(`Skipping non-HR: ${item.title.slice(0, 40)}...`);
         continue;
       }
