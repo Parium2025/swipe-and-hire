@@ -99,7 +99,7 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
               </div>
               {news.is_translated && (
                 <span className="text-[10px] text-white/60 bg-white/10 px-1.5 py-0.5 rounded font-medium">
-                  (EN)
+                  (Engelska)
                 </span>
               )}
             </div>
