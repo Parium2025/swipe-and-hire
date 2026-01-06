@@ -320,9 +320,103 @@ async function fetchAllRSSSources(): Promise<NewsItem[]> {
   return allItems;
 }
 
+// English sources that need translation
+const ENGLISH_SOURCES = [
+  'HR Dive', 'SHRM', 'People Management', 'ERE Recruiting', 
+  'Recruiting Daily', 'Teamtailor', 'AIHR', 'TLNT Talent', 'LinkedIn Talent'
+];
+
+// Detect if text is likely English
+function isEnglishText(text: string): boolean {
+  const englishWords = ['the', 'and', 'for', 'are', 'that', 'with', 'your', 'how', 'can', 'will'];
+  const lowerText = text.toLowerCase();
+  const matchCount = englishWords.filter(word => lowerText.includes(` ${word} `)).length;
+  return matchCount >= 2;
+}
+
+// Translate English articles to Swedish using Lovable AI
+async function translateToSwedish(items: NewsItem[]): Promise<NewsItem[]> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) return items;
+
+  // Find items that need translation
+  const itemsToTranslate = items.filter(item => 
+    ENGLISH_SOURCES.includes(item.source) || isEnglishText(`${item.title} ${item.summary}`)
+  );
+
+  if (itemsToTranslate.length === 0) {
+    console.log('No English articles to translate');
+    return items;
+  }
+
+  console.log(`Translating ${itemsToTranslate.length} English articles to Swedish...`);
+
+  try {
+    const prompt = `Översätt följande nyhetsrubriker och sammanfattningar från engelska till svenska.
+Behåll professionell HR-terminologi. Gör texterna naturliga på svenska.
+
+Artiklar att översätta:
+${itemsToTranslate.map((item, i) => `${i + 1}. Titel: "${item.title}"
+   Sammanfattning: "${item.summary}"`).join('\n\n')}
+
+Svara ENDAST med valid JSON:
+{"translations": [{"title": "svensk titel", "summary": "svensk sammanfattning"}, ...]}`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      console.log('Translation failed, using original text');
+      return items;
+    }
+
+    const aiData = await response.json();
+    const content = aiData.choices?.[0]?.message?.content || '';
+    
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const data = JSON.parse(jsonMatch[0]);
+      const translations = data.translations || [];
+      
+      // Apply translations to original items
+      itemsToTranslate.forEach((item, i) => {
+        if (translations[i]) {
+          const originalIndex = items.findIndex(it => it === item);
+          if (originalIndex !== -1) {
+            if (translations[i].title && translations[i].title.length > 5) {
+              items[originalIndex].title = translations[i].title.slice(0, 100);
+            }
+            if (translations[i].summary && translations[i].summary.length > 5) {
+              items[originalIndex].summary = translations[i].summary.slice(0, 150);
+            }
+          }
+        }
+      });
+      console.log(`Successfully translated ${translations.length} articles`);
+    }
+    
+    return items;
+  } catch (error) {
+    console.error('Translation error:', error);
+    return items;
+  }
+}
+
 // Use Lovable AI (FREE) to enhance summaries
 async function enhanceWithAI(items: NewsItem[]): Promise<NewsItem[]> {
   if (items.length === 0) return [];
+  
+  // First translate any English articles
+  items = await translateToSwedish(items);
   
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) {
@@ -333,7 +427,7 @@ async function enhanceWithAI(items: NewsItem[]): Promise<NewsItem[]> {
   try {
     console.log('Enhancing news with AI...');
     
-    const prompt = `Du är en HR-expert. Här är ${items.length} nyhetsartiklar från HRnytt.se.
+    const prompt = `Du är en HR-expert. Här är ${items.length} nyhetsartiklar.
 
 För varje artikel, skriv en kort och engagerande sammanfattning på svenska (max 70 tecken).
 Gör sammanfattningen informativ och professionell.
