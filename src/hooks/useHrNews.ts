@@ -11,6 +11,7 @@ export interface HrNewsItem {
   icon_name: string | null;
   gradient: string | null;
   news_date: string;
+  created_at: string;
   order_index: number;
 }
 
