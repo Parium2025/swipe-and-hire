@@ -493,6 +493,69 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     }
   }, [fallbackCity, fetchWeatherOnly, updateLocation, updateWeather]);
 
+  // 🔄 AUTOMATIC RESYNC: When fallbackCity becomes available or changes,
+  // and current weather city doesn't match, force update from profile location
+  useEffect(() => {
+    // Skip if no fallbackCity provided
+    if (!fallbackCity) {
+      prevFallbackCityRef.current = undefined;
+      return;
+    }
+
+    const normalizedFallback = normalizeCityQuery(fallbackCity);
+    const prevFallback = prevFallbackCityRef.current;
+    prevFallbackCityRef.current = fallbackCity;
+
+    // Check if this is a new/changed fallbackCity
+    const fallbackJustBecameAvailable = !prevFallback && fallbackCity;
+    const fallbackChanged = prevFallback && prevFallback.toLowerCase() !== fallbackCity.toLowerCase();
+
+    if (!fallbackJustBecameAvailable && !fallbackChanged) {
+      return; // No change, skip
+    }
+
+    // Check if current weather city matches the profile location
+    const currentCity = weather.city?.toLowerCase() || '';
+    const profileCity = normalizedFallback.toLowerCase();
+
+    // If they already match (roughly), no need to resync
+    if (currentCity && (currentCity.includes(profileCity) || profileCity.includes(currentCity))) {
+      console.log(`Weather city "${weather.city}" matches profile "${fallbackCity}" - no resync needed`);
+      return;
+    }
+
+    // Check if we have GPS - if GPS is granted, trust it over profile
+    (async () => {
+      const gpsPermission = await getGeolocationPermissionState();
+      
+      if (gpsPermission === 'granted') {
+        // GPS is active - it should be accurate, but let's double-check by triggering a location check
+        console.log(`GPS granted but city mismatch. Triggering location check...`);
+        checkForLocationChange(true);
+        return;
+      }
+
+      // No GPS - profile location is our best source of truth
+      console.log(`Profile city mismatch: current="${weather.city}" vs profile="${fallbackCity}". Resyncing...`);
+      
+      // Clear stale cache
+      clearWeatherCache();
+      
+      // Geocode the profile city and update
+      try {
+        const geo = await geocodeCity(normalizedFallback);
+        if (mountedRef.current) {
+          await updateLocation(geo.lat, geo.lon, geo.name, 'fallback');
+          console.log(`Resynced to profile location: ${geo.name}`);
+        }
+      } catch (err) {
+        console.warn('Failed to geocode profile city for resync:', err);
+        // Try the full location check as fallback
+        checkForLocationChange(true);
+      }
+    })();
+  }, [fallbackCity, weather.city, checkForLocationChange, updateLocation]);
+
   useEffect(() => {
     mountedRef.current = true;
     
