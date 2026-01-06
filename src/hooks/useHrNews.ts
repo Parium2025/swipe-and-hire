@@ -24,24 +24,51 @@ const fetchTodaysNews = async (): Promise<HrNewsItem[]> => {
     .eq('news_date', today)
     .order('order_index');
 
+  // If we have 4 cached news items for today, return them
   if (!cacheError && cachedNews && cachedNews.length >= 4) {
+    console.log('[HR News] Returning cached news for today');
     return cachedNews;
   }
 
-  // If no cached news, trigger the edge function to fetch fresh news
+  // If no cached news or not enough, trigger the edge function to fetch fresh news
+  console.log('[HR News] Fetching fresh news via edge function...');
+  
   try {
-    const { data, error } = await supabase.functions.invoke('fetch-hr-news');
+    const { data, error } = await supabase.functions.invoke('fetch-hr-news', {
+      body: { force: cachedNews?.length === 0 }
+    });
     
     if (error) {
-      console.error('Failed to fetch HR news:', error);
+      console.error('[HR News] Edge function error:', error);
       // Return cached news if available, even if incomplete
-      return cachedNews || [];
+      if (cachedNews && cachedNews.length > 0) {
+        return cachedNews;
+      }
+      throw error;
     }
 
-    return data?.news || [];
+    // The edge function returns { news: [...], cached: boolean, source: string }
+    if (data?.news && data.news.length > 0) {
+      console.log(`[HR News] Got ${data.news.length} items (source: ${data.source})`);
+      return data.news;
+    }
+
+    // If edge function returned but no news, return cached
+    if (cachedNews && cachedNews.length > 0) {
+      return cachedNews;
+    }
+    
+    return [];
   } catch (err) {
-    console.error('Error invoking fetch-hr-news:', err);
-    return cachedNews || [];
+    console.error('[HR News] Error invoking fetch-hr-news:', err);
+    
+    // Return cached news if available
+    if (cachedNews && cachedNews.length > 0) {
+      return cachedNews;
+    }
+    
+    // Final fallback: return empty array, the component will handle it
+    return [];
   }
 };
 
@@ -49,9 +76,10 @@ export const useHrNews = () => {
   return useQuery({
     queryKey: ['hr-news', new Date().toISOString().split('T')[0]],
     queryFn: fetchTodaysNews,
-    staleTime: 1000 * 60 * 60, // 1 hour - don't refetch too often
-    gcTime: 1000 * 60 * 60 * 24, // 24 hours cache
-    retry: 1,
+    staleTime: 1000 * 60 * 30, // 30 minutes - reasonable refresh
+    gcTime: 1000 * 60 * 60 * 2, // 2 hours cache
+    retry: 2,
+    retryDelay: 1000,
     refetchOnWindowFocus: false,
   });
 };
