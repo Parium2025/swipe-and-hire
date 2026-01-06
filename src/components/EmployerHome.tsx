@@ -43,29 +43,12 @@ const DateTimeDisplay = memo(() => {
   const [dateTime, setDateTime] = useState(() => formatDateTime());
   
   useEffect(() => {
-    // Calculate ms until next minute (sync with clock)
-    const now = new Date();
-    const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
-    
-    // First sync to the exact minute change
-    const syncTimeout = setTimeout(() => {
+    // Update every 10 seconds for responsive time display
+    const interval = setInterval(() => {
       setDateTime(formatDateTime());
-      
-      // Then update every 60 seconds exactly on the minute
-      const interval = setInterval(() => {
-        setDateTime(formatDateTime());
-      }, 60000);
-      
-      // Store interval for cleanup
-      (window as any).__dateTimeInterval = interval;
-    }, msUntilNextMinute);
+    }, 10000);
     
-    return () => {
-      clearTimeout(syncTimeout);
-      if ((window as any).__dateTimeInterval) {
-        clearInterval((window as any).__dateTimeInterval);
-      }
-    };
+    return () => clearInterval(interval);
   }, []);
   
   return (
