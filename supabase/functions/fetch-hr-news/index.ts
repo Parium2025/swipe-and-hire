@@ -39,13 +39,13 @@ const NEGATIVE_KEYWORDS = [
   // These are okay as labor market news
 ];
 
-// Keywords that indicate HR-relevant content (at least one must match)
+// Keywords that indicate HR-relevant content (at least 2 must match)
 const HR_RELEVANCE_KEYWORDS = [
   // Core HR terms
   'hr', 'rekryter', 'anställ', 'personal', 'medarbetar', 'arbetsplats', 'arbetsmiljö',
   'arbetsgivare', 'arbetstagare', 'arbetsmarknad', 'arbetsrätt', 'arbetsliv',
   // Leadership & Management
-  'chef', 'ledar', 'ledning', 'team', 'organisation', 'företagskultur', 'kultur',
+  'chef', 'ledar', 'ledning', 'team', 'organisation', 'företagskultur',
   // Talent & Competence
   'talent', 'kompetens', 'utbildning', 'utveckling', 'karriär', 'lön', 'förmån',
   // Hiring process
@@ -55,9 +55,29 @@ const HR_RELEVANCE_KEYWORDS = [
   // HR Tech
   'hr-tech', 'hrtech', 'ats', 'hris', 'lms',
   // Wellbeing
-  'trivsel', 'engagemang', 'motivation', 'välmående', 'hälsa',
+  'trivsel', 'engagemang', 'motivation', 'välmående',
   // Employment types
-  'heltid', 'deltid', 'konsult', 'vikarie', 'provanställ'
+  'heltid', 'deltid', 'konsult', 'vikarie', 'provanställ',
+  // Labor market
+  'arbetslöshet', 'arbetslös', 'sysselsättning', 'jobbmarknad'
+];
+
+// Blocklist - topics that are NOT HR-relevant even if they match some keywords
+const BLOCKLIST_KEYWORDS = [
+  // Finance/Investment
+  'kreditkort', 'fond', 'fonder', 'aktie', 'aktier', 'börsen', 'investering',
+  'ränta', 'räntor', 'börsras', 'kryptovaluta', 'bitcoin', 'valutor',
+  // IT Security/Infrastructure (not HR-tech)
+  'sårbarhet', 'brandvägg', 'hackare', 'cyberattack', 'malware', 'virus',
+  'ddos', 'ransomware', 'säkerhetshål', 'dataintrång',
+  // Sports
+  'fotboll', 'hockey', 'sport', 'match', 'liga', 'mästerskap',
+  // Entertainment
+  'film', 'musik', 'konsert', 'artist', 'kändis',
+  // Politics (non-labor)
+  'riksdag', 'val ', 'parti', 'minister',
+  // Consumer products
+  'iphone', 'samsung', 'apple card', 'tesla'
 ];
 
 // Categories with their styling
@@ -165,10 +185,18 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
   return items;
 }
 
-// Check if content is HR-relevant
+// Check if content is HR-relevant (requires 2+ keyword matches and no blocklist hits)
 function isHRRelevant(text: string): boolean {
   const lowerText = text.toLowerCase();
-  return HR_RELEVANCE_KEYWORDS.some(keyword => lowerText.includes(keyword));
+  
+  // First check blocklist - if any match, reject immediately
+  if (BLOCKLIST_KEYWORDS.some(keyword => lowerText.includes(keyword))) {
+    return false;
+  }
+  
+  // Count HR keyword matches - require at least 2
+  const matchCount = HR_RELEVANCE_KEYWORDS.filter(keyword => lowerText.includes(keyword)).length;
+  return matchCount >= 2;
 }
 
 // Check if content contains negative keywords
