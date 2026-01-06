@@ -64,7 +64,7 @@ const NewsCard = memo(() => {
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg min-h-[180px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg h-[200px]`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-6 h-full">
           <div className="flex items-center gap-2 mb-4">
@@ -80,7 +80,7 @@ const NewsCard = memo(() => {
   const currentNews = newsItems[currentIndex];
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg min-h-[180px]`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg h-[200px]`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
@@ -187,7 +187,7 @@ const StatsCard = memo(() => {
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg min-h-[180px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[200px]`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-6 h-full">
           <Skeleton className="h-10 w-10 rounded-xl bg-white/20 mb-4" />
@@ -201,7 +201,7 @@ const StatsCard = memo(() => {
   const Icon = currentStat.icon;
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg min-h-[180px]`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[200px]`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
@@ -272,7 +272,7 @@ const PlaceholderCard = memo(({
   title: string; 
   description: string;
 }) => (
-  <Card className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg min-h-[180px]`}>
+  <Card className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg h-[200px]`}>
     <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
     <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
     
