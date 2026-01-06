@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.fetch-hr-news]
 verify_jwt = false
+# Kör varje dag kl 05:00 UTC = 06:00 svensk tid (vintertid)
+# Under sommartid blir det 07:00 svensk tid
+schedule = "0 5 * * *"
