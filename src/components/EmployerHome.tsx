@@ -213,45 +213,6 @@ const EmployerHome = memo(() => {
         {/* HR News Cards */}
         <HrNewsCards />
 
-        {/* Additional actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
-        >
-          <Card 
-            className="bg-gradient-to-r from-white/[0.08] to-white/[0.04] backdrop-blur-sm border-white/10 hover:from-white/[0.12] hover:to-white/[0.08] transition-all duration-300 cursor-pointer group"
-            onClick={() => navigate('/company-profile')}
-          >
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-primary/30 to-primary/20 group-hover:from-primary/40 group-hover:to-primary/30 transition-all duration-300">
-                <Building2 className="h-5 w-5 text-primary" strokeWidth={1.5} />
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-white">Företagsprofil</p>
-                <p className="text-sm text-white/50">Uppdatera din företagsinformation</p>
-              </div>
-              <ArrowRight className="h-5 w-5 text-white/30 group-hover:text-white/60 group-hover:translate-x-1 transition-all duration-300" />
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="bg-gradient-to-r from-white/[0.08] to-white/[0.04] backdrop-blur-sm border-white/10 hover:from-white/[0.12] hover:to-white/[0.08] transition-all duration-300 cursor-pointer group"
-            onClick={() => navigate('/templates')}
-          >
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/30 to-cyan-600/20 group-hover:from-cyan-500/40 group-hover:to-cyan-600/30 transition-all duration-300">
-                <FileText className="h-5 w-5 text-cyan-300" strokeWidth={1.5} />
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-white">Jobbmallar</p>
-                <p className="text-sm text-white/50">Skapa och hantera återanvändbara mallar</p>
-              </div>
-              <ArrowRight className="h-5 w-5 text-white/30 group-hover:text-white/60 group-hover:translate-x-1 transition-all duration-300" />
-            </CardContent>
-          </Card>
-        </motion.div>
 
         {/* Empty state if no jobs */}
         {jobs.length === 0 && (
