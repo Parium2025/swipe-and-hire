@@ -1,4 +1,4 @@
-// HR News Fetcher - RSS-based with AI enhancement (FREE, no external API keys needed)
+// HR News Fetcher - Multi-source RSS with AI enhancement (FREE, no external API keys needed)
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -7,6 +7,24 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// RSS sources for recruitment, HR and job market news
+const RSS_SOURCES = [
+  { url: 'https://hrnytt.se/feed', name: 'HRnytt.se' },
+  { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
+  { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
+  { url: 'https://arbetsmarknadsnytt.se/feed/', name: 'Arbetsmarknadsnytt' },
+  { url: 'https://www.motivation.se/feed/', name: 'Motivation.se' },
+  { url: 'https://www.arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
+];
+
+// Keywords that indicate negative content to filter out
+const NEGATIVE_KEYWORDS = [
+  'uppsägning', 'avsked', 'varsel', 'konkurs', 'nedskärning', 'kris', 
+  'skandal', 'misslyck', 'problem', 'strejk', 'konflikt', 'döm', 
+  'åtal', 'brott', 'svek', 'fusk', 'bedrägeri', 'diskriminer',
+  'utbrändhet', 'sjukskriv', 'mobbing', 'trakasser', 'hot', 'våld'
+];
+
 // Categories with their styling
 const CATEGORIES = [
   { 
@@ -14,28 +32,28 @@ const CATEGORIES = [
     label: 'HR-Tech',
     icon: 'Cpu',
     gradient: 'from-emerald-500/90 via-emerald-600/80 to-teal-700/90',
-    keywords: ['ai', 'tech', 'digital', 'verktyg', 'automatiser', 'system', 'program', 'robot', 'chatbot', 'plattform']
+    keywords: ['ai', 'tech', 'digital', 'verktyg', 'automatiser', 'system', 'program', 'robot', 'chatbot', 'plattform', 'innovation']
   },
   { 
     key: 'trends', 
     label: 'Trender',
     icon: 'TrendingUp',
-    gradient: 'from-blue-500/90 via-blue-600/80 to-indigo-700/90',
-    keywords: ['trend', 'framtid', '2026', '2025', 'förändring', 'utveckling', 'arbetsmarknad', 'statistik']
+    gradient: 'from-amber-500/90 via-orange-500/80 to-orange-600/90',
+    keywords: ['trend', 'framtid', '2026', '2025', 'förändring', 'utveckling', 'arbetsmarknad', 'statistik', 'ökning', 'tillväxt']
   },
   { 
     key: 'leadership', 
     label: 'Ledarskap',
     icon: 'Users',
-    gradient: 'from-violet-500/90 via-purple-600/80 to-purple-700/90',
-    keywords: ['ledar', 'chef', 'team', 'medarbetar', 'förebild', 'kultur', 'motivation', 'feedback', 'arbetsmiljö']
+    gradient: 'from-blue-500/90 via-blue-600/80 to-indigo-700/90',
+    keywords: ['ledar', 'chef', 'team', 'medarbetar', 'förebild', 'kultur', 'motivation', 'feedback', 'arbetsmiljö', 'engagemang']
   },
   { 
     key: 'recruitment', 
     label: 'Rekrytering',
     icon: 'UserPlus',
-    gradient: 'from-amber-500/90 via-orange-500/80 to-orange-600/90',
-    keywords: ['rekryter', 'kandidat', 'anställ', 'intervju', 'urval', 'onboarding', 'talent', 'kompetens', 'lön']
+    gradient: 'from-violet-500/90 via-purple-600/80 to-purple-700/90',
+    keywords: ['rekryter', 'kandidat', 'anställ', 'intervju', 'urval', 'onboarding', 'talent', 'kompetens', 'lön', 'karriär', 'jobb']
   },
 ];
 
@@ -57,18 +75,26 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
   for (const match of itemMatches) {
     const itemContent = match[1];
     
-    // Extract title
-    const titleMatch = itemContent.match(/<title>([^<]*)<\/title>/i);
+    // Extract title - handle CDATA
+    let titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i);
+    if (!titleMatch) {
+      titleMatch = itemContent.match(/<title>([^<]*)<\/title>/i);
+    }
     const title = titleMatch ? titleMatch[1].trim() : '';
     
-    // Extract description
-    const descMatch = itemContent.match(/<description>([^<]*)<\/description>/i);
-    const description = descMatch ? descMatch[1].trim() : '';
+    // Extract description - handle CDATA
+    let descMatch = itemContent.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/is);
+    if (!descMatch) {
+      descMatch = itemContent.match(/<description>([^<]*)<\/description>/i);
+    }
+    let description = descMatch ? descMatch[1].trim() : '';
+    // Clean HTML tags from description
+    description = description.replace(/<[^>]+>/g, '').trim();
     
     // Extract link - handle both formats
     const linkMatch = itemContent.match(/<link>([^<]*)<\/link>/i) || 
                       itemContent.match(/<link[^>]*href="([^"]+)"/i) ||
-                      itemContent.match(/<guid>([^<]*)<\/guid>/i);
+                      itemContent.match(/<guid[^>]*>([^<]*)<\/guid>/i);
     const link = linkMatch ? linkMatch[1].trim() : '';
     
     if (title && title.length > 10) {
@@ -79,32 +105,46 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
   return items;
 }
 
-// Fetch news from HRnytt RSS feed
-async function fetchHRnyttRSS(): Promise<NewsItem[]> {
+// Check if content contains negative keywords
+function isNegativeContent(text: string): boolean {
+  const lowerText = text.toLowerCase();
+  return NEGATIVE_KEYWORDS.some(keyword => lowerText.includes(keyword));
+}
+
+// Fetch news from a single RSS source
+async function fetchRSSSource(source: { url: string; name: string }): Promise<NewsItem[]> {
   try {
-    console.log('Fetching HRnytt RSS feed...');
+    console.log(`Fetching ${source.name}...`);
     
-    const response = await fetch('https://hrnytt.se/feed', {
+    const response = await fetch(source.url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; Parium/1.0)',
-        'Accept': 'application/rss+xml, application/xml, text/xml',
+        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
       },
     });
     
     if (!response.ok) {
-      console.log(`HRnytt RSS returned ${response.status}`);
+      console.log(`${source.name} returned ${response.status}`);
       return [];
     }
     
     const xml = await response.text();
-    console.log(`RSS response length: ${xml.length}`);
-    
     const rssItems = parseRSSItems(xml);
-    console.log(`Parsed ${rssItems.length} items from RSS`);
+    console.log(`Parsed ${rssItems.length} items from ${source.name}`);
     
-    const newsItems: NewsItem[] = rssItems.slice(0, 10).map(item => {
+    const newsItems: NewsItem[] = [];
+    
+    for (const item of rssItems.slice(0, 5)) {
+      const fullText = `${item.title} ${item.description}`;
+      
+      // Skip negative content
+      if (isNegativeContent(fullText)) {
+        console.log(`Skipping negative: ${item.title.slice(0, 50)}...`);
+        continue;
+      }
+      
       // Categorize based on title and description
-      const searchText = `${item.title} ${item.description}`.toLowerCase();
+      const searchText = fullText.toLowerCase();
       let category = 'trends';
       
       for (const cat of CATEGORIES) {
@@ -114,21 +154,40 @@ async function fetchHRnyttRSS(): Promise<NewsItem[]> {
         }
       }
       
-      return {
-        title: item.title.slice(0, 80),
-        summary: item.description.slice(0, 120) || 'Läs mer på HRnytt.se',
-        source: 'HRnytt.se',
+      newsItems.push({
+        title: item.title.slice(0, 100),
+        summary: item.description.slice(0, 150) || `Läs mer på ${source.name}`,
+        source: source.name,
         source_url: item.link || null,
         category,
-      };
-    });
+      });
+    }
     
-    console.log(`Converted to ${newsItems.length} news items`);
     return newsItems;
   } catch (error) {
-    console.error('Error fetching HRnytt RSS:', error);
+    console.error(`Error fetching ${source.name}:`, error);
     return [];
   }
+}
+
+// Fetch news from all RSS sources
+async function fetchAllRSSSources(): Promise<NewsItem[]> {
+  console.log('Fetching from all RSS sources...');
+  
+  const results = await Promise.allSettled(
+    RSS_SOURCES.map(source => fetchRSSSource(source))
+  );
+  
+  const allItems: NewsItem[] = [];
+  
+  for (const result of results) {
+    if (result.status === 'fulfilled' && result.value.length > 0) {
+      allItems.push(...result.value);
+    }
+  }
+  
+  console.log(`Total items from all sources: ${allItems.length}`);
+  return allItems;
 }
 
 // Use Lovable AI (FREE) to enhance summaries
@@ -198,36 +257,46 @@ Svara ENDAST med valid JSON, inget annat:
   }
 }
 
-// Select best 4 news items (one from each category if possible)
+// Select best 4 news items (one from each category if possible, diverse sources)
 function selectBestNews(items: NewsItem[]): NewsItem[] {
   const selected: NewsItem[] = [];
   const categoryKeys = CATEGORIES.map(c => c.key);
+  const usedSources = new Set<string>();
   
-  // First pass: get one from each category
+  // First pass: get one from each category with diverse sources
   for (const category of categoryKeys) {
+    const item = items.find(i => 
+      i.category === category && 
+      !selected.includes(i) && 
+      !usedSources.has(i.source)
+    );
+    if (item) {
+      selected.push(item);
+      usedSources.add(item.source);
+    }
+  }
+  
+  // Second pass: fill remaining slots (allow same source if needed)
+  for (const category of categoryKeys) {
+    if (selected.length >= 4) break;
+    if (selected.some(s => s.category === category)) continue;
+    
     const item = items.find(i => i.category === category && !selected.includes(i));
     if (item) {
       selected.push(item);
     }
   }
   
-  // Second pass: fill remaining slots
+  // Third pass: fill with any remaining items
   for (const item of items) {
     if (selected.length >= 4) break;
     if (!selected.includes(item)) {
-      // Assign to a missing category
-      const usedCategories = selected.map(s => s.category);
-      const missingCat = categoryKeys.find(c => !usedCategories.includes(c));
-      if (missingCat) {
-        item.category = missingCat;
-      }
       selected.push(item);
     }
   }
   
   return selected;
 }
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -269,20 +338,19 @@ serve(async (req) => {
        }
      }
 
-    console.log('Fetching fresh HR news from RSS...');
+    console.log('Fetching fresh HR news from multiple RSS sources...');
     
-    // Fetch from HRnytt RSS
-    let newsItems = await fetchHRnyttRSS();
+    // Fetch from all RSS sources
+    let newsItems = await fetchAllRSSSources();
     let newsSource = 'rss';
 
     if (newsItems.length >= 4) {
-      // Enhance with AI summaries (FREE via Lovable AI)
-      newsItems = await enhanceWithAI(newsItems);
+      // Select best diverse items first, then enhance with AI
       newsItems = selectBestNews(newsItems);
+      newsItems = await enhanceWithAI(newsItems);
       console.log(`Selected ${newsItems.length} items from RSS`);
     } else {
       console.log(`Only got ${newsItems.length} RSS items, using what we have`);
-      // If we have some items but less than 4, still use them
       if (newsItems.length > 0) {
         newsItems = await enhanceWithAI(newsItems);
       }
