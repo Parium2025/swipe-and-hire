@@ -16,8 +16,8 @@ const TRUSTED_HR_SOURCES = [
   'DN Ekonomi', 'Expressen Ekonomi', 'Dagens Industri',
   // International HR (verified working)
   'HR Dive', 'HR Executive', 'AIHR', 'Personnel Today',
-  // Business/Career (verified working)
-  'Fast Company', 'Inc.'
+  // Business/Career (verified working - NO PAYWALL)
+  'Fast Company'
 ];
 
 const RSS_SOURCES = [
@@ -37,9 +37,9 @@ const RSS_SOURCES = [
   { url: 'https://www.aihr.com/feed/', name: 'AIHR' },
   { url: 'https://www.personneltoday.com/feed/', name: 'Personnel Today' },
   
-  // === CAREER & BUSINESS (VERIFIED WORKING - high volume) ===
+  // === CAREER & BUSINESS (VERIFIED WORKING - NO PAYWALL) ===
   { url: 'https://www.fastcompany.com/rss', name: 'Fast Company' },
-  { url: 'https://www.inc.com/rss', name: 'Inc.' },
+  // NOTE: Inc.com removed due to paywall
 ];
 
 // Keywords to filter out truly negative/scandal content (not labor market statistics)
@@ -110,6 +110,30 @@ const BLOCKLIST_KEYWORDS = [
   // === DISASTERS & CRIME ===
   'jordbävning', 'tsunami', 'orkan', 'översvämning',
 ];
+
+// PAYWALL DOMAINS - articles from these sites require premium subscription
+const PAYWALL_DOMAINS = [
+  'inc.com',
+  'hbr.org',              // Harvard Business Review
+  'wsj.com',              // Wall Street Journal
+  'ft.com',               // Financial Times
+  'bloomberg.com',
+  'businessinsider.com',
+  'forbes.com',
+  'economist.com',
+  'nytimes.com',
+  'washingtonpost.com',
+  'medium.com',           // Often has paywall
+  'thetimes.co.uk',
+  'telegraph.co.uk',
+];
+
+// Check if URL is from a paywalled domain
+function isPaywalledSource(url: string | null): boolean {
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  return PAYWALL_DOMAINS.some(domain => lowerUrl.includes(domain));
+}
 
 // Categories with their styling
 const CATEGORIES = [
@@ -436,6 +460,12 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
       // Skip event pages from HRnytt.se (they have /event/ in URL and show future dates)
       if (source.name === 'HRnytt.se' && item.link && item.link.includes('/event/')) {
         console.log(`Skipping HRnytt event: ${item.title.slice(0, 40)}...`);
+        continue;
+      }
+      
+      // Skip paywalled sources (require premium subscription)
+      if (isPaywalledSource(item.link)) {
+        console.log(`Skipping paywall: ${item.title.slice(0, 40)}... (${item.link})`);
         continue;
       }
       
