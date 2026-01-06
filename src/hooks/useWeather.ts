@@ -28,7 +28,36 @@ interface UseWeatherOptions {
 const DEFAULT_REFRESH_MS = 15 * 60 * 1000;
 const LOCATION_CACHE_KEY = 'parium_weather_location';
 const WEATHER_CACHE_KEY = 'parium_weather_data';
+const PROFILE_CITY_KEY = 'parium_weather_profile_city';
 const MOVEMENT_THRESHOLD_KM = 10; // If moved more than 10km, update location
+
+// Clear all weather cache - used when profile location changes
+const clearWeatherCache = () => {
+  try {
+    localStorage.removeItem(LOCATION_CACHE_KEY);
+    localStorage.removeItem(WEATHER_CACHE_KEY);
+    console.log('Weather cache cleared due to profile change');
+  } catch {
+    // Silent fail
+  }
+};
+
+// Store and check if profile city has changed
+const getStoredProfileCity = (): string | null => {
+  try {
+    return localStorage.getItem(PROFILE_CITY_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const setStoredProfileCity = (city: string) => {
+  try {
+    localStorage.setItem(PROFILE_CITY_KEY, city);
+  } catch {
+    // Silent fail
+  }
+};
 
 interface CachedWeather {
   temperature: number;
@@ -283,12 +312,23 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const mountedRef = useRef(true);
 
   const [weather, setWeather] = useState<WeatherData>(() => {
-    // Try to use cached weather first for instant display
-    // BUT: if fallbackCity is set and differs from cache, don't use stale cache
+    // CRITICAL: Check if profile city has changed since last visit
+    // If so, clear all cached data to force fresh location lookup
+    if (fallbackCity) {
+      const storedProfileCity = getStoredProfileCity();
+      if (storedProfileCity && storedProfileCity.toLowerCase() !== fallbackCity.toLowerCase()) {
+        console.log(`Profile city changed: ${storedProfileCity} → ${fallbackCity}`);
+        clearWeatherCache();
+      }
+      // Always store current profile city
+      setStoredProfileCity(fallbackCity);
+    }
+    
+    // Now check cache (may have just been cleared if profile changed)
     const cachedWeather = getCachedWeather();
     const cachedLocation = getCachedLocation();
     
-    // Check if cache is from a different city than the user's profile
+    // Don't use cache if it's from a different city than user's profile
     const isCacheStale = fallbackCity && cachedWeather?.city && 
       cachedWeather.city.toLowerCase() !== fallbackCity.toLowerCase();
     
@@ -299,7 +339,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         description: cachedWeather.description,
         emoji: cachedWeather.emoji,
         city: cachedWeather.city,
-        isLoading: false, // Already have data!
+        isLoading: false,
         error: null,
       };
     }
