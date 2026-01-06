@@ -176,7 +176,7 @@ const NewsCard = memo(() => {
                 <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
                   {currentNews.title}
                 </h3>
-                <p className="text-xs text-white/70 line-clamp-1 mb-1">
+                <p className="text-xs text-white line-clamp-1 mb-1">
                   {currentNews.summary || currentNews.title}
                 </p>
                 {currentNews.published_at && (
