@@ -36,9 +36,36 @@ interface NewsCardProps {
   index: number;
 }
 
+// Format published time as "idag HH:MM" or "igår HH:MM"
+function formatPublishedTime(publishedAt: string | null): string {
+  if (!publishedAt) return '';
+  
+  try {
+    const pubDate = new Date(publishedAt);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    const pubDay = new Date(pubDate.getFullYear(), pubDate.getMonth(), pubDate.getDate());
+    
+    const timeStr = pubDate.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    
+    if (pubDay.getTime() === today.getTime()) {
+      return `idag ${timeStr}`;
+    } else if (pubDay.getTime() === yesterday.getTime()) {
+      return `igår ${timeStr}`;
+    } else {
+      // For older articles, show date
+      return pubDate.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+    }
+  } catch {
+    return '';
+  }
+}
+
 const NewsCard = memo(({ news, index }: NewsCardProps) => {
   const Icon = iconMap[news.icon_name || ''] || Newspaper;
   const gradient = news.gradient || defaultGradients[index % 4];
+  const publishedTime = formatPublishedTime(news.published_at);
 
   const handleClick = () => {
     if (news.source_url) {
@@ -89,13 +116,18 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
             {news.summary}
           </p>
           
-          {/* Link indicator if clickable */}
-          {news.source_url && (
-            <div className="flex items-center gap-1 mt-3 text-white/40 group-hover:text-white/80 transition-colors">
-              <span className="text-xs font-medium">Läs mer</span>
-              <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </div>
-          )}
+          {/* Published time and link */}
+          <div className="flex items-center justify-between mt-3">
+            {publishedTime && (
+              <span className="text-xs text-white/50">{publishedTime}</span>
+            )}
+            {news.source_url && (
+              <div className="flex items-center gap-1 text-white/40 group-hover:text-white/80 transition-colors ml-auto">
+                <span className="text-xs font-medium">Läs mer</span>
+                <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </motion.div>

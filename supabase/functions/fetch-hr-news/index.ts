@@ -118,6 +118,7 @@ interface NewsItem {
   source: string;
   source_url: string | null;
   category: string;
+  published_at: string | null;
 }
 
 // Check if a date is within the last 48 hours (allows more source diversity)
@@ -260,6 +261,7 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
         source: source.name,
         source_url: item.link || null,
         category,
+        published_at: item.pubDate ? new Date(item.pubDate).toISOString() : null,
       });
     }
     
@@ -358,14 +360,23 @@ Svara ENDAST med valid JSON, inget annat:
 }
 
 // Select best 4 news items (one from each category if possible, diverse sources)
+// Sort by published_at so newest articles come first
 function selectBestNews(items: NewsItem[]): NewsItem[] {
+  // First, sort all items by published_at (newest first)
+  const sortedItems = [...items].sort((a, b) => {
+    if (!a.published_at && !b.published_at) return 0;
+    if (!a.published_at) return 1;
+    if (!b.published_at) return -1;
+    return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+  });
+
   const selected: NewsItem[] = [];
   const categoryKeys = CATEGORIES.map(c => c.key);
   const usedSources = new Set<string>();
   
-  // First pass: get one from each category with diverse sources
+  // First pass: get one from each category with diverse sources (prefer newer items)
   for (const category of categoryKeys) {
-    const item = items.find(i => 
+    const item = sortedItems.find(i => 
       i.category === category && 
       !selected.includes(i) && 
       !usedSources.has(i.source)
@@ -381,19 +392,27 @@ function selectBestNews(items: NewsItem[]): NewsItem[] {
     if (selected.length >= 4) break;
     if (selected.some(s => s.category === category)) continue;
     
-    const item = items.find(i => i.category === category && !selected.includes(i));
+    const item = sortedItems.find(i => i.category === category && !selected.includes(i));
     if (item) {
       selected.push(item);
     }
   }
   
-  // Third pass: fill with any remaining items
-  for (const item of items) {
+  // Third pass: fill with any remaining items (newest first)
+  for (const item of sortedItems) {
     if (selected.length >= 4) break;
     if (!selected.includes(item)) {
       selected.push(item);
     }
   }
+  
+  // Final sort: ensure newest article is always first position
+  selected.sort((a, b) => {
+    if (!a.published_at && !b.published_at) return 0;
+    if (!a.published_at) return 1;
+    if (!b.published_at) return -1;
+    return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+  });
   
   return selected;
 }
@@ -493,6 +512,7 @@ serve(async (req) => {
         gradient: categoryConfig.gradient,
         news_date: today,
         order_index: index,
+        published_at: item.published_at,
       };
     });
 
