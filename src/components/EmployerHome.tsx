@@ -17,6 +17,7 @@ import { motion } from 'framer-motion';
 import { isJobExpiredCheck } from '@/lib/date';
 import WeatherEffects from '@/components/WeatherEffects';
 import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
+import GpsPrompt from '@/components/GpsPrompt';
 
 const getGreeting = (): { text: string; isEvening: boolean } => {
   const hour = new Date().getHours();
@@ -157,6 +158,7 @@ const EmployerHome = memo(() => {
 
   return (
     <>
+      <GpsPrompt />
       <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />
       <div className="space-y-8 max-w-5xl mx-auto px-4 md:px-8 py-6 animate-fade-in relative z-10">
         {/* Personal greeting */}
