@@ -14,10 +14,11 @@ const TRUSTED_HR_SOURCES = [
   'HRnytt.se', 'Chef.se', 'Arbetsvärlden',
   // Swedish news/economy (verified working)
   'DN Ekonomi', 'Expressen Ekonomi', 'Dagens Industri',
-  // International HR (verified working)
-  'HR Dive', 'HR Executive', 'AIHR', 'Personnel Today',
+  // International HR (verified working - FREE)
+  'HR Dive', 'HR Executive', 'AIHR', 'Personnel Today', 'HR Magazine', 'HR Exchange Network',
+  'People Managing People', 'SHRM', 'Worklife',
   // Business/Career (verified working - NO PAYWALL)
-  'Fast Company'
+  'Fast Company', 'BBC Worklife'
 ];
 
 const RSS_SOURCES = [
@@ -31,15 +32,19 @@ const RSS_SOURCES = [
   { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
   { url: 'https://feeds.expressen.se/ekonomi', name: 'Expressen Ekonomi' },
   
-  // === INTERNATIONAL HR (VERIFIED WORKING) ===
+  // === INTERNATIONAL HR (VERIFIED WORKING - FREE) ===
   { url: 'https://www.hrdive.com/feeds/news/', name: 'HR Dive' },
   { url: 'https://hrexecutive.com/feed/', name: 'HR Executive' },
   { url: 'https://www.aihr.com/feed/', name: 'AIHR' },
   { url: 'https://www.personneltoday.com/feed/', name: 'Personnel Today' },
+  { url: 'https://www.hrmagazine.co.uk/feed', name: 'HR Magazine' },
+  { url: 'https://www.hrexchangenetwork.com/feed/rss.xml', name: 'HR Exchange Network' },
+  { url: 'https://peoplemanagingpeople.com/feed/', name: 'People Managing People' },
+  { url: 'https://www.shrm.org/rss/pages/rss.aspx', name: 'SHRM' },
   
   // === CAREER & BUSINESS (VERIFIED WORKING - NO PAYWALL) ===
   { url: 'https://www.fastcompany.com/rss', name: 'Fast Company' },
-  // NOTE: Inc.com removed due to paywall
+  { url: 'https://www.bbc.com/worklife/feed.rss', name: 'BBC Worklife' },
 ];
 
 // Keywords to filter out truly negative/scandal content (not labor market statistics)
