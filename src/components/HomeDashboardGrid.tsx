@@ -1,5 +1,5 @@
-import { memo, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { memo, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
@@ -17,6 +17,36 @@ import {
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
 import { useJobsData } from '@/hooks/useJobsData';
 import { isJobExpiredCheck } from '@/lib/date';
+import { cn } from '@/lib/utils';
+
+// Dot navigation component
+const DotNavigation = memo(({ 
+  total, 
+  current, 
+  onSelect 
+}: { 
+  total: number; 
+  current: number; 
+  onSelect: (index: number) => void;
+}) => (
+  <div className="flex items-center justify-center gap-2 mt-3">
+    {Array.from({ length: total }).map((_, i) => (
+      <button
+        key={i}
+        onClick={() => onSelect(i)}
+        className={cn(
+          "w-2 h-2 rounded-full transition-all duration-300",
+          i === current 
+            ? "bg-white scale-110" 
+            : "bg-white/30 hover:bg-white/50"
+        )}
+        aria-label={`Gå till ${i + 1}`}
+      />
+    ))}
+  </div>
+));
+
+DotNavigation.displayName = 'DotNavigation';
 
 // Gradients for each quadrant
 const GRADIENTS = {
@@ -26,35 +56,35 @@ const GRADIENTS = {
   placeholder2: 'from-amber-500/90 via-orange-500/80 to-orange-600/90',
 };
 
-// News Card (Green - Top Left)
+// News Card (Green - Top Left) - Carousel version
 const NewsCard = memo(() => {
   const { data: news, isLoading } = useHrNews();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const newsItems = news?.slice(0, 4) || [];
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg h-full`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-        <CardContent className="relative p-5 h-full">
+        <CardContent className="relative p-5">
           <div className="flex items-center gap-2 mb-4">
             <Skeleton className="h-8 w-8 rounded-lg bg-white/20" />
             <Skeleton className="h-4 w-32 bg-white/20" />
           </div>
-          <div className="space-y-3">
-            {[0, 1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-12 w-full bg-white/10" />
-            ))}
-          </div>
+          <Skeleton className="h-20 w-full bg-white/10 rounded-lg" />
         </CardContent>
       </Card>
     );
   }
 
+  const currentNews = newsItems[currentIndex];
+
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg h-full`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-5 h-full flex flex-col">
+      <CardContent className="relative p-5 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -63,18 +93,48 @@ const NewsCard = memo(() => {
             </div>
             <h3 className="text-base font-semibold text-white">Nyheter</h3>
           </div>
-          <span className="text-[10px] text-white/50 uppercase tracking-wider">00:00 CET</span>
+          <span className="text-[10px] text-white/50 uppercase tracking-wider">
+            {currentIndex + 1}/{newsItems.length || 1}
+          </span>
         </div>
         
-        {/* News list */}
-        <div className="flex-1 space-y-2 overflow-hidden">
-          {news && news.slice(0, 4).map((item, index) => (
-            <NewsListItem key={item.id} news={item} index={index} />
-          ))}
-          {(!news || news.length === 0) && (
-            <p className="text-sm text-white/60 text-center py-4">Inga nyheter just nu</p>
-          )}
+        {/* News carousel */}
+        <div className="min-h-[80px] flex items-center">
+          <AnimatePresence mode="wait">
+            {currentNews ? (
+              <motion.div
+                key={currentNews.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
+                className={`w-full p-4 rounded-lg bg-white/10 ${currentNews.source_url ? 'cursor-pointer hover:bg-white/15 transition-colors group' : ''}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white line-clamp-2">{currentNews.title}</p>
+                    <p className="text-xs text-white/50 mt-1">{currentNews.source}</p>
+                  </div>
+                  {currentNews.source_url && (
+                    <ExternalLink className="h-4 w-4 text-white/30 group-hover:text-white/70 flex-shrink-0 mt-0.5 transition-colors" />
+                  )}
+                </div>
+              </motion.div>
+            ) : (
+              <p className="text-sm text-white/60 text-center w-full">Inga nyheter just nu</p>
+            )}
+          </AnimatePresence>
         </div>
+        
+        {/* Dot navigation */}
+        {newsItems.length > 1 && (
+          <DotNavigation 
+            total={newsItems.length} 
+            current={currentIndex} 
+            onSelect={setCurrentIndex} 
+          />
+        )}
       </CardContent>
     </Card>
   );
@@ -82,110 +142,106 @@ const NewsCard = memo(() => {
 
 NewsCard.displayName = 'NewsCard';
 
-const NewsListItem = memo(({ news, index }: { news: HrNewsItem; index: number }) => {
-  const handleClick = () => {
-    if (news.source_url) {
-      window.open(news.source_url, '_blank', 'noopener,noreferrer');
-    }
-  };
+// Stats data type
+type StatData = {
+  icon: React.ElementType;
+  label: string;
+  value: number;
+  description: string;
+};
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.1 + index * 0.05 }}
-      onClick={handleClick}
-      className={`p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors ${news.source_url ? 'cursor-pointer group' : ''}`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-white line-clamp-1">{news.title}</p>
-          <p className="text-xs text-white/50 mt-0.5">{news.source}</p>
-        </div>
-        {news.source_url && (
-          <ExternalLink className="h-3.5 w-3.5 text-white/30 group-hover:text-white/70 flex-shrink-0 mt-0.5 transition-colors" />
-        )}
-      </div>
-    </motion.div>
-  );
-});
-
-NewsListItem.displayName = 'NewsListItem';
-
-// Stats Card (Blue - Top Right)
+// Stats Card (Blue - Top Right) - Carousel version
 const StatsCard = memo(() => {
   const { jobs, isLoading } = useJobsData({ scope: 'personal' });
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const stats = useMemo(() => {
-    if (!jobs) return { activeJobs: 0, newApplications: 0, totalViews: 0, candidates: 0 };
+  const statsArray: StatData[] = useMemo(() => {
+    if (!jobs) return [
+      { icon: Briefcase, label: 'Aktiva annonser', value: 0, description: 'Jobbannonser som är aktiva just nu' },
+      { icon: UserPlus, label: 'Nya ansökningar', value: 0, description: 'Ansökningar på dina aktiva annonser' },
+      { icon: Eye, label: 'Visningar', value: 0, description: 'Totalt antal visningar' },
+      { icon: Users, label: 'Kandidater', value: 0, description: 'Kandidater att granska' },
+    ];
     
     const activeJobs = jobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
     const newApplications = activeJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0);
     const totalViews = activeJobs.reduce((sum, job) => sum + (job.views_count || 0), 0);
     
-    return { 
-      activeJobs: activeJobs.length, 
-      newApplications,
-      totalViews,
-      candidates: newApplications // Placeholder - could be separate query
-    };
+    return [
+      { icon: Briefcase, label: 'Aktiva annonser', value: activeJobs.length, description: 'Jobbannonser som är aktiva just nu' },
+      { icon: UserPlus, label: 'Nya ansökningar', value: newApplications, description: 'Ansökningar på dina aktiva annonser' },
+      { icon: Eye, label: 'Visningar', value: totalViews, description: 'Totalt antal visningar' },
+      { icon: Users, label: 'Kandidater', value: newApplications, description: 'Kandidater att granska' },
+    ];
   }, [jobs]);
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-full`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-        <CardContent className="relative p-5 h-full">
+        <CardContent className="relative p-5">
           <Skeleton className="h-8 w-32 bg-white/20 mb-4" />
-          <div className="grid grid-cols-2 gap-3">
-            {[0, 1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-16 bg-white/10 rounded-lg" />
-            ))}
-          </div>
+          <Skeleton className="h-20 w-full bg-white/10 rounded-lg" />
         </CardContent>
       </Card>
     );
   }
 
+  const currentStat = statsArray[currentIndex];
+  const Icon = currentStat.icon;
+
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-full`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-5 h-full flex flex-col">
+      <CardContent className="relative p-5 flex flex-col">
         {/* Header */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 rounded-lg bg-white/10">
-            <BarChart3 className="h-5 w-5 text-white" strokeWidth={1.5} />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-white/10">
+              <BarChart3 className="h-5 w-5 text-white" strokeWidth={1.5} />
+            </div>
+            <h3 className="text-base font-semibold text-white">Statistik</h3>
           </div>
-          <h3 className="text-base font-semibold text-white">Statistik</h3>
+          <span className="text-[10px] text-white/50 uppercase tracking-wider">
+            {currentIndex + 1}/{statsArray.length}
+          </span>
         </div>
         
-        {/* Stats grid */}
-        <div className="flex-1 grid grid-cols-2 gap-3">
-          <StatItem icon={Briefcase} label="Aktiva annonser" value={stats.activeJobs} />
-          <StatItem icon={UserPlus} label="Nya ansökningar" value={stats.newApplications} />
-          <StatItem icon={Eye} label="Visningar" value={stats.totalViews} />
-          <StatItem icon={Users} label="Kandidater" value={stats.candidates} />
+        {/* Stats carousel */}
+        <div className="min-h-[80px] flex items-center">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="w-full p-4 rounded-lg bg-white/10"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Icon className="h-5 w-5 text-white/80" strokeWidth={1.5} />
+                <span className="text-sm text-white/80">{currentStat.label}</span>
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">{currentStat.value}</div>
+              <p className="text-xs text-white/50">{currentStat.description}</p>
+            </motion.div>
+          </AnimatePresence>
         </div>
+        
+        {/* Dot navigation */}
+        <DotNavigation 
+          total={statsArray.length} 
+          current={currentIndex} 
+          onSelect={setCurrentIndex} 
+        />
       </CardContent>
     </Card>
   );
 });
 
 StatsCard.displayName = 'StatsCard';
-
-const StatItem = memo(({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: number }) => (
-  <div className="p-3 rounded-lg bg-white/5 flex flex-col justify-center">
-    <div className="flex items-center gap-2 mb-1">
-      <Icon className="h-4 w-4 text-white/60" strokeWidth={1.5} />
-      <span className="text-xs text-white/60">{label}</span>
-    </div>
-    <span className="text-2xl font-bold text-white">{value}</span>
-  </div>
-));
-
-StatItem.displayName = 'StatItem';
 
 // Placeholder Cards (Purple & Orange - Bottom)
 const PlaceholderCard = memo(({ 
