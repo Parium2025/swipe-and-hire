@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface WeatherData {
   temperature: number;
+  feelsLike: number;
   weatherCode: number;
   description: string;
   emoji: string;
@@ -63,6 +64,7 @@ const setStoredProfileCity = (city: string) => {
 
 interface CachedWeather {
   temperature: number;
+  feelsLike: number;
   weatherCode: number;
   description: string;
   emoji: string;
@@ -189,16 +191,16 @@ const setCachedWeather = (weather: Omit<CachedWeather, 'timestamp'>) => {
 
 const fetchCurrentWeather = async (lat: number, lon: number) => {
   // Include daily sunrise/sunset to determine if it's night
+  // Include apparent_temperature for "feels like"
   // timezone=auto ensures times are in the location's local timezone
   const res = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=sunrise,sunset&timezone=auto`
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code&daily=sunrise,sunset&timezone=auto`
   );
   const data = await res.json();
-  const current = data?.current_weather;
-  if (!current) throw new Error('Missing current_weather');
+  const current = data?.current;
+  if (!current) throw new Error('Missing current weather data');
   
   // Use the API's reported time (which is in the location's timezone) for accurate comparison
-  // current_weather.time is in ISO format in the location's local timezone
   const currentTimeStr = current.time; // e.g., "2026-01-04T16:30"
   const todayStr = currentTimeStr?.split('T')[0];
   
@@ -214,8 +216,9 @@ const fetchCurrentWeather = async (lat: number, lon: number) => {
   }
   
   return {
-    temperature: Math.round(current.temperature),
-    weatherCode: current.weathercode as number,
+    temperature: Math.round(current.temperature_2m),
+    feelsLike: Math.round(current.apparent_temperature),
+    weatherCode: current.weather_code as number,
     isNight,
   };
 };
@@ -359,6 +362,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     if (cachedWeather && !isCacheStale) {
       return {
         temperature: cachedWeather.temperature,
+        feelsLike: cachedWeather.feelsLike ?? cachedWeather.temperature,
         weatherCode: cachedWeather.weatherCode,
         description: cachedWeather.description,
         emoji: cachedWeather.emoji,
@@ -371,6 +375,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     // Use fallback city as initial display if available
     return {
       temperature: 0,
+      feelsLike: 0,
       weatherCode: 0,
       description: '',
       emoji: getTimeBasedEmoji(),
@@ -389,11 +394,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     try {
       if (showLoading) updateWeather({ isLoading: true });
       
-      const { temperature, weatherCode, isNight } = await fetchCurrentWeather(lat, lon);
+      const { temperature, feelsLike, weatherCode, isNight } = await fetchCurrentWeather(lat, lon);
       const info = getWeatherInfo(weatherCode, isNight);
       
       const weatherData = {
         temperature,
+        feelsLike,
         weatherCode,
         description: info.description,
         emoji: info.emoji,
@@ -687,10 +693,11 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
   // Now fetch and cache the actual weather data
   if (location) {
     try {
-      const { temperature, weatherCode, isNight } = await fetchCurrentWeather(location.lat, location.lon);
+      const { temperature, feelsLike, weatherCode, isNight } = await fetchCurrentWeather(location.lat, location.lon);
       const info = getWeatherInfo(weatherCode, isNight);
       setCachedWeather({
         temperature,
+        feelsLike,
         weatherCode,
         description: info.description,
         emoji: info.emoji,
