@@ -284,8 +284,15 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
   const [weather, setWeather] = useState<WeatherData>(() => {
     // Try to use cached weather first for instant display
+    // BUT: if fallbackCity is set and differs from cache, don't use stale cache
     const cachedWeather = getCachedWeather();
-    if (cachedWeather) {
+    const cachedLocation = getCachedLocation();
+    
+    // Check if cache is from a different city than the user's profile
+    const isCacheStale = fallbackCity && cachedWeather?.city && 
+      cachedWeather.city.toLowerCase() !== fallbackCity.toLowerCase();
+    
+    if (cachedWeather && !isCacheStale) {
       return {
         temperature: cachedWeather.temperature,
         weatherCode: cachedWeather.weatherCode,
@@ -297,14 +304,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       };
     }
     
-    // Fall back to location cache for city name
-    const cachedLocation = getCachedLocation();
+    // Use fallback city as initial display if available
     return {
       temperature: 0,
       weatherCode: 0,
       description: '',
       emoji: getTimeBasedEmoji(),
-      city: cachedLocation?.city || '',
+      city: fallbackCity || cachedLocation?.city || '',
       isLoading: true,
       error: null,
     };
