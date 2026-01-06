@@ -295,6 +295,26 @@ const geocodeCity = async (city: string): Promise<{ lat: number; lon: number; na
   };
 };
 
+type GeoPermissionState = 'granted' | 'denied' | 'prompt' | 'unknown';
+
+const getGeolocationPermissionState = async (): Promise<GeoPermissionState> => {
+  try {
+    if (!('permissions' in navigator) || !navigator.permissions?.query) return 'unknown';
+    const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+    if (result.state === 'granted' || result.state === 'denied' || result.state === 'prompt') return result.state;
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
+};
+
+const normalizeCityQuery = (input: string): string => {
+  // Examples:
+  // - "Vega/136 55" -> "Vega"
+  // - "Haninge kommun" -> "Haninge kommun"
+  return input.split(/[\\/,-]/)[0]?.trim() ?? '';
+};
+
 // Fallback emoji based on time of day
 function getTimeBasedEmoji(): string {
   const hour = new Date().getHours();
@@ -310,6 +330,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const locationRef = useRef<CachedLocation | null>(null);
   const initializedRef = useRef(false);
   const mountedRef = useRef(true);
+  const prevFallbackCityRef = useRef<string | undefined>(undefined);
 
   const [weather, setWeather] = useState<WeatherData>(() => {
     // CRITICAL: Check if profile city has changed since last visit
