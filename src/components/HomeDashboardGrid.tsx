@@ -171,7 +171,7 @@ const NewsCard = memo(() => {
           
           {/* Update time indicator */}
           <span className="text-[9px] text-white/40">
-            Uppdateras 06:00 & 12:00
+            Uppdateras 06:00
           </span>
         </div>
       </CardContent>
