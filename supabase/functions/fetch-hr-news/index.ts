@@ -7,27 +7,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// RSS sources for recruitment, HR and job market news (15+ sources for variety)
+// RSS sources - focused on HR, recruitment, leadership and labor market
 const RSS_SOURCES = [
-  // HR & Recruitment
+  // PRIMARY: HR & Recruitment sources (most reliable)
   { url: 'https://hrnytt.se/feed', name: 'HRnytt.se' },
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
-  { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
-  { url: 'https://arbetsmarknadsnytt.se/feed/', name: 'Arbetsmarknadsnytt' },
+  { url: 'https://kollega.se/rss.xml', name: 'Kollega' },
   { url: 'https://www.motivation.se/feed/', name: 'Motivation.se' },
-  { url: 'https://www.arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
-  // Business & Career
-  { url: 'https://www.breakit.se/feed', name: 'Breakit' },
-  { url: 'https://www.va.se/rss/nyheter', name: 'Veckans Affärer' },
-  { url: 'https://www.resumé.se/feed/', name: 'Resumé' },
-  { url: 'https://www.dagensmedia.se/feed/', name: 'Dagens Media' },
-  // Tech & Innovation
-  { url: 'https://computersweden.se/feed/', name: 'Computer Sweden' },
-  { url: 'https://www.idg.se/rss/nyheter', name: 'IDG' },
-  { url: 'https://www.nyteknik.se/feed/', name: 'Ny Teknik' },
-  // General business news
+  { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
+  // Labor market & employment
+  { url: 'https://arbetsformedlingen.se/om-oss/press/nyheter.rss', name: 'Arbetsförmedlingen' },
+  { url: 'https://www.scb.se/rss/nyheter/', name: 'SCB Arbetsmarknad' },
+  // Leadership & management
+  { url: 'https://www.vd-tidningen.se/feed/', name: 'VD-tidningen' },
+  // Business news (for labor market angles)
   { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
-  { url: 'https://www.svd.se/feed/naringsliv.rss', name: 'SvD Näringsliv' },
 ];
 
 // Keywords to filter out truly negative/scandal content (not labor market statistics)
@@ -35,8 +29,6 @@ const NEGATIVE_KEYWORDS = [
   'skandal', 'misslyck', 'strejk', 'konflikt', 'döm', 
   'åtal', 'brott', 'svek', 'fusk', 'bedrägeri', 'diskriminer',
   'mobbing', 'trakasser', 'hot', 'våld'
-  // Removed: uppsägning, varsel, konkurs, nedskärning, kris, problem, utbrändhet, sjukskriv
-  // These are okay as labor market news
 ];
 
 // Keywords that indicate HR-relevant content (at least 2 must match)
@@ -58,26 +50,51 @@ const HR_RELEVANCE_KEYWORDS = [
   'trivsel', 'engagemang', 'motivation', 'välmående',
   // Employment types
   'heltid', 'deltid', 'konsult', 'vikarie', 'provanställ',
-  // Labor market
-  'arbetslöshet', 'arbetslös', 'sysselsättning', 'jobbmarknad'
+  // Labor market & employment
+  'arbetslöshet', 'arbetslös', 'sysselsättning', 'jobbmarknad', 'varsel',
+  'kollektivavtal', 'fackförening', 'fack', 'unionen', 'tjänstemän'
 ];
 
-// Blocklist - topics that are NOT HR-relevant even if they match some keywords
+// STRICT BLOCKLIST - topics that are NOT HR-relevant
 const BLOCKLIST_KEYWORDS = [
-  // Finance/Investment
+  // === GEOPOLITICS & WAR ===
+  'ukraina', 'ryssland', 'putin', 'zelensky', 'krig', 'invasion', 'missile',
+  'nato', 'militär', 'försvar', 'vapen', 'trupper', 'bombning', 'anfall',
+  'gaza', 'israel', 'hamas', 'mellanöstern', 'syrien', 'iran', 'taiwan',
+  'kina', 'beijing', 'trump', 'biden', 'vita huset', 'kongress',
+  
+  // === FINANCE & CRYPTO ===
   'kreditkort', 'fond', 'fonder', 'aktie', 'aktier', 'börsen', 'investering',
-  'ränta', 'räntor', 'börsras', 'kryptovaluta', 'bitcoin', 'valutor',
-  // IT Security/Infrastructure (not HR-tech)
+  'ränta', 'räntor', 'börsras', 'kryptovaluta', 'bitcoin', 'ethereum', 'valutor',
+  'aktiekurs', 'börskurs', 'nvidia', 'amd', 'intel', 'aktieanalys',
+  
+  // === IT SECURITY (not HR-tech) ===
   'sårbarhet', 'brandvägg', 'hackare', 'cyberattack', 'malware', 'virus',
-  'ddos', 'ransomware', 'säkerhetshål', 'dataintrång',
-  // Sports
-  'fotboll', 'hockey', 'sport', 'match', 'liga', 'mästerskap',
-  // Entertainment
-  'film', 'musik', 'konsert', 'artist', 'kändis',
-  // Politics (non-labor)
-  'riksdag', 'val ', 'parti', 'minister',
-  // Consumer products
-  'iphone', 'samsung', 'apple card', 'tesla'
+  'ddos', 'ransomware', 'säkerhetshål', 'dataintrång', 'ciso', 'it-säkerhet',
+  
+  // === CONSUMER TECH ===
+  'iphone', 'samsung', 'apple card', 'tesla', 'android', 'ios', 'galaxy',
+  'pixel', 'macbook', 'airpods', 'playstation', 'xbox', 'nintendo',
+  'streaming', 'netflix', 'spotify', 'youtube',
+  
+  // === SPORTS ===
+  'fotboll', 'hockey', 'sport', 'match', 'liga', 'mästerskap', 'allsvensk',
+  'premier league', 'champions league', 'vm', 'em', 'os', 'olympiska',
+  
+  // === ENTERTAINMENT ===
+  'film', 'musik', 'konsert', 'artist', 'kändis', 'hollywood', 'grammy',
+  'oscar', 'melodifestival', 'eurovision', 'tv-serie',
+  
+  // === POLITICS (non-labor) ===
+  'riksdag', 'val ', 'parti', 'minister', 'statsminister', 'opposition',
+  'högerparti', 'vänsterparti', 'moderat', 'socialdemokrat',
+  
+  // === DISASTERS & CRIME (non-workplace) ===
+  'olycka', 'krock', 'brottsling', 'misstänkt', 'polis', 'åklagare',
+  'jordbävning', 'tsunami', 'orkan', 'storm', 'översvämning',
+  
+  // === MISC IRRELEVANT ===
+  'recept', 'matlagning', 'träning', 'kosttillskott', 'diet'
 ];
 
 // Categories with their styling
