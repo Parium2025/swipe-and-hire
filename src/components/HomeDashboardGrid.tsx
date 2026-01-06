@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useCallback } from 'react';
+import { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
@@ -93,6 +93,17 @@ const NewsCard = memo(() => {
     if (newsItems.length > 1) {
       setCurrentIndex(prev => (prev - 1 + newsItems.length) % newsItems.length);
     }
+  }, [newsItems.length]);
+
+  // Auto-rotation every 10 seconds
+  useEffect(() => {
+    if (newsItems.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % newsItems.length);
+    }, 10000);
+    
+    return () => clearInterval(interval);
   }, [newsItems.length]);
 
   const swipeHandlers = useSwipeGesture({
