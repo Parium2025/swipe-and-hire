@@ -17,59 +17,76 @@ export interface HrNewsItem {
   is_translated?: boolean;
 }
 
-const fetchTodaysNews = async (): Promise<HrNewsItem[]> => {
-  const today = new Date().toISOString().split('T')[0];
-  
-  // First, try to get cached news from database
-  const { data: cachedNews, error: cacheError } = await supabase
+const HOURS_WINDOW = 48;
+
+function isWithinLastHours(dateStr: string, hours: number): boolean {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return false;
+  return Date.now() - d.getTime() <= hours * 60 * 60 * 1000;
+}
+
+const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
+  const thresholdIso = new Date(Date.now() - HOURS_WINDOW * 60 * 60 * 1000).toISOString();
+
+  // First, try to get cached news from database (last 48h, not "today")
+  const { data: cachedNewsRaw, error: cacheError } = await supabase
     .from('daily_hr_news')
     .select('*')
-    .eq('news_date', today)
+    .not('published_at', 'is', null)
+    .gte('published_at', thresholdIso)
     .order('published_at', { ascending: false, nullsFirst: false });
 
-  const hasRealSources = !!cachedNews?.some((item) => item.source_url);
-  
-  // If we have cached news with real sources, return it
-  if (!cacheError && cachedNews && cachedNews.length > 0 && hasRealSources) {
-    console.log('[HR News] Returning cached news with real sources');
+  const cachedNews = (cachedNewsRaw || []).filter((item) =>
+    item.published_at ? isWithinLastHours(item.published_at, HOURS_WINDOW) : false,
+  );
+
+  const hasRealSources = cachedNews.some((item) => item.source_url);
+
+  // If we have enough cached news with real sources, return it
+  if (!cacheError && cachedNews.length > 0 && hasRealSources) {
+    console.log('[HR News] Returning cached news (48h window)', {
+      count: cachedNews.length,
+      thresholdIso,
+    });
     return cachedNews;
   }
 
   // Otherwise, fetch fresh
-  const needsRefresh = !cachedNews || cachedNews.length === 0 || !hasRealSources;
-  console.log('[HR News] Fetching fresh news via edge function...', { needsRefresh, hasRealSources });
-  
+  const needsRefresh = !cachedNewsRaw || cachedNewsRaw.length === 0 || !hasRealSources;
+  console.log('[HR News] Fetching fresh news via backend function...', { needsRefresh, hasRealSources });
+
   try {
     const { data, error } = await supabase.functions.invoke('fetch-hr-news', {
       body: { force: needsRefresh },
     });
-    
+
     if (error) {
-      console.error('[HR News] Edge function error:', error);
-      if (cachedNews && cachedNews.length > 0 && hasRealSources) {
-        return cachedNews;
-      }
+      console.error('[HR News] Backend function error:', error);
+      if (!cacheError && cachedNews.length > 0) return cachedNews;
       return [];
     }
 
-    // The edge function returns { news: [...], cached: boolean, source: string }
-    if (data?.news && data.news.length > 0) {
-      console.log(`[HR News] Got ${data.news.length} items (source: ${data.source})`);
-      return data.news;
-    }
+    const fresh = (data?.news || []) as HrNewsItem[];
+    const freshFiltered = fresh
+      .filter((item) => item.published_at && isWithinLastHours(item.published_at, HOURS_WINDOW))
+      .sort((a, b) => {
+        const at = a.published_at ? new Date(a.published_at).getTime() : 0;
+        const bt = b.published_at ? new Date(b.published_at).getTime() : 0;
+        return bt - at;
+      });
 
-    if (cachedNews && cachedNews.length > 0 && hasRealSources) {
-      return cachedNews;
-    }
+    console.log('[HR News] Got items (48h filtered)', {
+      total: fresh.length,
+      kept: freshFiltered.length,
+      source: data?.source,
+    });
 
+    if (freshFiltered.length > 0) return freshFiltered;
+    if (!cacheError && cachedNews.length > 0) return cachedNews;
     return [];
   } catch (err) {
     console.error('[HR News] Error invoking fetch-hr-news:', err);
-
-    if (cachedNews && cachedNews.length > 0 && hasRealSources) {
-      return cachedNews;
-    }
-
+    if (!cacheError && cachedNews.length > 0) return cachedNews;
     return [];
   }
 };
@@ -77,11 +94,12 @@ const fetchTodaysNews = async (): Promise<HrNewsItem[]> => {
 export const useHrNews = () => {
   return useQuery({
     queryKey: ['hr-news', new Date().toISOString().split('T')[0]],
-    queryFn: fetchTodaysNews,
-    staleTime: 1000 * 60 * 30, // 30 minutes - reasonable refresh
-    gcTime: 1000 * 60 * 60 * 2, // 2 hours cache
+    queryFn: fetchRecentNews,
+    staleTime: 1000 * 60 * 30, // 30 minutes
+    gcTime: 1000 * 60 * 60 * 2, // 2 hours
     retry: 2,
     retryDelay: 1000,
     refetchOnWindowFocus: false,
   });
 };
+
