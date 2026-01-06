@@ -7,17 +7,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// RSS sources - focused on HR, recruitment, leadership, labor market, salary, career & business
+// RSS sources - endast svenska källor
 // TRUSTED_SOURCES get automatic pass without strict keyword filtering
 const TRUSTED_HR_SOURCES = [
   // Swedish HR (verified working)
   'HRnytt.se', 'Chef.se', 'Arbetsvärlden',
   // Swedish news/economy (verified working)
   'DN Ekonomi', 'Expressen Ekonomi', 'Dagens Industri',
-  // International HR (verified working - FREE)
-  'HR Dive', 'HR Executive', 'AIHR', 'Personnel Today',
-  // Business/Career (verified working - NO PAYWALL)
-  'Fast Company'
 ];
 
 const RSS_SOURCES = [
@@ -30,15 +26,6 @@ const RSS_SOURCES = [
   { url: 'https://www.dn.se/rss/ekonomi/', name: 'DN Ekonomi' },
   { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
   { url: 'https://feeds.expressen.se/ekonomi', name: 'Expressen Ekonomi' },
-  
-  // === INTERNATIONAL HR (VERIFIED WORKING - FREE) ===
-  { url: 'https://www.hrdive.com/feeds/news/', name: 'HR Dive' },
-  { url: 'https://hrexecutive.com/feed/', name: 'HR Executive' },
-  { url: 'https://www.aihr.com/feed/', name: 'AIHR' },
-  { url: 'https://www.personneltoday.com/feed/', name: 'Personnel Today' },
-  
-  // === CAREER & BUSINESS (VERIFIED WORKING - NO PAYWALL) ===
-  { url: 'https://www.fastcompany.com/rss', name: 'Fast Company' },
 ];
 
 // Keywords to filter out truly negative/scandal content (not labor market statistics)
