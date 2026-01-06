@@ -477,16 +477,14 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       checkForLocationChange(false);
     }
 
-    // Refresh weather every 5 minutes automatically in background
-    const weatherInterval = setInterval(() => {
-      if (locationRef.current && mountedRef.current) {
-        fetchWeatherOnly(
-          locationRef.current.lat, 
-          locationRef.current.lon, 
-          locationRef.current.city
-        );
+    // LIVE GPS TRACKING: Check GPS location every 2 minutes for real-time updates
+    // This ensures the city updates automatically as you move around
+    const gpsTrackingInterval = setInterval(() => {
+      if (mountedRef.current) {
+        console.log('Live GPS check - updating location...');
+        checkForLocationChange(true);
       }
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 2 * 60 * 1000); // 2 minutes - frequent enough to catch movement
 
     // Listen for network changes - user might have moved to new wifi/location
     const handleOnline = () => {
@@ -494,16 +492,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       checkForLocationChange(true);
     };
 
-    // Update weather when user comes back to tab/app
+    // Update location + weather when user comes back to tab/app
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && locationRef.current && mountedRef.current) {
-        // Check if weather cache is stale (older than 5 min)
-        const cached = getCachedWeather();
-        const isStale = !cached || (Date.now() - cached.timestamp > 5 * 60 * 1000);
-        if (isStale) {
-          console.log('Tab visible + stale cache - updating weather...');
-          fetchWeatherOnly(locationRef.current.lat, locationRef.current.lon, locationRef.current.city);
-        }
+      if (document.visibilityState === 'visible' && mountedRef.current) {
+        console.log('Tab visible - checking for location change...');
+        // Always do full location check when coming back to app
+        checkForLocationChange(true);
       }
     };
 
@@ -512,7 +506,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     return () => {
       mountedRef.current = false;
-      clearInterval(weatherInterval);
+      clearInterval(gpsTrackingInterval);
       window.removeEventListener('online', handleOnline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
