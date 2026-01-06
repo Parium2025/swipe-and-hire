@@ -34,12 +34,13 @@ const WEATHER_CACHE_KEY = 'parium_weather_data';
 const PROFILE_CITY_KEY = 'parium_weather_profile_city';
 const MOVEMENT_THRESHOLD_KM = 10; // If moved more than 10km, update location
 
-// Clear all weather cache - used when profile location changes
-const clearWeatherCache = () => {
+// Clear all weather cache - used when profile location changes or for debugging
+export const clearWeatherCache = () => {
   try {
     localStorage.removeItem(LOCATION_CACHE_KEY);
     localStorage.removeItem(WEATHER_CACHE_KEY);
-    console.log('Weather cache cleared due to profile change');
+    localStorage.removeItem(PROFILE_CITY_KEY);
+    console.log('Weather cache cleared');
   } catch {
     // Silent fail
   }
@@ -147,12 +148,20 @@ const getWeatherInfo = (code: number, isNight: boolean): { description: string; 
   return { description: 'Okänt', emoji: '🌡️' };
 };
 
-// Cache helpers
+// Cache helpers - location cache valid for 10 minutes max
+const LOCATION_CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
+
 const getCachedLocation = (): CachedLocation | null => {
   try {
     const cached = localStorage.getItem(LOCATION_CACHE_KEY);
     if (!cached) return null;
-    return JSON.parse(cached);
+    const data = JSON.parse(cached);
+    // Location cache expires after 10 minutes to ensure freshness
+    if (Date.now() - data.timestamp > LOCATION_CACHE_MAX_AGE) {
+      console.log('Location cache expired, will refresh');
+      return null;
+    }
+    return data;
   } catch {
     return null;
   }
@@ -438,22 +447,36 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         navigator.geolocation.getCurrentPosition(
           (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
           () => resolve(null),
-          { timeout: 8000, enableHighAccuracy: false, maximumAge: 5 * 60 * 1000 } // 5 min cache for GPS
+          { timeout: 8000, enableHighAccuracy: true, maximumAge: 60 * 1000 } // 1 min max age for GPS
         );
       });
 
       if (gpsResult && mountedRef.current) {
-        // If we have cached location, check if we've moved significantly
-        if (cached) {
+        // Always get fresh city name from GPS coordinates
+        // Don't rely on cached city names as they may be stale
+        const freshCity = await getCityName(gpsResult.lat, gpsResult.lon);
+        
+        // If we have cached location, check if city changed or we moved
+        if (cached && cached.source === 'gps') {
           const distance = getDistanceKm(cached.lat, cached.lon, gpsResult.lat, gpsResult.lon);
-          if (distance < MOVEMENT_THRESHOLD_KM && cached.source === 'gps') {
-            // Haven't moved much and already have GPS - just update weather
+          const cityChanged = freshCity && cached.city && 
+            freshCity.toLowerCase() !== cached.city.toLowerCase();
+          
+          if (distance < 1 && !cityChanged) {
+            // Very close (< 1km) and same city - just update weather with cached city
             await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
             return;
           }
+          
+          // City changed or moved - log it for debugging
+          if (cityChanged) {
+            console.log(`GPS city changed: ${cached.city} → ${freshCity}`);
+          }
         }
-        // New location or moved significantly
-        await updateLocation(gpsResult.lat, gpsResult.lon, null, 'gps');
+        
+        // Update to fresh GPS location with fresh city name
+        const cityToUse = freshCity || cached?.city || '';
+        await updateLocation(gpsResult.lat, gpsResult.lon, cityToUse, 'gps');
         return;
       }
     }

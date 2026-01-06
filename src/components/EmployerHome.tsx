@@ -2,7 +2,7 @@ import { memo, useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useJobsData } from '@/hooks/useJobsData';
-import { useWeather } from '@/hooks/useWeather';
+import { useWeather, clearWeatherCache } from '@/hooks/useWeather';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
