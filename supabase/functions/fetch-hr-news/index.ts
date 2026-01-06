@@ -38,6 +38,27 @@ const NEGATIVE_KEYWORDS = [
   'utbrändhet', 'sjukskriv', 'mobbing', 'trakasser', 'hot', 'våld'
 ];
 
+// Keywords that indicate HR-relevant content (at least one must match)
+const HR_RELEVANCE_KEYWORDS = [
+  // Core HR terms
+  'hr', 'rekryter', 'anställ', 'personal', 'medarbetar', 'arbetsplats', 'arbetsmiljö',
+  'arbetsgivare', 'arbetstagare', 'arbetsmarknad', 'arbetsrätt', 'arbetsliv',
+  // Leadership & Management
+  'chef', 'ledar', 'ledning', 'team', 'organisation', 'företagskultur', 'kultur',
+  // Talent & Competence
+  'talent', 'kompetens', 'utbildning', 'utveckling', 'karriär', 'lön', 'förmån',
+  // Hiring process
+  'kandidat', 'intervju', 'urval', 'onboarding', 'offboarding', 'cv', 'jobbansök',
+  // Modern workplace
+  'hybridarbete', 'distansarbete', 'hemarbete', 'flexibel', 'work-life',
+  // HR Tech
+  'hr-tech', 'hrtech', 'ats', 'hris', 'lms',
+  // Wellbeing
+  'trivsel', 'engagemang', 'motivation', 'välmående', 'hälsa',
+  // Employment types
+  'heltid', 'deltid', 'konsult', 'vikarie', 'provanställ'
+];
+
 // Categories with their styling
 const CATEGORIES = [
   { 
@@ -143,6 +164,12 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
   return items;
 }
 
+// Check if content is HR-relevant
+function isHRRelevant(text: string): boolean {
+  const lowerText = text.toLowerCase();
+  return HR_RELEVANCE_KEYWORDS.some(keyword => lowerText.includes(keyword));
+}
+
 // Check if content contains negative keywords
 function isNegativeContent(text: string): boolean {
   const lowerText = text.toLowerCase();
@@ -172,12 +199,18 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
     
     const newsItems: NewsItem[] = [];
     
-    for (const item of rssItems.slice(0, 5)) {
+    for (const item of rssItems.slice(0, 10)) { // Check more items to find relevant ones
       const fullText = `${item.title} ${item.description}`;
+      
+      // Skip non-HR content
+      if (!isHRRelevant(fullText)) {
+        console.log(`Skipping non-HR: ${item.title.slice(0, 40)}...`);
+        continue;
+      }
       
       // Skip negative content
       if (isNegativeContent(fullText)) {
-        console.log(`Skipping negative: ${item.title.slice(0, 50)}...`);
+        console.log(`Skipping negative: ${item.title.slice(0, 40)}...`);
         continue;
       }
       
