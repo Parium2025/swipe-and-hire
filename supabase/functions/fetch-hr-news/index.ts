@@ -358,17 +358,32 @@ serve(async (req) => {
      }
 
      const today = new Date().toISOString().split('T')[0];
+     const currentHour = new Date().getUTCHours();
+     const isMiddayCheck = currentHour >= 10 && currentHour <= 12; // 11:00-13:00 UTC window
      
-     // Check for existing REAL news (unless force refresh)
-     if (!forceRefresh) {
-       const { data: existingNews } = await supabase
-         .from('daily_hr_news')
-         .select('*')
-         .eq('news_date', today)
-         .order('order_index');
+     // Check for existing news
+     const { data: existingNews } = await supabase
+       .from('daily_hr_news')
+       .select('*')
+       .eq('news_date', today)
+       .order('order_index');
 
-       const hasRealSources = existingNews?.some((n) => n.source_url);
-       if (existingNews && existingNews.length > 0 && hasRealSources) {
+     const realArticleCount = existingNews?.filter((n) => n.source_url)?.length || 0;
+     
+     // At midday: only refresh if we have fewer than 4 real articles
+     if (isMiddayCheck && !forceRefresh) {
+       if (realArticleCount >= 4) {
+         console.log(`Midday check: Already have ${realArticleCount} real articles, skipping`);
+         return new Response(JSON.stringify({ news: existingNews, cached: true, source: 'cache', reason: 'midday_skip' }), {
+           headers: { ...corsHeaders, "Content-Type": "application/json" },
+         });
+       }
+       console.log(`Midday check: Only ${realArticleCount} real articles, fetching more...`);
+     }
+     
+     // Morning or force: use cache if we have real sources
+     if (!forceRefresh && !isMiddayCheck) {
+       if (existingNews && existingNews.length > 0 && realArticleCount > 0) {
          console.log('Returning cached news for today (real sources)');
          return new Response(JSON.stringify({ news: existingNews, cached: true, source: 'cache' }), {
            headers: { ...corsHeaders, "Content-Type": "application/json" },
