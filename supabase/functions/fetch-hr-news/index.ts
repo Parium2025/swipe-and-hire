@@ -12,7 +12,8 @@ const corsHeaders = {
 const TRUSTED_HR_SOURCES = [
   'HRnytt.se', 'Chef.se', 'Kollega', 'Motivation.se', 'Arbetsvärlden', 
   'Ledarna', 'Unionen', 'TCO', 'Almega', 'Svenskt Näringsliv',
-  'HR Dive', 'SHRM', 'People Management', 'Teamtailor', 'LinkedIn Talent'
+  'HR Dive', 'SHRM', 'People Management', 'Personnel Today', 'WorkLife',
+  'HR Executive', 'Teamtailor', 'LinkedIn Talent'
 ];
 
 const RSS_SOURCES = [
@@ -34,6 +35,9 @@ const RSS_SOURCES = [
   { url: 'https://www.hrdive.com/feeds/news/', name: 'HR Dive' },
   { url: 'https://www.shrm.org/rss/pages/rss.aspx', name: 'SHRM' },
   { url: 'https://www.peoplemanagement.co.uk/feed', name: 'People Management' },
+  { url: 'https://www.personneltoday.com/feed/', name: 'Personnel Today' },
+  { url: 'https://www.worklife.news/feed/', name: 'WorkLife' },
+  { url: 'https://hrexecutive.com/feed/', name: 'HR Executive' },
   { url: 'https://www.ere.net/feed/', name: 'ERE Recruiting' },
   { url: 'https://recruitingdaily.com/feed/', name: 'Recruiting Daily' },
   
