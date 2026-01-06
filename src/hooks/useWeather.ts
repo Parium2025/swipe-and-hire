@@ -22,42 +22,20 @@ interface CachedLocation {
 interface UseWeatherOptions {
   /** Used when all location methods fail */
   fallbackCity?: string;
-  /** How often to refresh weather, default 15 min */
-  refreshMs?: number;
   /** Whether to enable weather fetching, default true */
   enabled?: boolean;
 }
 
-const DEFAULT_REFRESH_MS = 15 * 60 * 1000;
 const LOCATION_CACHE_KEY = 'parium_weather_location';
 const WEATHER_CACHE_KEY = 'parium_weather_data';
-const PROFILE_CITY_KEY = 'parium_weather_profile_city';
-const MOVEMENT_THRESHOLD_KM = 10; // If moved more than 10km, update location
+const MOVEMENT_THRESHOLD_KM = 10; // If moved more than 10km, update location (for IP fallback)
 
-// Clear all weather cache - used when profile location changes or for debugging
+// Clear all weather cache - used for debugging or forcing fresh data
 export const clearWeatherCache = () => {
   try {
     localStorage.removeItem(LOCATION_CACHE_KEY);
     localStorage.removeItem(WEATHER_CACHE_KEY);
-    localStorage.removeItem(PROFILE_CITY_KEY);
     console.log('Weather cache cleared');
-  } catch {
-    // Silent fail
-  }
-};
-
-// Store and check if profile city has changed
-const getStoredProfileCity = (): string | null => {
-  try {
-    return localStorage.getItem(PROFILE_CITY_KEY);
-  } catch {
-    return null;
-  }
-};
-
-const setStoredProfileCity = (city: string) => {
-  try {
-    localStorage.setItem(PROFILE_CITY_KEY, city);
   } catch {
     // Silent fail
   }
@@ -232,27 +210,46 @@ const fetchCurrentWeather = async (lat: number, lon: number) => {
   };
 };
 
-// Reverse geocoding to get city name
+// Reverse geocoding to get city name - with multiple fallback services
 const getCityName = async (lat: number, lon: number): Promise<string> => {
+  // Try Nominatim first (most reliable for Swedish cities)
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=sv`
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=sv`,
+      { signal: AbortSignal.timeout(5000) }
     );
-    const data = await response.json();
-
-    const city =
-      data.address?.city ||
-      data.address?.town ||
-      data.address?.municipality ||
-      data.address?.village ||
-      data.address?.suburb ||
-      data.address?.county ||
-      '';
-
-    return city;
+    if (response.ok) {
+      const data = await response.json();
+      const city =
+        data.address?.city ||
+        data.address?.town ||
+        data.address?.municipality ||
+        data.address?.village ||
+        data.address?.suburb ||
+        data.address?.county ||
+        '';
+      if (city) return city;
+    }
   } catch {
-    return '';
+    // Try fallback
   }
+
+  // Fallback: BigDataCloud (free, no API key needed)
+  try {
+    const response = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=sv`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (response.ok) {
+      const data = await response.json();
+      const city = data.city || data.locality || data.principalSubdivision || '';
+      if (city) return city;
+    }
+  } catch {
+    // Both services failed
+  }
+
+  return '';
 };
 
 // IP-based geolocation (no permission required, less accurate)
@@ -309,26 +306,6 @@ const geocodeCity = async (city: string): Promise<{ lat: number; lon: number; na
   };
 };
 
-type GeoPermissionState = 'granted' | 'denied' | 'prompt' | 'unknown';
-
-const getGeolocationPermissionState = async (): Promise<GeoPermissionState> => {
-  try {
-    if (!('permissions' in navigator) || !navigator.permissions?.query) return 'unknown';
-    const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
-    if (result.state === 'granted' || result.state === 'denied' || result.state === 'prompt') return result.state;
-    return 'unknown';
-  } catch {
-    return 'unknown';
-  }
-};
-
-const normalizeCityQuery = (input: string): string => {
-  // Examples:
-  // - "Vega/136 55" -> "Vega"
-  // - "Haninge kommun" -> "Haninge kommun"
-  return input.split(/[\\/,-]/)[0]?.trim() ?? '';
-};
-
 // Fallback emoji based on time of day
 function getTimeBasedEmoji(): string {
   const hour = new Date().getHours();
@@ -338,57 +315,23 @@ function getTimeBasedEmoji(): string {
 }
 
 export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
-  const refreshMs = options.refreshMs ?? DEFAULT_REFRESH_MS;
   const fallbackCity = options.fallbackCity?.trim();
   const enabled = options.enabled ?? true;
 
   const locationRef = useRef<CachedLocation | null>(null);
   const initializedRef = useRef(false);
   const mountedRef = useRef(true);
-  const prevFallbackCityRef = useRef<string | undefined>(undefined);
 
   const [weather, setWeather] = useState<WeatherData>(() => {
-    // CRITICAL: Check if profile city has changed since last visit
-    // If so, clear all cached data to force fresh location lookup
-    if (fallbackCity) {
-      const storedProfileCity = getStoredProfileCity();
-      if (storedProfileCity && storedProfileCity.toLowerCase() !== fallbackCity.toLowerCase()) {
-        console.log(`Profile city changed: ${storedProfileCity} → ${fallbackCity}`);
-        clearWeatherCache();
-      }
-      // Always store current profile city
-      setStoredProfileCity(fallbackCity);
-    }
-    
-    // Now check cache (may have just been cleared if profile changed)
-    const cachedWeather = getCachedWeather();
-    const cachedLocation = getCachedLocation();
-    
-    // Don't use cache if it's from a different city than user's profile
-    const isCacheStale = fallbackCity && cachedWeather?.city && 
-      cachedWeather.city.toLowerCase() !== fallbackCity.toLowerCase();
-    
-    if (cachedWeather && !isCacheStale) {
-      return {
-        temperature: cachedWeather.temperature,
-        feelsLike: cachedWeather.feelsLike ?? cachedWeather.temperature,
-        weatherCode: cachedWeather.weatherCode,
-        description: cachedWeather.description,
-        emoji: cachedWeather.emoji,
-        city: cachedWeather.city,
-        isLoading: false,
-        error: null,
-      };
-    }
-    
-    // Use fallback city as initial display if available
+    // Start with loading state - we ALWAYS fetch fresh GPS location
+    // Never trust cached city name on initial load
     return {
       temperature: 0,
       feelsLike: 0,
       weatherCode: 0,
       description: '',
       emoji: getTimeBasedEmoji(),
-      city: fallbackCity || cachedLocation?.city || '',
+      city: '', // Empty until we get fresh GPS
       isLoading: true,
       error: null,
     };
@@ -512,69 +455,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     }
   }, [fallbackCity, fetchWeatherOnly, updateLocation, updateWeather]);
 
-  // 🔄 AUTOMATIC RESYNC: When fallbackCity becomes available or changes,
-  // and current weather city doesn't match, force update from profile location
-  useEffect(() => {
-    // Skip if no fallbackCity provided
-    if (!fallbackCity) {
-      prevFallbackCityRef.current = undefined;
-      return;
-    }
-
-    const normalizedFallback = normalizeCityQuery(fallbackCity);
-    const prevFallback = prevFallbackCityRef.current;
-    prevFallbackCityRef.current = fallbackCity;
-
-    // Check if this is a new/changed fallbackCity
-    const fallbackJustBecameAvailable = !prevFallback && fallbackCity;
-    const fallbackChanged = prevFallback && prevFallback.toLowerCase() !== fallbackCity.toLowerCase();
-
-    if (!fallbackJustBecameAvailable && !fallbackChanged) {
-      return; // No change, skip
-    }
-
-    // Check if current weather city matches the profile location
-    const currentCity = weather.city?.toLowerCase() || '';
-    const profileCity = normalizedFallback.toLowerCase();
-
-    // If they already match (roughly), no need to resync
-    if (currentCity && (currentCity.includes(profileCity) || profileCity.includes(currentCity))) {
-      console.log(`Weather city "${weather.city}" matches profile "${fallbackCity}" - no resync needed`);
-      return;
-    }
-
-    // Check if we have GPS - if GPS is granted, trust it over profile
-    (async () => {
-      const gpsPermission = await getGeolocationPermissionState();
-      
-      if (gpsPermission === 'granted') {
-        // GPS is active - it should be accurate, but let's double-check by triggering a location check
-        console.log(`GPS granted but city mismatch. Triggering location check...`);
-        checkForLocationChange(true);
-        return;
-      }
-
-      // No GPS - profile location is our best source of truth
-      console.log(`Profile city mismatch: current="${weather.city}" vs profile="${fallbackCity}". Resyncing...`);
-      
-      // Clear stale cache
-      clearWeatherCache();
-      
-      // Geocode the profile city and update
-      try {
-        const geo = await geocodeCity(normalizedFallback);
-        if (mountedRef.current) {
-          await updateLocation(geo.lat, geo.lon, geo.name, 'fallback');
-          console.log(`Resynced to profile location: ${geo.name}`);
-        }
-      } catch (err) {
-        console.warn('Failed to geocode profile city for resync:', err);
-        // Try the full location check as fallback
-        checkForLocationChange(true);
-      }
-    })();
-  }, [fallbackCity, weather.city, checkForLocationChange, updateLocation]);
-
+  // Main initialization effect
   useEffect(() => {
     mountedRef.current = true;
     
@@ -585,31 +466,15 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       };
     }
     
-    // Initial load - always do a fresh GPS check, but show cached weather immediately
+    // Initial load - ALWAYS do fresh GPS check, never show cached city first
     if (!initializedRef.current) {
       initializedRef.current = true;
       
-      // Show cached weather data immediately while we get fresh GPS
-      const cachedWeather = getCachedWeather();
-      const cachedLocation = getCachedLocation();
+      // Clear any stale cache to ensure fresh data
+      clearWeatherCache();
       
-      if (cachedWeather && cachedLocation) {
-        locationRef.current = cachedLocation;
-        // Show cached data immediately for instant UX
-        updateWeather({
-          temperature: cachedWeather.temperature,
-          feelsLike: cachedWeather.feelsLike,
-          weatherCode: cachedWeather.weatherCode,
-          description: cachedWeather.description,
-          emoji: cachedWeather.emoji,
-          city: cachedWeather.city,
-          isLoading: false,
-          error: null,
-        });
-      }
-      
-      // Always do fresh GPS check to ensure correct city
-      checkForLocationChange(true);
+      // Start fresh GPS check immediately
+      checkForLocationChange(false);
     }
 
     // Refresh weather every 5 minutes automatically in background
@@ -651,7 +516,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       window.removeEventListener('online', handleOnline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [enabled, fallbackCity, refreshMs, fetchWeatherOnly, checkForLocationChange]);
+  }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather]);
 
   return weather;
 };
