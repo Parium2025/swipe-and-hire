@@ -1,5 +1,6 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
@@ -62,6 +63,23 @@ const NewsCard = memo(() => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const newsItems = news?.slice(0, 4) || [];
 
+  const goNext = useCallback(() => {
+    if (newsItems.length > 1) {
+      setCurrentIndex(prev => (prev + 1) % newsItems.length);
+    }
+  }, [newsItems.length]);
+
+  const goPrev = useCallback(() => {
+    if (newsItems.length > 1) {
+      setCurrentIndex(prev => (prev - 1 + newsItems.length) % newsItems.length);
+    }
+  }, [newsItems.length]);
+
+  const swipeHandlers = useSwipeGesture({
+    onSwipeLeft: goNext,
+    onSwipeRight: goPrev,
+  });
+
   if (isLoading) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg h-[200px]`}>
@@ -80,7 +98,10 @@ const NewsCard = memo(() => {
   const currentNews = newsItems[currentIndex];
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg h-[200px]`}>
+    <Card 
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg h-[200px] touch-pan-y`}
+      {...swipeHandlers}
+    >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
@@ -185,6 +206,19 @@ const StatsCard = memo(() => {
     ];
   }, [jobs]);
 
+  const goNext = useCallback(() => {
+    setCurrentIndex(prev => (prev + 1) % statsArray.length);
+  }, [statsArray.length]);
+
+  const goPrev = useCallback(() => {
+    setCurrentIndex(prev => (prev - 1 + statsArray.length) % statsArray.length);
+  }, [statsArray.length]);
+
+  const swipeHandlers = useSwipeGesture({
+    onSwipeLeft: goNext,
+    onSwipeRight: goPrev,
+  });
+
   if (isLoading) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[200px]`}>
@@ -201,7 +235,10 @@ const StatsCard = memo(() => {
   const Icon = currentStat.icon;
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[200px]`}>
+    <Card 
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[200px] touch-pan-y`}
+      {...swipeHandlers}
+    >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
