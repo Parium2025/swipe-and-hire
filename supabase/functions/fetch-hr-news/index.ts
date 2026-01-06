@@ -672,30 +672,48 @@ serve(async (req) => {
     // Take top 20 most recent/relevant articles
     const topNews = translatedNews.slice(0, 20);
     
-    if (topNews.length === 0) {
-      console.log('No fresh HR news found');
-      return new Response(JSON.stringify({ message: 'No fresh news', count: 0 }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // === SMART UPDATE LOGIC ===
+    // Get current articles in database (max 4 displayed)
+    const { data: currentArticles } = await supabase
+      .from('daily_hr_news')
+      .select('id, source_url, published_at, order_index')
+      .order('order_index', { ascending: true })
+      .limit(10);
     
-    // Clear old news and insert new (only if we have new articles)
-    const today = new Date().toISOString().split('T')[0];
+    const existingUrls = new Set((currentArticles || []).map(a => a.source_url).filter(Boolean));
+    
+    // Filter out articles we already have
+    const newArticles = topNews.filter(item => !item.source_url || !existingUrls.has(item.source_url));
+    
+    console.log(`New articles available: ${newArticles.length}`);
     
     // Delete news older than 5 days
     const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     await supabase.from('daily_hr_news').delete().lt('news_date', fiveDaysAgo);
     
-    // Get existing article URLs to avoid duplicates
-    const { data: existingArticles } = await supabase
-      .from('daily_hr_news')
-      .select('source_url')
-      .not('source_url', 'is', null);
+    const today = new Date().toISOString().split('T')[0];
     
-    const existingUrls = new Set((existingArticles || []).map(a => a.source_url));
+    // === AI FALLBACK: Generate news if we have NO articles at all ===
+    if (topNews.length === 0 && (!currentArticles || currentArticles.length === 0)) {
+      console.log('No RSS articles and no existing articles - generating AI fallback');
+      const aiFallback = await generateAIFallbackNews(supabase);
+      if (aiFallback.length > 0) {
+        return new Response(JSON.stringify({ 
+          message: 'AI fallback news generated', 
+          count: aiFallback.length,
+          source: 'ai_fallback'
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
     
-    // Filter out articles we already have
-    const newArticles = topNews.filter(item => !item.source_url || !existingUrls.has(item.source_url));
+    // === SMART ROTATION LOGIC ===
+    // 4+ new articles: replace all top 4
+    // 3 new: keep 1 old, add 3 new
+    // 2 new: keep 2 old, add 2 new
+    // 1 new: keep 3 old, add 1 new (rotate oldest out)
+    // 0 new: keep all existing
     
     if (newArticles.length === 0) {
       console.log('No new articles to insert');
@@ -704,8 +722,50 @@ serve(async (req) => {
       });
     }
     
+    const MAX_DISPLAY = 4;
+    const currentCount = currentArticles?.length || 0;
+    let articlesToKeep = 0;
+    let articlesToAdd = 0;
+    
+    if (newArticles.length >= 4) {
+      // Replace all 4
+      articlesToKeep = 0;
+      articlesToAdd = 4;
+    } else if (newArticles.length === 3) {
+      // Keep 1 old, add 3 new
+      articlesToKeep = 1;
+      articlesToAdd = 3;
+    } else if (newArticles.length === 2) {
+      // Keep 2 old, add 2 new
+      articlesToKeep = 2;
+      articlesToAdd = 2;
+    } else {
+      // 1 new: rotate - keep 3, add 1
+      articlesToKeep = Math.min(3, currentCount);
+      articlesToAdd = 1;
+    }
+    
+    console.log(`Smart update: keeping ${articlesToKeep}, adding ${articlesToAdd}`);
+    
+    // Delete articles that should be rotated out
+    if (currentArticles && articlesToKeep < currentCount) {
+      // Keep the newest articles based on published_at
+      const sortedCurrent = [...currentArticles].sort((a, b) => {
+        if (a.published_at && b.published_at) {
+          return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+        }
+        return (a.order_index || 0) - (b.order_index || 0);
+      });
+      
+      const idsToDelete = sortedCurrent.slice(articlesToKeep).map(a => a.id);
+      if (idsToDelete.length > 0) {
+        await supabase.from('daily_hr_news').delete().in('id', idsToDelete);
+        console.log(`Deleted ${idsToDelete.length} old articles`);
+      }
+    }
+    
     // Insert new articles with category styling
-    const newsToInsert = newArticles.map((item, index) => {
+    const newsToInsert = newArticles.slice(0, articlesToAdd).map((item, index) => {
       const catInfo = getCategoryInfo(item.category);
       return {
         title: item.title,
@@ -722,16 +782,18 @@ serve(async (req) => {
       };
     });
     
-    const { error: insertError } = await supabase
-      .from('daily_hr_news')
-      .insert(newsToInsert);
-    
-    if (insertError) {
-      console.error('Insert error:', insertError);
-      throw insertError;
+    if (newsToInsert.length > 0) {
+      const { error: insertError } = await supabase
+        .from('daily_hr_news')
+        .insert(newsToInsert);
+      
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw insertError;
+      }
+      
+      console.log(`Successfully inserted ${newsToInsert.length} HR news articles`);
     }
-    
-    console.log(`Successfully inserted ${newsToInsert.length} HR news articles`);
     
     // Log distribution for debugging
     const sourceCounts: Record<string, number> = {};
@@ -746,6 +808,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       message: 'HR news fetched successfully', 
       count: newsToInsert.length,
+      kept: articlesToKeep,
       sources: Object.keys(sourceCounts),
       categories: Object.keys(catCounts),
     }), {
@@ -760,3 +823,102 @@ serve(async (req) => {
     });
   }
 });
+
+// === AI FALLBACK FUNCTION ===
+// Generates HR news using AI when no RSS articles are available
+async function generateAIFallbackNews(supabase: any): Promise<any[]> {
+  try {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      console.log('No LOVABLE_API_KEY configured for AI fallback');
+      return [];
+    }
+    
+    const today = new Date().toISOString().split('T')[0];
+    const dayNames = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
+    const dayName = dayNames[new Date().getDay()];
+    
+    const prompt = `Du är en HR-expert som skriver korta, informativa nyhetsnotiser för rekryterare i Sverige.
+
+Skriv 4 korta HR-nyheter för ${dayName}. Varje nyhet ska:
+- Ha en fängslande rubrik (max 60 tecken)
+- Ha en kort sammanfattning (max 100 tecken)
+- Vara relevant för rekryterare och HR-personal
+- Handla om: rekryteringstrender, arbetsmarknad, ledarskap, eller HR-tech
+
+Svara ENDAST med JSON i detta format:
+[
+  {"title": "Rubrik här", "summary": "Kort sammanfattning", "category": "recruitment"},
+  ...
+]
+
+Kategorier: recruitment, salary, career, hr_tech, trends, leadership, labor_market, business`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+      }),
+    });
+    
+    if (!response.ok) {
+      console.log('AI fallback request failed:', response.status);
+      return [];
+    }
+    
+    const result = await response.json();
+    const content = result.choices?.[0]?.message?.content || '';
+    
+    // Parse JSON from response (handle markdown code blocks)
+    let jsonStr = content;
+    if (content.includes('```')) {
+      const match = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (match) jsonStr = match[1].trim();
+    }
+    
+    const aiNews = JSON.parse(jsonStr);
+    
+    if (!Array.isArray(aiNews) || aiNews.length === 0) {
+      console.log('AI returned invalid format');
+      return [];
+    }
+    
+    // Insert AI-generated news (without source_url to indicate AI origin internally)
+    const newsToInsert = aiNews.slice(0, 4).map((item: any, index: number) => {
+      const catInfo = getCategoryInfo(item.category || 'trends');
+      return {
+        title: item.title,
+        summary: item.summary,
+        source: 'Parium Redaktion', // Looks like editorial content, not "AI"
+        source_url: null, // No external link
+        category: catInfo.label,
+        icon_name: catInfo.icon,
+        gradient: catInfo.gradient,
+        news_date: today,
+        order_index: index,
+        is_translated: false,
+        published_at: new Date().toISOString(),
+      };
+    });
+    
+    const { error } = await supabase.from('daily_hr_news').insert(newsToInsert);
+    
+    if (error) {
+      console.error('Failed to insert AI fallback news:', error);
+      return [];
+    }
+    
+    console.log(`Inserted ${newsToInsert.length} AI fallback articles`);
+    return newsToInsert;
+    
+  } catch (error) {
+    console.error('AI fallback generation failed:', error);
+    return [];
+  }
+}
