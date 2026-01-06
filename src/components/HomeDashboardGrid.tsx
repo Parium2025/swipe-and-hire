@@ -84,19 +84,19 @@ const NewsCard = memo(() => {
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-6 h-full flex flex-col justify-between">
+      <CardContent className="relative p-4 h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between mb-auto">
-          <div className="p-2.5 rounded-xl bg-white/10">
-            <Newspaper className="h-6 w-6 text-white" strokeWidth={1.5} />
+        <div className="flex items-center justify-between">
+          <div className="p-2 rounded-xl bg-white/10">
+            <Newspaper className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
-          <span className="text-xs text-white/60 uppercase tracking-wider font-medium">
+          <span className="text-[10px] text-white/60 uppercase tracking-wider font-medium">
             KÄLLA {currentNews?.source || ''}
           </span>
         </div>
         
         {/* News content */}
-        <div className="flex-1 flex flex-col justify-center py-4">
+        <div className="flex-1 flex flex-col justify-center py-2">
           <AnimatePresence mode="wait">
             {currentNews ? (
               <motion.div
@@ -108,21 +108,21 @@ const NewsCard = memo(() => {
                 onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
                 className={currentNews.source_url ? 'cursor-pointer group' : ''}
               >
-                <h3 className="text-lg font-semibold text-white leading-snug mb-2">
+                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
                   {currentNews.title}
                 </h3>
-                <p className="text-sm text-white/70 line-clamp-1 mb-3">
+                <p className="text-xs text-white/70 line-clamp-1 mb-2">
                   {currentNews.summary || currentNews.title}
                 </p>
                 {currentNews.source_url && (
-                  <div className="flex items-center gap-1.5 text-white/50 group-hover:text-white/80 transition-colors">
-                    <span className="text-sm">Läs mer</span>
-                    <ExternalLink className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-1 text-white/50 group-hover:text-white/80 transition-colors">
+                    <span className="text-xs">Läs mer</span>
+                    <ExternalLink className="h-3 w-3" />
                   </div>
                 )}
               </motion.div>
             ) : (
-              <p className="text-sm text-white/60 text-center">Inga nyheter just nu</p>
+              <p className="text-xs text-white/60 text-center">Inga nyheter just nu</p>
             )}
           </AnimatePresence>
         </div>
@@ -205,19 +205,19 @@ const StatsCard = memo(() => {
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-6 h-full flex flex-col justify-between">
+      <CardContent className="relative p-4 h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between mb-auto">
-          <div className="p-2.5 rounded-xl bg-white/10">
-            <Icon className="h-6 w-6 text-white" strokeWidth={1.5} />
+        <div className="flex items-center justify-between">
+          <div className="p-2 rounded-xl bg-white/10">
+            <Icon className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
-          <span className="text-xs text-white/60 uppercase tracking-wider font-medium">
-            KÄLLA Parium
+          <span className="text-[10px] text-white/60 uppercase tracking-wider font-medium">
+            KÄLLA PARIUM
           </span>
         </div>
         
         {/* Stats content */}
-        <div className="flex-1 flex flex-col justify-center py-4">
+        <div className="flex-1 flex flex-col justify-center py-2">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -226,11 +226,11 @@ const StatsCard = memo(() => {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              <h3 className="text-lg font-semibold text-white leading-snug mb-1">
+              <h3 className="text-sm font-semibold text-white leading-snug mb-0.5">
                 {currentStat.label}
               </h3>
-              <div className="text-3xl font-bold text-white mb-2">{currentStat.value}</div>
-              <p className="text-sm text-white/70">
+              <div className="text-2xl font-bold text-white mb-1">{currentStat.value}</div>
+              <p className="text-xs text-white/70">
                 {currentStat.description}
               </p>
             </motion.div>
