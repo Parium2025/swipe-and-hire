@@ -94,9 +94,9 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
         {/* Decorative elements */}
         <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
         
-        <CardContent className="relative p-5 flex flex-col h-full min-h-[160px]">
+        <CardContent className="relative p-5 flex flex-col h-full min-h-[160px] max-h-[200px]">
           {/* Icon, translation badge, and source */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
                 <Icon className="h-5 w-5 text-white" strokeWidth={1.5} />
@@ -113,17 +113,19 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
           </div>
           
           {/* Title */}
-          <h3 className="text-base font-semibold text-white mb-2 leading-tight line-clamp-2">
+          <h3 className="text-base font-semibold text-white mb-2 leading-tight line-clamp-2 flex-shrink-0">
             {news.title}
           </h3>
           
-          {/* Summary */}
-          <p className="text-sm text-white flex-1 line-clamp-2">
-            {news.summary}
-          </p>
+          {/* Summary - scrollable */}
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent pr-1">
+            <p className="text-sm text-white/90">
+              {news.summary}
+            </p>
+          </div>
           
           {/* Published time and link */}
-          <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center justify-between mt-3 flex-shrink-0">
             {publishedTime && (
               <span className="text-xs text-white">{publishedTime}</span>
             )}
