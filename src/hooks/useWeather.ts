@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
-
+import { useBackgroundLocation } from './useBackgroundLocation';
 interface WeatherData {
   temperature: number;
   feelsLike: number;
@@ -421,6 +421,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const locationRef = useRef<CachedLocation | null>(null);
   const initializedRef = useRef(false);
   const mountedRef = useRef(true);
+  const backgroundUpdatePendingRef = useRef(false);
 
   const [weather, setWeather] = useState<WeatherData>(() => {
     // Try to use cached weather data for instant display (from preload during login)
@@ -487,13 +488,44 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     }
   }, [updateWeather]);
 
-  const updateLocation = useCallback(async (newLat: number, newLon: number, knownCity: string | null, source: 'gps' | 'ip' | 'fallback') => {
+  const updateLocation = useCallback(async (newLat: number, newLon: number, knownCity: string | null, source: 'gps' | 'ip' | 'fallback' | 'background') => {
     const city = knownCity || await getCityName(newLat, newLon);
-    const newLocation: CachedLocation = { lat: newLat, lon: newLon, city, source, timestamp: Date.now() };
+    const newLocation: CachedLocation = { lat: newLat, lon: newLon, city, source: source === 'background' ? 'gps' : source, timestamp: Date.now() };
     setCachedLocation(newLocation);
     locationRef.current = newLocation;
     await fetchWeatherOnly(newLat, newLon, city);
   }, [fetchWeatherOnly]);
+
+  // Handler for background location updates (from native app)
+  const handleBackgroundLocationUpdate = useCallback(async (lat: number, lon: number) => {
+    // Debounce - don't update if we already have a recent update
+    if (backgroundUpdatePendingRef.current) return;
+    
+    const cached = locationRef.current;
+    if (cached) {
+      const distance = getDistanceKm(cached.lat, cached.lon, lat, lon);
+      // Only update if moved more than 500 meters
+      if (distance < 0.5) {
+        console.log('Background update: not enough movement, skipping');
+        return;
+      }
+      console.log(`Background update: moved ${distance.toFixed(2)}km, updating weather`);
+    }
+    
+    backgroundUpdatePendingRef.current = true;
+    try {
+      await updateLocation(lat, lon, null, 'background');
+    } finally {
+      backgroundUpdatePendingRef.current = false;
+    }
+  }, [updateLocation]);
+
+  // Use background location tracking on native platforms
+  useBackgroundLocation({
+    onLocationUpdate: handleBackgroundLocationUpdate,
+    distanceFilter: 500, // 500 meters minimum between updates
+    enabled: enabled && isNativeApp(),
+  });
 
   const checkForLocationChange = useCallback(async (silent = true) => {
     // Always try GPS first - uses native Capacitor on mobile, browser API on web
