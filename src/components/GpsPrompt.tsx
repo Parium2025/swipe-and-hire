@@ -59,8 +59,18 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
   const [visible, setVisible] = useState(false);
   const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
   const [showHelpModal, setShowHelpModal] = useState(false);
+  
+  // Check for debug mode via URL parameter
+  const forceShow = new URLSearchParams(window.location.search).get('showGpsPrompt') === 'true';
 
   useEffect(() => {
+    // If force show is enabled, show immediately with "prompt" state for testing
+    if (forceShow) {
+      setGpsStatus('prompt');
+      setVisible(true);
+      return;
+    }
+    
     const checkPermission = async () => {
       const status = await checkGpsPermission();
       setGpsStatus(status);
@@ -96,7 +106,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     };
 
     checkPermission();
-  }, []);
+  }, [forceShow]);
 
   const handleDismiss = () => {
     setVisible(false);
@@ -147,8 +157,8 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     );
   };
 
-  // Don't show if GPS is already granted
-  if (gpsStatus === 'granted') {
+  // Don't show if GPS is already granted (unless force show is enabled)
+  if (gpsStatus === 'granted' && !forceShow) {
     return null;
   }
 
