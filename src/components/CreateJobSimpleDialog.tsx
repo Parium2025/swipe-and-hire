@@ -501,7 +501,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                       <span className="text-sm text-blue-400 ml-2">Standard</span>
                                     )}
                                   </button>
-                                  <div className="flex gap-1 flex-shrink-0">
+                                  <div className="flex gap-2 flex-shrink-0">
                                     <Button
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -514,10 +514,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                         }, 150);
                                       }}
                                       variant="ghost"
-                                      size="sm"
-                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/20 h-8 w-8 p-0 flex-shrink-0"
+                                      size="icon"
+                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/40 h-8 w-8 rounded-full flex-shrink-0"
                                     >
-                                      <Edit className="h-4 w-4" />
+                                      <Edit className="h-3.5 w-3.5" />
                                     </Button>
                                     <Button
                                       onClick={(e) => {
@@ -525,10 +525,10 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                         setTemplateToDelete(template);
                                       }}
                                       variant="ghost"
-                                      size="sm"
-                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 hover:text-white md:hover:text-white h-8 w-8 p-0 flex-shrink-0"
+                                      size="icon"
+                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-white h-8 w-8 rounded-full flex-shrink-0"
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
                                   </div>
                                 </div>
