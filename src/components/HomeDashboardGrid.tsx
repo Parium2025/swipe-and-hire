@@ -381,9 +381,37 @@ PlaceholderCard.displayName = 'PlaceholderCard';
 
 const InsightsCard = memo(() => {
   const { data: insights, isLoading } = usePariumInsights();
-
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const items = insights?.slice(0, 4) || [];
-  const updatedAt = items[0]?.published_at ?? null;
+
+  const goNext = useCallback(() => {
+    if (items.length > 1) {
+      setCurrentIndex(prev => (prev + 1) % items.length);
+    }
+  }, [items.length]);
+
+  const goPrev = useCallback(() => {
+    if (items.length > 1) {
+      setCurrentIndex(prev => (prev - 1 + items.length) % items.length);
+    }
+  }, [items.length]);
+
+  // Auto-rotation every 10 seconds (pauses on hover)
+  useEffect(() => {
+    if (items.length <= 1 || isPaused) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % items.length);
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [items.length, isPaused]);
+
+  const swipeHandlers = useSwipeGesture({
+    onSwipeLeft: goNext,
+    onSwipeRight: goPrev,
+  });
 
   if (isLoading) {
     return (
@@ -394,57 +422,82 @@ const InsightsCard = memo(() => {
             <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
             <Skeleton className="h-4 w-32 bg-white/20" />
           </div>
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-full bg-white/10" />
-            <Skeleton className="h-3 w-11/12 bg-white/10" />
-            <Skeleton className="h-3 w-10/12 bg-white/10" />
-            <Skeleton className="h-3 w-9/12 bg-white/10" />
-          </div>
+          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
         </CardContent>
       </Card>
     );
   }
 
+  const currentInsight = items[currentIndex];
+
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px]`}>
+    <Card 
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px] touch-pan-y`}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      {...swipeHandlers}
+    >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
-
+      
       <CardContent className="relative p-4 h-full flex flex-col">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="p-2 rounded-xl bg-white/10">
             <Target className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
           <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium">INSIKTER</span>
         </div>
-
+        
+        {/* Insight content */}
         <div className="flex-1 flex flex-col justify-center py-2">
-          {items.length > 0 ? (
-            <div className="space-y-2">
-              {items.map((n, i) => (
-                <div key={n.id} className="flex items-start gap-2">
-                  <span className="text-[10px] text-white/60 tabular-nums mt-[1px]">{i + 1}.</span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-white leading-snug line-clamp-1">{n.title}</p>
-                    <p className="text-[10px] text-white/70 line-clamp-1">{n.category}</p>
+          <AnimatePresence mode="wait">
+            {currentInsight ? (
+              <motion.div
+                key={currentInsight.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
+                  {currentInsight.title}
+                </h3>
+                <p className="text-xs text-white line-clamp-2 mb-1">
+                  {currentInsight.summary || currentInsight.title}
+                </p>
+                {currentInsight.published_at && (
+                  <div className="flex items-center gap-1.5 text-white text-[10px]">
+                    <Clock className="h-3 w-3" />
+                    <span>{formatNewsTime(currentInsight.published_at)}</span>
                   </div>
-                </div>
+                )}
+              </motion.div>
+            ) : (
+              <p className="text-xs text-white/60 text-center">Inga insikter just nu</p>
+            )}
+          </AnimatePresence>
+        </div>
+        
+        {/* Footer with dots */}
+        <div className="flex items-center justify-between mt-auto">
+          {items.length > 1 ? (
+            <div className="flex items-center gap-2">
+              {items.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentIndex(i)}
+                  className={cn(
+                    "w-2.5 h-2.5 rounded-full transition-all duration-300",
+                    i === currentIndex 
+                      ? "bg-white" 
+                      : "bg-white/30 hover:bg-white/50"
+                  )}
+                  aria-label={`Gå till insikt ${i + 1}`}
+                />
               ))}
             </div>
-          ) : (
-            <p className="text-xs text-white/60 text-center">Inga insikter just nu</p>
-          )}
-        </div>
-
-        <div className="mt-auto">
-          {updatedAt ? (
-            <div className="flex items-center gap-1.5 text-white text-[10px]">
-              <Clock className="h-3 w-3" />
-              <span>Uppdaterad {formatNewsTime(updatedAt)}</span>
-            </div>
-          ) : (
-            <div className="h-3" />
-          )}
+          ) : <div />}
         </div>
       </CardContent>
     </Card>
