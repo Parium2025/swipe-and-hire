@@ -515,9 +515,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                       }}
                                       variant="ghost"
                                       size="icon"
-                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/40 h-8 w-8 rounded-full flex-shrink-0"
+                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/40 h-9 w-9 rounded-full flex-shrink-0"
                                     >
-                                      <Edit className="h-3.5 w-3.5" />
+                                      <Edit className="h-4 w-4" />
                                     </Button>
                                     <Button
                                       onClick={(e) => {
@@ -526,9 +526,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                       }}
                                       variant="ghost"
                                       size="icon"
-                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-white h-8 w-8 rounded-full flex-shrink-0"
+                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-white h-9 w-9 rounded-full flex-shrink-0"
                                     >
-                                      <Trash2 className="h-3.5 w-3.5" />
+                                      <Trash2 className="h-4 w-4" />
                                     </Button>
                                   </div>
                                 </div>
