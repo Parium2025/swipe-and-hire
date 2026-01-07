@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
 import { parse } from 'https://deno.land/std@0.224.0/csv/mod.ts';
 
 const corsHeaders = {

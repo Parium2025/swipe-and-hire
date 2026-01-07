@@ -2,7 +2,7 @@
 // Purpose: Move profile and cover images from public bucket (profile-media) to private bucket (job-applications)
 // and fix database fields to store permanent storage paths (never signed URLs).
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
+import { createClient } from 'npm:@supabase/supabase-js@2.53.0';
 
 // CORS headers for web calls
 const corsHeaders = {
