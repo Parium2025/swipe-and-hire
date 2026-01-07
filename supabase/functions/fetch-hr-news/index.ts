@@ -14,6 +14,7 @@ const TRUSTED_HR_SOURCES = [
   'HRnytt.se', 'Chef.se', 'Arbetsvärlden',
   // Swedish news/economy (verified working)
   'DN Ekonomi', 'Expressen Ekonomi', 'Dagens Industri',
+  'SvD Näringsliv', 'Breakit',
 ];
 
 const RSS_SOURCES = [
@@ -26,6 +27,10 @@ const RSS_SOURCES = [
   { url: 'https://www.dn.se/rss/ekonomi/', name: 'DN Ekonomi' },
   { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
   { url: 'https://feeds.expressen.se/ekonomi', name: 'Expressen Ekonomi' },
+  { url: 'https://www.svd.se/feed/naringsliv', name: 'SvD Näringsliv' },
+  
+  // === SWEDISH TECH/STARTUP ===
+  { url: 'https://www.breakit.se/feed/artiklar', name: 'Breakit' },
 ];
 
 // Keywords to filter out truly negative/scandal content (not labor market statistics)
