@@ -202,6 +202,9 @@ Svara ENDAST med giltig JSON.`
     
     return newsItems.slice(0, 4).map((item: any, idx: number) => {
       const catInfo = categoryMap[item.category] || categoryMap['Trender'];
+      // Spread times: 0, 15, 35, 60 minutes ago
+      const minutesAgo = [0, 15, 35, 60][idx] || idx * 20;
+      const itemTime = new Date(Date.now() - minutesAgo * 60 * 1000).toISOString();
       return {
         title: item.title,
         summary: item.summary,
@@ -212,7 +215,7 @@ Svara ENDAST med giltig JSON.`
         gradient: catInfo.gradient,
         news_date: today,
         order_index: idx,
-        published_at: now,
+        published_at: itemTime,
       };
     });
   } catch (e) {
