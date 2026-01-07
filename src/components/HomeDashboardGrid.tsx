@@ -450,7 +450,7 @@ const InsightsCard = memo(() => {
         </div>
         
         {/* Insight content */}
-        <div className="flex-1 flex flex-col justify-center py-2">
+        <div className="flex-1 min-h-0 flex flex-col py-2">
           <AnimatePresence mode="wait">
             {currentInsight ? (
               <motion.div
@@ -459,15 +459,21 @@ const InsightsCard = memo(() => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
+                className="flex-1 min-h-0 flex flex-col"
               >
-                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
+                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2 flex-shrink-0">
                   {currentInsight.title}
                 </h3>
-                <p className="text-xs text-white line-clamp-2 mb-1">
-                  {currentInsight.summary || currentInsight.title}
-                </p>
+
+                {/* Scrollable summary */}
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1">
+                  <p className="text-xs text-white leading-relaxed">
+                    {currentInsight.summary || currentInsight.title}
+                  </p>
+                </div>
+
                 {currentInsight.published_at && (
-                  <div className="flex items-center gap-1.5 text-white text-[10px]">
+                  <div className="flex items-center gap-1.5 text-white text-[10px] flex-shrink-0 mt-1">
                     <Clock className="h-3 w-3" />
                     <span>{formatNewsTime(currentInsight.published_at)}</span>
                   </div>
