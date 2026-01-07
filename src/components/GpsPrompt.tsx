@@ -128,34 +128,34 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[calc(100%-2rem)]"
+            className="fixed top-20 right-4 z-50 max-w-xs w-[calc(100%-2rem)] sm:w-80"
           >
             <div className={`backdrop-blur-xl rounded-2xl shadow-2xl border p-4 ${
               isDenied 
-                ? 'bg-amber-50/95 dark:bg-amber-900/30 border-amber-200/50 dark:border-amber-700/50' 
-                : 'bg-white/95 dark:bg-slate-900/95 border-white/20 dark:border-slate-700/50'
+                ? 'bg-amber-950/90 border-amber-700/50' 
+                : 'bg-slate-900/95 border-slate-700/50'
             }`}>
               <div className="flex items-start gap-3">
                 <div className={`p-2 rounded-xl shrink-0 ${
                   isDenied 
                     ? 'bg-amber-500/20' 
-                    : 'bg-gradient-to-br from-primary/20 to-primary/10'
+                    : 'bg-teal-500/20'
                 }`}>
                   {isDenied ? (
-                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    <AlertCircle className="h-5 w-5 text-amber-400" />
                   ) : (
-                    <MapPin className="h-5 w-5 text-primary" />
+                    <MapPin className="h-5 w-5 text-teal-400" />
                   )}
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <h4 className={`font-semibold text-sm mb-1 ${
-                    isDenied ? 'text-amber-900 dark:text-amber-100' : 'text-foreground'
+                    isDenied ? 'text-amber-100' : 'text-white'
                   }`}>
                     {isDenied ? 'Plats är blockerad' : 'Aktivera plats för exakt väder'}
                   </h4>
                   <p className={`text-xs leading-relaxed ${
-                    isDenied ? 'text-amber-800 dark:text-amber-200' : 'text-muted-foreground'
+                    isDenied ? 'text-amber-200/80' : 'text-slate-300'
                   }`}>
                     {isDenied 
                       ? 'Du har blockerat platsåtkomst. Klicka nedan för att se hur du aktiverar det.'
@@ -168,8 +168,8 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
                       onClick={handleEnableGps}
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                         isDenied
-                          ? 'bg-amber-600 text-white hover:bg-amber-700'
-                          : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                          ? 'bg-amber-500 text-amber-950 hover:bg-amber-400'
+                          : 'bg-teal-500 text-white hover:bg-teal-400'
                       }`}
                     >
                       {isDenied ? 'Visa instruktioner' : 'Aktivera'}
@@ -177,7 +177,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
                     {!isDenied && (
                       <button
                         onClick={handleDismiss}
-                        className="px-3 py-1.5 text-muted-foreground text-xs font-medium hover:text-foreground transition-colors"
+                        className="px-3 py-1.5 text-slate-400 text-xs font-medium hover:text-white transition-colors"
                       >
                         Inte nu
                       </button>
@@ -189,8 +189,8 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
                   onClick={handleDismiss}
                   className={`p-1 transition-colors shrink-0 ${
                     isDenied 
-                      ? 'text-amber-600 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-100' 
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'text-amber-400 hover:text-amber-100' 
+                      : 'text-slate-400 hover:text-white'
                   }`}
                   aria-label="Stäng"
                 >
