@@ -26,6 +26,8 @@ interface UseWeatherOptions {
   fallbackCity?: string;
   /** Whether to enable weather fetching, default true */
   enabled?: boolean;
+  /** Whether to enable background location updates (native only), default false */
+  backgroundLocationEnabled?: boolean;
 }
 
 const LOCATION_CACHE_KEY = 'parium_weather_location';
@@ -417,6 +419,7 @@ function getTimeBasedEmoji(): string {
 export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const fallbackCity = options.fallbackCity?.trim();
   const enabled = options.enabled ?? true;
+  const backgroundLocationEnabled = options.backgroundLocationEnabled ?? false;
 
   const locationRef = useRef<CachedLocation | null>(null);
   const initializedRef = useRef(false);
@@ -520,11 +523,11 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     }
   }, [updateLocation]);
 
-  // Use background location tracking on native platforms
+  // Use background location tracking on native platforms (only if user has enabled it)
   useBackgroundLocation({
     onLocationUpdate: handleBackgroundLocationUpdate,
     distanceFilter: 500, // 500 meters minimum between updates
-    enabled: enabled && isNativeApp(),
+    enabled: enabled && backgroundLocationEnabled && isNativeApp(),
   });
 
   const checkForLocationChange = useCallback(async (silent = true) => {

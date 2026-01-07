@@ -1092,6 +1092,7 @@ export type Database = {
         Row: {
           address: string | null
           availability: string | null
+          background_location_enabled: boolean | null
           bio: string | null
           birth_date: string | null
           city: string | null
@@ -1134,6 +1135,7 @@ export type Database = {
         Insert: {
           address?: string | null
           availability?: string | null
+          background_location_enabled?: boolean | null
           bio?: string | null
           birth_date?: string | null
           city?: string | null
@@ -1176,6 +1178,7 @@ export type Database = {
         Update: {
           address?: string | null
           availability?: string | null
+          background_location_enabled?: boolean | null
           bio?: string | null
           birth_date?: string | null
           city?: string | null

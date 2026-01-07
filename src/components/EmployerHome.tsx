@@ -145,6 +145,7 @@ const EmployerHome = memo(() => {
   const weather = useWeather({
     fallbackCity: gpsGranted ? (profile?.location || profile?.home_location || profile?.address || 'Stockholm') : undefined,
     enabled: gpsGranted === true,
+    backgroundLocationEnabled: (profile as any)?.background_location_enabled ?? false,
   });
   
   // Emoji logic based on time of day and weather

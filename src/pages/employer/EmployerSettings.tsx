@@ -4,12 +4,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
+import { Capacitor } from '@capacitor/core';
+import { MapPin, Smartphone } from 'lucide-react';
 
 const EmployerSettings = () => {
-  const { user, updatePassword } = useAuth();
+  const { user, profile, updateProfile, updatePassword } = useAuth();
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -21,6 +23,41 @@ const EmployerSettings = () => {
     messagesFromCandidates: true,
     weeklyReports: false
   });
+  const [backgroundLocationEnabled, setBackgroundLocationEnabled] = useState(false);
+  const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
+  const isNativeApp = Capacitor.isNativePlatform();
+
+  // Load background location preference from profile
+  useEffect(() => {
+    if (profile) {
+      setBackgroundLocationEnabled((profile as any)?.background_location_enabled ?? false);
+    }
+  }, [profile]);
+
+  const handleBackgroundLocationToggle = async (enabled: boolean) => {
+    setBackgroundLocationEnabled(enabled);
+    setSavingBackgroundLocation(true);
+    
+    try {
+      await updateProfile({ background_location_enabled: enabled } as any);
+      toast({
+        title: enabled ? "Bakgrundsplats aktiverad" : "Bakgrundsplats inaktiverad",
+        description: enabled 
+          ? "Vädret uppdateras automatiskt även när appen är i bakgrunden" 
+          : "Vädret uppdateras endast när appen är aktiv"
+      });
+    } catch (error) {
+      // Revert on error
+      setBackgroundLocationEnabled(!enabled);
+      toast({
+        title: "Fel",
+        description: "Kunde inte spara inställningen.",
+        variant: "destructive"
+      });
+    } finally {
+      setSavingBackgroundLocation(false);
+    }
+  };
 
   const handlePasswordUpdate = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -151,6 +188,39 @@ const EmployerSettings = () => {
             <Switch
               checked={notifications.weeklyReports}
               onCheckedChange={(checked) => setNotifications({...notifications, weeklyReports: checked})}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Background Location Settings - Only show on native apps or always show for awareness */}
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+        <div className="space-y-5 md:space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="h-4 w-4 text-white" />
+            <h3 className="text-sm font-medium text-white">Platsinställningar</h3>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <Label className="text-sm text-white">Bakgrundsplats för väder</Label>
+              <p className="text-sm text-white/70">
+                {isNativeApp 
+                  ? "Uppdatera vädret automatiskt även när appen är i bakgrunden"
+                  : "Aktiveras endast i native-appen (iOS/Android)"
+                }
+              </p>
+              {!isNativeApp && (
+                <div className="flex items-center gap-1.5 mt-1.5 text-xs text-white/50">
+                  <Smartphone className="h-3 w-3" />
+                  <span>Tillgänglig i mobilappen</span>
+                </div>
+              )}
+            </div>
+            <Switch
+              checked={backgroundLocationEnabled}
+              onCheckedChange={handleBackgroundLocationToggle}
+              disabled={savingBackgroundLocation || !isNativeApp}
             />
           </div>
         </div>
