@@ -323,15 +323,29 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const mountedRef = useRef(true);
 
   const [weather, setWeather] = useState<WeatherData>(() => {
-    // Start with loading state - we ALWAYS fetch fresh GPS location
-    // Never trust cached city name on initial load
+    // Try to use cached weather data for instant display (from preload during login)
+    const cached = getCachedWeather();
+    if (cached) {
+      return {
+        temperature: cached.temperature,
+        feelsLike: cached.feelsLike,
+        weatherCode: cached.weatherCode,
+        description: cached.description,
+        emoji: cached.emoji,
+        city: cached.city,
+        isLoading: false, // Show cached immediately!
+        error: null,
+      };
+    }
+    
+    // No cache - start loading
     return {
       temperature: 0,
       feelsLike: 0,
       weatherCode: 0,
       description: '',
       emoji: getTimeBasedEmoji(),
-      city: '', // Empty until we get fresh GPS
+      city: '',
       isLoading: true,
       error: null,
     };
@@ -466,15 +480,29 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       };
     }
     
-    // Initial load - ALWAYS do fresh GPS check, never show cached city first
+    // Initial load - use cached data if available, then refresh GPS in background
     if (!initializedRef.current) {
       initializedRef.current = true;
       
-      // Clear any stale cache to ensure fresh data
-      clearWeatherCache();
+      // Check if we already have valid cached location (from preload during login)
+      const cachedLocation = getCachedLocation();
+      const cachedWeather = getCachedWeather();
       
-      // Start fresh GPS check immediately
-      checkForLocationChange(false);
+      if (cachedLocation && cachedWeather) {
+        // We have cached data from preload - use it immediately
+        locationRef.current = cachedLocation;
+        console.log('Using preloaded weather cache for instant display');
+        
+        // Still do a background GPS refresh to ensure accuracy, but don't show loading
+        setTimeout(() => {
+          if (mountedRef.current) {
+            checkForLocationChange(true); // Silent refresh
+          }
+        }, 2000); // Small delay to let UI settle
+      } else {
+        // No cache - do full fresh check with loading state
+        checkForLocationChange(false);
+      }
     }
 
     // LIVE GPS TRACKING: Check GPS location every 2 minutes for real-time updates
