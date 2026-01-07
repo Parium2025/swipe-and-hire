@@ -159,7 +159,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
                   }`}>
                     {isDenied 
                       ? 'Du har blockerat platsåtkomst. Klicka nedan för att se hur du aktiverar det.'
-                      : 'Tillåt GPS för att alltid se rätt väder oavsett var du befinner dig.'
+                      : 'Tillåt GPS för att alltid se rätt väder och plats oavsett var du befinner dig.'
                     }
                   </p>
                   
