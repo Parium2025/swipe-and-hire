@@ -74,7 +74,7 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
 function isHRRelevant(text: string, source: string): boolean {
   const t = text.toLowerCase();
   if (BLOCKLIST.some(k => t.includes(k))) return false;
-  if (TRUSTED_SOURCES.includes(source)) return true;
+  // Always require HR keywords - no free pass for any source
   return HR_KEYWORDS.some(k => t.includes(k));
 }
 
