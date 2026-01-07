@@ -191,7 +191,7 @@ async function generateAIFallbackNews(supabase: any): Promise<any[]> {
       return {
         title: item.title,
         summary: item.summary,
-        source: 'Parium AI',
+        source: 'Parium',
         source_url: null,
         category: item.category,
         icon_name: catInfo.icon,
