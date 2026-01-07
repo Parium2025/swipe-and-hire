@@ -446,7 +446,7 @@ function EmployerTopNav() {
               <DropdownMenuSeparator className="bg-white/10 my-1.5" />
               <DropdownMenuItem 
                 onClick={signOut} 
-                className={`${dropdownItemClass} text-red-400 hover:text-red-300 hover:bg-red-500/10`}
+                className={`${dropdownItemClass} text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-full`}
               >
                 <LogOut className="h-4 w-4" />
                 Logga ut
