@@ -133,29 +133,29 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
             <div className={`backdrop-blur-xl rounded-2xl shadow-2xl border p-4 ${
               isDenied 
                 ? 'bg-amber-950/90 border-amber-700/50' 
-                : 'bg-card/95 border-border'
+                : 'bg-slate-800/95 border-slate-600/50'
             }`}>
               <div className="flex items-start gap-3">
                 <div className={`p-2 rounded-xl shrink-0 ${
                   isDenied 
                     ? 'bg-amber-500/20' 
-                    : 'bg-primary/20'
+                    : 'bg-teal-500/20'
                 }`}>
                   {isDenied ? (
                     <AlertCircle className="h-5 w-5 text-amber-400" />
                   ) : (
-                    <MapPin className="h-5 w-5 text-primary" />
+                    <MapPin className="h-5 w-5 text-teal-400" />
                   )}
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <h4 className={`font-semibold text-sm mb-1 ${
-                    isDenied ? 'text-amber-100' : 'text-foreground'
+                    isDenied ? 'text-amber-100' : 'text-white'
                   }`}>
                     {isDenied ? 'Plats är blockerad' : 'Aktivera plats för exakt väder'}
                   </h4>
                   <p className={`text-xs leading-relaxed ${
-                    isDenied ? 'text-amber-200/80' : 'text-muted-foreground'
+                    isDenied ? 'text-amber-200/80' : 'text-slate-300'
                   }`}>
                     {isDenied 
                       ? 'Du har blockerat platsåtkomst. Klicka nedan för att se hur du aktiverar det.'
@@ -169,7 +169,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                         isDenied
                           ? 'bg-amber-500 text-amber-950 hover:bg-amber-400'
-                          : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                          : 'bg-teal-500 text-white hover:bg-teal-400'
                       }`}
                     >
                       {isDenied ? 'Visa instruktioner' : 'Aktivera'}
@@ -177,7 +177,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
                     {!isDenied && (
                       <button
                         onClick={handleDismiss}
-                        className="px-3 py-1.5 text-muted-foreground text-xs font-medium hover:text-foreground transition-colors"
+                        className="px-3 py-1.5 text-slate-400 text-xs font-medium hover:text-white transition-colors"
                       >
                         Inte nu
                       </button>
@@ -190,7 +190,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
                   className={`p-1 transition-colors shrink-0 ${
                     isDenied 
                       ? 'text-amber-400 hover:text-amber-100' 
-                      : 'text-muted-foreground hover:text-foreground'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                   aria-label="Stäng"
                 >
