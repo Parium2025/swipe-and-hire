@@ -17,6 +17,7 @@ import {
   Clock
 } from 'lucide-react';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
+import { usePariumInsights } from '@/hooks/usePariumInsights';
 import { useJobsData } from '@/hooks/useJobsData';
 import { isJobExpiredCheck } from '@/lib/date';
 import { cn } from '@/lib/utils';
@@ -378,6 +379,80 @@ const PlaceholderCard = memo(({
 
 PlaceholderCard.displayName = 'PlaceholderCard';
 
+const InsightsCard = memo(() => {
+  const { data: insights, isLoading } = usePariumInsights();
+
+  const items = insights?.slice(0, 4) || [];
+  const updatedAt = items[0]?.published_at ?? null;
+
+  if (isLoading) {
+    return (
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px]`}>
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <CardContent className="relative p-6 h-full">
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
+            <Skeleton className="h-4 w-32 bg-white/20" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-full bg-white/10" />
+            <Skeleton className="h-3 w-11/12 bg-white/10" />
+            <Skeleton className="h-3 w-10/12 bg-white/10" />
+            <Skeleton className="h-3 w-9/12 bg-white/10" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px]`}>
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+      <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
+
+      <CardContent className="relative p-4 h-full flex flex-col">
+        <div className="flex items-center justify-between">
+          <div className="p-2 rounded-xl bg-white/10">
+            <Target className="h-5 w-5 text-white" strokeWidth={1.5} />
+          </div>
+          <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium">INSIKTER</span>
+        </div>
+
+        <div className="flex-1 flex flex-col justify-center py-2">
+          {items.length > 0 ? (
+            <div className="space-y-2">
+              {items.map((n, i) => (
+                <div key={n.id} className="flex items-start gap-2">
+                  <span className="text-[10px] text-white/60 tabular-nums mt-[1px]">{i + 1}.</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-white leading-snug line-clamp-1">{n.title}</p>
+                    <p className="text-[10px] text-white/70 line-clamp-1">{n.category}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-white/60 text-center">Inga insikter just nu</p>
+          )}
+        </div>
+
+        <div className="mt-auto">
+          {updatedAt ? (
+            <div className="flex items-center gap-1.5 text-white text-[10px]">
+              <Clock className="h-3 w-3" />
+              <span>Uppdaterad {formatNewsTime(updatedAt)}</span>
+            </div>
+          ) : (
+            <div className="h-3" />
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+InsightsCard.displayName = 'InsightsCard';
+
 // Main Dashboard Grid
 export const HomeDashboardGrid = memo(() => {
   return (
@@ -431,12 +506,7 @@ export const HomeDashboardGrid = memo(() => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.25 }}
         >
-          <PlaceholderCard 
-            gradient={GRADIENTS.placeholder2}
-            icon={Target}
-            title="Kommer snart"
-            description="Fler funktioner på väg"
-          />
+          <InsightsCard />
         </motion.div>
       </div>
     </div>
