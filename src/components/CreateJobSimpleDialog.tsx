@@ -502,34 +502,29 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                     )}
                                   </button>
                                   <div className="flex gap-2 flex-shrink-0">
-                                    <Button
+                                    <button
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         setTemplateToEdit(template);
                                         setTemplateMenuOpen(false);
                                         setOpen(false);
-                                        // Samma delay som för MobileJobWizard för smidig övergång
                                         setTimeout(() => {
                                           setShowTemplateWizard(true);
                                         }, 150);
                                       }}
-                                      variant="ghost"
-                                      size="icon"
-                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/40 h-9 w-9 rounded-full flex-shrink-0"
+                                      className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95"
                                     >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <Button
+                                      <Edit size={14} />
+                                    </button>
+                                    <button
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         setTemplateToDelete(template);
                                       }}
-                                      variant="ghost"
-                                      size="icon"
-                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-white h-9 w-9 rounded-full flex-shrink-0"
+                                      className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 active:scale-95"
                                     >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
+                                      <Trash2 size={14} />
+                                    </button>
                                   </div>
                                 </div>
                               </DropdownMenuItem>
