@@ -667,6 +667,45 @@ serve(async (req) => {
       return 0;
     });
     
+    // === SMART SOURCE BALANCING ===
+    // Prioritize max 2 articles per source for variety, but fill up to target if needed
+    const TARGET_ARTICLES = 4;
+    const MAX_PER_SOURCE_INITIAL = 2;
+    
+    function balanceBySource(articles: NewsItem[], target: number): NewsItem[] {
+      const sourceCount: Record<string, number> = {};
+      const balanced: NewsItem[] = [];
+      const overflow: NewsItem[] = [];
+      
+      // First pass: take max 2 per source
+      for (const article of articles) {
+        const count = sourceCount[article.source] || 0;
+        if (count < MAX_PER_SOURCE_INITIAL) {
+          balanced.push(article);
+          sourceCount[article.source] = count + 1;
+        } else {
+          overflow.push(article);
+        }
+        
+        // Stop if we have enough with variety
+        if (balanced.length >= target) break;
+      }
+      
+      // Second pass: if we don't have enough, fill from overflow (same sources)
+      if (balanced.length < target && overflow.length > 0) {
+        for (const article of overflow) {
+          balanced.push(article);
+          if (balanced.length >= target) break;
+        }
+      }
+      
+      return balanced.slice(0, target);
+    }
+    
+    // Apply source balancing before further processing
+    allNews = balanceBySource(allNews, 20); // Balance top 20 for processing
+    console.log(`After source balancing: ${allNews.length} articles`);
+    
     // Try to translate English articles to Swedish (limit to avoid rate limits)
     const translatedNews: NewsItem[] = [];
     let translationCount = 0;
