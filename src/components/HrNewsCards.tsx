@@ -78,11 +78,15 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, delay: 0.1 + index * 0.05, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="group"
+      className={news.source_url ? "group" : ""}
     >
       <Card 
-        className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-xl ${news.source_url ? 'cursor-pointer' : ''} h-full`}
-        onClick={handleClick}
+        className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg h-full ${
+          news.source_url 
+            ? 'cursor-pointer transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-xl' 
+            : ''
+        }`}
+        onClick={news.source_url ? handleClick : undefined}
       >
         {/* Glass overlay */}
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
