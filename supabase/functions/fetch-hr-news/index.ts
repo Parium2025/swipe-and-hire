@@ -225,15 +225,49 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
     const body = await req.json().catch(() => ({}));
     const force = body.force === true;
-    
-    if (!force) {
-      const { data } = await supabase.from('daily_hr_news').select('id').gte('created_at', new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()).limit(1);
-      if (data?.length) return new Response(JSON.stringify({ message: 'Fresh news exists', skipped: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const mode = typeof body.mode === 'string' ? body.mode : 'auto';
+
+    // Explicit test mode: generate AI backup without touching RSS items
+    if (mode === 'ai') {
+      console.log('Forced AI backup mode...');
+      const aiNews = await generateAIFallbackNews(supabase);
+      if (aiNews.length) {
+        await supabase
+          .from('daily_hr_news')
+          .delete()
+          .eq('source', 'Parium')
+          .is('source_url', null);
+        await supabase.from('daily_hr_news').insert(aiNews);
+        return new Response(
+          JSON.stringify({ message: 'AI backup generated', count: aiNews.length, source: 'ai' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ message: 'AI backup failed', count: 0, source: 'ai' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
     }
-    
+
+    if (!force) {
+      const { data } = await supabase
+        .from('daily_hr_news')
+        .select('id')
+        .gte('created_at', new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString())
+        .limit(1);
+      if (data?.length)
+        return new Response(JSON.stringify({ message: 'Fresh news exists', skipped: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+    }
+
     console.log('Fetching HR news...');
     const results = await Promise.all(RSS_SOURCES.map(fetchRSS));
     
