@@ -95,6 +95,29 @@ function getCatInfo(key: string) {
   return CATEGORIES.find(c => c.key === key) || CATEGORIES.find(c => c.key === 'trends')!;
 }
 
+// Truncate text at sentence boundary (ends with . ! or ?)
+function truncateAtSentence(text: string, maxLen: number): string {
+  if (!text || text.length <= maxLen) return text;
+  const truncated = text.slice(0, maxLen);
+  // Find last sentence boundary
+  const lastDot = Math.max(
+    truncated.lastIndexOf('. '),
+    truncated.lastIndexOf('! '),
+    truncated.lastIndexOf('? '),
+    truncated.lastIndexOf('."'),
+    truncated.lastIndexOf('."')
+  );
+  if (lastDot > maxLen * 0.4) {
+    return truncated.slice(0, lastDot + 1).trim();
+  }
+  // Fallback: truncate at last space
+  const lastSpace = truncated.lastIndexOf(' ');
+  if (lastSpace > maxLen * 0.6) {
+    return truncated.slice(0, lastSpace).trim() + '...';
+  }
+  return truncated.trim() + '...';
+}
+
 async function fetchRSS(source: { url: string; name: string }) {
   try {
     const r = await fetch(source.url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Parium/1.0)', 'Accept': 'application/rss+xml, text/xml, */*' } });
@@ -108,7 +131,7 @@ async function fetchRSS(source: { url: string; name: string }) {
       return isHRRelevant(full, source.name) && !isNegative(full);
     }).map(i => ({
       title: i.title,
-      summary: i.description.slice(0, 400) || i.title,
+      summary: truncateAtSentence(i.description, 250) || i.title,
       source: source.name,
       source_url: i.link || null,
       category: categorize(`${i.title} ${i.description}`),
