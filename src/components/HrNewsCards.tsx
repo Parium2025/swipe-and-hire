@@ -2,10 +2,10 @@ import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Cpu, 
-  TrendingUp, 
-  Users, 
+import {
+  Cpu,
+  TrendingUp,
+  Users,
   Globe,
   Newspaper,
   Sparkles,
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
 import { useNewsPreferences } from '@/hooks/useNewsPreferences';
+import { useNewsImageProxy } from '@/hooks/useNewsImageProxy';
 
 // Map icon names to components
 const iconMap: Record<string, React.ElementType> = {
@@ -70,11 +71,6 @@ function decodeHtmlEntities(str: string): string {
   return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
 }
 
-function getNewsImageProxyUrl(articleId: string): string {
-  const base = import.meta.env.VITE_SUPABASE_URL;
-  return `${base}/functions/v1/news-image-proxy?id=${encodeURIComponent(articleId)}`;
-}
-
 function getDisplayImageUrl(raw?: string | null): string | null {
   if (!raw) return null;
   const url = decodeHtmlEntities(raw);
@@ -91,7 +87,7 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
   const gradient = news.gradient || defaultGradients[index % 4];
   const publishedTime = formatPublishedTime(news.published_at);
   const imageUrl = getDisplayImageUrl(news.image_url);
-  const proxiedImageUrl = imageUrl ? getNewsImageProxyUrl(news.id) : null;
+  const { imageUrl: proxiedImageUrl } = useNewsImageProxy(news.id, !!imageUrl);
 
   const handleClick = () => {
     onRead(news.id, news.category);
@@ -156,7 +152,8 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
                     src={proxiedImageUrl}
                     alt={`Artikelbild för: ${news.title}`}
                     className="w-full h-full object-cover"
-                    loading="lazy"
+                    loading="eager"
+                    fetchPriority="high"
                   />
                 </div>
               )}
