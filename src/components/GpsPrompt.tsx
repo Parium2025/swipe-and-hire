@@ -56,57 +56,10 @@ interface GpsPromptProps {
 }
 
 const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
-  const [visible, setVisible] = useState(false);
-  const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
+  // TEMP: Always show for testing - set to 'denied' to see blocked state, 'prompt' for normal
+  const [visible, setVisible] = useState(true);
+  const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('prompt');
   const [showHelpModal, setShowHelpModal] = useState(false);
-  
-  // Check for debug mode via URL parameter
-  const forceShow = new URLSearchParams(window.location.search).get('showGpsPrompt') === 'true';
-
-  useEffect(() => {
-    // If force show is enabled, show immediately with "prompt" state for testing
-    if (forceShow) {
-      setGpsStatus('prompt');
-      setVisible(true);
-      return;
-    }
-    
-    const checkPermission = async () => {
-      const status = await checkGpsPermission();
-      setGpsStatus(status);
-      
-      // On web, listen for permission changes
-      if (!isNativeApp() && 'permissions' in navigator) {
-        try {
-          const result = await navigator.permissions.query({ name: 'geolocation' });
-          result.addEventListener('change', () => {
-            setGpsStatus(result.state as 'granted' | 'denied' | 'prompt');
-            if (result.state === 'granted') {
-              window.location.reload();
-            }
-          });
-        } catch {
-          // Ignore
-        }
-      }
-      
-      // If denied, always show the help prompt (ignore dismissal)
-      if (status === 'denied') {
-        setTimeout(() => setVisible(true), GPS_PROMPT_DELAY_MS);
-        return;
-      }
-      
-      // If prompt state (not yet decided), check dismissal
-      if (status === 'prompt') {
-        const dismissed = localStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
-        if (dismissed !== 'true') {
-          setTimeout(() => setVisible(true), GPS_PROMPT_DELAY_MS);
-        }
-      }
-    };
-
-    checkPermission();
-  }, [forceShow]);
 
   const handleDismiss = () => {
     setVisible(false);
@@ -157,10 +110,10 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     );
   };
 
-  // Don't show if GPS is already granted (unless force show is enabled)
-  if (gpsStatus === 'granted' && !forceShow) {
-    return null;
-  }
+  // TEMP: Skip grant check for testing
+  // if (gpsStatus === 'granted') {
+  //   return null;
+  // }
 
   const isDenied = gpsStatus === 'denied';
 
