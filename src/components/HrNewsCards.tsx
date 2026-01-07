@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,9 +9,11 @@ import {
   Globe,
   Newspaper,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  CheckCircle2
 } from 'lucide-react';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
+import { useNewsPreferences } from '@/hooks/useNewsPreferences';
 
 // Map icon names to components
 const iconMap: Record<string, React.ElementType> = {
@@ -34,6 +36,8 @@ const defaultGradients = [
 interface NewsCardProps {
   news: HrNewsItem;
   index: number;
+  isRead: boolean;
+  onRead: (id: string, category: string) => void;
 }
 
 // Format published time as "idag HH:MM" or "igår HH:MM"
@@ -62,12 +66,13 @@ function formatPublishedTime(publishedAt: string | null): string {
   }
 }
 
-const NewsCard = memo(({ news, index }: NewsCardProps) => {
+const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
   const Icon = iconMap[news.icon_name || ''] || Newspaper;
   const gradient = news.gradient || defaultGradients[index % 4];
   const publishedTime = formatPublishedTime(news.published_at);
 
   const handleClick = () => {
+    onRead(news.id, news.category);
     if (news.source_url) {
       window.open(news.source_url, '_blank', 'noopener,noreferrer');
     }
@@ -81,9 +86,17 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
       className="group"
     >
       <Card 
-        className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-xl ${news.source_url ? 'cursor-pointer' : ''} h-full`}
+        className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-xl ${news.source_url ? 'cursor-pointer' : ''} h-full ${isRead ? 'opacity-70' : ''}`}
         onClick={handleClick}
       >
+        {/* Article image background (if available) */}
+        {news.image_url && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-20"
+            style={{ backgroundImage: `url(${news.image_url})` }}
+          />
+        )}
+        
         {/* Glass overlay */}
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         
@@ -91,7 +104,7 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
         <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
         
         <CardContent className="relative p-5 flex flex-col h-full min-h-[160px]">
-          {/* Icon, translation badge, and source */}
+          {/* Icon, translation badge, read status, and source */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
@@ -101,6 +114,9 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
                 <span className="text-[10px] text-white bg-white/20 px-1.5 py-0.5 rounded font-medium">
                   (Engelska)
                 </span>
+              )}
+              {isRead && (
+                <CheckCircle2 className="h-4 w-4 text-white/60" />
               )}
             </div>
             <div className="flex items-center gap-1.5">
@@ -125,7 +141,7 @@ const NewsCard = memo(({ news, index }: NewsCardProps) => {
             )}
             {news.source_url && (
               <div className="flex items-center gap-1 text-white transition-colors ml-auto">
-                <span className="text-xs font-medium">Läs mer</span>
+                <span className="text-xs font-medium">{isRead ? 'Läst' : 'Läs mer'}</span>
                 <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </div>
             )}
@@ -158,6 +174,29 @@ const LoadingSkeleton = () => (
 
 export const HrNewsCards = memo(() => {
   const { data: news, isLoading, error } = useHrNews();
+  const { markAsRead, isRead, trackCategoryClick, getCategoryScore } = useNewsPreferences();
+
+  // Sort news by user preferences (personalization)
+  const sortedNews = useMemo(() => {
+    if (!news || news.length === 0) return [];
+    
+    // Create a copy and sort by category preference score
+    return [...news].sort((a, b) => {
+      const scoreA = getCategoryScore(a.category);
+      const scoreB = getCategoryScore(b.category);
+      
+      // Higher score = preferred category = comes first
+      if (scoreA !== scoreB) return scoreB - scoreA;
+      
+      // If same score, keep original order (by published date)
+      return 0;
+    });
+  }, [news, getCategoryScore]);
+
+  const handleRead = (articleId: string, category: string) => {
+    markAsRead(articleId);
+    trackCategoryClick(category);
+  };
 
   if (isLoading) {
     return (
@@ -175,7 +214,7 @@ export const HrNewsCards = memo(() => {
     );
   }
 
-  if (error || !news || news.length === 0) {
+  if (error || !sortedNews || sortedNews.length === 0) {
     return null; // Silently fail - don't show anything if news fails
   }
 
@@ -192,8 +231,14 @@ export const HrNewsCards = memo(() => {
       </motion.div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-        {news.slice(0, 4).map((item, index) => (
-          <NewsCard key={item.id} news={item} index={index} />
+        {sortedNews.slice(0, 4).map((item, index) => (
+          <NewsCard 
+            key={item.id} 
+            news={item} 
+            index={index} 
+            isRead={isRead(item.id)}
+            onRead={handleRead}
+          />
         ))}
       </div>
     </div>
