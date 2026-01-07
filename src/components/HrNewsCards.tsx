@@ -66,10 +66,26 @@ function formatPublishedTime(publishedAt: string | null): string {
   }
 }
 
+function decodeHtmlEntities(str: string): string {
+  return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+}
+
+function getDisplayImageUrl(raw?: string | null): string | null {
+  if (!raw) return null;
+  const url = decodeHtmlEntities(raw);
+  const lower = url.toLowerCase();
+
+  // Filter out common video/media URLs that RSS feeds sometimes publish as "image"
+  if (lower.includes('.mp4') || lower.includes('.webm') || lower.includes('.mov')) return null;
+
+  return url;
+}
+
 const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
   const Icon = iconMap[news.icon_name || ''] || Newspaper;
   const gradient = news.gradient || defaultGradients[index % 4];
   const publishedTime = formatPublishedTime(news.published_at);
+  const imageUrl = getDisplayImageUrl(news.image_url);
 
   const handleClick = () => {
     onRead(news.id, news.category);
@@ -95,10 +111,10 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
         )}
         
         {/* Article image background (if available) */}
-        {news.image_url && (
+        {imageUrl && (
           <div 
-            className="absolute inset-0 bg-cover bg-center opacity-20"
-            style={{ backgroundImage: `url(${news.image_url})` }}
+            className="absolute inset-0 bg-cover bg-center opacity-30"
+            style={{ backgroundImage: `url(${imageUrl})` }}
           />
         )}
         
@@ -128,6 +144,17 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
               )}
             </div>
             <div className="flex items-center gap-1.5">
+              {imageUrl && (
+                <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/10 backdrop-blur-sm">
+                  <img
+                    src={imageUrl}
+                    alt={`Artikelbild för: ${news.title}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              )}
               <span className="text-xs text-white font-medium">{news.source}</span>
             </div>
           </div>
