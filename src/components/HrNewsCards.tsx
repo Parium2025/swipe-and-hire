@@ -1,20 +1,17 @@
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Cpu,
-  TrendingUp,
-  Users,
+import { 
+  Cpu, 
+  TrendingUp, 
+  Users, 
   Globe,
   Newspaper,
   Sparkles,
-  ExternalLink,
-  CheckCircle2
+  ExternalLink
 } from 'lucide-react';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
-import { useNewsPreferences } from '@/hooks/useNewsPreferences';
-import { useNewsImageProxy } from '@/hooks/useNewsImageProxy';
 
 // Map icon names to components
 const iconMap: Record<string, React.ElementType> = {
@@ -37,8 +34,6 @@ const defaultGradients = [
 interface NewsCardProps {
   news: HrNewsItem;
   index: number;
-  isRead: boolean;
-  onRead: (id: string, category: string) => void;
 }
 
 // Format published time as "idag HH:MM" or "igår HH:MM"
@@ -67,30 +62,12 @@ function formatPublishedTime(publishedAt: string | null): string {
   }
 }
 
-function decodeHtmlEntities(str: string): string {
-  return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
-}
-
-function getDisplayImageUrl(raw?: string | null): string | null {
-  if (!raw) return null;
-  const url = decodeHtmlEntities(raw);
-  const lower = url.toLowerCase();
-
-  // Filter out common video/media URLs that RSS feeds sometimes publish as "image"
-  if (lower.includes('.mp4') || lower.includes('.webm') || lower.includes('.mov')) return null;
-
-  return url;
-}
-
-const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
+const NewsCard = memo(({ news, index }: NewsCardProps) => {
   const Icon = iconMap[news.icon_name || ''] || Newspaper;
   const gradient = news.gradient || defaultGradients[index % 4];
   const publishedTime = formatPublishedTime(news.published_at);
-  const imageUrl = getDisplayImageUrl(news.image_url);
-  const { imageUrl: proxiedImageUrl } = useNewsImageProxy(news.id, !!imageUrl);
 
   const handleClick = () => {
-    onRead(news.id, news.category);
     if (news.source_url) {
       window.open(news.source_url, '_blank', 'noopener,noreferrer');
     }
@@ -107,27 +84,14 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
         className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-xl ${news.source_url ? 'cursor-pointer' : ''} h-full`}
         onClick={handleClick}
       >
-        {/* Read overlay - grays out the card */}
-        {isRead && (
-          <div className="absolute inset-0 bg-black/40 z-10" />
-        )}
-        
-        {/* Article image background (if available) */}
-        {proxiedImageUrl && (
-          <div 
-            className="absolute inset-0 bg-cover bg-center opacity-30"
-            style={{ backgroundImage: `url(${proxiedImageUrl})` }}
-          />
-        )}
-        
         {/* Glass overlay */}
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         
         {/* Decorative elements */}
         <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
         
-        <CardContent className={`relative p-5 flex flex-col h-full min-h-[160px] ${isRead ? 'z-20' : ''}`}>
-          {/* Icon, translation badge, read status, and source */}
+        <CardContent className="relative p-5 flex flex-col h-full min-h-[160px]">
+          {/* Icon, translation badge, and source */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
@@ -138,25 +102,8 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
                   (Engelska)
                 </span>
               )}
-              {isRead && (
-                <span className="flex items-center gap-1 text-xs text-white/90 bg-white/20 px-2 py-0.5 rounded-full font-medium">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  Läst
-                </span>
-              )}
             </div>
             <div className="flex items-center gap-1.5">
-              {proxiedImageUrl && (
-                <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/10 backdrop-blur-sm">
-                  <img
-                    src={proxiedImageUrl}
-                    alt={`Artikelbild för: ${news.title}`}
-                    className="w-full h-full object-cover"
-                    loading="eager"
-                    fetchPriority="high"
-                  />
-                </div>
-              )}
               <span className="text-xs text-white font-medium">{news.source}</span>
             </div>
           </div>
@@ -176,7 +123,7 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
             {publishedTime && (
               <span className="text-xs text-white">{publishedTime}</span>
             )}
-            {news.source_url && !isRead && (
+            {news.source_url && (
               <div className="flex items-center gap-1 text-white transition-colors ml-auto">
                 <span className="text-xs font-medium">Läs mer</span>
                 <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -211,29 +158,6 @@ const LoadingSkeleton = () => (
 
 export const HrNewsCards = memo(() => {
   const { data: news, isLoading, error } = useHrNews();
-  const { markAsRead, isRead, trackCategoryClick, getCategoryScore } = useNewsPreferences();
-
-  // Sort news by user preferences (personalization)
-  const sortedNews = useMemo(() => {
-    if (!news || news.length === 0) return [];
-    
-    // Create a copy and sort by category preference score
-    return [...news].sort((a, b) => {
-      const scoreA = getCategoryScore(a.category);
-      const scoreB = getCategoryScore(b.category);
-      
-      // Higher score = preferred category = comes first
-      if (scoreA !== scoreB) return scoreB - scoreA;
-      
-      // If same score, keep original order (by published date)
-      return 0;
-    });
-  }, [news, getCategoryScore]);
-
-  const handleRead = (articleId: string, category: string) => {
-    markAsRead(articleId);
-    trackCategoryClick(category);
-  };
 
   if (isLoading) {
     return (
@@ -251,7 +175,7 @@ export const HrNewsCards = memo(() => {
     );
   }
 
-  if (error || !sortedNews || sortedNews.length === 0) {
+  if (error || !news || news.length === 0) {
     return null; // Silently fail - don't show anything if news fails
   }
 
@@ -268,14 +192,8 @@ export const HrNewsCards = memo(() => {
       </motion.div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-        {sortedNews.slice(0, 4).map((item, index) => (
-          <NewsCard 
-            key={item.id} 
-            news={item} 
-            index={index} 
-            isRead={isRead(item.id)}
-            onRead={handleRead}
-          />
+        {news.slice(0, 4).map((item, index) => (
+          <NewsCard key={item.id} news={item} index={index} />
         ))}
       </div>
     </div>

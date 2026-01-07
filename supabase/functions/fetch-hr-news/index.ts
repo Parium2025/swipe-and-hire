@@ -194,7 +194,6 @@ interface NewsItem {
   category: string;
   published_at: string | null;
   is_translated?: boolean;
-  image_url?: string | null;
 }
 
 // Check if a date is within the last 5 days (120 hours) - covers Monday-Friday work week
@@ -212,8 +211,8 @@ function isWithin5Days(dateStr: string): boolean {
 }
 
 // Parse RSS XML to extract news items (only from last 48 hours)
-function parseRSSItems(xml: string): { title: string; description: string; link: string; pubDate: string | null; imageUrl: string | null }[] {
-  const items: { title: string; description: string; link: string; pubDate: string | null; imageUrl: string | null }[] = [];
+function parseRSSItems(xml: string): { title: string; description: string; link: string; pubDate: string | null }[] {
+  const items: { title: string; description: string; link: string; pubDate: string | null }[] = [];
   
   // Extract <item> blocks
   const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/gi);
@@ -255,62 +254,6 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
       descMatch = itemContent.match(/<description>([^<]*)<\/description>/i);
     }
     let description = descMatch ? descMatch[1].trim() : '';
-    
-    // Extract image from description before cleaning HTML
-    let imageUrl: string | null = null;
-    
-    // Helper to validate image URL (exclude videos)
-    const isValidImageUrl = (url: string | null): boolean => {
-      if (!url) return false;
-      const lowerUrl = url.toLowerCase();
-      // Exclude video files
-      if (lowerUrl.includes('.mp4') || lowerUrl.includes('.webm') || lowerUrl.includes('.mov')) {
-        return false;
-      }
-      // Must look like an image URL
-      return lowerUrl.includes('.jpg') || lowerUrl.includes('.jpeg') || 
-             lowerUrl.includes('.png') || lowerUrl.includes('.gif') || 
-             lowerUrl.includes('.webp') || lowerUrl.includes('image');
-    };
-    
-    // Try to find image in description
-    const imgInDescMatch = description.match(/<img[^>]*src=["']([^"']+)["']/i);
-    if (imgInDescMatch && isValidImageUrl(imgInDescMatch[1])) {
-      imageUrl = imgInDescMatch[1];
-    }
-    
-    // Try media:content or media:thumbnail (common RSS image tags)
-    if (!imageUrl) {
-      const mediaMatch = itemContent.match(/<media:content[^>]*url=["']([^"']+)["']/i) ||
-                        itemContent.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i);
-      if (mediaMatch && isValidImageUrl(mediaMatch[1])) {
-        imageUrl = mediaMatch[1];
-      }
-    }
-    
-    // Try enclosure tag (also common for images)
-    if (!imageUrl) {
-      const enclosureMatch = itemContent.match(/<enclosure[^>]*type=["']image\/[^"']*["'][^>]*url=["']([^"']+)["']/i) ||
-                            itemContent.match(/<enclosure[^>]*url=["']([^"']+)["'][^>]*type=["']image/i);
-      if (enclosureMatch && isValidImageUrl(enclosureMatch[1])) {
-        imageUrl = enclosureMatch[1];
-      }
-    }
-    
-    // Try image tag directly
-    if (!imageUrl) {
-      const imageTagMatch = itemContent.match(/<image>([^<]+)<\/image>/i) ||
-                           itemContent.match(/<image><url>([^<]+)<\/url>/i);
-      if (imageTagMatch && isValidImageUrl(imageTagMatch[1].trim())) {
-        imageUrl = imageTagMatch[1].trim();
-      }
-    }
-    
-    // Decode HTML entities in imageUrl
-    if (imageUrl) {
-      imageUrl = imageUrl.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-    }
-    
     // Clean HTML tags from description
     description = description.replace(/<[^>]+>/g, '').trim();
     
@@ -321,7 +264,7 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
     const link = linkMatch ? linkMatch[1].trim() : '';
     
     if (title && title.length > 10) {
-      items.push({ title, description, link, pubDate, imageUrl });
+      items.push({ title, description, link, pubDate });
     }
   }
   
@@ -554,7 +497,6 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
         category,
         published_at: pubDate,
         is_translated: false,
-        image_url: item.imageUrl || null,
       });
     }
     
@@ -897,7 +839,6 @@ serve(async (req) => {
         order_index: index,
         is_translated: item.is_translated || false,
         published_at: item.published_at,
-        image_url: item.image_url || null,
       };
     });
     

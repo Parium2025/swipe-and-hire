@@ -15,7 +15,6 @@ export interface HrNewsItem {
   order_index: number;
   published_at: string | null;
   is_translated?: boolean;
-  image_url?: string | null;
 }
 
 const HOURS_WINDOW = 120; // 5 days (Monday-Friday)
