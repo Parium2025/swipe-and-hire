@@ -141,15 +141,29 @@ async function generateAIFallbackNews(supabase: any): Promise<any[]> {
         messages: [
           {
             role: "system",
-            content: "Du är en svensk HR-nyhetsredaktör. Generera 4 aktuella och realistiska HR-nyheter på svenska. Nyheterna ska vara positiva eller neutrala och handla om rekrytering, arbetsmarknad, ledarskap eller HR-tech. Svara ENDAST med giltig JSON."
+            content: `Du är en expert inom HR och rekrytering i Sverige. Din uppgift är att generera 4 FAKTA-BASERADE insikter och tips för rekryterare och HR-chefer.
+
+VIKTIGA REGLER:
+- Skriv ALDRIG om påhittade lagar, beslut eller nyheter
+- Basera allt på BEVISADE fakta, forskning eller beprövad erfarenhet
+- Fokusera på tidlösa, praktiska tips och insikter
+- Använd formuleringar som "Studier visar att...", "Enligt forskning...", "Bästa praxis är att..."
+- Alla påståenden ska vara sanna och verifierbara
+
+EXEMPEL PÅ BRA INNEHÅLL:
+- "Studier visar att strukturerade intervjuer ger 2x bättre träffsäkerhet"
+- "Forskning: Snabb återkoppling till kandidater ökar acceptansgraden med 40%"
+- "Tips: Kompetensbaserad rekrytering minskar felbeslut enligt flera studier"
+
+Svara ENDAST med giltig JSON.`
           },
           {
             role: "user",
-            content: `Generera 4 HR-nyheter i detta exakta JSON-format:
+            content: `Generera 4 fakta-baserade HR-insikter i detta exakta JSON-format:
 [
   {
-    "title": "Kort rubrik max 80 tecken",
-    "summary": "Sammanfattning på 1-2 meningar, max 200 tecken",
+    "title": "Kort rubrik max 80 tecken - börja gärna med 'Tips:', 'Forskning:' eller 'Insikt:'",
+    "summary": "Sammanfattning på 1-2 meningar, max 200 tecken. Måste vara fakta-baserad.",
     "category": "En av: Rekrytering, Ledarskap, HR-Tech, Arbetsmarknad, Trender"
   }
 ]`
