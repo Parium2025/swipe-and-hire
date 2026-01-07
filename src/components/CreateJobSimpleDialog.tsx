@@ -575,7 +575,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                 <Button 
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
-                  className={`flex-1 min-h-[44px] transition-all duration-150 active:scale-95 ${
+                  className={`flex-1 min-h-[44px] rounded-full transition-all duration-150 active:scale-95 ${
                     !loading && jobTitle.trim() ? 'border border-white/30' : ''
                   }`}
                 >
@@ -585,7 +585,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                 <Button 
                   variant="glass"
                   onClick={handleClose}
-                  className="min-h-[44px]"
+                  className="min-h-[44px] rounded-full"
                 >
                   Avbryt
                 </Button>
