@@ -41,14 +41,15 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
   );
 
   const hasRealSources = cachedNews.some((item) => item.source_url);
+  const cachedPreferred = hasRealSources ? cachedNews.filter((item) => !!item.source_url) : cachedNews;
 
-  // If we have enough cached news with real sources, return it
-  if (!cacheError && cachedNews.length > 0 && hasRealSources) {
+  // If we have cached news, prefer real sources when available
+  if (!cacheError && cachedPreferred.length > 0) {
     console.log('[HR News] Returning cached news (48h window)', {
-      count: cachedNews.length,
+      count: cachedPreferred.length,
       thresholdIso,
     });
-    return cachedNews;
+    return cachedPreferred;
   }
 
   // Otherwise, fetch fresh
@@ -62,7 +63,7 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
 
     if (error) {
       console.error('[HR News] Backend function error:', error);
-      if (!cacheError && cachedNews.length > 0) return cachedNews;
+      if (!cacheError && cachedPreferred.length > 0) return cachedPreferred;
       return [];
     }
 
@@ -75,18 +76,23 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
         return bt - at;
       });
 
+    const hasFreshRealSources = freshFiltered.some((item) => item.source_url);
+    const freshPreferred = hasFreshRealSources
+      ? freshFiltered.filter((item) => !!item.source_url)
+      : freshFiltered;
+
     console.log('[HR News] Got items (48h filtered)', {
       total: fresh.length,
-      kept: freshFiltered.length,
+      kept: freshPreferred.length,
       source: data?.source,
     });
 
-    if (freshFiltered.length > 0) return freshFiltered;
-    if (!cacheError && cachedNews.length > 0) return cachedNews;
+    if (freshPreferred.length > 0) return freshPreferred;
+    if (!cacheError && cachedPreferred.length > 0) return cachedPreferred;
     return [];
   } catch (err) {
     console.error('[HR News] Error invoking fetch-hr-news:', err);
-    if (!cacheError && cachedNews.length > 0) return cachedNews;
+    if (!cacheError && cachedPreferred.length > 0) return cachedPreferred;
     return [];
   }
 };
