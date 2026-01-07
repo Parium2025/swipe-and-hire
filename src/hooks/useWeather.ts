@@ -210,6 +210,13 @@ const fetchCurrentWeather = async (lat: number, lon: number) => {
   };
 };
 
+// Clean up city name - remove "kommun" suffix for cleaner display
+const cleanCityName = (name: string): string => {
+  if (!name) return '';
+  // Remove " kommun" suffix (case-insensitive) and trim
+  return name.replace(/\s+kommun$/i, '').trim();
+};
+
 // Reverse geocoding to get city name - with multiple fallback services
 const getCityName = async (lat: number, lon: number): Promise<string> => {
   // Try Nominatim first (most reliable for Swedish cities)
@@ -228,7 +235,7 @@ const getCityName = async (lat: number, lon: number): Promise<string> => {
         data.address?.suburb ||
         data.address?.county ||
         '';
-      if (city) return city;
+      if (city) return cleanCityName(city);
     }
   } catch {
     // Try fallback
@@ -243,7 +250,7 @@ const getCityName = async (lat: number, lon: number): Promise<string> => {
     if (response.ok) {
       const data = await response.json();
       const city = data.city || data.locality || data.principalSubdivision || '';
-      if (city) return city;
+      if (city) return cleanCityName(city);
     }
   } catch {
     // Both services failed
