@@ -194,6 +194,7 @@ interface NewsItem {
   category: string;
   published_at: string | null;
   is_translated?: boolean;
+  image_url?: string | null;
 }
 
 // Check if a date is within the last 5 days (120 hours) - covers Monday-Friday work week
@@ -211,8 +212,8 @@ function isWithin5Days(dateStr: string): boolean {
 }
 
 // Parse RSS XML to extract news items (only from last 48 hours)
-function parseRSSItems(xml: string): { title: string; description: string; link: string; pubDate: string | null }[] {
-  const items: { title: string; description: string; link: string; pubDate: string | null }[] = [];
+function parseRSSItems(xml: string): { title: string; description: string; link: string; pubDate: string | null; imageUrl: string | null }[] {
+  const items: { title: string; description: string; link: string; pubDate: string | null; imageUrl: string | null }[] = [];
   
   // Extract <item> blocks
   const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/gi);
@@ -254,6 +255,43 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
       descMatch = itemContent.match(/<description>([^<]*)<\/description>/i);
     }
     let description = descMatch ? descMatch[1].trim() : '';
+    
+    // Extract image from description before cleaning HTML
+    let imageUrl: string | null = null;
+    
+    // Try to find image in description
+    const imgInDescMatch = description.match(/<img[^>]*src=["']([^"']+)["']/i);
+    if (imgInDescMatch) {
+      imageUrl = imgInDescMatch[1];
+    }
+    
+    // Try media:content or media:thumbnail (common RSS image tags)
+    if (!imageUrl) {
+      const mediaMatch = itemContent.match(/<media:content[^>]*url=["']([^"']+)["']/i) ||
+                        itemContent.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i);
+      if (mediaMatch) {
+        imageUrl = mediaMatch[1];
+      }
+    }
+    
+    // Try enclosure tag (also common for images)
+    if (!imageUrl) {
+      const enclosureMatch = itemContent.match(/<enclosure[^>]*type=["']image\/[^"']*["'][^>]*url=["']([^"']+)["']/i) ||
+                            itemContent.match(/<enclosure[^>]*url=["']([^"']+)["'][^>]*type=["']image/i);
+      if (enclosureMatch) {
+        imageUrl = enclosureMatch[1];
+      }
+    }
+    
+    // Try image tag directly
+    if (!imageUrl) {
+      const imageTagMatch = itemContent.match(/<image>([^<]+)<\/image>/i) ||
+                           itemContent.match(/<image><url>([^<]+)<\/url>/i);
+      if (imageTagMatch) {
+        imageUrl = imageTagMatch[1].trim();
+      }
+    }
+    
     // Clean HTML tags from description
     description = description.replace(/<[^>]+>/g, '').trim();
     
@@ -264,7 +302,7 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
     const link = linkMatch ? linkMatch[1].trim() : '';
     
     if (title && title.length > 10) {
-      items.push({ title, description, link, pubDate });
+      items.push({ title, description, link, pubDate, imageUrl });
     }
   }
   
@@ -497,6 +535,7 @@ async function fetchRSSSource(source: { url: string; name: string }): Promise<Ne
         category,
         published_at: pubDate,
         is_translated: false,
+        image_url: item.imageUrl || null,
       });
     }
     
@@ -839,6 +878,7 @@ serve(async (req) => {
         order_index: index,
         is_translated: item.is_translated || false,
         published_at: item.published_at,
+        image_url: item.image_url || null,
       };
     });
     
