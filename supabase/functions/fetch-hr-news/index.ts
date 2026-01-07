@@ -120,6 +120,93 @@ async function fetchRSS(source: { url: string; name: string }) {
   }
 }
 
+async function generateAIFallbackNews(supabase: any): Promise<any[]> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) {
+    console.error('LOVABLE_API_KEY not configured, cannot generate AI fallback');
+    return [];
+  }
+  
+  console.log('Generating AI fallback news...');
+  
+  try {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: "Du är en svensk HR-nyhetsredaktör. Generera 4 aktuella och realistiska HR-nyheter på svenska. Nyheterna ska vara positiva eller neutrala och handla om rekrytering, arbetsmarknad, ledarskap eller HR-tech. Svara ENDAST med giltig JSON."
+          },
+          {
+            role: "user",
+            content: `Generera 4 HR-nyheter i detta exakta JSON-format:
+[
+  {
+    "title": "Kort rubrik max 80 tecken",
+    "summary": "Sammanfattning på 1-2 meningar, max 200 tecken",
+    "category": "En av: Rekrytering, Ledarskap, HR-Tech, Arbetsmarknad, Trender"
+  }
+]`
+          }
+        ],
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('AI fallback failed:', response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    
+    // Extract JSON from response
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      console.error('No JSON found in AI response');
+      return [];
+    }
+    
+    const newsItems = JSON.parse(jsonMatch[0]);
+    const today = new Date().toISOString().split('T')[0];
+    const now = new Date().toISOString();
+    
+    const categoryMap: Record<string, { icon: string; gradient: string }> = {
+      'Rekrytering': { icon: 'UserPlus', gradient: 'from-violet-500/90 via-purple-600/80 to-purple-700/90' },
+      'Ledarskap': { icon: 'Users', gradient: 'from-blue-500/90 via-blue-600/80 to-indigo-700/90' },
+      'HR-Tech': { icon: 'Cpu', gradient: 'from-emerald-500/90 via-emerald-600/80 to-teal-700/90' },
+      'Arbetsmarknad': { icon: 'Briefcase', gradient: 'from-rose-500/90 via-red-500/80 to-red-600/90' },
+      'Trender': { icon: 'TrendingUp', gradient: 'from-amber-500/90 via-orange-500/80 to-orange-600/90' },
+    };
+    
+    return newsItems.slice(0, 4).map((item: any, idx: number) => {
+      const catInfo = categoryMap[item.category] || categoryMap['Trender'];
+      return {
+        title: item.title,
+        summary: item.summary,
+        source: 'Parium AI',
+        source_url: null,
+        category: item.category,
+        icon_name: catInfo.icon,
+        gradient: catInfo.gradient,
+        news_date: today,
+        order_index: idx,
+        published_at: now,
+      };
+    });
+  } catch (e) {
+    console.error('AI fallback error:', e);
+    return [];
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -166,6 +253,18 @@ serve(async (req) => {
     
     // Delete old
     await supabase.from('daily_hr_news').delete().lt('news_date', new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+    
+    // If no RSS news at all, use AI fallback
+    if (!balanced.length) {
+      console.log('No RSS news found, using AI fallback...');
+      const aiNews = await generateAIFallbackNews(supabase);
+      if (aiNews.length) {
+        await supabase.from('daily_hr_news').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('daily_hr_news').insert(aiNews);
+        return new Response(JSON.stringify({ message: 'AI fallback news generated', count: aiNews.length, source: 'ai' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      return new Response(JSON.stringify({ message: 'No news available', count: 0 }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
     
     if (!newItems.length) return new Response(JSON.stringify({ message: 'No new articles', count: 0 }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     
