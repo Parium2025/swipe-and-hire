@@ -259,9 +259,23 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
     // Extract image from description before cleaning HTML
     let imageUrl: string | null = null;
     
+    // Helper to validate image URL (exclude videos)
+    const isValidImageUrl = (url: string | null): boolean => {
+      if (!url) return false;
+      const lowerUrl = url.toLowerCase();
+      // Exclude video files
+      if (lowerUrl.includes('.mp4') || lowerUrl.includes('.webm') || lowerUrl.includes('.mov')) {
+        return false;
+      }
+      // Must look like an image URL
+      return lowerUrl.includes('.jpg') || lowerUrl.includes('.jpeg') || 
+             lowerUrl.includes('.png') || lowerUrl.includes('.gif') || 
+             lowerUrl.includes('.webp') || lowerUrl.includes('image');
+    };
+    
     // Try to find image in description
     const imgInDescMatch = description.match(/<img[^>]*src=["']([^"']+)["']/i);
-    if (imgInDescMatch) {
+    if (imgInDescMatch && isValidImageUrl(imgInDescMatch[1])) {
       imageUrl = imgInDescMatch[1];
     }
     
@@ -269,7 +283,7 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
     if (!imageUrl) {
       const mediaMatch = itemContent.match(/<media:content[^>]*url=["']([^"']+)["']/i) ||
                         itemContent.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i);
-      if (mediaMatch) {
+      if (mediaMatch && isValidImageUrl(mediaMatch[1])) {
         imageUrl = mediaMatch[1];
       }
     }
@@ -278,7 +292,7 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
     if (!imageUrl) {
       const enclosureMatch = itemContent.match(/<enclosure[^>]*type=["']image\/[^"']*["'][^>]*url=["']([^"']+)["']/i) ||
                             itemContent.match(/<enclosure[^>]*url=["']([^"']+)["'][^>]*type=["']image/i);
-      if (enclosureMatch) {
+      if (enclosureMatch && isValidImageUrl(enclosureMatch[1])) {
         imageUrl = enclosureMatch[1];
       }
     }
@@ -287,9 +301,14 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
     if (!imageUrl) {
       const imageTagMatch = itemContent.match(/<image>([^<]+)<\/image>/i) ||
                            itemContent.match(/<image><url>([^<]+)<\/url>/i);
-      if (imageTagMatch) {
+      if (imageTagMatch && isValidImageUrl(imageTagMatch[1].trim())) {
         imageUrl = imageTagMatch[1].trim();
       }
+    }
+    
+    // Decode HTML entities in imageUrl
+    if (imageUrl) {
+      imageUrl = imageUrl.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     }
     
     // Clean HTML tags from description
