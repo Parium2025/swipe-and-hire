@@ -86,9 +86,14 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
       className="group"
     >
       <Card 
-        className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-xl ${news.source_url ? 'cursor-pointer' : ''} h-full ${isRead ? 'opacity-70' : ''}`}
+        className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-xl ${news.source_url ? 'cursor-pointer' : ''} h-full`}
         onClick={handleClick}
       >
+        {/* Read overlay - grays out the card */}
+        {isRead && (
+          <div className="absolute inset-0 bg-black/40 z-10" />
+        )}
+        
         {/* Article image background (if available) */}
         {news.image_url && (
           <div 
@@ -103,7 +108,7 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
         {/* Decorative elements */}
         <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
         
-        <CardContent className="relative p-5 flex flex-col h-full min-h-[160px]">
+        <CardContent className={`relative p-5 flex flex-col h-full min-h-[160px] ${isRead ? 'z-20' : ''}`}>
           {/* Icon, translation badge, read status, and source */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -116,7 +121,10 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
                 </span>
               )}
               {isRead && (
-                <CheckCircle2 className="h-4 w-4 text-white/60" />
+                <span className="flex items-center gap-1 text-xs text-white/90 bg-white/20 px-2 py-0.5 rounded-full font-medium">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Läst
+                </span>
               )}
             </div>
             <div className="flex items-center gap-1.5">
@@ -139,9 +147,9 @@ const NewsCard = memo(({ news, index, isRead, onRead }: NewsCardProps) => {
             {publishedTime && (
               <span className="text-xs text-white">{publishedTime}</span>
             )}
-            {news.source_url && (
+            {news.source_url && !isRead && (
               <div className="flex items-center gap-1 text-white transition-colors ml-auto">
-                <span className="text-xs font-medium">{isRead ? 'Läst' : 'Läs mer'}</span>
+                <span className="text-xs font-medium">Läs mer</span>
                 <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </div>
             )}
