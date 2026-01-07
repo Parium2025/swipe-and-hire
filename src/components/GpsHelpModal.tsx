@@ -1,0 +1,234 @@
+import { memo, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, MapPin, Chrome, Smartphone, Globe, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+interface GpsHelpModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+// Detect browser
+const getBrowser = (): 'chrome' | 'safari' | 'firefox' | 'edge' | 'other' => {
+  const ua = navigator.userAgent.toLowerCase();
+  if (ua.includes('edg/')) return 'edge';
+  if (ua.includes('chrome') && !ua.includes('edg/')) return 'chrome';
+  if (ua.includes('safari') && !ua.includes('chrome')) return 'safari';
+  if (ua.includes('firefox')) return 'firefox';
+  return 'other';
+};
+
+// Detect if mobile
+const isMobile = (): boolean => {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+};
+
+interface BrowserInstructions {
+  name: string;
+  icon: typeof Chrome;
+  steps: string[];
+  tip?: string;
+}
+
+const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
+  const browser = getBrowser();
+  const mobile = isMobile();
+
+  const instructions = useMemo((): BrowserInstructions => {
+    if (mobile) {
+      // iOS Safari
+      if (browser === 'safari') {
+        return {
+          name: 'Safari (iOS)',
+          icon: Smartphone,
+          steps: [
+            'Öppna Inställningar på din iPhone/iPad',
+            'Scrolla ner och tryck på Safari',
+            'Tryck på Plats under "Inställningar för webbplatser"',
+            'Välj "Tillåt" eller "Fråga"',
+            'Gå tillbaka till appen och ladda om sidan',
+          ],
+          tip: 'Du kan också trycka på "Aa" i adressfältet → Webbplatsinställningar → Plats',
+        };
+      }
+      // Android Chrome
+      return {
+        name: 'Chrome (Android)',
+        icon: Smartphone,
+        steps: [
+          'Tryck på de tre prickarna (⋮) uppe till höger',
+          'Välj Inställningar → Webbplatsinställningar',
+          'Tryck på Plats',
+          'Hitta denna webbplats och tryck på den',
+          'Ändra till "Tillåt"',
+        ],
+        tip: 'Du kan också trycka på hänglåset i adressfältet för snabb åtkomst',
+      };
+    }
+
+    // Desktop browsers
+    switch (browser) {
+      case 'chrome':
+      case 'edge':
+        return {
+          name: browser === 'edge' ? 'Microsoft Edge' : 'Google Chrome',
+          icon: Chrome,
+          steps: [
+            'Klicka på hänglåset 🔒 till vänster i adressfältet',
+            'Hitta "Plats" i listan',
+            'Ändra från "Blockera" till "Tillåt"',
+            'Klicka utanför menyn för att stänga',
+            'Ladda om sidan (Ctrl+R eller Cmd+R)',
+          ],
+          tip: 'Alternativt: Klicka på de tre prickarna → Inställningar → Sekretess → Webbplatsinställningar → Plats',
+        };
+      case 'safari':
+        return {
+          name: 'Safari (Mac)',
+          icon: Globe,
+          steps: [
+            'Klicka på Safari i menyraden → Inställningar',
+            'Gå till fliken "Webbplatser"',
+            'Välj "Plats" i vänstra sidofältet',
+            'Hitta denna webbplats i listan',
+            'Ändra till "Tillåt"',
+          ],
+          tip: 'Du kan också högerklicka i adressfältet → Inställningar för denna webbplats',
+        };
+      case 'firefox':
+        return {
+          name: 'Mozilla Firefox',
+          icon: Globe,
+          steps: [
+            'Klicka på hänglåset 🔒 till vänster i adressfältet',
+            'Klicka på pilen bredvid "Anslutningen är säker"',
+            'Klicka på "Mer information"',
+            'Gå till fliken "Behörigheter"',
+            'Hitta "Åtkomst till din plats" och klicka på "Tillåt"',
+          ],
+        };
+      default:
+        return {
+          name: 'Din webbläsare',
+          icon: Globe,
+          steps: [
+            'Öppna webbläsarens inställningar',
+            'Sök efter "Plats" eller "Platsbehörigheter"',
+            'Hitta denna webbplats och ändra till "Tillåt"',
+            'Ladda om sidan',
+          ],
+        };
+    }
+  }, [browser, mobile]);
+
+  const Icon = instructions.icon;
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+          />
+          
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[calc(100%-2rem)] max-w-md"
+          >
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 p-5 border-b border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-primary/20">
+                      <MapPin className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="font-semibold text-foreground">
+                        Aktivera plats
+                      </h2>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {instructions.name}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={onClose}
+                    className="p-2 text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">
+                    Så här gör du:
+                  </span>
+                </div>
+
+                <ol className="space-y-3">
+                  {instructions.steps.map((step, index) => (
+                    <li key={index} className="flex gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center">
+                        {index + 1}
+                      </span>
+                      <span className="text-sm text-foreground leading-relaxed pt-0.5">
+                        {step}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+
+                {instructions.tip && (
+                  <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800/50">
+                    <p className="text-xs text-amber-800 dark:text-amber-200">
+                      <span className="font-semibold">💡 Tips:</span> {instructions.tip}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="p-5 pt-0 flex gap-3">
+                <Button
+                  onClick={() => {
+                    onClose();
+                    // Try to trigger GPS permission again (will fail if blocked, but worth trying)
+                    navigator.geolocation.getCurrentPosition(
+                      () => window.location.reload(),
+                      () => {},
+                      { timeout: 5000 }
+                    );
+                  }}
+                  className="flex-1"
+                >
+                  Jag har aktiverat – testa igen
+                </Button>
+                <Button variant="outline" onClick={onClose}>
+                  Stäng
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+});
+
+GpsHelpModal.displayName = 'GpsHelpModal';
+
+export default GpsHelpModal;
