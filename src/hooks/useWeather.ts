@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 
 interface WeatherData {
   temperature: number;
@@ -59,6 +61,97 @@ interface CachedLocation {
   timestamp: number;
   source: 'gps' | 'ip' | 'fallback';
 }
+
+// Check if running as native app (Capacitor)
+const isNativeApp = (): boolean => {
+  return Capacitor.isNativePlatform();
+};
+
+// Get current GPS position - uses native Capacitor GPS on mobile, browser API on web
+const getCurrentPosition = async (options?: { 
+  timeout?: number; 
+  enableHighAccuracy?: boolean; 
+  maximumAge?: number;
+}): Promise<{ lat: number; lon: number } | null> => {
+  const timeout = options?.timeout ?? 8000;
+  const enableHighAccuracy = options?.enableHighAccuracy ?? true;
+  const maximumAge = options?.maximumAge ?? 0;
+
+  try {
+    // Use Capacitor native GPS on mobile for best experience
+    if (isNativeApp()) {
+      console.log('Using native Capacitor GPS');
+      const position = await Geolocation.getCurrentPosition({
+        timeout,
+        enableHighAccuracy,
+        maximumAge,
+      });
+      return {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude,
+      };
+    }
+    
+    // Fall back to browser API on web
+    if (navigator.geolocation) {
+      return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => resolve({ 
+            lat: position.coords.latitude, 
+            lon: position.coords.longitude 
+          }),
+          () => resolve(null),
+          { timeout, enableHighAccuracy, maximumAge }
+        );
+      });
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('GPS error:', error);
+    return null;
+  }
+};
+
+// Check GPS permission status - works on both native and web
+const checkGpsPermission = async (): Promise<'granted' | 'denied' | 'prompt'> => {
+  try {
+    if (isNativeApp()) {
+      const status = await Geolocation.checkPermissions();
+      if (status.location === 'granted' || status.coarseLocation === 'granted') {
+        return 'granted';
+      }
+      if (status.location === 'denied') {
+        return 'denied';
+      }
+      return 'prompt';
+    }
+    
+    // Browser API
+    if ('permissions' in navigator) {
+      const result = await navigator.permissions.query({ name: 'geolocation' });
+      return result.state as 'granted' | 'denied' | 'prompt';
+    }
+    
+    return 'prompt';
+  } catch {
+    return 'prompt';
+  }
+};
+
+// Request GPS permission on native (triggers OS permission dialog)
+const requestGpsPermission = async (): Promise<boolean> => {
+  try {
+    if (isNativeApp()) {
+      const status = await Geolocation.requestPermissions();
+      return status.location === 'granted' || status.coarseLocation === 'granted';
+    }
+    // On web, permission is requested when getCurrentPosition is called
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 // Calculate distance between two coordinates in km (Haversine formula)
 const getDistanceKm = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -403,30 +496,26 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   }, [fetchWeatherOnly]);
 
   const checkForLocationChange = useCallback(async (silent = true) => {
-    // Always try GPS first - it's always accurate and real-time
-    if (navigator.geolocation) {
-      const gpsResult = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
-        navigator.geolocation.getCurrentPosition(
-          (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
-          () => resolve(null),
-          { timeout: 8000, enableHighAccuracy: true, maximumAge: 0 } // Always get fresh GPS
-        );
-      });
+    // Always try GPS first - uses native Capacitor on mobile, browser API on web
+    const gpsResult = await getCurrentPosition({
+      timeout: 8000,
+      enableHighAccuracy: true,
+      maximumAge: 0, // Always get fresh GPS
+    });
 
-      if (gpsResult && mountedRef.current) {
-        // Always get fresh city name from GPS coordinates - never trust cache
-        const freshCity = await getCityName(gpsResult.lat, gpsResult.lon);
-        
-        if (freshCity) {
-          // We have fresh GPS coordinates and fresh city name - use them
-          await updateLocation(gpsResult.lat, gpsResult.lon, freshCity, 'gps');
-          return;
-        }
-        
-        // If reverse geocoding failed, still use GPS coords but try to get city name
-        await updateLocation(gpsResult.lat, gpsResult.lon, null, 'gps');
+    if (gpsResult && mountedRef.current) {
+      // Always get fresh city name from GPS coordinates - never trust cache
+      const freshCity = await getCityName(gpsResult.lat, gpsResult.lon);
+      
+      if (freshCity) {
+        // We have fresh GPS coordinates and fresh city name - use them
+        await updateLocation(gpsResult.lat, gpsResult.lon, freshCity, 'gps');
         return;
       }
+      
+      // If reverse geocoding failed, still use GPS coords but try to get city name
+      await updateLocation(gpsResult.lat, gpsResult.lon, null, 'gps');
+      return;
     }
 
     // GPS not available - fall back to cached location or IP
@@ -571,21 +660,17 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
 
   let location: CachedLocation | null = null;
 
-  // Try GPS first (most accurate)
-  if (navigator.geolocation) {
-    const gpsResult = await new Promise<{ lat: number; lon: number } | null>((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
-        () => resolve(null),
-        { timeout: 5000, enableHighAccuracy: false, maximumAge: 30 * 60 * 1000 }
-      );
-    });
+  // Try GPS first (most accurate) - uses native Capacitor on mobile, browser API on web
+  const gpsResult = await getCurrentPosition({
+    timeout: 5000,
+    enableHighAccuracy: false,
+    maximumAge: 30 * 60 * 1000,
+  });
 
-    if (gpsResult) {
-      const city = await getCityName(gpsResult.lat, gpsResult.lon);
-      location = { ...gpsResult, city, source: 'gps', timestamp: Date.now() };
-      setCachedLocation(location);
-    }
+  if (gpsResult) {
+    const city = await getCityName(gpsResult.lat, gpsResult.lon);
+    location = { ...gpsResult, city, source: 'gps', timestamp: Date.now() };
+    setCachedLocation(location);
   }
 
   // Try IP geolocation if GPS failed

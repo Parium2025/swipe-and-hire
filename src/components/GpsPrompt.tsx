@@ -1,10 +1,55 @@
 import { memo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, X, AlertCircle } from 'lucide-react';
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 import GpsHelpModal from '@/components/GpsHelpModal';
 
 const GPS_PROMPT_DISMISSED_KEY = 'parium_gps_prompt_dismissed';
 const GPS_PROMPT_DELAY_MS = 3000; // Show after 3 seconds
+
+// Check if running as native app
+const isNativeApp = (): boolean => Capacitor.isNativePlatform();
+
+// Unified GPS permission check for both native and web
+const checkGpsPermission = async (): Promise<'granted' | 'denied' | 'prompt'> => {
+  try {
+    if (isNativeApp()) {
+      const status = await Geolocation.checkPermissions();
+      if (status.location === 'granted' || status.coarseLocation === 'granted') {
+        return 'granted';
+      }
+      if (status.location === 'denied') {
+        return 'denied';
+      }
+      return 'prompt';
+    }
+    
+    // Browser API
+    if ('permissions' in navigator) {
+      const result = await navigator.permissions.query({ name: 'geolocation' });
+      return result.state as 'granted' | 'denied' | 'prompt';
+    }
+    
+    return 'prompt';
+  } catch {
+    return 'prompt';
+  }
+};
+
+// Request GPS permission - native shows OS dialog, web triggers on getCurrentPosition
+const requestGpsPermission = async (): Promise<boolean> => {
+  try {
+    if (isNativeApp()) {
+      const status = await Geolocation.requestPermissions();
+      return status.location === 'granted' || status.coarseLocation === 'granted';
+    }
+    // On web, permission is requested when getCurrentPosition is called
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 interface GpsPromptProps {
   onEnableGps?: () => void;
@@ -16,44 +61,33 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
   const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
-    // Check GPS permission status
     const checkPermission = async () => {
-      try {
-        if ('permissions' in navigator) {
+      const status = await checkGpsPermission();
+      setGpsStatus(status);
+      
+      // On web, listen for permission changes
+      if (!isNativeApp() && 'permissions' in navigator) {
+        try {
           const result = await navigator.permissions.query({ name: 'geolocation' });
-          setGpsStatus(result.state as 'granted' | 'denied' | 'prompt');
-          
-          // Listen for permission changes
           result.addEventListener('change', () => {
             setGpsStatus(result.state as 'granted' | 'denied' | 'prompt');
-            // If GPS becomes granted, reload to get weather
             if (result.state === 'granted') {
               window.location.reload();
             }
           });
-          
-          // If denied, always show the help prompt (ignore dismissal)
-          if (result.state === 'denied') {
-            setTimeout(() => setVisible(true), GPS_PROMPT_DELAY_MS);
-            return;
-          }
-          
-          // If prompt state (not yet decided), check dismissal
-          if (result.state === 'prompt') {
-            const dismissed = localStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
-            if (dismissed !== 'true') {
-              setTimeout(() => setVisible(true), GPS_PROMPT_DELAY_MS);
-            }
-          }
-        } else {
-          // Fallback: check dismissal
-          const dismissed = localStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
-          if (dismissed !== 'true') {
-            setTimeout(() => setVisible(true), GPS_PROMPT_DELAY_MS);
-          }
+        } catch {
+          // Ignore
         }
-      } catch {
-        // Permission API not supported
+      }
+      
+      // If denied, always show the help prompt (ignore dismissal)
+      if (status === 'denied') {
+        setTimeout(() => setVisible(true), GPS_PROMPT_DELAY_MS);
+        return;
+      }
+      
+      // If prompt state (not yet decided), check dismissal
+      if (status === 'prompt') {
         const dismissed = localStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
         if (dismissed !== 'true') {
           setTimeout(() => setVisible(true), GPS_PROMPT_DELAY_MS);
@@ -72,7 +106,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     }
   };
 
-  const handleEnableGps = () => {
+  const handleEnableGps = async () => {
     // If GPS is denied, show help modal instead of trying again
     if (gpsStatus === 'denied') {
       setShowHelpModal(true);
@@ -81,7 +115,22 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     
     handleDismiss();
     
-    // Trigger GPS permission request
+    // On native, use Capacitor to request permission first
+    if (isNativeApp()) {
+      const granted = await requestGpsPermission();
+      if (granted) {
+        console.log('Native GPS enabled successfully');
+        onEnableGps?.();
+        window.location.reload();
+      } else {
+        console.log('Native GPS permission denied');
+        setGpsStatus('denied');
+        setVisible(true);
+      }
+      return;
+    }
+    
+    // On web, trigger GPS permission request via getCurrentPosition
     navigator.geolocation.getCurrentPosition(
       () => {
         console.log('GPS enabled successfully');
