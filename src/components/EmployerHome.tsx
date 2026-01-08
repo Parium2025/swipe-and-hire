@@ -204,7 +204,7 @@ const EmployerHome = memo(() => {
         >
           <div className="flex items-center gap-2 justify-center md:justify-start">
             <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-              {greetingText}, {firstName} {displayEmoji}
+              {greetingText}, {firstName} 👋
             </h1>
           </div>
           <DateTimeDisplay />
@@ -214,7 +214,7 @@ const EmployerHome = memo(() => {
               {weather.feelsLike !== weather.temperature && (
                 <span className="text-white"> (känns som {weather.feelsLike}°)</span>
               )}
-              {' '}{weather.description}
+              {' '}{weather.description} {displayEmoji}
             </p>
           ) : !gpsGranted && gpsGranted !== null ? (
             <button
