@@ -276,7 +276,7 @@ function EmployerTopNav() {
                   >
                     <item.icon className="h-4 w-4" />
                     <span className="flex-1">{item.title}</span>
-                    {count && <span className="text-white/50 text-xs">({count})</span>}
+                    {count && <span className="text-white text-xs">({count})</span>}
                   </DropdownMenuItem>
                 );
               })}
@@ -317,7 +317,7 @@ function EmployerTopNav() {
                   >
                     <item.icon className="h-4 w-4" />
                     <span className="flex-1">{item.title}</span>
-                    {count && <span className="text-white/50 text-xs">({count})</span>}
+                    {count && <span className="text-white text-xs">({count})</span>}
                     {isMessages && preloadedUnreadMessages > 0 && (
                       <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                         {preloadedUnreadMessages}
