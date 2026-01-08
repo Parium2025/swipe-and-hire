@@ -121,7 +121,7 @@ export const JobSearchBar = ({
           <DropdownMenuTrigger asChild>
             <Button 
               variant="outline" 
-              className="w-auto min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white focus:ring-0 focus-visible:ring-0 focus:outline-none focus-visible:outline-none ring-0 outline-none data-[state=open]:ring-0 data-[state=open]:outline-none"
+              className="w-auto min-w-[180px] bg-white/5 border-white/20 text-white backdrop-blur-[2px] transition-colors duration-150 will-change-transform md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus-visible:outline-none focus:ring-0 ring-0 outline-none active:bg-white/5 active:border-white/20 active:shadow-none data-[state=open]:bg-white/5 data-[state=open]:border-white/20"
             >
               <ArrowUpDown className="mr-2 h-4 w-4" />
               {sortLabels[sortBy]}
