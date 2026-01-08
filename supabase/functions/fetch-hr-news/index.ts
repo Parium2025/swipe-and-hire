@@ -172,6 +172,7 @@ VIKTIGA REGLER:
 - Fokusera på tidlösa, praktiska tips och insikter
 - Använd formuleringar som "Studier visar att...", "Enligt forskning...", "Bästa praxis är att..."
 - Alla påståenden ska vara sanna och verifierbara
+- Skriv utförliga sammanfattningar med 3-4 meningar som ger konkret värde
 
 EXEMPEL PÅ BRA INNEHÅLL:
 - "Studier visar att strukturerade intervjuer ger 2x bättre träffsäkerhet"
@@ -186,13 +187,13 @@ Svara ENDAST med giltig JSON.`
 [
   {
     "title": "Kort rubrik max 80 tecken - börja gärna med 'Tips:', 'Forskning:' eller 'Insikt:'",
-    "summary": "Sammanfattning på 1-2 meningar, max 200 tecken. Måste vara fakta-baserad.",
+    "summary": "UTFÖRLIG sammanfattning på 3-4 meningar (ca 300-400 tecken). Beskriv insikten, förklara varför det är viktigt, och ge ett konkret tips eller exempel på hur man kan tillämpa det.",
     "category": "En av: Rekrytering, Ledarskap, HR-Tech, Arbetsmarknad, Trender"
   }
 ]`
           }
         ],
-        max_tokens: 1000,
+        max_tokens: 1500,
       }),
     });
 
