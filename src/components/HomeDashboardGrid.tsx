@@ -67,9 +67,9 @@ const DotNavigation = memo(({
         key={i}
         onClick={() => onSelect(i)}
         className={cn(
-          "w-2 h-2 rounded-full transition-all duration-300",
+          "w-2 h-2 rounded-full transition-colors duration-200",
           i === current 
-            ? "bg-white scale-110" 
+            ? "bg-white" 
             : "bg-white/30 hover:bg-white/50"
         )}
         aria-label={`Gå till ${i + 1}`}
@@ -211,7 +211,7 @@ const NewsCard = memo(() => {
                   key={i}
                   onClick={() => setCurrentIndex(i)}
                   className={cn(
-                    "w-2.5 h-2.5 rounded-full transition-all duration-300",
+                    "w-2.5 h-2.5 rounded-full transition-colors duration-200",
                     i === currentIndex 
                       ? "bg-white" 
                       : "bg-white/30 hover:bg-white/50"
