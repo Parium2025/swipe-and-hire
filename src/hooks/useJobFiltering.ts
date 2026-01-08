@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { expandSearchTerms, detectSalarySearch } from '@/lib/smartSearch';
 import { isJobExpiredCheck } from '@/lib/date';
 
@@ -38,10 +39,18 @@ export interface FilterableJob {
 
 type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'active-first' | 'expired-first' | 'draft-first';
 
+const validSortOptions: SortOption[] = ['newest', 'oldest', 'title-asc', 'title-desc', 'active-first', 'expired-first', 'draft-first'];
+
 export const useJobFiltering = (jobs: FilterableJob[]) => {
+  const [searchParams] = useSearchParams();
+  const sortFromUrl = searchParams.get('sort');
+  const initialSort: SortOption = sortFromUrl && validSortOptions.includes(sortFromUrl as SortOption) 
+    ? (sortFromUrl as SortOption) 
+    : 'newest';
+    
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [sortBy, setSortBy] = useState<SortOption>(initialSort);
   const [selectedRecruiterId, setSelectedRecruiterId] = useState<string | null>(null);
 
   // Debounce search input
