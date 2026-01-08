@@ -242,6 +242,27 @@ const StatsCard = memo(() => {
   const { jobs, isLoading: jobsLoading } = useJobsData({ scope: 'personal' });
   const { profile, user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [hasUpdatedSnapshots, setHasUpdatedSnapshots] = useState(false);
+  
+  // Query for job snapshots (last seen counts)
+  const { data: snapshots = [], isLoading: snapshotsLoading } = useQuery({
+    queryKey: ['employer-job-snapshots', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('employer_job_snapshots')
+        .select('*')
+        .eq('employer_id', user.id);
+      
+      if (error) {
+        console.error('Error fetching snapshots:', error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!user?.id,
+    staleTime: 60000, // 1 minute
+  });
   
   // Query for unread messages count
   const { data: unreadMessagesCount = 0, isLoading: messagesLoading } = useQuery({
@@ -264,30 +285,82 @@ const StatsCard = memo(() => {
     staleTime: 30000, // 30 seconds
   });
 
-  const isLoading = jobsLoading || messagesLoading;
+  const isLoading = jobsLoading || messagesLoading || snapshotsLoading;
 
+  // Calculate stats with "since last login" tracking
   const statsArray: StatData[] = useMemo(() => {
     if (!jobs) return [
       { icon: Briefcase, label: 'Aktiva annonser', value: 0, description: 'Jobbannonser som är aktiva just nu' },
       { icon: UserPlus, label: 'Nya ansökningar', value: 0, description: 'Sedan din senaste inloggning' },
-      { icon: Eye, label: 'Totala visningar', value: 0, description: 'Sedan din senaste inloggning' },
+      { icon: Eye, label: 'Nya visningar', value: 0, description: 'Sedan din senaste inloggning' },
       { icon: MessageSquare, label: 'Meddelanden', value: 0, description: 'Olästa meddelanden' },
     ];
     
     const activeJobs = jobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
     
-    // Calculate new applications since last login
-    // For now, we show total applications on active jobs (proper tracking would need application timestamps)
-    const totalApplications = activeJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0);
-    const totalViews = activeJobs.reduce((sum, job) => sum + (job.views_count || 0), 0);
+    // Create a map of snapshots by job_id for quick lookup
+    const snapshotMap = new Map(snapshots.map(s => [s.job_id, s]));
+    
+    // Calculate new applications and views since last snapshot
+    let newApplications = 0;
+    let newViews = 0;
+    
+    activeJobs.forEach(job => {
+      const snapshot = snapshotMap.get(job.id);
+      const currentApps = job.applications_count || 0;
+      const currentViews = job.views_count || 0;
+      
+      if (snapshot) {
+        // Calculate difference since last seen
+        newApplications += Math.max(0, currentApps - (snapshot.last_seen_applications_count || 0));
+        newViews += Math.max(0, currentViews - (snapshot.last_seen_views_count || 0));
+      } else {
+        // No snapshot = first time seeing this job, count all as new
+        newApplications += currentApps;
+        newViews += currentViews;
+      }
+    });
     
     return [
       { icon: Briefcase, label: 'Aktiva annonser', value: activeJobs.length, description: 'Jobbannonser som är aktiva just nu' },
-      { icon: UserPlus, label: 'Nya ansökningar', value: totalApplications, description: 'Ansökningar på dina aktiva annonser' },
-      { icon: Eye, label: 'Totala visningar', value: totalViews, description: 'Visningar på dina aktiva annonser' },
+      { icon: UserPlus, label: 'Nya ansökningar', value: newApplications, description: 'Sedan din senaste inloggning' },
+      { icon: Eye, label: 'Nya visningar', value: newViews, description: 'Sedan din senaste inloggning' },
       { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden' },
     ];
-  }, [jobs, unreadMessagesCount]);
+  }, [jobs, snapshots, unreadMessagesCount]);
+
+  // Update snapshots when dashboard is viewed (with debounce to avoid multiple updates)
+  useEffect(() => {
+    if (!user?.id || !jobs || jobs.length === 0 || hasUpdatedSnapshots || isLoading) return;
+    
+    const updateSnapshots = async () => {
+      const activeJobs = jobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
+      if (activeJobs.length === 0) return;
+      
+      // Upsert snapshots for all active jobs
+      const upsertData = activeJobs.map(job => ({
+        employer_id: user.id,
+        job_id: job.id,
+        last_seen_applications_count: job.applications_count || 0,
+        last_seen_views_count: job.views_count || 0,
+        last_seen_at: new Date().toISOString(),
+      }));
+      
+      const { error } = await supabase
+        .from('employer_job_snapshots')
+        .upsert(upsertData, { onConflict: 'employer_id,job_id' });
+      
+      if (error) {
+        console.error('Error updating snapshots:', error);
+      } else {
+        setHasUpdatedSnapshots(true);
+      }
+    };
+    
+    // Delay update to show "new" counts first before resetting
+    const timeout = setTimeout(updateSnapshots, 5000);
+    return () => clearTimeout(timeout);
+  }, [user?.id, jobs, hasUpdatedSnapshots, isLoading]);
 
   const goNext = useCallback(() => {
     setCurrentIndex(prev => (prev + 1) % statsArray.length);
