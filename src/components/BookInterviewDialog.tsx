@@ -65,8 +65,8 @@ export const BookInterviewDialog = ({
   useEffect(() => {
     if (open) {
       setSubject(`Intervju för ${jobTitle}`);
-      // Reset form
-      setDate(undefined);
+      // Reset form with today as default date
+      setDate(new Date());
       setTime('10:00');
       setDuration('30');
       setLocationType('video');
