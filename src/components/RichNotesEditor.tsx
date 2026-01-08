@@ -28,14 +28,13 @@ const ToolbarButton = memo(({
           type="button"
           onClick={onClick}
           className={cn(
-            "w-7 h-7 flex items-center justify-center rounded-md transition-all duration-150",
-            "bg-white/15 backdrop-blur-sm",
-            "hover:bg-white/25 hover:scale-105",
+            "w-5 h-5 flex items-center justify-center rounded transition-all duration-150",
+            "hover:bg-white/20",
             "active:scale-95",
-            isActive && "bg-white/30 ring-1 ring-white/40"
+            isActive && "bg-white/25"
           )}
         >
-          <Icon className="h-3.5 w-3.5 text-white" />
+          <Icon className="h-3 w-3 text-white/80" />
         </button>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -196,17 +195,14 @@ export const RichNotesEditor = memo(({
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
-      {/* Toolbar */}
-      <div className="flex items-center gap-1.5 pb-2 mb-2 border-b border-white/15">
-        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
-          <ToolbarButton onClick={handleBold} icon={Bold} title="Fet (⌘B / Ctrl+B)" />
-          <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv (⌘I / Ctrl+I)" />
-          <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken (⌘U / Ctrl+U)" />
-        </div>
-        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
-          <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista (⌘L / Ctrl+L)" />
-          <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox (⌘⇧C / Ctrl+Shift+C)" />
-        </div>
+      {/* Compact Toolbar */}
+      <div className="flex items-center gap-0.5 pb-1.5 mb-1.5 border-b border-white/10">
+        <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" />
+        <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" />
+        <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" />
+        <div className="w-px h-3 bg-white/20 mx-0.5" />
+        <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" />
+        <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" />
       </div>
       
       {/* Editor */}
