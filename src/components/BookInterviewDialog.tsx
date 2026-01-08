@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, Clock, MapPin, Video, Phone, Building2, Loader2, X } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -52,7 +52,7 @@ export const BookInterviewDialog = ({
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('10:00');
   const [duration, setDuration] = useState('30');
-  const [locationType, setLocationType] = useState<'video' | 'office' | 'phone'>('video');
+  const [locationType, setLocationType] = useState<'video' | 'office'>('video');
   const [locationDetails, setLocationDetails] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState(DEFAULT_MESSAGE);
@@ -81,8 +81,6 @@ export const BookInterviewDialog = ({
       setLocationDetails(officeAddress);
     } else if (locationType === 'video') {
       setLocationDetails('Videosamtal via Parium');
-    } else if (locationType === 'phone') {
-      setLocationDetails('');
     }
   }, [locationType, officeAddress]);
 
@@ -145,14 +143,12 @@ export const BookInterviewDialog = ({
         className="w-[min(90vw,480px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden"
       >
         <DialogHeader className="px-5 pt-5 pb-3 relative">
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
             onClick={() => onOpenChange(false)}
-            className="absolute right-0 top-0 h-8 w-8 text-white hover:text-white hover:bg-white/10"
+            className="absolute right-0 top-0 h-8 w-8 flex items-center justify-center text-white/70 hover:text-white transition-colors"
           >
             <X className="h-4 w-4" />
-          </Button>
+          </button>
           <DialogTitle className="flex items-center gap-2 text-white text-xl">
             <CalendarIcon className="h-5 w-5" />
             Boka intervju
@@ -229,66 +225,44 @@ export const BookInterviewDialog = ({
           {/* Location type */}
           <div className="space-y-2">
             <Label className="text-white">Plats</Label>
-            <div className="grid grid-cols-3 gap-2">
-              <Button
+            <div className="grid grid-cols-2 gap-2">
+              <button
                 type="button"
-                variant={locationType === 'video' ? 'default' : 'outline'}
                 className={cn(
-                  "flex flex-col h-auto py-3 gap-1",
+                  "flex flex-col items-center h-auto py-3 gap-1 rounded-lg border transition-colors",
                   locationType === 'video' 
-                    ? "bg-white text-slate-900 hover:bg-white/90" 
-                    : "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+                    ? "bg-white/20 border-white/40 text-white" 
+                    : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
                 )}
                 onClick={() => setLocationType('video')}
               >
                 <Video className="h-4 w-4" />
                 <span className="text-xs">Video</span>
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
-                variant={locationType === 'office' ? 'default' : 'outline'}
                 className={cn(
-                  "flex flex-col h-auto py-3 gap-1",
+                  "flex flex-col items-center h-auto py-3 gap-1 rounded-lg border transition-colors",
                   locationType === 'office' 
-                    ? "bg-white text-slate-900 hover:bg-white/90" 
-                    : "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+                    ? "bg-white/20 border-white/40 text-white" 
+                    : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
                 )}
                 onClick={() => setLocationType('office')}
               >
                 <Building2 className="h-4 w-4" />
                 <span className="text-xs">Kontor</span>
-              </Button>
-              <Button
-                type="button"
-                variant={locationType === 'phone' ? 'default' : 'outline'}
-                className={cn(
-                  "flex flex-col h-auto py-3 gap-1",
-                  locationType === 'phone' 
-                    ? "bg-white text-slate-900 hover:bg-white/90" 
-                    : "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
-                )}
-                onClick={() => setLocationType('phone')}
-              >
-                <Phone className="h-4 w-4" />
-                <span className="text-xs">Telefon</span>
-              </Button>
+              </button>
             </div>
           </div>
 
           {/* Location details */}
-          {(locationType === 'office' || locationType === 'phone') && (
+          {locationType === 'office' && (
             <div className="space-y-2">
-              <Label className="text-white">
-                {locationType === 'office' ? 'Adress' : 'Telefonnummer'}
-              </Label>
+              <Label className="text-white">Adress</Label>
               <Input
                 value={locationDetails}
                 onChange={(e) => setLocationDetails(e.target.value)}
-                placeholder={
-                  locationType === 'office' 
-                    ? 'Ange adress för mötet' 
-                    : 'Ange telefonnummer att ringa'
-                }
+                placeholder="Ange adress för mötet"
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
               />
             </div>
