@@ -36,7 +36,7 @@ export interface FilterableJob {
   };
 }
 
-type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'drafts-only' | 'active-first' | 'expired-first' | 'draft-first';
+type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'active-first' | 'expired-first' | 'draft-first';
 
 export const useJobFiltering = (jobs: FilterableJob[]) => {
   const [searchInput, setSearchInput] = useState('');
@@ -163,11 +163,6 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
           if (!aIsDraft && bIsDraft) return 1;
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         });
-      case 'drafts-only':
-        // Filter to only show drafts (is_active = false), sorted by newest
-        return result
-          .filter(job => !job.is_active)
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       case 'newest':
       default:
         return result.sort((a, b) => 

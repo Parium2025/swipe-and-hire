@@ -252,9 +252,7 @@ const EmployerDashboard = memo(() => {
                       <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-sm">
                         {searchTerm.trim() 
                           ? 'Inga annonser matchar din sökning' 
-                          : sortBy === 'drafts-only' 
-                            ? 'Inga utkast finns.' 
-                            : 'Inga jobbannonser än. Skapa din första annons!'}
+                          : 'Inga jobbannonser än. Skapa din första annons!'}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -430,9 +428,7 @@ const EmployerDashboard = memo(() => {
               <div className="text-center text-white py-8 font-medium text-sm">
                 {searchTerm.trim() 
                   ? 'Inga annonser matchar din sökning' 
-                  : sortBy === 'drafts-only' 
-                    ? 'Inga utkast finns.' 
-                    : 'Inga jobbannonser än. Skapa din första annons!'}
+                  : 'Inga jobbannonser än. Skapa din första annons!'}
               </div>
             ) : (
               <>
