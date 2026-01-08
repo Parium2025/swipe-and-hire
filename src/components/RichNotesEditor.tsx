@@ -129,16 +129,50 @@ export const RichNotesEditor = memo(({
     handleInput();
   }, [handleInput]);
 
+  // Handle keyboard shortcuts
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+    if (modKey) {
+      switch (e.key.toLowerCase()) {
+        case 'b':
+          e.preventDefault();
+          handleBold();
+          break;
+        case 'i':
+          e.preventDefault();
+          handleItalic();
+          break;
+        case 'u':
+          // Use underline shortcut for strikethrough since it's more useful here
+          e.preventDefault();
+          handleStrikethrough();
+          break;
+        case 'l':
+          e.preventDefault();
+          handleBulletList();
+          break;
+      }
+    }
+
+    // Shift+Ctrl+C for checkbox
+    if (modKey && e.shiftKey && e.key.toLowerCase() === 'c') {
+      e.preventDefault();
+      handleCheckbox();
+    }
+  }, [handleBold, handleItalic, handleStrikethrough, handleBulletList, handleCheckbox]);
+
   return (
     <div className={cn("flex flex-col h-full", className)}>
       {/* Toolbar */}
       <div className="flex items-center gap-0.5 pb-1.5 mb-1.5 border-b border-white/20">
-        <ToolbarButton onClick={handleBold} icon={Bold} title="Fet (Ctrl+B)" />
-        <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv (Ctrl+I)" />
-        <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" />
+        <ToolbarButton onClick={handleBold} icon={Bold} title="Fet (⌘B / Ctrl+B)" />
+        <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv (⌘I / Ctrl+I)" />
+        <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken (⌘U / Ctrl+U)" />
         <div className="w-px h-4 bg-white/20 mx-1" />
-        <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" />
-        <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" />
+        <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista (⌘L / Ctrl+L)" />
+        <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox (⌘⇧C / Ctrl+Shift+C)" />
       </div>
       
       {/* Editor */}
@@ -148,6 +182,7 @@ export const RichNotesEditor = memo(({
         onInput={handleInput}
         onClick={handleEditorClick}
         onPaste={handlePaste}
+        onKeyDown={handleKeyDown}
         data-placeholder={placeholder}
         className={cn(
           "flex-1 min-h-0 overflow-y-auto",
