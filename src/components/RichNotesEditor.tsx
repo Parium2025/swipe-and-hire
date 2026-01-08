@@ -1,4 +1,4 @@
-import { memo, useRef, useCallback, useEffect } from 'react';
+import { memo, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Bold, Italic, Strikethrough, List, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -193,6 +193,16 @@ export const RichNotesEditor = memo(({
     }
   }, [handleBold, handleItalic, handleStrikethrough, handleBulletList, handleCheckbox]);
 
+  const isEmpty = useMemo(() => {
+    if (!value) return true;
+    if (typeof document === 'undefined') return value.trim().length === 0;
+
+    const el = document.createElement('div');
+    el.innerHTML = value;
+    const text = (el.textContent || '').replace(/\u00a0/g, ' ').trim();
+    return text.length === 0;
+  }, [value]);
+
   return (
     <div className={cn("flex flex-col h-full", className)}>
       {/* Compact Toolbar */}
@@ -214,12 +224,17 @@ export const RichNotesEditor = memo(({
         onPaste={handlePaste}
         onKeyDown={handleKeyDown}
         data-placeholder={placeholder}
+        data-empty={isEmpty ? 'true' : 'false'}
         className={cn(
-          "flex-1 min-h-0 overflow-y-auto",
+          "relative flex-1 min-h-0 overflow-y-auto",
           "bg-white/10 rounded-lg p-2",
           "text-white text-sm leading-relaxed",
           "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
-          "empty:before:content-[attr(data-placeholder)] empty:before:text-white",
+          // Placeholder (contentEditable is rarely :empty due to <br>, so use data-empty)
+          "data-[empty=true]:before:content-[attr(data-placeholder)]",
+          "data-[empty=true]:before:text-white/70",
+          "data-[empty=true]:before:absolute data-[empty=true]:before:top-2 data-[empty=true]:before:left-2",
+          "data-[empty=true]:before:pointer-events-none data-[empty=true]:before:select-none",
           // List styling
           "[&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1",
           "[&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1",

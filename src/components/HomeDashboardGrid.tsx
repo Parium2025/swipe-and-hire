@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useCallback, useEffect } from 'react';
+import { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
@@ -499,18 +499,46 @@ StatsCard.displayName = 'StatsCard';
 // Notes Card (Purple - Bottom Left)
 const NotesCard = memo(() => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const hasLocalEditsRef = useRef(false);
+
+  const cacheKey = user?.id ? `employer_notes_cache_${user.id}` : 'employer_notes_cache';
+
   const [content, setContent] = useState(() => {
-    // Initialize from localStorage for instant display
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('employer_notes_cache') || '';
+    if (typeof window === 'undefined') return '';
+    if (user?.id) {
+      return localStorage.getItem(`employer_notes_cache_${user.id}`) || '';
     }
-    return '';
+    return localStorage.getItem('employer_notes_cache') || '';
   });
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // Fetch existing note with staleTime to prevent refetch on every render
-  const { data: noteData, isLoading } = useQuery({
+  // When user becomes available, load their specific cache (but don't clobber active typing)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !user?.id) return;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached !== null && !hasLocalEditsRef.current) {
+      setContent(cached);
+    }
+  }, [cacheKey, user?.id]);
+
+  // Cross-tab “realtime” feel via localStorage events
+  useEffect(() => {
+    if (typeof window === 'undefined' || !user?.id) return;
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === cacheKey && typeof e.newValue === 'string') {
+        if (!hasLocalEditsRef.current) {
+          setContent(e.newValue);
+        }
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [cacheKey, user?.id]);
+
+  // Fetch existing note (don’t block editor rendering)
+  const { data: noteData, isFetched } = useQuery({
     queryKey: ['employer-notes', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -518,51 +546,73 @@ const NotesCard = memo(() => {
         .select('*')
         .eq('employer_id', user!.id)
         .maybeSingle();
-      
+
       if (error) throw error;
       return data;
     },
     enabled: !!user?.id,
-    staleTime: 30000, // Keep data fresh for 30 seconds
+    staleTime: 30000,
   });
 
-  // Set content when data loads and cache it
+  // Sync server value into cache (and editor) once it arrives
   useEffect(() => {
-    if (noteData?.content) {
-      setContent(noteData.content);
-      localStorage.setItem('employer_notes_cache', noteData.content);
-    }
-  }, [noteData]);
+    if (typeof window === 'undefined' || !user?.id) return;
+    if (!noteData) return; // keep local draft if no row exists yet
 
-  // Auto-save with debounce
+    const serverContent = typeof noteData.content === 'string' ? noteData.content : '';
+    localStorage.setItem(cacheKey, serverContent);
+
+    if (!hasLocalEditsRef.current) {
+      setContent(serverContent);
+    }
+  }, [noteData, cacheKey, user?.id]);
+
+  const handleChange = useCallback(
+    (next: string) => {
+      hasLocalEditsRef.current = true;
+      setContent(next);
+
+      // Update cache immediately so other tabs can reflect changes instantly
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(cacheKey, next);
+      }
+    },
+    [cacheKey]
+  );
+
+  // Auto-save with debounce (wait until we know if note exists to avoid duplicates)
   useEffect(() => {
-    if (!user?.id || content === (noteData?.content || '')) return;
+    if (!user?.id || !isFetched) return;
+
+    const serverContent = typeof noteData?.content === 'string' ? noteData.content : '';
+    if (content === serverContent) return;
 
     const timer = setTimeout(async () => {
       setIsSaving(true);
       try {
         if (noteData?.id) {
-          // Update existing
           await supabase
             .from('employer_notes')
             .update({ content })
             .eq('id', noteData.id);
         } else {
-          // Create new
           await supabase
             .from('employer_notes')
             .insert({ employer_id: user.id, content });
         }
+
+        hasLocalEditsRef.current = false;
         setLastSaved(new Date());
+        queryClient.invalidateQueries({ queryKey: ['employer-notes', user.id] });
       } catch (err) {
         console.error('Failed to save note:', err);
       } finally {
         setIsSaving(false);
       }
-    }, 1000);
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [content, user?.id, noteData]);
+  }, [content, user?.id, isFetched, noteData, queryClient]);
 
   return (
     <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder1} border-0 shadow-lg h-[200px]`}>
@@ -592,15 +642,11 @@ const NotesCard = memo(() => {
         
         {/* Notes editor */}
         <div className="flex-1 min-h-0">
-          {isLoading ? (
-            <Skeleton className="h-full w-full bg-white/10 rounded-lg" />
-          ) : (
-            <RichNotesEditor
-              value={content}
-              onChange={setContent}
-              placeholder="Skriv påminnelser och anteckningar..."
-            />
-          )}
+          <RichNotesEditor
+            value={content}
+            onChange={handleChange}
+            placeholder="Skriv påminnelser och anteckningar..."
+          />
         </div>
       </CardContent>
     </Card>
