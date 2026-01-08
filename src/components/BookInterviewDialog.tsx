@@ -174,13 +174,14 @@ export const BookInterviewDialog = ({
                   {date ? format(date, 'EEEE d MMMM yyyy', { locale: sv }) : 'Välj datum'}
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4} avoidCollisions={false}>
                 <Calendar
                   mode="single"
                   selected={date}
                   onSelect={setDate}
                   disabled={(date) => date < new Date()}
                   initialFocus
+                  className="pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
@@ -195,7 +196,7 @@ export const BookInterviewDialog = ({
                   <Clock className="mr-2 h-4 w-4" />
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent side="bottom" align="start">
+                <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
                   {timeOptions.map((t) => (
                     <SelectItem key={t} value={t}>
                       {t}
@@ -210,7 +211,7 @@ export const BookInterviewDialog = ({
                 <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent side="bottom" align="start">
+                <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
                   <SelectItem value="15">15 min</SelectItem>
                   <SelectItem value="30">30 min</SelectItem>
                   <SelectItem value="45">45 min</SelectItem>
