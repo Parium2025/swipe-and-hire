@@ -164,16 +164,15 @@ export const BookInterviewDialog = ({
             <Label className="text-white">Datum</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
+                <button
                   className={cn(
-                    "w-full justify-start text-left font-normal bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white",
-                    !date && "text-white/60"
+                    "w-full flex items-center justify-start text-left font-normal bg-white/10 border border-white/20 rounded-md px-3 py-2 transition-colors hover:border-white/30",
+                    date ? "text-white" : "text-white/60"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {date ? format(date, 'EEEE d MMMM yyyy', { locale: sv }) : 'Välj datum'}
-                </Button>
+                </button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
@@ -196,7 +195,7 @@ export const BookInterviewDialog = ({
                   <Clock className="mr-2 h-4 w-4" />
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom" align="start">
                   {timeOptions.map((t) => (
                     <SelectItem key={t} value={t}>
                       {t}
@@ -211,7 +210,7 @@ export const BookInterviewDialog = ({
                 <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom" align="start">
                   <SelectItem value="15">15 min</SelectItem>
                   <SelectItem value="30">30 min</SelectItem>
                   <SelectItem value="45">45 min</SelectItem>
@@ -225,32 +224,32 @@ export const BookInterviewDialog = ({
           {/* Location type */}
           <div className="space-y-2">
             <Label className="text-white">Plats</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex gap-2">
               <button
                 type="button"
                 className={cn(
-                  "flex flex-col items-center h-auto py-3 gap-1 rounded-lg border transition-colors",
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm transition-colors",
                   locationType === 'video' 
                     ? "bg-white/20 border-white/40 text-white" 
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
                 )}
                 onClick={() => setLocationType('video')}
               >
-                <Video className="h-4 w-4" />
-                <span className="text-xs">Video</span>
+                <Video className="h-3.5 w-3.5" />
+                <span>Video</span>
               </button>
               <button
                 type="button"
                 className={cn(
-                  "flex flex-col items-center h-auto py-3 gap-1 rounded-lg border transition-colors",
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm transition-colors",
                   locationType === 'office' 
                     ? "bg-white/20 border-white/40 text-white" 
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
                 )}
                 onClick={() => setLocationType('office')}
               >
-                <Building2 className="h-4 w-4" />
-                <span className="text-xs">Kontor</span>
+                <Building2 className="h-3.5 w-3.5" />
+                <span>Kontor</span>
               </button>
             </div>
           </div>
