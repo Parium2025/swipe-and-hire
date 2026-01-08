@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, Clock, Video, Building2, Loader2, X } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, Video, Phone, Building2, Loader2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -52,7 +52,7 @@ export const BookInterviewDialog = ({
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('10:00');
   const [duration, setDuration] = useState('30');
-  const [locationType, setLocationType] = useState<'video' | 'office'>('video');
+  const [locationType, setLocationType] = useState<'video' | 'office' | 'phone'>('video');
   const [locationDetails, setLocationDetails] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState(DEFAULT_MESSAGE);
@@ -81,6 +81,8 @@ export const BookInterviewDialog = ({
       setLocationDetails(officeAddress);
     } else if (locationType === 'video') {
       setLocationDetails('Videosamtal via Parium');
+    } else if (locationType === 'phone') {
+      setLocationDetails('');
     }
   }, [locationType, officeAddress]);
 
@@ -147,7 +149,7 @@ export const BookInterviewDialog = ({
             variant="ghost"
             size="icon"
             onClick={() => onOpenChange(false)}
-            className="absolute right-0 top-0 h-8 w-8 text-white/70 hover:text-white hover:bg-transparent transition-colors"
+            className="absolute right-0 top-0 h-8 w-8 text-white hover:text-white hover:bg-white/10"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -227,13 +229,15 @@ export const BookInterviewDialog = ({
           {/* Location type */}
           <div className="space-y-2">
             <Label className="text-white">Plats</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <Button
                 type="button"
-                variant="glass"
+                variant={locationType === 'video' ? 'default' : 'outline'}
                 className={cn(
                   "flex flex-col h-auto py-3 gap-1",
-                  locationType === 'video' && "ring-1 ring-white/40"
+                  locationType === 'video' 
+                    ? "bg-white text-slate-900 hover:bg-white/90" 
+                    : "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
                 )}
                 onClick={() => setLocationType('video')}
               >
@@ -242,27 +246,49 @@ export const BookInterviewDialog = ({
               </Button>
               <Button
                 type="button"
-                variant="glass"
+                variant={locationType === 'office' ? 'default' : 'outline'}
                 className={cn(
                   "flex flex-col h-auto py-3 gap-1",
-                  locationType === 'office' && "ring-1 ring-white/40"
+                  locationType === 'office' 
+                    ? "bg-white text-slate-900 hover:bg-white/90" 
+                    : "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
                 )}
                 onClick={() => setLocationType('office')}
               >
                 <Building2 className="h-4 w-4" />
                 <span className="text-xs">Kontor</span>
               </Button>
+              <Button
+                type="button"
+                variant={locationType === 'phone' ? 'default' : 'outline'}
+                className={cn(
+                  "flex flex-col h-auto py-3 gap-1",
+                  locationType === 'phone' 
+                    ? "bg-white text-slate-900 hover:bg-white/90" 
+                    : "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+                )}
+                onClick={() => setLocationType('phone')}
+              >
+                <Phone className="h-4 w-4" />
+                <span className="text-xs">Telefon</span>
+              </Button>
             </div>
           </div>
 
           {/* Location details */}
-          {locationType === 'office' && (
+          {(locationType === 'office' || locationType === 'phone') && (
             <div className="space-y-2">
-              <Label className="text-white">Adress</Label>
+              <Label className="text-white">
+                {locationType === 'office' ? 'Adress' : 'Telefonnummer'}
+              </Label>
               <Input
                 value={locationDetails}
                 onChange={(e) => setLocationDetails(e.target.value)}
-                placeholder="Ange adress för mötet"
+                placeholder={
+                  locationType === 'office' 
+                    ? 'Ange adress för mötet' 
+                    : 'Ange telefonnummer att ringa'
+                }
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
               />
             </div>
