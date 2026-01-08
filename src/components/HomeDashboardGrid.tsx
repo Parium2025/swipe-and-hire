@@ -20,6 +20,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { RichNotesEditor } from '@/components/RichNotesEditor';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useAuth } from '@/hooks/useAuth';
@@ -581,16 +582,15 @@ const NotesCard = memo(() => {
           </div>
         </div>
         
-        {/* Notes textarea */}
+        {/* Notes editor */}
         <div className="flex-1 min-h-0">
           {isLoading ? (
             <Skeleton className="h-full w-full bg-white/10 rounded-lg" />
           ) : (
-            <Textarea
+            <RichNotesEditor
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={setContent}
               placeholder="Skriv påminnelser och anteckningar..."
-              className="h-full w-full resize-none bg-white/10 border-0 text-white placeholder:text-white/40 text-sm focus-visible:ring-1 focus-visible:ring-white/30 rounded-lg"
             />
           )}
         </div>
