@@ -34,7 +34,7 @@ const ToolbarButton = memo(({
             isActive && "bg-white/25"
           )}
         >
-          <Icon className="h-3 w-3 text-white/80" />
+          <Icon className="h-3 w-3 text-white" />
         </button>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -232,7 +232,7 @@ export const RichNotesEditor = memo(({
           "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
           // Placeholder (contentEditable is rarely :empty due to <br>, so use data-empty)
           "data-[empty=true]:before:content-[attr(data-placeholder)]",
-          "data-[empty=true]:before:text-white/70",
+          "data-[empty=true]:before:text-white",
           "data-[empty=true]:before:absolute data-[empty=true]:before:top-2 data-[empty=true]:before:left-2",
           "data-[empty=true]:before:pointer-events-none data-[empty=true]:before:select-none",
           // List styling
