@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, Clock, MapPin, Video, Phone, Building2, Loader2 } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, Video, Phone, Building2, Loader2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -144,7 +144,15 @@ export const BookInterviewDialog = ({
         hideClose
         className="w-[min(90vw,480px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden"
       >
-        <DialogHeader className="px-5 pt-5 pb-3">
+        <DialogHeader className="px-5 pt-5 pb-3 relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onOpenChange(false)}
+            className="absolute right-0 top-0 h-8 w-8 text-white hover:text-white hover:bg-white/10"
+          >
+            <X className="h-4 w-4" />
+          </Button>
           <DialogTitle className="flex items-center gap-2 text-white text-xl">
             <CalendarIcon className="h-5 w-5" />
             Boka intervju
@@ -313,16 +321,15 @@ export const BookInterviewDialog = ({
         {/* Actions */}
         <div className="flex justify-end gap-3 px-5 pb-5 pt-2 border-t border-white/10">
           <Button 
-            variant="outline" 
+            variant="glass" 
             onClick={() => onOpenChange(false)}
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
           >
             Avbryt
           </Button>
           <Button 
+            variant="glass"
             onClick={handleSubmit} 
             disabled={isSubmitting || !date}
-            className="bg-white text-slate-900 hover:bg-white/90"
           >
             {isSubmitting ? (
               <>
