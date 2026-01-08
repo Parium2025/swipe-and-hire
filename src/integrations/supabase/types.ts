@@ -449,6 +449,72 @@ export type Database = {
         }
         Relationships: []
       }
+      interviews: {
+        Row: {
+          applicant_id: string
+          application_id: string | null
+          created_at: string
+          duration_minutes: number
+          employer_id: string
+          id: string
+          job_id: string | null
+          location_details: string | null
+          location_type: string
+          message: string | null
+          scheduled_at: string
+          status: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          application_id?: string | null
+          created_at?: string
+          duration_minutes?: number
+          employer_id: string
+          id?: string
+          job_id?: string | null
+          location_details?: string | null
+          location_type?: string
+          message?: string | null
+          scheduled_at: string
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          application_id?: string | null
+          created_at?: string
+          duration_minutes?: number
+          employer_id?: string
+          id?: string
+          job_id?: string | null
+          location_details?: string | null
+          location_type?: string
+          message?: string | null
+          scheduled_at?: string
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interviews_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interviews_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_applications: {
         Row: {
           age: number | null

@@ -17,7 +17,10 @@ import {
   Clock,
   MessageSquare,
   FileText,
-  Calendar
+  Calendar,
+  Video,
+  Building2,
+  Phone
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { RichNotesEditor } from '@/components/RichNotesEditor';
@@ -28,6 +31,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { isJobExpiredCheck } from '@/lib/date';
 import { cn } from '@/lib/utils';
+import { useInterviews, Interview } from '@/hooks/useInterviews';
+import { format, isToday, isTomorrow } from 'date-fns';
+import { sv } from 'date-fns/locale';
 
 // Format relative time for news (e.g. "idag 08:30" or "igår 22:15")
 const formatNewsTime = (publishedAt: string | null): string => {
@@ -655,10 +661,75 @@ const NotesCard = memo(() => {
 
 NotesCard.displayName = 'NotesCard';
 
-// Calendar Card placeholder (Orange - Bottom Right)
-const CalendarCard = memo(() => {
+// Format interview date nicely
+const formatInterviewDate = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  if (isToday(date)) return 'Idag';
+  if (isTomorrow(date)) return 'Imorgon';
+  return format(date, 'd MMM', { locale: sv });
+};
+
+const formatInterviewTime = (dateStr: string): string => {
+  return format(new Date(dateStr), 'HH:mm');
+};
+
+// Interviews Card (Orange - Bottom Right)
+const InterviewsCard = memo(() => {
+  const { interviews, isLoading } = useInterviews();
+  const navigate = useNavigate();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Show max 4 upcoming interviews
+  const upcomingInterviews = interviews.slice(0, 4);
+
+  const goNext = useCallback(() => {
+    if (upcomingInterviews.length > 1) {
+      setCurrentIndex(prev => (prev + 1) % upcomingInterviews.length);
+    }
+  }, [upcomingInterviews.length]);
+
+  const goPrev = useCallback(() => {
+    if (upcomingInterviews.length > 1) {
+      setCurrentIndex(prev => (prev - 1 + upcomingInterviews.length) % upcomingInterviews.length);
+    }
+  }, [upcomingInterviews.length]);
+
+  const swipeHandlers = useSwipeGesture({
+    onSwipeLeft: goNext,
+    onSwipeRight: goPrev,
+  });
+
+  const getLocationIcon = (type: Interview['location_type']) => {
+    switch (type) {
+      case 'video': return Video;
+      case 'office': return Building2;
+      case 'phone': return Phone;
+      default: return Calendar;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px]`}>
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <CardContent className="relative p-4 h-full">
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
+            <Skeleton className="h-4 w-24 bg-white/20" />
+          </div>
+          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const currentInterview = upcomingInterviews[currentIndex];
+
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px]`}>
+    <Card 
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px] touch-pan-y`}
+      {...swipeHandlers}
+    >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
@@ -671,18 +742,79 @@ const CalendarCard = memo(() => {
           <span className="text-[10px] text-white uppercase tracking-wider font-medium">INTERVJUER</span>
         </div>
         
-        {/* Coming soon content */}
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <Calendar className="h-8 w-8 text-white/40 mb-2" />
-          <p className="text-sm font-medium text-white">Kommer snart</p>
-          <p className="text-xs text-white/60">Boka intervjuer här</p>
+        {/* Content */}
+        <div className="flex-1 flex flex-col justify-center py-2">
+          {upcomingInterviews.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center">
+              <Calendar className="h-8 w-8 text-white/40 mb-2" />
+              <p className="text-sm font-medium text-white">Inga bokade intervjuer</p>
+              <p className="text-xs text-white/60">Boka via kandidatprofilen</p>
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentInterview.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="cursor-pointer"
+                onClick={() => navigate('/my-candidates')}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg font-bold text-white">
+                    {formatInterviewDate(currentInterview.scheduled_at)}
+                  </span>
+                  <span className="text-sm text-white/80">
+                    kl {formatInterviewTime(currentInterview.scheduled_at)}
+                  </span>
+                </div>
+                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-1">
+                  {currentInterview.candidate_name}
+                </h3>
+                <div className="flex items-center gap-2 text-xs text-white/80">
+                  {(() => {
+                    const Icon = getLocationIcon(currentInterview.location_type);
+                    return <Icon className="h-3 w-3" />;
+                  })()}
+                  <span className="line-clamp-1">
+                    {currentInterview.location_type === 'video' ? 'Videosamtal' : 
+                     currentInterview.location_type === 'phone' ? 'Telefonintervju' :
+                     currentInterview.location_details || 'Kontor'}
+                  </span>
+                </div>
+                <p className="text-xs text-white/60 mt-1 line-clamp-1">
+                  {currentInterview.job_title}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          )}
         </div>
+        
+        {/* Dot navigation */}
+        {upcomingInterviews.length > 1 && (
+          <div className="flex items-center gap-2 mt-auto">
+            {upcomingInterviews.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className={cn(
+                  "w-2.5 h-2.5 rounded-full transition-colors duration-200",
+                  i === currentIndex 
+                    ? "bg-white" 
+                    : "bg-white/30 hover:bg-white/50"
+                )}
+                aria-label={`Gå till intervju ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 });
 
-CalendarCard.displayName = 'CalendarCard';
+InterviewsCard.displayName = 'InterviewsCard';
 
 // Main Dashboard Grid
 export const HomeDashboardGrid = memo(() => {
@@ -726,13 +858,13 @@ export const HomeDashboardGrid = memo(() => {
           <NotesCard />
         </motion.div>
         
-        {/* Bottom Right - Calendar (Orange) */}
+        {/* Bottom Right - Interviews (Orange) */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.25 }}
         >
-          <CalendarCard />
+          <InterviewsCard />
         </motion.div>
       </div>
     </div>
