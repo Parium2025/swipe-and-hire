@@ -18,78 +18,62 @@ export interface HrNewsItem {
 }
 
 /**
- * Fetch news from database - TRUST THE BACKEND
- * Backend is the gatekeeper: only valid articles with published_at are saved
- * Frontend shows whatever is in the database without additional filtering
+ * BULLETPROOF NEWS FETCHER
+ * 
+ * PRINCIPLE: Backend is the ONLY gatekeeper
+ * - Backend guarantees: all saved articles have valid published_at
+ * - Backend guarantees: always tries to maintain 4 articles (RSS + AI fallback)
+ * - Frontend: shows what's in DB, triggers refresh if < 4
+ * 
+ * NO FRONTEND FILTERING - trust the backend completely
  */
 const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
-  // First, try to get RSS news from database (source_url is not null)
-  // Backend guarantees all saved articles have valid published_at
-  const { data: rssNews, error: rssError } = await supabase
+  // Fetch ALL news (RSS + any AI fallback) - backend guarantees validity
+  const { data: allNews, error } = await supabase
     .from('daily_hr_news')
     .select('*')
-    .not('source_url', 'is', null)
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(4);
 
-  // If we have RSS news, return them (no additional filtering!)
-  if (!rssError && rssNews && rssNews.length >= 4) {
-    console.log('[HR News] Returning RSS news from DB', { count: rssNews.length });
-    return rssNews;
+  // Happy path: we have 4 valid articles
+  if (!error && allNews && allNews.length >= 4) {
+    console.log('[HR News] ✓ Got 4 articles from DB', { 
+      sources: allNews.map(n => n.source) 
+    });
+    return allNews;
   }
 
-  // Not enough RSS news - trigger backend refresh
-  console.log('[HR News] Not enough RSS news, triggering refresh...', { 
-    currentCount: rssNews?.length || 0 
-  });
+  // Not enough articles - trigger backend to fetch more
+  const currentCount = allNews?.length || 0;
+  console.log(`[HR News] Only ${currentCount} articles, triggering backend refresh...`);
 
   try {
-    const { error } = await supabase.functions.invoke('fetch-hr-news', {
+    const { error: fnError } = await supabase.functions.invoke('fetch-hr-news', {
       body: { force: true },
     });
 
-    if (error) {
-      console.error('[HR News] Backend function error:', error);
+    if (fnError) {
+      console.error('[HR News] Backend refresh error:', fnError);
     }
 
-    // Re-fetch from database after backend refresh
-    const { data: freshRss } = await supabase
+    // Re-fetch after backend processed
+    const { data: refreshedNews } = await supabase
       .from('daily_hr_news')
       .select('*')
-      .not('source_url', 'is', null)
       .order('published_at', { ascending: false, nullsFirst: false })
       .limit(4);
 
-    if (freshRss && freshRss.length > 0) {
-      console.log('[HR News] Got fresh RSS news', { count: freshRss.length });
-      return freshRss;
+    if (refreshedNews && refreshedNews.length > 0) {
+      console.log('[HR News] ✓ After refresh:', { count: refreshedNews.length });
+      return refreshedNews;
     }
 
-    // Still no RSS news - check for AI backup
-    console.log('[HR News] No RSS available, checking AI backup...');
-    const { data: aiNews } = await supabase
-      .from('daily_hr_news')
-      .select('*')
-      .eq('source', 'Parium')
-      .is('source_url', null)
-      .order('published_at', { ascending: false, nullsFirst: false })
-      .limit(4);
-
-    if (aiNews && aiNews.length > 0) {
-      console.log('[HR News] Using AI backup news', { count: aiNews.length });
-      return aiNews as HrNewsItem[];
-    }
-
-    // Return whatever RSS we have, even if less than 4
-    if (rssNews && rssNews.length > 0) {
-      return rssNews;
-    }
-
-    return [];
+    // Return what we originally had (fallback)
+    console.log('[HR News] ⚠ Returning original data as fallback');
+    return allNews || [];
   } catch (err) {
-    console.error('[HR News] Error invoking fetch-hr-news:', err);
-    // Return whatever we have from initial query
-    return rssNews || [];
+    console.error('[HR News] Fatal error:', err);
+    return allNews || [];
   }
 };
 
