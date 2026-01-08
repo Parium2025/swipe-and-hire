@@ -136,6 +136,17 @@ export const BookInterviewDialog = ({
     }
   }
 
+  // Calculate end time based on start time and duration
+  const getEndTime = (startTime: string, durationMinutes: string) => {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes + parseInt(durationMinutes);
+    const endHours = Math.floor(totalMinutes / 60) % 24;
+    const endMinutes = totalMinutes % 60;
+    return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+  };
+
+  const endTime = getEndTime(time, duration);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContentNoFocus 
@@ -193,8 +204,8 @@ export const BookInterviewDialog = ({
               <Label className="text-white">Tid</Label>
               <Select value={time} onValueChange={setTime}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
-                  <Clock className="mr-2 h-4 w-4" />
-                  <SelectValue />
+                  <Clock className="mr-2 h-4 w-4 flex-shrink-0" />
+                  <span className="flex-1 text-left">{time} → {endTime}</span>
                 </SelectTrigger>
                 <SelectContent 
                   side="bottom" 
