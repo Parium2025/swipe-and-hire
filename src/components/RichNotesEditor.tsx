@@ -1,6 +1,7 @@
 import { memo, useRef, useCallback, useEffect } from 'react';
 import { Bold, Italic, Strikethrough, List, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface RichNotesEditorProps {
   value: string;
@@ -20,20 +21,28 @@ const ToolbarButton = memo(({
   title: string;
   isActive?: boolean;
 }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    title={title}
-    className={cn(
-      "w-7 h-7 flex items-center justify-center rounded-md transition-all duration-150",
-      "bg-white/15 backdrop-blur-sm",
-      "hover:bg-white/25 hover:scale-105",
-      "active:scale-95",
-      isActive && "bg-white/30 ring-1 ring-white/40"
-    )}
-  >
-    <Icon className="h-3.5 w-3.5 text-white" />
-  </button>
+  <TooltipProvider delayDuration={300}>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={onClick}
+          className={cn(
+            "w-7 h-7 flex items-center justify-center rounded-md transition-all duration-150",
+            "bg-white/15 backdrop-blur-sm",
+            "hover:bg-white/25 hover:scale-105",
+            "active:scale-95",
+            isActive && "bg-white/30 ring-1 ring-white/40"
+          )}
+        >
+          <Icon className="h-3.5 w-3.5 text-white" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top">
+        <p>{title}</p>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
 ));
 
 ToolbarButton.displayName = 'ToolbarButton';
@@ -79,31 +88,43 @@ export const RichNotesEditor = memo(({
   }, [execCommand]);
 
   const handleCheckbox = useCallback(() => {
-    // Insert a checkbox using a special span that looks like a checkbox
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       
-      // Create checkbox element
+      // Create a wrapper div for the checkbox line
+      const wrapper = document.createElement('div');
+      wrapper.className = 'checkbox-line';
+      wrapper.style.display = 'flex';
+      wrapper.style.alignItems = 'flex-start';
+      wrapper.style.gap = '8px';
+      wrapper.style.marginBottom = '4px';
+      
+      // Create checkbox span
       const checkbox = document.createElement('span');
       checkbox.className = 'inline-checkbox';
       checkbox.setAttribute('data-checked', 'false');
-      checkbox.innerHTML = '☐ ';
-      checkbox.contentEditable = 'false';
+      checkbox.textContent = '☐';
       checkbox.style.cursor = 'pointer';
-      checkbox.onclick = (e) => {
-        e.preventDefault();
-        const isChecked = checkbox.getAttribute('data-checked') === 'true';
-        checkbox.setAttribute('data-checked', isChecked ? 'false' : 'true');
-        checkbox.innerHTML = isChecked ? '☐ ' : '☑ ';
-        handleInput();
-      };
+      checkbox.style.userSelect = 'none';
+      checkbox.style.flexShrink = '0';
       
-      range.insertNode(checkbox);
-      range.setStartAfter(checkbox);
-      range.collapse(true);
+      // Create text span for the content
+      const textSpan = document.createElement('span');
+      textSpan.className = 'checkbox-text';
+      textSpan.textContent = ' ';
+      
+      wrapper.appendChild(checkbox);
+      wrapper.appendChild(textSpan);
+      
+      range.insertNode(wrapper);
+      
+      // Position cursor in the text span
+      const newRange = document.createRange();
+      newRange.setStart(textSpan, 0);
+      newRange.collapse(true);
       selection.removeAllRanges();
-      selection.addRange(range);
+      selection.addRange(newRange);
       
       handleInput();
     }
@@ -115,9 +136,18 @@ export const RichNotesEditor = memo(({
     const target = e.target as HTMLElement;
     if (target.classList.contains('inline-checkbox')) {
       e.preventDefault();
+      e.stopPropagation();
       const isChecked = target.getAttribute('data-checked') === 'true';
       target.setAttribute('data-checked', isChecked ? 'false' : 'true');
-      target.innerHTML = isChecked ? '☐ ' : '☑ ';
+      target.textContent = isChecked ? '☐' : '☑';
+      
+      // Update strikethrough on sibling text
+      const sibling = target.nextElementSibling;
+      if (sibling && sibling.classList.contains('checkbox-text')) {
+        (sibling as HTMLElement).style.textDecoration = isChecked ? 'none' : 'line-through';
+        (sibling as HTMLElement).style.opacity = isChecked ? '1' : '0.6';
+      }
+      
       handleInput();
     }
   }, [handleInput]);
