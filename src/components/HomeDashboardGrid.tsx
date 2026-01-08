@@ -387,7 +387,7 @@ const StatsCard = memo(() => {
     return [
       { icon: Briefcase, label: 'Aktiva annonser', value: activeJobsCount, description: 'Mina aktiva jobbannonser' },
       { icon: UserPlus, label: 'Nya ansökningar', value: newApplicationsCount, description: 'Ansökningar du inte sett ännu' },
-      { icon: Heart, label: 'Sparade favoriter', value: savedFavoritesCount, description: 'Gånger dina jobb sparats' },
+      { icon: Heart, label: 'Sparade favoriter', value: savedFavoritesCount, description: 'Gånger dina aktiva jobb sparats' },
       { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden' },
     ];
   }, [activeJobIds.length, newApplicationsCount, savedFavoritesCount, unreadMessagesCount]);
