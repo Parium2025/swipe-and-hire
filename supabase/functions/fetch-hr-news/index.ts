@@ -315,16 +315,19 @@ serve(async (req) => {
     
     const seen = new Set<string>();
     let all = results.flat().filter(i => {
+      // CRITICAL: Only keep articles WITH a valid published_at date
+      if (!i.published_at) {
+        console.log(`Filtered out (no date): "${i.title}" from ${i.source}`);
+        return false;
+      }
       const n = i.title.toLowerCase().replace(/[^a-zåäö0-9]/g, '').slice(0, 50);
       if (seen.has(n)) return false;
       seen.add(n);
       return true;
     });
     
-    all.sort((a, b) => {
-      if (a.published_at && b.published_at) return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
-      return a.published_at ? -1 : b.published_at ? 1 : 0;
-    });
+    // Sort by published_at (newest first) - all items now guaranteed to have dates
+    all.sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime());
     
     // Separate positive and negative articles
     const positiveItems = all.filter(a => !a.isNegative);

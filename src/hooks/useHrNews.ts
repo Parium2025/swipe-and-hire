@@ -17,41 +17,34 @@ export interface HrNewsItem {
   is_translated?: boolean;
 }
 
-const HOURS_WINDOW = 120; // 5 days (Monday-Friday)
-
-function isWithinLastHours(dateStr: string, hours: number): boolean {
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return false;
-  return Date.now() - d.getTime() <= hours * 60 * 60 * 1000;
-}
-
+/**
+ * Fetch news from database - TRUST THE BACKEND
+ * Backend is the gatekeeper: only valid articles with published_at are saved
+ * Frontend shows whatever is in the database without additional filtering
+ */
 const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
-  const thresholdIso = new Date(Date.now() - HOURS_WINDOW * 60 * 60 * 1000).toISOString();
-
   // First, try to get RSS news from database (source_url is not null)
-  const { data: rssNewsRaw, error: rssError } = await supabase
+  // Backend guarantees all saved articles have valid published_at
+  const { data: rssNews, error: rssError } = await supabase
     .from('daily_hr_news')
     .select('*')
     .not('source_url', 'is', null)
-    .not('published_at', 'is', null)
-    .gte('published_at', thresholdIso)
-    .order('published_at', { ascending: false, nullsFirst: false });
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .limit(4);
 
-  const rssNews = (rssNewsRaw || []).filter((item) =>
-    item.published_at ? isWithinLastHours(item.published_at, HOURS_WINDOW) : false,
-  );
-
-  // If we have RSS news, return them
-  if (!rssError && rssNews.length > 0) {
-    console.log('[HR News] Returning RSS news', { count: rssNews.length });
+  // If we have RSS news, return them (no additional filtering!)
+  if (!rssError && rssNews && rssNews.length >= 4) {
+    console.log('[HR News] Returning RSS news from DB', { count: rssNews.length });
     return rssNews;
   }
 
-  // No RSS news - check if we need to fetch fresh
-  console.log('[HR News] No RSS news in window, fetching fresh...');
+  // Not enough RSS news - trigger backend refresh
+  console.log('[HR News] Not enough RSS news, triggering refresh...', { 
+    currentCount: rssNews?.length || 0 
+  });
 
   try {
-    const { data, error } = await supabase.functions.invoke('fetch-hr-news', {
+    const { error } = await supabase.functions.invoke('fetch-hr-news', {
       body: { force: true },
     });
 
@@ -59,32 +52,26 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
       console.error('[HR News] Backend function error:', error);
     }
 
-    // Re-fetch RSS news after function call
-    const { data: freshRssRaw } = await supabase
+    // Re-fetch from database after backend refresh
+    const { data: freshRss } = await supabase
       .from('daily_hr_news')
       .select('*')
       .not('source_url', 'is', null)
-      .not('published_at', 'is', null)
       .order('published_at', { ascending: false, nullsFirst: false })
       .limit(4);
 
-    const freshRss = (freshRssRaw || []).filter((item) =>
-      item.published_at ? isWithinLastHours(item.published_at, HOURS_WINDOW) : false,
-    );
-
-    if (freshRss.length > 0) {
+    if (freshRss && freshRss.length > 0) {
       console.log('[HR News] Got fresh RSS news', { count: freshRss.length });
       return freshRss;
     }
 
-    // Still no RSS news - use AI backup (source='Parium', source_url is null)
+    // Still no RSS news - check for AI backup
     console.log('[HR News] No RSS available, checking AI backup...');
     const { data: aiNews } = await supabase
       .from('daily_hr_news')
       .select('*')
       .eq('source', 'Parium')
       .is('source_url', null)
-      .not('published_at', 'is', null)
       .order('published_at', { ascending: false, nullsFirst: false })
       .limit(4);
 
@@ -93,10 +80,16 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
       return aiNews as HrNewsItem[];
     }
 
+    // Return whatever RSS we have, even if less than 4
+    if (rssNews && rssNews.length > 0) {
+      return rssNews;
+    }
+
     return [];
   } catch (err) {
     console.error('[HR News] Error invoking fetch-hr-news:', err);
-    return [];
+    // Return whatever we have from initial query
+    return rssNews || [];
   }
 };
 
@@ -104,11 +97,10 @@ export const useHrNews = () => {
   return useQuery({
     queryKey: ['hr-news', new Date().toISOString().split('T')[0]],
     queryFn: fetchRecentNews,
-    staleTime: 1000 * 60 * 30, // 30 minutes
-    gcTime: 1000 * 60 * 60 * 2, // 2 hours
+    staleTime: 1000 * 60 * 15, // 15 minutes (shorter for fresher news)
+    gcTime: 1000 * 60 * 60, // 1 hour
     retry: 2,
     retryDelay: 1000,
     refetchOnWindowFocus: false,
   });
 };
-
