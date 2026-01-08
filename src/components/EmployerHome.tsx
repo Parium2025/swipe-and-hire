@@ -214,7 +214,7 @@ const EmployerHome = memo(() => {
               {weather.feelsLike !== weather.temperature && (
                 <span className="text-white"> (känns som {weather.feelsLike}°)</span>
               )}
-              {' '}{weather.description} {displayEmoji}
+              {' '}{weather.description} <span className="text-xl">{displayEmoji}</span>
             </p>
           ) : !gpsGranted && gpsGranted !== null ? (
             <button
