@@ -356,19 +356,30 @@ serve(async (req) => {
       }
     }
     
-    const { data: current } = await supabase.from('daily_hr_news').select('id, source_url').limit(10);
-    const existingUrls = new Set((current || []).map(a => a.source_url).filter(Boolean));
+    // Only look at RSS articles (source_url IS NOT NULL), don't touch AI insights
+    const { data: currentRSS } = await supabase
+      .from('daily_hr_news')
+      .select('id, source_url')
+      .not('source_url', 'is', null)
+      .limit(10);
+    
+    const existingUrls = new Set((currentRSS || []).map(a => a.source_url).filter(Boolean));
     const newItems = balanced.filter(i => !i.source_url || !existingUrls.has(i.source_url));
     
-    // Delete old
-    await supabase.from('daily_hr_news').delete().lt('news_date', new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+    // Delete old RSS articles only (not AI insights)
+    await supabase
+      .from('daily_hr_news')
+      .delete()
+      .not('source_url', 'is', null)
+      .lt('news_date', new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
     
     // If no RSS news at all, use AI fallback
     if (!balanced.length) {
       console.log('No RSS news found, using AI fallback...');
       const aiNews = await generateAIFallbackNews(supabase);
       if (aiNews.length) {
-        await supabase.from('daily_hr_news').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        // Only delete RSS articles, keep AI insights separate
+        await supabase.from('daily_hr_news').delete().not('source_url', 'is', null);
         await supabase.from('daily_hr_news').insert(aiNews);
         return new Response(JSON.stringify({ message: 'AI fallback news generated', count: aiNews.length, source: 'ai' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
@@ -377,12 +388,12 @@ serve(async (req) => {
     
     if (!newItems.length) return new Response(JSON.stringify({ message: 'No new articles', count: 0 }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     
-    // Smart rotation
+    // Smart rotation - only rotate RSS articles
     const toAdd = Math.min(4, newItems.length);
     const toKeep = Math.max(0, 4 - toAdd);
     
-    if (current && toKeep < current.length) {
-      const ids = current.slice(toKeep).map(a => a.id);
+    if (currentRSS && toKeep < currentRSS.length) {
+      const ids = currentRSS.slice(toKeep).map(a => a.id);
       if (ids.length) await supabase.from('daily_hr_news').delete().in('id', ids);
     }
     
