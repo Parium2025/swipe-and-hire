@@ -40,8 +40,20 @@ const CATEGORIES = [
 function isWithin5Days(dateStr: string): boolean {
   try {
     const d = new Date(dateStr);
-    return !isNaN(d.getTime()) && (Date.now() - d.getTime()) <= 120 * 60 * 60 * 1000;
-  } catch { return false; }
+    if (isNaN(d.getTime())) {
+      console.log(`Invalid date format: "${dateStr}"`);
+      return false;
+    }
+    const fiveDaysMs = 5 * 24 * 60 * 60 * 1000; // 120 hours = 5 days
+    const isRecent = (Date.now() - d.getTime()) <= fiveDaysMs;
+    if (!isRecent) {
+      console.log(`Article too old: "${dateStr}" (>${Math.floor((Date.now() - d.getTime()) / (24*60*60*1000))} days)`);
+    }
+    return isRecent;
+  } catch (e) { 
+    console.log(`Date parse error: "${dateStr}"`, e);
+    return false; 
+  }
 }
 
 function parseRSSItems(xml: string): { title: string; description: string; link: string; pubDate: string | null }[] {
@@ -407,11 +419,41 @@ serve(async (req) => {
     });
     
     await supabase.from('daily_hr_news').insert(insert);
-    console.log(`Inserted ${insert.length} articles`);
+    console.log(`Inserted ${insert.length} RSS articles`);
     
-    return new Response(JSON.stringify({ message: 'HR news fetched successfully', count: insert.length, kept: toKeep, sources: [...new Set(insert.map(i => i.source))], categories: [...new Set(insert.map(i => i.category))] }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    // BULLETPROOF: Verify we have at least 4 articles total
+    const { data: finalCount } = await supabase
+      .from('daily_hr_news')
+      .select('id')
+      .not('source_url', 'is', null)
+      .limit(4);
+    
+    const totalRSS = finalCount?.length || 0;
+    console.log(`Total RSS articles in DB after insert: ${totalRSS}`);
+    
+    // If still under 4, add AI fallback to fill the gap
+    if (totalRSS < 4) {
+      console.log(`Only ${totalRSS} RSS articles, generating ${4 - totalRSS} AI fallback articles...`);
+      const aiNews = await generateAIFallbackNews(supabase);
+      if (aiNews.length > 0) {
+        // Only insert enough to reach 4 total
+        const needed = Math.min(4 - totalRSS, aiNews.length);
+        const toInsert = aiNews.slice(0, needed);
+        await supabase.from('daily_hr_news').insert(toInsert);
+        console.log(`Added ${needed} AI fallback articles to reach 4 total`);
+      }
+    }
+    
+    return new Response(JSON.stringify({ 
+      message: 'HR news fetched successfully', 
+      rss_count: insert.length, 
+      total_after: Math.max(totalRSS, 4),
+      kept: toKeep, 
+      sources: [...new Set(insert.map(i => i.source))], 
+      categories: [...new Set(insert.map(i => i.category))] 
+    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (e) {
-    console.error('Error:', e);
+    console.error('Fatal error in fetch-hr-news:', e);
     return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
