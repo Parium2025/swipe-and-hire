@@ -188,7 +188,26 @@ export const HrNewsCards = memo(() => {
   }
 
   if (error || !news || news.length === 0) {
-    return null; // Silently fail - don't show anything if news fails
+    return (
+      <div className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center gap-2"
+        >
+          <Sparkles className="h-5 w-5 text-white/60" />
+          <h2 className="text-lg font-semibold text-white/80">Nytt inom rekrytering idag</h2>
+        </motion.div>
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-6 text-center">
+            <p className="text-white/60 text-sm">
+              För tillfället kan vi inte leverera några nyheter.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

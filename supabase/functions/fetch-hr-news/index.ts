@@ -369,14 +369,14 @@ serve(async (req) => {
       // Check if there's already a negative article in the database
       const { data: existingNegative } = await supabase
         .from('daily_hr_news')
-        .select('id, title')
+        .select('id, title, summary')
         .not('source_url', 'is', null)
         .limit(20);
       
-      // Check titles against negative keywords to find existing negative articles
+      // Check BOTH title AND summary against negative keywords
       const hasNegativeInDB = (existingNegative || []).some(article => {
-        const text = article.title.toLowerCase();
-        return NEGATIVE_KEYWORDS.some(k => text.includes(k));
+        const fullText = `${article.title} ${article.summary || ''}`.toLowerCase();
+        return NEGATIVE_KEYWORDS.some(k => fullText.includes(k));
       });
       
       if (hasNegativeInDB) {
