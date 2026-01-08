@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState, useRef, useEffect } from 'react';
 
-type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'drafts-only' | 'active-first' | 'expired-first' | 'draft-first';
+type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'active-first' | 'expired-first' | 'draft-first';
 
 export interface Recruiter {
   id: string;
@@ -59,10 +59,9 @@ export const JobSearchBar = ({
     oldest: 'Äldst först',
     'title-asc': 'Titel A-Ö',
     'title-desc': 'Titel Ö-A',
-    'active-first': 'Aktiv först',
-    'expired-first': 'Utgången först',
-    'draft-first': 'Utkast först',
-    'drafts-only': 'Endast utkast',
+    'active-first': 'Aktiv',
+    'expired-first': 'Utgången',
+    'draft-first': 'Utkast',
   };
 
   return (
@@ -172,14 +171,6 @@ export const JobSearchBar = ({
             >
               {sortLabels['draft-first']}
             </DropdownMenuItem>
-            {hasDrafts && (
-              <DropdownMenuItem 
-                onClick={() => onSortChange('drafts-only')}
-                className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
-              >
-                {sortLabels['drafts-only']}
-              </DropdownMenuItem>
-            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -297,14 +288,6 @@ export const JobSearchBar = ({
                   >
                     {sortLabels['draft-first']}
                   </DropdownMenuItem>
-                  {hasDrafts && (
-                    <DropdownMenuItem 
-                      onClick={() => onSortChange('drafts-only')}
-                      className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
-                    >
-                      {sortLabels['drafts-only']}
-                    </DropdownMenuItem>
-                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -435,14 +418,6 @@ export const JobSearchBar = ({
                 >
                   {sortLabels['draft-first']}
                 </DropdownMenuItem>
-                {hasDrafts && (
-                  <DropdownMenuItem 
-                    onClick={() => onSortChange('drafts-only')}
-                    className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
-                  >
-                    {sortLabels['drafts-only']}
-                  </DropdownMenuItem>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
