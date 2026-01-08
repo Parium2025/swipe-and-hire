@@ -20,7 +20,7 @@ import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { isJobExpiredCheck } from '@/lib/date';
 import { cn } from '@/lib/utils';
 
@@ -237,11 +237,12 @@ type StatData = {
   description: string;
 };
 
-// Stats Card (Blue - Top Right) - Carousel version
+// Stats Card (Blue - Top Right) - Carousel version with real-time updates
 const StatsCard = memo(() => {
   const { jobs, isLoading: jobsLoading } = useJobsData({ scope: 'personal' });
   const { user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const queryClient = useQueryClient();
   
   // Get active job IDs for queries
   const activeJobIds = useMemo(() => {
@@ -269,8 +270,7 @@ const StatsCard = memo(() => {
       return count || 0;
     },
     enabled: !!user?.id && activeJobIds.length > 0,
-    staleTime: 10000, // 10 seconds for near real-time
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 5000,
   });
   
   // Query for saved favorites count on user's active jobs
@@ -290,8 +290,7 @@ const StatsCard = memo(() => {
       return count || 0;
     },
     enabled: !!user?.id && activeJobIds.length > 0,
-    staleTime: 30000, // 30 seconds
-    refetchInterval: 60000, // Refetch every minute
+    staleTime: 5000,
   });
   
   // Query for unread messages count
@@ -312,9 +311,73 @@ const StatsCard = memo(() => {
       return count || 0;
     },
     enabled: !!user?.id,
-    staleTime: 10000, // 10 seconds
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 5000,
   });
+
+  // Real-time subscriptions for instant updates
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    // Subscribe to job_applications changes (new applications, viewed status changes)
+    const applicationsChannel = supabase
+      .channel('stats-applications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_applications',
+        },
+        (payload) => {
+          console.log('Application change detected:', payload.eventType);
+          // Invalidate the query to trigger refetch
+          queryClient.invalidateQueries({ queryKey: ['new-applications-count'] });
+        }
+      )
+      .subscribe();
+    
+    // Subscribe to saved_jobs changes
+    const savedJobsChannel = supabase
+      .channel('stats-saved-jobs')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'saved_jobs',
+        },
+        (payload) => {
+          console.log('Saved job change detected:', payload.eventType);
+          queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] });
+        }
+      )
+      .subscribe();
+    
+    // Subscribe to messages changes
+    const messagesChannel = supabase
+      .channel('stats-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Message change detected:', payload.eventType);
+          queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
+        }
+      )
+      .subscribe();
+    
+    // Cleanup subscriptions on unmount
+    return () => {
+      supabase.removeChannel(applicationsChannel);
+      supabase.removeChannel(savedJobsChannel);
+      supabase.removeChannel(messagesChannel);
+    };
+  }, [user?.id, queryClient]);
 
   const isLoading = jobsLoading || applicationsLoading || favoritesLoading || messagesLoading;
 
