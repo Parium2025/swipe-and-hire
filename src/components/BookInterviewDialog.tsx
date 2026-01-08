@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X } from 'lucide-react';
-import { format, startOfDay } from 'date-fns';
+import { format, startOfDay, isToday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -128,13 +128,31 @@ export const BookInterviewDialog = ({
   };
 
   // Generate time options (every 15 min, full 24 hours)
-  const timeOptions = [];
+  const allTimeOptions = [];
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m += 15) {
       const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-      timeOptions.push(timeStr);
+      allTimeOptions.push(timeStr);
     }
   }
+
+  // Filter times if today is selected - only show future times
+  const timeOptions = date && isToday(date) 
+    ? allTimeOptions.filter(t => {
+        const [hours, minutes] = t.split(':').map(Number);
+        const now = new Date();
+        const timeDate = new Date();
+        timeDate.setHours(hours, minutes, 0, 0);
+        return timeDate > now;
+      })
+    : allTimeOptions;
+
+  // Reset time if current selection is no longer valid
+  React.useEffect(() => {
+    if (date && isToday(date) && !timeOptions.includes(time) && timeOptions.length > 0) {
+      setTime(timeOptions[0]);
+    }
+  }, [date, timeOptions, time]);
 
   // Calculate end time based on start time and duration
   const getEndTime = (startTime: string, durationMinutes: string) => {
