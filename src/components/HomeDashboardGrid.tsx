@@ -7,17 +7,20 @@ import {
   Newspaper,
   Sparkles,
   ExternalLink,
-  BarChart3,
   Users,
   Briefcase,
   Eye,
   UserPlus,
   Lightbulb,
   Target,
-  Clock
+  Clock,
+  MessageSquare
 } from 'lucide-react';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
 import { useJobsData } from '@/hooks/useJobsData';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 import { isJobExpiredCheck } from '@/lib/date';
 import { cn } from '@/lib/utils';
 
@@ -236,28 +239,55 @@ type StatData = {
 
 // Stats Card (Blue - Top Right) - Carousel version
 const StatsCard = memo(() => {
-  const { jobs, isLoading } = useJobsData({ scope: 'personal' });
+  const { jobs, isLoading: jobsLoading } = useJobsData({ scope: 'personal' });
+  const { profile, user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Query for unread messages count
+  const { data: unreadMessagesCount = 0, isLoading: messagesLoading } = useQuery({
+    queryKey: ['unread-messages-count', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return 0;
+      const { count, error } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_id', user.id)
+        .eq('is_read', false);
+      
+      if (error) {
+        console.error('Error fetching unread messages:', error);
+        return 0;
+      }
+      return count || 0;
+    },
+    enabled: !!user?.id,
+    staleTime: 30000, // 30 seconds
+  });
+
+  const isLoading = jobsLoading || messagesLoading;
 
   const statsArray: StatData[] = useMemo(() => {
     if (!jobs) return [
       { icon: Briefcase, label: 'Aktiva annonser', value: 0, description: 'Jobbannonser som är aktiva just nu' },
-      { icon: UserPlus, label: 'Nya ansökningar', value: 0, description: 'Ansökningar på dina aktiva annonser' },
-      { icon: Eye, label: 'Visningar', value: 0, description: 'Totalt antal visningar' },
-      { icon: Users, label: 'Kandidater', value: 0, description: 'Kandidater att granska' },
+      { icon: UserPlus, label: 'Nya ansökningar', value: 0, description: 'Sedan din senaste inloggning' },
+      { icon: Eye, label: 'Totala visningar', value: 0, description: 'Sedan din senaste inloggning' },
+      { icon: MessageSquare, label: 'Meddelanden', value: 0, description: 'Olästa meddelanden' },
     ];
     
     const activeJobs = jobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
-    const newApplications = activeJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0);
+    
+    // Calculate new applications since last login
+    // For now, we show total applications on active jobs (proper tracking would need application timestamps)
+    const totalApplications = activeJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0);
     const totalViews = activeJobs.reduce((sum, job) => sum + (job.views_count || 0), 0);
     
     return [
       { icon: Briefcase, label: 'Aktiva annonser', value: activeJobs.length, description: 'Jobbannonser som är aktiva just nu' },
-      { icon: UserPlus, label: 'Nya ansökningar', value: newApplications, description: 'Ansökningar på dina aktiva annonser' },
-      { icon: Eye, label: 'Visningar', value: totalViews, description: 'Totalt antal visningar' },
-      { icon: Users, label: 'Kandidater', value: newApplications, description: 'Kandidater att granska' },
+      { icon: UserPlus, label: 'Nya ansökningar', value: totalApplications, description: 'Ansökningar på dina aktiva annonser' },
+      { icon: Eye, label: 'Totala visningar', value: totalViews, description: 'Visningar på dina aktiva annonser' },
+      { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden' },
     ];
-  }, [jobs]);
+  }, [jobs, unreadMessagesCount]);
 
   const goNext = useCallback(() => {
     setCurrentIndex(prev => (prev + 1) % statsArray.length);
