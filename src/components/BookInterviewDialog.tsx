@@ -127,10 +127,10 @@ export const BookInterviewDialog = ({
     }
   };
 
-  // Generate time options (every 30 min from 07:00 to 20:00)
+  // Generate time options (every 15 min, full 24 hours)
   const timeOptions = [];
-  for (let h = 7; h <= 20; h++) {
-    for (let m = 0; m < 60; m += 30) {
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 15) {
       const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
       timeOptions.push(timeStr);
     }
@@ -196,9 +196,15 @@ export const BookInterviewDialog = ({
                   <Clock className="mr-2 h-4 w-4" />
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
+                <SelectContent 
+                  side="bottom" 
+                  align="start" 
+                  sideOffset={4} 
+                  avoidCollisions={false}
+                  className="max-h-[200px] overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                >
                   {timeOptions.map((t) => (
-                    <SelectItem key={t} value={t}>
+                    <SelectItem key={t} value={t} className="py-1.5 text-sm">
                       {t}
                     </SelectItem>
                   ))}
