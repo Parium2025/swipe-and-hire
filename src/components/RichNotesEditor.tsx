@@ -28,7 +28,7 @@ const ToolbarButton = memo(({
       "p-1 rounded transition-colors",
       isActive 
         ? "bg-white/30 text-white" 
-        : "text-white/70 hover:bg-white/20 hover:text-white"
+        : "text-white hover:bg-white/20"
     )}
   >
     <Icon className="h-3.5 w-3.5" />
@@ -189,7 +189,7 @@ export const RichNotesEditor = memo(({
           "bg-white/10 rounded-lg p-2",
           "text-white text-sm leading-relaxed",
           "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
-          "empty:before:content-[attr(data-placeholder)] empty:before:text-white/40",
+          "empty:before:content-[attr(data-placeholder)] empty:before:text-white",
           // List styling
           "[&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1",
           "[&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1",
