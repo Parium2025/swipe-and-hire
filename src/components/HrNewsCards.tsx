@@ -202,7 +202,7 @@ export const HrNewsCards = memo(() => {
         <Card className="bg-white/5 border-white/10">
           <CardContent className="p-6 text-center">
             <p className="text-white/60 text-sm">
-              För tillfället kan vi inte leverera några nyheter.
+              För tillfället kan vi inte leverera några nyheter. Vi jobbar på det.
             </p>
           </CardContent>
         </Card>
