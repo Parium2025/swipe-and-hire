@@ -79,12 +79,13 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
 
 export const useHrNews = () => {
   return useQuery({
-    queryKey: ['hr-news', new Date().toISOString().split('T')[0]],
+    queryKey: ['hr-news'],
     queryFn: fetchRecentNews,
-    staleTime: 1000 * 60 * 15, // 15 minutes (shorter for fresher news)
-    gcTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 5, // 5 minutes - check for new articles more often
+    gcTime: 1000 * 60 * 30, // 30 minutes
     retry: 2,
     retryDelay: 1000,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true, // Refetch when user comes back
+    refetchOnMount: 'always', // Always check for fresh articles on mount
   });
 };
