@@ -106,8 +106,9 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
       const granted = await requestGpsPermission();
       if (granted) {
         console.log('Native GPS enabled successfully');
+        setGpsStatus('granted');
         onEnableGps?.();
-        window.location.reload();
+        // Don't reload - let the app handle the state update naturally
       } else {
         console.log('Native GPS permission denied');
         setGpsStatus('denied');
@@ -120,8 +121,9 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     navigator.geolocation.getCurrentPosition(
       () => {
         console.log('GPS enabled successfully');
+        setGpsStatus('granted');
         onEnableGps?.();
-        window.location.reload();
+        // Don't reload - let the app handle the state update naturally
       },
       (error) => {
         console.log('GPS permission denied:', error.message);

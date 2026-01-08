@@ -503,7 +503,7 @@ const NotesCard = memo(() => {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // Fetch existing note
+  // Fetch existing note with staleTime to prevent refetch on every render
   const { data: noteData, isLoading } = useQuery({
     queryKey: ['employer-notes', user?.id],
     queryFn: async () => {
@@ -517,6 +517,7 @@ const NotesCard = memo(() => {
       return data;
     },
     enabled: !!user?.id,
+    staleTime: 30000, // Keep data fresh for 30 seconds
   });
 
   // Set content when data loads
