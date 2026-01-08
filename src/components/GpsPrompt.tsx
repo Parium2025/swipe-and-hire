@@ -62,56 +62,78 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
 
   // Check GPS permission on mount and listen for changes
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let permissionStatus: PermissionStatus | null = null;
+    
     const checkPermission = async () => {
-      // Check if already dismissed (only for non-denied cases)
-      const dismissed = localStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
-      
       const status = await checkGpsPermission();
       setGpsStatus(status);
       
-      // Show prompt if:
-      // - Permission is 'prompt' (not yet asked) and not dismissed
-      // - Permission is 'denied' (always show help option)
+      // If already granted - NEVER show our prompt
+      if (status === 'granted') {
+        setVisible(false);
+        return;
+      }
+      
+      // If denied - show help immediately
       if (status === 'denied') {
         setVisible(true);
-      } else if (status === 'prompt' && !dismissed) {
-        // Delay showing the prompt for better UX
-        setTimeout(() => setVisible(true), GPS_PROMPT_DELAY_MS);
+        return;
       }
-      // If 'granted', don't show anything
+      
+      // If prompt (browser hasn't asked yet):
+      // Wait 3 seconds, then show our custom prompt
+      const dismissed = localStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
+      if (status === 'prompt' && !dismissed) {
+        timeoutId = setTimeout(() => {
+          // Double-check permission hasn't changed during the wait
+          checkGpsPermission().then(currentStatus => {
+            if (currentStatus === 'prompt') {
+              setVisible(true);
+            } else if (currentStatus === 'granted') {
+              setGpsStatus('granted');
+              setVisible(false);
+            }
+          });
+        }, GPS_PROMPT_DELAY_MS);
+      }
     };
     
-    checkPermission();
-    
-    // Listen for permission changes (browser API)
-    let permissionStatus: PermissionStatus | null = null;
-    
+    // Setup permission change listener (browser API)
     const setupPermissionListener = async () => {
       if ('permissions' in navigator && !isNativeApp()) {
         try {
           permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
-          permissionStatus.addEventListener('change', () => {
+          
+          const handleChange = () => {
             const newState = permissionStatus?.state;
             if (newState === 'granted') {
               setGpsStatus('granted');
               setVisible(false);
+              // Cancel any pending timeout
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+              }
             } else if (newState === 'denied') {
               setGpsStatus('denied');
               setVisible(true);
             }
-          });
-        } catch (e) {
+          };
+          
+          permissionStatus.addEventListener('change', handleChange);
+        } catch {
           // Permission API not supported
         }
       }
     };
     
+    checkPermission();
     setupPermissionListener();
     
     return () => {
-      // Cleanup listener
-      if (permissionStatus) {
-        permissionStatus.removeEventListener('change', () => {});
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     };
   }, []);
