@@ -60,7 +60,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
   const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
   const [showHelpModal, setShowHelpModal] = useState(false);
 
-  // Check GPS permission on mount
+  // Check GPS permission on mount and listen for changes
   useEffect(() => {
     const checkPermission = async () => {
       // Check if already dismissed (only for non-denied cases)
@@ -82,6 +82,38 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     };
     
     checkPermission();
+    
+    // Listen for permission changes (browser API)
+    let permissionStatus: PermissionStatus | null = null;
+    
+    const setupPermissionListener = async () => {
+      if ('permissions' in navigator && !isNativeApp()) {
+        try {
+          permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+          permissionStatus.addEventListener('change', () => {
+            const newState = permissionStatus?.state;
+            if (newState === 'granted') {
+              setGpsStatus('granted');
+              setVisible(false);
+            } else if (newState === 'denied') {
+              setGpsStatus('denied');
+              setVisible(true);
+            }
+          });
+        } catch (e) {
+          // Permission API not supported
+        }
+      }
+    };
+    
+    setupPermissionListener();
+    
+    return () => {
+      // Cleanup listener
+      if (permissionStatus) {
+        permissionStatus.removeEventListener('change', () => {});
+      }
+    };
   }, []);
 
   const handleDismiss = () => {
