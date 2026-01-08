@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus } from 'lucide-react';
+import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -137,6 +138,7 @@ export const CandidateProfileDialog = ({
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editingNoteText, setEditingNoteText] = useState('');
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
+  const [bookInterviewOpen, setBookInterviewOpen] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -937,6 +939,14 @@ export const CandidateProfileDialog = ({
             {/* Actions */}
             <div className="flex flex-wrap justify-center gap-3 pt-4 border-t border-white/20">
               <Button
+                onClick={() => setBookInterviewOpen(true)}
+                variant="glassBlue"
+                size="lg"
+              >
+                <CalendarPlus className="h-4 w-4 mr-1.5" />
+                Boka möte
+              </Button>
+              <Button
                 onClick={() => updateStatus('reviewing')}
                 variant="glassYellow"
                 disabled={displayApp.status === 'reviewing'}
@@ -1177,6 +1187,19 @@ export const CandidateProfileDialog = ({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+
+    {/* Book Interview Dialog */}
+    {displayApp && (
+      <BookInterviewDialog
+        open={bookInterviewOpen}
+        onOpenChange={setBookInterviewOpen}
+        candidateName={`${displayApp.first_name || ''} ${displayApp.last_name || ''}`.trim() || 'Kandidat'}
+        candidateId={displayApp.applicant_id}
+        applicationId={displayApp.id}
+        jobId={displayApp.job_id}
+        jobTitle={displayApp.job_title || 'Tjänst'}
+      />
+    )}
     </>
   );
 };
