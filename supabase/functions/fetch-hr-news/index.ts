@@ -118,25 +118,40 @@ function truncateAtSentence(text: string, maxLen: number): string {
   return truncated.trim() + '...';
 }
 
-async function fetchRSS(source: { url: string; name: string }) {
+interface RSSItem {
+  title: string;
+  summary: string;
+  source: string;
+  source_url: string | null;
+  category: string;
+  published_at: string | null;
+  isNegative: boolean;
+}
+
+async function fetchRSS(source: { url: string; name: string }): Promise<RSSItem[]> {
   try {
     const r = await fetch(source.url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Parium/1.0)', 'Accept': 'application/rss+xml, text/xml, */*' } });
     if (!r.ok) return [];
     const xml = await r.text();
     const items = parseRSSItems(xml);
     
+    // Filter for HR-relevant items, but now include negative ones too (marked)
     return items.slice(0, 15).filter(i => {
       const full = `${i.title} ${i.description}`;
       if (source.name === 'HRnytt.se' && i.link?.includes('/event/')) return false;
-      return isHRRelevant(full, source.name) && !isNegative(full);
-    }).map(i => ({
-      title: i.title,
-      summary: truncateAtSentence(i.description, 250) || i.title,
-      source: source.name,
-      source_url: i.link || null,
-      category: categorize(`${i.title} ${i.description}`),
-      published_at: i.pubDate,
-    }));
+      return isHRRelevant(full, source.name); // Allow negative news if HR-relevant
+    }).map(i => {
+      const full = `${i.title} ${i.description}`;
+      return {
+        title: i.title,
+        summary: truncateAtSentence(i.description, 250) || i.title,
+        source: source.name,
+        source_url: i.link || null,
+        category: categorize(full),
+        published_at: i.pubDate,
+        isNegative: isNegative(full), // Mark if negative
+      };
+    });
   } catch (e) {
     console.error(`Error ${source.name}:`, e);
     return [];
@@ -311,15 +326,34 @@ serve(async (req) => {
       return a.published_at ? -1 : b.published_at ? 1 : 0;
     });
     
-    // Balance sources
+    // Separate positive and negative articles
+    const positiveItems = all.filter(a => !a.isNegative);
+    const negativeItems = all.filter(a => a.isNegative);
+    
+    console.log(`Found ${positiveItems.length} positive and ${negativeItems.length} negative HR articles`);
+    
+    // Balance sources - prioritize positive news
     const srcCount: Record<string, number> = {};
     const balanced: typeof all = [];
-    for (const a of all) {
+    
+    // First add positive articles (max 2 per source)
+    for (const a of positiveItems) {
       if ((srcCount[a.source] || 0) < 2) {
         balanced.push(a);
         srcCount[a.source] = (srcCount[a.source] || 0) + 1;
       }
       if (balanced.length >= 20) break;
+    }
+    
+    // If we have room and not enough positive news, add max 1 negative article
+    const negativeCount = balanced.filter(a => a.isNegative).length;
+    if (balanced.length < 4 && negativeCount === 0 && negativeItems.length > 0) {
+      // Add just one negative article if we need more content
+      const negToAdd = negativeItems.find(a => (srcCount[a.source] || 0) < 2);
+      if (negToAdd) {
+        balanced.push(negToAdd);
+        console.log(`Added 1 negative article to fill: "${negToAdd.title}"`);
+      }
     }
     
     const { data: current } = await supabase.from('daily_hr_news').select('id, source_url').limit(10);
