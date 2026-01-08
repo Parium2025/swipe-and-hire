@@ -499,7 +499,13 @@ StatsCard.displayName = 'StatsCard';
 // Notes Card (Purple - Bottom Left)
 const NotesCard = memo(() => {
   const { user } = useAuth();
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(() => {
+    // Initialize from localStorage for instant display
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('employer_notes_cache') || '';
+    }
+    return '';
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
@@ -520,10 +526,11 @@ const NotesCard = memo(() => {
     staleTime: 30000, // Keep data fresh for 30 seconds
   });
 
-  // Set content when data loads
+  // Set content when data loads and cache it
   useEffect(() => {
     if (noteData?.content) {
       setContent(noteData.content);
+      localStorage.setItem('employer_notes_cache', noteData.content);
     }
   }, [noteData]);
 
