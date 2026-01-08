@@ -425,47 +425,6 @@ export type Database = {
         }
         Relationships: []
       }
-      employer_job_snapshots: {
-        Row: {
-          created_at: string
-          employer_id: string
-          id: string
-          job_id: string
-          last_seen_applications_count: number
-          last_seen_at: string
-          last_seen_views_count: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          employer_id: string
-          id?: string
-          job_id: string
-          last_seen_applications_count?: number
-          last_seen_at?: string
-          last_seen_views_count?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          employer_id?: string
-          id?: string
-          job_id?: string
-          last_seen_applications_count?: number
-          last_seen_at?: string
-          last_seen_views_count?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employer_job_snapshots_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "job_postings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       job_applications: {
         Row: {
           age: number | null
