@@ -425,6 +425,30 @@ export type Database = {
         }
         Relationships: []
       }
+      employer_notes: {
+        Row: {
+          content: string
+          created_at: string
+          employer_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          employer_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          employer_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_applications: {
         Row: {
           age: number | null

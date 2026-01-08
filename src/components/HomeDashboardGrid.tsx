@@ -14,8 +14,11 @@ import {
   Lightbulb,
   Target,
   Clock,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  Calendar
 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useAuth } from '@/hooks/useAuth';
@@ -483,35 +486,114 @@ const StatsCard = memo(() => {
 
 StatsCard.displayName = 'StatsCard';
 
-// Placeholder Cards (Purple & Orange - Bottom)
-const PlaceholderCard = memo(({ 
-  gradient, 
-  icon: Icon, 
-  title, 
-  description 
-}: { 
-  gradient: string; 
-  icon: React.ElementType; 
-  title: string; 
-  description: string;
-}) => (
-  <Card className={`relative overflow-hidden bg-gradient-to-br ${gradient} border-0 shadow-lg h-[200px]`}>
-    <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-    <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
-    
-    <CardContent className="relative p-6 h-full flex flex-col items-center justify-center text-center">
-      <div className="p-3 rounded-xl bg-white/10 mb-3">
-        <Icon className="h-7 w-7 text-white" strokeWidth={1.5} />
-      </div>
-      <h3 className="text-lg font-semibold text-white mb-1">{title}</h3>
-      <p className="text-sm text-white/60">{description}</p>
-    </CardContent>
-  </Card>
-));
+// Notes Card (Purple - Bottom Left)
+const NotesCard = memo(() => {
+  const { user } = useAuth();
+  const [content, setContent] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-PlaceholderCard.displayName = 'PlaceholderCard';
+  // Fetch existing note
+  const { data: noteData, isLoading } = useQuery({
+    queryKey: ['employer-notes', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('employer_notes')
+        .select('*')
+        .eq('employer_id', user!.id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
-const InsightsCard = memo(() => {
+  // Set content when data loads
+  useEffect(() => {
+    if (noteData?.content) {
+      setContent(noteData.content);
+    }
+  }, [noteData]);
+
+  // Auto-save with debounce
+  useEffect(() => {
+    if (!user?.id || content === (noteData?.content || '')) return;
+
+    const timer = setTimeout(async () => {
+      setIsSaving(true);
+      try {
+        if (noteData?.id) {
+          // Update existing
+          await supabase
+            .from('employer_notes')
+            .update({ content })
+            .eq('id', noteData.id);
+        } else {
+          // Create new
+          await supabase
+            .from('employer_notes')
+            .insert({ employer_id: user.id, content });
+        }
+        setLastSaved(new Date());
+      } catch (err) {
+        console.error('Failed to save note:', err);
+      } finally {
+        setIsSaving(false);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [content, user?.id, noteData]);
+
+  return (
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder1} border-0 shadow-lg h-[200px]`}>
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+      <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
+      
+      <CardContent className="relative p-4 h-full flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-white/10">
+              <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isSaving && (
+              <span className="text-[10px] text-white animate-pulse">Sparar...</span>
+            )}
+            {!isSaving && lastSaved && (
+              <span className="text-[10px] text-white">Sparat</span>
+            )}
+            <span className="text-[10px] text-white uppercase tracking-wider font-medium">
+              ANTECKNINGAR
+            </span>
+          </div>
+        </div>
+        
+        {/* Notes textarea */}
+        <div className="flex-1 min-h-0">
+          {isLoading ? (
+            <Skeleton className="h-full w-full bg-white/10 rounded-lg" />
+          ) : (
+            <Textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Skriv påminnelser och anteckningar..."
+              className="h-full w-full resize-none bg-white/10 border-0 text-white placeholder:text-white/40 text-sm focus-visible:ring-1 focus-visible:ring-white/30 rounded-lg"
+            />
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+NotesCard.displayName = 'NotesCard';
+
+// Calendar Card placeholder (Orange - Bottom Right)
+const CalendarCard = memo(() => {
   return (
     <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px]`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
@@ -521,22 +603,23 @@ const InsightsCard = memo(() => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="p-2 rounded-xl bg-white/10">
-            <Target className="h-5 w-5 text-white" strokeWidth={1.5} />
+            <Calendar className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
-          <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium">INSIKTER</span>
+          <span className="text-[10px] text-white uppercase tracking-wider font-medium">INTERVJUER</span>
         </div>
         
         {/* Coming soon content */}
         <div className="flex-1 flex flex-col items-center justify-center">
-          <Lightbulb className="h-8 w-8 text-white/40 mb-2" />
-          <p className="text-sm font-medium text-white/80">Kommer snart</p>
+          <Calendar className="h-8 w-8 text-white/40 mb-2" />
+          <p className="text-sm font-medium text-white">Kommer snart</p>
+          <p className="text-xs text-white/60">Boka intervjuer här</p>
         </div>
       </CardContent>
     </Card>
   );
 });
 
-InsightsCard.displayName = 'InsightsCard';
+CalendarCard.displayName = 'CalendarCard';
 
 // Main Dashboard Grid
 export const HomeDashboardGrid = memo(() => {
@@ -571,27 +654,22 @@ export const HomeDashboardGrid = memo(() => {
           <StatsCard />
         </motion.div>
         
-        {/* Bottom Left - Placeholder (Purple) */}
+        {/* Bottom Left - Notes (Purple) */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <PlaceholderCard 
-            gradient={GRADIENTS.placeholder1}
-            icon={Lightbulb}
-            title="Kommer snart"
-            description="Fler funktioner på väg"
-          />
+          <NotesCard />
         </motion.div>
         
-        {/* Bottom Right - Placeholder (Orange) */}
+        {/* Bottom Right - Calendar (Orange) */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.25 }}
         >
-          <InsightsCard />
+          <CalendarCard />
         </motion.div>
       </div>
     </div>
