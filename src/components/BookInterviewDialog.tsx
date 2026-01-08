@@ -345,6 +345,7 @@ export const BookInterviewDialog = ({
             variant="glass"
             onClick={handleSubmit} 
             disabled={isSubmitting || !date}
+            className="bg-[#2A7B7B] hover:bg-[#238686] text-white border-[#3A8B8B]"
           >
             {isSubmitting ? (
               <>
