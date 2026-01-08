@@ -159,11 +159,9 @@ const NewsCard = memo(() => {
           <div className="p-2 rounded-xl bg-white/10">
             <Newspaper className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
-          {currentNews?.source && (
-            <span className="px-2 py-0.5 rounded-full bg-white/15 text-[10px] text-white/80 font-medium truncate max-w-[120px]">
-              {currentNews.source}
-            </span>
-          )}
+          <span className="text-[10px] text-white uppercase tracking-wider font-medium">
+            NYHETER
+          </span>
         </div>
         
         {/* News content */}
@@ -192,8 +190,9 @@ const NewsCard = memo(() => {
                   </div>
                 )}
                 {currentNews.source_url && (
-                  <div className="flex items-center gap-1 text-white transition-colors">
+                  <div className="flex items-center gap-1.5 text-white transition-colors">
                     <span className="text-xs">Läs mer</span>
+                    <span className="text-[10px] text-white/70">· {currentNews.source}</span>
                     <ExternalLink className="h-3 w-3" />
                   </div>
                 )}
