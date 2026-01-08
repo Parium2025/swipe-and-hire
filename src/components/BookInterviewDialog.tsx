@@ -334,7 +334,7 @@ export const BookInterviewDialog = ({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 px-5 pb-5 pt-2 border-t border-white/10">
+        <div className="flex justify-center gap-3 px-5 pb-5 pt-2 border-t border-white/10">
           <Button 
             variant="glass" 
             onClick={() => onOpenChange(false)}
