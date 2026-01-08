@@ -1,4 +1,5 @@
 import { memo, useMemo, useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
@@ -237,6 +238,7 @@ type StatData = {
   label: string;
   value: number;
   description: string;
+  link?: string;
 };
 
 // Stats Card (Blue - Top Right) - Carousel version with real-time updates
@@ -383,14 +385,16 @@ const StatsCard = memo(() => {
 
   const isLoading = jobsLoading || applicationsLoading || favoritesLoading || messagesLoading;
 
+  const navigate = useNavigate();
+
   const statsArray: StatData[] = useMemo(() => {
     const activeJobsCount = activeJobIds.length;
     
     return [
-      { icon: Briefcase, label: 'Aktiva annonser', value: activeJobsCount, description: 'Mina aktiva jobbannonser' },
-      { icon: UserPlus, label: 'Nya ansökningar', value: newApplicationsCount, description: 'Ansökningar du inte sett ännu' },
+      { icon: Briefcase, label: 'Aktiva annonser', value: activeJobsCount, description: 'Mina aktiva jobbannonser', link: '/my-jobs' },
+      { icon: UserPlus, label: 'Nya ansökningar', value: newApplicationsCount, description: 'Ansökningar du inte sett ännu', link: '/my-jobs' },
       { icon: Heart, label: 'Sparade favoriter', value: savedFavoritesCount, description: 'Gånger dina aktiva jobb sparats' },
-      { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden' },
+      { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden', link: '/messages' },
     ];
   }, [activeJobIds.length, newApplicationsCount, savedFavoritesCount, unreadMessagesCount]);
 
@@ -442,7 +446,13 @@ const StatsCard = memo(() => {
         </div>
         
         {/* Stats content */}
-        <div className="flex-1 flex flex-col justify-center py-2">
+        <div 
+          className={cn(
+            "flex-1 flex flex-col justify-center py-2",
+            currentStat.link && "cursor-pointer"
+          )}
+          onClick={() => currentStat.link && navigate(currentStat.link)}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
