@@ -56,10 +56,33 @@ interface GpsPromptProps {
 }
 
 const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
-  // TEMP: Always show for testing - set to 'denied' to see blocked state, 'prompt' for normal
-  const [visible, setVisible] = useState(true);
-  const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('prompt');
+  const [visible, setVisible] = useState(false);
+  const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
   const [showHelpModal, setShowHelpModal] = useState(false);
+
+  // Check GPS permission on mount
+  useEffect(() => {
+    const checkPermission = async () => {
+      // Check if already dismissed (only for non-denied cases)
+      const dismissed = localStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
+      
+      const status = await checkGpsPermission();
+      setGpsStatus(status);
+      
+      // Show prompt if:
+      // - Permission is 'prompt' (not yet asked) and not dismissed
+      // - Permission is 'denied' (always show help option)
+      if (status === 'denied') {
+        setVisible(true);
+      } else if (status === 'prompt' && !dismissed) {
+        // Delay showing the prompt for better UX
+        setTimeout(() => setVisible(true), GPS_PROMPT_DELAY_MS);
+      }
+      // If 'granted', don't show anything
+    };
+    
+    checkPermission();
+  }, []);
 
   const handleDismiss = () => {
     setVisible(false);
@@ -110,12 +133,13 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     );
   };
 
-  // TEMP: Skip grant check for testing
-  // if (gpsStatus === 'granted') {
-  //   return null;
-  // }
+  // Don't render if GPS is already granted
+  if (gpsStatus === 'granted') {
+    return null;
+  }
 
   const isDenied = gpsStatus === 'denied';
+
 
   return (
     <>
