@@ -322,8 +322,11 @@ export const useApplicationsData = (searchQuery: string = '') => {
       const snapshot = readSnapshot(user.id);
       if (snapshot.length === 0) return undefined;
       
+      // Only show "load more" if snapshot is full page size
+      const hasMore = snapshot.length >= PAGE_SIZE;
+      
       return {
-        pages: [{ items: snapshot, hasMore: true }],
+        pages: [{ items: snapshot, hasMore }],
         pageParams: [0],
       };
     },
