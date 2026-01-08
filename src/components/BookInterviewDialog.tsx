@@ -169,7 +169,7 @@ export const BookInterviewDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContentNoFocus 
         hideClose
-        className="w-[min(90vw,480px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden"
+        className="w-[min(90vw,480px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden flex flex-col"
       >
         <DialogHeader className="px-5 pt-5 pb-3 relative">
           <button
@@ -182,12 +182,12 @@ export const BookInterviewDialog = ({
             <CalendarIcon className="h-5 w-5" />
             Boka intervju
           </DialogTitle>
-          <DialogDescription className="text-white/80">
+          <DialogDescription className="text-white">
             Skicka en intervjukallelse till {candidateName} för tjänsten {jobTitle}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 px-5 pb-5 overflow-y-auto max-h-[calc(85vh-180px)]">
+        <div className="space-y-4 px-5 pb-5 overflow-y-auto flex-1 min-h-0">
           {/* Date picker */}
           <div className="space-y-2">
             <Label className="text-white">Datum</Label>
@@ -200,7 +200,10 @@ export const BookInterviewDialog = ({
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, 'EEEE d MMMM yyyy', { locale: sv }) : 'Välj datum'}
+                  {date ? (() => {
+                    const formatted = format(date, 'EEEE d MMMM yyyy', { locale: sv });
+                    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+                  })() : 'Välj datum'}
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="center" side="bottom" sideOffset={4} avoidCollisions={false}>
