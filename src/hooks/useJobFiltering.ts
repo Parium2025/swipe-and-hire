@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { expandSearchTerms, detectSalarySearch } from '@/lib/smartSearch';
+import { isJobExpiredCheck } from '@/lib/date';
 
 export interface FilterableJob {
   id: string;
@@ -35,7 +36,7 @@ export interface FilterableJob {
   };
 }
 
-type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'drafts-only';
+type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'drafts-only' | 'active-first' | 'expired-first' | 'draft-first';
 
 export const useJobFiltering = (jobs: FilterableJob[]) => {
   const [searchInput, setSearchInput] = useState('');
@@ -135,6 +136,33 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
         return result.sort((a, b) => 
           b.title.localeCompare(a.title, 'sv')
         );
+      case 'active-first':
+        // Active jobs first (is_active = true AND not expired), then expired, then drafts
+        return result.sort((a, b) => {
+          const aIsActive = a.is_active && !isJobExpiredCheck(a.created_at, a.expires_at);
+          const bIsActive = b.is_active && !isJobExpiredCheck(b.created_at, b.expires_at);
+          if (aIsActive && !bIsActive) return -1;
+          if (!aIsActive && bIsActive) return 1;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+      case 'expired-first':
+        // Expired jobs first (is_active = true AND expired)
+        return result.sort((a, b) => {
+          const aIsExpired = a.is_active && isJobExpiredCheck(a.created_at, a.expires_at);
+          const bIsExpired = b.is_active && isJobExpiredCheck(b.created_at, b.expires_at);
+          if (aIsExpired && !bIsExpired) return -1;
+          if (!aIsExpired && bIsExpired) return 1;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+      case 'draft-first':
+        // Draft jobs first (is_active = false)
+        return result.sort((a, b) => {
+          const aIsDraft = !a.is_active;
+          const bIsDraft = !b.is_active;
+          if (aIsDraft && !bIsDraft) return -1;
+          if (!aIsDraft && bIsDraft) return 1;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
       case 'drafts-only':
         // Filter to only show drafts (is_active = false), sorted by newest
         return result

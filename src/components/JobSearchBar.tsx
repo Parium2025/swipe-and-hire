@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState, useRef, useEffect } from 'react';
 
-type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'drafts-only';
+type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'drafts-only' | 'active-first' | 'expired-first' | 'draft-first';
 
 export interface Recruiter {
   id: string;
@@ -59,7 +59,10 @@ export const JobSearchBar = ({
     oldest: 'Äldst först',
     'title-asc': 'Titel A-Ö',
     'title-desc': 'Titel Ö-A',
-    'drafts-only': 'Utkast',
+    'active-first': 'Aktiv först',
+    'expired-first': 'Utgången först',
+    'draft-first': 'Utkast först',
+    'drafts-only': 'Endast utkast',
   };
 
   return (
@@ -149,6 +152,25 @@ export const JobSearchBar = ({
               className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
             >
               {sortLabels['title-desc']}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-white/20" />
+            <DropdownMenuItem 
+              onClick={() => onSortChange('active-first')}
+              className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+            >
+              {sortLabels['active-first']}
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => onSortChange('expired-first')}
+              className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+            >
+              {sortLabels['expired-first']}
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => onSortChange('draft-first')}
+              className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+            >
+              {sortLabels['draft-first']}
             </DropdownMenuItem>
             {hasDrafts && (
               <DropdownMenuItem 
@@ -255,6 +277,25 @@ export const JobSearchBar = ({
                     className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                   >
                     {sortLabels['title-desc']}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('active-first')}
+                    className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                  >
+                    {sortLabels['active-first']}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('expired-first')}
+                    className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                  >
+                    {sortLabels['expired-first']}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('draft-first')}
+                    className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                  >
+                    {sortLabels['draft-first']}
                   </DropdownMenuItem>
                   {hasDrafts && (
                     <DropdownMenuItem 
@@ -374,6 +415,25 @@ export const JobSearchBar = ({
                   className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
                 >
                   {sortLabels['title-desc']}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/20" />
+                <DropdownMenuItem 
+                  onClick={() => onSortChange('active-first')}
+                  className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                >
+                  {sortLabels['active-first']}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => onSortChange('expired-first')}
+                  className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                >
+                  {sortLabels['expired-first']}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => onSortChange('draft-first')}
+                  className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
+                >
+                  {sortLabels['draft-first']}
                 </DropdownMenuItem>
                 {hasDrafts && (
                   <DropdownMenuItem 
