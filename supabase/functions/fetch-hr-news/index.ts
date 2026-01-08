@@ -360,25 +360,40 @@ serve(async (req) => {
       if (balanced.length >= 20) break;
     }
     
-    // PRIORITY ORDER when filling to 4:
-    // 1. Positive RSS articles (already added above)
-    // 2. Negative RSS articles (if needed to reach 4)
-    // 3. AI fallback (only if RSS < 4 after including negative)
+    // RULE: Maximum 1 negative article in the ENTIRE system at any time
+    // Only add a negative article if:
+    // 1. We don't have 4 articles yet
+    // 2. There are NO negative articles currently in the database
     
-    // If we don't have 4 yet, add negative articles before considering AI
     if (balanced.length < 4 && negativeItems.length > 0) {
-      console.log(`Only ${balanced.length} positive articles, checking ${negativeItems.length} negative articles...`);
-      for (const neg of negativeItems) {
-        if (balanced.length >= 4) break;
-        if ((srcCount[neg.source] || 0) < 2) {
-          balanced.push(neg);
-          srcCount[neg.source] = (srcCount[neg.source] || 0) + 1;
-          console.log(`Added negative article to reach 4: "${neg.title}"`);
+      // Check if there's already a negative article in the database
+      const { data: existingNegative } = await supabase
+        .from('daily_hr_news')
+        .select('id, title')
+        .not('source_url', 'is', null)
+        .limit(20);
+      
+      // Check titles against negative keywords to find existing negative articles
+      const hasNegativeInDB = (existingNegative || []).some(article => {
+        const text = article.title.toLowerCase();
+        return NEGATIVE_KEYWORDS.some(k => text.includes(k));
+      });
+      
+      if (hasNegativeInDB) {
+        console.log(`Already have a negative article in DB, skipping new negative articles`);
+      } else {
+        // No negative in DB - we can add ONE
+        console.log(`No negative in DB, can add 1 negative if needed`);
+        const negToAdd = negativeItems.find(a => (srcCount[a.source] || 0) < 2);
+        if (negToAdd && balanced.length < 4) {
+          balanced.push(negToAdd);
+          srcCount[negToAdd.source] = (srcCount[negToAdd.source] || 0) + 1;
+          console.log(`Added 1 negative article: "${negToAdd.title}"`);
         }
       }
     }
     
-    console.log(`Final balanced selection: ${balanced.length} articles (${balanced.filter(a => a.isNegative).length} negative)`);
+    console.log(`Final selection: ${balanced.length} articles (${balanced.filter(a => a.isNegative).length} negative in batch)`);
     
     // Get current RSS articles SORTED by published_at (newest first)
     // This ensures we keep the NEWEST articles when rotating
