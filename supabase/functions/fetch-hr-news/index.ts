@@ -360,16 +360,25 @@ serve(async (req) => {
       if (balanced.length >= 20) break;
     }
     
-    // If we have room and not enough positive news, add max 1 negative article
-    const negativeCount = balanced.filter(a => a.isNegative).length;
-    if (balanced.length < 4 && negativeCount === 0 && negativeItems.length > 0) {
-      // Add just one negative article if we need more content
-      const negToAdd = negativeItems.find(a => (srcCount[a.source] || 0) < 2);
-      if (negToAdd) {
-        balanced.push(negToAdd);
-        console.log(`Added 1 negative article to fill: "${negToAdd.title}"`);
+    // PRIORITY ORDER when filling to 4:
+    // 1. Positive RSS articles (already added above)
+    // 2. Negative RSS articles (if needed to reach 4)
+    // 3. AI fallback (only if RSS < 4 after including negative)
+    
+    // If we don't have 4 yet, add negative articles before considering AI
+    if (balanced.length < 4 && negativeItems.length > 0) {
+      console.log(`Only ${balanced.length} positive articles, checking ${negativeItems.length} negative articles...`);
+      for (const neg of negativeItems) {
+        if (balanced.length >= 4) break;
+        if ((srcCount[neg.source] || 0) < 2) {
+          balanced.push(neg);
+          srcCount[neg.source] = (srcCount[neg.source] || 0) + 1;
+          console.log(`Added negative article to reach 4: "${neg.title}"`);
+        }
       }
     }
+    
+    console.log(`Final balanced selection: ${balanced.length} articles (${balanced.filter(a => a.isNegative).length} negative)`);
     
     // Only look at RSS articles (source_url IS NOT NULL), don't touch AI insights
     const { data: currentRSS } = await supabase
