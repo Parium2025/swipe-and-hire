@@ -434,7 +434,7 @@ const StatsCard = memo(() => {
           <div className="p-2 rounded-xl bg-white/10">
             <Icon className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
-          <span className="text-[10px] text-white/60 uppercase tracking-wider font-medium">
+          <span className="text-[10px] text-white uppercase tracking-wider font-medium">
             MIN STATISTIK
           </span>
         </div>
@@ -453,7 +453,7 @@ const StatsCard = memo(() => {
                 {currentStat.label}
               </h3>
               <div className="text-2xl font-bold text-white mb-1">{currentStat.value}</div>
-              <p className="text-xs text-white/70">
+              <p className="text-xs text-white">
                 {currentStat.description}
               </p>
             </motion.div>
