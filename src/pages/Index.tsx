@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import JobDetails from '@/pages/JobDetails';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
@@ -44,9 +44,11 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TruncatedText } from '@/components/TruncatedText';
 import MyCandidates from '@/pages/MyCandidates';
+import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
 
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [questionFilters, setQuestionFilters] = useState<QuestionFilterValue[]>([]);
 
   const { 
     applications, 
@@ -62,6 +64,53 @@ const CandidatesContent = () => {
   // Safety check to prevent null crash
   const safeApplications = applications || [];
 
+  // Filter applications by question filters (client-side)
+  const filteredApplications = useMemo(() => {
+    if (questionFilters.length === 0) return safeApplications;
+
+    return safeApplications.filter(app => {
+      const customAnswers = app.custom_answers || {};
+      
+      // All filters must match
+      return questionFilters.every(filter => {
+        // Check if any key in custom_answers contains the question text (partial match)
+        const matchingKey = Object.keys(customAnswers).find(key => 
+          key.toLowerCase().includes(filter.question.toLowerCase()) ||
+          filter.question.toLowerCase().includes(key.toLowerCase())
+        );
+
+        if (!matchingKey) return false;
+
+        const answer = customAnswers[matchingKey];
+
+        // If filter.answer is null, just check that they answered the question
+        if (filter.answer === null) {
+          return answer !== undefined && answer !== null && answer !== '';
+        }
+
+        // Match specific answer (case-insensitive)
+        if (typeof answer === 'string') {
+          return answer.toLowerCase() === filter.answer.toLowerCase();
+        }
+        if (typeof answer === 'boolean') {
+          return (answer ? 'ja' : 'nej') === filter.answer.toLowerCase() ||
+                 (answer ? 'yes' : 'no') === filter.answer.toLowerCase() ||
+                 String(answer) === filter.answer;
+        }
+        return String(answer) === filter.answer;
+      });
+    });
+  }, [safeApplications, questionFilters]);
+
+  // Recalculate stats based on filtered results
+  const filteredStats = useMemo(() => ({
+    total: filteredApplications.length,
+    new: filteredApplications.filter(app => app.status === 'pending').length,
+    reviewing: filteredApplications.filter(app => app.status === 'reviewing').length,
+    hired: filteredApplications.filter(app => app.status === 'hired').length,
+    rejected: filteredApplications.filter(app => app.status === 'rejected').length,
+  }), [filteredApplications]);
+
   return (
     <div className="max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
       {/* Main Content */}
@@ -69,16 +118,21 @@ const CandidatesContent = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
-            Alla kandidater ({isLoading ? '...' : stats.total})
+            Alla kandidater ({isLoading ? '...' : filteredStats.total})
+            {questionFilters.length > 0 && stats.total !== filteredStats.total && (
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                (av {stats.total})
+              </span>
+            )}
           </h1>
           <p className="text-sm text-white mt-1">
             Hantera och granska kandidater som sökt till dina jobbannonser
           </p>
         </div>
 
-        {/* Search Bar - hide during initial loading */}
+        {/* Search Bar + Question Filter */}
         {!isLoading && (
-          <div className="mb-6">
+          <div className="mb-6 space-y-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
               <Input
@@ -89,10 +143,13 @@ const CandidatesContent = () => {
                 className="pl-10 bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white transition-colors"
               />
             </div>
+            <QuestionFilter 
+              value={questionFilters}
+              onChange={setQuestionFilters}
+            />
           </div>
         )}
 
-        {/* Candidates Table */}
         {error ? (
           <div className="text-center py-12 text-destructive">
             Något gick fel vid hämtning av kandidater
@@ -115,12 +172,19 @@ const CandidatesContent = () => {
               När någon söker till dina jobb så kommer deras ansökning att visas här.
             </p>
           </div>
+        ) : filteredApplications.length === 0 && questionFilters.length > 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
+            <p className="text-white text-center">
+              Inga kandidater matchar dina filter.<br />
+              Prova att ändra eller ta bort några filter.
+            </p>
+          </div>
         ) : (
           <CandidatesTable 
-            applications={safeApplications} 
+            applications={filteredApplications} 
             onUpdate={refetch}
             onLoadMore={fetchNextPage}
-            hasMore={hasNextPage}
+            hasMore={hasNextPage && questionFilters.length === 0}
             isLoadingMore={isFetchingNextPage}
           />
         )}
