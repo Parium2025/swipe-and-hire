@@ -192,7 +192,7 @@ const NewsCard = memo(() => {
                 {currentNews.source_url && (
                   <div className="flex items-center gap-1.5 text-white transition-colors">
                     <span className="text-xs">Läs mer</span>
-                    <span className="text-[10px] text-white/70">· {currentNews.source}</span>
+                    <span className="text-[10px] text-white">· {currentNews.source}</span>
                     <ExternalLink className="h-3 w-3" />
                   </div>
                 )}
