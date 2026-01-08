@@ -211,6 +211,9 @@ export const BookInterviewDialog = ({
                   disabled={(date) => date < startOfDay(new Date())}
                   initialFocus
                   className="pointer-events-auto"
+                  classNames={{
+                    day_today: "" // Remove today highlight
+                  }}
                 />
               </PopoverContent>
             </Popover>
