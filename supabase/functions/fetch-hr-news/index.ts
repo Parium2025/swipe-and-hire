@@ -380,12 +380,19 @@ serve(async (req) => {
     
     console.log(`Final balanced selection: ${balanced.length} articles (${balanced.filter(a => a.isNegative).length} negative)`);
     
-    // Only look at RSS articles (source_url IS NOT NULL), don't touch AI insights
+    // Get current RSS articles SORTED by published_at (newest first)
+    // This ensures we keep the NEWEST articles when rotating
     const { data: currentRSS } = await supabase
       .from('daily_hr_news')
-      .select('id, source_url')
+      .select('id, source_url, published_at')
       .not('source_url', 'is', null)
+      .order('published_at', { ascending: false })
       .limit(10);
+    
+    console.log(`Current RSS in DB: ${currentRSS?.length || 0} articles`);
+    if (currentRSS?.length) {
+      console.log(`Oldest in DB: "${currentRSS[currentRSS.length - 1]?.published_at}"`);
+    }
     
     const existingUrls = new Set((currentRSS || []).map(a => a.source_url).filter(Boolean));
     const newItems = balanced.filter(i => !i.source_url || !existingUrls.has(i.source_url));
@@ -412,13 +419,19 @@ serve(async (req) => {
     
     if (!newItems.length) return new Response(JSON.stringify({ message: 'No new articles', count: 0 }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     
-    // Smart rotation - only rotate RSS articles
+    // Smart rotation: Keep NEWEST articles, remove OLDEST
+    // toKeep = how many existing articles to keep (newest ones)
+    // toAdd = how many new articles to insert
     const toAdd = Math.min(4, newItems.length);
     const toKeep = Math.max(0, 4 - toAdd);
     
-    if (currentRSS && toKeep < currentRSS.length) {
-      const ids = currentRSS.slice(toKeep).map(a => a.id);
-      if (ids.length) await supabase.from('daily_hr_news').delete().in('id', ids);
+    // Remove the OLDEST articles (they're at the end since sorted desc)
+    if (currentRSS && currentRSS.length > toKeep) {
+      const idsToRemove = currentRSS.slice(toKeep).map(a => a.id);
+      if (idsToRemove.length) {
+        console.log(`Removing ${idsToRemove.length} oldest articles to make room for ${toAdd} new`);
+        await supabase.from('daily_hr_news').delete().in('id', idsToRemove);
+      }
     }
     
     const today = new Date().toISOString().split('T')[0];
