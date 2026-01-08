@@ -174,7 +174,7 @@ export const BookInterviewDialog = ({
                   {date ? format(date, 'EEEE d MMMM yyyy', { locale: sv }) : 'Välj datum'}
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4} avoidCollisions={false}>
+              <PopoverContent className="w-auto p-0" align="center" side="bottom" sideOffset={4} avoidCollisions={false}>
                 <Calendar
                   mode="single"
                   selected={date}
