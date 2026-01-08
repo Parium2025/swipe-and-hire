@@ -17,7 +17,6 @@ import {
   Clock
 } from 'lucide-react';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
-import { usePariumInsights } from '@/hooks/usePariumInsights';
 import { useJobsData } from '@/hooks/useJobsData';
 import { isJobExpiredCheck } from '@/lib/date';
 import { cn } from '@/lib/utils';
@@ -380,63 +379,8 @@ const PlaceholderCard = memo(({
 PlaceholderCard.displayName = 'PlaceholderCard';
 
 const InsightsCard = memo(() => {
-  const { data: insights, isLoading } = usePariumInsights();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const items = insights?.slice(0, 4) || [];
-
-  const goNext = useCallback(() => {
-    if (items.length > 1) {
-      setCurrentIndex(prev => (prev + 1) % items.length);
-    }
-  }, [items.length]);
-
-  const goPrev = useCallback(() => {
-    if (items.length > 1) {
-      setCurrentIndex(prev => (prev - 1 + items.length) % items.length);
-    }
-  }, [items.length]);
-
-  // Auto-rotation every 10 seconds (pauses on hover)
-  useEffect(() => {
-    if (items.length <= 1 || isPaused) return;
-    
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % items.length);
-    }, 10000);
-    
-    return () => clearInterval(interval);
-  }, [items.length, isPaused]);
-
-  const swipeHandlers = useSwipeGesture({
-    onSwipeLeft: goNext,
-    onSwipeRight: goPrev,
-  });
-
-  if (isLoading) {
-    return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px]`}>
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-        <CardContent className="relative p-6 h-full">
-          <div className="flex items-center gap-2 mb-4">
-            <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
-            <Skeleton className="h-4 w-32 bg-white/20" />
-          </div>
-          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const currentInsight = items[currentIndex];
-
   return (
-    <Card 
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px] touch-pan-y`}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      {...swipeHandlers}
-    >
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px]`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
@@ -449,61 +393,10 @@ const InsightsCard = memo(() => {
           <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium">INSIKTER</span>
         </div>
         
-        {/* Insight content */}
-        <div className="flex-1 min-h-0 flex flex-col py-2">
-          <AnimatePresence mode="wait">
-            {currentInsight ? (
-              <motion.div
-                key={currentInsight.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="flex-1 min-h-0 flex flex-col"
-              >
-                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2 flex-shrink-0">
-                  {currentInsight.title}
-                </h3>
-
-                {/* Scrollable summary */}
-                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1">
-                  <p className="text-xs text-white leading-relaxed">
-                    {currentInsight.summary || currentInsight.title}
-                  </p>
-                </div>
-
-                {currentInsight.published_at && (
-                  <div className="flex items-center gap-1.5 text-white text-[10px] flex-shrink-0 mt-1">
-                    <Clock className="h-3 w-3" />
-                    <span>{formatNewsTime(currentInsight.published_at)}</span>
-                  </div>
-                )}
-              </motion.div>
-            ) : (
-              <p className="text-xs text-white/60 text-center">Inga insikter just nu</p>
-            )}
-          </AnimatePresence>
-        </div>
-        
-        {/* Footer with dots */}
-        <div className="flex items-center justify-between mt-auto">
-          {items.length > 1 ? (
-            <div className="flex items-center gap-2">
-              {items.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentIndex(i)}
-                  className={cn(
-                    "w-2.5 h-2.5 rounded-full transition-all duration-300",
-                    i === currentIndex 
-                      ? "bg-white" 
-                      : "bg-white/30 hover:bg-white/50"
-                  )}
-                  aria-label={`Gå till insikt ${i + 1}`}
-                />
-              ))}
-            </div>
-          ) : <div />}
+        {/* Coming soon content */}
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <Lightbulb className="h-8 w-8 text-white/40 mb-2" />
+          <p className="text-sm font-medium text-white/80">Kommer snart</p>
         </div>
       </CardContent>
     </Card>

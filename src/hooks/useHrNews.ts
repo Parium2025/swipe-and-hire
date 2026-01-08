@@ -28,71 +28,74 @@ function isWithinLastHours(dateStr: string, hours: number): boolean {
 const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
   const thresholdIso = new Date(Date.now() - HOURS_WINDOW * 60 * 60 * 1000).toISOString();
 
-  // First, try to get cached news from database (last 48h, not "today")
-  const { data: cachedNewsRaw, error: cacheError } = await supabase
+  // First, try to get RSS news from database (source_url is not null)
+  const { data: rssNewsRaw, error: rssError } = await supabase
     .from('daily_hr_news')
     .select('*')
+    .not('source_url', 'is', null)
     .not('published_at', 'is', null)
     .gte('published_at', thresholdIso)
     .order('published_at', { ascending: false, nullsFirst: false });
 
-  const cachedNews = (cachedNewsRaw || []).filter((item) =>
+  const rssNews = (rssNewsRaw || []).filter((item) =>
     item.published_at ? isWithinLastHours(item.published_at, HOURS_WINDOW) : false,
   );
 
-  const hasRealSources = cachedNews.some((item) => item.source_url);
-  const cachedPreferred = hasRealSources ? cachedNews.filter((item) => !!item.source_url) : cachedNews;
-
-  // If we have cached news, prefer real sources when available
-  if (!cacheError && cachedPreferred.length > 0) {
-    console.log('[HR News] Returning cached news (48h window)', {
-      count: cachedPreferred.length,
-      thresholdIso,
-    });
-    return cachedPreferred;
+  // If we have RSS news, return them
+  if (!rssError && rssNews.length > 0) {
+    console.log('[HR News] Returning RSS news', { count: rssNews.length });
+    return rssNews;
   }
 
-  // Otherwise, fetch fresh
-  const needsRefresh = !cachedNewsRaw || cachedNewsRaw.length === 0 || !hasRealSources;
-  console.log('[HR News] Fetching fresh news via backend function...', { needsRefresh, hasRealSources });
+  // No RSS news - check if we need to fetch fresh
+  console.log('[HR News] No RSS news in window, fetching fresh...');
 
   try {
     const { data, error } = await supabase.functions.invoke('fetch-hr-news', {
-      body: { force: needsRefresh },
+      body: { force: true },
     });
 
     if (error) {
       console.error('[HR News] Backend function error:', error);
-      if (!cacheError && cachedPreferred.length > 0) return cachedPreferred;
-      return [];
     }
 
-    const fresh = (data?.news || []) as HrNewsItem[];
-    const freshFiltered = fresh
-      .filter((item) => item.published_at && isWithinLastHours(item.published_at, HOURS_WINDOW))
-      .sort((a, b) => {
-        const at = a.published_at ? new Date(a.published_at).getTime() : 0;
-        const bt = b.published_at ? new Date(b.published_at).getTime() : 0;
-        return bt - at;
-      });
+    // Re-fetch RSS news after function call
+    const { data: freshRssRaw } = await supabase
+      .from('daily_hr_news')
+      .select('*')
+      .not('source_url', 'is', null)
+      .not('published_at', 'is', null)
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .limit(4);
 
-    const hasFreshRealSources = freshFiltered.some((item) => item.source_url);
-    const freshPreferred = hasFreshRealSources
-      ? freshFiltered.filter((item) => !!item.source_url)
-      : freshFiltered;
+    const freshRss = (freshRssRaw || []).filter((item) =>
+      item.published_at ? isWithinLastHours(item.published_at, HOURS_WINDOW) : false,
+    );
 
-    console.log('[HR News] Got items (48h filtered)', {
-      total: fresh.length,
-      kept: freshPreferred.length,
-      source: data?.source,
-    });
+    if (freshRss.length > 0) {
+      console.log('[HR News] Got fresh RSS news', { count: freshRss.length });
+      return freshRss;
+    }
 
-    if (freshPreferred.length > 0) return freshPreferred;
-    if (!cacheError && cachedPreferred.length > 0) return cachedPreferred;
+    // Still no RSS news - use AI backup (source='Parium', source_url is null)
+    console.log('[HR News] No RSS available, checking AI backup...');
+    const { data: aiNews } = await supabase
+      .from('daily_hr_news')
+      .select('*')
+      .eq('source', 'Parium')
+      .is('source_url', null)
+      .not('published_at', 'is', null)
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .limit(4);
+
+    if (aiNews && aiNews.length > 0) {
+      console.log('[HR News] Using AI backup news', { count: aiNews.length });
+      return aiNews as HrNewsItem[];
+    }
+
     return [];
   } catch (err) {
     console.error('[HR News] Error invoking fetch-hr-news:', err);
-    if (!cacheError && cachedPreferred.length > 0) return cachedPreferred;
     return [];
   }
 };
