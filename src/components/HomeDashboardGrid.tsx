@@ -467,7 +467,7 @@ const StatsCard = memo(() => {
               key={i}
               onClick={() => setCurrentIndex(i)}
               className={cn(
-                "w-2.5 h-2.5 rounded-full transition-all duration-300",
+                "w-2.5 h-2.5 rounded-full transition-colors duration-200",
                 i === currentIndex 
                   ? "bg-white" 
                   : "bg-white/30 hover:bg-white/50"
