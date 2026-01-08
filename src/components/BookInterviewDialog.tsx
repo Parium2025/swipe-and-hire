@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -139,28 +140,31 @@ export const BookInterviewDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-primary" />
+      <DialogContentNoFocus 
+        hideClose
+        className="w-[min(90vw,480px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden"
+      >
+        <DialogHeader className="px-5 pt-5 pb-3">
+          <DialogTitle className="flex items-center gap-2 text-white text-xl">
+            <CalendarIcon className="h-5 w-5" />
             Boka intervju
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-white/80">
             Skicka en intervjukallelse till {candidateName} för tjänsten {jobTitle}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 px-5 pb-5 overflow-y-auto max-h-[calc(85vh-180px)]">
           {/* Date picker */}
           <div className="space-y-2">
-            <Label>Datum</Label>
+            <Label className="text-white">Datum</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
+                    "w-full justify-start text-left font-normal bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white",
+                    !date && "text-white/60"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
@@ -182,9 +186,9 @@ export const BookInterviewDialog = ({
           {/* Time and duration */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Tid</Label>
+              <Label className="text-white">Tid</Label>
               <Select value={time} onValueChange={setTime}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
                   <Clock className="mr-2 h-4 w-4" />
                   <SelectValue />
                 </SelectTrigger>
@@ -198,9 +202,9 @@ export const BookInterviewDialog = ({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Längd</Label>
+              <Label className="text-white">Längd</Label>
               <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -216,12 +220,17 @@ export const BookInterviewDialog = ({
 
           {/* Location type */}
           <div className="space-y-2">
-            <Label>Plats</Label>
+            <Label className="text-white">Plats</Label>
             <div className="grid grid-cols-3 gap-2">
               <Button
                 type="button"
                 variant={locationType === 'video' ? 'default' : 'outline'}
-                className="flex flex-col h-auto py-3 gap-1"
+                className={cn(
+                  "flex flex-col h-auto py-3 gap-1",
+                  locationType === 'video' 
+                    ? "bg-white text-slate-900 hover:bg-white/90" 
+                    : "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+                )}
                 onClick={() => setLocationType('video')}
               >
                 <Video className="h-4 w-4" />
@@ -230,7 +239,12 @@ export const BookInterviewDialog = ({
               <Button
                 type="button"
                 variant={locationType === 'office' ? 'default' : 'outline'}
-                className="flex flex-col h-auto py-3 gap-1"
+                className={cn(
+                  "flex flex-col h-auto py-3 gap-1",
+                  locationType === 'office' 
+                    ? "bg-white text-slate-900 hover:bg-white/90" 
+                    : "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+                )}
                 onClick={() => setLocationType('office')}
               >
                 <Building2 className="h-4 w-4" />
@@ -239,7 +253,12 @@ export const BookInterviewDialog = ({
               <Button
                 type="button"
                 variant={locationType === 'phone' ? 'default' : 'outline'}
-                className="flex flex-col h-auto py-3 gap-1"
+                className={cn(
+                  "flex flex-col h-auto py-3 gap-1",
+                  locationType === 'phone' 
+                    ? "bg-white text-slate-900 hover:bg-white/90" 
+                    : "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+                )}
                 onClick={() => setLocationType('phone')}
               >
                 <Phone className="h-4 w-4" />
@@ -251,7 +270,7 @@ export const BookInterviewDialog = ({
           {/* Location details */}
           {(locationType === 'office' || locationType === 'phone') && (
             <div className="space-y-2">
-              <Label>
+              <Label className="text-white">
                 {locationType === 'office' ? 'Adress' : 'Telefonnummer'}
               </Label>
               <Input
@@ -262,38 +281,49 @@ export const BookInterviewDialog = ({
                     ? 'Ange adress för mötet' 
                     : 'Ange telefonnummer att ringa'
                 }
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
               />
             </div>
           )}
 
           {/* Subject */}
           <div className="space-y-2">
-            <Label>Ämnesrad</Label>
+            <Label className="text-white">Ämnesrad</Label>
             <Input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Ämne för intervjukallelsen"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
             />
           </div>
 
           {/* Message */}
           <div className="space-y-2">
-            <Label>Meddelande till kandidaten</Label>
+            <Label className="text-white">Meddelande till kandidaten</Label>
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Skriv ett personligt meddelande..."
               rows={4}
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
             />
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <div className="flex justify-end gap-3 px-5 pb-5 pt-2 border-t border-white/10">
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+          >
             Avbryt
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || !date}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting || !date}
+            className="bg-white text-slate-900 hover:bg-white/90"
+          >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -304,7 +334,7 @@ export const BookInterviewDialog = ({
             )}
           </Button>
         </div>
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
   );
 };
