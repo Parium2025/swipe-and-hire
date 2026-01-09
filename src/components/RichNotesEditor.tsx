@@ -26,9 +26,13 @@ const ToolbarButton = memo(({
       <TooltipTrigger asChild>
         <button
           type="button"
+          onMouseDown={(e) => {
+            // Keep selection in the editor (prevents caret/focus glitches)
+            e.preventDefault();
+          }}
           onClick={onClick}
           className={cn(
-            "w-5 h-5 flex items-center justify-center rounded transition-all duration-150",
+            "w-5 h-5 flex items-center justify-center rounded transition-all duration-150 caret-transparent",
             "hover:bg-white/20",
             "active:scale-95",
             isActive && "bg-white/25"
@@ -88,46 +92,61 @@ export const RichNotesEditor = memo(({
 
   const handleCheckbox = useCallback(() => {
     const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
+    const editorEl = editorRef.current;
+    if (!selection || !editorEl) return;
+
+    const findCheckboxLine = (node: Node | null): HTMLElement | null => {
+      let cur: Node | null = node;
+      while (cur && cur !== editorEl) {
+        if (cur instanceof HTMLElement && cur.classList.contains('checkbox-line')) return cur;
+        cur = cur.parentNode;
+      }
+      return null;
+    };
+
+    // Build a wrapper div for the checkbox line
+    const wrapper = document.createElement('div');
+    wrapper.className = 'checkbox-line';
+    wrapper.style.display = 'flex';
+    wrapper.style.alignItems = 'flex-start';
+    wrapper.style.gap = '8px';
+    wrapper.style.marginBottom = '4px';
+
+    const checkbox = document.createElement('span');
+    checkbox.className = 'inline-checkbox';
+    checkbox.setAttribute('data-checked', 'false');
+    checkbox.textContent = '☐';
+    checkbox.style.cursor = 'pointer';
+    checkbox.style.userSelect = 'none';
+    checkbox.style.flexShrink = '0';
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'checkbox-text';
+
+    wrapper.appendChild(checkbox);
+    wrapper.appendChild(textSpan);
+
+    // If cursor is currently inside an existing checkbox-line, insert AFTER it (never inside)
+    const currentCheckboxLine = findCheckboxLine(selection.focusNode);
+    if (currentCheckboxLine) {
+      currentCheckboxLine.insertAdjacentElement('afterend', wrapper);
+    } else if (selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
-      
-      // Create a wrapper div for the checkbox line
-      const wrapper = document.createElement('div');
-      wrapper.className = 'checkbox-line';
-      wrapper.style.display = 'flex';
-      wrapper.style.alignItems = 'flex-start';
-      wrapper.style.gap = '8px';
-      wrapper.style.marginBottom = '4px';
-      
-      // Create checkbox span
-      const checkbox = document.createElement('span');
-      checkbox.className = 'inline-checkbox';
-      checkbox.setAttribute('data-checked', 'false');
-      checkbox.textContent = '☐';
-      checkbox.style.cursor = 'pointer';
-      checkbox.style.userSelect = 'none';
-      checkbox.style.flexShrink = '0';
-      
-      // Create text span for the content
-      const textSpan = document.createElement('span');
-      textSpan.className = 'checkbox-text';
-      textSpan.textContent = ' ';
-      
-      wrapper.appendChild(checkbox);
-      wrapper.appendChild(textSpan);
-      
+      range.deleteContents();
       range.insertNode(wrapper);
-      
-      // Position cursor in the text span
-      const newRange = document.createRange();
-      newRange.setStart(textSpan, 0);
-      newRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-      
-      handleInput();
+    } else {
+      editorEl.appendChild(wrapper);
     }
-    editorRef.current?.focus();
+
+    // Place cursor inside the checkbox text span
+    const newRange = document.createRange();
+    newRange.selectNodeContents(textSpan);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
+    editorEl.focus();
+    handleInput();
   }, [handleInput]);
 
   // Handle click on checkboxes within the editor
@@ -157,12 +176,42 @@ export const RichNotesEditor = memo(({
     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const modKey = isMac ? e.metaKey : e.ctrlKey;
 
-    // Handle Enter key - insert line break
+    // If we're inside a checkbox-line, Enter should create a NEW line BELOW (not inside the same flex row)
     if (e.key === 'Enter' && !e.shiftKey && !modKey) {
-      e.preventDefault();
-      document.execCommand('insertLineBreak');
-      handleInput();
-      return;
+      const selection = window.getSelection();
+      const editorEl = editorRef.current;
+
+      if (selection && editorEl) {
+        let cur: Node | null = selection.focusNode;
+        let checkboxLine: HTMLElement | null = null;
+
+        while (cur && cur !== editorEl) {
+          if (cur instanceof HTMLElement && cur.classList.contains('checkbox-line')) {
+            checkboxLine = cur;
+            break;
+          }
+          cur = cur.parentNode;
+        }
+
+        if (checkboxLine) {
+          e.preventDefault();
+
+          const nextLine = document.createElement('div');
+          nextLine.appendChild(document.createElement('br'));
+          checkboxLine.insertAdjacentElement('afterend', nextLine);
+
+          const range = document.createRange();
+          range.setStart(nextLine, 0);
+          range.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(range);
+
+          editorEl.focus();
+          handleInput();
+          return;
+        }
+      }
+      // Outside checkbox-lines: let the browser handle Enter normally (lists/paragraphs etc.)
     }
 
     if (modKey) {
