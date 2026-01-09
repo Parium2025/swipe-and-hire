@@ -87,8 +87,16 @@ export const RichNotesEditor = memo(({
   const handleStrikethrough = useCallback(() => execCommand('strikeThrough'), [execCommand]);
   
   const handleBulletList = useCallback(() => {
+    const editorEl = editorRef.current;
+    if (editorEl) {
+      // Clear any placeholder-like content before inserting list
+      const currentText = editorEl.textContent?.trim() || '';
+      if (currentText === '' || currentText === placeholder) {
+        editorEl.innerHTML = '';
+      }
+    }
     execCommand('insertUnorderedList');
-  }, [execCommand]);
+  }, [execCommand, placeholder]);
 
   const handleCheckbox = useCallback(() => {
     const selection = window.getSelection();
@@ -278,11 +286,11 @@ export const RichNotesEditor = memo(({
         className={cn(
           "relative flex-1 min-h-0 overflow-y-auto",
           "bg-white/10 rounded-lg p-2",
-          "text-white text-sm leading-relaxed",
+          "text-sm leading-relaxed",
           "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
           // Placeholder (contentEditable is rarely :empty due to <br>, so use data-empty)
           "data-[empty=true]:before:content-[attr(data-placeholder)]",
-          "data-[empty=true]:before:text-white",
+          "data-[empty=true]:before:text-white/70",
           "data-[empty=true]:before:absolute data-[empty=true]:before:top-2 data-[empty=true]:before:left-2",
           "data-[empty=true]:before:pointer-events-none data-[empty=true]:before:select-none",
           // List styling
@@ -292,6 +300,7 @@ export const RichNotesEditor = memo(({
           // Checkbox styling
           "[&_.inline-checkbox]:cursor-pointer [&_.inline-checkbox]:select-none"
         )}
+        style={{ color: '#FFFFFF' }}
         suppressContentEditableWarning
       />
     </div>
