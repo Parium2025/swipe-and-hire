@@ -96,7 +96,22 @@ export const RichNotesEditor = memo(({
   }, []);
 
   const handleBulletList = useCallback(() => {
+    const editorEl = editorRef.current;
     clearEditorIfEmpty();
+
+    // Ensure caret is inside the editor so the command actually applies
+    if (editorEl) {
+      editorEl.focus();
+      const selection = window.getSelection();
+      if (selection && (!selection.rangeCount || !editorEl.contains(selection.anchorNode))) {
+        const range = document.createRange();
+        range.selectNodeContents(editorEl);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+
     execCommand('insertUnorderedList');
   }, [execCommand, clearEditorIfEmpty]);
 
@@ -105,11 +120,14 @@ export const RichNotesEditor = memo(({
     const editorEl = editorRef.current;
     if (!selection || !editorEl) return;
 
-    // Clear if empty before inserting checkbox
+    // Clear if empty before inserting checkbox (placeholder is a pseudo-element)
     const text = editorEl.textContent?.trim() || '';
     if (text === '') {
       editorEl.innerHTML = '';
     }
+
+    // Ensure caret is inside the editor before we insert
+    editorEl.focus();
 
     const findCheckboxLine = (node: Node | null): HTMLElement | null => {
       let cur: Node | null = node;
@@ -265,6 +283,12 @@ export const RichNotesEditor = memo(({
 
     const el = document.createElement('div');
     el.innerHTML = value;
+
+    // Important: an empty list (<ul><li><br/></li></ul>) has no textContent,
+    // but it's still "real content" and should hide the placeholder.
+    const hasStructure = !!el.querySelector('ul, ol, .checkbox-line, .inline-checkbox');
+    if (hasStructure) return false;
+
     const text = (el.textContent || '').replace(/\u00a0/g, ' ').trim();
     return text.length === 0;
   }, [value]);
