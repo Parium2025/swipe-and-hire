@@ -139,14 +139,7 @@ export const RichNotesEditor = memo(({
       const isChecked = target.getAttribute('data-checked') === 'true';
       target.setAttribute('data-checked', isChecked ? 'false' : 'true');
       target.textContent = isChecked ? '☐' : '☑';
-      
-      // Update strikethrough on sibling text
-      const sibling = target.nextElementSibling;
-      if (sibling && sibling.classList.contains('checkbox-text')) {
-        (sibling as HTMLElement).style.textDecoration = isChecked ? 'none' : 'line-through';
-        (sibling as HTMLElement).style.opacity = isChecked ? '1' : '0.6';
-      }
-      
+      // No strikethrough - just toggle the checkbox symbol
       handleInput();
     }
   }, [handleInput]);
@@ -163,6 +156,14 @@ export const RichNotesEditor = memo(({
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+    // Handle Enter key - insert line break
+    if (e.key === 'Enter' && !e.shiftKey && !modKey) {
+      e.preventDefault();
+      document.execCommand('insertLineBreak');
+      handleInput();
+      return;
+    }
 
     if (modKey) {
       switch (e.key.toLowerCase()) {
@@ -191,7 +192,7 @@ export const RichNotesEditor = memo(({
       e.preventDefault();
       handleCheckbox();
     }
-  }, [handleBold, handleItalic, handleStrikethrough, handleBulletList, handleCheckbox]);
+  }, [handleBold, handleItalic, handleStrikethrough, handleBulletList, handleCheckbox, handleInput]);
 
   const isEmpty = useMemo(() => {
     if (!value) return true;
