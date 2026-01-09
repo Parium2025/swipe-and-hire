@@ -1,17 +1,63 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { formatTimeAgo } from '@/lib/date';
 import { CandidateProfileDialog } from './CandidateProfileDialog';
 import { CandidateAvatar } from './CandidateAvatar';
-import { Button } from '@/components/ui/button';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus, Clock } from 'lucide-react';
+import { UserPlus, Clock, Loader2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
+import { Button } from '@/components/ui/button';
+
+// Infinite scroll sentinel component
+function InfiniteScrollSentinel({ 
+  onIntersect, 
+  isLoading 
+}: { 
+  onIntersect?: () => void; 
+  isLoading?: boolean;
+}) {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!onIntersect) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoading) {
+          onIntersect();
+        }
+      },
+      { rootMargin: '200px' } // Load early before reaching bottom
+    );
+
+    const sentinel = sentinelRef.current;
+    if (sentinel) {
+      observer.observe(sentinel);
+    }
+
+    return () => {
+      if (sentinel) {
+        observer.unobserve(sentinel);
+      }
+    };
+  }, [onIntersect, isLoading]);
+
+  return (
+    <div ref={sentinelRef} className="flex justify-center py-4">
+      {isLoading && (
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="text-sm">Laddar fler kandidater...</span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface CandidatesTableProps {
   applications: ApplicationData[];
@@ -197,16 +243,12 @@ export function CandidatesTable({
         </Table>
       </div>
       
-      {hasMore && onLoadMore && (
-        <div className="flex justify-center py-4">
-          <Button
-            onClick={onLoadMore}
-            disabled={isLoadingMore}
-            variant="glass"
-          >
-            {isLoadingMore ? 'Laddar fler...' : 'Visa fler kandidater'}
-          </Button>
-        </div>
+      {/* Infinite scroll sentinel */}
+      {hasMore && (
+        <InfiniteScrollSentinel 
+          onIntersect={onLoadMore} 
+          isLoading={isLoadingMore} 
+        />
       )}
 
       <CandidateProfileDialog
