@@ -86,22 +86,30 @@ export const RichNotesEditor = memo(({
   const handleItalic = useCallback(() => execCommand('italic'), [execCommand]);
   const handleStrikethrough = useCallback(() => execCommand('strikeThrough'), [execCommand]);
   
-  const handleBulletList = useCallback(() => {
+  const clearEditorIfEmpty = useCallback(() => {
     const editorEl = editorRef.current;
-    if (editorEl) {
-      // Clear any placeholder-like content before inserting list
-      const currentText = editorEl.textContent?.trim() || '';
-      if (currentText === '' || currentText === placeholder) {
-        editorEl.innerHTML = '';
-      }
+    if (!editorEl) return;
+    const text = editorEl.textContent?.trim() || '';
+    if (text === '') {
+      editorEl.innerHTML = '';
     }
+  }, []);
+
+  const handleBulletList = useCallback(() => {
+    clearEditorIfEmpty();
     execCommand('insertUnorderedList');
-  }, [execCommand, placeholder]);
+  }, [execCommand, clearEditorIfEmpty]);
 
   const handleCheckbox = useCallback(() => {
     const selection = window.getSelection();
     const editorEl = editorRef.current;
     if (!selection || !editorEl) return;
+
+    // Clear if empty before inserting checkbox
+    const text = editorEl.textContent?.trim() || '';
+    if (text === '') {
+      editorEl.innerHTML = '';
+    }
 
     const findCheckboxLine = (node: Node | null): HTMLElement | null => {
       let cur: Node | null = node;
@@ -290,7 +298,7 @@ export const RichNotesEditor = memo(({
           "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
           // Placeholder (contentEditable is rarely :empty due to <br>, so use data-empty)
           "data-[empty=true]:before:content-[attr(data-placeholder)]",
-          "data-[empty=true]:before:text-white/70",
+          "data-[empty=true]:before:text-white",
           "data-[empty=true]:before:absolute data-[empty=true]:before:top-2 data-[empty=true]:before:left-2",
           "data-[empty=true]:before:pointer-events-none data-[empty=true]:before:select-none",
           // List styling
