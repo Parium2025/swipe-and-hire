@@ -428,7 +428,7 @@ export const RichNotesEditor = memo(({
       }
     }
 
-    // If we're inside a checkbox-line, Enter inserts a normal empty line (checkbox stays/moves naturally)
+    // If we're inside a checkbox-line, Enter behaves like a checklist editor
     if (e.key === 'Enter' && !e.shiftKey && !modKey) {
       const selection = window.getSelection();
       const editorEl = editorRef.current;
@@ -455,24 +455,19 @@ export const RichNotesEditor = memo(({
           const createCheckboxLine = (initialText: string) => {
             const wrapper = document.createElement('div');
             wrapper.className = 'checkbox-line';
-            wrapper.style.display = 'flex';
-            wrapper.style.alignItems = 'flex-start';
-            wrapper.style.gap = '8px';
             wrapper.style.marginBottom = '4px';
 
             const checkbox = document.createElement('span');
             checkbox.className = 'inline-checkbox';
             checkbox.setAttribute('data-checked', 'false');
             checkbox.setAttribute('contenteditable', 'false');
-            checkbox.textContent = '☐';
+            checkbox.textContent = `☐\u00A0`;
             checkbox.style.cursor = 'pointer';
+            // Keep selectable so iOS/Android selection handles can expand past checkboxes
             checkbox.style.userSelect = 'text';
-            checkbox.style.flexShrink = '0';
 
             const textSpan = document.createElement('span');
             textSpan.className = 'checkbox-text';
-            textSpan.style.flex = '1';
-            textSpan.style.minWidth = '0';
             textSpan.textContent = `\u200b${initialText}`;
 
             wrapper.appendChild(checkbox);
@@ -493,6 +488,28 @@ export const RichNotesEditor = memo(({
             caretOffset = range.startOffset <= 1 ? 0 : textContent.length;
           } else {
             caretOffset = 0;
+          }
+
+          // UX: If the current checkbox item is empty, Enter exits the checklist.
+          if (textContent.length === 0) {
+            const plain = document.createElement('div');
+            plain.appendChild(document.createElement('br'));
+            checkboxLine.insertAdjacentElement('afterend', plain);
+            checkboxLine.remove();
+
+            const sel = window.getSelection();
+            if (sel) {
+              const r = document.createRange();
+              r.setStart(plain, 0);
+              r.collapse(true);
+              sel.removeAllRanges();
+              sel.addRange(r);
+            }
+
+            editorEl.focus();
+            handleInput();
+            updateScrollInfo();
+            return;
           }
 
           if (caretOffset > 0 && caretOffset < textContent.length && checkboxText) {
