@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo } from 'lucide-react';
+import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo, Heading1, Heading2, Quote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -192,6 +192,18 @@ export const RichNotesEditor = memo(({
     editor?.chain().focus().redo().run();
   }, [editor]);
 
+  const handleHeading1 = useCallback(() => {
+    editor?.chain().focus().toggleHeading({ level: 1 }).run();
+  }, [editor]);
+
+  const handleHeading2 = useCallback(() => {
+    editor?.chain().focus().toggleHeading({ level: 2 }).run();
+  }, [editor]);
+
+  const handleBlockquote = useCallback(() => {
+    editor?.chain().focus().toggleBlockquote().run();
+  }, [editor]);
+
   if (!editor) {
     return null;
   }
@@ -199,7 +211,20 @@ export const RichNotesEditor = memo(({
   return (
     <div className={cn("flex flex-col h-full rich-notes-editor", className)}>
       {/* Compact Toolbar */}
-      <div className="flex items-center gap-0.5 pb-1.5 mb-1.5 border-b border-white/10">
+      <div className="flex items-center gap-0.5 pb-1.5 mb-1.5 border-b border-white/10 flex-wrap">
+        <ToolbarButton 
+          onClick={handleHeading1} 
+          icon={Heading1} 
+          title="Rubrik 1" 
+          isActive={editor.isActive('heading', { level: 1 })}
+        />
+        <ToolbarButton 
+          onClick={handleHeading2} 
+          icon={Heading2} 
+          title="Rubrik 2" 
+          isActive={editor.isActive('heading', { level: 2 })}
+        />
+        <div className="w-px h-3 bg-white/20 mx-0.5" />
         <ToolbarButton 
           onClick={handleBold} 
           icon={Bold} 
@@ -228,8 +253,14 @@ export const RichNotesEditor = memo(({
         <ToolbarButton 
           onClick={handleCheckbox} 
           icon={CheckSquare} 
-          title="Checkbox (Ctrl+Shift+C)" 
+          title="Checkbox" 
           isActive={editor.isActive('taskList')}
+        />
+        <ToolbarButton 
+          onClick={handleBlockquote} 
+          icon={Quote} 
+          title="Citat-block" 
+          isActive={editor.isActive('blockquote')}
         />
         <div className="w-px h-3 bg-white/20 mx-0.5" />
         <ToolbarButton 
