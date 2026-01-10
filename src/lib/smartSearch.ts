@@ -223,52 +223,58 @@ function normalizeSwedish(text: string): string {
 }
 
 // Check if a string fuzzy-matches the query
-function fuzzyMatch(text: string, query: string, maxDistance: number = 2): { match: boolean; score: number } {
+// STRICT MODE: Only matches when there's a real similarity
+function fuzzyMatch(text: string, query: string, maxDistance: number = 1): { match: boolean; score: number } {
   if (!text || !query) return { match: false, score: 0 };
   
   const normalizedText = normalizeSwedish(text.toLowerCase().trim());
   const normalizedQuery = normalizeSwedish(query.toLowerCase().trim());
+  
+  // Query too short for meaningful fuzzy match - require exact
+  if (normalizedQuery.length < 2) {
+    return { match: false, score: 0 };
+  }
   
   // Exact match = highest score
   if (normalizedText === normalizedQuery) {
     return { match: true, score: 100 };
   }
   
-  // Contains match = high score
-  if (normalizedText.includes(normalizedQuery)) {
+  // Contains match = high score (query must be at least 2 chars)
+  if (normalizedQuery.length >= 2 && normalizedText.includes(normalizedQuery)) {
     return { match: true, score: 90 };
   }
   
-  // Word starts with query = high score
+  // Word starts with query = high score (query must be at least 2 chars)
   const words = normalizedText.split(/\s+/);
-  for (const word of words) {
-    if (word.startsWith(normalizedQuery)) {
-      return { match: true, score: 85 };
+  if (normalizedQuery.length >= 2) {
+    for (const word of words) {
+      if (word.startsWith(normalizedQuery)) {
+        return { match: true, score: 85 };
+      }
     }
   }
   
-  // Fuzzy match for typos - only for queries of 3+ characters
-  if (normalizedQuery.length >= 3) {
-    // Check each word in text
+  // Fuzzy match for typos - STRICT: only for queries of 4+ characters
+  // and word length must be similar to query length
+  if (normalizedQuery.length >= 4) {
     for (const word of words) {
-      if (word.length >= 2) {
+      // Word must be similar length (±2 characters)
+      const lengthDiff = Math.abs(word.length - normalizedQuery.length);
+      if (lengthDiff > 2) continue;
+      
+      if (word.length >= 3) {
         const distance = levenshteinDistance(word, normalizedQuery);
-        const allowedDistance = Math.min(maxDistance, Math.floor(normalizedQuery.length / 3));
-        if (distance <= allowedDistance) {
-          return { match: true, score: 70 - distance * 10 };
+        // Stricter: max 1 error per 4 characters, max 2 total
+        const allowedDistance = Math.min(maxDistance, Math.floor(normalizedQuery.length / 4));
+        if (distance <= allowedDistance && distance <= 2) {
+          return { match: true, score: 70 - distance * 15 };
         }
       }
     }
-    
-    // Check if query is close to any substring
-    for (let i = 0; i <= normalizedText.length - normalizedQuery.length; i++) {
-      const substring = normalizedText.substring(i, i + normalizedQuery.length);
-      const distance = levenshteinDistance(substring, normalizedQuery);
-      if (distance <= 1) {
-        return { match: true, score: 60 };
-      }
-    }
   }
+  
+  // NO substring matching - it was too permissive
   
   return { match: false, score: 0 };
 }
