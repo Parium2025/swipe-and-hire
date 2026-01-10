@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
@@ -88,30 +88,35 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
 
   const hasFilters = value.length > 0;
 
+  // Dropdown styling matching nav dropdowns
+  const dropdownContentClass = "min-w-[280px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-0";
+  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm transition-colors";
+
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      {/* Main filter button */}
+      {/* Main filter button - matching nav dropdown triggers */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={`gap-2 border-white/20 text-white hover:bg-white/10 hover:border-white/50 ${
-              hasFilters ? 'bg-primary/20 border-primary/50' : ''
-            }`}
+          <button
+            className={`
+              flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+              ${hasFilters 
+                ? 'bg-white/20 text-white' 
+                : 'text-white hover:bg-white/10'
+              }
+            `}
           >
             <Filter className="h-4 w-4" />
             <span>Filtrera på frågor</span>
             {hasFilters && (
-              <Badge variant="secondary" className="ml-1 bg-primary text-white text-xs px-1.5">
-                {value.length}
-              </Badge>
+              <span className="text-white text-xs">({value.length})</span>
             )}
-            <ChevronDown className="h-3 w-3 ml-1" />
-          </Button>
+            <ChevronDown className="h-3 w-3 text-white" />
+          </button>
         </PopoverTrigger>
         <PopoverContent 
           align="start" 
-          className="w-80 p-0 bg-card-parium border-white/20"
+          className={dropdownContentClass}
           sideOffset={8}
         >
           <div className="p-3 border-b border-white/10">
@@ -156,15 +161,15 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                             toggleQuestion(question);
                           }
                         }}
-                        className={`w-full flex items-start gap-2 p-2 rounded-md text-left transition-colors ${
+                        className={`${dropdownItemClass} w-full text-left ${
                           isSelected 
-                            ? 'bg-primary/20 text-white' 
-                            : 'hover:bg-white/5 text-muted-foreground hover:text-white'
+                            ? 'bg-white/15 text-white' 
+                            : 'text-muted-foreground hover:text-white'
                         }`}
                       >
                         <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm leading-tight truncate">{question.question_text}</p>
+                          <p className="text-sm leading-tight truncate font-medium">{question.question_text}</p>
                           {selectedAnswer && (
                             <p className="text-xs text-primary mt-0.5">= "{selectedAnswer}"</p>
                           )}
@@ -182,7 +187,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
 
                       {/* Options dropdown */}
                       {isExpanded && hasOptions && (
-                        <div className="ml-6 pl-2 border-l border-white/10 space-y-1">
+                        <div className="ml-6 pl-2 border-l border-white/10 space-y-0.5">
                           {/* Any answer option */}
                           <button
                             onClick={() => {
@@ -195,10 +200,10 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                                 ]);
                               }
                             }}
-                            className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-sm transition-colors ${
+                            className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
                               isSelected && selectedAnswer === null
-                                ? 'bg-primary/20 text-white'
-                                : 'hover:bg-white/5 text-muted-foreground hover:text-white'
+                                ? 'bg-white/15 text-white'
+                                : 'hover:bg-white/20 text-muted-foreground hover:text-white'
                             }`}
                           >
                             <Checkbox 
@@ -219,10 +224,10 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                                   setAnswer(question.question_text, option);
                                 }
                               }}
-                              className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-sm transition-colors ${
+                              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
                                 selectedAnswer === option
-                                  ? 'bg-primary/20 text-white'
-                                  : 'hover:bg-white/5 text-muted-foreground hover:text-white'
+                                  ? 'bg-white/15 text-white'
+                                  : 'hover:bg-white/20 text-muted-foreground hover:text-white'
                               }`}
                             >
                               <Checkbox 
