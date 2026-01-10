@@ -344,7 +344,7 @@ export const BookInterviewDialog = ({
           <Button 
             onClick={handleSubmit} 
             disabled={isSubmitting || !date}
-            className="rounded-full bg-primary hover:bg-primary/90 text-white px-8 py-2 ring-1 ring-white/20"
+            className="rounded-full bg-primary hover:bg-primary text-white px-8 py-2 ring-1 ring-white/20"
           >
             {isSubmitting ? (
               <>
