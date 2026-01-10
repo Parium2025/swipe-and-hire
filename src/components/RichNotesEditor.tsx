@@ -1,4 +1,4 @@
-import { memo, useRef, useCallback, useEffect, useMemo } from 'react';
+import { memo, useRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { Bold, Italic, Strikethrough, List, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -58,6 +58,27 @@ export const RichNotesEditor = memo(({
 }: RichNotesEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const isInternalChange = useRef(false);
+  const [scrollInfo, setScrollInfo] = useState({ scrollTop: 0, scrollHeight: 0, clientHeight: 0 });
+
+  // Update scroll info when editor scrolls
+  const handleScroll = useCallback(() => {
+    if (editorRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = editorRef.current;
+      setScrollInfo({ scrollTop, scrollHeight, clientHeight });
+    }
+  }, []);
+
+  // Calculate scrollbar thumb position and size
+  const scrollbarInfo = useMemo(() => {
+    const { scrollTop, scrollHeight, clientHeight } = scrollInfo;
+    const hasScroll = scrollHeight > clientHeight;
+    if (!hasScroll) return { show: false, thumbTop: 0, thumbHeight: 0 };
+    
+    const thumbHeight = Math.max((clientHeight / scrollHeight) * 100, 15); // Min 15% height
+    const thumbTop = (scrollTop / (scrollHeight - clientHeight)) * (100 - thumbHeight);
+    
+    return { show: true, thumbTop, thumbHeight };
+  }, [scrollInfo]);
 
   // Sync external value changes to editor
   useEffect(() => {
@@ -316,39 +337,58 @@ export const RichNotesEditor = memo(({
         <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" />
       </div>
       
-      {/* Editor */}
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={handleInput}
-        onClick={handleEditorClick}
-        onPaste={handlePaste}
-        onKeyDown={handleKeyDown}
-        data-placeholder={placeholder}
-        data-empty={isEmpty ? 'true' : 'false'}
-        className={cn(
-          "relative flex-1 min-h-0 overflow-y-auto",
-          "bg-white/10 rounded-lg p-2",
-          "text-sm leading-relaxed",
-          "text-pure-white",
-          "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
-          // Enable smooth touch scrolling and text selection on mobile/tablet
-          "touch-auto",
-          // Placeholder (contentEditable is rarely :empty due to <br>, so use data-empty)
-          "data-[empty=true]:before:content-[attr(data-placeholder)]",
-          "data-[empty=true]:before:text-pure-white",
-          "data-[empty=true]:before:absolute data-[empty=true]:before:top-2 data-[empty=true]:before:left-2",
-          "data-[empty=true]:before:pointer-events-none data-[empty=true]:before:select-none",
-          // List styling
-          "[&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1",
-          "[&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1",
-          "[&_li]:my-0.5",
-          // Checkbox styling - keep checkbox selectable so selection can span many lines
-          "[&_.inline-checkbox]:cursor-pointer [&_.inline-checkbox]:select-text",
-          "[&_.checkbox-line]:select-text [&_.checkbox-text]:select-text"
+      {/* Editor with scrollbar indicator */}
+      <div className="relative flex-1 min-h-0">
+        <div
+          ref={editorRef}
+          contentEditable
+          onInput={handleInput}
+          onClick={handleEditorClick}
+          onPaste={handlePaste}
+          onKeyDown={handleKeyDown}
+          onScroll={handleScroll}
+          data-placeholder={placeholder}
+          data-empty={isEmpty ? 'true' : 'false'}
+          className={cn(
+            "h-full overflow-y-auto",
+            "bg-white/10 rounded-lg p-2 pr-4",
+            "text-sm leading-relaxed",
+            "text-pure-white",
+            "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
+            // Enable smooth touch scrolling and text selection on mobile/tablet
+            "touch-auto",
+            // Placeholder (contentEditable is rarely :empty due to <br>, so use data-empty)
+            "data-[empty=true]:before:content-[attr(data-placeholder)]",
+            "data-[empty=true]:before:text-pure-white",
+            "data-[empty=true]:before:absolute data-[empty=true]:before:top-2 data-[empty=true]:before:left-2",
+            "data-[empty=true]:before:pointer-events-none data-[empty=true]:before:select-none",
+            // List styling
+            "[&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1",
+            "[&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1",
+            "[&_li]:my-0.5",
+            // Checkbox styling - keep checkbox selectable so selection can span many lines
+            "[&_.inline-checkbox]:cursor-pointer [&_.inline-checkbox]:select-text",
+            "[&_.checkbox-line]:select-text [&_.checkbox-text]:select-text"
+          )}
+          suppressContentEditableWarning
+        />
+        
+        {/* Mini scrollbar indicator */}
+        {scrollbarInfo.show && (
+          <div 
+            className="absolute right-1 top-1 bottom-1 w-1 rounded-full bg-white/10 pointer-events-none"
+            aria-hidden="true"
+          >
+            <div 
+              className="absolute w-full rounded-full bg-white/40 transition-all duration-100"
+              style={{
+                top: `${scrollbarInfo.thumbTop}%`,
+                height: `${scrollbarInfo.thumbHeight}%`,
+              }}
+            />
+          </div>
         )}
-        suppressContentEditableWarning
-      />
+      </div>
     </div>
   );
 });
