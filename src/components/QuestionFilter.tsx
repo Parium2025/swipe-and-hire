@@ -197,13 +197,8 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
               />
             </div>
           </div>
-          
-          {/* Count of filterable questions */}
-          <div className="px-2.5 py-1.5 text-xs text-white border-b border-white/10">
-            {filterableQuestions.length} {filterableQuestions.length === 1 ? 'fråga' : 'frågor'} att välja mellan
-          </div>
 
-          <div className="max-h-[320px] overflow-y-auto scrollbar-none">
+          <div className="max-h-[220px] overflow-y-auto scrollbar-none">
             {isLoading ? (
               <div className="p-4 text-center text-white text-sm">
                 Laddar frågor...
