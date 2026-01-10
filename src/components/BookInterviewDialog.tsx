@@ -342,9 +342,9 @@ export const BookInterviewDialog = ({
             Avbryt
           </Button>
           <Button 
+            variant="glass"
             onClick={handleSubmit} 
             disabled={isSubmitting || !date}
-            className="rounded-full bg-primary hover:bg-primary/90 text-white px-8 py-2"
           >
             {isSubmitting ? (
               <>
