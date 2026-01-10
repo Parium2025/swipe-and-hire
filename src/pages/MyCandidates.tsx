@@ -83,6 +83,7 @@ import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 import { useStageSettings, getIconByName, DEFAULT_STAGE_KEYS, CandidateStage } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
+import { smartSearchCandidates } from '@/lib/smartSearch';
 
 
 interface CandidateCardProps {
@@ -829,19 +830,16 @@ const MyCandidates = () => {
     };
   }, [displayedCandidates, candidatesByStage, activeStageOrder]);
 
-  // Filter candidates based on search query and stage filter
+  // Filter candidates based on search query and stage filter using smart search
   const filteredCandidatesByStage = useMemo(() => {
-    const query = searchQuery.toLowerCase().trim();
+    const query = searchQuery.trim();
     
     const filterCandidates = (stageKey: string) => {
       const stageCandidates = candidatesByStage[stageKey] || [];
       if (!query) return stageCandidates;
-      return stageCandidates.filter(c => {
-        const fullName = `${c.first_name || ''} ${c.last_name || ''}`.toLowerCase();
-        const jobTitle = (c.job_title || '').toLowerCase();
-        const notes = (c.notes || '').toLowerCase();
-        return fullName.includes(query) || jobTitle.includes(query) || notes.includes(query);
-      });
+      
+      // Use smart search with fuzzy matching, multi-field search, and ranking
+      return smartSearchCandidates(stageCandidates, query);
     };
 
     const filtered: Record<string, MyCandidateData[]> = {};
