@@ -29,15 +29,35 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
 
-  // Filter questions by search term
-  const filteredQuestions = useMemo(() => {
-    if (!questions) return [];
-    if (!searchTerm.trim()) return questions;
+  // Filter questions by search term AND only show filterable types
+  const filterableTypes = ['select', 'radio', 'checkbox', 'boolean', 'yes_no'];
+  
+  const { filterableQuestions, unfilteredCount } = useMemo(() => {
+    if (!questions) return { filterableQuestions: [], unfilteredCount: 0 };
     
-    const term = searchTerm.toLowerCase();
-    return questions.filter(q => 
-      q.question_text.toLowerCase().includes(term)
+    // Separate filterable from non-filterable
+    const filterable = questions.filter(q => 
+      filterableTypes.includes(q.question_type) || 
+      (q.options && q.options.length > 0)
     );
+    const nonFilterable = questions.filter(q => 
+      !filterableTypes.includes(q.question_type) && 
+      (!q.options || q.options.length === 0)
+    );
+    
+    // Apply search filter
+    let searchFiltered = filterable;
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      searchFiltered = filterable.filter(q => 
+        q.question_text.toLowerCase().includes(term)
+      );
+    }
+    
+    return { 
+      filterableQuestions: searchFiltered, 
+      unfilteredCount: nonFilterable.length 
+    };
   }, [questions, searchTerm]);
 
   // Check if a question is selected
@@ -183,16 +203,16 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
               <div className="p-4 text-center text-white text-sm">
                 Laddar frågor...
               </div>
-            ) : filteredQuestions.length === 0 ? (
+            ) : filterableQuestions.length === 0 ? (
               <div className="p-4 text-center text-white/70 text-sm">
                 {questions?.length === 0 
                   ? 'Inga frågor skapade än'
-                  : 'Inga frågor matchar sökningen'
+                  : 'Inga filterbara frågor hittades'
                 }
               </div>
             ) : (
               <div className="p-2 space-y-1">
-                {filteredQuestions.map((question) => {
+                {filterableQuestions.map((question) => {
                   const isSelected = isQuestionSelected(question.question_text);
                   const isExpanded = expandedQuestion === question.question_text;
                   const options = getQuestionOptions(question);
@@ -271,6 +291,13 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
               </div>
             )}
           </div>
+
+          {/* Info about excluded question types */}
+          {unfilteredCount > 0 && (
+            <div className="px-3 py-2 border-t border-white/10 text-xs text-white/50">
+              {unfilteredCount} {unfilteredCount === 1 ? 'fråga' : 'frågor'} (fritext/siffror) kan ej filtreras
+            </div>
+          )}
 
           {hasFilters && (
             <div className="p-2 border-t border-white/10">
