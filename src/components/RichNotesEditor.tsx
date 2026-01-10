@@ -195,10 +195,21 @@ export const RichNotesEditor = memo(({
     wrapper.appendChild(checkbox);
     wrapper.appendChild(textSpan);
 
+    // Check if this is the FIRST element in an empty editor - add an empty line before for easier selection
+    const isFirstElement = editorEl.childNodes.length === 0 || 
+      (editorEl.childNodes.length === 1 && editorEl.firstChild?.nodeName === 'BR');
+
     // If cursor is currently inside an existing checkbox-line, insert AFTER it (never inside)
     const currentCheckboxLine = findCheckboxLine(selection.focusNode);
     if (currentCheckboxLine) {
       currentCheckboxLine.insertAdjacentElement('afterend', wrapper);
+    } else if (isFirstElement) {
+      // For the very first checkbox, add an empty selectable line before it
+      // This makes it possible to select and delete the first checkbox
+      const emptyLine = document.createElement('div');
+      emptyLine.innerHTML = '<br>';
+      editorEl.appendChild(emptyLine);
+      editorEl.appendChild(wrapper);
     } else if (selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       range.deleteContents();
