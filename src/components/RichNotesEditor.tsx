@@ -335,7 +335,15 @@ export const RichNotesEditor = memo(({
             const focusNode = selection.focusNode;
             let currentElement: HTMLElement | null = null;
 
-            if (focusNode) {
+            // Sometimes the caret is directly on the editor element (between top-level blocks).
+            // In that case we resolve the "current" block from the range offset.
+            if (focusNode === editorEl) {
+              const idx = range.startOffset;
+              const candidate = e.key === 'Backspace'
+                ? editorEl.childNodes[idx - 1]
+                : editorEl.childNodes[idx];
+              currentElement = candidate instanceof HTMLElement ? candidate : null;
+            } else if (focusNode) {
               if (focusNode.nodeType === Node.ELEMENT_NODE) {
                 currentElement = focusNode as HTMLElement;
               } else if (focusNode.parentElement) {
@@ -429,7 +437,7 @@ export const RichNotesEditor = memo(({
             }
           }
           
-          // Backspace at the start of checkbox text should remove the checkbox
+          // Backspace/Delete behavior around checkbox-lines
           if (checkboxLine) {
             const checkboxText = checkboxLine.querySelector<HTMLElement>('.checkbox-text');
             const checkboxSpan = checkboxLine.querySelector<HTMLElement>('.inline-checkbox');
@@ -442,84 +450,27 @@ export const RichNotesEditor = memo(({
             const hasRealText = realText.length > 0;
 
             // We insert a zero-width space in checkboxText; caret at start is usually offset 0 or 1.
-            // Important: if the checkbox has NO real text, treat offset 1 as "not start" so Backspace
-            // while navigating doesn't accidentally delete the checkbox.
             const atStartOfCheckboxText = (() => {
               if (!isInCheckboxText) return false;
-              if (!hasRealText) {
-                if (range.startContainer.nodeType === Node.TEXT_NODE) return range.startOffset === 0;
-                if (checkboxText && range.startContainer === checkboxText) return range.startOffset === 0;
-                return false;
-              }
               if (range.startContainer.nodeType === Node.TEXT_NODE) return range.startOffset <= 1;
               if (checkboxText && range.startContainer === checkboxText) return range.startOffset === 0;
               return false;
             })();
 
-            // Navigation safety: never delete an EMPTY checkbox-line via Backspace/Delete.
-            // This prevents the checkbox from disappearing when you "backspace" away empty Enter-lines.
-            if (!hasRealText && (e.key === 'Backspace' || e.key === 'Delete') && (isOnCheckbox || isInCheckboxText)) {
-              e.preventDefault();
+            // If the checkbox line is EMPTY, only allow deleting it when the caret is explicitly
+            // "on the checkbox" or at the very start of the checkbox text (front-of-line).
+            if (!hasRealText) {
+              const explicitFrontDelete = isOnCheckbox || atStartOfCheckboxText;
 
-              const newRange = document.createRange();
-              const next = checkboxLine.nextSibling;
-              const prev = checkboxLine.previousSibling;
+              if (explicitFrontDelete && (e.key === 'Backspace' || e.key === 'Delete')) {
+                e.preventDefault();
 
-              if (e.key === 'Backspace') {
-                if (prev) {
-                  newRange.selectNodeContents(prev);
-                  newRange.collapse(false);
-                } else if (checkboxText?.firstChild && checkboxText.firstChild.nodeType === Node.TEXT_NODE) {
-                  // Keep caret usable inside the checkbox line (after ZWS)
-                  newRange.setStart(checkboxText.firstChild, 1);
-                  newRange.collapse(true);
-                } else {
-                  newRange.selectNodeContents(editorEl);
-                  newRange.collapse(true);
-                }
-              } else {
-                if (next) {
-                  newRange.setStart(next, 0);
-                  newRange.collapse(true);
-                } else if (checkboxText?.firstChild && checkboxText.firstChild.nodeType === Node.TEXT_NODE) {
-                  newRange.setStart(checkboxText.firstChild, 1);
-                  newRange.collapse(true);
-                } else {
-                  newRange.selectNodeContents(editorEl);
-                  newRange.collapse(false);
-                }
-              }
-
-              selection.removeAllRanges();
-              selection.addRange(newRange);
-              editorEl.focus();
-              updateScrollInfo();
-              return;
-            }
-
-            // Only delete the checkbox-line with Backspace when it has real text (explicit intent).
-            if (e.key === 'Backspace' && hasRealText && (isOnCheckbox || atStartOfCheckboxText)) {
-              e.preventDefault();
-
-              if (hasRealText && checkboxText) {
-                // Remove the checkbox but keep the text as a normal line
-                const plain = document.createElement('div');
-                plain.textContent = realText;
-                checkboxLine.replaceWith(plain);
-
-                const newRange = document.createRange();
-                newRange.selectNodeContents(plain);
-                newRange.collapse(false);
-                selection.removeAllRanges();
-                selection.addRange(newRange);
-              } else {
-                // No text: remove the whole checkbox line
                 const next = checkboxLine.nextSibling;
                 const prev = checkboxLine.previousSibling;
                 checkboxLine.remove();
 
                 const newRange = document.createRange();
-                if (next) {
+                if (e.key === 'Delete' && next) {
                   newRange.setStart(next, 0);
                   newRange.collapse(true);
                 } else if (prev) {
@@ -529,9 +480,34 @@ export const RichNotesEditor = memo(({
                   newRange.selectNodeContents(editorEl);
                   newRange.collapse(true);
                 }
+
                 selection.removeAllRanges();
                 selection.addRange(newRange);
+                editorEl.focus();
+                handleInput();
+                updateScrollInfo();
+                return;
               }
+
+              // Not explicit front-delete: never let Backspace/Delete remove the checkbox.
+              // (So when you're deleting the empty Enter-lines AFTER it, the checkbox stays.)
+              return;
+            }
+
+            // Checkbox has real text: Backspace at the start removes checkbox but keeps text as plain line
+            if (e.key === 'Backspace' && (isOnCheckbox || atStartOfCheckboxText)) {
+              e.preventDefault();
+
+              // Remove the checkbox but keep the text as a normal line
+              const plain = document.createElement('div');
+              plain.textContent = realText;
+              checkboxLine.replaceWith(plain);
+
+              const newRange = document.createRange();
+              newRange.selectNodeContents(plain);
+              newRange.collapse(false);
+              selection.removeAllRanges();
+              selection.addRange(newRange);
 
               editorEl.focus();
               handleInput();
