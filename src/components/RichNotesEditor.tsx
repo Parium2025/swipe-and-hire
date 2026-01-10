@@ -311,8 +311,67 @@ export const RichNotesEditor = memo(({
             return;
           }
         } else {
-          // Collapsed caret: Backspace at the start of checkbox text should remove the checkbox
+          // Collapsed caret handling
           const checkboxLine = findCheckboxLine(selection.focusNode);
+          
+          // Check if we're in an empty line and Delete would hit a checkbox below
+          if (e.key === 'Delete' && !checkboxLine) {
+            const focusNode = selection.focusNode;
+            let currentElement: HTMLElement | null = null;
+            
+            if (focusNode) {
+              if (focusNode.nodeType === Node.ELEMENT_NODE) {
+                currentElement = focusNode as HTMLElement;
+              } else if (focusNode.parentElement) {
+                currentElement = focusNode.parentElement;
+              }
+            }
+            
+            // Find the block-level element we're in
+            while (currentElement && currentElement !== editorEl && !['DIV', 'P', 'BR'].includes(currentElement.tagName)) {
+              currentElement = currentElement.parentElement;
+            }
+            
+            // Check if we're at the end of current element and next sibling is a checkbox
+            if (currentElement && currentElement !== editorEl) {
+              const nextSibling = currentElement.nextElementSibling;
+              if (nextSibling && nextSibling.classList.contains('checkbox-line')) {
+                // Check if caret is at the end of current element
+                const textContent = currentElement.textContent || '';
+                const isAtEnd = range.startOffset >= textContent.length || 
+                  (range.startContainer.nodeType === Node.TEXT_NODE && 
+                   range.startOffset >= (range.startContainer.textContent?.length || 0));
+                
+                if (isAtEnd) {
+                  // Delete the empty line instead of merging with checkbox
+                  e.preventDefault();
+                  const isEmpty = textContent.trim() === '';
+                  if (isEmpty) {
+                    currentElement.remove();
+                  }
+                  // Move cursor to start of checkbox text
+                  const checkboxText = nextSibling.querySelector<HTMLElement>('.checkbox-text');
+                  const newRange = document.createRange();
+                  const tn = checkboxText?.firstChild;
+                  if (tn && tn.nodeType === Node.TEXT_NODE) {
+                    newRange.setStart(tn, 1); // after zero-width space
+                    newRange.collapse(true);
+                  } else if (checkboxText) {
+                    newRange.selectNodeContents(checkboxText);
+                    newRange.collapse(true);
+                  }
+                  selection.removeAllRanges();
+                  selection.addRange(newRange);
+                  editorEl.focus();
+                  handleInput();
+                  updateScrollInfo();
+                  return;
+                }
+              }
+            }
+          }
+          
+          // Backspace at the start of checkbox text should remove the checkbox
           if (checkboxLine) {
             const checkboxText = checkboxLine.querySelector<HTMLElement>('.checkbox-text');
             const checkboxSpan = checkboxLine.querySelector<HTMLElement>('.inline-checkbox');
