@@ -188,7 +188,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
 
                       {/* Options dropdown */}
                       {isExpanded && hasOptions && (
-                        <div className="ml-6 pl-2 border-l border-white/10 space-y-0.5">
+                        <div className="space-y-0.5 pl-2">
                           {/* Any answer option */}
                           <button
                             onClick={() => {
