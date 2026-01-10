@@ -415,7 +415,7 @@ export const RichNotesEditor = memo(({
           const atStart = caretOffset === 0;
           const atEnd = caretOffset >= textContent.length;
 
-          // "Before" means: insert a gap above and move caret into that gap
+          // "Before" means: insert a gap above, but keep the caret WITH the checkbox line
           const shouldInsertBefore =
             isOnCheckbox ||
             (!isInTextSpan && atStart) ||
@@ -426,9 +426,19 @@ export const RichNotesEditor = memo(({
             emptyLine.innerHTML = '<br>';
             checkboxLine.insertAdjacentElement('beforebegin', emptyLine);
 
+            // Keep cursor at the start of the checkbox text (so checkbox "follows" the caret down)
             const newRange = document.createRange();
-            newRange.setStart(emptyLine, 0);
-            newRange.collapse(true);
+            const tn = checkboxText?.firstChild;
+            if (tn && tn.nodeType === Node.TEXT_NODE) {
+              newRange.setStart(tn, 1); // after zero-width space
+              newRange.collapse(true);
+            } else if (checkboxText) {
+              newRange.selectNodeContents(checkboxText);
+              newRange.collapse(true);
+            } else {
+              newRange.selectNodeContents(checkboxLine);
+              newRange.collapse(true);
+            }
             selection.removeAllRanges();
             selection.addRange(newRange);
           } else if (atEnd || textContent.length === 0) {
