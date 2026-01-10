@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,19 +7,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Filter, Search, X, ChevronDown, MessageSquare } from 'lucide-react';
 import { useOrganizationQuestions, OrganizationQuestion } from '@/hooks/useOrganizationQuestions';
 
 export interface QuestionFilterValue {
   question: string;
-  answer: string | null; // null means "any answer to this question"
+  answers: string[]; // empty array means "any answer", multiple values for multi-select
 }
 
 interface QuestionFilterProps {
   value: QuestionFilterValue[];
   onChange: (filters: QuestionFilterValue[]) => void;
 }
+
+// Default options for text/yes-no questions
+const YES_NO_OPTIONS = ['Ja', 'Nej'];
 
 export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
   const { data: questions, isLoading } = useOrganizationQuestions();
@@ -44,34 +45,70 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
     return value.some(v => v.question === questionText);
   };
 
-  // Get selected answer for a question
-  const getSelectedAnswer = (questionText: string): string | null => {
+  // Get selected answers for a question
+  const getSelectedAnswers = (questionText: string): string[] => {
     const filter = value.find(v => v.question === questionText);
-    return filter?.answer ?? null;
+    return filter?.answers ?? [];
   };
 
-  // Toggle question filter (any answer)
-  const toggleQuestion = (question: OrganizationQuestion) => {
-    if (isQuestionSelected(question.question_text)) {
-      // Remove this question from filters
-      onChange(value.filter(v => v.question !== question.question_text));
+  // Check if "Alla" is selected (empty answers array)
+  const isAllSelected = (questionText: string): boolean => {
+    const filter = value.find(v => v.question === questionText);
+    return filter ? filter.answers.length === 0 : false;
+  };
+
+  // Toggle a specific answer for a question (multi-select)
+  const toggleAnswer = (questionText: string, answer: string, options: string[]) => {
+    const currentAnswers = getSelectedAnswers(questionText);
+    const isCurrentlyAll = currentAnswers.length === 0;
+    
+    let newAnswers: string[];
+    
+    if (isCurrentlyAll) {
+      // Was "Alla", now select this specific answer
+      newAnswers = [answer];
+    } else if (currentAnswers.includes(answer)) {
+      // Remove this answer
+      newAnswers = currentAnswers.filter(a => a !== answer);
+      // If no answers left, remove the filter entirely
+      if (newAnswers.length === 0) {
+        onChange(value.filter(v => v.question !== questionText));
+        return;
+      }
     } else {
-      // Add with null answer (means "any answer")
-      onChange([...value, { question: question.question_text, answer: null }]);
+      // Add this answer
+      newAnswers = [...currentAnswers, answer];
+      // If all options are selected, switch to "Alla"
+      if (newAnswers.length === options.length) {
+        newAnswers = [];
+      }
+    }
+    
+    const existingIndex = value.findIndex(v => v.question === questionText);
+    if (existingIndex >= 0) {
+      const newValue = [...value];
+      newValue[existingIndex] = { question: questionText, answers: newAnswers };
+      onChange(newValue);
+    } else {
+      onChange([...value, { question: questionText, answers: newAnswers }]);
     }
   };
 
-  // Set specific answer for a question
-  const setAnswer = (questionText: string, answer: string) => {
+  // Set "Alla" (any answer)
+  const setAllAnswers = (questionText: string) => {
     const existingIndex = value.findIndex(v => v.question === questionText);
     if (existingIndex >= 0) {
-      // Update existing
+      // If already "Alla", remove filter
+      if (value[existingIndex].answers.length === 0) {
+        onChange(value.filter(v => v.question !== questionText));
+        return;
+      }
+      // Otherwise set to "Alla"
       const newValue = [...value];
-      newValue[existingIndex] = { question: questionText, answer };
+      newValue[existingIndex] = { question: questionText, answers: [] };
       onChange(newValue);
     } else {
-      // Add new
-      onChange([...value, { question: questionText, answer }]);
+      onChange([...value, { question: questionText, answers: [] }]);
     }
   };
 
@@ -84,6 +121,15 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
   const clearAll = () => {
     onChange([]);
     setOpen(false);
+  };
+
+  // Get options for a question - use yes/no for text questions
+  const getQuestionOptions = (question: OrganizationQuestion): string[] => {
+    if (question.options && question.options.length > 0) {
+      return question.options;
+    }
+    // Text questions get Ja/Nej options
+    return YES_NO_OPTIONS;
   };
 
   const hasFilters = value.length > 0;
@@ -149,18 +195,15 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                 {filteredQuestions.map((question) => {
                   const isSelected = isQuestionSelected(question.question_text);
                   const isExpanded = expandedQuestion === question.question_text;
-                  const hasOptions = question.options && question.options.length > 0;
-                  const selectedAnswer = getSelectedAnswer(question.question_text);
+                  const options = getQuestionOptions(question);
+                  const selectedAnswers = getSelectedAnswers(question.question_text);
+                  const allSelected = isAllSelected(question.question_text);
 
                   return (
                     <div key={question.question_text} className="space-y-1">
                       <button
                         onClick={() => {
-                          if (hasOptions) {
-                            setExpandedQuestion(isExpanded ? null : question.question_text);
-                          } else {
-                            toggleQuestion(question);
-                          }
+                          setExpandedQuestion(isExpanded ? null : question.question_text);
                         }}
                         className={`${dropdownItemClass} w-full text-left ${
                           isSelected 
@@ -168,76 +211,58 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                             : 'text-white hover:text-white'
                         }`}
                       >
-                        <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0 text-white" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm leading-tight truncate font-medium">{question.question_text}</p>
-                          {selectedAnswer && (
-                            <p className="text-xs text-primary mt-0.5">= "{selectedAnswer}"</p>
+                          <p className="text-sm leading-tight truncate font-medium text-white">{question.question_text}</p>
+                          {isSelected && (
+                            <p className="text-xs text-white/70 mt-0.5">
+                              = {allSelected ? 'Alla' : selectedAnswers.join(', ')}
+                            </p>
                           )}
                         </div>
-                        {hasOptions && (
-                          <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                        )}
-                        {!hasOptions && (
-                          <Checkbox 
-                            checked={isSelected}
-                            className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                          />
-                        )}
+                        <ChevronDown className={`h-4 w-4 transition-transform text-white ${isExpanded ? 'rotate-180' : ''}`} />
                       </button>
 
-                      {/* Options dropdown */}
-                      {isExpanded && hasOptions && (
+                      {/* Options dropdown - always show for all questions */}
+                      {isExpanded && (
                         <div className="space-y-0.5 pl-2">
-                          {/* Any answer option */}
+                          {/* Alla option */}
                           <button
-                            onClick={() => {
-                              if (isSelected && selectedAnswer === null) {
-                                removeFilter(question.question_text);
-                              } else {
-                                onChange([
-                                  ...value.filter(v => v.question !== question.question_text),
-                                  { question: question.question_text, answer: null }
-                                ]);
-                              }
-                            }}
+                            onClick={() => setAllAnswers(question.question_text)}
                             className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
-                              isSelected && selectedAnswer === null
+                              allSelected
                                 ? 'bg-white/15 text-white'
                                 : 'hover:bg-white/20 text-white'
                             }`}
                           >
                             <Checkbox 
-                              checked={isSelected && selectedAnswer === null}
+                              checked={allSelected}
                               className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary"
                             />
-                            <span className="italic">Alla svar</span>
+                            <span className="text-white">Alla</span>
                           </button>
 
-                          {/* Specific answer options */}
-                          {question.options!.map((option) => (
-                            <button
-                              key={option}
-                              onClick={() => {
-                                if (selectedAnswer === option) {
-                                  removeFilter(question.question_text);
-                                } else {
-                                  setAnswer(question.question_text, option);
-                                }
-                              }}
-                              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
-                                selectedAnswer === option
-                                  ? 'bg-white/15 text-white'
-                                  : 'hover:bg-white/20 text-white'
-                              }`}
-                            >
-                              <Checkbox 
-                                checked={selectedAnswer === option}
-                                className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary"
-                              />
-                              <span className="truncate">{option}</span>
-                            </button>
-                          ))}
+                          {/* Specific answer options - multi-select */}
+                          {options.map((option) => {
+                            const isOptionSelected = selectedAnswers.includes(option);
+                            return (
+                              <button
+                                key={option}
+                                onClick={() => toggleAnswer(question.question_text, option, options)}
+                                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
+                                  isOptionSelected
+                                    ? 'bg-white/15 text-white'
+                                    : 'hover:bg-white/20 text-white'
+                                }`}
+                              >
+                                <Checkbox 
+                                  checked={isOptionSelected}
+                                  className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary"
+                                />
+                                <span className="truncate text-white">{option}</span>
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -270,12 +295,12 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
           variant="outline"
           className="gap-1 bg-primary/20 border-primary/50 text-white py-1 px-2"
         >
-          <span className="truncate max-w-32">
-            {filter.question.length > 25 
-              ? filter.question.slice(0, 25) + '...' 
+          <span className="truncate max-w-32 text-white">
+            {filter.question.length > 20 
+              ? filter.question.slice(0, 20) + '...' 
               : filter.question
             }
-            {filter.answer && `: ${filter.answer}`}
+            : {filter.answers.length === 0 ? 'Alla' : filter.answers.join(', ')}
           </span>
           <button
             onClick={() => removeFilter(filter.question)}
