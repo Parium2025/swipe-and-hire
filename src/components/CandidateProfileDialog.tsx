@@ -939,6 +939,7 @@ export const CandidateProfileDialog = ({
             {/* Actions */}
             <div className="flex flex-wrap justify-center gap-3 pt-4 border-t border-white/20">
               <Button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setBookInterviewOpen(true)}
                 variant="glassBlue"
                 size="lg"
@@ -947,6 +948,7 @@ export const CandidateProfileDialog = ({
                 Boka möte
               </Button>
               <Button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => updateStatus('reviewing')}
                 variant="glassYellow"
                 disabled={displayApp.status === 'reviewing'}
@@ -955,6 +957,7 @@ export const CandidateProfileDialog = ({
                 Granska
               </Button>
               <Button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => updateStatus('hired')}
                 variant="glassGreen"
                 disabled={displayApp.status === 'hired'}
@@ -963,6 +966,7 @@ export const CandidateProfileDialog = ({
                 Anställ
               </Button>
               <Button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => updateStatus('rejected')}
                 variant="glassRed"
                 disabled={displayApp.status === 'rejected'}
