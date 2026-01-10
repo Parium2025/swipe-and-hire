@@ -239,8 +239,10 @@ export const RichNotesEditor = memo(({
   const handleEditorClick = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.classList.contains('inline-checkbox')) {
-      e.preventDefault();
-      e.stopPropagation();
+      // If user is selecting text (drag/handles), don't toggle the checkbox.
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed) return;
+
       const isChecked = target.getAttribute('data-checked') === 'true';
       target.setAttribute('data-checked', isChecked ? 'false' : 'true');
       target.textContent = isChecked ? '☐' : '☑';
@@ -261,6 +263,110 @@ export const RichNotesEditor = memo(({
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+    // Allow deleting checkbox-lines reliably (including the very first one)
+    if (e.key === 'Backspace' || e.key === 'Delete') {
+      const selection = window.getSelection();
+      const editorEl = editorRef.current;
+
+      if (selection && editorEl && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+
+        const findCheckboxLine = (node: Node | null): HTMLElement | null => {
+          let cur: Node | null = node;
+          while (cur && cur !== editorEl) {
+            if (cur instanceof HTMLElement && cur.classList.contains('checkbox-line')) return cur;
+            cur = cur.parentNode;
+          }
+          return null;
+        };
+
+        const safeIntersects = (node: Node) => {
+          try {
+            return range.intersectsNode(node);
+          } catch {
+            return false;
+          }
+        };
+
+        // If user has a selection range, remove any checkbox-lines touched by it
+        if (!range.collapsed) {
+          const checkboxLines = Array.from(editorEl.querySelectorAll<HTMLElement>('.checkbox-line'));
+          const toRemove = checkboxLines.filter((el) => safeIntersects(el));
+
+          if (toRemove.length > 0) {
+            e.preventDefault();
+            toRemove.forEach((el) => el.remove());
+            handleInput();
+            updateScrollInfo();
+            return;
+          }
+        } else {
+          // Collapsed caret: Backspace at the start of checkbox text should remove the checkbox
+          const checkboxLine = findCheckboxLine(selection.focusNode);
+          if (checkboxLine) {
+            const checkboxText = checkboxLine.querySelector<HTMLElement>('.checkbox-text');
+            const checkboxSpan = checkboxLine.querySelector<HTMLElement>('.inline-checkbox');
+
+            const focusNode = selection.focusNode;
+            const isOnCheckbox = !!(checkboxSpan && focusNode && checkboxSpan.contains(focusNode));
+            const isInCheckboxText = !!(checkboxText && focusNode && checkboxText.contains(focusNode));
+
+            const realText = (checkboxText?.textContent || '').replace(/\u200b/g, '').trim();
+            const hasRealText = realText.length > 0;
+
+            // We insert a zero-width space in checkboxText; caret at start is usually offset 0 or 1
+            const atStartOfCheckboxText = (() => {
+              if (!isInCheckboxText) return false;
+              if (range.startContainer.nodeType === Node.TEXT_NODE) return range.startOffset <= 1;
+              if (checkboxText && range.startContainer === checkboxText) return range.startOffset === 0;
+              return false;
+            })();
+
+            if (e.key === 'Backspace' && (isOnCheckbox || atStartOfCheckboxText)) {
+              e.preventDefault();
+
+              if (hasRealText && checkboxText) {
+                // Remove the checkbox but keep the text as a normal line
+                const plain = document.createElement('div');
+                plain.textContent = realText;
+                checkboxLine.replaceWith(plain);
+
+                const newRange = document.createRange();
+                newRange.selectNodeContents(plain);
+                newRange.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+              } else {
+                // No text: remove the whole checkbox line
+                const next = checkboxLine.nextSibling;
+                const prev = checkboxLine.previousSibling;
+                checkboxLine.remove();
+
+                const newRange = document.createRange();
+                if (next) {
+                  newRange.setStart(next, 0);
+                  newRange.collapse(true);
+                } else if (prev) {
+                  newRange.selectNodeContents(prev);
+                  newRange.collapse(false);
+                } else {
+                  newRange.selectNodeContents(editorEl);
+                  newRange.collapse(true);
+                }
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+              }
+
+              editorEl.focus();
+              handleInput();
+              updateScrollInfo();
+              return;
+            }
+          }
+        }
+      }
+    }
 
     // If we're inside a checkbox-line, Enter should create a NEW line BELOW (not inside the same flex row)
     if (e.key === 'Enter' && !e.shiftKey && !modKey) {
@@ -294,6 +400,7 @@ export const RichNotesEditor = memo(({
 
           editorEl.focus();
           handleInput();
+          updateScrollInfo();
           return;
         }
       }
@@ -327,7 +434,7 @@ export const RichNotesEditor = memo(({
       e.preventDefault();
       handleCheckbox();
     }
-  }, [handleBold, handleItalic, handleStrikethrough, handleBulletList, handleCheckbox, handleInput]);
+  }, [handleBold, handleItalic, handleStrikethrough, handleBulletList, handleCheckbox, handleInput, updateScrollInfo]);
 
   const isEmpty = useMemo(() => {
     if (!value) return true;
