@@ -101,15 +101,6 @@ export const RichNotesEditor = memo(({
 
   const handleInput = useCallback(() => {
     if (editorRef.current) {
-      // Cleanup: if we have a stray empty line before a checklist, remove it (prevents "jump" at top)
-      const first = editorRef.current.firstElementChild as HTMLElement | null;
-      const second = first?.nextElementSibling as HTMLElement | null;
-      if (first && second?.classList.contains('checkbox-line')) {
-        const firstText = (first.textContent || '').replace(/\u00a0/g, ' ').trim();
-        const hasOnlyBr = firstText === '' && !!first.querySelector('br') && first.children.length === 1;
-        if (hasOnlyBr) first.remove();
-      }
-
       isInternalChange.current = true;
       onChange(editorRef.current.innerHTML);
       updateScrollInfo();
@@ -408,10 +399,13 @@ export const RichNotesEditor = memo(({
           e.preventDefault();
 
           const checkboxText = checkboxLine.querySelector<HTMLElement>('.checkbox-text');
+          const checkboxSpan = checkboxLine.querySelector<HTMLElement>('.inline-checkbox');
           const textContent = (checkboxText?.textContent || '').replace(/\u200b/g, '');
 
           // Determine caret position: at start, end, or middle of text
-          const isInTextSpan = checkboxText && checkboxText.contains(selection.focusNode);
+          const isInTextSpan = !!(checkboxText && checkboxText.contains(selection.focusNode));
+          const isOnCheckbox = !!(checkboxSpan && selection.focusNode && checkboxSpan.contains(selection.focusNode));
+
           let caretOffset = 0;
           if (isInTextSpan && range.startContainer.nodeType === Node.TEXT_NODE) {
             // Account for zero-width space at position 0
@@ -421,22 +415,20 @@ export const RichNotesEditor = memo(({
           const atStart = caretOffset === 0;
           const atEnd = caretOffset >= textContent.length;
 
-          if (atStart && textContent.length > 0) {
-            // Caret at start: insert empty line BEFORE checkbox, checkbox stays
+          // "Before" means: insert a gap above and move caret into that gap
+          const shouldInsertBefore =
+            isOnCheckbox ||
+            (!isInTextSpan && atStart) ||
+            (isInTextSpan && atStart && textContent.length > 0);
+
+          if (shouldInsertBefore) {
             const emptyLine = document.createElement('div');
             emptyLine.innerHTML = '<br>';
             checkboxLine.insertAdjacentElement('beforebegin', emptyLine);
 
-            // Keep cursor at start of checkbox text
             const newRange = document.createRange();
-            const tn = checkboxText?.firstChild;
-            if (tn) {
-              newRange.setStart(tn, 1);
-              newRange.collapse(true);
-            } else if (checkboxText) {
-              newRange.selectNodeContents(checkboxText);
-              newRange.collapse(true);
-            }
+            newRange.setStart(emptyLine, 0);
+            newRange.collapse(true);
             selection.removeAllRanges();
             selection.addRange(newRange);
           } else if (atEnd || textContent.length === 0) {
