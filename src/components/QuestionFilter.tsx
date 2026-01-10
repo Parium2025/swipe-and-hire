@@ -313,74 +313,82 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                   }
                 </div>
               ) : (
-                <div className="p-2 space-y-1">
-                  {filterableQuestions.map((question) => {
+                <div className="p-2 space-y-0">
+                  {filterableQuestions.map((question, index) => {
                     const isSelected = isQuestionSelected(question.question_text);
                     const isExpanded = expandedQuestion === question.question_text;
                     const options = getQuestionOptions(question);
                     const selectedAnswers = getSelectedAnswers(question.question_text);
                     const allSelected = isAllSelected(question.question_text);
+                    const isLastQuestion = index === filterableQuestions.length - 1;
 
                     return (
-                      <div key={question.question_text} className="space-y-1">
-                        <QuestionItem
-                          question={question}
-                          isSelected={isSelected}
-                          isExpanded={isExpanded}
-                          allSelected={allSelected}
-                          selectedAnswers={selectedAnswers}
-                          dropdownItemClass={dropdownItemClass}
-                          onToggle={() => {
-                            const willExpand = !isExpanded;
-                            // Immediately show gradient when expanding to avoid flash
-                            if (willExpand) {
-                              setCanScrollDown(true);
-                            }
-                            setExpandedQuestion(willExpand ? question.question_text : null);
-                          }}
-                        />
+                      <div key={question.question_text}>
+                        <div className="space-y-1 py-1">
+                          <QuestionItem
+                            question={question}
+                            isSelected={isSelected}
+                            isExpanded={isExpanded}
+                            allSelected={allSelected}
+                            selectedAnswers={selectedAnswers}
+                            dropdownItemClass={dropdownItemClass}
+                            onToggle={() => {
+                              const willExpand = !isExpanded;
+                              // Immediately show gradient when expanding to avoid flash
+                              if (willExpand) {
+                                setCanScrollDown(true);
+                              }
+                              setExpandedQuestion(willExpand ? question.question_text : null);
+                            }}
+                          />
 
-                        {/* Options dropdown - always show for all questions */}
-                        {isExpanded && (
-                          <div className="space-y-0.5 pl-2">
-                            {/* Alla option */}
-                            <button
-                              onClick={() => setAllAnswers(question.question_text)}
-                              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors focus:outline-none ${
-                                allSelected
-                                  ? 'bg-white/15 text-white'
-                                  : 'hover:bg-white/15 active:bg-white/15 focus-visible:bg-white/15 text-white'
-                              }`}
-                            >
-                              <Checkbox 
-                                checked={allSelected}
-                                className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary pointer-events-none"
-                              />
-                              <span className="text-white">Alla</span>
-                            </button>
+                          {/* Options dropdown - always show for all questions */}
+                          {isExpanded && (
+                            <div className="space-y-0.5 pl-2">
+                              {/* Alla option */}
+                              <button
+                                onClick={() => setAllAnswers(question.question_text)}
+                                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors focus:outline-none ${
+                                  allSelected
+                                    ? 'bg-white/15 text-white'
+                                    : 'hover:bg-white/15 active:bg-white/15 focus-visible:bg-white/15 text-white'
+                                }`}
+                              >
+                                <Checkbox 
+                                  checked={allSelected}
+                                  className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary pointer-events-none"
+                                />
+                                <span className="text-white">Alla</span>
+                              </button>
 
-                            {/* Specific answer options - multi-select */}
-                            {options.map((option) => {
-                              const isOptionSelected = selectedAnswers.includes(option);
-                              return (
-                                <button
-                                  key={option}
-                                  onClick={() => toggleAnswer(question.question_text, option, options)}
-                                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors focus:outline-none ${
-                                    isOptionSelected
-                                      ? 'bg-white/15 text-white'
-                                      : 'hover:bg-white/15 active:bg-white/15 focus-visible:bg-white/15 text-white'
-                                  }`}
-                                >
-                                  <Checkbox 
-                                    checked={isOptionSelected}
-                                    className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary pointer-events-none"
-                                  />
-                                  <span className="truncate text-white">{option}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
+                              {/* Specific answer options - multi-select */}
+                              {options.map((option) => {
+                                const isOptionSelected = selectedAnswers.includes(option);
+                                return (
+                                  <button
+                                    key={option}
+                                    onClick={() => toggleAnswer(question.question_text, option, options)}
+                                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors focus:outline-none ${
+                                      isOptionSelected
+                                        ? 'bg-white/15 text-white'
+                                        : 'hover:bg-white/15 active:bg-white/15 focus-visible:bg-white/15 text-white'
+                                    }`}
+                                  >
+                                    <Checkbox 
+                                      checked={isOptionSelected}
+                                      className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary pointer-events-none"
+                                    />
+                                    <span className="truncate text-white">{option}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Separator line between questions */}
+                        {!isLastQuestion && (
+                          <div className="mx-2 border-t border-white/10" />
                         )}
                       </div>
                     );
