@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { smartSearchCandidates } from '@/lib/smartSearch';
 import JobDetails from '@/pages/JobDetails';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
 import CompanyReviews from '@/components/CompanyReviews';
@@ -64,11 +65,20 @@ const CandidatesContent = () => {
   // Safety check to prevent null crash
   const safeApplications = applications || [];
 
-  // Filter applications by question filters (client-side)
+  // Filter applications by question filters AND smart search (client-side)
   const filteredApplications = useMemo(() => {
-    if (questionFilters.length === 0) return safeApplications;
+    let result = safeApplications;
+    
+    // Apply smart search filter first (strict client-side filtering)
+    // This ensures gibberish queries show 0 results even if server returns cached data
+    if (searchQuery && searchQuery.trim().length >= 2) {
+      result = smartSearchCandidates(result, searchQuery);
+    }
+    
+    // Then apply question filters
+    if (questionFilters.length === 0) return result;
 
-    return safeApplications.filter(app => {
+    return result.filter(app => {
       const customAnswers = app.custom_answers || {};
       
       // All filters must match
@@ -104,7 +114,7 @@ const CandidatesContent = () => {
         );
       });
     });
-  }, [safeApplications, questionFilters]);
+  }, [safeApplications, questionFilters, searchQuery]);
 
   // Recalculate stats based on filtered results
   const filteredStats = useMemo(() => ({
@@ -176,12 +186,30 @@ const CandidatesContent = () => {
               När någon söker till dina jobb så kommer deras ansökning att visas här.
             </p>
           </div>
-        ) : filteredApplications.length === 0 && questionFilters.length > 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
-            <p className="text-white text-center">
-              Inga kandidater matchar dina filter.<br />
-              Prova att ändra eller ta bort några filter.
+        ) : filteredApplications.length === 0 && (questionFilters.length > 0 || searchQuery.trim()) ? (
+          <div className="flex flex-col items-center justify-center py-12 px-4 bg-white/5 border border-white/10 rounded-lg">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-3">
+              <Search className="h-5 w-5 text-white/60" />
+            </div>
+            <p className="text-white font-medium text-sm">Inga kandidater hittades</p>
+            <p className="text-white/60 text-xs mt-1 text-center max-w-xs">
+              {searchQuery.trim() 
+                ? 'Försök med ett annat sökord eller kontrollera stavningen'
+                : 'Prova att ändra eller ta bort några filter'}
             </p>
+            {(searchQuery.trim() || questionFilters.length > 0) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery('');
+                  setQuestionFilters([]);
+                }}
+                className="mt-3 text-white/70 hover:text-white hover:bg-white/10"
+              >
+                Rensa filter
+              </Button>
+            )}
           </div>
         ) : (
           <CandidatesTable 
