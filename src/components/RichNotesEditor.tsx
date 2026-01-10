@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo, Heading1, Heading2, Quote } from 'lucide-react';
+import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo, Heading1, Heading2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -200,9 +200,6 @@ export const RichNotesEditor = memo(({
     editor?.chain().focus().toggleHeading({ level: 2 }).run();
   }, [editor]);
 
-  const handleBlockquote = useCallback(() => {
-    editor?.chain().focus().toggleBlockquote().run();
-  }, [editor]);
 
   if (!editor) {
     return null;
@@ -228,19 +225,19 @@ export const RichNotesEditor = memo(({
         <ToolbarButton 
           onClick={handleBold} 
           icon={Bold} 
-          title="Fet (Ctrl+B)" 
+          title="Fet" 
           isActive={editor.isActive('bold')}
         />
         <ToolbarButton 
           onClick={handleItalic} 
           icon={Italic} 
-          title="Kursiv (Ctrl+I)" 
+          title="Kursiv" 
           isActive={editor.isActive('italic')}
         />
         <ToolbarButton 
           onClick={handleStrikethrough} 
           icon={Strikethrough} 
-          title="Genomstruken (Ctrl+Shift+S)" 
+          title="Genomstruken" 
           isActive={editor.isActive('strike')}
         />
         <div className="w-px h-3 bg-white/20 mx-0.5" />
@@ -256,23 +253,17 @@ export const RichNotesEditor = memo(({
           title="Checkbox" 
           isActive={editor.isActive('taskList')}
         />
-        <ToolbarButton 
-          onClick={handleBlockquote} 
-          icon={Quote} 
-          title="Citat-block" 
-          isActive={editor.isActive('blockquote')}
-        />
         <div className="w-px h-3 bg-white/20 mx-0.5" />
         <ToolbarButton 
           onClick={handleUndo} 
           icon={Undo} 
-          title="Ångra (Ctrl+Z)" 
+          title="Ångra" 
           disabled={!editor.can().undo()}
         />
         <ToolbarButton 
           onClick={handleRedo} 
           icon={Redo} 
-          title="Gör om (Ctrl+Y)" 
+          title="Gör om" 
           disabled={!editor.can().redo()}
         />
       </div>
