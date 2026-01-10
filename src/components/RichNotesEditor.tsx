@@ -665,7 +665,10 @@ export const RichNotesEditor = memo(({
     const hasStructure = !!el.querySelector('ul, ol, .checkbox-line, .inline-checkbox');
     if (hasStructure) return false;
 
-    const text = (el.textContent || '').replace(/\u00a0/g, ' ').trim();
+    const text = (el.textContent || '')
+      .replace(/\u00a0/g, ' ')
+      .replace(/\u200b/g, '')
+      .trim();
     return text.length === 0;
   }, [value]);
 
