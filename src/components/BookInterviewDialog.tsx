@@ -345,7 +345,7 @@ export const BookInterviewDialog = ({
             variant="outline"
             onClick={handleSubmit} 
             disabled={isSubmitting || !date}
-            className="rounded-full bg-primary md:hover:bg-primary border-none text-white px-8 py-2 ring-1 ring-white/20"
+            className="rounded-full bg-primary md:hover:bg-primary md:hover:text-white border-none text-white px-8 py-2 ring-1 ring-white/20"
           >
             {isSubmitting ? (
               <>
