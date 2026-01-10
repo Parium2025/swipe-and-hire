@@ -132,7 +132,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
             </div>
           </div>
 
-          <ScrollArea className="h-[280px]">
+          <div className="max-h-[320px] overflow-y-auto scrollbar-none">
             {isLoading ? (
               <div className="p-4 text-center text-white text-sm">
                 Laddar frågor...
@@ -245,7 +245,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                 })}
               </div>
             )}
-          </ScrollArea>
+          </div>
 
           {hasFilters && (
             <div className="p-2 border-t border-white/10">
