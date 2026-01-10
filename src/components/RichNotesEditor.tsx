@@ -156,6 +156,10 @@ export const RichNotesEditor = memo(({
 
     const textSpan = document.createElement('span');
     textSpan.className = 'checkbox-text';
+    textSpan.style.flex = '1';
+    textSpan.style.minWidth = '0';
+    // Add a zero-width space to ensure the span is focusable
+    textSpan.innerHTML = '&#8203;';
 
     wrapper.appendChild(checkbox);
     wrapper.appendChild(textSpan);
@@ -172,10 +176,16 @@ export const RichNotesEditor = memo(({
       editorEl.appendChild(wrapper);
     }
 
-    // Place cursor inside the checkbox text span
+    // Place cursor AFTER the zero-width space inside the text span (so user types after checkbox)
     const newRange = document.createRange();
-    newRange.selectNodeContents(textSpan);
-    newRange.collapse(true);
+    const textNode = textSpan.firstChild;
+    if (textNode) {
+      newRange.setStart(textNode, 1); // After the zero-width space
+      newRange.collapse(true);
+    } else {
+      newRange.selectNodeContents(textSpan);
+      newRange.collapse(false);
+    }
     selection.removeAllRanges();
     selection.addRange(newRange);
 
@@ -320,6 +330,8 @@ export const RichNotesEditor = memo(({
           "bg-white/10 rounded-lg p-2",
           "text-sm leading-relaxed",
           "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
+          // Enable smooth touch scrolling and text selection on mobile/tablet
+          "touch-auto",
           // Placeholder (contentEditable is rarely :empty due to <br>, so use data-empty)
           "data-[empty=true]:before:content-[attr(data-placeholder)]",
           "data-[empty=true]:before:text-white",
@@ -329,8 +341,9 @@ export const RichNotesEditor = memo(({
           "[&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1",
           "[&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1",
           "[&_li]:my-0.5",
-          // Checkbox styling
-          "[&_.inline-checkbox]:cursor-pointer [&_.inline-checkbox]:select-none"
+          // Checkbox styling - ensure text comes after checkbox visually
+          "[&_.inline-checkbox]:cursor-pointer [&_.inline-checkbox]:select-none",
+          "[&_.checkbox-line]:select-text [&_.checkbox-text]:select-text"
         )}
         style={{ color: '#FFFFFF' }}
         suppressContentEditableWarning
