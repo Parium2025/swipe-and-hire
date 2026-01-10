@@ -61,21 +61,30 @@ export const RichNotesEditor = memo(({
   const [scrollInfo, setScrollInfo] = useState({ scrollTop: 0, scrollHeight: 0, clientHeight: 0 });
 
   // Update scroll info when editor scrolls
-  const handleScroll = useCallback(() => {
+  const updateScrollInfo = useCallback(() => {
     if (editorRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = editorRef.current;
       setScrollInfo({ scrollTop, scrollHeight, clientHeight });
     }
   }, []);
 
+  // Update scroll info on mount, value change, and resize
+  useEffect(() => {
+    updateScrollInfo();
+    // Also update after a short delay to catch layout changes
+    const timer = setTimeout(updateScrollInfo, 100);
+    return () => clearTimeout(timer);
+  }, [value, updateScrollInfo]);
+
   // Calculate scrollbar thumb position and size
   const scrollbarInfo = useMemo(() => {
     const { scrollTop, scrollHeight, clientHeight } = scrollInfo;
-    const hasScroll = scrollHeight > clientHeight;
+    const hasScroll = scrollHeight > clientHeight + 5; // 5px threshold
     if (!hasScroll) return { show: false, thumbTop: 0, thumbHeight: 0 };
     
-    const thumbHeight = Math.max((clientHeight / scrollHeight) * 100, 15); // Min 15% height
-    const thumbTop = (scrollTop / (scrollHeight - clientHeight)) * (100 - thumbHeight);
+    const thumbHeight = Math.max((clientHeight / scrollHeight) * 100, 20); // Min 20% height
+    const maxScroll = scrollHeight - clientHeight;
+    const thumbTop = maxScroll > 0 ? (scrollTop / maxScroll) * (100 - thumbHeight) : 0;
     
     return { show: true, thumbTop, thumbHeight };
   }, [scrollInfo]);
@@ -346,7 +355,7 @@ export const RichNotesEditor = memo(({
           onClick={handleEditorClick}
           onPaste={handlePaste}
           onKeyDown={handleKeyDown}
-          onScroll={handleScroll}
+          onScroll={updateScrollInfo}
           data-placeholder={placeholder}
           data-empty={isEmpty ? 'true' : 'false'}
           className={cn(
