@@ -185,17 +185,22 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
           className={dropdownContentClass}
           sideOffset={8}
         >
-          <div className="p-3 border-b border-white/10">
+          <div className="px-2.5 py-1.5 border-b border-white/10">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/50" />
               <input
                 type="text"
                 placeholder="Sök efter fråga..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 bg-transparent border-0 text-white placeholder:text-white/50 text-sm focus:outline-none focus:ring-0"
+                className="w-full pl-7 pr-2 py-1 bg-transparent border-0 text-white placeholder:text-white/50 text-sm focus:outline-none focus:ring-0"
               />
             </div>
+          </div>
+          
+          {/* Count of filterable questions */}
+          <div className="px-2.5 py-1.5 text-xs text-white border-b border-white/10">
+            {filterableQuestions.length} {filterableQuestions.length === 1 ? 'fråga' : 'frågor'} att välja mellan
           </div>
 
           <div className="max-h-[320px] overflow-y-auto scrollbar-none">
@@ -294,7 +299,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
 
           {/* Info about excluded question types */}
           {unfilteredCount > 0 && (
-            <div className="px-3 py-2 border-t border-white/10 text-xs text-white/50">
+            <div className="px-2.5 py-1.5 border-t border-white/10 text-xs text-white">
               {unfilteredCount} {unfilteredCount === 1 ? 'fråga' : 'frågor'} (fritext/siffror) kan ej filtreras
             </div>
           )}
