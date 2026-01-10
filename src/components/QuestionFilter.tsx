@@ -249,7 +249,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
 
   // Dropdown styling matching nav dropdowns - left aligned
   const dropdownContentClass = "min-w-[280px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-0";
-  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/20 focus-visible:bg-white/20 focus:outline-none rounded-md px-2.5 py-2 text-sm transition-colors";
+  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/15 active:bg-white/15 focus-visible:bg-white/15 focus:outline-none rounded-md px-2.5 py-2 text-sm transition-colors";
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -338,12 +338,12 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                               className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors focus:outline-none ${
                                 allSelected
                                   ? 'bg-white/15 text-white'
-                                  : 'hover:bg-white/20 focus-visible:bg-white/20 text-white'
+                                  : 'hover:bg-white/15 active:bg-white/15 focus-visible:bg-white/15 text-white'
                               }`}
                             >
                               <Checkbox 
                                 checked={allSelected}
-                                className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary"
+                                className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary pointer-events-none"
                               />
                               <span className="text-white">Alla</span>
                             </button>
@@ -358,12 +358,12 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                                   className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors focus:outline-none ${
                                     isOptionSelected
                                       ? 'bg-white/15 text-white'
-                                      : 'hover:bg-white/20 focus-visible:bg-white/20 text-white'
+                                      : 'hover:bg-white/15 active:bg-white/15 focus-visible:bg-white/15 text-white'
                                   }`}
                                 >
                                   <Checkbox 
                                     checked={isOptionSelected}
-                                    className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary"
+                                    className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary pointer-events-none"
                                   />
                                   <span className="truncate text-white">{option}</span>
                                 </button>
