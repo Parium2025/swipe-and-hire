@@ -133,11 +133,6 @@ const CandidatesContent = () => {
         <div className="text-center mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
             Alla kandidater ({isLoading ? '...' : filteredStats.total})
-            {questionFilters.length > 0 && stats.total !== filteredStats.total && (
-              <span className="text-sm font-normal text-muted-foreground ml-2">
-                (av {stats.total})
-              </span>
-            )}
           </h1>
           <p className="text-sm text-white mt-1">
             Hantera och granska kandidater som sökt till dina jobbannonser
