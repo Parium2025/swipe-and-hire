@@ -180,6 +180,8 @@ export const RichNotesEditor = memo(({
     const checkbox = document.createElement('span');
     checkbox.className = 'inline-checkbox';
     checkbox.setAttribute('data-checked', 'false');
+    // Prevent the checkbox glyph from being edited/deleted by contentEditable
+    checkbox.setAttribute('contenteditable', 'false');
     checkbox.textContent = '☐';
     checkbox.style.cursor = 'pointer';
     // Important: keep selectable so iOS/Android selection handles can expand past checkboxes
@@ -311,7 +313,7 @@ export const RichNotesEditor = memo(({
             return;
           }
         } else {
-          // Collapsed caret: Backspace at the start of checkbox text should remove the checkbox
+          // Collapsed caret inside a checkbox-line: protect the checkbox glyph from being deleted.
           const checkboxLine = findCheckboxLine(selection.focusNode);
           if (checkboxLine) {
             const checkboxText = checkboxLine.querySelector<HTMLElement>('.checkbox-text');
@@ -321,55 +323,57 @@ export const RichNotesEditor = memo(({
             const isOnCheckbox = !!(checkboxSpan && focusNode && checkboxSpan.contains(focusNode));
             const isInCheckboxText = !!(checkboxText && focusNode && checkboxText.contains(focusNode));
 
-            const realText = (checkboxText?.textContent || '').replace(/\u200b/g, '').trim();
-            const hasRealText = realText.length > 0;
+            // In contentEditable it's common that the caret "behind the checkbox" is represented as:
+            // range.startContainer === checkboxLine AND startOffset === 1 (between [checkbox][text]).
+            const caretInLineContainer = range.startContainer === checkboxLine;
+            const caretBetweenCheckboxAndText = caretInLineContainer && range.startOffset === 1;
 
-            // We insert a zero-width space in checkboxText; caret at start is usually offset 0 or 1
+            const ensureZwsp = () => {
+              if (!checkboxText) return;
+              const current = checkboxText.textContent ?? '';
+              if (!current.startsWith('\u200b')) {
+                checkboxText.textContent = `\u200b${current}`;
+              }
+            };
+
+            const placeCaretAfterCheckbox = () => {
+              if (!checkboxText) return;
+              ensureZwsp();
+
+              const tn = checkboxText.firstChild;
+              const newRange = document.createRange();
+              if (tn && tn.nodeType === Node.TEXT_NODE) {
+                const len = tn.textContent?.length ?? 0;
+                newRange.setStart(tn, Math.min(1, len));
+                newRange.collapse(true);
+              } else {
+                newRange.selectNodeContents(checkboxText);
+                newRange.collapse(true);
+              }
+              selection.removeAllRanges();
+              selection.addRange(newRange);
+            };
+
             const atStartOfCheckboxText = (() => {
+              if (isOnCheckbox || caretBetweenCheckboxAndText) return true;
               if (!isInCheckboxText) return false;
-              if (range.startContainer.nodeType === Node.TEXT_NODE) return range.startOffset <= 1;
+              if (range.startContainer.nodeType === Node.TEXT_NODE) return range.startOffset <= 1; // before/at ZWSP
               if (checkboxText && range.startContainer === checkboxText) return range.startOffset === 0;
               return false;
             })();
 
-            if (e.key === 'Backspace' && (isOnCheckbox || atStartOfCheckboxText)) {
+            // Backspace from "behind checkbox" should NOT delete the checkbox.
+            if (e.key === 'Backspace' && atStartOfCheckboxText) {
               e.preventDefault();
+              placeCaretAfterCheckbox();
+              requestAnimationFrame(placeCaretAfterCheckbox);
+              return;
+            }
 
-              if (hasRealText && checkboxText) {
-                // Remove the checkbox but keep the text as a normal line
-                const plain = document.createElement('div');
-                plain.textContent = realText;
-                checkboxLine.replaceWith(plain);
-
-                const newRange = document.createRange();
-                newRange.selectNodeContents(plain);
-                newRange.collapse(false);
-                selection.removeAllRanges();
-                selection.addRange(newRange);
-              } else {
-                // No text: remove the whole checkbox line
-                const next = checkboxLine.nextSibling;
-                const prev = checkboxLine.previousSibling;
-                checkboxLine.remove();
-
-                const newRange = document.createRange();
-                if (next) {
-                  newRange.setStart(next, 0);
-                  newRange.collapse(true);
-                } else if (prev) {
-                  newRange.selectNodeContents(prev);
-                  newRange.collapse(false);
-                } else {
-                  newRange.selectNodeContents(editorEl);
-                  newRange.collapse(true);
-                }
-                selection.removeAllRanges();
-                selection.addRange(newRange);
-              }
-
-              editorEl.focus();
-              handleInput();
-              updateScrollInfo();
+            // Delete from "behind checkbox" should delete text (forward) — never the checkbox.
+            // Normalize the caret into the text span so the browser applies Delete correctly.
+            if (e.key === 'Delete' && (isOnCheckbox || caretBetweenCheckboxAndText)) {
+              placeCaretAfterCheckbox();
               return;
             }
           }
@@ -402,51 +406,64 @@ export const RichNotesEditor = memo(({
           const checkboxSpan = checkboxLine.querySelector<HTMLElement>('.inline-checkbox');
           const textContent = (checkboxText?.textContent || '').replace(/\u200b/g, '');
 
+          const ensureZwsp = () => {
+            if (!checkboxText) return;
+            const current = checkboxText.textContent ?? '';
+            if (!current.startsWith('\u200b')) {
+              checkboxText.textContent = `\u200b${current}`;
+            }
+          };
+
+          const placeCaretAfterCheckbox = () => {
+            if (!checkboxText) return;
+            ensureZwsp();
+
+            const newRange = document.createRange();
+            const tn = checkboxText.firstChild;
+            if (tn && tn.nodeType === Node.TEXT_NODE) {
+              const len = tn.textContent?.length ?? 0;
+              newRange.setStart(tn, Math.min(1, len)); // right after ZWSP
+              newRange.collapse(true);
+            } else {
+              newRange.selectNodeContents(checkboxText);
+              newRange.collapse(true);
+            }
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          };
+
           // Determine caret position: at start, end, or middle of text
           const isInTextSpan = !!(checkboxText && checkboxText.contains(selection.focusNode));
           const isOnCheckbox = !!(checkboxSpan && selection.focusNode && checkboxSpan.contains(selection.focusNode));
 
           let caretOffset = 0;
-          if (isInTextSpan && range.startContainer.nodeType === Node.TEXT_NODE) {
+
+          // On some browsers the caret "behind the checkbox" is represented as being between children of the wrapper.
+          if (range.startContainer === checkboxLine) {
+            // children: [checkboxSpan][checkboxText] => offset 1 means "behind checkbox"
+            caretOffset = range.startOffset <= 1 ? 0 : textContent.length;
+          } else if (isInTextSpan && range.startContainer.nodeType === Node.TEXT_NODE) {
             // Account for zero-width space at position 0
             caretOffset = Math.max(0, range.startOffset - 1);
+          } else if (checkboxText && range.startContainer === checkboxText) {
+            caretOffset = 0;
           }
 
           const atStart = caretOffset === 0;
           const atEnd = caretOffset >= textContent.length;
 
           // "Before" means: insert a gap above, but keep the caret WITH the checkbox line
-          const shouldInsertBefore =
-            isOnCheckbox ||
-            (!isInTextSpan && atStart) ||
-            (isInTextSpan && atStart && textContent.length > 0);
+          const shouldInsertBefore = isOnCheckbox || (atStart && textContent.length > 0);
 
           if (shouldInsertBefore) {
             const emptyLine = document.createElement('div');
             emptyLine.innerHTML = '<br>';
             checkboxLine.insertAdjacentElement('beforebegin', emptyLine);
 
-            // Keep cursor behind the checkbox symbol (inside the text span), even after focus/updates.
-            const placeCaretAfterCheckbox = () => {
-              if (!checkboxText) return;
-              const newRange = document.createRange();
-              const tn = checkboxText.firstChild;
-
-              if (tn && tn.nodeType === Node.TEXT_NODE) {
-                const len = tn.textContent?.length ?? 0;
-                newRange.setStart(tn, Math.min(1, len)); // after zero-width space when present
-                newRange.collapse(true);
-              } else {
-                newRange.selectNodeContents(checkboxText);
-                newRange.collapse(true);
-              }
-
-              selection.removeAllRanges();
-              selection.addRange(newRange);
-            };
-
+            // Some browsers will still "normalize" the caret after keydown; re-apply a few times.
             placeCaretAfterCheckbox();
             requestAnimationFrame(placeCaretAfterCheckbox);
+            setTimeout(placeCaretAfterCheckbox, 0);
           } else if (atEnd || textContent.length === 0) {
             // Caret at end (or empty): insert empty line AFTER checkbox, move cursor there
             const emptyLine = document.createElement('div');
