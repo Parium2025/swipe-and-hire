@@ -386,63 +386,93 @@ export const RichNotesEditor = memo(({
       }
     }
 
-    // If we're inside a checkbox-line, Enter should create a NEW checkbox line BELOW
+    // If we're inside a checkbox-line, Enter inserts a normal empty line (checkbox stays/moves naturally)
     if (e.key === 'Enter' && !e.shiftKey && !modKey) {
       const selection = window.getSelection();
       const editorEl = editorRef.current;
 
-      if (selection && editorEl) {
-        let cur: Node | null = selection.focusNode;
-        let checkboxLine: HTMLElement | null = null;
+      if (selection && editorEl && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
 
-        while (cur && cur !== editorEl) {
-          if (cur instanceof HTMLElement && cur.classList.contains('checkbox-line')) {
-            checkboxLine = cur;
-            break;
+        const findCheckboxLine = (node: Node | null): HTMLElement | null => {
+          let cur: Node | null = node;
+          while (cur && cur !== editorEl) {
+            if (cur instanceof HTMLElement && cur.classList.contains('checkbox-line')) return cur;
+            cur = cur.parentNode;
           }
-          cur = cur.parentNode;
-        }
+          return null;
+        };
 
+        const checkboxLine = findCheckboxLine(selection.focusNode);
         if (checkboxLine) {
           e.preventDefault();
 
-          const wrapper = document.createElement('div');
-          wrapper.className = 'checkbox-line';
-          wrapper.style.display = 'flex';
-          wrapper.style.alignItems = 'flex-start';
-          wrapper.style.gap = '8px';
-          wrapper.style.marginBottom = '4px';
+          const checkboxText = checkboxLine.querySelector<HTMLElement>('.checkbox-text');
+          const textContent = (checkboxText?.textContent || '').replace(/\u200b/g, '');
 
-          const checkbox = document.createElement('span');
-          checkbox.className = 'inline-checkbox';
-          checkbox.setAttribute('data-checked', 'false');
-          checkbox.textContent = '☐';
-          checkbox.style.cursor = 'pointer';
-          checkbox.style.userSelect = 'text';
-          checkbox.style.flexShrink = '0';
-
-          const textSpan = document.createElement('span');
-          textSpan.className = 'checkbox-text';
-          textSpan.style.flex = '1';
-          textSpan.style.minWidth = '0';
-          textSpan.innerHTML = '&#8203;';
-
-          wrapper.appendChild(checkbox);
-          wrapper.appendChild(textSpan);
-
-          checkboxLine.insertAdjacentElement('afterend', wrapper);
-
-          const range = document.createRange();
-          const tn = textSpan.firstChild;
-          if (tn) {
-            range.setStart(tn, 1);
-            range.collapse(true);
-          } else {
-            range.selectNodeContents(textSpan);
-            range.collapse(false);
+          // Determine caret position: at start, end, or middle of text
+          const isInTextSpan = checkboxText && checkboxText.contains(selection.focusNode);
+          let caretOffset = 0;
+          if (isInTextSpan && range.startContainer.nodeType === Node.TEXT_NODE) {
+            // Account for zero-width space at position 0
+            caretOffset = Math.max(0, range.startOffset - 1);
           }
-          selection.removeAllRanges();
-          selection.addRange(range);
+
+          const atStart = caretOffset === 0;
+          const atEnd = caretOffset >= textContent.length;
+
+          if (atStart && textContent.length > 0) {
+            // Caret at start: insert empty line BEFORE checkbox, checkbox stays
+            const emptyLine = document.createElement('div');
+            emptyLine.innerHTML = '<br>';
+            checkboxLine.insertAdjacentElement('beforebegin', emptyLine);
+
+            // Keep cursor at start of checkbox text
+            const newRange = document.createRange();
+            const tn = checkboxText?.firstChild;
+            if (tn) {
+              newRange.setStart(tn, 1);
+              newRange.collapse(true);
+            } else if (checkboxText) {
+              newRange.selectNodeContents(checkboxText);
+              newRange.collapse(true);
+            }
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          } else if (atEnd || textContent.length === 0) {
+            // Caret at end (or empty): insert empty line AFTER checkbox, move cursor there
+            const emptyLine = document.createElement('div');
+            emptyLine.innerHTML = '<br>';
+            checkboxLine.insertAdjacentElement('afterend', emptyLine);
+
+            const newRange = document.createRange();
+            newRange.setStart(emptyLine, 0);
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          } else {
+            // Caret in middle: split text - keep first part in checkbox, move rest to new line below
+            const beforeText = textContent.slice(0, caretOffset);
+            const afterText = textContent.slice(caretOffset);
+
+            if (checkboxText) {
+              checkboxText.innerHTML = '&#8203;' + beforeText;
+            }
+
+            const newLine = document.createElement('div');
+            newLine.textContent = afterText;
+            checkboxLine.insertAdjacentElement('afterend', newLine);
+
+            const newRange = document.createRange();
+            if (newLine.firstChild) {
+              newRange.setStart(newLine.firstChild, 0);
+            } else {
+              newRange.selectNodeContents(newLine);
+            }
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          }
 
           editorEl.focus();
           handleInput();
