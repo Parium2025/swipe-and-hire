@@ -1279,3 +1279,29 @@ All colors MUST be HSL.
   outline: none;
 }
 
+/* Heading styles */
+.rich-notes-editor .ProseMirror h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+
+.rich-notes-editor .ProseMirror h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+
+/* Blockquote styling */
+.rich-notes-editor .ProseMirror blockquote {
+  border-left: 3px solid rgba(255, 255, 255, 0.4);
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  font-style: italic;
+  opacity: 0.9;
+}
+
