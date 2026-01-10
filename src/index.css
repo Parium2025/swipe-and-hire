@@ -72,7 +72,6 @@ body {
 /* Ta bort ring-effekter från interaktiva element */
 button:focus,
 button:focus-visible,
-button:active,
 a:focus,
 a:focus-visible,
 [role="button"]:focus,
@@ -89,45 +88,8 @@ video:focus-visible,
 [tabindex]:focus-visible {
   outline: none !important;
   box-shadow: none !important;
-  --tw-ring-shadow: none !important;
-  --tw-ring-offset-shadow: none !important;
 }
 
-/* Specifikt för glass-knappar - ALDRIG några ring/border-effekter vid fokus/aktiv */
-button[class*="glass"],
-button[class*="Blue"],
-button[class*="Green"],
-button[class*="Yellow"],
-button[class*="Red"],
-button[class*="Amber"] {
-  --tw-ring-shadow: none !important;
-  --tw-ring-offset-shadow: none !important;
-}
-
-button[class*="glass"]:focus,
-button[class*="glass"]:focus-visible,
-button[class*="glass"]:active,
-button[class*="Blue"]:focus,
-button[class*="Blue"]:focus-visible,
-button[class*="Blue"]:active,
-button[class*="Green"]:focus,
-button[class*="Green"]:focus-visible,
-button[class*="Green"]:active,
-button[class*="Yellow"]:focus,
-button[class*="Yellow"]:focus-visible,
-button[class*="Yellow"]:active,
-button[class*="Red"]:focus,
-button[class*="Red"]:focus-visible,
-button[class*="Red"]:active,
-button[class*="Amber"]:focus,
-button[class*="Amber"]:focus-visible,
-button[class*="Amber"]:active {
-  outline: none !important;
-  box-shadow: none !important;
-  --tw-ring-shadow: none !important;
-  --tw-ring-offset-shadow: none !important;
-  border-color: inherit !important;
-}
 
 /* Specifikt för video-element och media */
 video,
