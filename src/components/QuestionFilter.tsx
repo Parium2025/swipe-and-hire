@@ -306,7 +306,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                   Laddar frågor...
                 </div>
               ) : filterableQuestions.length === 0 ? (
-                <div className="p-4 text-center text-white/70 text-sm">
+                <div className="p-4 text-center text-white text-sm">
                   {questions?.length === 0 
                     ? 'Inga frågor skapade än'
                     : 'Inga filterbara frågor hittades'
