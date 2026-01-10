@@ -88,7 +88,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
 
   const hasFilters = value.length > 0;
 
-  // Dropdown styling matching nav dropdowns
+  // Dropdown styling matching nav dropdowns - left aligned
   const dropdownContentClass = "min-w-[280px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-0";
   const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm transition-colors";
 
@@ -134,11 +134,11 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
 
           <ScrollArea className="h-[280px]">
             {isLoading ? (
-              <div className="p-4 text-center text-muted-foreground text-sm">
+              <div className="p-4 text-center text-white text-sm">
                 Laddar frågor...
               </div>
             ) : filteredQuestions.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground text-sm">
+              <div className="p-4 text-center text-white/70 text-sm">
                 {questions?.length === 0 
                   ? 'Inga frågor skapade än'
                   : 'Inga frågor matchar sökningen'
@@ -165,7 +165,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                         className={`${dropdownItemClass} w-full text-left ${
                           isSelected 
                             ? 'bg-white/15 text-white' 
-                            : 'text-muted-foreground hover:text-white'
+                            : 'text-white hover:text-white'
                         }`}
                       >
                         <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -204,7 +204,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                             className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
                               isSelected && selectedAnswer === null
                                 ? 'bg-white/15 text-white'
-                                : 'hover:bg-white/20 text-muted-foreground hover:text-white'
+                                : 'hover:bg-white/20 text-white'
                             }`}
                           >
                             <Checkbox 
@@ -228,7 +228,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                               className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
                                 selectedAnswer === option
                                   ? 'bg-white/15 text-white'
-                                  : 'hover:bg-white/20 text-muted-foreground hover:text-white'
+                                  : 'hover:bg-white/20 text-white'
                               }`}
                             >
                               <Checkbox 
@@ -253,7 +253,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                 variant="ghost"
                 size="sm"
                 onClick={clearAll}
-                className="w-full text-muted-foreground hover:text-white"
+                className="w-full text-white hover:text-white hover:bg-white/10"
               >
                 <X className="h-3.5 w-3.5 mr-1" />
                 Rensa alla filter
