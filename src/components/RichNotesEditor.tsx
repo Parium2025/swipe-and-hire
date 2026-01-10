@@ -349,7 +349,9 @@ export const RichNotesEditor = memo(({
             }
 
             if (currentElement && currentElement !== editorEl) {
-              const textContent = (currentElement.textContent || '').replace(/\u200b/g, '');
+              const textContent = (currentElement.textContent || '')
+                .replace(/\u00a0/g, ' ')
+                .replace(/\u200b/g, '');
               const isEmpty = textContent.trim() === '';
 
               const prevSibling = currentElement.previousElementSibling as HTMLElement | null;
@@ -372,7 +374,7 @@ export const RichNotesEditor = memo(({
               })();
 
               // Backspace from an empty line right after a checkbox: remove the empty line only.
-              if (e.key === 'Backspace' && isEmpty && caretAtStart && prevSibling?.classList.contains('checkbox-line')) {
+              if (e.key === 'Backspace' && isEmpty && prevSibling?.classList.contains('checkbox-line')) {
                 e.preventDefault();
                 currentElement.remove();
 
@@ -454,29 +456,38 @@ export const RichNotesEditor = memo(({
               return false;
             })();
 
-            // Navigation safety: if the checkbox line is empty, Backspace should NOT delete the checkbox
-            // when you're just "walking back" through empty Enter-lines.
-            if (
-              e.key === 'Backspace' &&
-              !hasRealText &&
-              isInCheckboxText &&
-              range.startContainer.nodeType === Node.TEXT_NODE &&
-              range.startOffset <= 1
-            ) {
+            // Navigation safety: never delete an EMPTY checkbox-line via Backspace/Delete.
+            // This prevents the checkbox from disappearing when you "backspace" away empty Enter-lines.
+            if (!hasRealText && (e.key === 'Backspace' || e.key === 'Delete') && (isOnCheckbox || isInCheckboxText)) {
               e.preventDefault();
 
-              const prev = checkboxLine.previousSibling;
               const newRange = document.createRange();
+              const next = checkboxLine.nextSibling;
+              const prev = checkboxLine.previousSibling;
 
-              if (prev) {
-                newRange.selectNodeContents(prev);
-                newRange.collapse(false);
-              } else if (checkboxText?.firstChild && checkboxText.firstChild.nodeType === Node.TEXT_NODE) {
-                newRange.setStart(checkboxText.firstChild, 1); // keep caret usable (after ZWS)
-                newRange.collapse(true);
+              if (e.key === 'Backspace') {
+                if (prev) {
+                  newRange.selectNodeContents(prev);
+                  newRange.collapse(false);
+                } else if (checkboxText?.firstChild && checkboxText.firstChild.nodeType === Node.TEXT_NODE) {
+                  // Keep caret usable inside the checkbox line (after ZWS)
+                  newRange.setStart(checkboxText.firstChild, 1);
+                  newRange.collapse(true);
+                } else {
+                  newRange.selectNodeContents(editorEl);
+                  newRange.collapse(true);
+                }
               } else {
-                newRange.selectNodeContents(checkboxLine);
-                newRange.collapse(true);
+                if (next) {
+                  newRange.setStart(next, 0);
+                  newRange.collapse(true);
+                } else if (checkboxText?.firstChild && checkboxText.firstChild.nodeType === Node.TEXT_NODE) {
+                  newRange.setStart(checkboxText.firstChild, 1);
+                  newRange.collapse(true);
+                } else {
+                  newRange.selectNodeContents(editorEl);
+                  newRange.collapse(false);
+                }
               }
 
               selection.removeAllRanges();
@@ -486,7 +497,8 @@ export const RichNotesEditor = memo(({
               return;
             }
 
-            if (e.key === 'Backspace' && (isOnCheckbox || (atStartOfCheckboxText && hasRealText))) {
+            // Only delete the checkbox-line with Backspace when it has real text (explicit intent).
+            if (e.key === 'Backspace' && hasRealText && (isOnCheckbox || atStartOfCheckboxText)) {
               e.preventDefault();
 
               if (hasRealText && checkboxText) {
@@ -712,7 +724,7 @@ export const RichNotesEditor = memo(({
           data-placeholder={placeholder}
           data-empty={isEmpty ? 'true' : 'false'}
           className={cn(
-            "h-full overflow-y-auto",
+            "relative h-full overflow-y-auto",
             "bg-white/10 rounded-lg p-2 pr-4",
             "text-sm leading-relaxed",
             "text-pure-white",
