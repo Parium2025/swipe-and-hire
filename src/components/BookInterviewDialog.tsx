@@ -64,6 +64,12 @@ export const BookInterviewDialog = ({
   // Set default subject when dialog opens
   useEffect(() => {
     if (open) {
+      // Prevent the underlying trigger button from keeping focus (removes the "flash"/extra outline)
+      // when interacting inside the dialog.
+      requestAnimationFrame(() => {
+        (document.activeElement as HTMLElement | null)?.blur?.();
+      });
+
       setSubject(`Intervju för ${jobTitle}`);
       // Reset form with today as default date
       setDate(new Date());
