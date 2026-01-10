@@ -1431,11 +1431,30 @@ const MyCandidates = () => {
 
           {/* Search results info */}
           {searchQuery && (
-            <p className="text-center text-sm text-white">
-              {filteredTotal === 0 
-                ? 'Inga kandidater hittades' 
-                : `Visar ${filteredTotal} av ${stats.total} kandidater`}
-            </p>
+            filteredTotal === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 px-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-3">
+                  <Search className="h-5 w-5 text-white/60" />
+                </div>
+                <p className="text-white font-medium text-sm">Inga kandidater hittades</p>
+                <p className="text-white/60 text-xs mt-1 text-center max-w-xs">
+                  Försök med ett annat sökord eller kontrollera stavningen
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchQuery('')}
+                  className="mt-3 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <X className="h-3.5 w-3.5 mr-1.5" />
+                  Rensa sökning
+                </Button>
+              </div>
+            ) : (
+              <p className="text-center text-sm text-white">
+                Visar {filteredTotal} av {stats.total} kandidater
+              </p>
+            )
           )}
         </div>
         )}
