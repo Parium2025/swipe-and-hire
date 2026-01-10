@@ -239,7 +239,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
           <button
             className={`
               flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-              ${hasFilters 
+              ${open || hasFilters 
                 ? 'bg-white/20 text-white' 
                 : 'text-white hover:bg-white/10'
               }
