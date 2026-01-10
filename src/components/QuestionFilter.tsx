@@ -284,7 +284,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
         >
           <div className="px-2.5 py-1.5 border-b border-white/10">
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/50" />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white" />
               <input
                 type="text"
                 placeholder="Sök efter fråga..."
