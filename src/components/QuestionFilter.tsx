@@ -101,6 +101,17 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Check if there's more content to scroll
+  const updateScrollIndicator = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const hasMoreToScroll = container.scrollHeight - container.scrollTop - container.clientHeight > 5;
+      setCanScrollDown(hasMoreToScroll);
+    }
+  }, []);
 
   // Filter questions by search term AND only show filterable types
   const filterableTypes = ['select', 'radio', 'checkbox', 'boolean', 'yes_no'];
@@ -132,6 +143,15 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
       unfilteredCount: nonFilterable.length 
     };
   }, [questions, searchTerm]);
+
+  // Update scroll indicator when questions change or popover opens
+  useEffect(() => {
+    if (open) {
+      // Small delay to let content render
+      const timer = setTimeout(updateScrollIndicator, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [open, filterableQuestions, expandedQuestion, updateScrollIndicator]);
 
   // Check if a question is selected
   const isQuestionSelected = (questionText: string) => {
@@ -271,85 +291,99 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
             </div>
           </div>
 
-          <div className="max-h-[220px] overflow-y-auto scrollbar-none">
-            {isLoading ? (
-              <div className="p-4 text-center text-white text-sm">
-                Laddar frågor...
-              </div>
-            ) : filterableQuestions.length === 0 ? (
-              <div className="p-4 text-center text-white/70 text-sm">
-                {questions?.length === 0 
-                  ? 'Inga frågor skapade än'
-                  : 'Inga filterbara frågor hittades'
-                }
-              </div>
-            ) : (
-              <div className="p-2 space-y-1">
-                {filterableQuestions.map((question) => {
-                  const isSelected = isQuestionSelected(question.question_text);
-                  const isExpanded = expandedQuestion === question.question_text;
-                  const options = getQuestionOptions(question);
-                  const selectedAnswers = getSelectedAnswers(question.question_text);
-                  const allSelected = isAllSelected(question.question_text);
+          <div className="relative">
+            <div 
+              ref={scrollContainerRef}
+              onScroll={updateScrollIndicator}
+              className="max-h-[220px] overflow-y-auto scrollbar-none"
+            >
+              {isLoading ? (
+                <div className="p-4 text-center text-white text-sm">
+                  Laddar frågor...
+                </div>
+              ) : filterableQuestions.length === 0 ? (
+                <div className="p-4 text-center text-white/70 text-sm">
+                  {questions?.length === 0 
+                    ? 'Inga frågor skapade än'
+                    : 'Inga filterbara frågor hittades'
+                  }
+                </div>
+              ) : (
+                <div className="p-2 space-y-1">
+                  {filterableQuestions.map((question) => {
+                    const isSelected = isQuestionSelected(question.question_text);
+                    const isExpanded = expandedQuestion === question.question_text;
+                    const options = getQuestionOptions(question);
+                    const selectedAnswers = getSelectedAnswers(question.question_text);
+                    const allSelected = isAllSelected(question.question_text);
 
-                  return (
-                    <div key={question.question_text} className="space-y-1">
-                      <QuestionItem
-                        question={question}
-                        isSelected={isSelected}
-                        isExpanded={isExpanded}
-                        allSelected={allSelected}
-                        selectedAnswers={selectedAnswers}
-                        dropdownItemClass={dropdownItemClass}
-                        onToggle={() => setExpandedQuestion(isExpanded ? null : question.question_text)}
-                      />
+                    return (
+                      <div key={question.question_text} className="space-y-1">
+                        <QuestionItem
+                          question={question}
+                          isSelected={isSelected}
+                          isExpanded={isExpanded}
+                          allSelected={allSelected}
+                          selectedAnswers={selectedAnswers}
+                          dropdownItemClass={dropdownItemClass}
+                          onToggle={() => setExpandedQuestion(isExpanded ? null : question.question_text)}
+                        />
 
-                      {/* Options dropdown - always show for all questions */}
-                      {isExpanded && (
-                        <div className="space-y-0.5 pl-2">
-                          {/* Alla option */}
-                          <button
-                            onClick={() => setAllAnswers(question.question_text)}
-                            className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
-                              allSelected
-                                ? 'bg-white/15 text-white'
-                                : 'hover:bg-white/20 text-white'
-                            }`}
-                          >
-                            <Checkbox 
-                              checked={allSelected}
-                              className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary"
-                            />
-                            <span className="text-white">Alla</span>
-                          </button>
+                        {/* Options dropdown - always show for all questions */}
+                        {isExpanded && (
+                          <div className="space-y-0.5 pl-2">
+                            {/* Alla option */}
+                            <button
+                              onClick={() => setAllAnswers(question.question_text)}
+                              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
+                                allSelected
+                                  ? 'bg-white/15 text-white'
+                                  : 'hover:bg-white/20 text-white'
+                              }`}
+                            >
+                              <Checkbox 
+                                checked={allSelected}
+                                className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary"
+                              />
+                              <span className="text-white">Alla</span>
+                            </button>
 
-                          {/* Specific answer options - multi-select */}
-                          {options.map((option) => {
-                            const isOptionSelected = selectedAnswers.includes(option);
-                            return (
-                              <button
-                                key={option}
-                                onClick={() => toggleAnswer(question.question_text, option, options)}
-                                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
-                                  isOptionSelected
-                                    ? 'bg-white/15 text-white'
-                                    : 'hover:bg-white/20 text-white'
-                                }`}
-                              >
-                                <Checkbox 
-                                  checked={isOptionSelected}
-                                  className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary"
-                                />
-                                <span className="truncate text-white">{option}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                            {/* Specific answer options - multi-select */}
+                            {options.map((option) => {
+                              const isOptionSelected = selectedAnswers.includes(option);
+                              return (
+                                <button
+                                  key={option}
+                                  onClick={() => toggleAnswer(question.question_text, option, options)}
+                                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
+                                    isOptionSelected
+                                      ? 'bg-white/15 text-white'
+                                      : 'hover:bg-white/20 text-white'
+                                  }`}
+                                >
+                                  <Checkbox 
+                                    checked={isOptionSelected}
+                                    className="h-3.5 w-3.5 border-white/50 data-[state=checked]:bg-primary"
+                                  />
+                                  <span className="truncate text-white">{option}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Scroll indicator gradient */}
+            {canScrollDown && (
+              <div 
+                className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-900/90 to-transparent pointer-events-none rounded-b-lg"
+                aria-hidden="true"
+              />
             )}
           </div>
 
