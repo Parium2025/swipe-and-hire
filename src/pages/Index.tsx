@@ -191,20 +191,19 @@ const CandidatesContent = () => {
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-3">
               <Search className="h-5 w-5 text-white" />
             </div>
-            <p className="text-white font-medium text-sm">Inga kandidater hittades</p>
-            <p className="text-white text-xs mt-1 text-center max-w-xs">
+            <p className="text-white font-medium text-base">Inga kandidater hittades</p>
+            <p className="text-white text-sm mt-1 text-center max-w-xs">
               {searchQuery.trim() 
                 ? 'Försök med ett annat sökord eller kontrollera stavningen'
                 : 'Prova att ändra eller ta bort några filter'}
             </p>
             {(searchQuery.trim() || questionFilters.length > 0) && (
               <Button
-                size="sm"
                 onClick={() => {
                   setSearchQuery('');
                   setQuestionFilters([]);
                 }}
-                className="mt-4 bg-white text-gray-900 hover:bg-white/90"
+                className="mt-4 bg-[#1a2c38] text-white hover:bg-[#243a4a] rounded-full px-5 py-2"
               >
                 Rensa filter
               </Button>
