@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,78 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Filter, Search, X, ChevronDown, MessageSquare } from 'lucide-react';
 import { useOrganizationQuestions, OrganizationQuestion } from '@/hooks/useOrganizationQuestions';
+
+// Component for question item with smart tooltip
+const QuestionItem = ({ 
+  question, 
+  isSelected, 
+  isExpanded, 
+  allSelected, 
+  selectedAnswers, 
+  dropdownItemClass, 
+  onToggle 
+}: {
+  question: OrganizationQuestion;
+  isSelected: boolean;
+  isExpanded: boolean;
+  allSelected: boolean;
+  selectedAnswers: string[];
+  dropdownItemClass: string;
+  onToggle: () => void;
+}) => {
+  const textRef = useRef<HTMLParagraphElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  const checkTruncation = useCallback(() => {
+    const el = textRef.current;
+    if (el) {
+      setIsTruncated(el.scrollWidth > el.clientWidth);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkTruncation();
+    window.addEventListener('resize', checkTruncation);
+    return () => window.removeEventListener('resize', checkTruncation);
+  }, [checkTruncation, question.question_text]);
+
+  const buttonContent = (
+    <button
+      onClick={onToggle}
+      className={`${dropdownItemClass} w-full text-left ${
+        isSelected 
+          ? 'bg-white/15 text-white' 
+          : 'text-white hover:text-white'
+      }`}
+    >
+      <MessageSquare className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-white" />
+      <div className="flex-1 min-w-0">
+        <p ref={textRef} className="text-sm leading-tight truncate text-white">{question.question_text}</p>
+        {isSelected && (
+          <p className="text-xs text-white/70 mt-0.5">
+            = {allSelected ? 'Alla' : selectedAnswers.join(', ')}
+          </p>
+        )}
+      </div>
+      <ChevronDown className={`h-3.5 w-3.5 transition-transform text-white ${isExpanded ? 'rotate-180' : ''}`} />
+    </button>
+  );
+
+  if (isTruncated) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {buttonContent}
+        </TooltipTrigger>
+        <TooltipContent side="right" className="max-w-[300px] bg-slate-900 border-white/20 text-white">
+          {question.question_text}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return buttonContent;
+};
 
 export interface QuestionFilterValue {
   question: string;
@@ -222,34 +294,15 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
 
                   return (
                     <div key={question.question_text} className="space-y-1">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => {
-                              setExpandedQuestion(isExpanded ? null : question.question_text);
-                            }}
-                            className={`${dropdownItemClass} w-full text-left ${
-                              isSelected 
-                                ? 'bg-white/15 text-white' 
-                                : 'text-white hover:text-white'
-                            }`}
-                          >
-                            <MessageSquare className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-white" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm leading-tight truncate text-white">{question.question_text}</p>
-                              {isSelected && (
-                                <p className="text-xs text-white/70 mt-0.5">
-                                  = {allSelected ? 'Alla' : selectedAnswers.join(', ')}
-                                </p>
-                              )}
-                            </div>
-                            <ChevronDown className={`h-3.5 w-3.5 transition-transform text-white ${isExpanded ? 'rotate-180' : ''}`} />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="right" className="max-w-[300px] bg-slate-900 border-white/20 text-white">
-                          {question.question_text}
-                        </TooltipContent>
-                      </Tooltip>
+                      <QuestionItem
+                        question={question}
+                        isSelected={isSelected}
+                        isExpanded={isExpanded}
+                        allSelected={allSelected}
+                        selectedAnswers={selectedAnswers}
+                        dropdownItemClass={dropdownItemClass}
+                        onToggle={() => setExpandedQuestion(isExpanded ? null : question.question_text)}
+                      />
 
                       {/* Options dropdown - always show for all questions */}
                       {isExpanded && (
