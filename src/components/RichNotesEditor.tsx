@@ -101,10 +101,20 @@ export const RichNotesEditor = memo(({
 
   const handleInput = useCallback(() => {
     if (editorRef.current) {
+      // Cleanup: if we have a stray empty line before a checklist, remove it (prevents "jump" at top)
+      const first = editorRef.current.firstElementChild as HTMLElement | null;
+      const second = first?.nextElementSibling as HTMLElement | null;
+      if (first && second?.classList.contains('checkbox-line')) {
+        const firstText = (first.textContent || '').replace(/\u00a0/g, ' ').trim();
+        const hasOnlyBr = firstText === '' && !!first.querySelector('br') && first.children.length === 1;
+        if (hasOnlyBr) first.remove();
+      }
+
       isInternalChange.current = true;
       onChange(editorRef.current.innerHTML);
+      updateScrollInfo();
     }
-  }, [onChange]);
+  }, [onChange, updateScrollInfo]);
 
   const execCommand = useCallback((command: string, value?: string) => {
     document.execCommand(command, false, value);
@@ -195,21 +205,10 @@ export const RichNotesEditor = memo(({
     wrapper.appendChild(checkbox);
     wrapper.appendChild(textSpan);
 
-    // Check if this is the FIRST element in an empty editor - add an empty line before for easier selection
-    const isFirstElement = editorEl.childNodes.length === 0 || 
-      (editorEl.childNodes.length === 1 && editorEl.firstChild?.nodeName === 'BR');
-
     // If cursor is currently inside an existing checkbox-line, insert AFTER it (never inside)
     const currentCheckboxLine = findCheckboxLine(selection.focusNode);
     if (currentCheckboxLine) {
       currentCheckboxLine.insertAdjacentElement('afterend', wrapper);
-    } else if (isFirstElement) {
-      // For the very first checkbox, add an empty selectable line before it
-      // This makes it possible to select and delete the first checkbox
-      const emptyLine = document.createElement('div');
-      emptyLine.innerHTML = '<br>';
-      editorEl.appendChild(emptyLine);
-      editorEl.appendChild(wrapper);
     } else if (selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       range.deleteContents();
@@ -239,17 +238,36 @@ export const RichNotesEditor = memo(({
   const handleEditorClick = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.classList.contains('inline-checkbox')) {
-      // If user is selecting text (drag/handles), don't toggle the checkbox.
       const sel = window.getSelection();
+
+      // If user is selecting text (drag/handles), don't toggle the checkbox.
       if (sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed) return;
 
       const isChecked = target.getAttribute('data-checked') === 'true';
       target.setAttribute('data-checked', isChecked ? 'false' : 'true');
       target.textContent = isChecked ? '☐' : '☑';
-      // No strikethrough - just toggle the checkbox symbol
+
+      // Keep caret in the checkbox text (prevents "jump" feeling)
+      const line = target.closest('.checkbox-line') as HTMLElement | null;
+      const textEl = line?.querySelector<HTMLElement>('.checkbox-text') || null;
+      if (sel && textEl) {
+        const range = document.createRange();
+        const tn = textEl.firstChild;
+        if (tn && tn.nodeType === Node.TEXT_NODE) {
+          range.setStart(tn, (tn.textContent?.length || 0));
+          range.collapse(true);
+        } else {
+          range.selectNodeContents(textEl);
+          range.collapse(false);
+        }
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+
       handleInput();
+      updateScrollInfo();
     }
-  }, [handleInput]);
+  }, [handleInput, updateScrollInfo]);
 
   // Handle paste to strip formatting except basic text
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
@@ -368,7 +386,7 @@ export const RichNotesEditor = memo(({
       }
     }
 
-    // If we're inside a checkbox-line, Enter should create a NEW line BELOW (not inside the same flex row)
+    // If we're inside a checkbox-line, Enter should create a NEW checkbox line BELOW
     if (e.key === 'Enter' && !e.shiftKey && !modKey) {
       const selection = window.getSelection();
       const editorEl = editorRef.current;
@@ -388,13 +406,41 @@ export const RichNotesEditor = memo(({
         if (checkboxLine) {
           e.preventDefault();
 
-          const nextLine = document.createElement('div');
-          nextLine.appendChild(document.createElement('br'));
-          checkboxLine.insertAdjacentElement('afterend', nextLine);
+          const wrapper = document.createElement('div');
+          wrapper.className = 'checkbox-line';
+          wrapper.style.display = 'flex';
+          wrapper.style.alignItems = 'flex-start';
+          wrapper.style.gap = '8px';
+          wrapper.style.marginBottom = '4px';
+
+          const checkbox = document.createElement('span');
+          checkbox.className = 'inline-checkbox';
+          checkbox.setAttribute('data-checked', 'false');
+          checkbox.textContent = '☐';
+          checkbox.style.cursor = 'pointer';
+          checkbox.style.userSelect = 'text';
+          checkbox.style.flexShrink = '0';
+
+          const textSpan = document.createElement('span');
+          textSpan.className = 'checkbox-text';
+          textSpan.style.flex = '1';
+          textSpan.style.minWidth = '0';
+          textSpan.innerHTML = '&#8203;';
+
+          wrapper.appendChild(checkbox);
+          wrapper.appendChild(textSpan);
+
+          checkboxLine.insertAdjacentElement('afterend', wrapper);
 
           const range = document.createRange();
-          range.setStart(nextLine, 0);
-          range.collapse(true);
+          const tn = textSpan.firstChild;
+          if (tn) {
+            range.setStart(tn, 1);
+            range.collapse(true);
+          } else {
+            range.selectNodeContents(textSpan);
+            range.collapse(false);
+          }
           selection.removeAllRanges();
           selection.addRange(range);
 
