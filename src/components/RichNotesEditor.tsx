@@ -100,11 +100,26 @@ export const RichNotesEditor = memo(({
   }, [value]);
 
   const handleInput = useCallback(() => {
-    if (editorRef.current) {
-      isInternalChange.current = true;
-      onChange(editorRef.current.innerHTML);
-      updateScrollInfo();
+    const editorEl = editorRef.current;
+    if (!editorEl) return;
+
+    // Normalize truly-empty contentEditable HTML to "" so placeholder returns.
+    const tmp = document.createElement('div');
+    tmp.innerHTML = editorEl.innerHTML;
+
+    const hasStructure = !!tmp.querySelector('ul, ol, .checkbox-line, .inline-checkbox');
+    const text = (tmp.textContent || '')
+      .replace(/\u00a0/g, ' ')
+      .replace(/\u200b/g, '')
+      .trim();
+
+    if (!hasStructure && text.length === 0) {
+      editorEl.innerHTML = '';
     }
+
+    isInternalChange.current = true;
+    onChange(editorEl.innerHTML);
+    updateScrollInfo();
   }, [onChange, updateScrollInfo]);
 
   const execCommand = useCallback((command: string, value?: string) => {
@@ -471,7 +486,7 @@ export const RichNotesEditor = memo(({
               return;
             }
 
-            if (e.key === 'Backspace' && (isOnCheckbox || atStartOfCheckboxText)) {
+            if (e.key === 'Backspace' && (isOnCheckbox || (atStartOfCheckboxText && hasRealText))) {
               e.preventDefault();
 
               if (hasRealText && checkboxText) {
