@@ -426,23 +426,27 @@ export const RichNotesEditor = memo(({
             emptyLine.innerHTML = '<br>';
             checkboxLine.insertAdjacentElement('beforebegin', emptyLine);
 
-            // Keep cursor at the same position: in the text span (behind/after the checkbox symbol)
-            if (checkboxText) {
+            // Keep cursor behind the checkbox symbol (inside the text span), even after focus/updates.
+            const placeCaretAfterCheckbox = () => {
+              if (!checkboxText) return;
               const newRange = document.createRange();
               const tn = checkboxText.firstChild;
+
               if (tn && tn.nodeType === Node.TEXT_NODE) {
-                // Place cursor at position 1 (after zero-width space) = start of text area
-                newRange.setStart(tn, 1);
+                const len = tn.textContent?.length ?? 0;
+                newRange.setStart(tn, Math.min(1, len)); // after zero-width space when present
                 newRange.collapse(true);
               } else {
-                // Fallback: put cursor at start of text span
                 newRange.selectNodeContents(checkboxText);
                 newRange.collapse(true);
               }
+
               selection.removeAllRanges();
               selection.addRange(newRange);
-              checkboxText.focus();
-            }
+            };
+
+            placeCaretAfterCheckbox();
+            requestAnimationFrame(placeCaretAfterCheckbox);
           } else if (atEnd || textContent.length === 0) {
             // Caret at end (or empty): insert empty line AFTER checkbox, move cursor there
             const emptyLine = document.createElement('div');
