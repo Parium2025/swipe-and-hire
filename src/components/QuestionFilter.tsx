@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Filter, Search, X, ChevronDown, MessageSquare } from 'lucide-react';
 import { useOrganizationQuestions, OrganizationQuestion } from '@/hooks/useOrganizationQuestions';
 
@@ -221,27 +222,34 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
 
                   return (
                     <div key={question.question_text} className="space-y-1">
-                      <button
-                        onClick={() => {
-                          setExpandedQuestion(isExpanded ? null : question.question_text);
-                        }}
-                        className={`${dropdownItemClass} w-full text-left ${
-                          isSelected 
-                            ? 'bg-white/15 text-white' 
-                            : 'text-white hover:text-white'
-                        }`}
-                      >
-                        <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0 text-white" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm leading-tight truncate font-medium text-white">{question.question_text}</p>
-                          {isSelected && (
-                            <p className="text-xs text-white/70 mt-0.5">
-                              = {allSelected ? 'Alla' : selectedAnswers.join(', ')}
-                            </p>
-                          )}
-                        </div>
-                        <ChevronDown className={`h-4 w-4 transition-transform text-white ${isExpanded ? 'rotate-180' : ''}`} />
-                      </button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => {
+                              setExpandedQuestion(isExpanded ? null : question.question_text);
+                            }}
+                            className={`${dropdownItemClass} w-full text-left ${
+                              isSelected 
+                                ? 'bg-white/15 text-white' 
+                                : 'text-white hover:text-white'
+                            }`}
+                          >
+                            <MessageSquare className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-white" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm leading-tight truncate text-white">{question.question_text}</p>
+                              {isSelected && (
+                                <p className="text-xs text-white/70 mt-0.5">
+                                  = {allSelected ? 'Alla' : selectedAnswers.join(', ')}
+                                </p>
+                              )}
+                            </div>
+                            <ChevronDown className={`h-3.5 w-3.5 transition-transform text-white ${isExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-[300px] bg-slate-900 border-white/20 text-white">
+                          {question.question_text}
+                        </TooltipContent>
+                      </Tooltip>
 
                       {/* Options dropdown - always show for all questions */}
                       {isExpanded && (
