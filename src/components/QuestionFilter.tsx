@@ -249,7 +249,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
 
   // Dropdown styling matching nav dropdowns - left aligned
   const dropdownContentClass = "min-w-[280px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-0";
-  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm transition-colors";
+  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/20 focus-visible:bg-white/20 focus:outline-none rounded-md px-2.5 py-2 text-sm transition-colors";
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -335,10 +335,10 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                             {/* Alla option */}
                             <button
                               onClick={() => setAllAnswers(question.question_text)}
-                              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
+                              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors focus:outline-none ${
                                 allSelected
                                   ? 'bg-white/15 text-white'
-                                  : 'hover:bg-white/20 text-white'
+                                  : 'hover:bg-white/20 focus-visible:bg-white/20 text-white'
                               }`}
                             >
                               <Checkbox 
@@ -355,10 +355,10 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                                 <button
                                   key={option}
                                   onClick={() => toggleAnswer(question.question_text, option, options)}
-                                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors ${
+                                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors focus:outline-none ${
                                     isOptionSelected
                                       ? 'bg-white/15 text-white'
-                                      : 'hover:bg-white/20 text-white'
+                                      : 'hover:bg-white/20 focus-visible:bg-white/20 text-white'
                                   }`}
                                 >
                                   <Checkbox 
