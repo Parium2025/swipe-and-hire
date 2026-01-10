@@ -1,7 +1,12 @@
-import { memo, useRef, useCallback, useEffect, useMemo, useState } from 'react';
-import { Bold, Italic, Strikethrough, List, CheckSquare } from 'lucide-react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
+import Placeholder from '@tiptap/extension-placeholder';
 
 interface RichNotesEditorProps {
   value: string;
@@ -14,12 +19,14 @@ const ToolbarButton = memo(({
   onClick, 
   icon: Icon, 
   title,
-  isActive = false 
+  isActive = false,
+  disabled = false
 }: { 
   onClick: () => void; 
   icon: React.ComponentType<{ className?: string }>; 
   title: string;
   isActive?: boolean;
+  disabled?: boolean;
 }) => (
   <TooltipProvider delayDuration={300}>
     <Tooltip>
@@ -27,14 +34,15 @@ const ToolbarButton = memo(({
         <button
           type="button"
           onMouseDown={(e) => {
-            // Keep selection in the editor (prevents caret/focus glitches)
             e.preventDefault();
           }}
           onClick={onClick}
+          disabled={disabled}
           className={cn(
             "w-5 h-5 flex items-center justify-center rounded transition-all duration-150 caret-transparent",
             "hover:bg-white/20",
             "active:scale-95",
+            "disabled:opacity-30 disabled:cursor-not-allowed",
             isActive && "bg-white/25"
           )}
         >
@@ -56,659 +64,194 @@ export const RichNotesEditor = memo(({
   placeholder = "Skriv påminnelser och anteckningar...",
   className 
 }: RichNotesEditorProps) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const isInternalChange = useRef(false);
   const [scrollInfo, setScrollInfo] = useState({ scrollTop: 0, scrollHeight: 0, clientHeight: 0 });
 
-  // Update scroll info when editor scrolls
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        // Disable default list extensions since we use TaskList
+        bulletList: {
+          HTMLAttributes: {
+            class: 'list-disc ml-4 my-1',
+          },
+        },
+        orderedList: {
+          HTMLAttributes: {
+            class: 'list-decimal ml-4 my-1',
+          },
+        },
+        listItem: {
+          HTMLAttributes: {
+            class: 'my-0.5',
+          },
+        },
+      }),
+      TaskList.configure({
+        HTMLAttributes: {
+          class: 'task-list',
+        },
+      }),
+      TaskItem.configure({
+        nested: false,
+        HTMLAttributes: {
+          class: 'task-item',
+        },
+      }),
+      Placeholder.configure({
+        placeholder,
+        emptyEditorClass: 'is-editor-empty',
+      }),
+    ],
+    content: value || '',
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      // Normalize empty content
+      const isEmpty = editor.isEmpty;
+      onChange(isEmpty ? '' : html);
+      updateScrollInfo();
+    },
+    editorProps: {
+      attributes: {
+        class: cn(
+          "relative h-full overflow-y-auto",
+          "bg-white/10 rounded-lg p-2 pr-4",
+          "text-sm leading-relaxed",
+          "text-pure-white",
+          "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
+          "touch-auto",
+          "min-h-[100px]"
+        ),
+      },
+    },
+  });
+
+  // Sync external value changes
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      // Only update if the value is meaningfully different
+      const editorEmpty = editor.isEmpty;
+      const valueEmpty = !value || value === '<p></p>' || value.trim() === '';
+      
+      if (editorEmpty && valueEmpty) return;
+      
+      editor.commands.setContent(value || '', { emitUpdate: false });
+    }
+  }, [value, editor]);
+
   const updateScrollInfo = useCallback(() => {
-    if (editorRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = editorRef.current;
+    const editorElement = document.querySelector('.ProseMirror');
+    if (editorElement) {
+      const { scrollTop, scrollHeight, clientHeight } = editorElement;
       setScrollInfo({ scrollTop, scrollHeight, clientHeight });
     }
   }, []);
 
-  // Update scroll info on mount, value change, and resize
   useEffect(() => {
     updateScrollInfo();
-    // Also update after a short delay to catch layout changes
     const timer = setTimeout(updateScrollInfo, 100);
     return () => clearTimeout(timer);
   }, [value, updateScrollInfo]);
 
-  // Calculate scrollbar thumb position and size
   const scrollbarInfo = useMemo(() => {
     const { scrollTop, scrollHeight, clientHeight } = scrollInfo;
-    const hasScroll = scrollHeight > clientHeight + 5; // 5px threshold
+    const hasScroll = scrollHeight > clientHeight + 5;
     if (!hasScroll) return { show: false, thumbTop: 0, thumbHeight: 0 };
     
-    const thumbHeight = Math.max((clientHeight / scrollHeight) * 100, 20); // Min 20% height
+    const thumbHeight = Math.max((clientHeight / scrollHeight) * 100, 20);
     const maxScroll = scrollHeight - clientHeight;
     const thumbTop = maxScroll > 0 ? (scrollTop / maxScroll) * (100 - thumbHeight) : 0;
     
     return { show: true, thumbTop, thumbHeight };
   }, [scrollInfo]);
 
-  // Sync external value changes to editor
-  useEffect(() => {
-    if (editorRef.current && !isInternalChange.current) {
-      if (editorRef.current.innerHTML !== value) {
-        editorRef.current.innerHTML = value;
-      }
-    }
-    isInternalChange.current = false;
-  }, [value]);
+  const handleBold = useCallback(() => {
+    editor?.chain().focus().toggleBold().run();
+  }, [editor]);
 
-  const handleInput = useCallback(() => {
-    const editorEl = editorRef.current;
-    if (!editorEl) return;
+  const handleItalic = useCallback(() => {
+    editor?.chain().focus().toggleItalic().run();
+  }, [editor]);
 
-    // Normalize truly-empty contentEditable HTML to "" so placeholder returns.
-    const tmp = document.createElement('div');
-    tmp.innerHTML = editorEl.innerHTML;
-
-    const hasStructure = !!tmp.querySelector('ul, ol, .checkbox-line, .inline-checkbox');
-    const text = (tmp.textContent || '')
-      .replace(/\u00a0/g, ' ')
-      .replace(/\u200b/g, '')
-      .trim();
-
-    if (!hasStructure && text.length === 0) {
-      editorEl.innerHTML = '';
-    }
-
-    isInternalChange.current = true;
-    onChange(editorEl.innerHTML);
-    updateScrollInfo();
-  }, [onChange, updateScrollInfo]);
-
-  const execCommand = useCallback((command: string, value?: string) => {
-    document.execCommand(command, false, value);
-    editorRef.current?.focus();
-    handleInput();
-  }, [handleInput]);
-
-  const handleBold = useCallback(() => execCommand('bold'), [execCommand]);
-  const handleItalic = useCallback(() => execCommand('italic'), [execCommand]);
-  const handleStrikethrough = useCallback(() => execCommand('strikeThrough'), [execCommand]);
-  
-  const clearEditorIfEmpty = useCallback(() => {
-    const editorEl = editorRef.current;
-    if (!editorEl) return;
-    const text = editorEl.textContent?.trim() || '';
-    if (text === '') {
-      editorEl.innerHTML = '';
-    }
-  }, []);
+  const handleStrikethrough = useCallback(() => {
+    editor?.chain().focus().toggleStrike().run();
+  }, [editor]);
 
   const handleBulletList = useCallback(() => {
-    const editorEl = editorRef.current;
-    clearEditorIfEmpty();
-
-    // Ensure caret is inside the editor so the command actually applies
-    if (editorEl) {
-      editorEl.focus();
-      const selection = window.getSelection();
-      if (selection && (!selection.rangeCount || !editorEl.contains(selection.anchorNode))) {
-        const range = document.createRange();
-        range.selectNodeContents(editorEl);
-        range.collapse(false);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
-    }
-
-    execCommand('insertUnorderedList');
-  }, [execCommand, clearEditorIfEmpty]);
+    editor?.chain().focus().toggleBulletList().run();
+  }, [editor]);
 
   const handleCheckbox = useCallback(() => {
-    const selection = window.getSelection();
-    const editorEl = editorRef.current;
-    if (!selection || !editorEl) return;
-
-    // Clear if empty before inserting checkbox (placeholder is a pseudo-element)
-    const text = editorEl.textContent?.trim() || '';
-    if (text === '') {
-      editorEl.innerHTML = '';
-    }
-
-    // Ensure caret is inside the editor before we insert
-    editorEl.focus();
-
-    const findCheckboxLine = (node: Node | null): HTMLElement | null => {
-      let cur: Node | null = node;
-      while (cur && cur !== editorEl) {
-        if (cur instanceof HTMLElement && cur.classList.contains('checkbox-line')) return cur;
-        cur = cur.parentNode;
-      }
-      return null;
-    };
-
-    // Build a wrapper div for the checkbox line
-    const wrapper = document.createElement('div');
-    wrapper.className = 'checkbox-line';
-    wrapper.style.display = 'flex';
-    wrapper.style.alignItems = 'flex-start';
-    wrapper.style.gap = '8px';
-    wrapper.style.marginBottom = '4px';
-
-    const checkbox = document.createElement('span');
-    checkbox.className = 'inline-checkbox';
-    checkbox.setAttribute('data-checked', 'false');
-    checkbox.textContent = '☐';
-    checkbox.style.cursor = 'pointer';
-    // Important: keep selectable so iOS/Android selection handles can expand past checkboxes
-    checkbox.style.userSelect = 'text';
-    checkbox.style.flexShrink = '0';
-
-    const textSpan = document.createElement('span');
-    textSpan.className = 'checkbox-text';
-    textSpan.style.flex = '1';
-    textSpan.style.minWidth = '0';
-    // Add a zero-width space to ensure the span is focusable
-    textSpan.innerHTML = '&#8203;';
-
-    wrapper.appendChild(checkbox);
-    wrapper.appendChild(textSpan);
-
-    // If cursor is currently inside an existing checkbox-line, insert AFTER it (never inside)
-    const currentCheckboxLine = findCheckboxLine(selection.focusNode);
-    if (currentCheckboxLine) {
-      currentCheckboxLine.insertAdjacentElement('afterend', wrapper);
-    } else if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      range.deleteContents();
-      range.insertNode(wrapper);
-    } else {
-      editorEl.appendChild(wrapper);
-    }
-
-    // Place cursor AFTER the zero-width space inside the text span (so user types after checkbox)
-    const newRange = document.createRange();
-    const textNode = textSpan.firstChild;
-    if (textNode) {
-      newRange.setStart(textNode, 1); // After the zero-width space
-      newRange.collapse(true);
-    } else {
-      newRange.selectNodeContents(textSpan);
-      newRange.collapse(false);
-    }
-    selection.removeAllRanges();
-    selection.addRange(newRange);
-
-    editorEl.focus();
-    handleInput();
-  }, [handleInput]);
-
-  // Handle click on checkboxes within the editor
-  const handleEditorClick = useCallback((e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.classList.contains('inline-checkbox')) {
-      const sel = window.getSelection();
-
-      // If user is selecting text (drag/handles), don't toggle the checkbox.
-      if (sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed) return;
-
-      const isChecked = target.getAttribute('data-checked') === 'true';
-      target.setAttribute('data-checked', isChecked ? 'false' : 'true');
-      target.textContent = isChecked ? '☐' : '☑';
-
-      // Keep caret in the checkbox text (prevents "jump" feeling)
-      const line = target.closest('.checkbox-line') as HTMLElement | null;
-      const textEl = line?.querySelector<HTMLElement>('.checkbox-text') || null;
-      if (sel && textEl) {
-        const range = document.createRange();
-        const tn = textEl.firstChild;
-        if (tn && tn.nodeType === Node.TEXT_NODE) {
-          range.setStart(tn, (tn.textContent?.length || 0));
-          range.collapse(true);
-        } else {
-          range.selectNodeContents(textEl);
-          range.collapse(false);
-        }
-        sel.removeAllRanges();
-        sel.addRange(range);
-      }
-
-      handleInput();
-      updateScrollInfo();
-    }
-  }, [handleInput, updateScrollInfo]);
-
-  // Handle paste to strip formatting except basic text
-  const handlePaste = useCallback((e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
-    handleInput();
-  }, [handleInput]);
-
-  // Handle deletion reliably across browsers (especially when contentEditable caret is on root)
-  const handleBeforeInput = useCallback((e: React.FormEvent<HTMLDivElement>) => {
-    const native = e.nativeEvent as InputEvent;
-    const inputType = native?.inputType || '';
-
-    if (!inputType.startsWith('delete')) return;
-
-    const editorEl = editorRef.current;
-    const selection = window.getSelection();
-    if (!editorEl || !selection || selection.rangeCount === 0) return;
-
-    const range = selection.getRangeAt(0);
-
-    const isBackward = inputType.includes('Backward');
-    const isForward = inputType.includes('Forward');
-
-    const normalizeText = (s: string) =>
-      s.replace(/\u00a0/g, ' ').replace(/\u200b/g, '').trim();
-
-    const resolveTopLevelBlock = (): HTMLElement | null => {
-      const focusNode = selection.focusNode;
-      if (!focusNode) return null;
-
-      // If caret sits directly on editor element, derive the "current" block from offset.
-      if (focusNode === editorEl) {
-        const idx = range.startOffset;
-        const candidate = isBackward ? editorEl.childNodes[idx - 1] : editorEl.childNodes[idx];
-        return candidate instanceof HTMLElement ? candidate : null;
-      }
-
-      let el: HTMLElement | null =
-        focusNode.nodeType === Node.ELEMENT_NODE
-          ? (focusNode as HTMLElement)
-          : (focusNode.parentElement as HTMLElement | null);
-
-      while (el && el.parentElement !== editorEl) {
-        el = el.parentElement;
-      }
-      return el;
-    };
-
-    const placeCaretAtEnd = (el: HTMLElement) => {
-      const newRange = document.createRange();
-      if (el.classList.contains('checkbox-line')) {
-        const textEl = el.querySelector<HTMLElement>('.checkbox-text');
-        const tn = textEl?.firstChild;
-        if (tn && tn.nodeType === Node.TEXT_NODE) {
-          newRange.setStart(tn, tn.textContent?.length || 0);
-          newRange.collapse(true);
-        } else if (textEl) {
-          newRange.selectNodeContents(textEl);
-          newRange.collapse(false);
-        } else {
-          newRange.selectNodeContents(el);
-          newRange.collapse(false);
-        }
-      } else {
-        newRange.selectNodeContents(el);
-        newRange.collapse(false);
-      }
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-    };
-
-    const placeCaretAtStart = (el: HTMLElement) => {
-      const newRange = document.createRange();
-      if (el.classList.contains('checkbox-line')) {
-        const textEl = el.querySelector<HTMLElement>('.checkbox-text');
-        const tn = textEl?.firstChild;
-        if (tn && tn.nodeType === Node.TEXT_NODE) {
-          newRange.setStart(tn, 1); // after zero-width space
-          newRange.collapse(true);
-        } else if (textEl) {
-          newRange.selectNodeContents(textEl);
-          newRange.collapse(true);
-        } else {
-          newRange.setStart(el, 0);
-          newRange.collapse(true);
-        }
-      } else {
-        newRange.setStart(el, 0);
-        newRange.collapse(true);
-      }
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-    };
-
-    const safeIntersects = (node: Node) => {
-      try {
-        return range.intersectsNode(node);
-      } catch {
-        return false;
-      }
-    };
-
-    // Selection delete: remove any checkbox-lines inside the selection, then delete the rest.
-    if (!range.collapsed) {
-      const checkboxLines = Array.from(editorEl.querySelectorAll<HTMLElement>('.checkbox-line'));
-      const touched = checkboxLines.filter((el) => safeIntersects(el));
-
-      if (touched.length > 0) {
-        e.preventDefault();
-        touched.forEach((el) => el.remove());
-        try {
-          range.deleteContents();
-        } catch {
-          // ignore
-        }
-        handleInput();
-        updateScrollInfo();
-      }
-      return;
-    }
-
-    const block = resolveTopLevelBlock();
-    if (!block) return;
-
-    // If caret is in an empty block (typically <div><br></div> from Enter), delete that block only.
-    if (!block.classList.contains('checkbox-line')) {
-      const isEmptyBlock = normalizeText(block.textContent || '') === '';
-      if (isEmptyBlock) {
-        e.preventDefault();
-
-        const prev = block.previousElementSibling as HTMLElement | null;
-        const next = block.nextElementSibling as HTMLElement | null;
-        block.remove();
-
-        if (isBackward) {
-          if (prev) placeCaretAtEnd(prev);
-          else {
-            const nr = document.createRange();
-            nr.selectNodeContents(editorEl);
-            nr.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(nr);
-          }
-        } else if (isForward) {
-          if (next) placeCaretAtStart(next);
-          else if (prev) placeCaretAtEnd(prev);
-          else {
-            const nr = document.createRange();
-            nr.selectNodeContents(editorEl);
-            nr.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(nr);
-          }
-        }
-
-        editorEl.focus();
-        handleInput();
-        updateScrollInfo();
-        return;
-      }
-
-      // Otherwise: let the browser do normal deletion inside normal text blocks
-      return;
-    }
-
-    // Block is a checkbox-line: never allow deleting it when caret is BEHIND it.
-    const checkboxSpan = block.querySelector<HTMLElement>('.inline-checkbox');
-    const checkboxText = block.querySelector<HTMLElement>('.checkbox-text');
-
-    const focusNode = selection.focusNode;
-    const isOnCheckbox = !!(checkboxSpan && focusNode && checkboxSpan.contains(focusNode));
-
-    const realText = normalizeText((checkboxText?.textContent || ''));
-    const hasRealText = realText.length > 0;
-
-    // Allow deleting checkbox ONLY when user explicitly targets the checkbox icon.
-    if (!hasRealText) {
-      if (isOnCheckbox) {
-        e.preventDefault();
-        const prev = block.previousElementSibling as HTMLElement | null;
-        const next = block.nextElementSibling as HTMLElement | null;
-        block.remove();
-        if (next) placeCaretAtStart(next);
-        else if (prev) placeCaretAtEnd(prev);
-        else {
-          const nr = document.createRange();
-          nr.selectNodeContents(editorEl);
-          nr.collapse(true);
-          selection.removeAllRanges();
-          selection.addRange(nr);
-        }
-        editorEl.focus();
-        handleInput();
-        updateScrollInfo();
-      } else {
-        e.preventDefault();
-      }
-      return;
-    }
-
-    // If checkbox has real text: Backspace at the start converts to a normal line (keeps text).
-    if (isBackward && checkboxText) {
-      const atStartOfText = (() => {
-        if (!checkboxText.contains(range.startContainer)) return false;
-        if (range.startContainer.nodeType === Node.TEXT_NODE) return range.startOffset <= 1;
-        if (range.startContainer === checkboxText) return range.startOffset === 0;
-        return false;
-      })();
-
-      if (atStartOfText) {
-        e.preventDefault();
-        const plain = document.createElement('div');
-        plain.textContent = realText;
-        block.replaceWith(plain);
-        placeCaretAtEnd(plain);
-        editorEl.focus();
-        handleInput();
-        updateScrollInfo();
-      }
-    }
-  }, [handleInput, updateScrollInfo]);
-
-  // Handle keyboard shortcuts
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-    const modKey = isMac ? e.metaKey : e.ctrlKey;
-
-
-    // Deletion is handled in onBeforeInput (more reliable than keydown across browsers).
-
-    // If we're inside a checkbox-line, Enter inserts a normal empty line (checkbox stays/moves naturally)
-    if (e.key === 'Enter' && !e.shiftKey && !modKey) {
-      const selection = window.getSelection();
-      const editorEl = editorRef.current;
-
-      if (selection && editorEl && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-
-        const findCheckboxLine = (node: Node | null): HTMLElement | null => {
-          let cur: Node | null = node;
-          while (cur && cur !== editorEl) {
-            if (cur instanceof HTMLElement && cur.classList.contains('checkbox-line')) return cur;
-            cur = cur.parentNode;
-          }
-          return null;
-        };
-
-        const checkboxLine = findCheckboxLine(selection.focusNode);
-        if (checkboxLine) {
-          e.preventDefault();
-
-          const checkboxText = checkboxLine.querySelector<HTMLElement>('.checkbox-text');
-          const checkboxSpan = checkboxLine.querySelector<HTMLElement>('.inline-checkbox');
-          const textContent = (checkboxText?.textContent || '').replace(/\u200b/g, '');
-
-          // Determine caret position: at start, end, or middle of text
-          const isInTextSpan = !!(checkboxText && checkboxText.contains(selection.focusNode));
-          const isOnCheckbox = !!(checkboxSpan && selection.focusNode && checkboxSpan.contains(selection.focusNode));
-
-          let caretOffset = 0;
-          if (isInTextSpan && range.startContainer.nodeType === Node.TEXT_NODE) {
-            // Account for zero-width space at position 0
-            caretOffset = Math.max(0, range.startOffset - 1);
-          }
-
-          const atStart = caretOffset === 0;
-          const atEnd = caretOffset >= textContent.length;
-
-          // "Before" means: insert a gap above, but keep the caret WITH the checkbox line
-          const shouldInsertBefore =
-            isOnCheckbox ||
-            (!isInTextSpan && atStart) ||
-            (isInTextSpan && atStart && textContent.length > 0);
-
-          if (shouldInsertBefore) {
-            const emptyLine = document.createElement('div');
-            emptyLine.innerHTML = '<br>';
-            checkboxLine.insertAdjacentElement('beforebegin', emptyLine);
-
-            // Keep cursor at the start of the checkbox text (so checkbox "follows" the caret down)
-            const newRange = document.createRange();
-            const tn = checkboxText?.firstChild;
-            if (tn && tn.nodeType === Node.TEXT_NODE) {
-              newRange.setStart(tn, 1); // after zero-width space
-              newRange.collapse(true);
-            } else if (checkboxText) {
-              newRange.selectNodeContents(checkboxText);
-              newRange.collapse(true);
-            } else {
-              newRange.selectNodeContents(checkboxLine);
-              newRange.collapse(true);
-            }
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-          } else if (atEnd || textContent.length === 0) {
-            // Caret at end (or empty): insert empty line AFTER checkbox, move cursor there
-            const emptyLine = document.createElement('div');
-            emptyLine.innerHTML = '<br>';
-            checkboxLine.insertAdjacentElement('afterend', emptyLine);
-
-            const newRange = document.createRange();
-            newRange.setStart(emptyLine, 0);
-            newRange.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-          } else {
-            // Caret in middle: split text - keep first part in checkbox, move rest to new line below
-            const beforeText = textContent.slice(0, caretOffset);
-            const afterText = textContent.slice(caretOffset);
-
-            if (checkboxText) {
-              checkboxText.innerHTML = '&#8203;' + beforeText;
-            }
-
-            const newLine = document.createElement('div');
-            newLine.textContent = afterText;
-            checkboxLine.insertAdjacentElement('afterend', newLine);
-
-            const newRange = document.createRange();
-            if (newLine.firstChild) {
-              newRange.setStart(newLine.firstChild, 0);
-            } else {
-              newRange.selectNodeContents(newLine);
-            }
-            newRange.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-          }
-
-          editorEl.focus();
-          handleInput();
-          updateScrollInfo();
-          return;
-        }
-      }
-      // Outside checkbox-lines: let the browser handle Enter normally (lists/paragraphs etc.)
-    }
-
-    if (modKey) {
-      switch (e.key.toLowerCase()) {
-        case 'b':
-          e.preventDefault();
-          handleBold();
-          break;
-        case 'i':
-          e.preventDefault();
-          handleItalic();
-          break;
-        case 'u':
-          // Use underline shortcut for strikethrough since it's more useful here
-          e.preventDefault();
-          handleStrikethrough();
-          break;
-        case 'l':
-          e.preventDefault();
-          handleBulletList();
-          break;
-      }
-    }
-
-    // Shift+Ctrl+C for checkbox
-    if (modKey && e.shiftKey && e.key.toLowerCase() === 'c') {
-      e.preventDefault();
-      handleCheckbox();
-    }
-  }, [handleBold, handleItalic, handleStrikethrough, handleBulletList, handleCheckbox, handleInput, updateScrollInfo]);
-
-  const isEmpty = useMemo(() => {
-    if (!value) return true;
-    if (typeof document === 'undefined') return value.trim().length === 0;
-
-    const el = document.createElement('div');
-    el.innerHTML = value;
-
-    // Important: an empty list (<ul><li><br/></li></ul>) has no textContent,
-    // but it's still "real content" and should hide the placeholder.
-    const hasStructure = !!el.querySelector('ul, ol, .checkbox-line, .inline-checkbox');
-    if (hasStructure) return false;
-
-    const text = (el.textContent || '')
-      .replace(/\u00a0/g, ' ')
-      .replace(/\u200b/g, '')
-      .trim();
-    return text.length === 0;
-  }, [value]);
+    editor?.chain().focus().toggleTaskList().run();
+  }, [editor]);
+
+  const handleUndo = useCallback(() => {
+    editor?.chain().focus().undo().run();
+  }, [editor]);
+
+  const handleRedo = useCallback(() => {
+    editor?.chain().focus().redo().run();
+  }, [editor]);
+
+  if (!editor) {
+    return null;
+  }
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div className={cn("flex flex-col h-full rich-notes-editor", className)}>
       {/* Compact Toolbar */}
       <div className="flex items-center gap-0.5 pb-1.5 mb-1.5 border-b border-white/10">
-        <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" />
-        <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" />
-        <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" />
+        <ToolbarButton 
+          onClick={handleBold} 
+          icon={Bold} 
+          title="Fet (Ctrl+B)" 
+          isActive={editor.isActive('bold')}
+        />
+        <ToolbarButton 
+          onClick={handleItalic} 
+          icon={Italic} 
+          title="Kursiv (Ctrl+I)" 
+          isActive={editor.isActive('italic')}
+        />
+        <ToolbarButton 
+          onClick={handleStrikethrough} 
+          icon={Strikethrough} 
+          title="Genomstruken (Ctrl+Shift+S)" 
+          isActive={editor.isActive('strike')}
+        />
         <div className="w-px h-3 bg-white/20 mx-0.5" />
-        <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" />
-        <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" />
+        <ToolbarButton 
+          onClick={handleBulletList} 
+          icon={List} 
+          title="Punktlista" 
+          isActive={editor.isActive('bulletList')}
+        />
+        <ToolbarButton 
+          onClick={handleCheckbox} 
+          icon={CheckSquare} 
+          title="Checkbox (Ctrl+Shift+C)" 
+          isActive={editor.isActive('taskList')}
+        />
+        <div className="w-px h-3 bg-white/20 mx-0.5" />
+        <ToolbarButton 
+          onClick={handleUndo} 
+          icon={Undo} 
+          title="Ångra (Ctrl+Z)" 
+          disabled={!editor.can().undo()}
+        />
+        <ToolbarButton 
+          onClick={handleRedo} 
+          icon={Redo} 
+          title="Gör om (Ctrl+Y)" 
+          disabled={!editor.can().redo()}
+        />
       </div>
       
       {/* Editor with scrollbar indicator */}
       <div className="relative flex-1 min-h-0">
-        <div
-          ref={editorRef}
-          contentEditable
-          onInput={handleInput}
-          onClick={handleEditorClick}
-          onPaste={handlePaste}
-          onBeforeInput={handleBeforeInput}
-          onKeyDown={handleKeyDown}
+        <EditorContent 
+          editor={editor} 
+          className="h-full [&_.ProseMirror]:h-full"
           onScroll={updateScrollInfo}
-          data-placeholder={placeholder}
-          data-empty={isEmpty ? 'true' : 'false'}
-          className={cn(
-            "relative h-full overflow-y-auto",
-            "bg-white/10 rounded-lg p-2 pr-4",
-            "text-sm leading-relaxed",
-            "text-pure-white",
-            "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
-            // Enable smooth touch scrolling and text selection on mobile/tablet
-            "touch-auto",
-            // Placeholder (contentEditable is rarely :empty due to <br>, so use data-empty)
-            "data-[empty=true]:before:content-[attr(data-placeholder)]",
-            "data-[empty=true]:before:text-pure-white",
-            "data-[empty=true]:before:absolute data-[empty=true]:before:top-2 data-[empty=true]:before:left-2",
-            "data-[empty=true]:before:pointer-events-none data-[empty=true]:before:select-none",
-            // List styling
-            "[&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1",
-            "[&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1",
-            "[&_li]:my-0.5",
-            // Checkbox styling - keep checkbox selectable so selection can span many lines
-            "[&_.inline-checkbox]:cursor-pointer [&_.inline-checkbox]:select-text",
-            "[&_.checkbox-line]:select-text [&_.checkbox-text]:select-text"
-          )}
-          suppressContentEditableWarning
         />
         
         {/* Mini scrollbar indicator */}
