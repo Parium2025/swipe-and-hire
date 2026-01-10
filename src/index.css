@@ -1171,13 +1171,22 @@ All colors MUST be HSL.
    TipTap Rich Notes Editor Styling
    ============================================ */
 
-/* Placeholder styling */
-.rich-notes-editor .ProseMirror.is-editor-empty:first-child::before {
+/* Placeholder styling - TipTap puts placeholder on first paragraph */
+.rich-notes-editor .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   color: rgba(255, 255, 255, 0.5);
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
+  float: left;
+  height: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Alternative: when entire editor is empty */
+.rich-notes-editor .ProseMirror.is-empty::before {
+  content: attr(data-placeholder);
+  color: rgba(255, 255, 255, 0.5);
+  float: left;
+  height: 0;
   pointer-events: none;
   user-select: none;
 }
