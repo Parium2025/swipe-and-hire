@@ -25,22 +25,22 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 md:hover:underline",
         // 🎨 Glassmorphism oval style - subtle blur default, stronger on hover
         glass:
-          "rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 text-white md:hover:bg-white/15 md:hover:backdrop-blur-sm md:hover:border-white/50 active:scale-95 active:bg-white/20 transition-all duration-300",
+          "rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 text-white md:hover:bg-white/15 md:hover:backdrop-blur-sm md:hover:border-white/50 active:scale-95 active:bg-white/20 transition-all duration-300 focus:ring-0 focus-visible:ring-0",
         // Glass variant with amber accent (for save/warning actions)
         glassAmber:
-          "rounded-full bg-amber-500/20 backdrop-blur-sm border border-amber-500/40 text-white md:hover:bg-amber-500/30 md:hover:border-amber-500/50 active:scale-95 transition-all duration-300",
+          "rounded-full bg-amber-500/20 backdrop-blur-sm border border-amber-500/40 text-white md:hover:bg-amber-500/30 md:hover:border-amber-500/50 active:scale-95 transition-all duration-300 focus:ring-0 focus-visible:ring-0",
         // Glass variant with green accent (for success/confirm actions)
         glassGreen:
-          "rounded-full bg-green-500/20 backdrop-blur-sm border border-green-500/40 text-white md:hover:bg-green-500/30 md:hover:border-green-500/50 active:scale-95 transition-all duration-300",
+          "rounded-full bg-green-500/20 backdrop-blur-sm border border-green-500/40 text-white md:hover:bg-green-500/30 md:hover:border-green-500/50 active:scale-95 transition-all duration-300 focus:ring-0 focus-visible:ring-0",
         // Glass variant with red accent (for destructive actions)
         glassRed:
-          "rounded-full bg-red-500/20 backdrop-blur-sm border border-red-500/40 text-white md:hover:bg-red-500/30 md:hover:border-red-500/50 active:scale-95 transition-all duration-300",
+          "rounded-full bg-red-500/20 backdrop-blur-sm border border-red-500/40 text-white md:hover:bg-red-500/30 md:hover:border-red-500/50 active:scale-95 transition-all duration-300 focus:ring-0 focus-visible:ring-0",
         // Glass variant with blue accent (for info/primary actions)
         glassBlue:
-          "rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white md:hover:bg-blue-500/30 md:hover:border-blue-500/50 active:scale-95 transition-all duration-300",
+          "rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white md:hover:bg-blue-500/30 md:hover:border-blue-500/50 active:scale-95 transition-all duration-300 focus:ring-0 focus-visible:ring-0",
         // Glass variant with yellow accent (for warning/reviewing actions)
         glassYellow:
-          "rounded-full bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/40 text-white md:hover:bg-yellow-500/30 md:hover:border-yellow-500/50 active:scale-95 transition-all duration-300",
+          "rounded-full bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/40 text-white md:hover:bg-yellow-500/30 md:hover:border-yellow-500/50 active:scale-95 transition-all duration-300 focus:ring-0 focus-visible:ring-0",
       },
       size: {
         default: "min-h-touch md:h-10 px-4 py-2",

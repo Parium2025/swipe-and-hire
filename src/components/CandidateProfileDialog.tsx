@@ -942,7 +942,6 @@ export const CandidateProfileDialog = ({
                 onClick={() => setBookInterviewOpen(true)}
                 variant="glassBlue"
                 size="lg"
-                className="focus:ring-0 focus-visible:ring-0 focus:outline-none"
               >
                 <CalendarPlus className="h-4 w-4 mr-1.5" />
                 Boka möte
