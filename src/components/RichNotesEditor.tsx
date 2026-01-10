@@ -99,6 +99,47 @@ export const RichNotesEditor = memo(({
     isInternalChange.current = false;
   }, [value]);
 
+  // Normalize caret position when it lands in checkbox-anchor or inline-checkbox
+  // This ensures typing always goes into the text span
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const sel = window.getSelection();
+      const editorEl = editorRef.current;
+      if (!sel || !editorEl || sel.rangeCount === 0) return;
+      
+      const range = sel.getRangeAt(0);
+      if (!range.collapsed) return; // Only normalize for collapsed caret
+      
+      const container = range.startContainer;
+      
+      // Check if caret is inside checkbox anchor or checkbox glyph
+      const anchor = container.nodeType === Node.TEXT_NODE 
+        ? (container.parentElement?.closest('.checkbox-anchor') || container.parentElement?.closest('.inline-checkbox'))
+        : (container instanceof Element ? container.closest('.checkbox-anchor') || container.closest('.inline-checkbox') : null);
+      
+      if (anchor && editorEl.contains(anchor)) {
+        const line = anchor.closest('.checkbox-line') as HTMLElement | null;
+        if (line) {
+          const textEl = line.querySelector<HTMLElement>('.checkbox-text');
+          if (textEl) {
+            const newRange = document.createRange();
+            if (textEl.firstChild) {
+              newRange.setStart(textEl.firstChild, 0);
+            } else {
+              newRange.setStart(textEl, 0);
+            }
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, []);
+
   const handleInput = useCallback(() => {
     if (editorRef.current) {
       isInternalChange.current = true;
@@ -180,22 +221,23 @@ export const RichNotesEditor = memo(({
     const checkbox = document.createElement('span');
     checkbox.className = 'inline-checkbox';
     checkbox.setAttribute('data-checked', 'false');
-    // Prevent the checkbox glyph from being edited/deleted by contentEditable
-    checkbox.setAttribute('contenteditable', 'false');
     checkbox.textContent = '☐';
     checkbox.style.cursor = 'pointer';
-    // Important: keep selectable so iOS/Android selection handles can expand past checkboxes
-    checkbox.style.userSelect = 'text';
+    checkbox.style.userSelect = 'none';
     checkbox.style.flexShrink = '0';
+
+    // Caret anchor - an editable span that gives the browser a stable place for the caret
+    const caretAnchor = document.createElement('span');
+    caretAnchor.className = 'checkbox-anchor';
+    caretAnchor.textContent = '\u200b'; // Zero-width space
 
     const textSpan = document.createElement('span');
     textSpan.className = 'checkbox-text';
     textSpan.style.flex = '1';
     textSpan.style.minWidth = '0';
-    // Add a zero-width space to ensure the span is focusable
-    textSpan.innerHTML = '&#8203;';
 
     wrapper.appendChild(checkbox);
+    wrapper.appendChild(caretAnchor);
     wrapper.appendChild(textSpan);
 
     // If cursor is currently inside an existing checkbox-line, insert AFTER it (never inside)
@@ -210,44 +252,49 @@ export const RichNotesEditor = memo(({
       editorEl.appendChild(wrapper);
     }
 
-    // Place cursor AFTER the zero-width space inside the text span (so user types after checkbox)
-    const newRange = document.createRange();
-    const textNode = textSpan.firstChild;
-    if (textNode) {
-      newRange.setStart(textNode, 1); // After the zero-width space
-      newRange.collapse(true);
-    } else {
-      newRange.selectNodeContents(textSpan);
-      newRange.collapse(false);
-    }
-    selection.removeAllRanges();
-    selection.addRange(newRange);
+    // Place cursor in the caret anchor (right after checkbox)
+    placeCaretInCheckboxText(wrapper, false);
 
     editorEl.focus();
     handleInput();
   }, [handleInput]);
 
   const placeCaretInCheckboxText = useCallback((line: HTMLElement, atEnd: boolean) => {
+    const anchorEl = line.querySelector<HTMLElement>('.checkbox-anchor');
     const textEl = line.querySelector<HTMLElement>('.checkbox-text');
     const sel = window.getSelection();
-    if (!textEl || !sel) return;
+    if (!sel) return;
 
-    const current = textEl.textContent ?? '';
-    if (!current.startsWith('\u200b')) {
-      textEl.textContent = `\u200b${current}`;
-    }
-
-    const tn = textEl.firstChild;
     const range = document.createRange();
 
-    if (tn && tn.nodeType === Node.TEXT_NODE) {
-      const len = tn.textContent?.length ?? 0;
-      const offset = atEnd ? len : Math.min(1, len);
-      range.setStart(tn, offset);
+    if (atEnd && textEl) {
+      // Place caret at end of text
+      const tn = textEl.lastChild;
+      if (tn && tn.nodeType === Node.TEXT_NODE) {
+        range.setStart(tn, tn.textContent?.length ?? 0);
+      } else if (textEl.firstChild) {
+        range.selectNodeContents(textEl);
+        range.collapse(false);
+      } else {
+        range.setStart(textEl, 0);
+      }
+      range.collapse(true);
+    } else if (anchorEl) {
+      // Place caret in the anchor (right after checkbox)
+      const tn = anchorEl.firstChild;
+      if (tn && tn.nodeType === Node.TEXT_NODE) {
+        range.setStart(tn, 1); // After the ZWSP
+        range.collapse(true);
+      } else {
+        range.selectNodeContents(anchorEl);
+        range.collapse(false);
+      }
+    } else if (textEl) {
+      // Fallback: start of text
+      range.selectNodeContents(textEl);
       range.collapse(true);
     } else {
-      range.selectNodeContents(textEl);
-      range.collapse(!atEnd);
+      return;
     }
 
     sel.removeAllRanges();
@@ -348,30 +395,46 @@ export const RichNotesEditor = memo(({
           if (checkboxLine) {
             const checkboxText = checkboxLine.querySelector<HTMLElement>('.checkbox-text');
             const checkboxSpan = checkboxLine.querySelector<HTMLElement>('.inline-checkbox');
+            const checkboxAnchor = checkboxLine.querySelector<HTMLElement>('.checkbox-anchor');
 
             const focusNode = selection.focusNode;
             const isOnCheckbox = !!(checkboxSpan && focusNode && checkboxSpan.contains(focusNode));
             const isInCheckboxText = !!(checkboxText && focusNode && checkboxText.contains(focusNode));
+            const isInAnchor = !!(checkboxAnchor && focusNode && checkboxAnchor.contains(focusNode));
 
             // In contentEditable it's common that the caret "behind the checkbox" is represented as:
-            // range.startContainer === checkboxLine AND startOffset === 1 (between [checkbox][text]).
+            // range.startContainer === checkboxLine AND startOffset === 1 or 2 (between [checkbox][anchor][text]).
             const caretInLineContainer = range.startContainer === checkboxLine;
-            const caretBetweenCheckboxAndText = caretInLineContainer && range.startOffset === 1;
+            const caretBetweenElements = caretInLineContainer && (range.startOffset === 1 || range.startOffset === 2);
 
             const textContent = (checkboxText?.textContent || '').replace(/\u200b/g, '');
 
             const atStartOfCheckboxText = (() => {
-              if (isOnCheckbox || caretBetweenCheckboxAndText) return true;
+              if (isOnCheckbox || isInAnchor || caretBetweenElements) return true;
               if (!isInCheckboxText) return false;
-              if (range.startContainer.nodeType === Node.TEXT_NODE) return range.startOffset <= 1; // before/at ZWSP
+              if (range.startContainer.nodeType === Node.TEXT_NODE) return range.startOffset === 0;
               if (checkboxText && range.startContainer === checkboxText) return range.startOffset === 0;
               return false;
             })();
 
-            // Delete (forward) from "behind checkbox": normalize caret into the text span so the
-            // browser never deletes the checkbox glyph.
-            if (e.key === 'Delete' && (isOnCheckbox || caretBetweenCheckboxAndText)) {
-              placeCaretInCheckboxText(checkboxLine, false);
+            // Delete (forward) from anchor or checkbox: move caret into text so we don't delete checkbox
+            if (e.key === 'Delete' && (isOnCheckbox || isInAnchor || caretBetweenElements)) {
+              e.preventDefault();
+              // Move caret to start of actual text content
+              if (checkboxText) {
+                const sel = window.getSelection();
+                if (sel) {
+                  const r = document.createRange();
+                  if (checkboxText.firstChild) {
+                    r.setStart(checkboxText.firstChild, 0);
+                  } else {
+                    r.setStart(checkboxText, 0);
+                  }
+                  r.collapse(true);
+                  sel.removeAllRanges();
+                  sel.addRange(r);
+                }
+              }
               return;
             }
 
@@ -463,35 +526,45 @@ export const RichNotesEditor = memo(({
             const checkbox = document.createElement('span');
             checkbox.className = 'inline-checkbox';
             checkbox.setAttribute('data-checked', 'false');
-            checkbox.setAttribute('contenteditable', 'false');
             checkbox.textContent = '☐';
             checkbox.style.cursor = 'pointer';
-            // Keep selectable so iOS/Android selection handles can expand past checkboxes
-            checkbox.style.userSelect = 'text';
+            checkbox.style.userSelect = 'none';
             checkbox.style.flexShrink = '0';
+
+            // Caret anchor - stable place for caret right after checkbox
+            const caretAnchor = document.createElement('span');
+            caretAnchor.className = 'checkbox-anchor';
+            caretAnchor.textContent = '\u200b';
 
             const textSpan = document.createElement('span');
             textSpan.className = 'checkbox-text';
             textSpan.style.flex = '1';
             textSpan.style.minWidth = '0';
-            textSpan.textContent = `\u200b${initialText}`;
+            textSpan.textContent = initialText;
 
             wrapper.appendChild(checkbox);
+            wrapper.appendChild(caretAnchor);
             wrapper.appendChild(textSpan);
             return wrapper;
           };
 
           // Determine caret position inside the checkbox text (0..textContent.length)
+          // With the new structure: [checkbox][anchor][text]
+          const checkboxAnchor = checkboxLine.querySelector<HTMLElement>('.checkbox-anchor');
+          const isInAnchor = checkboxAnchor && range.startContainer.nodeType === Node.TEXT_NODE && checkboxAnchor.contains(range.startContainer);
+          
           let caretOffset = 0;
-          if (
+          if (isInAnchor) {
+            caretOffset = 0; // Caret is in anchor, treat as start
+          } else if (
             checkboxText &&
             range.startContainer.nodeType === Node.TEXT_NODE &&
             checkboxText.contains(range.startContainer)
           ) {
-            caretOffset = Math.max(0, range.startOffset - 1); // account for ZWSP
+            caretOffset = range.startOffset;
           } else if (range.startContainer === checkboxLine) {
-            // children: [checkbox][text] => offset 1 means "behind checkbox"
-            caretOffset = range.startOffset <= 1 ? 0 : textContent.length;
+            // children: [checkbox][anchor][text] => offset <= 2 means "behind checkbox"
+            caretOffset = range.startOffset <= 2 ? 0 : textContent.length;
           } else {
             caretOffset = 0;
           }
@@ -501,7 +574,7 @@ export const RichNotesEditor = memo(({
             const beforeText = textContent.slice(0, caretOffset);
             const afterText = textContent.slice(caretOffset);
 
-            checkboxText.textContent = `\u200b${beforeText}`;
+            checkboxText.textContent = beforeText;
 
             const newItem = createCheckboxLine(afterText);
             checkboxLine.insertAdjacentElement('afterend', newItem);
@@ -609,8 +682,9 @@ export const RichNotesEditor = memo(({
             "[&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1",
             "[&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1",
             "[&_li]:my-0.5",
-            // Checkbox styling - keep checkbox selectable so selection can span many lines
-            "[&_.inline-checkbox]:cursor-pointer [&_.inline-checkbox]:select-text",
+            // Checkbox styling
+            "[&_.inline-checkbox]:cursor-pointer [&_.inline-checkbox]:select-none",
+            "[&_.checkbox-anchor]:w-0 [&_.checkbox-anchor]:overflow-hidden",
             "[&_.checkbox-line]:select-text [&_.checkbox-text]:select-text"
           )}
           suppressContentEditableWarning
