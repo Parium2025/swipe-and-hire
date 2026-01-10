@@ -24,6 +24,7 @@ export interface ApplicationData {
   updated_at: string;
   custom_answers: any;
   job_title?: string;
+  job_occupation?: string | null;
   profile_image_url?: string | null;
   video_url?: string | null;
   is_profile_video?: boolean | null;
@@ -168,7 +169,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
       const from = pageParam * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
       
-      // Build query with job title - profile image fetched via RPC for security
+      // Build query with job title + occupation - profile image fetched via RPC for security
       let query = supabase
         .from('job_applications')
         .select(`
@@ -191,14 +192,14 @@ export const useApplicationsData = (searchQuery: string = '') => {
           applied_at,
           updated_at,
           viewed_at,
-          job_postings!inner(title)
+          job_postings!inner(title, occupation)
         `);
 
-      // Apply powerful global search across all relevant fields including job title
+      // Apply powerful global search across all relevant fields including job title and occupation
       if (searchQuery && searchQuery.trim()) {
         const searchTerm = searchQuery.trim();
-        // Search across name, email, phone, location, bio, and job title
-        query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%,job_postings.title.ilike.%${searchTerm}%`);
+        // Search across name, email, phone, location, bio, job title, and job occupation (role)
+        query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%,job_postings.title.ilike.%${searchTerm}%,job_postings.occupation.ilike.%${searchTerm}%`);
       }
 
       const { data: baseData, error: baseError } = await query
@@ -276,6 +277,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
          return {
            ...item,
            job_title: item.job_postings?.title || 'Okänt jobb',
+           job_occupation: item.job_postings?.occupation || null,
            profile_image_url: media.profile_image_url,
            video_url: media.video_url,
            is_profile_video: media.is_profile_video,

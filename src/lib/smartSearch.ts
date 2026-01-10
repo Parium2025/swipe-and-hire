@@ -334,6 +334,7 @@ export interface CandidateSearchFields {
   phone?: string | null;
   location?: string | null;
   job_title?: string | null;
+  job_occupation?: string | null;
   notes?: string | null;
   bio?: string | null;
   custom_answers?: any;
@@ -356,6 +357,7 @@ const CANDIDATE_FIELD_WEIGHTS = {
   email: 15,
   phone: 15,
   job_title: 18,
+  job_occupation: 20, // High weight - searching by role/category is important
   location: 12,
   notes: 10,
   bio: 8,
@@ -400,6 +402,7 @@ export function smartSearchCandidates<T extends CandidateSearchFields>(
       phone: (candidate.phone || '').replace(/\D/g, ''), // Numbers only for phone
       phone_formatted: candidate.phone || '', // Keep original format too
       job_title: candidate.job_title || '',
+      job_occupation: candidate.job_occupation || '', // Role/category for the job
       location: candidate.location || '',
       notes: candidate.notes || '',
       bio: candidate.bio || '',
