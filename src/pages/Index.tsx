@@ -83,21 +83,25 @@ const CandidatesContent = () => {
 
         const answer = customAnswers[matchingKey];
 
-        // If filter.answer is null, just check that they answered the question
-        if (filter.answer === null) {
+        // If filter.answers is empty, just check that they answered the question (Alla)
+        if (filter.answers.length === 0) {
           return answer !== undefined && answer !== null && answer !== '';
         }
 
-        // Match specific answer (case-insensitive)
-        if (typeof answer === 'string') {
-          return answer.toLowerCase() === filter.answer.toLowerCase();
-        }
-        if (typeof answer === 'boolean') {
-          return (answer ? 'ja' : 'nej') === filter.answer.toLowerCase() ||
-                 (answer ? 'yes' : 'no') === filter.answer.toLowerCase() ||
-                 String(answer) === filter.answer;
-        }
-        return String(answer) === filter.answer;
+        // Match any of the selected answers (multi-select OR logic)
+        const normalizedAnswer = typeof answer === 'string' 
+          ? answer.toLowerCase() 
+          : typeof answer === 'boolean'
+            ? (answer ? 'ja' : 'nej')
+            : String(answer).toLowerCase();
+
+        return filter.answers.some(selectedAnswer => 
+          normalizedAnswer === selectedAnswer.toLowerCase() ||
+          (typeof answer === 'boolean' && (
+            (answer && selectedAnswer.toLowerCase() === 'ja') ||
+            (!answer && selectedAnswer.toLowerCase() === 'nej')
+          ))
+        );
       });
     });
   }, [safeApplications, questionFilters]);
