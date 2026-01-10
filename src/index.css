@@ -1174,7 +1174,7 @@ All colors MUST be HSL.
 /* Placeholder styling - TipTap puts placeholder on first paragraph */
 .rich-notes-editor .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
-  color: rgba(255, 255, 255, 0.5);
+  color: white;
   float: left;
   height: 0;
   pointer-events: none;
@@ -1184,7 +1184,7 @@ All colors MUST be HSL.
 /* Alternative: when entire editor is empty */
 .rich-notes-editor .ProseMirror.is-empty::before {
   content: attr(data-placeholder);
-  color: rgba(255, 255, 255, 0.5);
+  color: white;
   float: left;
   height: 0;
   pointer-events: none;
@@ -1218,7 +1218,7 @@ All colors MUST be HSL.
   -webkit-appearance: none;
   width: 1rem;
   height: 1rem;
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid white;
   border-radius: 0.25rem;
   background: transparent;
   cursor: pointer;
@@ -1229,7 +1229,7 @@ All colors MUST be HSL.
 
 .rich-notes-editor .ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
   background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.7);
+  border-color: white;
 }
 
 .rich-notes-editor .ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"]:checked::after {
