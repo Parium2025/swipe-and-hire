@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Filter, Search, X, ChevronDown, MessageSquare } from 'lucide-react';
 import { useOrganizationQuestions, OrganizationQuestion } from '@/hooks/useOrganizationQuestions';
 
@@ -429,28 +429,53 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
         </PopoverContent>
       </Popover>
 
-      {/* Active filter badges */}
-      {value.map((filter) => (
-        <Badge
-          key={filter.question}
-          variant="outline"
-          className="gap-1 bg-primary/20 border-primary/50 text-white py-1 px-2"
-        >
-          <span className="truncate max-w-32 text-white">
-            {filter.question.length > 20 
-              ? filter.question.slice(0, 20) + '...' 
-              : filter.question
-            }
-            : {filter.answers.length === 0 ? 'Alla' : filter.answers.join(', ')}
-          </span>
+      {/* Active filter badges - matching stage filter style */}
+      {value.map((filter) => {
+        const displayText = filter.answers.length === 0 ? 'Alla' : filter.answers.join(', ');
+        const fullText = `${filter.question}: ${displayText}`;
+        const isTruncated = filter.question.length > 15;
+        
+        const chipContent = (
           <button
-            onClick={() => removeFilter(filter.question)}
-            className="ml-1 hover:text-red-400 transition-colors"
+            key={filter.question}
+            className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[200px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
           >
-            <X className="h-3 w-3" />
+            <span className="truncate min-w-0">
+              {filter.question.length > 15 
+                ? filter.question.slice(0, 15) + '...' 
+                : filter.question
+              }
+            </span>
+            <span className="flex-shrink-0 text-white/70">: {displayText}</span>
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                removeFilter(filter.question);
+              }}
+              className="ml-0.5 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
+            >
+              <X className="h-3 w-3" />
+            </span>
           </button>
-        </Badge>
-      ))}
+        );
+        
+        if (!isTruncated) {
+          return <React.Fragment key={filter.question}>{chipContent}</React.Fragment>;
+        }
+        
+        return (
+          <TooltipProvider key={filter.question} delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {chipContent}
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs bg-slate-900 border-white/20 text-white">
+                <p>{fullText}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      })}
     </div>
   );
 };
