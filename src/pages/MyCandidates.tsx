@@ -390,7 +390,7 @@ const StageColumn = ({
             </Tooltip>
           </TooltipProvider>
           <span 
-            className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
+            className="text-white text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}66` }}
           >
             {candidates.length}
