@@ -446,7 +446,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                 : filter.question
               }
             </span>
-            <span className="flex-shrink-0 text-white/70">: {displayText}</span>
+            <span className="flex-shrink-0 text-white">: {displayText}</span>
             <span
               onClick={(e) => {
                 e.stopPropagation();
