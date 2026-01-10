@@ -147,9 +147,13 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
   // Update scroll indicator when questions change or popover opens
   useEffect(() => {
     if (open) {
-      // Small delay to let content render
-      const timer = setTimeout(updateScrollIndicator, 50);
-      return () => clearTimeout(timer);
+      // Use requestAnimationFrame for immediate update after DOM changes
+      const updateAfterRender = () => {
+        requestAnimationFrame(() => {
+          updateScrollIndicator();
+        });
+      };
+      updateAfterRender();
     }
   }, [open, filterableQuestions, expandedQuestion, updateScrollIndicator]);
 
@@ -326,7 +330,14 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
                           allSelected={allSelected}
                           selectedAnswers={selectedAnswers}
                           dropdownItemClass={dropdownItemClass}
-                          onToggle={() => setExpandedQuestion(isExpanded ? null : question.question_text)}
+                          onToggle={() => {
+                            const willExpand = !isExpanded;
+                            // Immediately show gradient when expanding to avoid flash
+                            if (willExpand) {
+                              setCanScrollDown(true);
+                            }
+                            setExpandedQuestion(willExpand ? question.question_text : null);
+                          }}
                         />
 
                         {/* Options dropdown - always show for all questions */}
