@@ -199,13 +199,15 @@ const CandidatesContent = () => {
             </p>
             {(searchQuery.trim() || questionFilters.length > 0) && (
               <Button
+                variant="glass"
                 onClick={() => {
                   setSearchQuery('');
                   setQuestionFilters([]);
                 }}
-                className="mt-4 bg-[#1a2c38] text-white hover:bg-[#243a4a] rounded-full px-5 py-2"
+                className="mt-4"
               >
                 Rensa filter
+                <ArrowRightLeft size={16} />
               </Button>
             )}
           </div>
