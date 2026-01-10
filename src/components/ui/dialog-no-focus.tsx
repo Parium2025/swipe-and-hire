@@ -14,10 +14,14 @@ export const DialogContentNoFocus = React.forwardRef<
     ref={ref}
     onOpenAutoFocus={(e) => {
       e.preventDefault();
+      // Blur any focused element to prevent flash on trigger button
+      (document.activeElement as HTMLElement | null)?.blur?.();
       onOpenAutoFocus?.(e);
     }}
     onCloseAutoFocus={(e) => {
       e.preventDefault();
+      // Blur to prevent focus returning to trigger button (causes flash)
+      (document.activeElement as HTMLElement | null)?.blur?.();
       onCloseAutoFocus?.(e);
     }}
     {...props}

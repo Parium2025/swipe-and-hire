@@ -64,12 +64,6 @@ export const BookInterviewDialog = ({
   // Set default subject when dialog opens
   useEffect(() => {
     if (open) {
-      // Prevent the underlying trigger button from keeping focus (removes the "flash"/extra outline)
-      // when interacting inside the dialog.
-      requestAnimationFrame(() => {
-        (document.activeElement as HTMLElement | null)?.blur?.();
-      });
-
       setSubject(`Intervju för ${jobTitle}`);
       // Reset form with today as default date
       setDate(new Date());
@@ -351,7 +345,7 @@ export const BookInterviewDialog = ({
             variant="outline"
             onClick={handleSubmit} 
             disabled={isSubmitting || !date}
-            className="rounded-full bg-primary md:hover:bg-primary md:hover:text-white border-none text-white px-8 py-2 ring-1 ring-white/20"
+            className="rounded-full bg-primary md:hover:bg-primary md:hover:text-white border border-white/20 text-white px-8 py-2"
           >
             {isSubmitting ? (
               <>
