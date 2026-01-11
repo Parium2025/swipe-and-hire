@@ -555,12 +555,24 @@ export function useMyCandidatesData(searchQuery: string = '') {
         return { inserted: 0, alreadyExisted: candidates.length };
       }
 
+      // Get the user's stage settings to find the first available stage
+      const { data: stageSettings } = await supabase
+        .from('user_stage_settings')
+        .select('stage_key, order_index, custom_label')
+        .eq('user_id', user.id)
+        .gt('order_index', -1) // Exclude deleted stages
+        .order('order_index', { ascending: true })
+        .limit(1);
+
+      // Use the first available stage, or fall back to 'to_contact' if no stages configured
+      const defaultStage = stageSettings?.[0]?.stage_key || 'to_contact';
+
       const insertData = newCandidates.map(c => ({
         recruiter_id: user.id,
         applicant_id: c.applicantId,
         application_id: c.applicationId,
         job_id: c.jobId || null,
-        stage: 'to_contact',
+        stage: defaultStage,
       }));
 
       const { data, error } = await supabase
