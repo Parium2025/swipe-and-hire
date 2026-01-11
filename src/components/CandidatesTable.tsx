@@ -299,11 +299,8 @@ export function CandidatesTable({
 
   // Sort icon helper - shows both arrows when neutral
   const SortIcon = ({ field }: { field: SortField }) => {
-    const isActive = sortField === field && sortDirection !== null;
-    const base = cn(
-      "h-3.5 w-3.5 ml-1.5 shrink-0 transition-opacity",
-      isActive ? "text-white" : "text-white/50"
-    );
+    // Always white, regardless of state
+    const base = "h-3.5 w-3.5 ml-1.5 shrink-0 text-white";
 
     // Neutral state (no sorting or different field): show both arrows
     if (sortField !== field || sortDirection === null) {
