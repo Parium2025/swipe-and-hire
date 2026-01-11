@@ -1566,6 +1566,16 @@ export type Database = {
           video_url: string
         }[]
       }
+      get_applicant_profile_media_batch: {
+        Args: { p_applicant_ids: string[]; p_employer_id: string }
+        Returns: {
+          applicant_id: string
+          is_profile_video: boolean
+          last_active_at: string
+          profile_image_url: string
+          video_url: string
+        }[]
+      }
       get_consented_profile_for_employer: {
         Args: { p_employer_id: string; p_profile_id: string }
         Returns: {
