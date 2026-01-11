@@ -27,6 +27,7 @@ import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useDevice } from "@/hooks/use-device";
 import { useGlobalImagePreloader } from "@/hooks/useGlobalImagePreloader";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient({
@@ -102,6 +103,7 @@ const App = () => {
       <TooltipProvider delayDuration={0}>
       <Toaster />
       <OfflineIndicator />
+      <SystemHealthPanel />
       <BrowserRouter>
         <UnsavedChangesProvider>
           <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
