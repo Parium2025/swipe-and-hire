@@ -499,6 +499,58 @@ export function useMyCandidatesData(searchQuery: string = '') {
     };
   }, [user, candidates, queryClient]);
 
+  // Real-time subscription for persistent ratings (candidate_ratings table)
+  useEffect(() => {
+    if (!user) return;
+
+    const ratingsChannel = supabase
+      .channel('candidate-ratings-sync')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'candidate_ratings',
+        },
+        (payload: any) => {
+          // Invalidate queries when ratings change (from any team member)
+          queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(ratingsChannel);
+    };
+  }, [user, queryClient]);
+
+  // Real-time subscription for persistent notes (candidate_notes table)
+  useEffect(() => {
+    if (!user) return;
+
+    const notesChannel = supabase
+      .channel('candidate-notes-sync')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'candidate_notes',
+        },
+        (payload: any) => {
+          // Invalidate queries when notes change (from any team member)
+          queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(notesChannel);
+    };
+  }, [user, queryClient]);
+
   // Add candidate to my list
   const addCandidate = useMutation({
     mutationFn: async ({ applicationId, applicantId, jobId }: { applicationId: string; applicantId: string; jobId?: string }) => {
