@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl, useMediaUrl } from '@/hooks/useMediaUrl';
 import { CompanyAvatar } from "@/components/CompanyAvatar";
+import { SystemHealthButton, SystemHealthPanelContent } from "@/components/SystemHealthPanel";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,6 +81,7 @@ function EmployerTopNav() {
   const [candidatesOpen, setCandidatesOpen] = useState(false);
   const [businessOpen, setBusinessOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [healthPanelOpen, setHealthPanelOpen] = useState(false);
 
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {
@@ -379,6 +381,9 @@ function EmployerTopNav() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* System Health Button (admin only) */}
+          <SystemHealthButton onClick={() => setHealthPanelOpen(!healthPanelOpen)} />
+
           {/* Profil Dropdown (ersätter Support) */}
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>
@@ -459,6 +464,12 @@ function EmployerTopNav() {
           </DropdownMenu>
         </div>
       </div>
+
+      {/* System Health Panel */}
+      <SystemHealthPanelContent 
+        isVisible={healthPanelOpen} 
+        onClose={() => setHealthPanelOpen(false)} 
+      />
     </nav>
   );
 }
