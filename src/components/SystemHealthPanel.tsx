@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, FileText, RefreshCw, Video, FileUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, RefreshCw, Video, FileUp, AlertTriangle, CheckCircle, Wifi } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ADMIN_EMAIL = 'pariumab@hotmail.com';
@@ -37,9 +37,13 @@ interface RealUsageStats {
   // Activity indicators
   activeJobsCount: number;
   applicationsThisWeek: number;
+  jobViewsThisMonth: number;
   
   // Email estimates
   emailsThisMonth: number;
+  
+  // Bandwidth estimate (MB)
+  bandwidthEstimateMB: number;
   
   // Meta
   isRealData: boolean;
@@ -147,14 +151,19 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       
-      const [activeJobsRes, applicationsWeekRes] = await Promise.all([
+      const [activeJobsRes, applicationsWeekRes, totalJobViewsRes] = await Promise.all([
         supabase.from('job_postings').select('id', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('job_applications').select('id', { count: 'exact', head: true })
           .gte('created_at', oneWeekAgo.toISOString()),
+        // Get total job views for bandwidth estimation
+        supabase.from('job_postings').select('views_count'),
       ]);
 
       const activeJobsCount = activeJobsRes.count || 0;
       const applicationsThisWeek = applicationsWeekRes.count || 0;
+      // Sum all job views (estimate monthly views as total / months active, assume ~1 month for now)
+      const totalJobViews = (totalJobViewsRes.data || []).reduce((sum, job) => sum + (job.views_count || 0), 0);
+      const jobViewsThisMonth = Math.max(totalJobViews, applicationsThisWeek * 5); // At least 5 views per application
 
       let newStats: RealUsageStats;
 
@@ -170,6 +179,14 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
         const videoCount = profilesWithVideoRes.count || 0;
         const cvCount = profilesWithCvRes.count || 0;
         const imageCount = profilesWithImageRes.count || 0;
+
+        // Estimate bandwidth: videos are the killer
+        // Each video view = ~15MB, CV download = ~0.5MB, image load = ~0.3MB
+        const videoViewsBandwidth = videoCount * 3 * 15; // Assume 3 views per video
+        const cvDownloadsBandwidth = cvCount * 2 * 0.5; // Assume 2 downloads per CV
+        const imageLoadsBandwidth = imageCount * 10 * 0.3; // Assume 10 loads per image
+        const apiBandwidth = applicationsThisWeek * 4 * 0.01; // API calls ~10KB each
+        const bandwidthEstimateMB = videoViewsBandwidth + cvDownloadsBandwidth + imageLoadsBandwidth + apiBandwidth;
 
         newStats = {
           storage: {
@@ -188,12 +205,32 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           totalMessages: 0,
           activeJobsCount,
           applicationsThisWeek,
+          jobViewsThisMonth,
           emailsThisMonth: applicationsThisWeek * 8,
+          bandwidthEstimateMB,
           isRealData: false,
           timestamp: new Date().toISOString(),
         };
       } else {
         // Use real data from edge function
+        const videosMB = storageData.storage.byType.videos.mb || 0;
+        const cvsMB = storageData.storage.byType.cvs.mb || 0;
+        const imagesMB = storageData.storage.byType.images.mb || 0;
+        const videosCount = storageData.storage.byType.videos.count || 0;
+        const cvsCount = storageData.storage.byType.cvs.count || 0;
+        const imagesCount = storageData.storage.byType.images.count || 0;
+
+        // Bandwidth estimate based on real file sizes and activity
+        // Videos: assume each video is viewed 3 times per month
+        // CVs: assume each CV is downloaded 2 times per month
+        // Images: assume each image is loaded 10 times per month
+        // Job views generate API traffic (~10KB per view)
+        const videoViewsBandwidth = videosCount * 3 * (videosMB / Math.max(videosCount, 1));
+        const cvDownloadsBandwidth = cvsCount * 2 * (cvsMB / Math.max(cvsCount, 1));
+        const imageLoadsBandwidth = imagesCount * 10 * (imagesMB / Math.max(imagesCount, 1));
+        const apiTrafficMB = jobViewsThisMonth * 0.01; // ~10KB per job view
+        const bandwidthEstimateMB = videoViewsBandwidth + cvDownloadsBandwidth + imageLoadsBandwidth + apiTrafficMB;
+
         newStats = {
           storage: {
             totalMB: storageData.storage.totalMB,
@@ -223,7 +260,9 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           totalMessages: storageData.database.messages,
           activeJobsCount,
           applicationsThisWeek,
+          jobViewsThisMonth,
           emailsThisMonth: (storageData.database.profiles || 0) + (applicationsThisWeek * 4),
+          bandwidthEstimateMB,
           isRealData: true,
           timestamp: new Date().toISOString(),
         };
@@ -263,11 +302,13 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
     const storagePercentage = (stats.storage.totalMB / LIMITS.storage) * 100;
     const dbPercentage = (stats.dbEstimatedMB / LIMITS.database) * 100;
     const emailPercentage = (stats.emailsThisMonth / LIMITS.emailsPerMonth) * 100;
+    const bandwidthPercentage = (stats.bandwidthEstimateMB / LIMITS.bandwidth) * 100;
     
     const limits = [
       { name: 'Lagring', percentage: storagePercentage, current: stats.storage.totalMB, max: LIMITS.storage, unit: 'MB' },
       { name: 'Databas', percentage: dbPercentage, current: stats.dbEstimatedMB, max: LIMITS.database, unit: 'MB' },
       { name: 'Email', percentage: emailPercentage, current: stats.emailsThisMonth, max: LIMITS.emailsPerMonth, unit: '' },
+      { name: 'Bandbredd', percentage: bandwidthPercentage, current: stats.bandwidthEstimateMB, max: LIMITS.bandwidth, unit: 'MB' },
     ];
     
     const sorted = limits.sort((a, b) => b.percentage - a.percentage);
@@ -301,8 +342,9 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
   const storagePercentage = stats ? Math.min((stats.storage.totalMB / LIMITS.storage) * 100, 100) : 0;
   const dbPercentage = stats ? Math.min((stats.dbEstimatedMB / LIMITS.database) * 100, 100) : 0;
   const emailPercentage = stats ? Math.min((stats.emailsThisMonth / LIMITS.emailsPerMonth) * 100, 100) : 0;
+  const bandwidthPercentage = stats ? Math.min((stats.bandwidthEstimateMB / LIMITS.bandwidth) * 100, 100) : 0;
   
-  const overallHealth = Math.max(storagePercentage, dbPercentage, emailPercentage);
+  const overallHealth = Math.max(storagePercentage, dbPercentage, emailPercentage, bandwidthPercentage);
   const needsAttention = overallHealth > 70;
   const critical = overallHealth > 90;
 
@@ -455,6 +497,30 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                 style={{ width: `${emailPercentage}%` }}
               />
             </div>
+          </div>
+
+          {/* BANDWIDTH */}
+          <div className="pt-3 border-t border-slate-700 space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                <Wifi className="h-3 w-3" />
+                Bandbredd/månad
+              </p>
+              <span className={`text-xs font-medium ${getHealthColor(bandwidthPercentage)}`}>
+                ~{stats?.bandwidthEstimateMB.toFixed(0) || 0} / {LIMITS.bandwidth} MB
+              </span>
+            </div>
+            
+            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all ${getProgressColor(bandwidthPercentage)}`}
+                style={{ width: `${bandwidthPercentage}%` }}
+              />
+            </div>
+            
+            <p className="text-xs text-slate-500">
+              Baserat på {stats?.jobViewsThisMonth || 0} jobbvisningar + filnedladdningar
+            </p>
           </div>
 
           {/* ACTIVITY PULSE */}
