@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
@@ -196,6 +196,18 @@ export function useColleagueCandidates(colleagueId: string | null) {
       setIsLoading(false);
     }
   }, [colleagueId, user]);
+
+  // PRE-FETCHING: Automatically load next batch in background after each page loads
+  // This makes scrolling feel instant - data is ready before user reaches bottom
+  useEffect(() => {
+    if (hasMore && !isLoading && candidates.length > 0) {
+      // Small delay to avoid blocking the main thread
+      const timer = setTimeout(() => {
+        fetchColleagueCandidates(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [candidates.length, hasMore, isLoading, fetchColleagueCandidates]);
 
   // Load more candidates (for pagination)
   const loadMoreCandidates = useCallback(() => {
