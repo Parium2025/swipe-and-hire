@@ -525,6 +525,17 @@ export function useMyCandidatesData(searchQuery: string = '') {
 
       const restoredRating = existingRating?.rating || 0;
 
+      // Check for existing persistent notes for this applicant
+      const { data: existingNote } = await supabase
+        .from('candidate_notes')
+        .select('note')
+        .eq('employer_id', user.id)
+        .eq('applicant_id', applicantId)
+        .is('job_id', null) // Global note
+        .maybeSingle();
+
+      const restoredNotes = existingNote?.note || null;
+
       const { data, error } = await supabase
         .from('my_candidates')
         .insert({
@@ -534,6 +545,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           job_id: jobId || null,
           stage: defaultStage,
           rating: restoredRating, // Restore previous rating if exists
+          notes: restoredNotes, // Restore previous notes if exists
         })
         .select()
         .single();
@@ -599,6 +611,16 @@ export function useMyCandidatesData(searchQuery: string = '') {
 
       const ratingsMap = new Map(existingRatings?.map(r => [r.applicant_id, r.rating]) || []);
 
+      // Check for existing persistent notes for these applicants
+      const { data: existingNotes } = await supabase
+        .from('candidate_notes')
+        .select('applicant_id, note')
+        .eq('employer_id', user.id)
+        .is('job_id', null) // Global notes only
+        .in('applicant_id', applicantIds);
+
+      const notesMap = new Map(existingNotes?.map(n => [n.applicant_id, n.note]) || []);
+
       const insertData = newCandidates.map(c => ({
         recruiter_id: user.id,
         applicant_id: c.applicantId,
@@ -606,6 +628,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
         job_id: c.jobId || null,
         stage: defaultStage,
         rating: ratingsMap.get(c.applicantId) || 0, // Restore previous rating
+        notes: notesMap.get(c.applicantId) || null, // Restore previous notes
       }));
 
       const { data, error } = await supabase
@@ -695,21 +718,55 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
   });
 
-  // Update notes
+  // Update notes - also saves to persistent candidate_notes table
   const updateNotes = useMutation({
-    mutationFn: async ({ id, notes }: { id: string; notes: string }) => {
+    mutationFn: async ({ id, notes, applicantId }: { id: string; notes: string; applicantId?: string }) => {
+      // Update my_candidates notes
       const { data, error } = await supabase
         .from('my_candidates')
         .update({ notes })
         .eq('id', id)
-        .select()
+        .select('applicant_id')
         .single();
 
       if (error) throw error;
+
+      // Also save to persistent candidate_notes table (upsert by employer_id + applicant_id)
+      const targetApplicantId = applicantId || data?.applicant_id;
+      if (targetApplicantId && user) {
+        // First check if a note exists for this employer/applicant combo
+        const { data: existingNote } = await supabase
+          .from('candidate_notes')
+          .select('id')
+          .eq('employer_id', user.id)
+          .eq('applicant_id', targetApplicantId)
+          .is('job_id', null) // Global note (not job-specific)
+          .maybeSingle();
+
+        if (existingNote) {
+          // Update existing note
+          await supabase
+            .from('candidate_notes')
+            .update({ note: notes })
+            .eq('id', existingNote.id);
+        } else if (notes.trim()) {
+          // Create new note only if not empty
+          await supabase
+            .from('candidate_notes')
+            .insert({
+              employer_id: user.id,
+              applicant_id: targetApplicantId,
+              note: notes,
+              job_id: null, // Global note
+            });
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
     },
     onError: () => {
       toast.error('Kunde inte uppdatera anteckningar');
