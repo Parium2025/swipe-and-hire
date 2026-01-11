@@ -538,7 +538,24 @@ export function useMyCandidatesData(searchQuery: string = '') {
     mutationFn: async (candidates: Array<{ applicationId: string; applicantId: string; jobId?: string }>) => {
       if (!user) throw new Error('Not authenticated');
 
-      const insertData = candidates.map(c => ({
+      // First, check which candidates already exist in my_candidates
+      const applicationIds = candidates.map(c => c.applicationId);
+      const { data: existing } = await supabase
+        .from('my_candidates')
+        .select('application_id')
+        .eq('recruiter_id', user.id)
+        .in('application_id', applicationIds);
+
+      const existingIds = new Set(existing?.map(e => e.application_id) || []);
+      
+      // Filter out candidates that already exist
+      const newCandidates = candidates.filter(c => !existingIds.has(c.applicationId));
+      
+      if (newCandidates.length === 0) {
+        return { inserted: 0, alreadyExisted: candidates.length };
+      }
+
+      const insertData = newCandidates.map(c => ({
         recruiter_id: user.id,
         applicant_id: c.applicantId,
         application_id: c.applicationId,
@@ -548,21 +565,17 @@ export function useMyCandidatesData(searchQuery: string = '') {
 
       const { data, error } = await supabase
         .from('my_candidates')
-        .upsert(insertData, { 
-          onConflict: 'recruiter_id,applicant_id,application_id',
-          ignoreDuplicates: true 
-        })
+        .insert(insertData)
         .select();
 
       if (error) throw error;
-      return data;
+      return { inserted: data?.length || 0, alreadyExisted: existingIds.size };
     },
-    onSuccess: (data) => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
-      const count = data?.length || 0;
-      if (count > 0) {
-        toast.success(`${count} kandidat${count !== 1 ? 'er' : ''} tillagd${count !== 1 ? 'a' : ''} i din lista`);
-      } else {
+      if (result.inserted > 0) {
+        toast.success(`${result.inserted} kandidat${result.inserted !== 1 ? 'er' : ''} tillagd${result.inserted !== 1 ? 'a' : ''} i din lista`);
+      } else if (result.alreadyExisted > 0) {
         toast.info('Kandidaterna finns redan i din lista');
       }
     },
