@@ -254,10 +254,10 @@ export function CandidatesTable({
 
   // Sort icon helper
   const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1 text-white opacity-60" />;
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1.5 text-white" />;
     return sortDirection === 'asc' 
-      ? <ArrowUp className="h-3 w-3 ml-1 text-white" />
-      : <ArrowDown className="h-3 w-3 ml-1 text-white" />;
+      ? <ArrowUp className="h-4 w-4 ml-1.5 text-white" />
+      : <ArrowDown className="h-4 w-4 ml-1.5 text-white" />;
   };
 
   if (applications.length === 0) {
