@@ -381,10 +381,7 @@ function EmployerTopNav() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* System Health Button (admin only) */}
-          <SystemHealthButton onClick={() => setHealthPanelOpen(!healthPanelOpen)} />
-
-          {/* Profil Dropdown (ersätter Support) */}
+          {/* Profil Dropdown */}
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>
               <button
@@ -462,6 +459,9 @@ function EmployerTopNav() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* System Health Button (admin only) - after profile */}
+          <SystemHealthButton onClick={() => setHealthPanelOpen(!healthPanelOpen)} />
         </div>
       </div>
 
