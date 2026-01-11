@@ -14,7 +14,8 @@ interface TeamCandidateInfo {
 
 /**
  * Hook to fetch info about which team members have added specific candidates
- * Used to show "Added by colleague X" indicators in the candidates table
+ * Uses persistent candidate_ratings table for ratings (survives remove/re-add)
+ * Used to show "Added by colleague X" indicators and ratings in the candidates table
  */
 export function useTeamCandidateInfo(applicationIds: string[]) {
   const { user } = useAuth();
@@ -26,12 +27,30 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
       if (!user || applicationIds.length === 0) return {};
 
       // Fetch all my_candidates entries for these applications from any team member
-      const { data, error } = await supabase
+      const { data: myCandidatesData, error: mcError } = await supabase
         .from('my_candidates')
         .select('applicant_id, application_id, recruiter_id, rating, stage')
         .in('application_id', applicationIds);
 
-      if (error) throw error;
+      if (mcError) throw mcError;
+
+      // Get unique applicant IDs to fetch persistent ratings
+      const applicantIds = [...new Set(myCandidatesData?.map(c => c.applicant_id) || [])];
+
+      // Fetch persistent ratings for all relevant applicants
+      const { data: persistentRatings } = await supabase
+        .from('candidate_ratings')
+        .select('applicant_id, recruiter_id, rating')
+        .in('applicant_id', applicantIds);
+
+      // Create a lookup map for persistent ratings: applicant_id -> recruiter_id -> rating
+      const persistentRatingMap: Record<string, Record<string, number>> = {};
+      persistentRatings?.forEach(r => {
+        if (!persistentRatingMap[r.applicant_id]) {
+          persistentRatingMap[r.applicant_id] = {};
+        }
+        persistentRatingMap[r.applicant_id][r.recruiter_id] = r.rating;
+      });
 
       // Create a map of application_id -> array of team members who have added it
       const infoMap: Record<string, TeamCandidateInfo[]> = {};
@@ -44,7 +63,7 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
       // Add current user
       recruiterNames[user.id] = 'Du';
 
-      data?.forEach(candidate => {
+      myCandidatesData?.forEach(candidate => {
         const appId = candidate.application_id;
         if (!infoMap[appId]) {
           infoMap[appId] = [];
@@ -52,14 +71,25 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
 
         const recruiterName = recruiterNames[candidate.recruiter_id] || 'Kollega';
         
+        // Use persistent rating if available, otherwise use my_candidates rating
+        const persistentRating = persistentRatingMap[candidate.applicant_id]?.[candidate.recruiter_id];
+        const effectiveRating = persistentRating ?? candidate.rating ?? 0;
+        
         infoMap[appId].push({
           applicant_id: candidate.applicant_id,
           application_id: candidate.application_id,
           recruiter_id: candidate.recruiter_id,
           recruiter_name: recruiterName,
-          rating: candidate.rating || 0,
+          rating: effectiveRating,
           stage: candidate.stage,
         });
+      });
+
+      // Also check for persistent ratings for applicants NOT currently in my_candidates
+      // This ensures ratings show even after removal
+      const appToApplicant: Record<string, string> = {};
+      myCandidatesData?.forEach(c => {
+        appToApplicant[c.application_id] = c.applicant_id;
       });
 
       return infoMap;
