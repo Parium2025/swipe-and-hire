@@ -214,7 +214,7 @@ export function CandidatesTable({
       {/* Bulk actions bar - only visible when in selection mode */}
       {selectionMode && (
         <div className="mb-3 px-3 py-2 rounded-lg bg-white/[0.03] backdrop-blur-md border border-white/10 flex items-center justify-between">
-          <span className="text-xs text-white/70">
+          <span className="text-xs text-white">
             {selectedIds.size > 0 
               ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
               : 'Välj kandidater'
@@ -224,7 +224,7 @@ export function CandidatesTable({
             {selectedIds.size > 0 && (
               <>
                 <button
-                  className="h-7 px-2.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 text-xs transition-colors"
+                  className="h-7 px-2.5 rounded-lg text-white hover:bg-white/10 text-xs transition-colors"
                   onClick={() => setSelectedIds(new Set())}
                 >
                   Avmarkera
@@ -232,7 +232,7 @@ export function CandidatesTable({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className="h-7 px-2.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 border border-white/10 text-xs transition-colors"
+                      className="h-7 px-2.5 rounded-lg text-white hover:bg-white/10 border border-white/10 text-xs transition-colors"
                     >
                       Åtgärder
                     </button>
@@ -251,7 +251,7 @@ export function CandidatesTable({
               </>
             )}
             <button
-              className="h-7 w-7 flex items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+              className="h-7 w-7 flex items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"
               onClick={clearSelection}
             >
               <X className="h-3.5 w-3.5" />
