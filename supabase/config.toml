@@ -1,5 +1,8 @@
 project_id = "jrjaegapuujushsiofoi"
 
+[functions.get-storage-stats]
+verify_jwt = false
+
 [functions.custom-signup]
 verify_jwt = false
 

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, FileText, RefreshCw, Video, FileUp, AlertTriangle } from 'lucide-react';
+import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, FileText, RefreshCw, Video, FileUp, AlertTriangle, CheckCircle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ADMIN_EMAIL = 'pariumab@hotmail.com';
@@ -13,46 +13,40 @@ const LIMITS = {
   bandwidth: 5000, // MB per month
 };
 
-// Average file sizes for estimation
-const AVG_SIZES = {
-  profileVideo: 15, // MB per video
-  cv: 0.5, // MB per CV
-  profileImage: 0.3, // MB per image
-  companyLogo: 0.2, // MB per logo
-  jobImage: 0.5, // MB per job image
-};
+interface StorageStats {
+  totalMB: number;
+  byType: {
+    videos: { count: number; mb: number };
+    cvs: { count: number; mb: number };
+    images: { count: number; mb: number };
+    other: { count: number; mb: number };
+  };
+}
 
 interface RealUsageStats {
-  // Actual counts of what takes up space
-  profilesWithVideo: number;
-  profilesWithCv: number;
-  profilesWithImage: number;
-  companiesWithLogo: number;
-  jobsWithImage: number;
+  // Real storage data from edge function
+  storage: StorageStats;
   
-  // Calculated real storage
-  estimatedVideoStorage: number;
-  estimatedCvStorage: number;
-  estimatedImageStorage: number;
-  totalStorageUsed: number;
-  
-  // Database activity
+  // Database stats
+  dbEstimatedMB: number;
+  totalProfiles: number;
+  totalJobs: number;
   totalApplications: number;
   totalMessages: number;
-  totalNotes: number;
-  estimatedDbSize: number;
-  
-  // Email estimates (based on activity)
-  emailsThisMonth: number;
   
   // Activity indicators
   activeJobsCount: number;
   applicationsThisWeek: number;
   
+  // Email estimates
+  emailsThisMonth: number;
+  
+  // Meta
+  isRealData: boolean;
   timestamp: string;
 }
 
-const HISTORY_KEY = 'parium_system_health_v2';
+const HISTORY_KEY = 'parium_system_health_v3';
 
 const getStoredHistory = (): RealUsageStats[] => {
   try {
@@ -126,117 +120,122 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const isAdmin = useIsSystemAdmin();
 
   const fetchStats = useCallback(async () => {
     if (!isAdmin) return;
     
     try {
-      // Get real counts of what actually uses storage
+      setError(null);
+      
+      // Get session for auth header
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError('Ingen session');
+        return;
+      }
+
+      // Fetch real storage stats from edge function
+      const { data: storageData, error: funcError } = await supabase.functions.invoke('get-storage-stats', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      // Also fetch activity data directly
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       
-      const [
-        profilesWithVideoRes,
-        profilesWithCvRes,
-        profilesWithImageRes,
-        companiesWithLogoRes,
-        jobsWithImageRes,
-        activeJobsRes,
-        applicationsRes,
-        applicationsWeekRes,
-        messagesRes,
-        notesRes,
-      ] = await Promise.all([
-        // Profiles with video uploaded
-        supabase.from('profiles').select('id', { count: 'exact', head: true })
-          .not('video_url', 'is', null),
-        // Profiles with CV uploaded
-        supabase.from('profiles').select('id', { count: 'exact', head: true })
-          .not('cv_url', 'is', null),
-        // Profiles with profile image
-        supabase.from('profiles').select('id', { count: 'exact', head: true })
-          .not('profile_image_url', 'is', null),
-        // Companies with logo
-        supabase.from('profiles').select('id', { count: 'exact', head: true })
-          .eq('role', 'employer')
-          .not('company_logo_url', 'is', null),
-        // Jobs with images
-        supabase.from('job_postings').select('id', { count: 'exact', head: true })
-          .not('job_image_url', 'is', null),
-        // Active jobs
-        supabase.from('job_postings').select('id', { count: 'exact', head: true })
-          .eq('is_active', true),
-        // Total applications (database size indicator)
-        supabase.from('job_applications').select('id', { count: 'exact', head: true }),
-        // Applications this week (activity indicator)
+      const [activeJobsRes, applicationsWeekRes] = await Promise.all([
+        supabase.from('job_postings').select('id', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('job_applications').select('id', { count: 'exact', head: true })
           .gte('created_at', oneWeekAgo.toISOString()),
-        // Messages (database usage)
-        supabase.from('messages').select('id', { count: 'exact', head: true }),
-        // Notes (database usage)
-        supabase.from('candidate_notes').select('id', { count: 'exact', head: true }),
       ]);
 
-      const profilesWithVideo = profilesWithVideoRes.count || 0;
-      const profilesWithCv = profilesWithCvRes.count || 0;
-      const profilesWithImage = profilesWithImageRes.count || 0;
-      const companiesWithLogo = companiesWithLogoRes.count || 0;
-      const jobsWithImage = jobsWithImageRes.count || 0;
       const activeJobsCount = activeJobsRes.count || 0;
-      const totalApplications = applicationsRes.count || 0;
       const applicationsThisWeek = applicationsWeekRes.count || 0;
-      const totalMessages = messagesRes.count || 0;
-      const totalNotes = notesRes.count || 0;
 
-      // Calculate REAL storage estimates based on actual uploads
-      const estimatedVideoStorage = profilesWithVideo * AVG_SIZES.profileVideo;
-      const estimatedCvStorage = profilesWithCv * AVG_SIZES.cv;
-      const estimatedImageStorage = 
-        (profilesWithImage * AVG_SIZES.profileImage) +
-        (companiesWithLogo * AVG_SIZES.companyLogo) +
-        (jobsWithImage * AVG_SIZES.jobImage);
-      
-      const totalStorageUsed = estimatedVideoStorage + estimatedCvStorage + estimatedImageStorage;
+      let newStats: RealUsageStats;
 
-      // Database size estimation based on actual data
-      const estimatedDbSize = 
-        (totalApplications * 0.02) + // Applications with answers
-        (totalMessages * 0.002) + // Messages
-        (totalNotes * 0.001) + // Notes
-        5; // Base overhead
+      if (funcError || !storageData) {
+        console.error('Edge function error:', funcError);
+        // Fallback to estimates
+        const [profilesWithVideoRes, profilesWithCvRes, profilesWithImageRes] = await Promise.all([
+          supabase.from('profiles').select('id', { count: 'exact', head: true }).not('video_url', 'is', null),
+          supabase.from('profiles').select('id', { count: 'exact', head: true }).not('cv_url', 'is', null),
+          supabase.from('profiles').select('id', { count: 'exact', head: true }).not('profile_image_url', 'is', null),
+        ]);
 
-      // Email estimation: welcome emails + notifications
-      const emailsThisMonth = 
-        (applicationsThisWeek * 4 * 2) + // ~2 emails per application, extrapolated
-        (activeJobsCount * 5); // Various job notifications
+        const videoCount = profilesWithVideoRes.count || 0;
+        const cvCount = profilesWithCvRes.count || 0;
+        const imageCount = profilesWithImageRes.count || 0;
 
-      const newStats: RealUsageStats = {
-        profilesWithVideo,
-        profilesWithCv,
-        profilesWithImage,
-        companiesWithLogo,
-        jobsWithImage,
-        estimatedVideoStorage,
-        estimatedCvStorage,
-        estimatedImageStorage,
-        totalStorageUsed,
-        totalApplications,
-        totalMessages,
-        totalNotes,
-        estimatedDbSize,
-        emailsThisMonth,
-        activeJobsCount,
-        applicationsThisWeek,
-        timestamp: new Date().toISOString(),
-      };
+        newStats = {
+          storage: {
+            totalMB: (videoCount * 15) + (cvCount * 0.5) + (imageCount * 0.3),
+            byType: {
+              videos: { count: videoCount, mb: videoCount * 15 },
+              cvs: { count: cvCount, mb: cvCount * 0.5 },
+              images: { count: imageCount, mb: imageCount * 0.3 },
+              other: { count: 0, mb: 0 },
+            },
+          },
+          dbEstimatedMB: 5,
+          totalProfiles: 0,
+          totalJobs: 0,
+          totalApplications: 0,
+          totalMessages: 0,
+          activeJobsCount,
+          applicationsThisWeek,
+          emailsThisMonth: applicationsThisWeek * 8,
+          isRealData: false,
+          timestamp: new Date().toISOString(),
+        };
+      } else {
+        // Use real data from edge function
+        newStats = {
+          storage: {
+            totalMB: storageData.storage.totalMB,
+            byType: {
+              videos: { 
+                count: storageData.storage.byType.videos.count, 
+                mb: storageData.storage.byType.videos.mb 
+              },
+              cvs: { 
+                count: storageData.storage.byType.cvs.count, 
+                mb: storageData.storage.byType.cvs.mb 
+              },
+              images: { 
+                count: storageData.storage.byType.images.count, 
+                mb: storageData.storage.byType.images.mb 
+              },
+              other: { 
+                count: storageData.storage.byType.other.count, 
+                mb: storageData.storage.byType.other.mb 
+              },
+            },
+          },
+          dbEstimatedMB: storageData.database.estimatedMB,
+          totalProfiles: storageData.database.profiles,
+          totalJobs: storageData.database.jobs,
+          totalApplications: storageData.database.applications,
+          totalMessages: storageData.database.messages,
+          activeJobsCount,
+          applicationsThisWeek,
+          emailsThisMonth: (storageData.database.profiles || 0) + (applicationsThisWeek * 4),
+          isRealData: true,
+          timestamp: new Date().toISOString(),
+        };
+      }
 
       setStats(newStats);
       setLastUpdated(new Date());
       storeHistory(newStats);
       setHistory(getStoredHistory());
-    } catch (error) {
-      console.error('Failed to fetch system stats:', error);
+    } catch (err) {
+      console.error('Failed to fetch system stats:', err);
+      setError('Kunde inte hämta data');
     } finally {
       setLoading(false);
     }
@@ -261,13 +260,13 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
   const criticalPath = useMemo(() => {
     if (!stats) return null;
     
-    const storagePercentage = (stats.totalStorageUsed / LIMITS.storage) * 100;
-    const dbPercentage = (stats.estimatedDbSize / LIMITS.database) * 100;
+    const storagePercentage = (stats.storage.totalMB / LIMITS.storage) * 100;
+    const dbPercentage = (stats.dbEstimatedMB / LIMITS.database) * 100;
     const emailPercentage = (stats.emailsThisMonth / LIMITS.emailsPerMonth) * 100;
     
     const limits = [
-      { name: 'Lagring', percentage: storagePercentage, current: stats.totalStorageUsed, max: LIMITS.storage, unit: 'MB' },
-      { name: 'Databas', percentage: dbPercentage, current: stats.estimatedDbSize, max: LIMITS.database, unit: 'MB' },
+      { name: 'Lagring', percentage: storagePercentage, current: stats.storage.totalMB, max: LIMITS.storage, unit: 'MB' },
+      { name: 'Databas', percentage: dbPercentage, current: stats.dbEstimatedMB, max: LIMITS.database, unit: 'MB' },
       { name: 'Email', percentage: emailPercentage, current: stats.emailsThisMonth, max: LIMITS.emailsPerMonth, unit: '' },
     ];
     
@@ -278,8 +277,8 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
   const chartData = useMemo(() => {
     return history.map(h => ({
       date: new Date(h.timestamp).toLocaleDateString('sv-SE', { month: 'short', day: 'numeric' }),
-      storage: h.totalStorageUsed,
-      db: h.estimatedDbSize,
+      storage: h.storage.totalMB,
+      db: h.dbEstimatedMB,
     }));
   }, [history]);
 
@@ -299,8 +298,8 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
     return 'bg-red-500';
   };
 
-  const storagePercentage = stats ? Math.min((stats.totalStorageUsed / LIMITS.storage) * 100, 100) : 0;
-  const dbPercentage = stats ? Math.min((stats.estimatedDbSize / LIMITS.database) * 100, 100) : 0;
+  const storagePercentage = stats ? Math.min((stats.storage.totalMB / LIMITS.storage) * 100, 100) : 0;
+  const dbPercentage = stats ? Math.min((stats.dbEstimatedMB / LIMITS.database) * 100, 100) : 0;
   const emailPercentage = stats ? Math.min((stats.emailsThisMonth / LIMITS.emailsPerMonth) * 100, 100) : 0;
   
   const overallHealth = Math.max(storagePercentage, dbPercentage, emailPercentage);
@@ -331,31 +330,49 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
             </button>
           </div>
           
-          {/* Critical path indicator */}
-          {criticalPath && criticalPath.percentage > 30 && (
-            <div className="mt-2 text-xs">
-              <span className="text-slate-400">Flaskhals: </span>
-              <span className={getHealthColor(criticalPath.percentage)}>
-                {criticalPath.name} ({criticalPath.percentage.toFixed(0)}%)
+          {/* Data source indicator */}
+          <div className="flex items-center gap-2 mt-2">
+            {stats?.isRealData ? (
+              <span className="text-xs text-emerald-400 flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                Riktig data
               </span>
-            </div>
-          )}
+            ) : (
+              <span className="text-xs text-yellow-400">
+                ⚠️ Uppskattningar
+              </span>
+            )}
+            {criticalPath && criticalPath.percentage > 30 && (
+              <>
+                <span className="text-slate-600">•</span>
+                <span className="text-xs text-slate-400">
+                  Flaskhals: <span className={getHealthColor(criticalPath.percentage)}>{criticalPath.name}</span>
+                </span>
+              </>
+            )}
+          </div>
           
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             {lastUpdated ? `Uppdaterad ${lastUpdated.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}` : 'Laddar...'}
           </p>
         </div>
 
         <div className="p-4 space-y-4">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded p-2 text-xs text-red-400">
+              {error}
+            </div>
+          )}
+
           {/* STORAGE - The main concern */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
                 <HardDrive className="h-3 w-3" />
-                Lagring (Kritisk)
+                Lagring
               </p>
               <span className={`text-xs font-medium ${getHealthColor(storagePercentage)}`}>
-                {stats?.totalStorageUsed.toFixed(0) || 0} / {LIMITS.storage} MB
+                {stats?.storage.totalMB.toFixed(1) || 0} / {LIMITS.storage} MB
               </span>
             </div>
             
@@ -373,24 +390,24 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                   <Video className="h-3 w-3" />
                   Video
                 </div>
-                <p className="text-white font-medium">{stats?.estimatedVideoStorage.toFixed(0) || 0} MB</p>
-                <p className="text-slate-500">{stats?.profilesWithVideo || 0} st</p>
+                <p className="text-white font-medium">{stats?.storage.byType.videos.mb.toFixed(1) || 0} MB</p>
+                <p className="text-slate-500">{stats?.storage.byType.videos.count || 0} filer</p>
               </div>
               <div className="bg-slate-800 p-2 rounded">
                 <div className="flex items-center gap-1 text-slate-400 mb-1">
                   <FileUp className="h-3 w-3" />
                   CV:er
                 </div>
-                <p className="text-white font-medium">{stats?.estimatedCvStorage.toFixed(1) || 0} MB</p>
-                <p className="text-slate-500">{stats?.profilesWithCv || 0} st</p>
+                <p className="text-white font-medium">{stats?.storage.byType.cvs.mb.toFixed(1) || 0} MB</p>
+                <p className="text-slate-500">{stats?.storage.byType.cvs.count || 0} filer</p>
               </div>
               <div className="bg-slate-800 p-2 rounded">
                 <div className="flex items-center gap-1 text-slate-400 mb-1">
                   <Users className="h-3 w-3" />
                   Bilder
                 </div>
-                <p className="text-white font-medium">{stats?.estimatedImageStorage.toFixed(1) || 0} MB</p>
-                <p className="text-slate-500">{(stats?.profilesWithImage || 0) + (stats?.companiesWithLogo || 0)} st</p>
+                <p className="text-white font-medium">{stats?.storage.byType.images.mb.toFixed(1) || 0} MB</p>
+                <p className="text-slate-500">{stats?.storage.byType.images.count || 0} filer</p>
               </div>
             </div>
           </div>
@@ -403,7 +420,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                 Databas
               </p>
               <span className={`text-xs font-medium ${getHealthColor(dbPercentage)}`}>
-                ~{stats?.estimatedDbSize.toFixed(1) || 0} / {LIMITS.database} MB
+                ~{stats?.dbEstimatedMB.toFixed(1) || 0} / {LIMITS.database} MB
               </span>
             </div>
             
@@ -525,20 +542,16 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                   </p>
                 )}
                 
-                {/* Smart projections */}
-                {stats && stats.totalStorageUsed > 10 && (
+                {/* Capacity projections */}
+                {stats && stats.storage.totalMB > 0 && (
                   <div className="bg-slate-800 p-3 rounded text-xs space-y-1">
-                    <p className="text-white font-medium">📊 Prognos</p>
-                    {stats.profilesWithVideo > 0 && (
-                      <p className="text-slate-300">
-                        Video-lagring: ~{Math.floor((LIMITS.storage - stats.totalStorageUsed) / AVG_SIZES.profileVideo)} fler videos innan gräns
-                      </p>
-                    )}
-                    {stats.profilesWithCv > 0 && (
-                      <p className="text-slate-300">
-                        CV-kapacitet: ~{Math.floor((LIMITS.storage - stats.totalStorageUsed) / AVG_SIZES.cv)} fler CVs
-                      </p>
-                    )}
+                    <p className="text-white font-medium">📊 Kapacitet kvar</p>
+                    <p className="text-slate-300">
+                      Lagring: {(LIMITS.storage - stats.storage.totalMB).toFixed(0)} MB ({((LIMITS.storage - stats.storage.totalMB) / LIMITS.storage * 100).toFixed(0)}%)
+                    </p>
+                    <p className="text-slate-300">
+                      Databas: {(LIMITS.database - stats.dbEstimatedMB).toFixed(0)} MB ({((LIMITS.database - stats.dbEstimatedMB) / LIMITS.database * 100).toFixed(0)}%)
+                    </p>
                   </div>
                 )}
               </div>
