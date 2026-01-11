@@ -229,6 +229,18 @@ export function useMyCandidatesData() {
     refetchOnWindowFocus: true,
   });
 
+  // PRE-FETCHING: Automatically load next batch in background after each page loads
+  // This makes scrolling feel instant - data is ready before user reaches bottom
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage && data?.pages && data.pages.length > 0) {
+      // Small delay to avoid blocking the main thread
+      const timer = setTimeout(() => {
+        fetchNextPage();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [data?.pages?.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   // Flatten all pages into single array
   const candidates = useMemo(() => {
     return data?.pages.flatMap(page => page.items) || [];
