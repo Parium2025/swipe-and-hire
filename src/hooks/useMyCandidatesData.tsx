@@ -53,7 +53,7 @@ export const STAGE_CONFIG = {
 // Page size for pagination - optimized for performance
 const PAGE_SIZE = 50;
 
-export function useMyCandidatesData() {
+export function useMyCandidatesData(searchQuery: string = '') {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
@@ -68,12 +68,124 @@ export function useMyCandidatesData() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['my-candidates', user?.id],
+    queryKey: ['my-candidates', user?.id, searchQuery],
     initialPageParam: null as string | null,
     queryFn: async ({ pageParam }) => {
       if (!user) return { items: [], nextCursor: null };
 
-      // Build query with cursor-based pagination (much faster than offset for large datasets)
+      // If search query exists, use Full-Text Search RPC for blazing fast filtering
+      if (searchQuery && searchQuery.trim()) {
+        const { data: searchResults, error: searchError } = await supabase.rpc('search_my_candidates', {
+          p_recruiter_id: user.id,
+          p_search_query: searchQuery.trim(),
+          p_limit: PAGE_SIZE,
+          p_cursor_updated_at: pageParam || null,
+        });
+
+        if (searchError) throw searchError;
+        if (!searchResults || searchResults.length === 0) {
+          return { items: [], nextCursor: null };
+        }
+
+        // Get application details for the search results
+        const applicationIds = searchResults.map((r: any) => r.application_id);
+        const applicantIds = [...new Set(searchResults.map((r: any) => r.applicant_id))];
+
+        // Fetch job applications data
+        const { data: applications, error: appError } = await supabase
+          .from('job_applications')
+          .select(`
+            id, applicant_id, first_name, last_name, email, phone, location, bio,
+            cv_url, age, employment_status, work_schedule, availability, custom_answers,
+            status, applied_at, viewed_at, job_postings!inner(title)
+          `)
+          .in('id', applicationIds);
+
+        if (appError) throw appError;
+        const appMap = new Map(applications?.map(app => [app.id, app]) || []);
+
+        // Fetch profile media batch
+        const profileMediaMap: Record<string, any> = {};
+        const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+          p_applicant_ids: applicantIds,
+          p_employer_id: user.id,
+        });
+
+        if (batchMediaData) {
+          batchMediaData.forEach((row: any) => {
+            profileMediaMap[row.applicant_id] = {
+              profile_image_url: row.profile_image_url,
+              video_url: row.video_url,
+              is_profile_video: row.is_profile_video,
+              last_active_at: row.last_active_at || null,
+            };
+          });
+        }
+
+        // Fetch activity data
+        const activityMap: Record<string, any> = {};
+        const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
+          p_applicant_ids: applicantIds,
+          p_employer_id: user.id,
+        });
+
+        if (activityData) {
+          activityData.forEach((item: any) => {
+            activityMap[item.applicant_id] = {
+              latest_application_at: item.latest_application_at,
+              last_active_at: item.last_active_at,
+            };
+          });
+        }
+
+        // Combine data
+        const items: MyCandidateData[] = searchResults.map((mc: any) => {
+          const app = appMap.get(mc.application_id);
+          const media = profileMediaMap[mc.applicant_id] || {};
+          const activity = activityMap[mc.applicant_id] || {};
+
+          return {
+            id: mc.my_candidate_id,
+            recruiter_id: user.id,
+            applicant_id: mc.applicant_id,
+            application_id: mc.application_id,
+            job_id: mc.job_id,
+            stage: mc.stage,
+            notes: mc.notes,
+            rating: mc.rating || 0,
+            created_at: mc.created_at,
+            updated_at: mc.updated_at,
+            first_name: app?.first_name || null,
+            last_name: app?.last_name || null,
+            email: app?.email || null,
+            phone: app?.phone || null,
+            location: app?.location || null,
+            bio: app?.bio || null,
+            cv_url: app?.cv_url || null,
+            age: app?.age || null,
+            employment_status: app?.employment_status || null,
+            work_schedule: app?.work_schedule || null,
+            availability: app?.availability || null,
+            custom_answers: app?.custom_answers || null,
+            status: app?.status || 'pending',
+            job_title: (app?.job_postings as any)?.title || null,
+            profile_image_url: media.profile_image_url || null,
+            video_url: media.video_url || null,
+            is_profile_video: media.is_profile_video || null,
+            applied_at: app?.applied_at || null,
+            viewed_at: app?.viewed_at || null,
+            latest_application_at: activity.latest_application_at || null,
+            last_active_at: (activity.last_active_at ?? media.last_active_at) || null,
+          };
+        });
+
+        const lastItem = searchResults[searchResults.length - 1];
+        const nextCursor = searchResults.length === PAGE_SIZE ? lastItem.updated_at : null;
+
+        return { items, nextCursor };
+      }
+
+      // No search query - use standard query with cursor-based pagination
       let query = supabase
         .from('my_candidates')
         .select('*')
