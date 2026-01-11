@@ -254,10 +254,10 @@ export function CandidatesTable({
 
   // Sort icon helper
   const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1 text-white opacity-60" />;
     return sortDirection === 'asc' 
-      ? <ArrowUp className="h-3 w-3 ml-1" />
-      : <ArrowDown className="h-3 w-3 ml-1" />;
+      ? <ArrowUp className="h-3 w-3 ml-1 text-white" />
+      : <ArrowDown className="h-3 w-3 ml-1 text-white" />;
   };
 
   if (applications.length === 0) {
@@ -301,7 +301,7 @@ export function CandidatesTable({
             {selectedIds.size > 0 && (
               <>
                 <button
-                  className="h-7 px-2.5 rounded-lg text-white hover:bg-white/10 text-xs transition-colors"
+                  className="h-7 px-2.5 rounded-lg text-white hover:bg-white/10 border border-white/10 text-xs transition-colors"
                   onClick={() => setSelectedIds(new Set())}
                 >
                   Avmarkera
@@ -387,7 +387,7 @@ export function CandidatesTable({
                 </span>
               </TableHead>
               <TableHead 
-                className="text-white cursor-pointer hover:bg-white/5 select-none"
+                className="text-white cursor-pointer hover:bg-white/5 select-none whitespace-nowrap"
                 onClick={() => handleSort('last_active_at')}
               >
                 <span className="flex items-center">
