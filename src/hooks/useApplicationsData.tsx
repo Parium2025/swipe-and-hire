@@ -205,11 +205,22 @@ export const useApplicationsData = (searchQuery: string = '') => {
           job_postings!inner(title, occupation)
         `);
 
-      // Apply powerful global search across all relevant fields including job title and occupation
+      // Apply Full-Text Search for blazing fast filtering on 100k+ candidates
+      // Uses GIN-indexed tsvector column - 10-100x faster than ILIKE on large datasets
       if (searchQuery && searchQuery.trim()) {
         const searchTerm = searchQuery.trim();
-        // Search across name, email, phone, location, bio, job title, and job occupation (role)
-        query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%,job_postings.title.ilike.%${searchTerm}%,job_postings.occupation.ilike.%${searchTerm}%`);
+        
+        // Convert search term to tsquery format (prefix matching for partial words)
+        // "Joh" becomes "Joh:*" to match "Johan", "Johansson" etc
+        const tsQueryTerm = searchTerm
+          .split(/\s+/)
+          .filter(Boolean)
+          .map(word => `${word}:*`)
+          .join(' & ');
+        
+        // Use Full-Text Search on the indexed search_vector column
+        // Also search job title/occupation with ILIKE as fallback (they're in a joined table)
+        query = query.or(`search_vector.fts.${tsQueryTerm},job_postings.title.ilike.%${searchTerm}%,job_postings.occupation.ilike.%${searchTerm}%`);
       }
 
       const { data: baseData, error: baseError } = await query

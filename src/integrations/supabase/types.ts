@@ -534,6 +534,7 @@ export type Database = {
           last_name: string | null
           location: string | null
           phone: string | null
+          search_vector: unknown
           status: string
           updated_at: string
           viewed_at: string | null
@@ -557,6 +558,7 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           phone?: string | null
+          search_vector?: unknown
           status?: string
           updated_at?: string
           viewed_at?: string | null
@@ -580,6 +582,7 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           phone?: string | null
+          search_vector?: unknown
           status?: string
           updated_at?: string
           viewed_at?: string | null
