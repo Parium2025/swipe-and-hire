@@ -269,7 +269,7 @@ export function CandidatesTable({
       <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/10 hover:bg-white/5 hover:border-white/50">
+            <TableRow className="border-white/10">
               {selectionMode && (
                 <TableHead className="w-12">
                   <Checkbox
@@ -302,7 +302,8 @@ export function CandidatesTable({
                 <TableRow
                   key={application.id}
                   className={cn(
-                    "group border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-all duration-150 active:bg-white/10",
+                    "group border-white/10 cursor-pointer transition-all duration-150",
+                    !selectionMode && "hover:bg-white/5 active:bg-white/10",
                     isSelected && "bg-white/10"
                   )}
                   onClick={() => handleRowClick(application)}
