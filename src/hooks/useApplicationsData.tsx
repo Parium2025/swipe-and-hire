@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { smartSearchCandidates } from '@/lib/smartSearch';
 
 export interface ApplicationData {
   id: string;
@@ -520,8 +521,17 @@ export const useApplicationsData = (searchQuery: string = '') => {
       });
   }, [applications, jobTitles]);
 
-  // Applications already have job_title from the join
-  const enrichedApplications = applications;
+  // Apply client-side fuzzy matching for typo tolerance on top of FTS results
+  // This runs on already-filtered data from the database, so it's fast
+  const enrichedApplications = useMemo(() => {
+    if (!searchQuery || !searchQuery.trim()) {
+      return applications;
+    }
+    
+    // FTS already filtered at database level - fuzzy matching adds typo tolerance
+    // and re-ranks by relevance (best matches first)
+    return smartSearchCandidates(applications, searchQuery);
+  }, [applications, searchQuery]);
 
   // Memoize stats to prevent unnecessary recalculations
   const stats = useMemo(() => ({
