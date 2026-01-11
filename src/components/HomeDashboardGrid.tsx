@@ -758,10 +758,10 @@ const NotesCard = memo(() => {
             
             {/* Character/word counter */}
             <div className="flex items-center justify-end gap-4 mt-3 pt-3 border-t border-white/10">
-              <span className="text-xs text-white/60">
+              <span className="text-xs text-white">
                 {textStats.charCount} tecken
               </span>
-              <span className="text-xs text-white/60">
+              <span className="text-xs text-white">
                 {textStats.wordCount} ord
               </span>
             </div>
