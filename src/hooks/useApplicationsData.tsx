@@ -226,7 +226,8 @@ export const useApplicationsData = (searchQuery: string = '') => {
       }
 
 
-       // Fetch profile media (image, video, is_profile_video, last_active_at) via secure RPC function for each applicant
+       // Fetch profile media (image, video, is_profile_video, last_active_at) via secure BATCH RPC function
+       // This is a single call instead of N calls - critical for scalability with 10M+ users
        const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
        const profileMediaMap: Record<
          string,
@@ -238,30 +239,34 @@ export const useApplicationsData = (searchQuery: string = '') => {
          }
        > = {};
 
-       // Batch fetch profile media via RPC (security definer function)
-       await Promise.all(
-         applicantIds.map(async (applicantId) => {
-           const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
-             p_applicant_id: applicantId,
-             p_employer_id: user.id,
-           });
-           if (mediaData && mediaData.length > 0) {
-             profileMediaMap[applicantId] = {
-               profile_image_url: mediaData[0].profile_image_url,
-               video_url: mediaData[0].video_url,
-               is_profile_video: mediaData[0].is_profile_video,
-               last_active_at: mediaData[0].last_active_at || null,
-             };
-           } else {
-             profileMediaMap[applicantId] = {
-               profile_image_url: null,
-               video_url: null,
-               is_profile_video: null,
-               last_active_at: null,
-             };
-           }
-         })
-       );
+       // Single batch RPC call for all applicants (scales to millions)
+       const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+         p_applicant_ids: applicantIds,
+         p_employer_id: user.id,
+       });
+
+       if (batchMediaData && Array.isArray(batchMediaData)) {
+         batchMediaData.forEach((row: any) => {
+           profileMediaMap[row.applicant_id] = {
+             profile_image_url: row.profile_image_url,
+             video_url: row.video_url,
+             is_profile_video: row.is_profile_video,
+             last_active_at: row.last_active_at || null,
+           };
+         });
+       }
+
+       // Fill in nulls for any applicants not returned (no permission)
+       applicantIds.forEach((id) => {
+         if (!profileMediaMap[id]) {
+           profileMediaMap[id] = {
+             profile_image_url: null,
+             video_url: null,
+             is_profile_video: null,
+             last_active_at: null,
+           };
+         }
+       });
 
        // Fetch latest activity (SAME source as "Mina kandidater") in one batch
        const activityMap: Record<string, { last_active_at: string | null }> = {};
