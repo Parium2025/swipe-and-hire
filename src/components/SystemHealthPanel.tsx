@@ -1,7 +1,6 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Database, Users, Building2, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Database, Users, Building2, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, FileText, RefreshCw } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ADMIN_EMAIL = 'pariumab@hotmail.com';
@@ -11,14 +10,15 @@ const LIMITS = {
   database: 500, // MB
   storage: 1000, // MB (1GB)
   emailsPerMonth: 3000,
-  organizations: 15,
   candidates: 2000,
+  applications: 5000,
 };
 
 interface SystemStats {
   totalCandidates: number;
   totalOrganizations: number;
   totalJobs: number;
+  totalActiveJobs: number;
   totalApplications: number;
   estimatedDbSize: number;
   estimatedStorageSize: number;
@@ -99,7 +99,63 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
   const [history, setHistory] = useState<SystemStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const isAdmin = useIsSystemAdmin();
+
+  const fetchStats = useCallback(async () => {
+    if (!isAdmin) return;
+    
+    try {
+      const [employersRes, candidatesRes, jobsRes, activeJobsRes, applicationsRes] = await Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'employer'),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'job_seeker'),
+        supabase.from('job_postings').select('id', { count: 'exact', head: true }),
+        supabase.from('job_postings').select('id', { count: 'exact', head: true }).eq('is_active', true),
+        supabase.from('job_applications').select('id', { count: 'exact', head: true }),
+      ]);
+
+      const totalCandidates = candidatesRes.count || 0;
+      const totalOrganizations = employersRes.count || 0;
+      const totalJobs = jobsRes.count || 0;
+      const totalActiveJobs = activeJobsRes.count || 0;
+      const totalApplications = applicationsRes.count || 0;
+
+      // More accurate DB size estimation based on actual data
+      const estimatedDbSize = (
+        (totalCandidates * 0.01) + // profiles with CV data
+        (totalOrganizations * 0.005) +
+        (totalJobs * 0.02) + // job descriptions
+        (totalApplications * 0.015) // applications with answers
+      );
+
+      // Storage: mainly CVs and profile images
+      const estimatedStorageSize = (totalCandidates * 0.8) + (totalOrganizations * 0.2);
+      
+      // Emails: welcome emails + application notifications
+      const emailsThisMonth = Math.floor(totalApplications * 0.5) + totalCandidates + totalOrganizations;
+
+      const newStats: SystemStats = {
+        totalCandidates,
+        totalOrganizations,
+        totalJobs,
+        totalActiveJobs,
+        totalApplications,
+        estimatedDbSize,
+        estimatedStorageSize,
+        emailsThisMonth,
+        timestamp: new Date().toISOString(),
+      };
+
+      setStats(newStats);
+      setLastUpdated(new Date());
+      storeHistory(newStats);
+      setHistory(getStoredHistory());
+    } catch (error) {
+      console.error('Failed to fetch system stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     if (!isAdmin || !isVisible) {
@@ -108,53 +164,13 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
     }
 
     setHistory(getStoredHistory());
-
-    const fetchStats = async () => {
-      try {
-        const [employersRes, candidatesRes, jobsRes, applicationsRes] = await Promise.all([
-          supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'employer'),
-          supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'job_seeker'),
-          supabase.from('job_postings').select('id', { count: 'exact', head: true }),
-          supabase.from('job_applications').select('id', { count: 'exact', head: true }),
-        ]);
-
-        const totalCandidates = candidatesRes.count || 0;
-        const totalOrganizations = employersRes.count || 0;
-        const totalJobs = jobsRes.count || 0;
-        const totalApplications = applicationsRes.count || 0;
-
-        const estimatedDbSize = (
-          (totalCandidates + totalOrganizations) * 0.005 +
-          totalJobs * 0.01 +
-          totalApplications * 0.003
-        );
-
-        const estimatedStorageSize = (totalCandidates + totalOrganizations) * 0.5;
-        const emailsThisMonth = Math.floor(totalApplications * 0.3);
-
-        const newStats: SystemStats = {
-          totalCandidates,
-          totalOrganizations,
-          totalJobs,
-          totalApplications,
-          estimatedDbSize,
-          estimatedStorageSize,
-          emailsThisMonth,
-          timestamp: new Date().toISOString(),
-        };
-
-        setStats(newStats);
-        storeHistory(newStats);
-        setHistory(getStoredHistory());
-      } catch (error) {
-        console.error('Failed to fetch system stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStats();
-  }, [isAdmin, isVisible]);
+
+    // Live updates every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    
+    return () => clearInterval(interval);
+  }, [isAdmin, isVisible, fetchStats]);
 
   const projection = useMemo(() => {
     if (history.length < 2) return null;
@@ -163,20 +179,20 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
     const newest = history[history.length - 1];
     const daysDiff = Math.max(1, (new Date(newest.timestamp).getTime() - new Date(oldest.timestamp).getTime()) / (1000 * 60 * 60 * 24));
     
-    const orgGrowthPerDay = (newest.totalOrganizations - oldest.totalOrganizations) / daysDiff;
+    const appGrowthPerDay = (newest.totalApplications - oldest.totalApplications) / daysDiff;
     const candidateGrowthPerDay = (newest.totalCandidates - oldest.totalCandidates) / daysDiff;
     
-    const daysUntilOrgLimit = orgGrowthPerDay > 0 
-      ? Math.ceil((LIMITS.organizations - newest.totalOrganizations) / orgGrowthPerDay)
+    const daysUntilAppLimit = appGrowthPerDay > 0 
+      ? Math.ceil((LIMITS.applications - newest.totalApplications) / appGrowthPerDay)
       : null;
     const daysUntilCandidateLimit = candidateGrowthPerDay > 0
       ? Math.ceil((LIMITS.candidates - newest.totalCandidates) / candidateGrowthPerDay)
       : null;
     
     return {
-      orgGrowthPerDay: orgGrowthPerDay.toFixed(1),
+      appGrowthPerDay: appGrowthPerDay.toFixed(1),
       candidateGrowthPerDay: candidateGrowthPerDay.toFixed(1),
-      daysUntilOrgLimit,
+      daysUntilAppLimit,
       daysUntilCandidateLimit,
     };
   }, [history]);
@@ -184,23 +200,23 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
   const chartData = useMemo(() => {
     return history.map(h => ({
       date: new Date(h.timestamp).toLocaleDateString('sv-SE', { month: 'short', day: 'numeric' }),
-      orgs: h.totalOrganizations,
+      applications: h.totalApplications,
       candidates: h.totalCandidates,
       jobs: h.totalJobs,
     }));
   }, [history]);
 
-  if (!isVisible || !isAdmin || loading) return null;
+  if (!isVisible || !isAdmin) return null;
 
   const getHealthColor = (percentage: number) => {
-    if (percentage < 50) return 'text-green-500';
-    if (percentage < 75) return 'text-yellow-500';
-    if (percentage < 90) return 'text-orange-500';
-    return 'text-red-500';
+    if (percentage < 50) return 'text-emerald-400';
+    if (percentage < 75) return 'text-yellow-400';
+    if (percentage < 90) return 'text-orange-400';
+    return 'text-red-400';
   };
 
   const getProgressColor = (percentage: number) => {
-    if (percentage < 50) return 'bg-green-500';
+    if (percentage < 50) return 'bg-emerald-500';
     if (percentage < 75) return 'bg-yellow-500';
     if (percentage < 90) return 'bg-orange-500';
     return 'bg-red-500';
@@ -208,143 +224,170 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
 
   const dbPercentage = stats ? Math.min((stats.estimatedDbSize / LIMITS.database) * 100, 100) : 0;
   const storagePercentage = stats ? Math.min((stats.estimatedStorageSize / LIMITS.storage) * 100, 100) : 0;
-  const orgsPercentage = stats ? Math.min((stats.totalOrganizations / LIMITS.organizations) * 100, 100) : 0;
   const candidatesPercentage = stats ? Math.min((stats.totalCandidates / LIMITS.candidates) * 100, 100) : 0;
+  const applicationsPercentage = stats ? Math.min((stats.totalApplications / LIMITS.applications) * 100, 100) : 0;
   const emailPercentage = stats ? Math.min((stats.emailsThisMonth / LIMITS.emailsPerMonth) * 100, 100) : 0;
 
   return (
     <div className="fixed top-16 right-4 z-[9999] w-96 max-h-[80vh] overflow-y-auto">
-      <Card className="shadow-2xl border-2 border-primary/20 bg-background/98 backdrop-blur-sm">
-        <CardHeader className="pb-2">
+      <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl">
+        {/* Header */}
+        <div className="p-4 border-b border-slate-700">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Database className="h-4 w-4" />
-              System Health
-            </CardTitle>
-            <button onClick={onClose} className="p-1 hover:bg-muted rounded">
+            <div className="flex items-center gap-2">
+              <Database className="h-4 w-4 text-white" />
+              <span className="text-sm font-semibold text-white">System Health</span>
+              {loading && <RefreshCw className="h-3 w-3 text-slate-400 animate-spin" />}
+            </div>
+            <button onClick={onClose} className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors">
               <X className="h-4 w-4" />
             </button>
           </div>
-          <p className="text-xs text-muted-foreground">Free Tier Status • Admin Only</p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Organizations */}
+          <p className="text-xs text-slate-400 mt-1">
+            Free Tier • {lastUpdated ? `Uppdaterad ${lastUpdated.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}` : 'Laddar...'}
+          </p>
+        </div>
+
+        <div className="p-4 space-y-4">
+          {/* Key Activity Metrics - What actually matters */}
           <div className="space-y-1">
+            <p className="text-xs text-slate-400 uppercase tracking-wide mb-2">Faktisk Aktivitet</p>
+            
+            {/* Applications - Most important */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="flex items-center gap-1.5 text-white">
+                  <FileText className="h-3 w-3" />
+                  Ansökningar
+                </span>
+                <span className={getHealthColor(applicationsPercentage)}>
+                  {stats?.totalApplications || 0} / {LIMITS.applications}
+                </span>
+              </div>
+              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${getProgressColor(applicationsPercentage)}`}
+                  style={{ width: `${applicationsPercentage}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Active Jobs */}
+            <div className="space-y-1 mt-3">
+              <div className="flex justify-between text-xs">
+                <span className="flex items-center gap-1.5 text-white">
+                  <Briefcase className="h-3 w-3" />
+                  Aktiva jobb
+                </span>
+                <span className="text-emerald-400">
+                  {stats?.totalActiveJobs || 0} av {stats?.totalJobs || 0}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* User Metrics */}
+          <div className="pt-3 border-t border-slate-700 space-y-3">
+            <p className="text-xs text-slate-400 uppercase tracking-wide">Användare</p>
+            
+            {/* Candidates */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="flex items-center gap-1.5 text-white">
+                  <Users className="h-3 w-3" />
+                  Kandidater
+                </span>
+                <span className={getHealthColor(candidatesPercentage)}>
+                  {stats?.totalCandidates || 0} / {LIMITS.candidates}
+                </span>
+              </div>
+              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${getProgressColor(candidatesPercentage)}`}
+                  style={{ width: `${candidatesPercentage}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Organizations - just info, not a limit */}
             <div className="flex justify-between text-xs">
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5 text-white">
                 <Building2 className="h-3 w-3" />
                 Organisationer
               </span>
-              <span className={getHealthColor(orgsPercentage)}>
-                {stats?.totalOrganizations || 0} / {LIMITS.organizations}
-              </span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div 
-                className={`h-full transition-all ${getProgressColor(orgsPercentage)}`}
-                style={{ width: `${orgsPercentage}%` }}
-              />
+              <span className="text-slate-300">{stats?.totalOrganizations || 0}</span>
             </div>
           </div>
 
-          {/* Candidates */}
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                Kandidater
-              </span>
-              <span className={getHealthColor(candidatesPercentage)}>
-                {stats?.totalCandidates || 0} / {LIMITS.candidates}
-              </span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div 
-                className={`h-full transition-all ${getProgressColor(candidatesPercentage)}`}
-                style={{ width: `${candidatesPercentage}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Database */}
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="flex items-center gap-1">
-                <Database className="h-3 w-3" />
-                Databas
-              </span>
-              <span className={getHealthColor(dbPercentage)}>
-                ~{stats?.estimatedDbSize.toFixed(1) || 0} / {LIMITS.database} MB
-              </span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div 
-                className={`h-full transition-all ${getProgressColor(dbPercentage)}`}
-                style={{ width: `${dbPercentage}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Storage */}
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="flex items-center gap-1">
-                <HardDrive className="h-3 w-3" />
-                Lagring
-              </span>
-              <span className={getHealthColor(storagePercentage)}>
-                ~{stats?.estimatedStorageSize.toFixed(0) || 0} / {LIMITS.storage} MB
-              </span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div 
-                className={`h-full transition-all ${getProgressColor(storagePercentage)}`}
-                style={{ width: `${storagePercentage}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Emails */}
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="flex items-center gap-1">
-                <Mail className="h-3 w-3" />
-                Emails/mån
-              </span>
-              <span className={getHealthColor(emailPercentage)}>
-                ~{stats?.emailsThisMonth || 0} / {LIMITS.emailsPerMonth}
-              </span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div 
-                className={`h-full transition-all ${getProgressColor(emailPercentage)}`}
-                style={{ width: `${emailPercentage}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Quick stats */}
-          <div className="pt-2 border-t">
-            <p className="text-xs text-muted-foreground mb-2">Snabbstatistik</p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-muted/50 p-2 rounded">
-                <span className="text-muted-foreground">Jobb</span>
-                <p className="font-semibold">{stats?.totalJobs || 0}</p>
+          {/* Infrastructure */}
+          <div className="pt-3 border-t border-slate-700 space-y-3">
+            <p className="text-xs text-slate-400 uppercase tracking-wide">Infrastruktur</p>
+            
+            {/* Database */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="flex items-center gap-1.5 text-white">
+                  <Database className="h-3 w-3" />
+                  Databas
+                </span>
+                <span className={getHealthColor(dbPercentage)}>
+                  ~{stats?.estimatedDbSize.toFixed(1) || 0} / {LIMITS.database} MB
+                </span>
               </div>
-              <div className="bg-muted/50 p-2 rounded">
-                <span className="text-muted-foreground">Ansökningar</span>
-                <p className="font-semibold">{stats?.totalApplications || 0}</p>
+              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${getProgressColor(dbPercentage)}`}
+                  style={{ width: `${dbPercentage}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Storage */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="flex items-center gap-1.5 text-white">
+                  <HardDrive className="h-3 w-3" />
+                  Lagring
+                </span>
+                <span className={getHealthColor(storagePercentage)}>
+                  ~{stats?.estimatedStorageSize.toFixed(0) || 0} / {LIMITS.storage} MB
+                </span>
+              </div>
+              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${getProgressColor(storagePercentage)}`}
+                  style={{ width: `${storagePercentage}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Emails */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="flex items-center gap-1.5 text-white">
+                  <Mail className="h-3 w-3" />
+                  Emails/mån
+                </span>
+                <span className={getHealthColor(emailPercentage)}>
+                  ~{stats?.emailsThisMonth || 0} / {LIMITS.emailsPerMonth}
+                </span>
+              </div>
+              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${getProgressColor(emailPercentage)}`}
+                  style={{ width: `${emailPercentage}%` }}
+                />
               </div>
             </div>
           </div>
 
           {/* Historical data toggle */}
-          <div className="pt-2 border-t">
+          <div className="pt-3 border-t border-slate-700">
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className="flex items-center justify-between w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center justify-between w-full text-xs text-slate-400 hover:text-white transition-colors"
             >
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 <TrendingUp className="h-3 w-3" />
                 Tillväxtprognos
               </span>
@@ -357,31 +400,48 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                   <div className="h-32 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData}>
-                        <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                        <YAxis tick={{ fontSize: 10 }} width={30} />
+                        <XAxis 
+                          dataKey="date" 
+                          tick={{ fontSize: 10, fill: '#94a3b8' }} 
+                          axisLine={{ stroke: '#475569' }}
+                          tickLine={{ stroke: '#475569' }}
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 10, fill: '#94a3b8' }} 
+                          width={30}
+                          axisLine={{ stroke: '#475569' }}
+                          tickLine={{ stroke: '#475569' }}
+                        />
                         <Tooltip 
-                          contentStyle={{ fontSize: 11, padding: '4px 8px' }}
-                          labelStyle={{ fontSize: 10 }}
+                          contentStyle={{ 
+                            fontSize: 11, 
+                            padding: '8px 12px',
+                            backgroundColor: '#1e293b',
+                            border: '1px solid #475569',
+                            borderRadius: '6px',
+                            color: '#fff'
+                          }}
+                          labelStyle={{ fontSize: 10, color: '#94a3b8' }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="applications" 
+                          stroke="#10b981" 
+                          fill="#10b98133" 
+                          name="Ansökningar"
                         />
                         <Area 
                           type="monotone" 
                           dataKey="candidates" 
-                          stroke="hsl(var(--primary))" 
-                          fill="hsl(var(--primary)/0.2)" 
+                          stroke="#3b82f6" 
+                          fill="#3b82f633" 
                           name="Kandidater"
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="orgs" 
-                          stroke="hsl(var(--secondary))" 
-                          fill="hsl(var(--secondary)/0.2)" 
-                          name="Orgs"
                         />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground text-center py-4">
+                  <p className="text-xs text-slate-500 text-center py-4">
                     Historisk data samlas in dagligen. Kom tillbaka om några dagar.
                   </p>
                 )}
@@ -389,21 +449,21 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                 {projection && (
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Orgs/dag:</span>
-                      <span className="font-medium">+{projection.orgGrowthPerDay}</span>
+                      <span className="text-slate-400">Ansökningar/dag:</span>
+                      <span className="font-medium text-white">+{projection.appGrowthPerDay}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Kandidater/dag:</span>
-                      <span className="font-medium">+{projection.candidateGrowthPerDay}</span>
+                      <span className="text-slate-400">Kandidater/dag:</span>
+                      <span className="font-medium text-white">+{projection.candidateGrowthPerDay}</span>
                     </div>
-                    {projection.daysUntilOrgLimit && projection.daysUntilOrgLimit < 365 && (
-                      <div className="flex justify-between text-orange-500">
-                        <span>Org-gräns nås om:</span>
-                        <span className="font-medium">{projection.daysUntilOrgLimit} dagar</span>
+                    {projection.daysUntilAppLimit && projection.daysUntilAppLimit < 365 && (
+                      <div className="flex justify-between text-orange-400">
+                        <span>Ansökningsgräns nås om:</span>
+                        <span className="font-medium">{projection.daysUntilAppLimit} dagar</span>
                       </div>
                     )}
                     {projection.daysUntilCandidateLimit && projection.daysUntilCandidateLimit < 365 && (
-                      <div className="flex justify-between text-orange-500">
+                      <div className="flex justify-between text-orange-400">
                         <span>Kandidat-gräns nås om:</span>
                         <span className="font-medium">{projection.daysUntilCandidateLimit} dagar</span>
                       </div>
@@ -415,15 +475,15 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           </div>
 
           {/* Upgrade hint */}
-          {(orgsPercentage > 70 || candidatesPercentage > 70 || dbPercentage > 70) && (
-            <div className="pt-2 border-t">
-              <p className="text-xs text-orange-500">
-                ⚠️ Närmar er gränsen - överväg Supabase Pro ($25/mån)
+          {(applicationsPercentage > 70 || candidatesPercentage > 70 || dbPercentage > 70) && (
+            <div className="pt-3 border-t border-slate-700">
+              <p className="text-xs text-orange-400">
+                ⚠️ Närmar er gränsen - överväg uppgradering ($25/mån)
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
