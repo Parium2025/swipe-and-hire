@@ -20,8 +20,10 @@ import {
   Calendar,
   Video,
   Building2,
-  Phone
+  Phone,
+  X
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
 import type { Editor } from '@tiptap/react';
@@ -509,6 +511,8 @@ const NotesCard = memo(() => {
   const queryClient = useQueryClient();
   const hasLocalEditsRef = useRef(false);
   const [notesEditor, setNotesEditor] = useState<Editor | null>(null);
+  const [expandedEditor, setExpandedEditor] = useState<Editor | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const cacheKey = user?.id ? `employer_notes_cache_${user.id}` : 'employer_notes_cache';
 
@@ -592,6 +596,18 @@ const NotesCard = memo(() => {
     setNotesEditor(editor);
   }, []);
 
+  const handleExpandedEditorReady = useCallback((editor: Editor) => {
+    setExpandedEditor(editor);
+  }, []);
+
+  const handleExpand = useCallback(() => {
+    setIsExpanded(true);
+  }, []);
+
+  const handleCloseExpanded = useCallback(() => {
+    setIsExpanded(false);
+  }, []);
+
   // Auto-save with debounce (wait until we know if note exists to avoid duplicates)
   useEffect(() => {
     if (!user?.id || !isFetched) return;
@@ -627,45 +643,96 @@ const NotesCard = memo(() => {
   }, [content, user?.id, isFetched, noteData, queryClient]);
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder1} border-0 shadow-lg h-[200px]`}>
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-      <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
-      
-      <CardContent className="relative p-4 h-full flex flex-col">
-        {/* Header with toolbar integrated */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-white/10">
-              <FileText className="h-4 w-4 text-white" strokeWidth={1.5} />
-            </div>
-            {/* Toolbar in header */}
-            <NotesToolbar editor={notesEditor} />
-          </div>
-          <div className="flex items-center gap-2">
-            {isSaving && (
-              <span className="text-[10px] text-white animate-pulse">Sparar...</span>
-            )}
-            {!isSaving && lastSaved && (
-              <span className="text-[10px] text-white">Sparat</span>
-            )}
-            <span className="text-[10px] text-white uppercase tracking-wider font-medium">
-              ANTECKNINGAR
-            </span>
-          </div>
-        </div>
+    <>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder1} border-0 shadow-lg h-[200px]`}>
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
         
-        {/* Notes editor - toolbar hidden, more space for writing */}
-        <div className="flex-1 min-h-0">
-          <RichNotesEditor
-            value={content}
-            onChange={handleChange}
-            placeholder="Skriv påminnelser och anteckningar..."
-            hideToolbar
-            onEditorReady={handleEditorReady}
-          />
-        </div>
-      </CardContent>
-    </Card>
+        <CardContent className="relative p-4 h-full flex flex-col">
+          {/* Header with toolbar integrated */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-white/10">
+                <FileText className="h-4 w-4 text-white" strokeWidth={1.5} />
+              </div>
+              {/* Toolbar in header */}
+              <NotesToolbar editor={notesEditor} onExpand={handleExpand} />
+            </div>
+            <div className="flex items-center gap-2">
+              {isSaving && (
+                <span className="text-[10px] text-white animate-pulse">Sparar...</span>
+              )}
+              {!isSaving && lastSaved && (
+                <span className="text-[10px] text-white">Sparat</span>
+              )}
+              <span className="text-[10px] text-white uppercase tracking-wider font-medium">
+                ANTECKNINGAR
+              </span>
+            </div>
+          </div>
+          
+          {/* Notes editor - toolbar hidden, more space for writing */}
+          <div className="flex-1 min-h-0">
+            <RichNotesEditor
+              value={content}
+              onChange={handleChange}
+              placeholder="Skriv påminnelser och anteckningar..."
+              hideToolbar
+              onEditorReady={handleEditorReady}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Fullscreen Notes Dialog */}
+      <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
+        <DialogContent className="max-w-4xl h-[80vh] bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 border-0 p-0 overflow-hidden">
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+          <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+          
+          <div className="relative flex flex-col h-full p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-white/10">
+                  <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
+                </div>
+                <h2 className="text-xl font-semibold text-white">Anteckningar</h2>
+                {/* Toolbar */}
+                <NotesToolbar editor={expandedEditor} className="ml-4" />
+              </div>
+              <div className="flex items-center gap-3">
+                {isSaving && (
+                  <span className="text-xs text-white/80 animate-pulse">Sparar...</span>
+                )}
+                {!isSaving && lastSaved && (
+                  <span className="text-xs text-white/80">Sparat</span>
+                )}
+                <button
+                  onClick={handleCloseExpanded}
+                  className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                >
+                  <X className="h-5 w-5 text-white" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Editor */}
+            <div className="flex-1 min-h-0">
+              <RichNotesEditor
+                value={content}
+                onChange={handleChange}
+                placeholder="Skriv påminnelser och anteckningar..."
+                hideToolbar
+                onEditorReady={handleExpandedEditorReady}
+                className="h-full [&_.ProseMirror]:min-h-[400px]"
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 });
 

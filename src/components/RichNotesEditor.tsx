@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState, forwardRef, useImperativeHandle } from 'react';
-import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo, Heading1, Heading2 } from 'lucide-react';
+import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo, Heading1, Heading2, Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
@@ -68,9 +68,10 @@ ToolbarButton.displayName = 'ToolbarButton';
 interface NotesToolbarProps {
   editor: Editor | null;
   className?: string;
+  onExpand?: () => void;
 }
 
-export const NotesToolbar = memo(({ editor, className }: NotesToolbarProps) => {
+export const NotesToolbar = memo(({ editor, className, onExpand }: NotesToolbarProps) => {
   const handleBold = useCallback(() => {
     editor?.chain().focus().toggleBold().run();
   }, [editor]);
@@ -168,6 +169,16 @@ export const NotesToolbar = memo(({ editor, className }: NotesToolbarProps) => {
         title="Gör om" 
         disabled={!editor.can().redo()}
       />
+      {onExpand && (
+        <>
+          <div className="w-px h-3 bg-white/20 mx-0.5" />
+          <ToolbarButton 
+            onClick={onExpand} 
+            icon={Maximize2} 
+            title="Expandera" 
+          />
+        </>
+      )}
     </div>
   );
 });
