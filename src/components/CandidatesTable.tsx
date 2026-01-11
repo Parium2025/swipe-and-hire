@@ -223,23 +223,19 @@ export function CandidatesTable({
           <div className="flex items-center gap-1.5">
             {selectedIds.size > 0 && (
               <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-white/60 hover:text-white hover:bg-white/10 text-xs"
+                <button
+                  className="h-7 px-2.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 text-xs transition-colors"
                   onClick={() => setSelectedIds(new Set())}
                 >
                   Avmarkera
-                </Button>
+                </button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-white/80 hover:text-white hover:bg-white/10 border border-white/10 text-xs"
+                    <button
+                      className="h-7 px-2.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 border border-white/10 text-xs transition-colors"
                     >
                       Åtgärder
-                    </Button>
+                    </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-[hsl(222,47%,11%)] border-white/10 min-w-[180px]">
                     <DropdownMenuItem className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
@@ -254,14 +250,12 @@ export function CandidatesTable({
                 </DropdownMenu>
               </>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 text-white/60 hover:text-white hover:bg-white/10"
+            <button
+              className="h-7 w-7 flex items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
               onClick={clearSelection}
             >
               <X className="h-3.5 w-3.5" />
-            </Button>
+            </button>
           </div>
         </div>
       )}
