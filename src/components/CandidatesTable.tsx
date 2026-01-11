@@ -9,7 +9,7 @@ import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare } from 'lucide-react';
+import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { Button } from '@/components/ui/button';
@@ -69,6 +69,8 @@ interface CandidatesTableProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
+  selectionMode?: boolean;
+  onSelectionModeChange?: (mode: boolean) => void;
 }
 
 const statusConfig = {
@@ -83,7 +85,9 @@ export function CandidatesTable({
   onUpdate, 
   onLoadMore,
   hasMore = false,
-  isLoadingMore = false 
+  isLoadingMore = false,
+  selectionMode = false,
+  onSelectionModeChange,
 }: CandidatesTableProps) {
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -94,6 +98,13 @@ export function CandidatesTable({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const allSelected = applications.length > 0 && selectedIds.size === applications.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < applications.length;
+
+  // Clear selection when selection mode is turned off
+  useEffect(() => {
+    if (!selectionMode) {
+      setSelectedIds(new Set());
+    }
+  }, [selectionMode]);
 
   // Team candidate info for colleague indicators
   const applicationIds = useMemo(() => applications.map(a => a.id), [applications]);
@@ -153,7 +164,8 @@ export function CandidatesTable({
 
   const clearSelection = useCallback(() => {
     setSelectedIds(new Set());
-  }, []);
+    onSelectionModeChange?.(false);
+  }, [onSelectionModeChange]);
 
   // Get average rating for an application from team candidates
   const getTeamInfo = useCallback((appId: string) => {
@@ -199,45 +211,59 @@ export function CandidatesTable({
 
   return (
     <>
-      {/* Bulk actions bar */}
-      {selectedIds.size > 0 && (
-        <div className="mb-4 p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-between">
+      {/* Bulk actions bar - only visible when in selection mode */}
+      {selectionMode && (
+        <div className="mb-4 p-3 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-sm text-white font-medium">
-              {selectedIds.size} kandidat{selectedIds.size !== 1 ? 'er' : ''} markerad{selectedIds.size !== 1 ? 'e' : ''}
+            <span className="text-sm text-white/80 font-medium">
+              {selectedIds.size > 0 
+                ? `${selectedIds.size} kandidat${selectedIds.size !== 1 ? 'er' : ''} markerad${selectedIds.size !== 1 ? 'e' : ''}`
+                : 'Välj kandidater i listan'
+              }
             </span>
           </div>
           <div className="flex items-center gap-2">
+            {selectedIds.size > 0 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/60 hover:text-white hover:bg-white/10 text-xs"
+                  onClick={() => setSelectedIds(new Set())}
+                >
+                  Avmarkera
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white/80 hover:text-white hover:bg-white/10 border border-white/10"
+                    >
+                      Åtgärder
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-md border-white/10">
+                    <DropdownMenuItem className="text-white cursor-pointer hover:bg-white/10">
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Lägg till i Mina kandidater
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive cursor-pointer hover:bg-white/10">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Ta bort
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
             <Button
               variant="ghost"
               size="sm"
-              className="text-white/70 hover:text-white hover:bg-white/10"
+              className="text-white/60 hover:text-white hover:bg-white/10"
               onClick={clearSelection}
             >
-              Avmarkera alla
+              <X className="h-4 w-4" />
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-white/20 text-white hover:bg-white/10"
-                >
-                  <MoreHorizontal className="h-4 w-4 mr-2" />
-                  Åtgärder
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border-white/10">
-                <DropdownMenuItem className="text-white cursor-pointer">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Lägg till i Mina kandidater
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-destructive cursor-pointer">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Ta bort
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       )}
@@ -246,18 +272,20 @@ export function CandidatesTable({
         <Table>
           <TableHeader>
             <TableRow className="border-white/10 hover:bg-white/5 hover:border-white/50">
-              <TableHead className="w-12">
-                <Checkbox
-                  checked={allSelected}
-                  ref={(el) => {
-                    if (el) {
-                      (el as any).indeterminate = someSelected;
-                    }
-                  }}
-                  onCheckedChange={toggleSelectAll}
-                  className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-background"
-                />
-              </TableHead>
+              {selectionMode && (
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) {
+                        (el as any).indeterminate = someSelected;
+                      }
+                    }}
+                    onCheckedChange={toggleSelectAll}
+                    className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-background"
+                  />
+                </TableHead>
+              )}
               <TableHead className="text-white">Kandidat</TableHead>
               <TableHead className="text-white">Betyg</TableHead>
               <TableHead className="text-white">Tjänst</TableHead>
@@ -282,14 +310,16 @@ export function CandidatesTable({
                   )}
                   onClick={() => handleRowClick(application)}
                 >
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => {}}
-                      onClick={(e) => toggleSelect(application.id, e)}
-                      className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-background"
-                    />
-                  </TableCell>
+                  {selectionMode && (
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => {}}
+                        onClick={(e) => toggleSelect(application.id, e)}
+                        className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-background"
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <CandidateAvatar

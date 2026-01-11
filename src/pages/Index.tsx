@@ -36,7 +36,7 @@ import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRightLeft, Search, Loader2 } from 'lucide-react';
+import { ArrowRightLeft, Search, Loader2, CheckSquare, X } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import KeepAlive from '@/components/KeepAlive';
 import { useApplicationsData } from '@/hooks/useApplicationsData';
@@ -50,6 +50,7 @@ import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [questionFilters, setQuestionFilters] = useState<QuestionFilterValue[]>([]);
+  const [selectionMode, setSelectionMode] = useState(false);
 
   const { 
     applications, 
@@ -156,6 +157,28 @@ const CandidatesContent = () => {
               value={questionFilters}
               onChange={setQuestionFilters}
             />
+            <button
+              onClick={() => setSelectionMode(prev => !prev)}
+              className={`
+                flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                ${selectionMode 
+                  ? 'bg-white/20 text-white' 
+                  : 'text-white hover:bg-white/10'
+                }
+              `}
+            >
+              {selectionMode ? (
+                <>
+                  <X className="h-4 w-4" />
+                  <span>Avsluta urval</span>
+                </>
+              ) : (
+                <>
+                  <CheckSquare className="h-4 w-4" />
+                  <span>Välj kandidater</span>
+                </>
+              )}
+            </button>
           </div>
         )}
 
@@ -213,6 +236,8 @@ const CandidatesContent = () => {
             onLoadMore={fetchNextPage}
             hasMore={hasNextPage && questionFilters.length === 0}
             isLoadingMore={isFetchingNextPage}
+            selectionMode={selectionMode}
+            onSelectionModeChange={setSelectionMode}
           />
         )}
       </div>
