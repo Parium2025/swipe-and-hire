@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { MyCandidateData } from '@/hooks/useMyCandidatesData';
+import { MyCandidateData, useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -505,9 +505,43 @@ const MyCandidates = () => {
     setStageCount(activeStageOrder.length);
   }, [activeStageOrder.length, setStageCount]);
   
-  // Local state for candidates - like JobDetails pattern
+  // Search state with debounced version for FTS
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  
+  // Debounce search query for FTS (300ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+  
+  // Use the hook with debounced search for FTS
+  const {
+    candidates: hookCandidates,
+    isLoading: hookLoading,
+    refetch: refetchCandidates,
+    moveCandidate: hookMoveCandidate,
+    removeCandidate: hookRemoveCandidate,
+    updateNotes: hookUpdateNotes,
+    updateRating: hookUpdateRating,
+  } = useMyCandidatesData(debouncedSearchQuery);
+  
+  // Sync candidates from hook to local state (needed for optimistic updates)
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    setCandidates(hookCandidates);
+    setIsLoading(hookLoading);
+  }, [hookCandidates, hookLoading]);
+  
+  // Sync candidates from hook
+  useEffect(() => {
+    setCandidates(hookCandidates);
+    setIsLoading(hookLoading);
+  }, [hookCandidates, hookLoading]);
   
   // Active candidates to display
   const displayedCandidates = isViewingColleague ? colleagueCandidates : candidates;
@@ -520,8 +554,7 @@ const MyCandidates = () => {
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [candidateToRemove, setCandidateToRemove] = useState<MyCandidateData | null>(null);
   
-  // Search and filter state
-  const [searchQuery, setSearchQuery] = useState('');
+  // Filter state
   const [activeStageFilter, setActiveStageFilter] = useState<string | 'all'>('all');
   
   // Selection mode state
@@ -645,160 +678,9 @@ const MyCandidates = () => {
     }
   }, [viewingColleagueId, fetchColleagueCandidates]);
 
-  // Fetch candidates data
-  const fetchCandidates = useCallback(async () => {
-    if (!user) return;
-    
-    try {
-      // Fetch my_candidates with joined application data
-      const { data: myCandidates, error: mcError } = await supabase
-        .from('my_candidates')
-        .select('*')
-        .eq('recruiter_id', user.id)
-        .order('updated_at', { ascending: false });
-
-      if (mcError) throw mcError;
-      if (!myCandidates || myCandidates.length === 0) {
-        setCandidates([]);
-        return;
-      }
-
-      // Get application IDs to fetch related data
-      const applicationIds = myCandidates.map(mc => mc.application_id);
-
-      // Fetch job applications data
-      const { data: applications, error: appError } = await supabase
-        .from('job_applications')
-        .select(`
-          id,
-          applicant_id,
-          first_name,
-          last_name,
-          email,
-          phone,
-          location,
-          bio,
-          cv_url,
-          age,
-          employment_status,
-          work_schedule,
-          availability,
-          custom_answers,
-          status,
-          applied_at,
-          viewed_at,
-          job_postings!inner(title)
-        `)
-        .in('id', applicationIds);
-
-      if (appError) throw appError;
-
-      // Create a map for quick lookup
-      const appMap = new Map(applications?.map(app => [app.id, app]) || []);
-
-      // Fetch profile media for all applicants in ONE batch call (scales to millions)
-      const applicantIds = [...new Set(myCandidates.map(mc => mc.applicant_id))];
-      const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }> = {};
-
-      // Single batch RPC call instead of N individual calls
-      const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
-        p_applicant_ids: applicantIds,
-        p_employer_id: user.id,
-      });
-
-      if (batchMediaData && Array.isArray(batchMediaData)) {
-        batchMediaData.forEach((row: any) => {
-          profileMediaMap[row.applicant_id] = {
-            profile_image_url: row.profile_image_url,
-            video_url: row.video_url,
-            is_profile_video: row.is_profile_video,
-          };
-        });
-      }
-
-      // Fill in nulls for any applicants not returned
-      applicantIds.forEach((id) => {
-        if (!profileMediaMap[id]) {
-          profileMediaMap[id] = {
-            profile_image_url: null,
-            video_url: null,
-            is_profile_video: null,
-          };
-        }
-      });
-
-      // Fetch latest activity data (latest_application_at across org + last_active_at)
-      const activityMap: Record<string, { latest_application_at: string | null; last_active_at: string | null }> = {};
-      const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
-        p_applicant_ids: applicantIds,
-        p_employer_id: user.id,
-      });
-
-      if (activityData) {
-        activityData.forEach((item: any) => {
-          activityMap[item.applicant_id] = {
-            latest_application_at: item.latest_application_at,
-            last_active_at: item.last_active_at,
-          };
-        });
-      }
-
-      // Combine the data
-      const result: MyCandidateData[] = myCandidates.map(mc => {
-        const app = appMap.get(mc.application_id);
-        const media = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null };
-        const activity = activityMap[mc.applicant_id] || { latest_application_at: null, last_active_at: null };
-
-        return {
-          id: mc.id,
-          recruiter_id: mc.recruiter_id,
-          applicant_id: mc.applicant_id,
-          application_id: mc.application_id,
-          job_id: mc.job_id,
-          stage: mc.stage as CandidateStage,
-          notes: mc.notes,
-          rating: mc.rating || 0,
-          created_at: mc.created_at,
-          updated_at: mc.updated_at,
-          first_name: app?.first_name || null,
-          last_name: app?.last_name || null,
-          email: app?.email || null,
-          phone: app?.phone || null,
-          location: app?.location || null,
-          bio: app?.bio || null,
-          cv_url: app?.cv_url || null,
-          age: app?.age || null,
-          employment_status: app?.employment_status || null,
-          work_schedule: app?.work_schedule || null,
-          availability: app?.availability || null,
-          custom_answers: app?.custom_answers || null,
-          status: app?.status || 'pending',
-          job_title: (app?.job_postings as any)?.title || null,
-          profile_image_url: media.profile_image_url,
-          video_url: media.video_url,
-          is_profile_video: media.is_profile_video,
-          applied_at: app?.applied_at || null,
-          viewed_at: app?.viewed_at || null,
-          latest_application_at: activity.latest_application_at,
-          last_active_at: activity.last_active_at,
-        };
-      });
-
-      setCandidates(result);
-    } catch (error) {
-      console.error('Error fetching candidates:', error);
-      toast.error('Kunde inte ladda kandidater');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  // Initial fetch
-  useEffect(() => {
-    if (user) {
-      fetchCandidates();
-    }
-  }, [user, fetchCandidates]);
+  // fetchCandidates is now handled by useMyCandidatesData hook
+  // Just create a reference for compatibility
+  const fetchCandidates = refetchCandidates;
 
   // Förladda CV-sammanfattningar i bakgrunden
   useCvSummaryPreloader(displayedCandidates);
@@ -834,15 +716,22 @@ const MyCandidates = () => {
     };
   }, [displayedCandidates, candidatesByStage, activeStageOrder]);
 
-  // Filter candidates based on search query and stage filter using smart search
+  // Filter candidates based on search query and stage filter
+  // FTS already filters at database level (debouncedSearchQuery), so we only use smartSearch
+  // for instant local filtering while typing (before debounce triggers)
   const filteredCandidatesByStage = useMemo(() => {
     const query = searchQuery.trim();
+    const debouncedQuery = debouncedSearchQuery.trim();
     
     const filterCandidates = (stageKey: string) => {
       const stageCandidates = candidatesByStage[stageKey] || [];
       if (!query) return stageCandidates;
       
-      // Use smart search with fuzzy matching, multi-field search, and ranking
+      // If FTS has already filtered with same query, no need for local filtering
+      if (query === debouncedQuery) return stageCandidates;
+      
+      // Use smart search for instant local filtering while user types
+      // This gives responsive feedback before FTS kicks in (300ms debounce)
       return smartSearchCandidates(stageCandidates, query);
     };
 
@@ -851,7 +740,7 @@ const MyCandidates = () => {
       filtered[stage] = filterCandidates(stage);
     });
     return filtered;
-  }, [candidatesByStage, searchQuery, activeStageOrder]);
+  }, [candidatesByStage, searchQuery, debouncedSearchQuery, activeStageOrder]);
 
   // Get total filtered count
   const filteredTotal = useMemo(() => {

@@ -1623,6 +1623,25 @@ export type Database = {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean
       }
+      search_my_candidates: {
+        Args: {
+          p_cursor_updated_at?: string
+          p_limit?: number
+          p_recruiter_id: string
+          p_search_query: string
+        }
+        Returns: {
+          applicant_id: string
+          application_id: string
+          created_at: string
+          job_id: string
+          my_candidate_id: string
+          notes: string
+          rating: number
+          stage: string
+          updated_at: string
+        }[]
+      }
       try_uuid: { Args: { p_text: string }; Returns: string }
     }
     Enums: {
