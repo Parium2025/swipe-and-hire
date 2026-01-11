@@ -382,13 +382,13 @@ export function CandidatesTable({
                   <TableCell className="text-muted-foreground">
                     {application.job_title || 'Okänd tjänst'}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground whitespace-nowrap">
                     {formatTimeAgo(application.applied_at)}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground whitespace-nowrap">
                     {application.last_active_at ? (
                       <span className="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5" />
+                        <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                         {formatTimeAgo(application.last_active_at)}
                       </span>
                     ) : (
