@@ -241,12 +241,12 @@ export function CandidatesTable({
                       Åtgärder
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-md border-white/10">
-                    <DropdownMenuItem className="text-white cursor-pointer hover:bg-white/10">
+                  <DropdownMenuContent align="end" className="bg-[hsl(222,47%,11%)] border-white/10 min-w-[180px]">
+                    <DropdownMenuItem className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
                       <UserPlus className="h-4 w-4 mr-2" />
                       Lägg till i Mina kandidater
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive cursor-pointer hover:bg-white/10">
+                    <DropdownMenuItem className="text-red-400 cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-red-400">
                       <Trash2 className="h-4 w-4 mr-2" />
                       Ta bort
                     </DropdownMenuItem>
