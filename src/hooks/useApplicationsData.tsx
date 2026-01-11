@@ -351,6 +351,18 @@ export const useApplicationsData = (searchQuery: string = '') => {
     },
   });
 
+  // PRE-FETCHING: Automatically load next batch in background after each page loads
+  // This makes scrolling feel instant - data is ready before user reaches bottom
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage && data?.pages && data.pages.length > 0) {
+      // Small delay to avoid blocking the main thread
+      const timer = setTimeout(() => {
+        fetchNextPage();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [data?.pages?.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   // Flatten all pages
   const applications = data?.pages.flatMap(page => page.items) || [];
 
