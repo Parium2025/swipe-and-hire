@@ -153,32 +153,34 @@ const CandidatesContent = () => {
                 className="pl-10 bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white transition-colors"
               />
             </div>
-            <QuestionFilter 
-              value={questionFilters}
-              onChange={setQuestionFilters}
-            />
-            <button
-              onClick={() => setSelectionMode(prev => !prev)}
-              className={`
-                flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                ${selectionMode 
-                  ? 'bg-white/20 text-white' 
-                  : 'text-white hover:bg-white/10'
-                }
-              `}
-            >
-              {selectionMode ? (
-                <>
-                  <X className="h-4 w-4" />
-                  <span>Avsluta urval</span>
-                </>
-              ) : (
-                <>
-                  <CheckSquare className="h-4 w-4" />
-                  <span>Välj kandidater</span>
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-1">
+              <QuestionFilter 
+                value={questionFilters}
+                onChange={setQuestionFilters}
+              />
+              <button
+                onClick={() => setSelectionMode(prev => !prev)}
+                className={`
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                  ${selectionMode 
+                    ? 'bg-white/20 text-white' 
+                    : 'text-white hover:bg-white/10'
+                  }
+                `}
+              >
+                {selectionMode ? (
+                  <>
+                    <X className="h-4 w-4" />
+                    <span>Avsluta urval</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckSquare className="h-4 w-4" />
+                    <span>Välj kandidater</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         )}
 
