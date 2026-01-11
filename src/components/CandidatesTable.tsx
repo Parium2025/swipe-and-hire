@@ -17,6 +17,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 type SortField = 'name' | 'rating' | 'applied_at' | 'last_active_at' | null;
 type SortDirection = 'asc' | 'desc';
@@ -97,6 +101,8 @@ export function CandidatesTable({
   const [dialogOpen, setDialogOpen] = useState(false);
   const { isInMyCandidates, addCandidate, addCandidates } = useMyCandidatesData();
   const { teamMembers, hasTeam } = useTeamMembers();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   // Bulk selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -131,6 +137,28 @@ export function CandidatesTable({
       cv_url: app.cv_url,
     }))
   );
+
+  // Prefetch candidate data on hover for instant profile opening
+  const handlePrefetchCandidate = useCallback((application: ApplicationData) => {
+    if (!user || !application.applicant_id) return;
+    
+    // Prefetch activities
+    prefetchCandidateActivities(queryClient, application.applicant_id, user.id);
+    
+    // Prefetch persistent notes
+    queryClient.prefetchQuery({
+      queryKey: ['candidate-notes', application.applicant_id],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from('candidate_notes')
+          .select('*')
+          .eq('applicant_id', application.applicant_id)
+          .is('job_id', null);
+        return data || [];
+      },
+      staleTime: 30 * 1000,
+    });
+  }, [user, queryClient]);
 
   // Derive selected application from latest list so refetch updates the dialog content
   const selectedApplication = useMemo(() => {
@@ -416,6 +444,7 @@ export function CandidatesTable({
                     isSelected && "bg-white/10"
                   )}
                   onClick={() => handleRowClick(application)}
+                  onMouseEnter={() => handlePrefetchCandidate(application)}
                 >
                   {selectionMode && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
