@@ -213,22 +213,20 @@ export function CandidatesTable({
     <>
       {/* Bulk actions bar - only visible when in selection mode */}
       {selectionMode && (
-        <div className="mb-4 p-3 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-white/80 font-medium">
-              {selectedIds.size > 0 
-                ? `${selectedIds.size} kandidat${selectedIds.size !== 1 ? 'er' : ''} markerad${selectedIds.size !== 1 ? 'e' : ''}`
-                : 'Välj kandidater i listan'
-              }
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
+        <div className="mb-3 px-3 py-2 rounded-lg bg-white/[0.03] backdrop-blur-md border border-white/10 flex items-center justify-between">
+          <span className="text-xs text-white/70">
+            {selectedIds.size > 0 
+              ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
+              : 'Välj kandidater'
+            }
+          </span>
+          <div className="flex items-center gap-1.5">
             {selectedIds.size > 0 && (
               <>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-white/60 hover:text-white hover:bg-white/10 text-xs"
+                  className="h-7 px-2 text-white/60 hover:text-white hover:bg-white/10 text-xs"
                   onClick={() => setSelectedIds(new Set())}
                 >
                   Avmarkera
@@ -238,7 +236,7 @@ export function CandidatesTable({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-white/80 hover:text-white hover:bg-white/10 border border-white/10"
+                      className="h-7 px-2 text-white/80 hover:text-white hover:bg-white/10 border border-white/10 text-xs"
                     >
                       Åtgärder
                     </Button>
@@ -259,10 +257,10 @@ export function CandidatesTable({
             <Button
               variant="ghost"
               size="sm"
-              className="text-white/60 hover:text-white hover:bg-white/10"
+              className="h-7 w-7 p-0 text-white/60 hover:text-white hover:bg-white/10"
               onClick={clearSelection}
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
@@ -282,7 +280,6 @@ export function CandidatesTable({
                       }
                     }}
                     onCheckedChange={toggleSelectAll}
-                    className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-background"
                   />
                 </TableHead>
               )}
@@ -316,7 +313,6 @@ export function CandidatesTable({
                         checked={isSelected}
                         onCheckedChange={() => {}}
                         onClick={(e) => toggleSelect(application.id, e)}
-                        className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-background"
                       />
                     </TableCell>
                   )}
