@@ -39,8 +39,13 @@ const ToolbarButton = memo(({
       <TooltipTrigger asChild>
         <button
           type="button"
+          tabIndex={-1}
           onMouseDown={(e) => {
             e.preventDefault();
+          }}
+          onFocus={(e) => {
+            // Prevent focus from triggering tooltip on dialog open
+            e.currentTarget.blur();
           }}
           onClick={onClick}
           disabled={disabled}
