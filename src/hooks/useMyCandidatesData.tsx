@@ -103,32 +103,38 @@ export function useMyCandidatesData() {
       // Create a map for quick lookup
       const appMap = new Map(applications?.map(app => [app.id, app]) || []);
 
-      // Fetch profile media for each applicant
+      // Fetch profile media for all applicants in ONE batch call (scales to millions)
       const applicantIds = [...new Set(myCandidates.map(mc => mc.applicant_id))];
-      const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }> = {};
+      const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; last_active_at: string | null }> = {};
 
-      await Promise.all(
-        applicantIds.map(async (applicantId) => {
-          const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
-            p_applicant_id: applicantId,
-            p_employer_id: user.id,
-          });
+      // Single batch RPC call instead of N individual calls - critical for 10M+ users
+      const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+        p_applicant_ids: applicantIds,
+        p_employer_id: user.id,
+      });
 
-          if (mediaData && mediaData.length > 0) {
-            profileMediaMap[applicantId] = {
-              profile_image_url: mediaData[0].profile_image_url,
-              video_url: mediaData[0].video_url,
-              is_profile_video: mediaData[0].is_profile_video,
-            };
-          } else {
-            profileMediaMap[applicantId] = {
-              profile_image_url: null,
-              video_url: null,
-              is_profile_video: null,
-            };
-          }
-        })
-      );
+      if (batchMediaData && Array.isArray(batchMediaData)) {
+        batchMediaData.forEach((row: any) => {
+          profileMediaMap[row.applicant_id] = {
+            profile_image_url: row.profile_image_url,
+            video_url: row.video_url,
+            is_profile_video: row.is_profile_video,
+            last_active_at: row.last_active_at || null,
+          };
+        });
+      }
+
+      // Fill in nulls for any applicants not returned
+      applicantIds.forEach((id) => {
+        if (!profileMediaMap[id]) {
+          profileMediaMap[id] = {
+            profile_image_url: null,
+            video_url: null,
+            is_profile_video: null,
+            last_active_at: null,
+          };
+        }
+      });
 
       // Fetch latest activity data (latest_application_at across org + last_active_at)
       const activityMap: Record<string, { latest_application_at: string | null; last_active_at: string | null }> = {};
@@ -149,7 +155,7 @@ export function useMyCandidatesData() {
       // Combine the data
       const result: MyCandidateData[] = myCandidates.map(mc => {
         const app = appMap.get(mc.application_id);
-        const media = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null };
+        const media = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null };
         const activity = activityMap[mc.applicant_id] || { latest_application_at: null, last_active_at: null };
 
         return {
@@ -183,14 +189,16 @@ export function useMyCandidatesData() {
           applied_at: app?.applied_at || null,
           viewed_at: app?.viewed_at || null,
           latest_application_at: activity.latest_application_at,
-          last_active_at: activity.last_active_at,
+          last_active_at: activity.last_active_at ?? media.last_active_at,
         };
       });
 
       return result;
     },
     enabled: !!user,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0, // Always fresh data for real-time experience
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   // Real-time subscription for my_candidates changes (all users for team sync)

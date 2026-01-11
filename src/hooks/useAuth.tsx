@@ -1509,18 +1509,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           const applicantIds = [...new Set(apps.map((a: any) => a.applicant_id))].slice(0, 20);
 
-          const media = await Promise.all(
-            applicantIds.map(async (applicantId) => {
-              const { data } = await supabase.rpc('get_applicant_profile_media', {
-                p_applicant_id: applicantId,
-                p_employer_id: user.id,
-              });
-              const storagePath = data?.[0]?.profile_image_url as string | undefined;
-              return storagePath && storagePath.trim() ? storagePath : null;
-            })
-          );
+          // Single batch RPC call instead of N individual calls (scales to millions)
+          const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+            p_applicant_ids: applicantIds,
+            p_employer_id: user.id,
+          });
 
-          const paths = media.filter((p): p is string => typeof p === 'string' && p.trim() !== '');
+          const paths = (batchMediaData || [])
+            .map((row: any) => row.profile_image_url)
+            .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '');
           if (paths.length === 0) return;
 
           await Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {})));
