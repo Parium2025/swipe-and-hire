@@ -537,15 +537,11 @@ const MyCandidates = () => {
   } = useMyCandidatesData(debouncedSearchQuery);
   
   // Sync candidates from hook to local state (needed for optimistic updates)
-  const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Initialize with hook values to prevent initial flicker
+  const [candidates, setCandidates] = useState<MyCandidateData[]>(() => hookCandidates);
+  const [isLoading, setIsLoading] = useState(() => hookLoading);
   
-  useEffect(() => {
-    setCandidates(hookCandidates);
-    setIsLoading(hookLoading);
-  }, [hookCandidates, hookLoading]);
-  
-  // Sync candidates from hook
+  // Sync candidates from hook when they change
   useEffect(() => {
     setCandidates(hookCandidates);
     setIsLoading(hookLoading);
