@@ -118,6 +118,16 @@ const readSnapshot = (userId: string): ApplicationData[] => {
       return [];
     }
 
+    // CRITICAL: Invalidate snapshots where last_active_at exists but is null for ALL candidates
+    // This ensures fresh data is fetched instead of showing stale "-" in "Senaste aktivitet"
+    const allCandidatesLackLastActive = snapshot.items.every(
+      (item: any) => item.last_active_at === null || item.last_active_at === undefined
+    );
+    if (allCandidatesLackLastActive && snapshot.items.length > 0) {
+      localStorage.removeItem(key);
+      return [];
+    }
+
     const isValid = hasRequiredFields;
 
     if (!isValid) {
