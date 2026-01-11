@@ -14,6 +14,8 @@ import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useColleagueCandidates } from '@/hooks/useColleagueCandidates';
 import { useColleagueStageSettings } from '@/hooks/useColleagueStageSettings';
+import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -90,6 +92,7 @@ interface CandidateCardProps {
   candidate: MyCandidateData;
   onRemove: () => void;
   onOpenProfile: () => void;
+  onPrefetch?: () => void;
   isDragging?: boolean;
   isSelectionMode?: boolean;
   isSelected?: boolean;
@@ -148,6 +151,7 @@ const CandidateCardContent = ({
   candidate, 
   onRemove, 
   onOpenProfile,
+  onPrefetch,
   isDragging,
   isSelectionMode,
   isSelected,
@@ -178,6 +182,7 @@ const CandidateCardContent = ({
             : 'ring-white/10 hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
         }`}
       onClick={handleClick}
+      onMouseEnter={onPrefetch}
     >
       {/* Selection checkbox - shows in selection mode */}
       {isSelectionMode && (
@@ -306,6 +311,7 @@ interface StageColumnProps {
   onMoveCandidate: (id: string, stage: CandidateStage) => void;
   onRemoveCandidate: (candidate: MyCandidateData) => void;
   onOpenProfile: (candidate: MyCandidateData) => void;
+  onPrefetch?: (candidate: MyCandidateData) => void;
   stageSettings: { label: string; color: string; iconName: string };
   isReadOnly?: boolean;
   totalStageCount: number;
@@ -324,7 +330,8 @@ const StageColumn = ({
   candidates, 
   onMoveCandidate, 
   onRemoveCandidate, 
-  onOpenProfile, 
+  onOpenProfile,
+  onPrefetch,
   stageSettings, 
   isReadOnly, 
   totalStageCount, 
@@ -441,6 +448,7 @@ const StageColumn = ({
                 candidate={candidate}
                 onRemove={() => onRemoveCandidate(candidate)}
                 onOpenProfile={() => onOpenProfile(candidate)}
+                onPrefetch={onPrefetch ? () => onPrefetch(candidate) : undefined}
                 isSelectionMode={isSelectionMode}
                 isSelected={selectedCandidateIds?.has(candidate.id)}
                 onToggleSelect={() => onToggleSelect?.(candidate.id)}
@@ -1110,6 +1118,31 @@ const MyCandidates = () => {
     }
   };
 
+  // Query client for prefetching
+  const queryClient = useQueryClient();
+  
+  // Prefetch candidate data on hover for instant profile opening
+  const handlePrefetchCandidate = useCallback((candidate: MyCandidateData) => {
+    if (!user || !candidate.applicant_id) return;
+    
+    // Prefetch activities
+    prefetchCandidateActivities(queryClient, candidate.applicant_id, user.id);
+    
+    // Prefetch persistent notes
+    queryClient.prefetchQuery({
+      queryKey: ['candidate-notes', candidate.applicant_id],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from('candidate_notes')
+          .select('*')
+          .eq('applicant_id', candidate.applicant_id)
+          .is('job_id', null);
+        return data || [];
+      },
+      staleTime: 30 * 1000,
+    });
+  }, [user, queryClient]);
+
   const handleDialogClose = () => {
     setDialogOpen(false);
     setTimeout(() => setSelectedCandidate(null), 300);
@@ -1402,6 +1435,7 @@ const MyCandidates = () => {
                   onMoveCandidate={handleMoveCandidate}
                   onRemoveCandidate={handleRemoveCandidate}
                   onOpenProfile={handleOpenProfile}
+                  onPrefetch={handlePrefetchCandidate}
                   stageSettings={activeStageConfig[stage] || { label: stage, color: '#6366F1', iconName: 'flag' }}
                   isReadOnly={isViewingColleague}
                   totalStageCount={activeStageOrder.length}
