@@ -56,6 +56,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
   const { scope, enableRealtime = true } = options;
 
   // For organization scope, we need to fetch jobs from all users in the same organization
+  // Limit to 500 jobs max for performance - use pagination for more
   const { data: jobs = [], isLoading, error, refetch } = useQuery({
     queryKey: ['jobs', scope, profile?.organization_id, user?.id],
     queryFn: async () => {
@@ -68,7 +69,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           .from('user_roles')
           .select('user_id')
           .eq('organization_id', profile.organization_id)
-          .eq('is_active', true);
+          .eq('is_active', true)
+          .limit(1000); // Max 1000 users per org for this query
         
         if (orgError) throw orgError;
         
@@ -89,12 +91,13 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             )
           `)
           .in('employer_id', userIds)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(500); // Limit for scalability - most orgs won't have 500+ active jobs
 
         if (error) throw error;
         return data || [];
       } else {
-        // Personal scope - only current user's jobs
+        // Personal scope - only current user's jobs (limit 200 for performance)
         const { data, error } = await supabase
           .from('job_postings')
           .select(`
@@ -105,7 +108,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             )
           `)
           .eq('employer_id', user.id)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(200);
 
         if (error) throw error;
         return data || [];

@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -50,25 +50,48 @@ export const STAGE_CONFIG = {
   hired: { label: 'Anställd', color: 'bg-green-500/20 ring-1 ring-inset ring-green-500/50 text-green-100', hoverRing: 'ring-green-500/70' },
 } as const;
 
+// Page size for pagination - optimized for performance
+const PAGE_SIZE = 50;
+
 export function useMyCandidatesData() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
 
-  const { data: candidates = [], isLoading, error, refetch } = useQuery({
+  // Use infinite query for scalable pagination (handles 100k+ candidates)
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['my-candidates', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
+    initialPageParam: null as string | null,
+    queryFn: async ({ pageParam }) => {
+      if (!user) return { items: [], nextCursor: null };
 
-      // Fetch my_candidates with joined application data
-      const { data: myCandidates, error: mcError } = await supabase
+      // Build query with cursor-based pagination (much faster than offset for large datasets)
+      let query = supabase
         .from('my_candidates')
         .select('*')
         .eq('recruiter_id', user.id)
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false })
+        .limit(PAGE_SIZE);
+
+      // Apply cursor for pagination
+      if (pageParam) {
+        query = query.lt('updated_at', pageParam);
+      }
+
+      const { data: myCandidates, error: mcError } = await query;
 
       if (mcError) throw mcError;
-      if (!myCandidates || myCandidates.length === 0) return [];
+      if (!myCandidates || myCandidates.length === 0) {
+        return { items: [], nextCursor: null };
+      }
 
       // Get application IDs to fetch related data
       const applicationIds = myCandidates.map(mc => mc.application_id);
@@ -153,7 +176,7 @@ export function useMyCandidatesData() {
       }
 
       // Combine the data
-      const result: MyCandidateData[] = myCandidates.map(mc => {
+      const items: MyCandidateData[] = myCandidates.map(mc => {
         const app = appMap.get(mc.application_id);
         const media = profileMediaMap[mc.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null };
         const activity = activityMap[mc.applicant_id] || { latest_application_at: null, last_active_at: null };
@@ -193,13 +216,23 @@ export function useMyCandidatesData() {
         };
       });
 
-      return result;
+      // Determine next cursor for pagination
+      const lastItem = myCandidates[myCandidates.length - 1];
+      const nextCursor = myCandidates.length === PAGE_SIZE ? lastItem.updated_at : null;
+
+      return { items, nextCursor };
     },
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: !!user,
     staleTime: 0, // Always fresh data for real-time experience
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
+
+  // Flatten all pages into single array
+  const candidates = useMemo(() => {
+    return data?.pages.flatMap(page => page.items) || [];
+  }, [data]);
 
   // Real-time subscription for my_candidates changes (all users for team sync)
   useEffect(() => {
@@ -227,9 +260,17 @@ export function useMyCandidatesData() {
             if (next.recruiter_id === user.id && next.stage) {
               queryClient.setQueryData(
                 ['my-candidates', user.id],
-                (old: MyCandidateData[] | undefined) => {
-                  if (!old) return old;
-                  return old.map((c) => (c.id === next.id ? { ...c, stage: next.stage! } : c));
+                (old: any) => {
+                  if (!old?.pages) return old;
+                  return {
+                    ...old,
+                    pages: old.pages.map((page: any) => ({
+                      ...page,
+                      items: page.items.map((c: MyCandidateData) =>
+                        c.id === next.id ? { ...c, stage: next.stage! } : c
+                      ),
+                    })),
+                  };
                 }
               );
               return;
@@ -268,16 +309,22 @@ export function useMyCandidatesData() {
           const updatedUserId = payload.new?.user_id;
           if (updatedUserId && applicantIds.includes(updatedUserId)) {
             const newLastActiveAt = payload.new?.last_active_at;
-            // Update the specific candidate's last_active_at in cache
+            // Update the specific candidate's last_active_at in cache (paginated structure)
             queryClient.setQueryData(
               ['my-candidates', user.id],
-              (old: MyCandidateData[] | undefined) => {
-                if (!old) return old;
-                return old.map((c) =>
-                  c.applicant_id === updatedUserId
-                    ? { ...c, last_active_at: newLastActiveAt }
-                    : c
-                );
+              (old: any) => {
+                if (!old?.pages) return old;
+                return {
+                  ...old,
+                  pages: old.pages.map((page: any) => ({
+                    ...page,
+                    items: page.items.map((c: MyCandidateData) =>
+                      c.applicant_id === updatedUserId
+                        ? { ...c, last_active_at: newLastActiveAt }
+                        : c
+                    ),
+                  })),
+                };
               }
             );
           }
@@ -299,16 +346,22 @@ export function useMyCandidatesData() {
           const applicantId = payload.new?.applicant_id;
           const appliedAt = payload.new?.applied_at;
           if (applicantId && applicantIds.includes(applicantId) && appliedAt) {
-            // Update the specific candidate's latest_application_at in cache
+            // Update the specific candidate's latest_application_at in cache (paginated structure)
             queryClient.setQueryData(
               ['my-candidates', user.id],
-              (old: MyCandidateData[] | undefined) => {
-                if (!old) return old;
-                return old.map((c) =>
-                  c.applicant_id === applicantId
-                    ? { ...c, latest_application_at: appliedAt }
-                    : c
-                );
+              (old: any) => {
+                if (!old?.pages) return old;
+                return {
+                  ...old,
+                  pages: old.pages.map((page: any) => ({
+                    ...page,
+                    items: page.items.map((c: MyCandidateData) =>
+                      c.applicant_id === applicantId
+                        ? { ...c, latest_application_at: appliedAt }
+                        : c
+                    ),
+                  })),
+                };
               }
             );
           }
@@ -373,13 +426,21 @@ export function useMyCandidatesData() {
       // Mark as dragging to prevent realtime from overwriting
       setIsDragging(true);
 
-      // Optimistic update - MUST be synchronous to feel instant (like JobDetails)
+      // Optimistic update - MUST be synchronous to feel instant (paginated structure)
       void queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
       const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
 
-      queryClient.setQueryData(['my-candidates', user?.id], (old: MyCandidateData[] | undefined) => {
-        if (!old) return old;
-        return old.map((c) => (c.id === id ? { ...c, stage } : c));
+      queryClient.setQueryData(['my-candidates', user?.id], (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((c: MyCandidateData) =>
+              c.id === id ? { ...c, stage } : c
+            ),
+          })),
+        };
       });
 
       return { previousCandidates };
@@ -449,13 +510,21 @@ export function useMyCandidatesData() {
       return data;
     },
     onMutate: async ({ id, rating }) => {
-      // Optimistic update
+      // Optimistic update (paginated structure)
       await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
       const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
       
-      queryClient.setQueryData(['my-candidates', user?.id], (old: MyCandidateData[] | undefined) => {
-        if (!old) return old;
-        return old.map(c => c.id === id ? { ...c, rating } : c);
+      queryClient.setQueryData(['my-candidates', user?.id], (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((c: MyCandidateData) =>
+              c.id === id ? { ...c, rating } : c
+            ),
+          })),
+        };
       });
       
       return { previousCandidates };
@@ -513,16 +582,22 @@ export function useMyCandidatesData() {
       if (error) throw error;
     },
     onMutate: async (applicationId) => {
-      // Optimistic update
+      // Optimistic update (paginated structure)
       await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
       
-      queryClient.setQueryData(['my-candidates', user?.id], (old: MyCandidateData[] | undefined) => {
-        if (!old) return old;
-        return old.map(c => 
-          c.application_id === applicationId 
-            ? { ...c, viewed_at: new Date().toISOString() } 
-            : c
-        );
+      queryClient.setQueryData(['my-candidates', user?.id], (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((c: MyCandidateData) =>
+              c.application_id === applicationId 
+                ? { ...c, viewed_at: new Date().toISOString() } 
+                : c
+            ),
+          })),
+        };
       });
     },
     onSettled: () => {
@@ -538,6 +613,9 @@ export function useMyCandidatesData() {
     isLoading,
     error,
     refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     addCandidate,
     moveCandidate,
     removeCandidate,

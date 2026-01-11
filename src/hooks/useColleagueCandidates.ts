@@ -1,36 +1,57 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
 import { toast } from 'sonner';
 
+// Page size for scalable pagination
+const PAGE_SIZE = 50;
+
 /**
  * Hook to fetch and manage a colleague's candidates.
- * Used when viewing another team member's candidate list.
+ * Uses cursor-based pagination for scalability (handles 100k+ candidates).
  */
 export function useColleagueCandidates(colleagueId: string | null) {
   const { user } = useAuth();
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const cursorRef = useRef<string | null>(null);
 
-  const fetchColleagueCandidates = useCallback(async () => {
+  const fetchColleagueCandidates = useCallback(async (loadMore = false) => {
     if (!colleagueId || !user) {
       setCandidates([]);
+      setHasMore(false);
       return;
     }
 
-    setIsLoading(true);
+    if (!loadMore) {
+      setIsLoading(true);
+      cursorRef.current = null;
+    }
+
     try {
-      // Fetch colleague's my_candidates
-      const { data: myCandidates, error: mcError } = await supabase
+      // Build query with cursor-based pagination
+      let query = supabase
         .from('my_candidates')
         .select('*')
         .eq('recruiter_id', colleagueId)
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false })
+        .limit(PAGE_SIZE);
+
+      // Apply cursor for pagination
+      if (loadMore && cursorRef.current) {
+        query = query.lt('updated_at', cursorRef.current);
+      }
+
+      const { data: myCandidates, error: mcError } = await query;
 
       if (mcError) throw mcError;
       if (!myCandidates || myCandidates.length === 0) {
-        setCandidates([]);
+        if (!loadMore) {
+          setCandidates([]);
+        }
+        setHasMore(false);
         return;
       }
 
@@ -155,15 +176,33 @@ export function useColleagueCandidates(colleagueId: string | null) {
         };
       });
 
-      setCandidates(result);
+      // Update cursor for next page
+      const lastItem = myCandidates[myCandidates.length - 1];
+      cursorRef.current = lastItem.updated_at;
+      setHasMore(myCandidates.length === PAGE_SIZE);
+
+      if (loadMore) {
+        setCandidates(prev => [...prev, ...result]);
+      } else {
+        setCandidates(result);
+      }
     } catch (error) {
       console.error('Error fetching colleague candidates:', error);
       toast.error('Kunde inte ladda kollegans kandidater');
-      setCandidates([]);
+      if (!loadMore) {
+        setCandidates([]);
+      }
     } finally {
       setIsLoading(false);
     }
   }, [colleagueId, user]);
+
+  // Load more candidates (for pagination)
+  const loadMoreCandidates = useCallback(() => {
+    if (hasMore && !isLoading) {
+      fetchColleagueCandidates(true);
+    }
+  }, [hasMore, isLoading, fetchColleagueCandidates]);
 
   // Move candidate to different stage (in colleague's list)
   const moveCandidateInColleagueList = async (candidateId: string, newStage: CandidateStage) => {
@@ -251,7 +290,9 @@ export function useColleagueCandidates(colleagueId: string | null) {
     candidates,
     setCandidates,
     isLoading,
+    hasMore,
     fetchColleagueCandidates,
+    loadMoreCandidates,
     moveCandidateInColleagueList,
     removeCandidateFromColleagueList,
     addCandidateToColleagueList,
