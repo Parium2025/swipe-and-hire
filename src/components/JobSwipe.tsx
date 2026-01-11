@@ -149,8 +149,6 @@ const JobSwipe = () => {
 
   const fetchJobs = async () => {
     try {
-      // Limit to 100 jobs at a time for performance - swipe through them
-      // In production, would implement infinite scroll/pagination
       const { data, error } = await supabase
         .from('job_postings')
         .select(`
@@ -162,8 +160,7 @@ const JobSwipe = () => {
           )
         `)
         .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(100); // Limit for scalability
+        .order('created_at', { ascending: false });
 
       if (error) {
         toast({
