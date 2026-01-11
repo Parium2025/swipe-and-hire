@@ -515,6 +515,16 @@ export function useMyCandidatesData(searchQuery: string = '') {
 
       const defaultStage = stageSettings?.[0]?.stage_key || 'to_contact';
 
+      // Check for existing persistent rating for this applicant
+      const { data: existingRating } = await supabase
+        .from('candidate_ratings')
+        .select('rating')
+        .eq('recruiter_id', user.id)
+        .eq('applicant_id', applicantId)
+        .maybeSingle();
+
+      const restoredRating = existingRating?.rating || 0;
+
       const { data, error } = await supabase
         .from('my_candidates')
         .insert({
@@ -523,6 +533,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           application_id: applicationId,
           job_id: jobId || null,
           stage: defaultStage,
+          rating: restoredRating, // Restore previous rating if exists
         })
         .select()
         .single();
@@ -578,12 +589,23 @@ export function useMyCandidatesData(searchQuery: string = '') {
       // Use the first available stage, or fall back to 'to_contact' if no stages configured
       const defaultStage = stageSettings?.[0]?.stage_key || 'to_contact';
 
+      // Check for existing persistent ratings for these applicants
+      const applicantIds = newCandidates.map(c => c.applicantId);
+      const { data: existingRatings } = await supabase
+        .from('candidate_ratings')
+        .select('applicant_id, rating')
+        .eq('recruiter_id', user.id)
+        .in('applicant_id', applicantIds);
+
+      const ratingsMap = new Map(existingRatings?.map(r => [r.applicant_id, r.rating]) || []);
+
       const insertData = newCandidates.map(c => ({
         recruiter_id: user.id,
         applicant_id: c.applicantId,
         application_id: c.applicationId,
         job_id: c.jobId || null,
         stage: defaultStage,
+        rating: ratingsMap.get(c.applicantId) || 0, // Restore previous rating
       }));
 
       const { data, error } = await supabase
@@ -694,17 +716,33 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
   });
 
-  // Update rating
+  // Update rating - also saves to persistent candidate_ratings table
   const updateRating = useMutation({
-    mutationFn: async ({ id, rating }: { id: string; rating: number }) => {
+    mutationFn: async ({ id, rating, applicantId }: { id: string; rating: number; applicantId?: string }) => {
+      // Update my_candidates rating
       const { data, error } = await supabase
         .from('my_candidates')
         .update({ rating })
         .eq('id', id)
-        .select()
+        .select('applicant_id')
         .single();
 
       if (error) throw error;
+
+      // Also save to persistent candidate_ratings table (upsert)
+      const targetApplicantId = applicantId || data?.applicant_id;
+      if (targetApplicantId && user) {
+        await supabase
+          .from('candidate_ratings')
+          .upsert({
+            recruiter_id: user.id,
+            applicant_id: targetApplicantId,
+            rating,
+          }, {
+            onConflict: 'recruiter_id,applicant_id',
+          });
+      }
+
       return data;
     },
     onMutate: async ({ id, rating }) => {
@@ -733,6 +771,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
     },
   });
 

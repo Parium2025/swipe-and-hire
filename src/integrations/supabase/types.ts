@@ -146,6 +146,44 @@ export type Database = {
           },
         ]
       }
+      candidate_ratings: {
+        Row: {
+          applicant_id: string
+          created_at: string
+          id: string
+          job_id: string | null
+          rating: number
+          recruiter_id: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          rating?: number
+          recruiter_id: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          rating?: number
+          recruiter_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_ratings_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_summaries: {
         Row: {
           applicant_id: string
