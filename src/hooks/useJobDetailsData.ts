@@ -148,14 +148,23 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
     });
   }
 
-  // Fetch profile media in parallel (batch RPC calls)
-  const mediaPromises = applicationsData.map(app => 
-    supabase.rpc('get_applicant_profile_media', {
-      p_applicant_id: app.applicant_id,
-      p_employer_id: userId
-    })
-  );
-  const mediaResults = await Promise.all(mediaPromises);
+  // Fetch profile media in ONE batch call (scales to millions)
+  // Note: applicantIds already declared above at line 93
+  const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+    p_applicant_ids: applicantIds,
+    p_employer_id: userId
+  });
+  
+  const mediaByApplicant = new Map<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }>();
+  if (batchMediaData && Array.isArray(batchMediaData)) {
+    batchMediaData.forEach((row: any) => {
+      mediaByApplicant.set(row.applicant_id, {
+        profile_image_url: row.profile_image_url,
+        video_url: row.video_url,
+        is_profile_video: row.is_profile_video,
+      });
+    });
+  }
 
   // Fetch last_active_at for all applicants using the activity RPC
   const activityResult = await supabase.rpc('get_applicant_latest_activity', {
@@ -169,12 +178,8 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
   });
 
   // Combine all data
-  return applicationsData.map((app, index) => {
-    const media = (mediaResults[index].data?.[0] || {}) as {
-      profile_image_url?: string;
-      video_url?: string;
-      is_profile_video?: boolean;
-    };
+  return applicationsData.map((app) => {
+    const media = mediaByApplicant.get(app.applicant_id) || { profile_image_url: null, video_url: null, is_profile_video: false };
     const evalId = evaluationByApplicant.get(app.applicant_id);
     const criterionResults = evalId ? resultsByEvaluation.get(evalId) || [] : [];
     const activity = activityByApplicant.get(app.applicant_id);

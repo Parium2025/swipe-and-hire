@@ -345,35 +345,38 @@ export function EmployerSidebar() {
         if (baseError) throw baseError;
         if (!baseData) return { items: [], hasMore: false };
 
-        // Batch fetch profile media via RPC (secure, access-controlled)
+        // Single batch RPC call instead of N individual calls (scales to millions)
         const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
         const profileMediaMap: Record<
           string,
           { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }
         > = {};
 
-        await Promise.all(
-          applicantIds.map(async (applicantId) => {
-            const { data: mediaData } = await supabase.rpc('get_applicant_profile_media', {
-              p_applicant_id: applicantId,
-              p_employer_id: user.id,
-            });
+        const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+          p_applicant_ids: applicantIds,
+          p_employer_id: user.id,
+        });
 
-            if (mediaData && mediaData.length > 0) {
-              profileMediaMap[applicantId] = {
-                profile_image_url: mediaData[0].profile_image_url,
-                video_url: mediaData[0].video_url,
-                is_profile_video: mediaData[0].is_profile_video,
-              };
-            } else {
-              profileMediaMap[applicantId] = {
-                profile_image_url: null,
-                video_url: null,
-                is_profile_video: null,
-              };
-            }
-          })
-        );
+        if (batchMediaData && Array.isArray(batchMediaData)) {
+          batchMediaData.forEach((row: any) => {
+            profileMediaMap[row.applicant_id] = {
+              profile_image_url: row.profile_image_url,
+              video_url: row.video_url,
+              is_profile_video: row.is_profile_video,
+            };
+          });
+        }
+
+        // Fill in nulls for any applicants not returned
+        applicantIds.forEach((id) => {
+          if (!profileMediaMap[id]) {
+            profileMediaMap[id] = {
+              profile_image_url: null,
+              video_url: null,
+              is_profile_video: null,
+            };
+          }
+        });
 
         const items = baseData.map((item: any) => {
           const media = profileMediaMap[item.applicant_id] || {
