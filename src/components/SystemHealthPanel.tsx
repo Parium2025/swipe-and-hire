@@ -1,34 +1,60 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Database, Users, Building2, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, FileText, RefreshCw } from 'lucide-react';
+import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, FileText, RefreshCw, Video, FileUp, AlertTriangle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ADMIN_EMAIL = 'pariumab@hotmail.com';
 
-// Free tier limits
+// Free tier limits (Supabase)
 const LIMITS = {
   database: 500, // MB
   storage: 1000, // MB (1GB)
   emailsPerMonth: 3000,
-  candidates: 2000,
-  applications: 5000,
+  bandwidth: 5000, // MB per month
 };
 
-interface SystemStats {
-  totalCandidates: number;
-  totalOrganizations: number;
-  totalJobs: number;
-  totalActiveJobs: number;
+// Average file sizes for estimation
+const AVG_SIZES = {
+  profileVideo: 15, // MB per video
+  cv: 0.5, // MB per CV
+  profileImage: 0.3, // MB per image
+  companyLogo: 0.2, // MB per logo
+  jobImage: 0.5, // MB per job image
+};
+
+interface RealUsageStats {
+  // Actual counts of what takes up space
+  profilesWithVideo: number;
+  profilesWithCv: number;
+  profilesWithImage: number;
+  companiesWithLogo: number;
+  jobsWithImage: number;
+  
+  // Calculated real storage
+  estimatedVideoStorage: number;
+  estimatedCvStorage: number;
+  estimatedImageStorage: number;
+  totalStorageUsed: number;
+  
+  // Database activity
   totalApplications: number;
+  totalMessages: number;
+  totalNotes: number;
   estimatedDbSize: number;
-  estimatedStorageSize: number;
+  
+  // Email estimates (based on activity)
   emailsThisMonth: number;
+  
+  // Activity indicators
+  activeJobsCount: number;
+  applicationsThisWeek: number;
+  
   timestamp: string;
 }
 
-const HISTORY_KEY = 'parium_system_health_history';
+const HISTORY_KEY = 'parium_system_health_v2';
 
-const getStoredHistory = (): SystemStats[] => {
+const getStoredHistory = (): RealUsageStats[] => {
   try {
     const stored = localStorage.getItem(HISTORY_KEY);
     return stored ? JSON.parse(stored) : [];
@@ -37,7 +63,7 @@ const getStoredHistory = (): SystemStats[] => {
   }
 };
 
-const storeHistory = (stats: SystemStats) => {
+const storeHistory = (stats: RealUsageStats) => {
   try {
     const history = getStoredHistory();
     const today = new Date().toISOString().split('T')[0];
@@ -95,10 +121,10 @@ export const SystemHealthButton = ({ onClick }: { onClick: () => void }) => {
 
 // Full panel component  
 export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) => {
-  const [stats, setStats] = useState<SystemStats | null>(null);
-  const [history, setHistory] = useState<SystemStats[]>([]);
+  const [stats, setStats] = useState<RealUsageStats | null>(null);
+  const [history, setHistory] = useState<RealUsageStats[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showHistory, setShowHistory] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const isAdmin = useIsSystemAdmin();
 
@@ -106,43 +132,102 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
     if (!isAdmin) return;
     
     try {
-      const [employersRes, candidatesRes, jobsRes, activeJobsRes, applicationsRes] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'employer'),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'job_seeker'),
-        supabase.from('job_postings').select('id', { count: 'exact', head: true }),
-        supabase.from('job_postings').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      // Get real counts of what actually uses storage
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      
+      const [
+        profilesWithVideoRes,
+        profilesWithCvRes,
+        profilesWithImageRes,
+        companiesWithLogoRes,
+        jobsWithImageRes,
+        activeJobsRes,
+        applicationsRes,
+        applicationsWeekRes,
+        messagesRes,
+        notesRes,
+      ] = await Promise.all([
+        // Profiles with video uploaded
+        supabase.from('profiles').select('id', { count: 'exact', head: true })
+          .not('video_url', 'is', null),
+        // Profiles with CV uploaded
+        supabase.from('profiles').select('id', { count: 'exact', head: true })
+          .not('cv_url', 'is', null),
+        // Profiles with profile image
+        supabase.from('profiles').select('id', { count: 'exact', head: true })
+          .not('profile_image_url', 'is', null),
+        // Companies with logo
+        supabase.from('profiles').select('id', { count: 'exact', head: true })
+          .eq('role', 'employer')
+          .not('company_logo_url', 'is', null),
+        // Jobs with images
+        supabase.from('job_postings').select('id', { count: 'exact', head: true })
+          .not('job_image_url', 'is', null),
+        // Active jobs
+        supabase.from('job_postings').select('id', { count: 'exact', head: true })
+          .eq('is_active', true),
+        // Total applications (database size indicator)
         supabase.from('job_applications').select('id', { count: 'exact', head: true }),
+        // Applications this week (activity indicator)
+        supabase.from('job_applications').select('id', { count: 'exact', head: true })
+          .gte('created_at', oneWeekAgo.toISOString()),
+        // Messages (database usage)
+        supabase.from('messages').select('id', { count: 'exact', head: true }),
+        // Notes (database usage)
+        supabase.from('candidate_notes').select('id', { count: 'exact', head: true }),
       ]);
 
-      const totalCandidates = candidatesRes.count || 0;
-      const totalOrganizations = employersRes.count || 0;
-      const totalJobs = jobsRes.count || 0;
-      const totalActiveJobs = activeJobsRes.count || 0;
+      const profilesWithVideo = profilesWithVideoRes.count || 0;
+      const profilesWithCv = profilesWithCvRes.count || 0;
+      const profilesWithImage = profilesWithImageRes.count || 0;
+      const companiesWithLogo = companiesWithLogoRes.count || 0;
+      const jobsWithImage = jobsWithImageRes.count || 0;
+      const activeJobsCount = activeJobsRes.count || 0;
       const totalApplications = applicationsRes.count || 0;
+      const applicationsThisWeek = applicationsWeekRes.count || 0;
+      const totalMessages = messagesRes.count || 0;
+      const totalNotes = notesRes.count || 0;
 
-      // More accurate DB size estimation based on actual data
-      const estimatedDbSize = (
-        (totalCandidates * 0.01) + // profiles with CV data
-        (totalOrganizations * 0.005) +
-        (totalJobs * 0.02) + // job descriptions
-        (totalApplications * 0.015) // applications with answers
-      );
-
-      // Storage: mainly CVs and profile images
-      const estimatedStorageSize = (totalCandidates * 0.8) + (totalOrganizations * 0.2);
+      // Calculate REAL storage estimates based on actual uploads
+      const estimatedVideoStorage = profilesWithVideo * AVG_SIZES.profileVideo;
+      const estimatedCvStorage = profilesWithCv * AVG_SIZES.cv;
+      const estimatedImageStorage = 
+        (profilesWithImage * AVG_SIZES.profileImage) +
+        (companiesWithLogo * AVG_SIZES.companyLogo) +
+        (jobsWithImage * AVG_SIZES.jobImage);
       
-      // Emails: welcome emails + application notifications
-      const emailsThisMonth = Math.floor(totalApplications * 0.5) + totalCandidates + totalOrganizations;
+      const totalStorageUsed = estimatedVideoStorage + estimatedCvStorage + estimatedImageStorage;
 
-      const newStats: SystemStats = {
-        totalCandidates,
-        totalOrganizations,
-        totalJobs,
-        totalActiveJobs,
+      // Database size estimation based on actual data
+      const estimatedDbSize = 
+        (totalApplications * 0.02) + // Applications with answers
+        (totalMessages * 0.002) + // Messages
+        (totalNotes * 0.001) + // Notes
+        5; // Base overhead
+
+      // Email estimation: welcome emails + notifications
+      const emailsThisMonth = 
+        (applicationsThisWeek * 4 * 2) + // ~2 emails per application, extrapolated
+        (activeJobsCount * 5); // Various job notifications
+
+      const newStats: RealUsageStats = {
+        profilesWithVideo,
+        profilesWithCv,
+        profilesWithImage,
+        companiesWithLogo,
+        jobsWithImage,
+        estimatedVideoStorage,
+        estimatedCvStorage,
+        estimatedImageStorage,
+        totalStorageUsed,
         totalApplications,
+        totalMessages,
+        totalNotes,
         estimatedDbSize,
-        estimatedStorageSize,
         emailsThisMonth,
+        activeJobsCount,
+        applicationsThisWeek,
         timestamp: new Date().toISOString(),
       };
 
@@ -172,37 +257,29 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
     return () => clearInterval(interval);
   }, [isAdmin, isVisible, fetchStats]);
 
-  const projection = useMemo(() => {
-    if (history.length < 2) return null;
+  // Calculate which limit will be hit first
+  const criticalPath = useMemo(() => {
+    if (!stats) return null;
     
-    const oldest = history[0];
-    const newest = history[history.length - 1];
-    const daysDiff = Math.max(1, (new Date(newest.timestamp).getTime() - new Date(oldest.timestamp).getTime()) / (1000 * 60 * 60 * 24));
+    const storagePercentage = (stats.totalStorageUsed / LIMITS.storage) * 100;
+    const dbPercentage = (stats.estimatedDbSize / LIMITS.database) * 100;
+    const emailPercentage = (stats.emailsThisMonth / LIMITS.emailsPerMonth) * 100;
     
-    const appGrowthPerDay = (newest.totalApplications - oldest.totalApplications) / daysDiff;
-    const candidateGrowthPerDay = (newest.totalCandidates - oldest.totalCandidates) / daysDiff;
+    const limits = [
+      { name: 'Lagring', percentage: storagePercentage, current: stats.totalStorageUsed, max: LIMITS.storage, unit: 'MB' },
+      { name: 'Databas', percentage: dbPercentage, current: stats.estimatedDbSize, max: LIMITS.database, unit: 'MB' },
+      { name: 'Email', percentage: emailPercentage, current: stats.emailsThisMonth, max: LIMITS.emailsPerMonth, unit: '' },
+    ];
     
-    const daysUntilAppLimit = appGrowthPerDay > 0 
-      ? Math.ceil((LIMITS.applications - newest.totalApplications) / appGrowthPerDay)
-      : null;
-    const daysUntilCandidateLimit = candidateGrowthPerDay > 0
-      ? Math.ceil((LIMITS.candidates - newest.totalCandidates) / candidateGrowthPerDay)
-      : null;
-    
-    return {
-      appGrowthPerDay: appGrowthPerDay.toFixed(1),
-      candidateGrowthPerDay: candidateGrowthPerDay.toFixed(1),
-      daysUntilAppLimit,
-      daysUntilCandidateLimit,
-    };
-  }, [history]);
+    const sorted = limits.sort((a, b) => b.percentage - a.percentage);
+    return sorted[0];
+  }, [stats]);
 
   const chartData = useMemo(() => {
     return history.map(h => ({
       date: new Date(h.timestamp).toLocaleDateString('sv-SE', { month: 'short', day: 'numeric' }),
-      applications: h.totalApplications,
-      candidates: h.totalCandidates,
-      jobs: h.totalJobs,
+      storage: h.totalStorageUsed,
+      db: h.estimatedDbSize,
     }));
   }, [history]);
 
@@ -222,161 +299,161 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
     return 'bg-red-500';
   };
 
+  const storagePercentage = stats ? Math.min((stats.totalStorageUsed / LIMITS.storage) * 100, 100) : 0;
   const dbPercentage = stats ? Math.min((stats.estimatedDbSize / LIMITS.database) * 100, 100) : 0;
-  const storagePercentage = stats ? Math.min((stats.estimatedStorageSize / LIMITS.storage) * 100, 100) : 0;
-  const candidatesPercentage = stats ? Math.min((stats.totalCandidates / LIMITS.candidates) * 100, 100) : 0;
-  const applicationsPercentage = stats ? Math.min((stats.totalApplications / LIMITS.applications) * 100, 100) : 0;
   const emailPercentage = stats ? Math.min((stats.emailsThisMonth / LIMITS.emailsPerMonth) * 100, 100) : 0;
+  
+  const overallHealth = Math.max(storagePercentage, dbPercentage, emailPercentage);
+  const needsAttention = overallHealth > 70;
+  const critical = overallHealth > 90;
 
   return (
     <div className="fixed top-16 right-4 z-[9999] w-96 max-h-[80vh] overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl">
-        {/* Header */}
-        <div className="p-4 border-b border-slate-700">
+      <div className={`bg-slate-900 border ${critical ? 'border-red-500' : needsAttention ? 'border-orange-500' : 'border-slate-700'} rounded-xl shadow-2xl`}>
+        {/* Header with overall status */}
+        <div className={`p-4 border-b ${critical ? 'border-red-500/50 bg-red-500/10' : needsAttention ? 'border-orange-500/50 bg-orange-500/10' : 'border-slate-700'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Database className="h-4 w-4 text-white" />
-              <span className="text-sm font-semibold text-white">System Health</span>
+              {critical ? (
+                <AlertTriangle className="h-4 w-4 text-red-400 animate-pulse" />
+              ) : needsAttention ? (
+                <AlertTriangle className="h-4 w-4 text-orange-400" />
+              ) : (
+                <Database className="h-4 w-4 text-emerald-400" />
+              )}
+              <span className="text-sm font-semibold text-white">
+                {critical ? 'KRITISKT' : needsAttention ? 'Behöver uppmärksamhet' : 'System OK'}
+              </span>
               {loading && <RefreshCw className="h-3 w-3 text-slate-400 animate-spin" />}
             </div>
             <button onClick={onClose} className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors">
               <X className="h-4 w-4" />
             </button>
           </div>
+          
+          {/* Critical path indicator */}
+          {criticalPath && criticalPath.percentage > 30 && (
+            <div className="mt-2 text-xs">
+              <span className="text-slate-400">Flaskhals: </span>
+              <span className={getHealthColor(criticalPath.percentage)}>
+                {criticalPath.name} ({criticalPath.percentage.toFixed(0)}%)
+              </span>
+            </div>
+          )}
+          
           <p className="text-xs text-slate-400 mt-1">
-            Free Tier • {lastUpdated ? `Uppdaterad ${lastUpdated.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}` : 'Laddar...'}
+            {lastUpdated ? `Uppdaterad ${lastUpdated.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}` : 'Laddar...'}
           </p>
         </div>
 
         <div className="p-4 space-y-4">
-          {/* Key Activity Metrics - What actually matters */}
-          <div className="space-y-1">
-            <p className="text-xs text-slate-400 uppercase tracking-wide mb-2">Faktisk Aktivitet</p>
-            
-            {/* Applications - Most important */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span className="flex items-center gap-1.5 text-white">
-                  <FileText className="h-3 w-3" />
-                  Ansökningar
-                </span>
-                <span className={getHealthColor(applicationsPercentage)}>
-                  {stats?.totalApplications || 0} / {LIMITS.applications}
-                </span>
-              </div>
-              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full transition-all ${getProgressColor(applicationsPercentage)}`}
-                  style={{ width: `${applicationsPercentage}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Active Jobs */}
-            <div className="space-y-1 mt-3">
-              <div className="flex justify-between text-xs">
-                <span className="flex items-center gap-1.5 text-white">
-                  <Briefcase className="h-3 w-3" />
-                  Aktiva jobb
-                </span>
-                <span className="text-emerald-400">
-                  {stats?.totalActiveJobs || 0} av {stats?.totalJobs || 0}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* User Metrics */}
-          <div className="pt-3 border-t border-slate-700 space-y-3">
-            <p className="text-xs text-slate-400 uppercase tracking-wide">Användare</p>
-            
-            {/* Candidates */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span className="flex items-center gap-1.5 text-white">
-                  <Users className="h-3 w-3" />
-                  Kandidater
-                </span>
-                <span className={getHealthColor(candidatesPercentage)}>
-                  {stats?.totalCandidates || 0} / {LIMITS.candidates}
-                </span>
-              </div>
-              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full transition-all ${getProgressColor(candidatesPercentage)}`}
-                  style={{ width: `${candidatesPercentage}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Organizations - just info, not a limit */}
-            <div className="flex justify-between text-xs">
-              <span className="flex items-center gap-1.5 text-white">
-                <Building2 className="h-3 w-3" />
-                Organisationer
+          {/* STORAGE - The main concern */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                <HardDrive className="h-3 w-3" />
+                Lagring (Kritisk)
+              </p>
+              <span className={`text-xs font-medium ${getHealthColor(storagePercentage)}`}>
+                {stats?.totalStorageUsed.toFixed(0) || 0} / {LIMITS.storage} MB
               </span>
-              <span className="text-slate-300">{stats?.totalOrganizations || 0}</span>
+            </div>
+            
+            <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all ${getProgressColor(storagePercentage)}`}
+                style={{ width: `${storagePercentage}%` }}
+              />
+            </div>
+            
+            {/* Storage breakdown */}
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="bg-slate-800 p-2 rounded">
+                <div className="flex items-center gap-1 text-slate-400 mb-1">
+                  <Video className="h-3 w-3" />
+                  Video
+                </div>
+                <p className="text-white font-medium">{stats?.estimatedVideoStorage.toFixed(0) || 0} MB</p>
+                <p className="text-slate-500">{stats?.profilesWithVideo || 0} st</p>
+              </div>
+              <div className="bg-slate-800 p-2 rounded">
+                <div className="flex items-center gap-1 text-slate-400 mb-1">
+                  <FileUp className="h-3 w-3" />
+                  CV:er
+                </div>
+                <p className="text-white font-medium">{stats?.estimatedCvStorage.toFixed(1) || 0} MB</p>
+                <p className="text-slate-500">{stats?.profilesWithCv || 0} st</p>
+              </div>
+              <div className="bg-slate-800 p-2 rounded">
+                <div className="flex items-center gap-1 text-slate-400 mb-1">
+                  <Users className="h-3 w-3" />
+                  Bilder
+                </div>
+                <p className="text-white font-medium">{stats?.estimatedImageStorage.toFixed(1) || 0} MB</p>
+                <p className="text-slate-500">{(stats?.profilesWithImage || 0) + (stats?.companiesWithLogo || 0)} st</p>
+              </div>
             </div>
           </div>
 
-          {/* Infrastructure */}
-          <div className="pt-3 border-t border-slate-700 space-y-3">
-            <p className="text-xs text-slate-400 uppercase tracking-wide">Infrastruktur</p>
+          {/* DATABASE */}
+          <div className="pt-3 border-t border-slate-700 space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                <Database className="h-3 w-3" />
+                Databas
+              </p>
+              <span className={`text-xs font-medium ${getHealthColor(dbPercentage)}`}>
+                ~{stats?.estimatedDbSize.toFixed(1) || 0} / {LIMITS.database} MB
+              </span>
+            </div>
             
-            {/* Database */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span className="flex items-center gap-1.5 text-white">
-                  <Database className="h-3 w-3" />
-                  Databas
-                </span>
-                <span className={getHealthColor(dbPercentage)}>
-                  ~{stats?.estimatedDbSize.toFixed(1) || 0} / {LIMITS.database} MB
-                </span>
-              </div>
-              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full transition-all ${getProgressColor(dbPercentage)}`}
-                  style={{ width: `${dbPercentage}%` }}
-                />
-              </div>
+            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all ${getProgressColor(dbPercentage)}`}
+                style={{ width: `${dbPercentage}%` }}
+              />
             </div>
-
-            {/* Storage */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span className="flex items-center gap-1.5 text-white">
-                  <HardDrive className="h-3 w-3" />
-                  Lagring
-                </span>
-                <span className={getHealthColor(storagePercentage)}>
-                  ~{stats?.estimatedStorageSize.toFixed(0) || 0} / {LIMITS.storage} MB
-                </span>
-              </div>
-              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full transition-all ${getProgressColor(storagePercentage)}`}
-                  style={{ width: `${storagePercentage}%` }}
-                />
-              </div>
+            
+            <div className="flex justify-between text-xs text-slate-400">
+              <span>{stats?.totalApplications || 0} ansökningar</span>
+              <span>{stats?.totalMessages || 0} meddelanden</span>
             </div>
+          </div>
 
-            {/* Emails */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span className="flex items-center gap-1.5 text-white">
-                  <Mail className="h-3 w-3" />
-                  Emails/mån
-                </span>
-                <span className={getHealthColor(emailPercentage)}>
-                  ~{stats?.emailsThisMonth || 0} / {LIMITS.emailsPerMonth}
-                </span>
+          {/* EMAIL */}
+          <div className="pt-3 border-t border-slate-700 space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                <Mail className="h-3 w-3" />
+                Email/månad
+              </p>
+              <span className={`text-xs font-medium ${getHealthColor(emailPercentage)}`}>
+                ~{stats?.emailsThisMonth || 0} / {LIMITS.emailsPerMonth}
+              </span>
+            </div>
+            
+            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all ${getProgressColor(emailPercentage)}`}
+                style={{ width: `${emailPercentage}%` }}
+              />
+            </div>
+          </div>
+
+          {/* ACTIVITY PULSE */}
+          <div className="pt-3 border-t border-slate-700">
+            <p className="text-xs text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+              <Briefcase className="h-3 w-3" />
+              Aktivitet denna vecka
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-slate-800 p-2 rounded">
+                <span className="text-slate-400">Ansökningar</span>
+                <p className="text-white font-semibold text-lg">{stats?.applicationsThisWeek || 0}</p>
               </div>
-              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full transition-all ${getProgressColor(emailPercentage)}`}
-                  style={{ width: `${emailPercentage}%` }}
-                />
+              <div className="bg-slate-800 p-2 rounded">
+                <span className="text-slate-400">Aktiva jobb</span>
+                <p className="text-white font-semibold text-lg">{stats?.activeJobsCount || 0}</p>
               </div>
             </div>
           </div>
@@ -384,17 +461,17 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           {/* Historical data toggle */}
           <div className="pt-3 border-t border-slate-700">
             <button
-              onClick={() => setShowHistory(!showHistory)}
+              onClick={() => setShowDetails(!showDetails)}
               className="flex items-center justify-between w-full text-xs text-slate-400 hover:text-white transition-colors"
             >
               <span className="flex items-center gap-1.5">
                 <TrendingUp className="h-3 w-3" />
-                Tillväxtprognos
+                Tillväxt & Prognos
               </span>
-              {showHistory ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
             </button>
             
-            {showHistory && (
+            {showDetails && (
               <div className="mt-3 space-y-3">
                 {chartData.length > 1 ? (
                   <div className="h-32 w-full">
@@ -408,9 +485,10 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                         />
                         <YAxis 
                           tick={{ fontSize: 10, fill: '#94a3b8' }} 
-                          width={30}
+                          width={35}
                           axisLine={{ stroke: '#475569' }}
                           tickLine={{ stroke: '#475569' }}
+                          unit=" MB"
                         />
                         <Tooltip 
                           contentStyle={{ 
@@ -422,51 +500,44 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                             color: '#fff'
                           }}
                           labelStyle={{ fontSize: 10, color: '#94a3b8' }}
+                          formatter={(value: number) => [`${value.toFixed(1)} MB`]}
                         />
                         <Area 
                           type="monotone" 
-                          dataKey="applications" 
-                          stroke="#10b981" 
-                          fill="#10b98133" 
-                          name="Ansökningar"
+                          dataKey="storage" 
+                          stroke="#f59e0b" 
+                          fill="#f59e0b33" 
+                          name="Lagring"
                         />
                         <Area 
                           type="monotone" 
-                          dataKey="candidates" 
+                          dataKey="db" 
                           stroke="#3b82f6" 
                           fill="#3b82f633" 
-                          name="Kandidater"
+                          name="Databas"
                         />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
                   <p className="text-xs text-slate-500 text-center py-4">
-                    Historisk data samlas in dagligen. Kom tillbaka om några dagar.
+                    Historisk data samlas in dagligen.
                   </p>
                 )}
                 
-                {projection && (
-                  <div className="space-y-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Ansökningar/dag:</span>
-                      <span className="font-medium text-white">+{projection.appGrowthPerDay}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Kandidater/dag:</span>
-                      <span className="font-medium text-white">+{projection.candidateGrowthPerDay}</span>
-                    </div>
-                    {projection.daysUntilAppLimit && projection.daysUntilAppLimit < 365 && (
-                      <div className="flex justify-between text-orange-400">
-                        <span>Ansökningsgräns nås om:</span>
-                        <span className="font-medium">{projection.daysUntilAppLimit} dagar</span>
-                      </div>
+                {/* Smart projections */}
+                {stats && stats.totalStorageUsed > 10 && (
+                  <div className="bg-slate-800 p-3 rounded text-xs space-y-1">
+                    <p className="text-white font-medium">📊 Prognos</p>
+                    {stats.profilesWithVideo > 0 && (
+                      <p className="text-slate-300">
+                        Video-lagring: ~{Math.floor((LIMITS.storage - stats.totalStorageUsed) / AVG_SIZES.profileVideo)} fler videos innan gräns
+                      </p>
                     )}
-                    {projection.daysUntilCandidateLimit && projection.daysUntilCandidateLimit < 365 && (
-                      <div className="flex justify-between text-orange-400">
-                        <span>Kandidat-gräns nås om:</span>
-                        <span className="font-medium">{projection.daysUntilCandidateLimit} dagar</span>
-                      </div>
+                    {stats.profilesWithCv > 0 && (
+                      <p className="text-slate-300">
+                        CV-kapacitet: ~{Math.floor((LIMITS.storage - stats.totalStorageUsed) / AVG_SIZES.cv)} fler CVs
+                      </p>
                     )}
                   </div>
                 )}
@@ -474,11 +545,22 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
             )}
           </div>
 
-          {/* Upgrade hint */}
-          {(applicationsPercentage > 70 || candidatesPercentage > 70 || dbPercentage > 70) && (
-            <div className="pt-3 border-t border-slate-700">
+          {/* Upgrade warning */}
+          {critical && (
+            <div className="pt-3 border-t border-red-500/50 bg-red-500/5 -mx-4 px-4 pb-4 -mb-4 rounded-b-xl">
+              <p className="text-sm text-red-400 font-medium">
+                ⚠️ Kritisk nivå - uppgradera nu!
+              </p>
+              <p className="text-xs text-red-300/70 mt-1">
+                Supabase Pro: $25/mån → 8GB lagring, 8GB databas
+              </p>
+            </div>
+          )}
+          
+          {needsAttention && !critical && (
+            <div className="pt-3 border-t border-orange-500/50">
               <p className="text-xs text-orange-400">
-                ⚠️ Närmar er gränsen - överväg uppgradering ($25/mån)
+                ⚠️ Närmar sig gräns - planera uppgradering
               </p>
             </div>
           )}
