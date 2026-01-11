@@ -467,23 +467,22 @@ export function CandidatesTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    {teamInfo && teamInfo.maxRating > 0 ? (
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((star) => {
+                        const rating = teamInfo?.maxRating || 0;
+                        return (
                           <Star
                             key={star}
                             className={cn(
                               "h-3.5 w-3.5",
-                              star <= teamInfo.maxRating
+                              star <= rating
                                 ? "fill-yellow-400 text-yellow-400"
                                 : "text-white/20"
                             )}
                           />
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-white/30 text-sm">–</span>
-                    )}
+                        );
+                      })}
+                    </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {application.job_title || 'Okänd tjänst'}
