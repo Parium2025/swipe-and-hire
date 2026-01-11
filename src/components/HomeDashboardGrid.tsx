@@ -709,10 +709,13 @@ const NotesCard = memo(() => {
 
       {/* Fullscreen Notes Dialog */}
       <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
-        <DialogContent className="max-w-4xl h-[80vh] bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 border-0 p-0 overflow-hidden">
-          <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-          <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-          <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+        <DialogContent 
+          hideClose 
+          className="max-w-4xl h-[80vh] bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 border-0 p-0 overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px] pointer-events-none" />
+          <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="relative flex flex-col h-full p-6">
             {/* Header */}
@@ -742,14 +745,14 @@ const NotesCard = memo(() => {
             </div>
             
             {/* Editor */}
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 overflow-hidden">
               <RichNotesEditor
                 value={content}
                 onChange={handleChange}
                 placeholder="Skriv påminnelser och anteckningar..."
                 hideToolbar
                 onEditorReady={handleExpandedEditorReady}
-                className="h-full [&_.ProseMirror]:min-h-[400px]"
+                className="h-full [&_.ProseMirror]:min-h-[300px]"
               />
             </div>
             
