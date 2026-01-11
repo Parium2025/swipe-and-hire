@@ -43,7 +43,8 @@ export const useInterviews = () => {
         .eq('employer_id', user.id)
         .gte('scheduled_at', new Date().toISOString())
         .in('status', ['pending', 'confirmed'])
-        .order('scheduled_at', { ascending: true });
+        .order('scheduled_at', { ascending: true })
+        .limit(100); // Limit for scalability
 
       if (error) throw error;
 
@@ -124,7 +125,8 @@ export const useCandidateInterviews = () => {
         .eq('applicant_id', user.id)
         .gte('scheduled_at', new Date().toISOString())
         .in('status', ['pending', 'confirmed'])
-        .order('scheduled_at', { ascending: true });
+        .order('scheduled_at', { ascending: true })
+        .limit(50); // Limit for scalability
 
       if (error) throw error;
 
