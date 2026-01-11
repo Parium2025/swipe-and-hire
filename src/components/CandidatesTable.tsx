@@ -23,7 +23,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 type SortField = 'name' | 'rating' | 'applied_at' | 'last_active_at' | null;
-type SortDirection = 'asc' | 'desc';
+type SortDirection = 'asc' | 'desc' | null;
 
 // Infinite scroll sentinel component
 function InfiniteScrollSentinel({ 
@@ -109,9 +109,9 @@ export function CandidatesTable({
   const allSelected = applications.length > 0 && selectedIds.size === applications.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < applications.length;
 
-  // Sorting state
+  // Sorting state - 3-step toggle: null (neutral) → desc → asc → null
   const [sortField, setSortField] = useState<SortField>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   // Clear selection when selection mode is turned off
   useEffect(() => {
@@ -220,15 +220,22 @@ export function CandidatesTable({
     onUpdate();
   }, [applications, selectedIds, addCandidates, onSelectionModeChange, onUpdate]);
 
-  // Sorting logic
+  // Sorting logic - 3-step toggle: neutral → desc → asc → neutral
   const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      // Cycle through: desc → asc → null (neutral)
+      if (sortDirection === 'desc') {
+        setSortDirection('asc');
+      } else if (sortDirection === 'asc') {
+        setSortField(null);
+        setSortDirection(null);
+      }
     } else {
+      // New field: start with desc
       setSortField(field);
       setSortDirection('desc');
     }
-  }, [sortField]);
+  }, [sortField, sortDirection]);
 
   // Get average rating for an application from team candidates
   const getTeamInfo = useCallback((appId: string) => {
@@ -248,7 +255,8 @@ export function CandidatesTable({
 
   // Sort applications
   const sortedApplications = useMemo(() => {
-    if (!sortField) return applications;
+    // No sorting when neutral (sortField or sortDirection is null)
+    if (!sortField || !sortDirection) return applications;
 
     return [...applications].sort((a, b) => {
       let comparison = 0;
@@ -280,11 +288,20 @@ export function CandidatesTable({
     });
   }, [applications, sortField, sortDirection, getTeamInfo]);
 
-  // Sort icon helper
+  // Sort icon helper - shows both arrows when neutral
   const SortIcon = ({ field }: { field: SortField }) => {
-    const base = "h-3.5 w-3.5 ml-1.5 text-white shrink-0";
+    const isActive = sortField === field && sortDirection !== null;
+    const base = cn(
+      "h-3.5 w-3.5 ml-1.5 shrink-0 transition-opacity",
+      isActive ? "text-white" : "text-white/50"
+    );
 
-    if (sortField !== field) return <ArrowUpDown className={base} />;
+    // Neutral state (no sorting or different field): show both arrows
+    if (sortField !== field || sortDirection === null) {
+      return <ArrowUpDown className={base} />;
+    }
+    
+    // Active sorting: show single arrow
     return sortDirection === 'asc'
       ? <ArrowUp className={base} />
       : <ArrowDown className={base} />;
