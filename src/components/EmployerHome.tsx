@@ -1,23 +1,24 @@
-import { memo, useMemo, useEffect, useState } from 'react';
+import { memo, useMemo, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useJobsData } from '@/hooks/useJobsData';
-import { useWeather, clearWeatherCache } from '@/hooks/useWeather';
+import { useWeather } from '@/hooks/useWeather';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   Briefcase, 
   Users, 
   Plus,
-  ArrowRight,
-  FileText,
-  Building2,
+  Database,
+  AlertTriangle,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { isJobExpiredCheck } from '@/lib/date';
 import WeatherEffects from '@/components/WeatherEffects';
 import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
+import { useIsSystemAdmin } from '@/components/SystemHealthPanel';
+import { supabase } from '@/integrations/supabase/client';
 
 const getGreeting = (): { text: string; isEvening: boolean; isDaytime: boolean } => {
   const hour = new Date().getHours();
@@ -67,8 +68,16 @@ const EmployerHome = memo(() => {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { jobs, isLoading } = useJobsData({ scope: 'personal' });
+  const isSystemAdmin = useIsSystemAdmin();
   
   const [showContent, setShowContent] = useState(false);
+  const [systemHealth, setSystemHealth] = useState<{
+    storagePercent: number;
+    dbPercent: number;
+    bandwidthPercent: number;
+    worstMetric: string;
+    worstPercent: number;
+  } | null>(null);
   
   useEffect(() => {
     if (!isLoading) {
@@ -76,6 +85,53 @@ const EmployerHome = memo(() => {
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
+
+  // Fetch system health for admin
+  const fetchSystemHealth = useCallback(async () => {
+    if (!isSystemAdmin) return;
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data } = await supabase.functions.invoke('get-storage-stats', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (data) {
+        const LIMITS = { storage: 1000, database: 500, bandwidth: 5000 };
+        const storagePercent = (data.storage.totalMB / LIMITS.storage) * 100;
+        const dbPercent = (data.database.estimatedMB / LIMITS.database) * 100;
+        
+        // Estimate bandwidth
+        const videosMB = data.storage.byType.videos.mb || 0;
+        const videosCount = data.storage.byType.videos.count || 1;
+        const bandwidthEstimate = videosCount * 3 * (videosMB / videosCount);
+        const bandwidthPercent = (bandwidthEstimate / LIMITS.bandwidth) * 100;
+
+        const metrics = [
+          { name: 'Lagring', percent: storagePercent },
+          { name: 'Databas', percent: dbPercent },
+          { name: 'Bandbredd', percent: bandwidthPercent },
+        ];
+        const worst = metrics.sort((a, b) => b.percent - a.percent)[0];
+
+        setSystemHealth({
+          storagePercent,
+          dbPercent,
+          bandwidthPercent,
+          worstMetric: worst.name,
+          worstPercent: worst.percent,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch system health:', err);
+    }
+  }, [isSystemAdmin]);
+
+  useEffect(() => {
+    fetchSystemHealth();
+  }, [fetchSystemHealth]);
 
   // Calculate basic stats for context
   const stats = useMemo(() => {
@@ -233,7 +289,7 @@ const EmployerHome = memo(() => {
         </motion.div>
 
         {/* Quick summary */}
-        {(stats.activeJobs > 0 || stats.pendingApplications > 0) && (
+        {(stats.activeJobs > 0 || stats.pendingApplications > 0 || (isSystemAdmin && systemHealth)) && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -253,6 +309,33 @@ const EmployerHome = memo(() => {
                 <Users className="h-4 w-4 text-blue-400" />
                 <span className="text-white text-sm">
                   <span className="font-semibold">{stats.pendingApplications}</span> nya ansökningar
+                </span>
+              </div>
+            )}
+            {/* System Health badge - admin only */}
+            {isSystemAdmin && systemHealth && (
+              <div 
+                className={`flex items-center gap-2 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-colors ${
+                  systemHealth.worstPercent > 70 
+                    ? 'bg-orange-500/20 hover:bg-orange-500/30' 
+                    : 'bg-white/10 hover:bg-white/20'
+                }`}
+                title="Klicka på grafikonen i navbaren för detaljer"
+              >
+                {systemHealth.worstPercent > 70 ? (
+                  <AlertTriangle className="h-4 w-4 text-orange-400" />
+                ) : (
+                  <Database className="h-4 w-4 text-emerald-400" />
+                )}
+                <span className="text-white text-sm">
+                  System: <span className={`font-semibold ${
+                    systemHealth.worstPercent > 70 ? 'text-orange-300' : 'text-emerald-300'
+                  }`}>
+                    {systemHealth.worstPercent > 70 
+                      ? `${systemHealth.worstMetric} ${systemHealth.worstPercent.toFixed(0)}%`
+                      : 'OK'
+                    }
+                  </span>
                 </span>
               </div>
             )}
