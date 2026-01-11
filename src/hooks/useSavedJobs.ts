@@ -16,12 +16,10 @@ export const useSavedJobs = () => {
     }
 
     try {
-      // Limit to 1000 saved jobs for performance - most users won't save more
       const { data, error } = await supabase
         .from('saved_jobs')
         .select('job_id')
-        .eq('user_id', user.id)
-        .limit(1000);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 

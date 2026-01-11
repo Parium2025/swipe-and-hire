@@ -97,7 +97,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         if (error) throw error;
         return data || [];
       } else {
-        // Personal scope - only current user's jobs (limit 200 for performance)
+        // Personal scope - only current user's jobs
         const { data, error } = await supabase
           .from('job_postings')
           .select(`
@@ -108,8 +108,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             )
           `)
           .eq('employer_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(200);
+          .order('created_at', { ascending: false });
 
         if (error) throw error;
         return data || [];
