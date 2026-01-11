@@ -533,6 +533,44 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
   });
 
+  // Add multiple candidates at once (bulk action)
+  const addCandidates = useMutation({
+    mutationFn: async (candidates: Array<{ applicationId: string; applicantId: string; jobId?: string }>) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const insertData = candidates.map(c => ({
+        recruiter_id: user.id,
+        applicant_id: c.applicantId,
+        application_id: c.applicationId,
+        job_id: c.jobId || null,
+        stage: 'to_contact',
+      }));
+
+      const { data, error } = await supabase
+        .from('my_candidates')
+        .upsert(insertData, { 
+          onConflict: 'recruiter_id,applicant_id,application_id',
+          ignoreDuplicates: true 
+        })
+        .select();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      const count = data?.length || 0;
+      if (count > 0) {
+        toast.success(`${count} kandidat${count !== 1 ? 'er' : ''} tillagd${count !== 1 ? 'a' : ''} i din lista`);
+      } else {
+        toast.info('Kandidaterna finns redan i din lista');
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Kunde inte lägga till kandidaterna');
+    },
+  });
+
   // Move candidate to different stage
   const moveCandidate = useMutation({
     mutationFn: async ({ id, stage }: { id: string; stage: CandidateStage }) => {
@@ -741,6 +779,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
     hasNextPage,
     isFetchingNextPage,
     addCandidate,
+    addCandidates,
     moveCandidate,
     removeCandidate,
     updateNotes,

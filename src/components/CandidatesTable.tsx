@@ -9,13 +9,17 @@ import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare, X } from 'lucide-react';
+import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+
+type SortField = 'name' | 'rating' | 'applied_at' | 'last_active_at' | null;
+type SortDirection = 'asc' | 'desc';
 
 // Infinite scroll sentinel component
 function InfiniteScrollSentinel({ 
@@ -91,13 +95,17 @@ export function CandidatesTable({
 }: CandidatesTableProps) {
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { isInMyCandidates, addCandidate } = useMyCandidatesData();
+  const { isInMyCandidates, addCandidate, addCandidates } = useMyCandidatesData();
   const { teamMembers, hasTeam } = useTeamMembers();
   
   // Bulk selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const allSelected = applications.length > 0 && selectedIds.size === applications.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < applications.length;
+
+  // Sorting state
+  const [sortField, setSortField] = useState<SortField>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // Clear selection when selection mode is turned off
   useEffect(() => {
@@ -167,6 +175,33 @@ export function CandidatesTable({
     onSelectionModeChange?.(false);
   }, [onSelectionModeChange]);
 
+  // Handle bulk add to my candidates
+  const handleBulkAddToMyCandidates = useCallback(async () => {
+    const selectedApps = applications.filter(a => selectedIds.has(a.id));
+    if (selectedApps.length === 0) return;
+
+    const candidatesToAdd = selectedApps.map(app => ({
+      applicationId: app.id,
+      applicantId: app.applicant_id,
+      jobId: app.job_id,
+    }));
+
+    await addCandidates.mutateAsync(candidatesToAdd);
+    setSelectedIds(new Set());
+    onSelectionModeChange?.(false);
+    onUpdate();
+  }, [applications, selectedIds, addCandidates, onSelectionModeChange, onUpdate]);
+
+  // Sorting logic
+  const handleSort = useCallback((field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  }, [sortField]);
+
   // Get average rating for an application from team candidates
   const getTeamInfo = useCallback((appId: string) => {
     const info = teamCandidates[appId];
@@ -182,6 +217,48 @@ export function CandidatesTable({
       count: info.length,
     };
   }, [teamCandidates]);
+
+  // Sort applications
+  const sortedApplications = useMemo(() => {
+    if (!sortField) return applications;
+
+    return [...applications].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortField) {
+        case 'name':
+          const nameA = `${a.first_name || ''} ${a.last_name || ''}`.toLowerCase();
+          const nameB = `${b.first_name || ''} ${b.last_name || ''}`.toLowerCase();
+          comparison = nameA.localeCompare(nameB, 'sv');
+          break;
+        case 'rating':
+          const ratingA = getTeamInfo(a.id)?.maxRating || 0;
+          const ratingB = getTeamInfo(b.id)?.maxRating || 0;
+          comparison = ratingA - ratingB;
+          break;
+        case 'applied_at':
+          const dateA = a.applied_at ? new Date(a.applied_at).getTime() : 0;
+          const dateB = b.applied_at ? new Date(b.applied_at).getTime() : 0;
+          comparison = dateA - dateB;
+          break;
+        case 'last_active_at':
+          const activeA = a.last_active_at ? new Date(a.last_active_at).getTime() : 0;
+          const activeB = b.last_active_at ? new Date(b.last_active_at).getTime() : 0;
+          comparison = activeA - activeB;
+          break;
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [applications, sortField, sortDirection, getTeamInfo]);
+
+  // Sort icon helper
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
 
   if (applications.length === 0) {
     return (
@@ -238,9 +315,13 @@ export function CandidatesTable({
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-[hsl(222,47%,11%)] border-white/10 min-w-[180px]">
-                    <DropdownMenuItem className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
+                    <DropdownMenuItem 
+                      className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                      onClick={handleBulkAddToMyCandidates}
+                      disabled={addCandidates.isPending}
+                    >
                       <UserPlus className="h-4 w-4 mr-2" />
-                      Lägg till i Mina kandidater
+                      {addCandidates.isPending ? 'Lägger till...' : 'Lägg till i Mina kandidater'}
                     </DropdownMenuItem>
                     <DropdownMenuItem className="text-red-400 cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-red-400">
                       <Trash2 className="h-4 w-4 mr-2" />
@@ -277,16 +358,48 @@ export function CandidatesTable({
                   />
                 </TableHead>
               )}
-              <TableHead className="text-white">Kandidat</TableHead>
-              <TableHead className="text-white">Betyg</TableHead>
+              <TableHead 
+                className="text-white cursor-pointer hover:bg-white/5 select-none"
+                onClick={() => handleSort('name')}
+              >
+                <span className="flex items-center">
+                  Kandidat
+                  <SortIcon field="name" />
+                </span>
+              </TableHead>
+              <TableHead 
+                className="text-white cursor-pointer hover:bg-white/5 select-none"
+                onClick={() => handleSort('rating')}
+              >
+                <span className="flex items-center">
+                  Betyg
+                  <SortIcon field="rating" />
+                </span>
+              </TableHead>
               <TableHead className="text-white">Tjänst</TableHead>
-              <TableHead className="text-white">Ansökt</TableHead>
-              <TableHead className="text-white">Senaste aktivitet</TableHead>
+              <TableHead 
+                className="text-white cursor-pointer hover:bg-white/5 select-none"
+                onClick={() => handleSort('applied_at')}
+              >
+                <span className="flex items-center">
+                  Ansökt
+                  <SortIcon field="applied_at" />
+                </span>
+              </TableHead>
+              <TableHead 
+                className="text-white cursor-pointer hover:bg-white/5 select-none"
+                onClick={() => handleSort('last_active_at')}
+              >
+                <span className="flex items-center">
+                  Senaste aktivitet
+                  <SortIcon field="last_active_at" />
+                </span>
+              </TableHead>
               <TableHead className="text-white w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {applications.map((application) => {
+            {sortedApplications.map((application) => {
               const status = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
               const isAlreadyAdded = isInMyCandidates(application.id);
               const teamInfo = getTeamInfo(application.id);
