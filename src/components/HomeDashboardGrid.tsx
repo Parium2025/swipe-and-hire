@@ -608,6 +608,29 @@ const NotesCard = memo(() => {
     setIsExpanded(false);
   }, []);
 
+  // Escape key to close fullscreen
+  useEffect(() => {
+    if (!isExpanded) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsExpanded(false);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isExpanded]);
+
+  // Calculate character and word count
+  const textStats = useMemo(() => {
+    // Strip HTML tags to get plain text
+    const plainText = content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+    const charCount = plainText.length;
+    const wordCount = plainText.trim() ? plainText.trim().split(/\s+/).length : 0;
+    return { charCount, wordCount };
+  }, [content]);
+
   // Auto-save with debounce (wait until we know if note exists to avoid duplicates)
   useEffect(() => {
     if (!user?.id || !isFetched) return;
@@ -728,6 +751,16 @@ const NotesCard = memo(() => {
                 onEditorReady={handleExpandedEditorReady}
                 className="h-full [&_.ProseMirror]:min-h-[400px]"
               />
+            </div>
+            
+            {/* Character/word counter */}
+            <div className="flex items-center justify-end gap-4 mt-3 pt-3 border-t border-white/10">
+              <span className="text-xs text-white/60">
+                {textStats.charCount} tecken
+              </span>
+              <span className="text-xs text-white/60">
+                {textStats.wordCount} ord
+              </span>
             </div>
           </div>
         </DialogContent>
