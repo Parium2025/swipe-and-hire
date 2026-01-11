@@ -222,25 +222,16 @@ export function CandidatesTable({
 
   // Sorting logic - 3-step toggle: neutral → desc → asc → neutral
   const handleSort = useCallback((field: SortField) => {
-    console.log('[CandidatesTable] handleSort called', { field, currentSortField: sortField, currentSortDirection: sortDirection });
-    
     if (sortField === field) {
-      // Cycle through: desc → asc → null (neutral)
       if (sortDirection === 'desc') {
-        console.log('[CandidatesTable] Switching to asc');
         setSortDirection('asc');
       } else if (sortDirection === 'asc') {
-        console.log('[CandidatesTable] Switching to neutral');
         setSortField(null);
         setSortDirection(null);
       } else {
-        // If somehow in null state for same field, start with desc
-        console.log('[CandidatesTable] Was null, switching to desc');
         setSortDirection('desc');
       }
     } else {
-      // New field: start with desc
-      console.log('[CandidatesTable] New field, starting with desc');
       setSortField(field);
       setSortDirection('desc');
     }
