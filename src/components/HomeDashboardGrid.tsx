@@ -23,7 +23,8 @@ import {
   Phone
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { RichNotesEditor } from '@/components/RichNotesEditor';
+import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
+import type { Editor } from '@tiptap/react';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useAuth } from '@/hooks/useAuth';
@@ -507,6 +508,7 @@ const NotesCard = memo(() => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const hasLocalEditsRef = useRef(false);
+  const [notesEditor, setNotesEditor] = useState<Editor | null>(null);
 
   const cacheKey = user?.id ? `employer_notes_cache_${user.id}` : 'employer_notes_cache';
 
@@ -529,7 +531,7 @@ const NotesCard = memo(() => {
     }
   }, [cacheKey, user?.id]);
 
-  // Cross-tab “realtime” feel via localStorage events
+  // Cross-tab "realtime" feel via localStorage events
   useEffect(() => {
     if (typeof window === 'undefined' || !user?.id) return;
     const onStorage = (e: StorageEvent) => {
@@ -543,7 +545,7 @@ const NotesCard = memo(() => {
     return () => window.removeEventListener('storage', onStorage);
   }, [cacheKey, user?.id]);
 
-  // Fetch existing note (don’t block editor rendering)
+  // Fetch existing note (don't block editor rendering)
   const { data: noteData, isFetched } = useQuery({
     queryKey: ['employer-notes', user?.id],
     queryFn: async () => {
@@ -586,6 +588,10 @@ const NotesCard = memo(() => {
     [cacheKey]
   );
 
+  const handleEditorReady = useCallback((editor: Editor) => {
+    setNotesEditor(editor);
+  }, []);
+
   // Auto-save with debounce (wait until we know if note exists to avoid duplicates)
   useEffect(() => {
     if (!user?.id || !isFetched) return;
@@ -626,12 +632,14 @@ const NotesCard = memo(() => {
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
       <CardContent className="relative p-4 h-full flex flex-col">
-        {/* Header */}
+        {/* Header with toolbar integrated */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-white/10">
-              <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
+            <div className="p-1.5 rounded-lg bg-white/10">
+              <FileText className="h-4 w-4 text-white" strokeWidth={1.5} />
             </div>
+            {/* Toolbar in header */}
+            <NotesToolbar editor={notesEditor} />
           </div>
           <div className="flex items-center gap-2">
             {isSaving && (
@@ -646,12 +654,14 @@ const NotesCard = memo(() => {
           </div>
         </div>
         
-        {/* Notes editor */}
+        {/* Notes editor - toolbar hidden, more space for writing */}
         <div className="flex-1 min-h-0">
           <RichNotesEditor
             value={content}
             onChange={handleChange}
             placeholder="Skriv påminnelser och anteckningar..."
+            hideToolbar
+            onEditorReady={handleEditorReady}
           />
         </div>
       </CardContent>
