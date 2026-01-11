@@ -504,6 +504,17 @@ export function useMyCandidatesData(searchQuery: string = '') {
     mutationFn: async ({ applicationId, applicantId, jobId }: { applicationId: string; applicantId: string; jobId?: string }) => {
       if (!user) throw new Error('Not authenticated');
 
+      // Add to the first available stage (avoids adding to deleted stages)
+      const { data: stageSettings } = await supabase
+        .from('user_stage_settings')
+        .select('stage_key, order_index')
+        .eq('user_id', user.id)
+        .gt('order_index', -1)
+        .order('order_index', { ascending: true })
+        .limit(1);
+
+      const defaultStage = stageSettings?.[0]?.stage_key || 'to_contact';
+
       const { data, error } = await supabase
         .from('my_candidates')
         .insert({
@@ -511,7 +522,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           applicant_id: applicantId,
           application_id: applicationId,
           job_id: jobId || null,
-          stage: 'to_contact',
+          stage: defaultStage,
         })
         .select()
         .single();
