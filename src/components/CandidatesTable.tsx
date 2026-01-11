@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -7,11 +7,15 @@ import { CandidateProfileDialog } from './CandidateProfileDialog';
 import { CandidateAvatar } from './CandidateAvatar';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus, Clock, Loader2 } from 'lucide-react';
+import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 // Infinite scroll sentinel component
 function InfiniteScrollSentinel({ 
@@ -86,6 +90,15 @@ export function CandidatesTable({
   const { isInMyCandidates, addCandidate } = useMyCandidatesData();
   const { teamMembers, hasTeam } = useTeamMembers();
   
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const allSelected = applications.length > 0 && selectedIds.size === applications.length;
+  const someSelected = selectedIds.size > 0 && selectedIds.size < applications.length;
+
+  // Team candidate info for colleague indicators
+  const applicationIds = useMemo(() => applications.map(a => a.id), [applications]);
+  const { teamCandidates } = useTeamCandidateInfo(applicationIds);
+  
   // State for team selection dialog
   const [teamDialogOpen, setTeamDialogOpen] = useState(false);
   const [selectedApplicationForTeam, setSelectedApplicationForTeam] = useState<ApplicationData | null>(null);
@@ -116,6 +129,48 @@ export function CandidatesTable({
     setTimeout(() => setSelectedApplicationId(null), 300);
   };
 
+  // Bulk selection handlers
+  const toggleSelectAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(applications.map(a => a.id)));
+    }
+  }, [allSelected, applications]);
+
+  const toggleSelect = useCallback((id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  // Get average rating for an application from team candidates
+  const getTeamInfo = useCallback((appId: string) => {
+    const info = teamCandidates[appId];
+    if (!info || info.length === 0) return null;
+    
+    const avgRating = info.reduce((sum, c) => sum + c.rating, 0) / info.length;
+    const colleagues = info.filter(c => c.recruiter_name !== 'Du');
+    
+    return {
+      avgRating: Math.round(avgRating * 10) / 10,
+      maxRating: Math.max(...info.map(c => c.rating)),
+      colleagues: colleagues.map(c => c.recruiter_name),
+      count: info.length,
+    };
+  }, [teamCandidates]);
+
   if (applications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
@@ -144,11 +199,67 @@ export function CandidatesTable({
 
   return (
     <>
+      {/* Bulk actions bar */}
+      {selectedIds.size > 0 && (
+        <div className="mb-4 p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-white font-medium">
+              {selectedIds.size} kandidat{selectedIds.size !== 1 ? 'er' : ''} markerad{selectedIds.size !== 1 ? 'e' : ''}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white/70 hover:text-white hover:bg-white/10"
+              onClick={clearSelection}
+            >
+              Avmarkera alla
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  <MoreHorizontal className="h-4 w-4 mr-2" />
+                  Åtgärder
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-background border-white/10">
+                <DropdownMenuItem className="text-white cursor-pointer">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Lägg till i Mina kandidater
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive cursor-pointer">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Ta bort
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-white/10 hover:bg-white/5 hover:border-white/50">
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={allSelected}
+                  ref={(el) => {
+                    if (el) {
+                      (el as any).indeterminate = someSelected;
+                    }
+                  }}
+                  onCheckedChange={toggleSelectAll}
+                  className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-background"
+                />
+              </TableHead>
               <TableHead className="text-white">Kandidat</TableHead>
+              <TableHead className="text-white">Betyg</TableHead>
               <TableHead className="text-white">Tjänst</TableHead>
               <TableHead className="text-white">Ansökt</TableHead>
               <TableHead className="text-white">Senaste aktivitet</TableHead>
@@ -159,13 +270,26 @@ export function CandidatesTable({
             {applications.map((application) => {
               const status = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
               const isAlreadyAdded = isInMyCandidates(application.id);
+              const teamInfo = getTeamInfo(application.id);
+              const isSelected = selectedIds.has(application.id);
               
               return (
                 <TableRow
                   key={application.id}
-                  className="group border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-all duration-150 active:bg-white/10"
+                  className={cn(
+                    "group border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-all duration-150 active:bg-white/10",
+                    isSelected && "bg-white/10"
+                  )}
                   onClick={() => handleRowClick(application)}
                 >
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => {}}
+                      onClick={(e) => toggleSelect(application.id, e)}
+                      className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-background"
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <CandidateAvatar
@@ -177,14 +301,53 @@ export function CandidatesTable({
                         stopPropagation
                       />
                       <div>
-                        <div className="font-medium text-white">
-                          {application.first_name} {application.last_name}
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-white">
+                            {application.first_name} {application.last_name}
+                          </span>
+                          {/* Colleague indicator */}
+                          {teamInfo && teamInfo.colleagues.length > 0 && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30">
+                                  <Users className="h-3 w-3 text-purple-300" />
+                                  <span className="text-[10px] text-purple-300 font-medium">
+                                    {teamInfo.colleagues.length}
+                                  </span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-xs">
+                                <p className="text-xs">
+                                  Tillagd av: {teamInfo.colleagues.join(', ')}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
                         </div>
                         {application.phone && (
                           <div className="text-sm text-muted-foreground">{application.phone}</div>
                         )}
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {teamInfo && teamInfo.maxRating > 0 ? (
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={cn(
+                              "h-3.5 w-3.5",
+                              star <= teamInfo.maxRating
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-white/20"
+                            )}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-white/30 text-sm">–</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {application.job_title || 'Okänd tjänst'}
