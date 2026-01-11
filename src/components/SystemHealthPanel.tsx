@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, RefreshCw, Video, FileUp, AlertTriangle, CheckCircle, Wifi } from 'lucide-react';
+import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, RefreshCw, Video, FileUp, AlertTriangle, CheckCircle, Wifi, Calendar, HeadphonesIcon, FileSearch } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ADMIN_EMAIL = 'pariumab@hotmail.com';
@@ -38,6 +38,11 @@ interface RealUsageStats {
   activeJobsCount: number;
   applicationsThisWeek: number;
   jobViewsThisMonth: number;
+  
+  // Additional tracking
+  interviewsScheduled: number;
+  openSupportTickets: number;
+  cvAnalysisQueueSize: number;
   
   // Email estimates
   emailsThisMonth: number;
@@ -151,16 +156,29 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       
-      const [activeJobsRes, applicationsWeekRes, totalJobViewsRes] = await Promise.all([
+      const [activeJobsRes, applicationsWeekRes, totalJobViewsRes, interviewsRes, supportTicketsRes, cvQueueRes] = await Promise.all([
         supabase.from('job_postings').select('id', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('job_applications').select('id', { count: 'exact', head: true })
           .gte('created_at', oneWeekAgo.toISOString()),
         // Get total job views for bandwidth estimation
         supabase.from('job_postings').select('views_count'),
+        // Interviews scheduled this week and upcoming
+        supabase.from('interviews').select('id', { count: 'exact', head: true })
+          .eq('status', 'scheduled')
+          .gte('scheduled_at', new Date().toISOString()),
+        // Open support tickets
+        supabase.from('support_tickets').select('id', { count: 'exact', head: true })
+          .in('status', ['open', 'pending']),
+        // CV analysis queue size
+        supabase.from('cv_analysis_queue').select('id', { count: 'exact', head: true })
+          .eq('status', 'pending'),
       ]);
 
       const activeJobsCount = activeJobsRes.count || 0;
       const applicationsThisWeek = applicationsWeekRes.count || 0;
+      const interviewsScheduled = interviewsRes.count || 0;
+      const openSupportTickets = supportTicketsRes.count || 0;
+      const cvAnalysisQueueSize = cvQueueRes.count || 0;
       // Sum all job views (estimate monthly views as total / months active, assume ~1 month for now)
       const totalJobViews = (totalJobViewsRes.data || []).reduce((sum, job) => sum + (job.views_count || 0), 0);
       const jobViewsThisMonth = Math.max(totalJobViews, applicationsThisWeek * 5); // At least 5 views per application
@@ -206,6 +224,9 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           activeJobsCount,
           applicationsThisWeek,
           jobViewsThisMonth,
+          interviewsScheduled,
+          openSupportTickets,
+          cvAnalysisQueueSize,
           emailsThisMonth: applicationsThisWeek * 8,
           bandwidthEstimateMB,
           isRealData: false,
@@ -261,6 +282,9 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           activeJobsCount,
           applicationsThisWeek,
           jobViewsThisMonth,
+          interviewsScheduled,
+          openSupportTickets,
+          cvAnalysisQueueSize,
           emailsThisMonth: (storageData.database.profiles || 0) + (applicationsThisWeek * 4),
           bandwidthEstimateMB,
           isRealData: true,
@@ -289,10 +313,36 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
     setHistory(getStoredHistory());
     fetchStats();
 
-    // Live updates every 30 seconds
+    // Live updates every 30 seconds as backup
     const interval = setInterval(fetchStats, 30000);
     
-    return () => clearInterval(interval);
+    // Subscribe to realtime changes for instant updates
+    const channel = supabase
+      .channel('system-health-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, () => {
+        fetchStats();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, () => {
+        fetchStats();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        fetchStats();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'interviews' }, () => {
+        fetchStats();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets' }, () => {
+        fetchStats();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cv_analysis_queue' }, () => {
+        fetchStats();
+      })
+      .subscribe();
+    
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, [isAdmin, isVisible, fetchStats]);
 
   // Calculate which limit will be hit first
@@ -409,7 +459,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           {/* STORAGE - The main concern */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+              <p className="text-xs text-white uppercase tracking-wide flex items-center gap-1.5">
                 <HardDrive className="h-3 w-3" />
                 Lagring
               </p>
@@ -428,28 +478,28 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
             {/* Storage breakdown */}
             <div className="grid grid-cols-3 gap-2 text-xs">
               <div className="bg-slate-800 p-2 rounded">
-                <div className="flex items-center gap-1 text-slate-400 mb-1">
+                <div className="flex items-center gap-1 text-white mb-1">
                   <Video className="h-3 w-3" />
                   Video
                 </div>
                 <p className="text-white font-medium">{stats?.storage.byType.videos.mb.toFixed(1) || 0} MB</p>
-                <p className="text-slate-500">{stats?.storage.byType.videos.count || 0} filer</p>
+                <p className="text-white/60">{stats?.storage.byType.videos.count || 0} filer</p>
               </div>
               <div className="bg-slate-800 p-2 rounded">
-                <div className="flex items-center gap-1 text-slate-400 mb-1">
+                <div className="flex items-center gap-1 text-white mb-1">
                   <FileUp className="h-3 w-3" />
                   CV:er
                 </div>
                 <p className="text-white font-medium">{stats?.storage.byType.cvs.mb.toFixed(1) || 0} MB</p>
-                <p className="text-slate-500">{stats?.storage.byType.cvs.count || 0} filer</p>
+                <p className="text-white/60">{stats?.storage.byType.cvs.count || 0} filer</p>
               </div>
               <div className="bg-slate-800 p-2 rounded">
-                <div className="flex items-center gap-1 text-slate-400 mb-1">
+                <div className="flex items-center gap-1 text-white mb-1">
                   <Users className="h-3 w-3" />
                   Bilder
                 </div>
                 <p className="text-white font-medium">{stats?.storage.byType.images.mb.toFixed(1) || 0} MB</p>
-                <p className="text-slate-500">{stats?.storage.byType.images.count || 0} filer</p>
+                <p className="text-white/60">{stats?.storage.byType.images.count || 0} filer</p>
               </div>
             </div>
           </div>
@@ -457,7 +507,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           {/* DATABASE */}
           <div className="pt-3 border-t border-slate-700 space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+              <p className="text-xs text-white uppercase tracking-wide flex items-center gap-1.5">
                 <Database className="h-3 w-3" />
                 Databas
               </p>
@@ -473,7 +523,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
               />
             </div>
             
-            <div className="flex justify-between text-xs text-slate-400">
+            <div className="flex justify-between text-xs text-white/80">
               <span>{stats?.totalApplications || 0} ansökningar</span>
               <span>{stats?.totalMessages || 0} meddelanden</span>
             </div>
@@ -482,7 +532,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           {/* EMAIL */}
           <div className="pt-3 border-t border-slate-700 space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+              <p className="text-xs text-white uppercase tracking-wide flex items-center gap-1.5">
                 <Mail className="h-3 w-3" />
                 Email/månad
               </p>
@@ -502,7 +552,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           {/* BANDWIDTH */}
           <div className="pt-3 border-t border-slate-700 space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+              <p className="text-xs text-white uppercase tracking-wide flex items-center gap-1.5">
                 <Wifi className="h-3 w-3" />
                 Bandbredd/månad
               </p>
@@ -518,25 +568,63 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
               />
             </div>
             
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-white/60">
               Baserat på {stats?.jobViewsThisMonth || 0} jobbvisningar + filnedladdningar
             </p>
           </div>
 
           {/* ACTIVITY PULSE */}
           <div className="pt-3 border-t border-slate-700">
-            <p className="text-xs text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+            <p className="text-xs text-white uppercase tracking-wide mb-2 flex items-center gap-1.5">
               <Briefcase className="h-3 w-3" />
               Aktivitet denna vecka
             </p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="bg-slate-800 p-2 rounded">
-                <span className="text-slate-400">Ansökningar</span>
+                <span className="text-white/80">Ansökningar</span>
                 <p className="text-white font-semibold text-lg">{stats?.applicationsThisWeek || 0}</p>
               </div>
               <div className="bg-slate-800 p-2 rounded">
-                <span className="text-slate-400">Aktiva jobb</span>
+                <span className="text-white/80">Aktiva jobb</span>
                 <p className="text-white font-semibold text-lg">{stats?.activeJobsCount || 0}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* SYSTEM STATUS */}
+          <div className="pt-3 border-t border-slate-700">
+            <p className="text-xs text-white uppercase tracking-wide mb-2 flex items-center gap-1.5">
+              <TrendingUp className="h-3 w-3" />
+              Systemstatus
+            </p>
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="bg-slate-800 p-2 rounded">
+                <div className="flex items-center gap-1 text-white/80 mb-1">
+                  <Calendar className="h-3 w-3" />
+                  Intervjuer
+                </div>
+                <p className="text-white font-semibold">{stats?.interviewsScheduled || 0}</p>
+                <p className="text-white/50 text-[10px]">planerade</p>
+              </div>
+              <div className="bg-slate-800 p-2 rounded">
+                <div className="flex items-center gap-1 text-white/80 mb-1">
+                  <HeadphonesIcon className="h-3 w-3" />
+                  Support
+                </div>
+                <p className={`font-semibold ${(stats?.openSupportTickets || 0) > 0 ? 'text-orange-400' : 'text-white'}`}>
+                  {stats?.openSupportTickets || 0}
+                </p>
+                <p className="text-white/50 text-[10px]">öppna</p>
+              </div>
+              <div className="bg-slate-800 p-2 rounded">
+                <div className="flex items-center gap-1 text-white/80 mb-1">
+                  <FileSearch className="h-3 w-3" />
+                  CV-kö
+                </div>
+                <p className={`font-semibold ${(stats?.cvAnalysisQueueSize || 0) > 5 ? 'text-yellow-400' : 'text-white'}`}>
+                  {stats?.cvAnalysisQueueSize || 0}
+                </p>
+                <p className="text-white/50 text-[10px]">väntar</p>
               </div>
             </div>
           </div>
@@ -545,7 +633,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           <div className="pt-3 border-t border-slate-700">
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="flex items-center justify-between w-full text-xs text-slate-400 hover:text-white transition-colors"
+              className="flex items-center justify-between w-full text-xs text-white/80 hover:text-white transition-colors"
             >
               <span className="flex items-center gap-1.5">
                 <TrendingUp className="h-3 w-3" />
@@ -603,7 +691,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-500 text-center py-4">
+                  <p className="text-xs text-white/50 text-center py-4">
                     Historisk data samlas in dagligen.
                   </p>
                 )}
@@ -612,11 +700,14 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                 {stats && stats.storage.totalMB > 0 && (
                   <div className="bg-slate-800 p-3 rounded text-xs space-y-1">
                     <p className="text-white font-medium">📊 Kapacitet kvar</p>
-                    <p className="text-slate-300">
+                    <p className="text-white/80">
                       Lagring: {(LIMITS.storage - stats.storage.totalMB).toFixed(0)} MB ({((LIMITS.storage - stats.storage.totalMB) / LIMITS.storage * 100).toFixed(0)}%)
                     </p>
-                    <p className="text-slate-300">
+                    <p className="text-white/80">
                       Databas: {(LIMITS.database - stats.dbEstimatedMB).toFixed(0)} MB ({((LIMITS.database - stats.dbEstimatedMB) / LIMITS.database * 100).toFixed(0)}%)
+                    </p>
+                    <p className="text-white/80">
+                      Bandbredd: {(LIMITS.bandwidth - (stats.bandwidthEstimateMB || 0)).toFixed(0)} MB ({((LIMITS.bandwidth - (stats.bandwidthEstimateMB || 0)) / LIMITS.bandwidth * 100).toFixed(0)}%)
                     </p>
                   </div>
                 )}
@@ -631,7 +722,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                 ⚠️ Kritisk nivå - uppgradera nu!
               </p>
               <p className="text-xs text-red-300/70 mt-1">
-                Supabase Pro: $25/mån → 8GB lagring, 8GB databas
+                Lovable Pro: $25/mån → 8GB lagring, 8GB databas
               </p>
             </div>
           )}
