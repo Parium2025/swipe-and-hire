@@ -5,7 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, UserMinus } from 'lucide-react';
+import { ShareCandidateDialog } from '@/components/ShareCandidateDialog';
+import { SendMessageDialog } from '@/components/SendMessageDialog';
 import type { StageSettings } from '@/hooks/useStageSettings';
 import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { supabase } from '@/integrations/supabase/client';
@@ -60,6 +62,8 @@ interface CandidateProfileDialogProps {
   stageConfig?: Record<string, StageSettings>;
   /** Callback when stage is changed */
   onStageChange?: (newStage: string) => void;
+  /** Callback when candidate is removed from my candidates list */
+  onRemoveFromList?: () => void;
 }
 
 const statusConfig = {
@@ -143,6 +147,7 @@ export const CandidateProfileDialog = ({
   stageOrder,
   stageConfig,
   onStageChange,
+  onRemoveFromList,
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
@@ -155,6 +160,10 @@ export const CandidateProfileDialog = ({
   const [editingNoteText, setEditingNoteText] = useState('');
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const [bookInterviewOpen, setBookInterviewOpen] = useState(false);
+  const [sendMessageOpen, setSendMessageOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+  const [removing, setRemoving] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -955,8 +964,8 @@ export const CandidateProfileDialog = ({
             {/* Actions - show stage navigation + book meeting for my-candidates, only Book meeting for all-candidates */}
             {variant === 'my-candidates' ? (
               <div className="pt-4 border-t border-white/20 space-y-3">
-                {/* Book meeting button - above stage navigation */}
-                <div className="flex justify-center">
+                {/* Action buttons row */}
+                <div className="flex justify-center gap-2 flex-wrap">
                   <Button
                     onClick={() => setBookInterviewOpen(true)}
                     variant="glassBlue"
@@ -964,6 +973,31 @@ export const CandidateProfileDialog = ({
                   >
                     <CalendarPlus className="h-4 w-4 mr-1.5" />
                     Boka möte
+                  </Button>
+                  <Button
+                    onClick={() => setSendMessageOpen(true)}
+                    variant="glass"
+                    size="default"
+                  >
+                    <MessageSquare className="h-4 w-4 mr-1.5" />
+                    Meddelande
+                  </Button>
+                  <Button
+                    onClick={() => setShareDialogOpen(true)}
+                    variant="glass"
+                    size="default"
+                  >
+                    <Users className="h-4 w-4 mr-1.5" />
+                    Dela
+                  </Button>
+                  <Button
+                    onClick={() => setRemoveConfirmOpen(true)}
+                    variant="glass"
+                    size="default"
+                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  >
+                    <UserMinus className="h-4 w-4 mr-1.5" />
+                    Ta bort
                   </Button>
                 </div>
 
@@ -1260,6 +1294,57 @@ export const CandidateProfileDialog = ({
         jobTitle={displayApp.job_title || 'Tjänst'}
       />
     )}
+
+    {/* Send Message Dialog */}
+    {displayApp && (
+      <SendMessageDialog
+        open={sendMessageOpen}
+        onOpenChange={setSendMessageOpen}
+        recipientId={displayApp.applicant_id}
+        recipientName={`${displayApp.first_name || ''} ${displayApp.last_name || ''}`.trim() || 'Kandidat'}
+        jobId={displayApp.job_id}
+      />
+    )}
+
+    {/* Share Candidate Dialog */}
+    {displayApp && (
+      <ShareCandidateDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        applicantId={displayApp.applicant_id}
+        applicationId={displayApp.id}
+        jobId={displayApp.job_id}
+        candidateName={`${displayApp.first_name || ''} ${displayApp.last_name || ''}`.trim() || 'Kandidat'}
+      />
+    )}
+
+    {/* Remove from list confirmation dialog */}
+    <AlertDialog open={removeConfirmOpen} onOpenChange={setRemoveConfirmOpen}>
+      <AlertDialogContent className="bg-slate-900 border-white/10">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-white">Ta bort från Mina kandidater?</AlertDialogTitle>
+          <AlertDialogDescription className="text-white/70">
+            Kandidaten kommer att tas bort från din lista. Du kan alltid lägga till dem igen senare.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+            Avbryt
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={() => {
+              if (onRemoveFromList) {
+                onRemoveFromList();
+                onOpenChange(false);
+              }
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            Ta bort
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </>
   );
 };
