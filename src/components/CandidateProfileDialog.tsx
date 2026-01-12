@@ -976,8 +976,8 @@ export const CandidateProfileDialog = ({
                 </Button>
               </div>
             ) : (
-              /* Sticky floating button for all-candidates view - transparent, small */
-              <div className="sticky bottom-0 left-0 right-0 flex justify-center py-3">
+              /* Fixed footer button for all-candidates view */
+              <div className="border-t border-white/15 pt-4 mt-4 flex justify-center">
                 <Button
                   onClick={() => setBookInterviewOpen(true)}
                   variant="glassBlue"
