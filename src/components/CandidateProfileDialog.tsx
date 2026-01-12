@@ -49,6 +49,8 @@ interface CandidateProfileDialogProps {
   candidateRating?: number;
   /** Callback when rating is changed */
   onRatingChange?: (rating: number) => void;
+  /** Variant: 'all-candidates' shows only Book meeting button (sticky), 'my-candidates' shows all buttons */
+  variant?: 'all-candidates' | 'my-candidates';
 }
 
 const statusConfig = {
@@ -127,6 +129,7 @@ export const CandidateProfileDialog = ({
   allApplications,
   candidateRating,
   onRatingChange,
+  variant = 'my-candidates',
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
@@ -936,41 +939,56 @@ export const CandidateProfileDialog = ({
             </div>
           </div>
 
-            {/* Actions */}
-            <div className="flex flex-wrap justify-center gap-3 pt-4 border-t border-white/20">
-              <Button
-                onClick={() => setBookInterviewOpen(true)}
-                variant="glassBlue"
-                size="lg"
-              >
-                <CalendarPlus className="h-4 w-4 mr-1.5" />
-                Boka möte
-              </Button>
-              <Button
-                onClick={() => updateStatus('reviewing')}
-                variant="glassYellow"
-                disabled={displayApp.status === 'reviewing'}
-                size="lg"
-              >
-                Granska
-              </Button>
-              <Button
-                onClick={() => updateStatus('hired')}
-                variant="glassGreen"
-                disabled={displayApp.status === 'hired'}
-                size="lg"
-              >
-                Anställ
-              </Button>
-              <Button
-                onClick={() => updateStatus('rejected')}
-                variant="glassRed"
-                disabled={displayApp.status === 'rejected'}
-                size="lg"
-              >
-                Avvisa
-              </Button>
-            </div>
+            {/* Actions - show all buttons for my-candidates, only sticky Book meeting for all-candidates */}
+            {variant === 'my-candidates' ? (
+              <div className="flex flex-wrap justify-center gap-3 pt-4 border-t border-white/20">
+                <Button
+                  onClick={() => setBookInterviewOpen(true)}
+                  variant="glassBlue"
+                  size="lg"
+                >
+                  <CalendarPlus className="h-4 w-4 mr-1.5" />
+                  Boka möte
+                </Button>
+                <Button
+                  onClick={() => updateStatus('reviewing')}
+                  variant="glassYellow"
+                  disabled={displayApp.status === 'reviewing'}
+                  size="lg"
+                >
+                  Granska
+                </Button>
+                <Button
+                  onClick={() => updateStatus('hired')}
+                  variant="glassGreen"
+                  disabled={displayApp.status === 'hired'}
+                  size="lg"
+                >
+                  Anställ
+                </Button>
+                <Button
+                  onClick={() => updateStatus('rejected')}
+                  variant="glassRed"
+                  disabled={displayApp.status === 'rejected'}
+                  size="lg"
+                >
+                  Avvisa
+                </Button>
+              </div>
+            ) : (
+              /* Sticky floating button for all-candidates view */
+              <div className="sticky bottom-0 left-0 right-0 pt-4 pb-2 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent -mx-4 px-4 mt-4">
+                <Button
+                  onClick={() => setBookInterviewOpen(true)}
+                  variant="glassBlue"
+                  size="lg"
+                  className="w-full"
+                >
+                  <CalendarPlus className="h-4 w-4 mr-1.5" />
+                  Boka möte
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Activity Sidebar - right side */}

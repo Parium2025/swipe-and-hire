@@ -600,6 +600,7 @@ export function CandidatesTable({
           onUpdate();
           handleDialogClose();
         }}
+        variant="all-candidates"
       />
 
       {/* Team selection dialog */}
