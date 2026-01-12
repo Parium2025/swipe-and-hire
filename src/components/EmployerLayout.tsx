@@ -14,6 +14,7 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useDevice } from '@/hooks/use-device';
+import { useEmployerDocumentTitle } from '@/hooks/useDocumentTitle';
 
 interface EmployerLayoutProps {
   children: ReactNode;
@@ -54,6 +55,9 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
   
   // Track user activity for "last seen" feature
   useActivityTracker();
+  
+  // Update browser tab title with unread message count
+  useEmployerDocumentTitle();
 
   // Keyboard shortcut: Cmd+N / Ctrl+N to open "Create New Job" dialog
   const handleKeyDown = useCallback((e: KeyboardEvent) => {

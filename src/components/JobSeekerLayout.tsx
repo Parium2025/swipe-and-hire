@@ -8,6 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
+import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
@@ -21,6 +22,9 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   
   // Track user activity for "last seen" feature
   useActivityTracker();
+  
+  // Update browser tab title with unread message count
+  useJobSeekerDocumentTitle();
 
   // Prefetch public jobs in background so they're ready instantly when navigating to /search-jobs
   useEffect(() => {
