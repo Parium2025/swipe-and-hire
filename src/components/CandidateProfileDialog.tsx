@@ -955,6 +955,18 @@ export const CandidateProfileDialog = ({
             {/* Actions - show stage navigation + book meeting for my-candidates, only Book meeting for all-candidates */}
             {variant === 'my-candidates' ? (
               <div className="pt-4 border-t border-white/20 space-y-3">
+                {/* Book meeting button - above stage navigation */}
+                <div className="flex justify-center">
+                  <Button
+                    onClick={() => setBookInterviewOpen(true)}
+                    variant="glassBlue"
+                    size="default"
+                  >
+                    <CalendarPlus className="h-4 w-4 mr-1.5" />
+                    Boka möte
+                  </Button>
+                </div>
+
                 {/* Stage navigation buttons */}
                 {currentStage && stageOrder && stageConfig && onStageChange && stageOrder.length > 1 && (() => {
                   const currentIndex = stageOrder.indexOf(currentStage);
@@ -966,16 +978,18 @@ export const CandidateProfileDialog = ({
                   return (
                     <div className="flex items-center justify-between gap-2">
                       {/* Previous stage button */}
-                      <Button
+                      <button
                         onClick={() => prevStage && onStageChange(prevStage)}
-                        variant="ghost"
-                        size="sm"
                         disabled={!prevStage}
-                        className={`flex-1 text-white/70 hover:text-white hover:bg-white/10 ${!prevStage ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                          prevStage 
+                            ? 'text-white/70 bg-white/5 hover:bg-white/10 hover:text-white/90' 
+                            : 'opacity-40 cursor-not-allowed text-white/50'
+                        }`}
                       >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        <ChevronLeft className="h-4 w-4" />
                         <span className="truncate max-w-[100px]">{prevLabel || 'Föregående'}</span>
-                      </Button>
+                      </button>
 
                       {/* Current stage indicator */}
                       <div className="flex-shrink-0 px-3 py-1 rounded-full bg-white/10 text-white/60 text-xs">
@@ -983,31 +997,21 @@ export const CandidateProfileDialog = ({
                       </div>
 
                       {/* Next stage button */}
-                      <Button
+                      <button
                         onClick={() => nextStage && onStageChange(nextStage)}
-                        variant="ghost"
-                        size="sm"
                         disabled={!nextStage}
-                        className={`flex-1 text-white/70 hover:text-white hover:bg-white/10 ${!nextStage ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                          nextStage 
+                            ? 'text-white/70 bg-white/5 hover:bg-white/10 hover:text-white/90' 
+                            : 'opacity-40 cursor-not-allowed text-white/50'
+                        }`}
                       >
                         <span className="truncate max-w-[100px]">{nextLabel || 'Nästa'}</span>
-                        <ChevronRight className="h-4 w-4 ml-1" />
-                      </Button>
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
                     </div>
                   );
                 })()}
-
-                {/* Book meeting button */}
-                <div className="flex justify-center">
-                  <Button
-                    onClick={() => setBookInterviewOpen(true)}
-                    variant="glassBlue"
-                    size="default"
-                  >
-                    <CalendarPlus className="h-4 w-4 mr-1.5" />
-                    Boka möte
-                  </Button>
-                </div>
               </div>
             ) : (
               /* Fixed footer button for all-candidates view */
