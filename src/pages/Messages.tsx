@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useMessages, Message } from '@/hooks/useMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 import { 
   Inbox, 
   Send, 
@@ -24,12 +24,43 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
+type MessageTab = 'inbox' | 'sent';
+
 export default function Messages() {
   const { user } = useAuth();
   const { inbox, sent, isLoading, unreadCount, markAsRead } = useMessages();
+  const [activeTab, setActiveTab] = useState<MessageTab>('inbox');
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [replyContent, setReplyContent] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
+  
+  // Refs for sliding indicator
+  const inboxRef = useRef<HTMLButtonElement>(null);
+  const sentRef = useRef<HTMLButtonElement>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 0 });
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const inboxButton = inboxRef.current;
+      const sentButton = sentRef.current;
+      
+      if (activeTab === 'inbox' && inboxButton) {
+        setIndicatorStyle({
+          left: inboxButton.offsetLeft,
+          width: inboxButton.offsetWidth,
+        });
+      } else if (activeTab === 'sent' && sentButton) {
+        setIndicatorStyle({
+          left: sentButton.offsetLeft,
+          width: sentButton.offsetWidth,
+        });
+      }
+    };
+
+    updateIndicator();
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [activeTab, unreadCount]);
 
   const handleOpenMessage = (message: Message) => {
     setSelectedMessage(message);
@@ -197,49 +228,70 @@ export default function Messages() {
         </div>
       </div>
 
-      <Tabs defaultValue="inbox" className="w-full">
-        <TabsList className="bg-white/5 border border-white/10 mb-4">
-          <TabsTrigger 
-            value="inbox" 
-            className="data-[state=active]:bg-white/10 text-white/70 data-[state=active]:text-white gap-2"
-          >
-            <Inbox className="h-4 w-4" />
-            Inkorg
-            {unreadCount > 0 && (
-              <Badge className="bg-blue-500 text-white text-xs ml-1">
-                {unreadCount}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger 
-            value="sent" 
-            className="data-[state=active]:bg-white/10 text-white/70 data-[state=active]:text-white gap-2"
-          >
-            <Send className="h-4 w-4" />
-            Skickat
-          </TabsTrigger>
-        </TabsList>
+      {/* Sliding Tabs */}
+      <div className="relative flex bg-white/5 backdrop-blur-[2px] rounded-md p-1 border border-white/10 w-fit gap-0.5 mb-6">
+        {/* Sliding background */}
+        <motion.div
+          className="absolute top-1 bottom-1 bg-parium-navy rounded-[5px]"
+          initial={false}
+          animate={{
+            left: indicatorStyle.left,
+            width: indicatorStyle.width,
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 35,
+            mass: 0.8,
+          }}
+        />
+        
+        {/* Buttons */}
+        <button
+          ref={inboxRef}
+          type="button"
+          onClick={() => setActiveTab('inbox')}
+          className="relative z-10 flex items-center gap-1.5 py-1.5 px-3 rounded-[5px] text-xs font-medium text-white transition-colors whitespace-nowrap"
+        >
+          <Inbox className="h-3.5 w-3.5" />
+          Inkorg
+          {unreadCount > 0 && (
+            <span className="bg-blue-500 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[16px] text-center">
+              {unreadCount}
+            </span>
+          )}
+        </button>
+        <button
+          ref={sentRef}
+          type="button"
+          onClick={() => setActiveTab('sent')}
+          className="relative z-10 flex items-center gap-1.5 py-1.5 px-3 rounded-[5px] text-xs font-medium text-white transition-colors whitespace-nowrap"
+        >
+          <Send className="h-3.5 w-3.5" />
+          Skickat
+        </button>
+      </div>
 
-        <TabsContent value="inbox" className="space-y-3">
-          {inbox.length === 0 ? (
+      {/* Content */}
+      <div className="space-y-3">
+        {activeTab === 'inbox' ? (
+          inbox.length === 0 ? (
             <EmptyState type="inbox" />
           ) : (
             inbox.map((message) => (
               <MessageCard key={message.id} message={message} isSent={false} />
             ))
-          )}
-        </TabsContent>
-
-        <TabsContent value="sent" className="space-y-3">
-          {sent.length === 0 ? (
+          )
+        ) : (
+          sent.length === 0 ? (
             <EmptyState type="sent" />
           ) : (
             sent.map((message) => (
               <MessageCard key={message.id} message={message} isSent={true} />
             ))
-          )}
-        </TabsContent>
-      </Tabs>
+          )
+        )}
+      </div>
 
       {/* Message Detail Dialog */}
       <Dialog open={!!selectedMessage} onOpenChange={(open) => !open && setSelectedMessage(null)}>
