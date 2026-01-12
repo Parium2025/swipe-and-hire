@@ -976,13 +976,12 @@ export const CandidateProfileDialog = ({
                 </Button>
               </div>
             ) : (
-              /* Sticky floating button for all-candidates view */
-              <div className="sticky bottom-0 left-0 right-0 pt-4 pb-2 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent -mx-4 px-4 mt-4">
+              /* Sticky floating button for all-candidates view - transparent, small */
+              <div className="sticky bottom-0 left-0 right-0 flex justify-center py-3">
                 <Button
                   onClick={() => setBookInterviewOpen(true)}
                   variant="glassBlue"
-                  size="lg"
-                  className="w-full"
+                  size="default"
                 >
                   <CalendarPlus className="h-4 w-4 mr-1.5" />
                   Boka möte
