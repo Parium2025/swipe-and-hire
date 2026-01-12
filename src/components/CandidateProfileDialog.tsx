@@ -978,7 +978,7 @@ export const CandidateProfileDialog = ({
                   return (
                     <div className="space-y-2">
                       {/* Section label */}
-                      <p className="text-center text-white/40 text-xs">Flytta kandidat</p>
+                      <p className="text-center text-white text-xs font-medium">Flytta kandidat</p>
                       
                       <div className="flex items-center justify-between gap-2">
                         {/* Previous stage button */}
@@ -987,17 +987,17 @@ export const CandidateProfileDialog = ({
                           disabled={!prevStage}
                           className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                             prevStage 
-                              ? 'text-white/70 bg-white/5 hover:bg-white/10 hover:text-white/90' 
+                              ? 'text-white bg-white/10 hover:bg-white/20' 
                               : 'opacity-40 cursor-not-allowed text-white/50'
                           }`}
                         >
                           <ChevronLeft className="h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">Till {prevLabel || 'föregående'}</span>
+                          <span className="truncate">Till {(prevLabel || 'föregående').replace('?', '')}</span>
                         </button>
 
                         {/* Current stage indicator */}
-                        <div className="flex-shrink-0 px-3 py-1 rounded-full bg-white/10 text-white/60 text-xs whitespace-nowrap">
-                          {stageConfig[currentStage]?.label || currentStage}
+                        <div className="flex-shrink-0 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium whitespace-nowrap">
+                          {(stageConfig[currentStage]?.label || currentStage).replace('?', '')}
                         </div>
 
                         {/* Next stage button */}
@@ -1006,11 +1006,11 @@ export const CandidateProfileDialog = ({
                           disabled={!nextStage}
                           className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                             nextStage 
-                              ? 'text-white/70 bg-white/5 hover:bg-white/10 hover:text-white/90' 
+                              ? 'text-white bg-white/10 hover:bg-white/20' 
                               : 'opacity-40 cursor-not-allowed text-white/50'
                           }`}
                         >
-                          <span className="truncate">Till {nextLabel || 'nästa'}</span>
+                          <span className="truncate">Till {(nextLabel || 'nästa').replace('?', '')}</span>
                           <ChevronRight className="h-4 w-4 flex-shrink-0" />
                         </button>
                       </div>
