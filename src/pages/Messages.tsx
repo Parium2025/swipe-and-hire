@@ -37,7 +37,7 @@ export default function Messages() {
   // Refs for sliding indicator
   const inboxRef = useRef<HTMLButtonElement>(null);
   const sentRef = useRef<HTMLButtonElement>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 0 });
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 80, ready: false });
 
   useEffect(() => {
     const updateIndicator = () => {
@@ -48,11 +48,13 @@ export default function Messages() {
         setIndicatorStyle({
           left: inboxButton.offsetLeft,
           width: inboxButton.offsetWidth,
+          ready: true,
         });
       } else if (activeTab === 'sent' && sentButton) {
         setIndicatorStyle({
           left: sentButton.offsetLeft,
           width: sentButton.offsetWidth,
+          ready: true,
         });
       }
     };
@@ -198,7 +200,7 @@ export default function Messages() {
       <h3 className="text-lg font-medium text-white mb-1">
         {type === 'inbox' ? 'Inga mottagna meddelanden' : 'Inga skickade meddelanden'}
       </h3>
-      <p className="text-white/60 text-sm max-w-sm">
+      <p className="text-white text-sm max-w-sm">
         {type === 'inbox' 
           ? 'När någon skickar ett meddelande till dig visas det här.'
           : 'Meddelanden du skickar till kandidater eller arbetsgivare visas här.'}
@@ -228,16 +230,18 @@ export default function Messages() {
         {/* Sliding background */}
         <motion.div
           className="absolute top-1 bottom-1 bg-parium-navy rounded-[5px]"
-          initial={false}
+          initial={{ left: indicatorStyle.left, width: indicatorStyle.width, opacity: indicatorStyle.ready ? 1 : 0 }}
           animate={{
             left: indicatorStyle.left,
             width: indicatorStyle.width,
+            opacity: indicatorStyle.ready ? 1 : 0,
           }}
           transition={{
             type: "spring",
             stiffness: 300,
             damping: 35,
             mass: 0.8,
+            opacity: { duration: 0.15 },
           }}
         />
         
