@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react';
+import type { StageSettings } from '@/hooks/useStageSettings';
 import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -51,6 +52,14 @@ interface CandidateProfileDialogProps {
   onRatingChange?: (rating: number) => void;
   /** Variant: 'all-candidates' shows only Book meeting button (sticky), 'my-candidates' shows all buttons */
   variant?: 'all-candidates' | 'my-candidates';
+  /** Current stage of the candidate (for my-candidates variant) */
+  currentStage?: string;
+  /** Ordered list of stage keys */
+  stageOrder?: string[];
+  /** Stage configuration with labels/colors */
+  stageConfig?: Record<string, StageSettings>;
+  /** Callback when stage is changed */
+  onStageChange?: (newStage: string) => void;
 }
 
 const statusConfig = {
@@ -130,6 +139,10 @@ export const CandidateProfileDialog = ({
   candidateRating,
   onRatingChange,
   variant = 'my-candidates',
+  currentStage,
+  stageOrder,
+  stageConfig,
+  onStageChange,
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
@@ -939,41 +952,62 @@ export const CandidateProfileDialog = ({
             </div>
           </div>
 
-            {/* Actions - show all buttons for my-candidates, only sticky Book meeting for all-candidates */}
+            {/* Actions - show stage navigation + book meeting for my-candidates, only Book meeting for all-candidates */}
             {variant === 'my-candidates' ? (
-              <div className="flex flex-wrap justify-center gap-3 pt-4 border-t border-white/20">
-                <Button
-                  onClick={() => setBookInterviewOpen(true)}
-                  variant="glassBlue"
-                  size="lg"
-                >
-                  <CalendarPlus className="h-4 w-4 mr-1.5" />
-                  Boka möte
-                </Button>
-                <Button
-                  onClick={() => updateStatus('reviewing')}
-                  variant="glassYellow"
-                  disabled={displayApp.status === 'reviewing'}
-                  size="lg"
-                >
-                  Granska
-                </Button>
-                <Button
-                  onClick={() => updateStatus('hired')}
-                  variant="glassGreen"
-                  disabled={displayApp.status === 'hired'}
-                  size="lg"
-                >
-                  Anställ
-                </Button>
-                <Button
-                  onClick={() => updateStatus('rejected')}
-                  variant="glassRed"
-                  disabled={displayApp.status === 'rejected'}
-                  size="lg"
-                >
-                  Avvisa
-                </Button>
+              <div className="pt-4 border-t border-white/20 space-y-3">
+                {/* Stage navigation buttons */}
+                {currentStage && stageOrder && stageConfig && onStageChange && stageOrder.length > 1 && (() => {
+                  const currentIndex = stageOrder.indexOf(currentStage);
+                  const prevStage = currentIndex > 0 ? stageOrder[currentIndex - 1] : null;
+                  const nextStage = currentIndex < stageOrder.length - 1 ? stageOrder[currentIndex + 1] : null;
+                  const prevLabel = prevStage ? stageConfig[prevStage]?.label || prevStage : null;
+                  const nextLabel = nextStage ? stageConfig[nextStage]?.label || nextStage : null;
+                  
+                  return (
+                    <div className="flex items-center justify-between gap-2">
+                      {/* Previous stage button */}
+                      <Button
+                        onClick={() => prevStage && onStageChange(prevStage)}
+                        variant="ghost"
+                        size="sm"
+                        disabled={!prevStage}
+                        className={`flex-1 text-white/70 hover:text-white hover:bg-white/10 ${!prevStage ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        <span className="truncate max-w-[100px]">{prevLabel || 'Föregående'}</span>
+                      </Button>
+
+                      {/* Current stage indicator */}
+                      <div className="flex-shrink-0 px-3 py-1 rounded-full bg-white/10 text-white/60 text-xs">
+                        {stageConfig[currentStage]?.label || currentStage}
+                      </div>
+
+                      {/* Next stage button */}
+                      <Button
+                        onClick={() => nextStage && onStageChange(nextStage)}
+                        variant="ghost"
+                        size="sm"
+                        disabled={!nextStage}
+                        className={`flex-1 text-white/70 hover:text-white hover:bg-white/10 ${!nextStage ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      >
+                        <span className="truncate max-w-[100px]">{nextLabel || 'Nästa'}</span>
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
+                  );
+                })()}
+
+                {/* Book meeting button */}
+                <div className="flex justify-center">
+                  <Button
+                    onClick={() => setBookInterviewOpen(true)}
+                    variant="glassBlue"
+                    size="default"
+                  >
+                    <CalendarPlus className="h-4 w-4 mr-1.5" />
+                    Boka möte
+                  </Button>
+                </div>
               </div>
             ) : (
               /* Fixed footer button for all-candidates view */

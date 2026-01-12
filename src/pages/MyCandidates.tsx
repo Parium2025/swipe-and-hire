@@ -1489,6 +1489,22 @@ const MyCandidates = () => {
             updateCandidateRating(selectedCandidate.id, rating);
           }
         }}
+        currentStage={selectedCandidate?.stage}
+        stageOrder={activeStageOrder}
+        stageConfig={activeStageConfig}
+        onStageChange={(newStage) => {
+          if (selectedCandidate && !isViewingColleague) {
+            // Move candidate to new stage
+            handleMoveCandidate(selectedCandidate.id, newStage);
+            // Update local state
+            setSelectedCandidate(prev => prev ? { ...prev, stage: newStage } : null);
+            toast.success(`Flyttade till ${activeStageConfig[newStage]?.label || newStage}`);
+          } else if (selectedCandidate && isViewingColleague) {
+            moveCandidateInColleagueList(selectedCandidate.id, newStage);
+            setSelectedCandidate(prev => prev ? { ...prev, stage: newStage } : null);
+            toast.success(`Flyttade till ${activeStageConfig[newStage]?.label || newStage}`);
+          }
+        }}
       />
 
       {/* Remove Confirmation Dialog */}
