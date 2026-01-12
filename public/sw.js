@@ -1,12 +1,14 @@
-const CACHE_NAME = 'parium-v1';
-const IMAGE_CACHE = 'parium-images-v1';
-const STATIC_CACHE = 'parium-static-v1';
+const CACHE_VERSION = 'v2';
 
-// Kritiska assets som alltid ska cachas
+const IMAGE_CACHE = `parium-images-${CACHE_VERSION}`;
+const STATIC_CACHE = `parium-static-${CACHE_VERSION}`;
+const API_CACHE = `parium-api-${CACHE_VERSION}`;
+
+// Kritiska assets som alltid ska cachas (offline-fallback)
 const CRITICAL_ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
 ];
 
 // Mönster för bilder och filer som ska cachas permanent
@@ -27,17 +29,16 @@ const IMAGE_PATTERNS = [
   /\.mov$/,
   /\.pdf$/,
   /\.doc$/,
-  /\.docx$/
+  /\.docx$/,
 ];
 
 // API-anrop som ska cachas för offline support
-const API_CACHE = 'parium-api-v1';
 const API_PATTERNS = [
   /\/rest\/v1\/job_postings/,
   /\/rest\/v1\/profiles/,
   /\/rest\/v1\/job_applications/,
   /\/rest\/v1\/organizations/,
-  /\/rest\/v1\/job_questions/
+  /\/rest\/v1\/job_questions/,
 ];
 
 // Kolla om URL är en bild
@@ -73,10 +74,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME && 
-              cacheName !== IMAGE_CACHE && 
-              cacheName !== STATIC_CACHE &&
-              cacheName !== API_CACHE) {
+          if (cacheName !== IMAGE_CACHE && cacheName !== STATIC_CACHE && cacheName !== API_CACHE) {
             console.log('[SW] Removing old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -185,28 +183,34 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // För alla andra requests: Network-first med cache fallback
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        // Cacha lyckade HTML/JS/CSS requests
-        if (response.status === 200 && 
-            (request.url.includes('.js') || 
-             request.url.includes('.css') || 
-             request.url.includes('.html'))) {
-          const responseToCache = response.clone();
-          caches.open(STATIC_CACHE).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+  // För app-shell (HTML/JS/CSS): alltid hämta färskt från nätverk för att undvika "fast" UI efter uppdateringar
+  const isAppShell =
+    request.mode === 'navigate' ||
+    request.destination === 'script' ||
+    request.destination === 'style' ||
+    request.destination === 'worker' ||
+    /\.(js|css|html)(\?|$)/.test(new URL(url).pathname);
+
+  if (isAppShell) {
+    event.respondWith(
+      fetch(new Request(request, { cache: 'reload' })).catch(async () => {
+        // Offline fallback
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        if (request.mode === 'navigate') {
+          const offlineShell = await caches.match('/index.html');
+          if (offlineShell) return offlineShell;
         }
-        return response;
+        throw new Error('Network error and no cache');
       })
-      .catch(() => {
-        // Om nätverk failar, försök hämta från cache
-        return caches.match(request);
-      })
+    );
+    return;
+  }
+
+  // För alla andra requests: Network-first med cache fallback (för t.ex. fonts)
+  event.respondWith(
+    fetch(request).catch(() => caches.match(request))
   );
-});
 
 // Message event - hantera meddelanden från appen
 self.addEventListener('message', (event) => {

@@ -16,10 +16,23 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
 
   try {
     registration = await navigator.serviceWorker.register('/sw.js', {
-      scope: '/'
+      scope: '/',
     });
 
-    
+    // Force check for updates on load
+    registration.update().catch(() => {
+      // Ignore
+    });
+
+    // When a new SW takes control, hard-reload to ensure fresh UI/assets
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
+
+    // If there is already a waiting worker (rare but possible), activate it immediately
+    if (registration.waiting) {
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
 
     // Lyssna på uppdateringar
     registration.addEventListener('updatefound', () => {
@@ -27,8 +40,8 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
       if (newWorker) {
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            
-            // Här kan vi visa en toast till användaren om uppdatering
+            // Activate update immediately
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
           }
         });
       }
