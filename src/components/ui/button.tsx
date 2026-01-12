@@ -41,6 +41,9 @@ const buttonVariants = cva(
         // Glass variant with yellow accent (for warning/reviewing actions)
         glassYellow:
           "rounded-full bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/40 text-white transition-colors duration-150 focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none",
+        // Glass variant with purple accent (for messaging/communication actions)
+        glassPurple:
+          "rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white transition-colors duration-150 focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none",
       },
       size: {
         default: "min-h-touch md:h-10 px-4 py-2",
