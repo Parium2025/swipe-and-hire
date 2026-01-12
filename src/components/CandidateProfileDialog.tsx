@@ -1026,7 +1026,7 @@ export const CandidateProfileDialog = ({
                           className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                             prevStage 
                               ? 'text-white bg-white/10 hover:bg-white/20' 
-                              : 'opacity-40 cursor-not-allowed text-white/50'
+                              : 'opacity-40 text-white/50'
                           }`}
                         >
                           <ChevronLeft className="h-4 w-4 flex-shrink-0" />
@@ -1045,7 +1045,7 @@ export const CandidateProfileDialog = ({
                           className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                             nextStage 
                               ? 'text-white bg-white/10 hover:bg-white/20' 
-                              : 'opacity-40 cursor-not-allowed text-white/50'
+                              : 'opacity-40 text-white/50'
                           }`}
                         >
                           <span className="truncate">Till {(nextLabel || 'nästa').replace('?', '')}</span>
