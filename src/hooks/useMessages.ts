@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -55,6 +56,8 @@ export function useMessages() {
 
       // Fetch sender profiles separately
       const senderIds = [...new Set(data?.map(m => m.sender_id) || [])];
+      if (senderIds.length === 0) return [];
+      
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
@@ -89,6 +92,8 @@ export function useMessages() {
 
       // Fetch recipient profiles separately
       const recipientIds = [...new Set(data?.map(m => m.recipient_id) || [])];
+      if (recipientIds.length === 0) return [];
+      
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
@@ -103,6 +108,45 @@ export function useMessages() {
     },
     enabled: !!user,
   });
+
+  // Subscribe to realtime updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('messages-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        () => {
+          // Invalidate inbox when we receive a new message
+          queryClient.invalidateQueries({ queryKey: ['messages', 'inbox', user.id] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `sender_id=eq.${user.id}`,
+        },
+        () => {
+          // Invalidate sent when we send a message
+          queryClient.invalidateQueries({ queryKey: ['messages', 'sent', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
   // Mark message as read
   const markAsReadMutation = useMutation({
