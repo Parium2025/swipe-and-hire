@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 import { useMessages, Message } from '@/hooks/useMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -37,9 +37,9 @@ export default function Messages() {
   // Refs for sliding indicator
   const inboxRef = useRef<HTMLButtonElement>(null);
   const sentRef = useRef<HTMLButtonElement>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 80, ready: false });
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 80 });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updateIndicator = () => {
       const inboxButton = inboxRef.current;
       const sentButton = sentRef.current;
@@ -48,13 +48,11 @@ export default function Messages() {
         setIndicatorStyle({
           left: inboxButton.offsetLeft,
           width: inboxButton.offsetWidth,
-          ready: true,
         });
       } else if (activeTab === 'sent' && sentButton) {
         setIndicatorStyle({
           left: sentButton.offsetLeft,
           width: sentButton.offsetWidth,
-          ready: true,
         });
       }
     };
@@ -230,18 +228,16 @@ export default function Messages() {
         {/* Sliding background */}
         <motion.div
           className="absolute top-1 bottom-1 bg-parium-navy rounded-[5px]"
-          initial={{ left: indicatorStyle.left, width: indicatorStyle.width, opacity: indicatorStyle.ready ? 1 : 0 }}
+          initial={false}
           animate={{
             left: indicatorStyle.left,
             width: indicatorStyle.width,
-            opacity: indicatorStyle.ready ? 1 : 0,
           }}
           transition={{
             type: "spring",
             stiffness: 300,
             damping: 35,
             mass: 0.8,
-            opacity: { duration: 0.15 },
           }}
         />
         
