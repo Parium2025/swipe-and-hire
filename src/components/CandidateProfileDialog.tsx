@@ -1,11 +1,12 @@
 import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, UserMinus } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, UserMinus, AlertTriangle } from 'lucide-react';
 import { ShareCandidateDialog } from '@/components/ShareCandidateDialog';
 import { SendMessageDialog } from '@/components/SendMessageDialog';
 import type { StageSettings } from '@/hooks/useStageSettings';
@@ -1261,7 +1262,7 @@ export const CandidateProfileDialog = ({
 
     {/* Delete note confirmation dialog */}
     <AlertDialog open={!!deletingNoteId} onOpenChange={(open) => !open && setDeletingNoteId(null)}>
-      <AlertDialogContent className="bg-slate-900 border-white/10">
+      <AlertDialogContentNoFocus className="bg-slate-900 border-white/10">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-white">Ta bort anteckning?</AlertDialogTitle>
           <AlertDialogDescription className="text-white/70">
@@ -1279,7 +1280,7 @@ export const CandidateProfileDialog = ({
             Ta bort
           </AlertDialogAction>
         </AlertDialogFooter>
-      </AlertDialogContent>
+      </AlertDialogContentNoFocus>
     </AlertDialog>
 
     {/* Book Interview Dialog */}
@@ -1320,30 +1321,50 @@ export const CandidateProfileDialog = ({
 
     {/* Remove from list confirmation dialog */}
     <AlertDialog open={removeConfirmOpen} onOpenChange={setRemoveConfirmOpen}>
-      <AlertDialogContent className="bg-slate-900 border-white/10">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-white">Ta bort från Mina kandidater?</AlertDialogTitle>
-          <AlertDialogDescription className="text-white/70">
-            Kandidaten kommer att tas bort från din lista. Du kan alltid lägga till dem igen senare.
+      <AlertDialogContentNoFocus 
+        className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+      >
+        <AlertDialogHeader className="space-y-4 text-center">
+          <div className="flex items-center justify-center gap-2.5">
+            <div className="bg-red-500/20 p-2 rounded-full">
+              <AlertTriangle className="h-4 w-4 text-red-400" />
+            </div>
+            <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+              Ta bort kandidat
+            </AlertDialogTitle>
+          </div>
+          <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
+            Är du säker på att du vill ta bort{' '}
+            <span className="font-semibold text-white break-words">
+              "{displayApp?.first_name} {displayApp?.last_name}"
+            </span>
+            ? Denna åtgärd går inte att ångra.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+        <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+          <AlertDialogCancel 
+            onClick={() => setRemoveConfirmOpen(false)}
+            style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+            className="flex-[0.6] mt-0 flex items-center justify-center bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+          >
             Avbryt
           </AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogAction
             onClick={() => {
               if (onRemoveFromList) {
                 onRemoveFromList();
                 onOpenChange(false);
               }
             }}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            variant="destructiveSoft"
+            style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+            className="flex-[0.4] text-sm flex items-center justify-center"
           >
+            <Trash2 className="h-4 w-4 mr-1.5" />
             Ta bort
           </AlertDialogAction>
         </AlertDialogFooter>
-      </AlertDialogContent>
+      </AlertDialogContentNoFocus>
     </AlertDialog>
     </>
   );
