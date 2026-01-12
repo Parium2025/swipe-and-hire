@@ -40,11 +40,10 @@ const dashboardItems = [
   { title: "Mina Annonser", url: "/my-jobs", icon: Briefcase },
 ];
 
-// Kandidater dropdown items (inkl meddelanden)
+// Kandidater dropdown items
 const candidateItems = [
   { title: "Alla Kandidater", url: "/candidates", icon: Users },
   { title: "Mina Kandidater", url: "/my-candidates", icon: UserCheck },
-  { title: "Meddelanden", url: "/messages", icon: MessageCircle },
 ];
 
 // Företag dropdown items (inkl inställningar)
@@ -334,6 +333,26 @@ function EmployerTopNav() {
               })}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Meddelanden Button */}
+          <button
+            onClick={() => handleNavigation('/messages')}
+            className={`
+              flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all relative
+              ${isActiveUrl('/messages') 
+                ? 'bg-white/20 text-white' 
+                : 'text-white hover:bg-white/10'
+              }
+            `}
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span>Meddelanden</span>
+            {preloadedUnreadMessages > 0 && (
+              <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                {preloadedUnreadMessages}
+              </span>
+            )}
+          </button>
 
           {/* Företag Dropdown */}
           <DropdownMenu open={businessOpen} onOpenChange={setBusinessOpen}>
