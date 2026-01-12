@@ -190,9 +190,9 @@ export default function Messages() {
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
         {type === 'inbox' ? (
-          <Inbox className="h-8 w-8 text-white/40" />
+          <Inbox className="h-8 w-8 text-white" />
         ) : (
-          <Send className="h-8 w-8 text-white/40" />
+          <Send className="h-8 w-8 text-white" />
         )}
       </div>
       <h3 className="text-lg font-medium text-white mb-1">
@@ -220,12 +220,7 @@ export default function Messages() {
         <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
           <MessageSquare className="h-5 w-5 text-white" />
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-white">Meddelanden</h1>
-          <p className="text-white/60 text-sm">
-            {unreadCount > 0 ? `${unreadCount} olästa meddelanden` : 'Alla meddelanden lästa'}
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-white">Meddelanden</h1>
       </div>
 
       {/* Sliding Tabs */}
