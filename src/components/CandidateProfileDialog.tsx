@@ -977,7 +977,7 @@ export const CandidateProfileDialog = ({
                   </Button>
                   <Button
                     onClick={() => setSendMessageOpen(true)}
-                    variant="glass"
+                    variant="glassPurple"
                     size="default"
                   >
                     <MessageSquare className="h-4 w-4 mr-1.5" />
@@ -985,7 +985,7 @@ export const CandidateProfileDialog = ({
                   </Button>
                   <Button
                     onClick={() => setShareDialogOpen(true)}
-                    variant="glass"
+                    variant="glassAmber"
                     size="default"
                   >
                     <Users className="h-4 w-4 mr-1.5" />
@@ -993,9 +993,8 @@ export const CandidateProfileDialog = ({
                   </Button>
                   <Button
                     onClick={() => setRemoveConfirmOpen(true)}
-                    variant="glass"
+                    variant="glassRed"
                     size="default"
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                   >
                     <UserMinus className="h-4 w-4 mr-1.5" />
                     Ta bort
