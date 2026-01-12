@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { CvViewer } from '@/components/CvViewer';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
 import { useCandidateActivities } from '@/hooks/useCandidateActivities';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
 import {
   Select,
   SelectContent,
@@ -151,6 +152,7 @@ export const CandidateProfileDialog = ({
   onRemoveFromList,
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
+  const { hasTeam } = useTeamMembers();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'comments'>('activity');
   const [notes, setNotes] = useState<CandidateNote[]>([]);
@@ -983,14 +985,16 @@ export const CandidateProfileDialog = ({
                     <MessageSquare className="h-4 w-4 mr-1.5" />
                     Meddelande
                   </Button>
-                  <Button
-                    onClick={() => setShareDialogOpen(true)}
-                    variant="glassAmber"
-                    size="default"
-                  >
-                    <Users className="h-4 w-4 mr-1.5" />
-                    Dela
-                  </Button>
+                  {hasTeam && (
+                    <Button
+                      onClick={() => setShareDialogOpen(true)}
+                      variant="glassAmber"
+                      size="default"
+                    >
+                      <Users className="h-4 w-4 mr-1.5" />
+                      Dela
+                    </Button>
+                  )}
                   <Button
                     onClick={() => setRemoveConfirmOpen(true)}
                     variant="glassRed"
