@@ -976,39 +976,44 @@ export const CandidateProfileDialog = ({
                   const nextLabel = nextStage ? stageConfig[nextStage]?.label || nextStage : null;
                   
                   return (
-                    <div className="flex items-center justify-between gap-2">
-                      {/* Previous stage button */}
-                      <button
-                        onClick={() => prevStage && onStageChange(prevStage)}
-                        disabled={!prevStage}
-                        className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
-                          prevStage 
-                            ? 'text-white/70 bg-white/5 hover:bg-white/10 hover:text-white/90' 
-                            : 'opacity-40 cursor-not-allowed text-white/50'
-                        }`}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                        <span className="truncate max-w-[100px]">{prevLabel || 'Föregående'}</span>
-                      </button>
+                    <div className="space-y-2">
+                      {/* Section label */}
+                      <p className="text-center text-white/40 text-xs">Flytta kandidat</p>
+                      
+                      <div className="flex items-center justify-between gap-2">
+                        {/* Previous stage button */}
+                        <button
+                          onClick={() => prevStage && onStageChange(prevStage)}
+                          disabled={!prevStage}
+                          className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                            prevStage 
+                              ? 'text-white/70 bg-white/5 hover:bg-white/10 hover:text-white/90' 
+                              : 'opacity-40 cursor-not-allowed text-white/50'
+                          }`}
+                        >
+                          <ChevronLeft className="h-4 w-4 flex-shrink-0" />
+                          <span className="truncate">Till {prevLabel || 'föregående'}</span>
+                        </button>
 
-                      {/* Current stage indicator */}
-                      <div className="flex-shrink-0 px-3 py-1 rounded-full bg-white/10 text-white/60 text-xs">
-                        {stageConfig[currentStage]?.label || currentStage}
+                        {/* Current stage indicator */}
+                        <div className="flex-shrink-0 px-3 py-1 rounded-full bg-white/10 text-white/60 text-xs whitespace-nowrap">
+                          {stageConfig[currentStage]?.label || currentStage}
+                        </div>
+
+                        {/* Next stage button */}
+                        <button
+                          onClick={() => nextStage && onStageChange(nextStage)}
+                          disabled={!nextStage}
+                          className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                            nextStage 
+                              ? 'text-white/70 bg-white/5 hover:bg-white/10 hover:text-white/90' 
+                              : 'opacity-40 cursor-not-allowed text-white/50'
+                          }`}
+                        >
+                          <span className="truncate">Till {nextLabel || 'nästa'}</span>
+                          <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                        </button>
                       </div>
-
-                      {/* Next stage button */}
-                      <button
-                        onClick={() => nextStage && onStageChange(nextStage)}
-                        disabled={!nextStage}
-                        className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
-                          nextStage 
-                            ? 'text-white/70 bg-white/5 hover:bg-white/10 hover:text-white/90' 
-                            : 'opacity-40 cursor-not-allowed text-white/50'
-                        }`}
-                      >
-                        <span className="truncate max-w-[100px]">{nextLabel || 'Nästa'}</span>
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
                     </div>
                   );
                 })()}
