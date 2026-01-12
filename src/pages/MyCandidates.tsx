@@ -1505,6 +1505,18 @@ const MyCandidates = () => {
             toast.success(`Flyttade till ${activeStageConfig[newStage]?.label || newStage}`);
           }
         }}
+        onRemoveFromList={() => {
+          if (selectedCandidate) {
+            // Use the existing remove logic
+            setCandidateToRemove(selectedCandidate);
+            // Close the dialog first
+            setDialogOpen(false);
+            // Then trigger the confirm
+            setTimeout(() => {
+              confirmRemoveCandidate();
+            }, 100);
+          }
+        }}
       />
 
       {/* Remove Confirmation Dialog */}
