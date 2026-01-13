@@ -1129,7 +1129,7 @@ export const CandidateProfileDialog = ({
                       onClick={saveNote}
                       disabled={!newNote.trim() || savingNote}
                       size="sm"
-                      className="w-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs"
+                      className="w-full rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs"
                     >
                       <Send className="h-3 w-3 mr-1.5" />
                       Lägg till
