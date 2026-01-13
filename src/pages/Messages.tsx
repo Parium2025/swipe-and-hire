@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { NewConversationDialog } from '@/components/NewConversationDialog';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -27,12 +28,19 @@ import { cn } from '@/lib/utils';
 
 export default function Messages() {
   const { user } = useAuth();
-  const { conversations, isLoading, totalUnreadCount } = useConversations();
+  const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileChat, setShowMobileChat] = useState(false);
+  const [showNewConversation, setShowNewConversation] = useState(false);
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
+
+  const handleConversationCreated = (conversationId: string) => {
+    refetch();
+    setSelectedConversationId(conversationId);
+    setShowMobileChat(true);
+  };
 
   // Filter conversations based on search
   const filteredConversations = conversations.filter(conv => {
@@ -82,16 +90,29 @@ export default function Messages() {
   return (
     <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4 flex-shrink-0">
-        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-          <MessageSquare className="h-5 w-5 text-white" />
+      <div className="flex items-center justify-between mb-4 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+            <MessageSquare className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Meddelanden</h1>
+            {totalUnreadCount > 0 && (
+              <p className="text-white/60 text-sm">{totalUnreadCount} olästa meddelanden</p>
+            )}
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-white">Meddelanden</h1>
-          {totalUnreadCount > 0 && (
-            <p className="text-white/60 text-sm">{totalUnreadCount} olästa meddelanden</p>
-          )}
-        </div>
+
+        {/* New conversation button */}
+        <Button
+          variant="glass"
+          onClick={() => setShowNewConversation(true)}
+          className="bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
+        >
+          <Plus className="h-4 w-4 mr-1.5" />
+          <span className="hidden sm:inline">Ny konversation</span>
+          <span className="sm:hidden">Ny</span>
+        </Button>
       </div>
 
       {/* Main content - Split view on desktop, stacked on mobile */}
@@ -150,6 +171,13 @@ export default function Messages() {
           )}
         </div>
       </div>
+
+      {/* New conversation dialog */}
+      <NewConversationDialog
+        open={showNewConversation}
+        onOpenChange={setShowNewConversation}
+        onConversationCreated={handleConversationCreated}
+      />
     </div>
   );
 }
