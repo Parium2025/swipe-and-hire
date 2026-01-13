@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "174128401662",
+    "project_id": "parium-c7db7",
+    "storage_bucket": "parium-c7db7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:174128401662:android:f66e556f02ae5482a7e9af",
+        "android_client_info": {
+          "package_name": "com.parium.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATmyTXc3sI2heOET0z4bmOpnKvVYwoGzA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
