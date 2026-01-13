@@ -28,6 +28,7 @@ import { useDevice } from "@/hooks/use-device";
 import { useGlobalImagePreloader } from "@/hooks/useGlobalImagePreloader";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { SystemHealthPanel } from "@/components/SystemHealthPanel";
+import { PushNotificationProvider } from "@/components/PushNotificationProvider";
 import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient({
@@ -107,6 +108,7 @@ const App = () => {
       <SystemHealthPanel />
       <BrowserRouter>
         <UnsavedChangesProvider>
+          <PushNotificationProvider />
           <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
             <div className="relative z-10">
               {showHeader && <Header />}
