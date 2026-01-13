@@ -47,8 +47,9 @@ export function formatCompactTime(input: Date | string | null | undefined): stri
     
     if (hours < 1) return 'nu';
     if (hours < 24) return `${hours}tim`;
-    if (days < 30) return `${days}dag`;
-    if (months < 12) return `${months}mån`;
+    // Show days until we have at least 1 full month
+    if (months < 1) return `${days}dag`;
+    if (years < 1) return `${months}mån`;
     return `${years}år`;
   } catch {
     return null;
