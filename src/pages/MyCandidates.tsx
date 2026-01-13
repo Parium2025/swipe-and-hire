@@ -227,7 +227,7 @@ const CandidateCardContent = ({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="flex items-center gap-0.5 cursor-default">
-                        <ArrowDown className="h-2.5 w-2.5 text-white/90" />
+                        <ArrowDown className="h-3.5 w-3.5 text-white" />
                         {latestApplicationTime}
                       </span>
                     </TooltipTrigger>
@@ -242,7 +242,7 @@ const CandidateCardContent = ({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="flex items-center gap-0.5 cursor-default">
-                        <Clock className="h-2.5 w-2.5 text-white/90" />
+                        <Clock className="h-3.5 w-3.5 text-white" />
                         {lastActiveTime}
                       </span>
                     </TooltipTrigger>
