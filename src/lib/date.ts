@@ -46,11 +46,11 @@ export function formatCompactTime(input: Date | string | null | undefined): stri
     const years = differenceInYears(now, date);
     
     if (hours < 1) return 'nu';
-    if (hours < 24) return `${hours}tim`;
+    if (hours < 24) return `${hours} tim`;
     // Show days until we have at least 1 full month
-    if (months < 1) return `${days}dag`;
-    if (years < 1) return `${months}mån`;
-    return `${years}år`;
+    if (months < 1) return `${days} dag`;
+    if (years < 1) return `${months} mån`;
+    return `${years} år`;
   } catch {
     return null;
   }
