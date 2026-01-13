@@ -262,7 +262,7 @@ const CandidateCardContent = ({
       {!isSelectionMode && (
         <button
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="absolute right-1 bottom-1 p-1 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full
+          className="absolute right-1 top-1 p-1 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-full
             opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100"
         >
           <Trash2 className="h-3 w-3" />
