@@ -134,15 +134,15 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
     // Check for Firebase Service Account credentials (FCM HTTP v1)
-    const fcmServiceAccountJson = Deno.env.get("FCM_SERVICE_ACCOUNT");
+    const fcmServiceAccountJson = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON");
     
     if (!fcmServiceAccountJson) {
-      console.log("FCM_SERVICE_ACCOUNT not configured - push notifications disabled");
+      console.log("FIREBASE_SERVICE_ACCOUNT_JSON not configured - push notifications disabled");
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: "Push notifications not configured. FCM_SERVICE_ACCOUNT is required.",
-          hint: "Add FCM_SERVICE_ACCOUNT secret (Service Account JSON) to enable push notifications."
+          error: "Push notifications not configured. FIREBASE_SERVICE_ACCOUNT_JSON is required.",
+          hint: "Add FIREBASE_SERVICE_ACCOUNT_JSON secret (Service Account JSON) to enable push notifications."
         }),
         { 
           status: 200, 
@@ -155,11 +155,11 @@ Deno.serve(async (req) => {
     try {
       credentials = JSON.parse(fcmServiceAccountJson);
     } catch (e) {
-      console.error("Invalid FCM_SERVICE_ACCOUNT JSON:", e);
+      console.error("Invalid FIREBASE_SERVICE_ACCOUNT_JSON:", e);
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           success: false, 
-          error: "Invalid FCM_SERVICE_ACCOUNT format. Must be valid JSON."
+          error: "Invalid FIREBASE_SERVICE_ACCOUNT_JSON format. Must be valid JSON."
         }),
         { 
           status: 400, 
