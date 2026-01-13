@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.fredrikandits.swipehire',
-  appName: 'swipe-and-hire',
+  appId: 'com.parium.app',
+  appName: 'Parium',
   webDir: 'dist',
   plugins: {
     SplashScreen: {
