@@ -1604,7 +1604,7 @@ const MyCandidates = () => {
       {/* Floating Action Bar for Selection Mode */}
       {isSelectionMode && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 duration-300">
-          <div className="flex items-center gap-3 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 shadow-xl">
+          <div className="flex items-center gap-3 bg-[#1a2a3a]/90 backdrop-blur-xl border border-white/15 rounded-full px-4 py-2 shadow-2xl">
             <span className="text-white text-sm font-medium whitespace-nowrap">
               {selectedCandidateIds.size} av {allVisibleCandidateIds.length} valda
             </span>
@@ -1612,15 +1612,15 @@ const MyCandidates = () => {
             
             {/* Select All / Deselect All toggle (single mounted button to prevent flicker) */}
             <Button
-              variant="ghost"
+              variant="glass"
               size="sm"
               onClick={toggleAllVisible}
-              className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200"
+              className="h-8 px-3 text-xs"
             >
               {allVisibleSelected ? (
-                <Square className="h-4 w-4 mr-1.5" />
+                <Square className="h-3.5 w-3.5 mr-1" />
               ) : (
-                <CheckSquare className="h-4 w-4 mr-1.5" />
+                <CheckSquare className="h-3.5 w-3.5 mr-1" />
               )}
               {allVisibleSelected ? 'Avmarkera alla' : 'Välj alla'}
             </Button>
@@ -1631,13 +1631,13 @@ const MyCandidates = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant="ghost"
+                  variant="glass"
                   size="sm"
                   disabled={selectedCandidateIds.size === 0}
                   aria-disabled={selectedCandidateIds.size === 0}
-                  className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200"
+                  className="h-8 px-3 text-xs"
                 >
-                  <ArrowDown className="h-4 w-4 mr-1.5" />
+                  <ArrowDown className="h-3.5 w-3.5 mr-1" />
                   Flytta till
                 </Button>
               </DropdownMenuTrigger>
@@ -1664,13 +1664,13 @@ const MyCandidates = () => {
             </DropdownMenu>
             
             <Button
-              variant="ghost"
+              variant="glassRed"
               size="sm"
               disabled={selectedCandidateIds.size === 0}
               onClick={() => setShowBulkDeleteConfirm(true)}
-              className="bg-red-500/20 text-white [&_svg]:text-red-400 md:hover:bg-red-500/30 md:hover:text-white md:hover:[&_svg]:text-red-400 transition-all duration-200"
+              className="h-8 px-3 text-xs"
             >
-              <Trash2 className="h-4 w-4 mr-1.5" />
+              <Trash2 className="h-3.5 w-3.5 mr-1" />
               Ta bort
             </Button>
           </div>
