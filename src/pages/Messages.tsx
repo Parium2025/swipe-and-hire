@@ -26,6 +26,8 @@ import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
+type ConversationTab = 'all' | 'candidates' | 'colleagues';
+
 export default function Messages() {
   const { user } = useAuth();
   const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
@@ -33,8 +35,23 @@ export default function Messages() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [showNewConversation, setShowNewConversation] = useState(false);
+  const [activeTab, setActiveTab] = useState<ConversationTab>('all');
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
+
+  // Categorize conversations
+  const categorizeConversation = (conv: Conversation): 'candidates' | 'colleagues' => {
+    const otherMembers = conv.members.filter(m => m.user_id !== user?.id);
+    // If any other member is a job_seeker, it's a candidate conversation
+    const hasCandidate = otherMembers.some(m => m.profile?.role === 'job_seeker');
+    return hasCandidate ? 'candidates' : 'colleagues';
+  };
+
+  const candidateConversations = conversations.filter(c => categorizeConversation(c) === 'candidates');
+  const colleagueConversations = conversations.filter(c => categorizeConversation(c) === 'colleagues');
+
+  const candidateUnread = candidateConversations.reduce((sum, c) => sum + c.unread_count, 0);
+  const colleagueUnread = colleagueConversations.reduce((sum, c) => sum + c.unread_count, 0);
 
   const handleConversationCreated = (conversationId: string) => {
     refetch();
@@ -42,8 +59,19 @@ export default function Messages() {
     setShowMobileChat(true);
   };
 
-  // Filter conversations based on search
-  const filteredConversations = conversations.filter(conv => {
+  // Filter conversations based on tab and search
+  const getConversationsForTab = () => {
+    switch (activeTab) {
+      case 'candidates':
+        return candidateConversations;
+      case 'colleagues':
+        return colleagueConversations;
+      default:
+        return conversations;
+    }
+  };
+
+  const filteredConversations = getConversationsForTab().filter(conv => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     
@@ -122,6 +150,60 @@ export default function Messages() {
           "w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col",
           showMobileChat && "hidden md:flex"
         )}>
+          {/* Tab filter */}
+          <div className="flex gap-1 mb-3 p-1 bg-white/5 rounded-lg border border-white/10 flex-shrink-0">
+            <button
+              onClick={() => setActiveTab('all')}
+              className={cn(
+                "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                activeTab === 'all' 
+                  ? "bg-white/15 text-white" 
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              )}
+            >
+              Alla
+              {totalUnreadCount > 0 && (
+                <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-blue-500/30 rounded-full">
+                  {totalUnreadCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('candidates')}
+              className={cn(
+                "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5",
+                activeTab === 'candidates' 
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" 
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              )}
+            >
+              <User className="h-3 w-3" />
+              Kandidater
+              {candidateUnread > 0 && (
+                <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/40 rounded-full">
+                  {candidateUnread}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('colleagues')}
+              className={cn(
+                "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5",
+                activeTab === 'colleagues' 
+                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30" 
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              )}
+            >
+              <Users className="h-3 w-3" />
+              Kollegor
+              {colleagueUnread > 0 && (
+                <span className="px-1.5 py-0.5 text-[10px] bg-blue-500/40 rounded-full">
+                  {colleagueUnread}
+                </span>
+              )}
+            </button>
+          </div>
+
           {/* Search */}
           <div className="relative mb-3 flex-shrink-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
@@ -147,6 +229,7 @@ export default function Messages() {
                       isSelected={selectedConversationId === conv.id}
                       currentUserId={user?.id || ''}
                       onClick={() => handleSelectConversation(conv.id)}
+                      category={categorizeConversation(conv)}
                     />
                   ))}
                 </div>
@@ -188,11 +271,13 @@ function ConversationItem({
   isSelected, 
   currentUserId,
   onClick,
+  category,
 }: { 
   conversation: Conversation;
   isSelected: boolean;
   currentUserId: string;
   onClick: () => void;
+  category: 'candidates' | 'colleagues';
 }) {
   const otherMembers = conversation.members.filter(m => m.user_id !== currentUserId);
   const displayMember = otherMembers[0];
@@ -249,22 +334,39 @@ function ConversationItem({
           : "hover:bg-white/10 border border-transparent"
       )}
     >
-      {/* Avatar */}
+      {/* Avatar with category indicator */}
       <div className="relative flex-shrink-0">
         {conversation.is_group ? (
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 border border-white/20 flex items-center justify-center">
             <Users className="h-5 w-5 text-white/80" />
           </div>
         ) : (
-          <Avatar className="h-10 w-10 border border-white/10">
+          <Avatar className={cn(
+            "h-10 w-10 border-2",
+            category === 'candidates' ? "border-emerald-500/50" : "border-blue-500/50"
+          )}>
             <AvatarImage src={getAvatarUrl() || undefined} />
-            <AvatarFallback className="bg-white/10 text-white text-sm">
+            <AvatarFallback className={cn(
+              "text-white text-sm",
+              category === 'candidates' ? "bg-emerald-500/20" : "bg-blue-500/20"
+            )}>
               {getInitials()}
             </AvatarFallback>
           </Avatar>
         )}
+        {/* Category badge */}
+        <div className={cn(
+          "absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center border-2 border-slate-900",
+          category === 'candidates' ? "bg-emerald-500" : "bg-blue-500"
+        )}>
+          {category === 'candidates' ? (
+            <User className="h-2 w-2 text-white" />
+          ) : (
+            <Briefcase className="h-2 w-2 text-white" />
+          )}
+        </div>
         {conversation.unread_count > 0 && (
-          <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
+          <div className="absolute -top-1 -left-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
             {conversation.unread_count > 99 ? '99+' : conversation.unread_count}
           </div>
         )}
