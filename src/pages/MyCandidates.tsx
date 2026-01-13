@@ -186,11 +186,11 @@ const CandidateCardContent = ({
     >
       {/* Selection checkbox - shows in selection mode */}
       {isSelectionMode && (
-        <div className="absolute left-1.5 top-1.5 z-10">
+        <div className="absolute left-1 top-1 z-10">
           <Checkbox 
             checked={isSelected}
             onCheckedChange={() => onToggleSelect?.()}
-            className="h-5 w-5 border-2 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white hover:border-white/70"
+            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white hover:border-white/70"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
