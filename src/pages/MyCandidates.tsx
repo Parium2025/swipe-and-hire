@@ -221,13 +221,13 @@ const CandidateCardContent = ({
           </TooltipProvider>
           <StarRating rating={candidate.rating} />
           {(latestApplicationTime || lastActiveTime) && (
-            <div className="flex items-center gap-1.5 mt-0.5 max-w-full text-white text-[10px] leading-none">
+            <div className="flex items-center gap-1 mt-0.5 max-w-full text-white text-[9px] leading-none">
               {latestApplicationTime && (
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="inline-flex items-center gap-1 cursor-default whitespace-nowrap">
-                        <ArrowDown className="h-3.5 w-3.5 shrink-0 text-white drop-shadow-sm" strokeWidth={2.75} />
+                      <span className="inline-flex items-center gap-0.5 cursor-default whitespace-nowrap">
+                        <ArrowDown className="h-2.5 w-2.5 shrink-0 text-white" strokeWidth={3} />
                         {latestApplicationTime}
                       </span>
                     </TooltipTrigger>
@@ -241,8 +241,8 @@ const CandidateCardContent = ({
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="inline-flex items-center gap-1 cursor-default whitespace-nowrap">
-                        <Clock className="h-3.5 w-3.5 shrink-0 text-white drop-shadow-sm" strokeWidth={2.75} />
+                      <span className="inline-flex items-center gap-0.5 cursor-default whitespace-nowrap">
+                        <Clock className="h-2.5 w-2.5 shrink-0 text-white" strokeWidth={3} />
                         {lastActiveTime}
                       </span>
                     </TooltipTrigger>
