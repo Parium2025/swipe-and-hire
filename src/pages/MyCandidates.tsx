@@ -1288,12 +1288,12 @@ const MyCandidates = () => {
             
             {/* Select mode toggle button (single button to prevent focus flicker) */}
             <Button
-              variant="ghost"
+              variant="glass"
               size="sm"
               onClick={() => isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)}
-              className="bg-white/5 border border-white/20 text-white [&_svg]:text-white md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200 flex-shrink-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
+              className="h-8 px-3 text-xs"
             >
-              {isSelectionMode ? null : <CheckSquare className="h-4 w-4 mr-1.5" />}
+              {isSelectionMode ? null : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
               {isSelectionMode ? 'Avbryt' : 'Välj'}
             </Button>
           </div>
