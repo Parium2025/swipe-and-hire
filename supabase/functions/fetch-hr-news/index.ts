@@ -395,99 +395,134 @@ serve(async (req) => {
     
     console.log(`Final selection: ${balanced.length} articles (${balanced.filter(a => a.isNegative).length} negative in batch)`);
     
-    // Get current RSS articles SORTED by published_at (newest first)
-    // This ensures we keep the NEWEST articles when rotating
-    const { data: currentRSS } = await supabase
+    // Fetch existing RSS urls to de-duplicate
+    const { data: existingRss } = await supabase
       .from('daily_hr_news')
-      .select('id, source_url, published_at')
+      .select('source_url')
       .not('source_url', 'is', null)
-      .order('published_at', { ascending: false })
-      .limit(10);
-    
-    console.log(`Current RSS in DB: ${currentRSS?.length || 0} articles`);
-    if (currentRSS?.length) {
-      console.log(`Oldest in DB: "${currentRSS[currentRSS.length - 1]?.published_at}"`);
-    }
-    
-    const existingUrls = new Set((currentRSS || []).map(a => a.source_url).filter(Boolean));
+      .limit(50);
+
+    const existingUrls = new Set((existingRss || []).map((a: any) => a.source_url).filter(Boolean));
     const newItems = balanced.filter(i => !i.source_url || !existingUrls.has(i.source_url));
-    
+
     // Delete old RSS articles only (not AI insights)
     await supabase
       .from('daily_hr_news')
       .delete()
       .not('source_url', 'is', null)
       .lt('news_date', new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-    
-    // If no RSS news at all, use AI fallback
-    if (!balanced.length) {
-      console.log('No RSS news found, using AI fallback...');
-      const aiNews = await generateAIFallbackNews(supabase);
-      if (aiNews.length) {
-        // Only delete RSS articles, keep AI insights separate
-        await supabase.from('daily_hr_news').delete().not('source_url', 'is', null);
-        await supabase.from('daily_hr_news').insert(aiNews);
-        return new Response(JSON.stringify({ message: 'AI fallback news generated', count: aiNews.length, source: 'ai' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      }
-      return new Response(JSON.stringify({ message: 'No news available', count: 0 }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
+    const today = new Date().toISOString().split('T')[0];
+
+    // Insert new RSS articles (if any)
+    let insertedRss = 0;
+    if (newItems.length) {
+      const insert = newItems.slice(0, 4).map((i, idx) => {
+        const cat = getCatInfo(i.category);
+        return {
+          title: i.title,
+          summary: i.summary,
+          source: i.source,
+          source_url: i.source_url,
+          category: cat.label,
+          icon_name: cat.icon,
+          gradient: cat.gradient,
+          news_date: today,
+          order_index: idx,
+          published_at: i.published_at,
+        };
+      });
+
+      await supabase.from('daily_hr_news').insert(insert);
+      insertedRss = insert.length;
+      console.log(`Inserted ${insertedRss} RSS articles`);
     }
-    
-    if (!newItems.length) return new Response(JSON.stringify({ message: 'No new articles', count: 0 }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    
-    // Smart rotation: Keep NEWEST articles, remove OLDEST
-    // toKeep = how many existing articles to keep (newest ones)
-    // toAdd = how many new articles to insert
-    const toAdd = Math.min(4, newItems.length);
-    const toKeep = Math.max(0, 4 - toAdd);
-    
-    // Remove the OLDEST articles (they're at the end since sorted desc)
-    if (currentRSS && currentRSS.length > toKeep) {
-      const idsToRemove = currentRSS.slice(toKeep).map(a => a.id);
+
+    // Always enforce the 4-slot rule across BOTH RSS + AI
+    // 1) Keep the 4 newest items by published_at
+    // 2) If fewer than 4 remain (because RSS has been empty long enough for items to expire), top up with AI items
+
+    const { data: afterInsert } = await supabase
+      .from('daily_hr_news')
+      .select('id, source, source_url, published_at')
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .limit(50);
+
+    const items = afterInsert || [];
+
+    // Trim down to 4 if we have more
+    if (items.length > 4) {
+      const idsToRemove = items.slice(4).map((r: any) => r.id);
       if (idsToRemove.length) {
-        console.log(`Removing ${idsToRemove.length} oldest articles to make room for ${toAdd} new`);
         await supabase.from('daily_hr_news').delete().in('id', idsToRemove);
       }
     }
-    
-    const today = new Date().toISOString().split('T')[0];
-    const insert = newItems.slice(0, toAdd).map((i, idx) => {
-      const cat = getCatInfo(i.category);
-      return { title: i.title, summary: i.summary, source: i.source, source_url: i.source_url, category: cat.label, icon_name: cat.icon, gradient: cat.gradient, news_date: today, order_index: idx, published_at: i.published_at };
-    });
-    
-    await supabase.from('daily_hr_news').insert(insert);
-    console.log(`Inserted ${insert.length} RSS articles`);
-    
-    // BULLETPROOF: Verify we have RSS articles
-    // NOTE: AI fallback is ONLY used when there are ZERO RSS articles within 5 days
-    // If we have ANY RSS articles (even just 1-3), we show those - no AI mixing
-    const { data: finalCount } = await supabase
+
+    // Re-read the top set (after trimming)
+    const { data: trimmed } = await supabase
       .from('daily_hr_news')
-      .select('id')
-      .not('source_url', 'is', null)
+      .select('id, source, source_url, published_at')
+      .order('published_at', { ascending: false, nullsFirst: false })
       .limit(10);
-    
-    const totalRSS = finalCount?.length || 0;
-    console.log(`Total RSS articles in DB after insert: ${totalRSS}`);
-    
-    // Remove any old AI fallback articles since we now have real RSS news
-    if (totalRSS > 0) {
-      await supabase
-        .from('daily_hr_news')
-        .delete()
-        .eq('source', 'Parium')
-        .is('source_url', null);
-      console.log('Cleared AI fallback articles - real RSS news is available');
+
+    const top = trimmed || [];
+
+    // If fewer than 4, top up with AI (incrementally) so we always show 4 slots
+    let aiAdded = 0;
+    if (top.length < 4) {
+      const needed = 4 - top.length;
+      console.log(`Only ${top.length} total items after expiry, topping up with ${needed} AI item(s)`);
+
+      const aiNews = await generateAIFallbackNews(supabase);
+      if (aiNews.length) {
+        const oldestTs = top.reduce((minTs: number, r: any) => {
+          const t = r.published_at ? new Date(r.published_at).getTime() : Date.now();
+          return Math.min(minTs, t);
+        }, Date.now());
+
+        // Place AI items as the OLDEST so real RSS never gets pushed away from the left
+        const fillers = aiNews.slice(0, needed).map((item: any, idx: number) => ({
+          ...item,
+          news_date: today,
+          order_index: top.length + idx,
+          published_at: new Date(oldestTs - (idx + 1) * 60 * 1000).toISOString(),
+        }));
+
+        await supabase.from('daily_hr_news').insert(fillers);
+        aiAdded = fillers.length;
+        console.log(`Inserted ${aiAdded} AI filler item(s)`);
+      }
     }
-    
-    return new Response(JSON.stringify({ 
-      message: 'HR news fetched successfully', 
-      rss_count: insert.length, 
-      total_after: Math.max(totalRSS, 4),
-      kept: toKeep, 
-      sources: [...new Set(insert.map(i => i.source))], 
-      categories: [...new Set(insert.map(i => i.category))] 
-    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
+    // Final enforce 4 slots (after AI insert)
+    const { data: finalItems } = await supabase
+      .from('daily_hr_news')
+      .select('id, source, category')
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .limit(50);
+
+    const finalList = finalItems || [];
+    if (finalList.length > 4) {
+      const idsToRemove = finalList.slice(4).map((r: any) => r.id);
+      if (idsToRemove.length) {
+        await supabase.from('daily_hr_news').delete().in('id', idsToRemove);
+      }
+    }
+
+    const topSources = [...new Set(finalList.slice(0, 4).map((i: any) => i.source))];
+    const topCategories = [...new Set(finalList.slice(0, 4).map((i: any) => i.category))];
+
+    return new Response(
+      JSON.stringify({
+        message: 'HR news fetched successfully',
+        rss_count: insertedRss,
+        ai_added: aiAdded,
+        total_after: Math.min(4, finalList.length),
+        sources: topSources,
+        categories: topCategories,
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
   } catch (e) {
     console.error('Fatal error in fetch-hr-news:', e);
     return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
