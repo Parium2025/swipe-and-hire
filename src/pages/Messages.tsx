@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useConversations, useConversationMessages, Conversation, ConversationMessage, useCreateConversation } from '@/hooks/useConversations';
 import { useAuth } from '@/hooks/useAuth';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,11 +32,12 @@ type ConversationTab = 'all' | 'candidates' | 'colleagues';
 export default function Messages() {
   const { user } = useAuth();
   const { conversations, isLoading, totalUnreadCount, refetch } = useConversations();
+  const { hasTeam } = useTeamMembers();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [showNewConversation, setShowNewConversation] = useState(false);
-  const [activeTab, setActiveTab] = useState<ConversationTab>('all');
+  const [activeTab, setActiveTab] = useState<ConversationTab>(hasTeam ? 'all' : 'candidates');
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
@@ -150,59 +152,61 @@ export default function Messages() {
           "w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col",
           showMobileChat && "hidden md:flex"
         )}>
-          {/* Tab filter */}
-          <div className="flex gap-1 mb-3 p-1 bg-white/5 rounded-lg border border-white/10 flex-shrink-0">
-            <button
-              onClick={() => setActiveTab('all')}
-              className={cn(
-                "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                activeTab === 'all' 
-                  ? "bg-white/15 text-white" 
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              )}
-            >
-              Alla
-              {totalUnreadCount > 0 && (
-                <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-blue-500/30 rounded-full">
-                  {totalUnreadCount}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('candidates')}
-              className={cn(
-                "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5",
-                activeTab === 'candidates' 
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" 
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              )}
-            >
-              <User className="h-3 w-3" />
-              Kandidater
-              {candidateUnread > 0 && (
-                <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/40 rounded-full">
-                  {candidateUnread}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('colleagues')}
-              className={cn(
-                "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5",
-                activeTab === 'colleagues' 
-                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30" 
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              )}
-            >
-              <Users className="h-3 w-3" />
-              Kollegor
-              {colleagueUnread > 0 && (
-                <span className="px-1.5 py-0.5 text-[10px] bg-blue-500/40 rounded-full">
-                  {colleagueUnread}
-                </span>
-              )}
-            </button>
-          </div>
+          {/* Tab filter - only show tabs if there are colleagues */}
+          {hasTeam ? (
+            <div className="flex gap-1 mb-3 p-1 bg-white/5 rounded-lg border border-white/10 flex-shrink-0">
+              <button
+                onClick={() => setActiveTab('all')}
+                className={cn(
+                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                  activeTab === 'all' 
+                    ? "bg-white/15 text-white" 
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                )}
+              >
+                Alla
+                {totalUnreadCount > 0 && (
+                  <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-blue-500/30 rounded-full">
+                    {totalUnreadCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('candidates')}
+                className={cn(
+                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5",
+                  activeTab === 'candidates' 
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" 
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                )}
+              >
+                <User className="h-3 w-3" />
+                Kandidater
+                {candidateUnread > 0 && (
+                  <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/40 rounded-full">
+                    {candidateUnread}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('colleagues')}
+                className={cn(
+                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5",
+                  activeTab === 'colleagues' 
+                    ? "bg-blue-500/20 text-blue-300 border border-blue-500/30" 
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                )}
+              >
+                <Users className="h-3 w-3" />
+                Kollegor
+                {colleagueUnread > 0 && (
+                  <span className="px-1.5 py-0.5 text-[10px] bg-blue-500/40 rounded-full">
+                    {colleagueUnread}
+                  </span>
+                )}
+              </button>
+            </div>
+          ) : null}
 
           {/* Search */}
           <div className="relative mb-3 flex-shrink-0">
