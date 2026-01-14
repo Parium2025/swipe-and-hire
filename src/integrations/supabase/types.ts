@@ -1830,6 +1830,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      trigger_hr_news_fetch: { Args: never; Returns: undefined }
       try_uuid: { Args: { p_text: string }; Returns: string }
     }
     Enums: {
