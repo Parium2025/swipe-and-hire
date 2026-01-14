@@ -134,16 +134,18 @@ export default function Messages() {
           </div>
         </div>
 
-        {/* New conversation button */}
-        <Button
-          variant="glass"
-          onClick={() => setShowNewConversation(true)}
-          className="bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
-        >
-          <Plus className="h-4 w-4 mr-1.5" />
-          <span className="hidden sm:inline">Ny konversation</span>
-          <span className="sm:hidden">Ny</span>
-        </Button>
+        {/* New conversation button - only show if there are colleagues (for group chats) */}
+        {hasTeam && (
+          <Button
+            variant="glass"
+            onClick={() => setShowNewConversation(true)}
+            className="bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
+          >
+            <Plus className="h-4 w-4 mr-1.5" />
+            <span className="hidden sm:inline">Ny konversation</span>
+            <span className="sm:hidden">Ny</span>
+          </Button>
+        )}
       </div>
 
       {/* Main content - Split view on desktop, stacked on mobile */}

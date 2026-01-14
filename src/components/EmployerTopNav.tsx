@@ -254,7 +254,7 @@ function EmployerTopNav() {
             <DropdownMenuTrigger asChild>
               <button
                 className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150
                   ${isDropdownActive(dashboardItems) 
                     ? 'bg-white/20 text-white' 
                     : 'text-white hover:bg-white/10'
@@ -294,7 +294,7 @@ function EmployerTopNav() {
               <button
                 onMouseEnter={prefetchApplications}
                 className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150
                   ${isDropdownActive(candidateItems) 
                     ? 'bg-white/20 text-white' 
                     : 'text-white hover:bg-white/10'
@@ -338,7 +338,7 @@ function EmployerTopNav() {
           <button
             onClick={() => handleNavigation('/messages')}
             className={`
-              flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all relative
+              flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 relative
               ${isActiveUrl('/messages') 
                 ? 'bg-white/20 text-white' 
                 : 'text-white hover:bg-white/10'
@@ -359,7 +359,7 @@ function EmployerTopNav() {
             <DropdownMenuTrigger asChild>
               <button
                 className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150
                   ${isDropdownActive(businessItems) 
                     ? 'bg-white/20 text-white' 
                     : 'text-white hover:bg-white/10'
