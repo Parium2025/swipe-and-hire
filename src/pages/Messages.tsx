@@ -26,6 +26,7 @@ import {
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { MessagesTabs } from '@/components/MessagesTabs';
 
 type ConversationTab = 'all' | 'candidates' | 'colleagues';
 
@@ -154,58 +155,13 @@ export default function Messages() {
         )}>
           {/* Tab filter - only show tabs if there are colleagues */}
           {hasTeam ? (
-            <div className="flex gap-1 mb-3 p-1 bg-white/5 rounded-lg border border-white/10 flex-shrink-0">
-              <button
-                onClick={() => setActiveTab('all')}
-                className={cn(
-                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                  activeTab === 'all' 
-                    ? "bg-white/15 text-white" 
-                    : "text-white/60 hover:text-white hover:bg-white/5"
-                )}
-              >
-                Alla
-                {totalUnreadCount > 0 && (
-                  <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-blue-500/30 rounded-full">
-                    {totalUnreadCount}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => setActiveTab('candidates')}
-                className={cn(
-                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5",
-                  activeTab === 'candidates' 
-                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" 
-                    : "text-white/60 hover:text-white hover:bg-white/5"
-                )}
-              >
-                <User className="h-3 w-3" />
-                Kandidater
-                {candidateUnread > 0 && (
-                  <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/40 rounded-full">
-                    {candidateUnread}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => setActiveTab('colleagues')}
-                className={cn(
-                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5",
-                  activeTab === 'colleagues' 
-                    ? "bg-blue-500/20 text-blue-300 border border-blue-500/30" 
-                    : "text-white/60 hover:text-white hover:bg-white/5"
-                )}
-              >
-                <Users className="h-3 w-3" />
-                Kollegor
-                {colleagueUnread > 0 && (
-                  <span className="px-1.5 py-0.5 text-[10px] bg-blue-500/40 rounded-full">
-                    {colleagueUnread}
-                  </span>
-                )}
-              </button>
-            </div>
+            <MessagesTabs 
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              totalUnreadCount={totalUnreadCount}
+              candidateUnread={candidateUnread}
+              colleagueUnread={colleagueUnread}
+            />
           ) : null}
 
           {/* Search */}
@@ -341,12 +297,12 @@ function ConversationItem({
       {/* Avatar with category indicator */}
       <div className="relative flex-shrink-0">
         {conversation.is_group ? (
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 border border-white/20 flex items-center justify-center">
-            <Users className="h-5 w-5 text-white/80" />
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 border border-white/20 flex items-center justify-center">
+            <Users className="h-6 w-6 text-white/80" />
           </div>
         ) : (
           <Avatar className={cn(
-            "h-10 w-10 border-2",
+            "h-12 w-12 border-2",
             category === 'candidates' ? "border-emerald-500/50" : "border-blue-500/50"
           )}>
             <AvatarImage src={getAvatarUrl() || undefined} />
