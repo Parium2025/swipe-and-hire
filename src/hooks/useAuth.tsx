@@ -1499,28 +1499,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTimeout(() => {
       (async () => {
         try {
+          // 1. Prefetch kandidat-avatarer för /candidates
           const { data: apps, error } = await supabase
             .from('job_applications')
             .select('applicant_id')
             .order('applied_at', { ascending: false })
             .range(0, 24);
 
-          if (error || !apps || apps.length === 0) return;
+          if (!error && apps && apps.length > 0) {
+            const applicantIds = [...new Set(apps.map((a: any) => a.applicant_id))].slice(0, 20);
 
-          const applicantIds = [...new Set(apps.map((a: any) => a.applicant_id))].slice(0, 20);
+            // Single batch RPC call instead of N individual calls (scales to millions)
+            const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+              p_applicant_ids: applicantIds,
+              p_employer_id: user.id,
+            });
 
-          // Single batch RPC call instead of N individual calls (scales to millions)
-          const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
-            p_applicant_ids: applicantIds,
-            p_employer_id: user.id,
-          });
+            const paths = (batchMediaData || [])
+              .map((row: any) => row.profile_image_url)
+              .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '');
+            if (paths.length > 0) {
+              await Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {})));
+            }
+          }
 
-          const paths = (batchMediaData || [])
-            .map((row: any) => row.profile_image_url)
-            .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '');
-          if (paths.length === 0) return;
+          // 2. Prefetch my_candidates data för /my-candidates (så det känns instant)
+          const { data: myCandidates } = await supabase
+            .from('my_candidates')
+            .select('*')
+            .eq('recruiter_id', user.id)
+            .order('updated_at', { ascending: false })
+            .limit(50);
 
-          await Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {})));
+          if (myCandidates && myCandidates.length > 0) {
+            const applicationIds = myCandidates.map(mc => mc.application_id);
+            const myCandApplicantIds = [...new Set(myCandidates.map(mc => mc.applicant_id))];
+
+            // Fetch job applications data in background
+            await supabase
+              .from('job_applications')
+              .select(`id, applicant_id, first_name, last_name, email, phone, location, bio,
+                cv_url, age, employment_status, work_schedule, availability, custom_answers,
+                status, applied_at, viewed_at, job_postings!inner(title)`)
+              .in('id', applicationIds);
+
+            // Fetch my_candidates avatars
+            const { data: myCandMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+              p_applicant_ids: myCandApplicantIds,
+              p_employer_id: user.id,
+            });
+
+            const myCandPaths = (myCandMediaData || [])
+              .map((row: any) => row.profile_image_url)
+              .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '');
+            if (myCandPaths.length > 0) {
+              await Promise.all(myCandPaths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {})));
+            }
+          }
         } catch {
           // silent
         }
