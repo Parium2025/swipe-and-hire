@@ -458,27 +458,26 @@ serve(async (req) => {
     await supabase.from('daily_hr_news').insert(insert);
     console.log(`Inserted ${insert.length} RSS articles`);
     
-    // BULLETPROOF: Verify we have at least 4 articles total
+    // BULLETPROOF: Verify we have RSS articles
+    // NOTE: AI fallback is ONLY used when there are ZERO RSS articles within 5 days
+    // If we have ANY RSS articles (even just 1-3), we show those - no AI mixing
     const { data: finalCount } = await supabase
       .from('daily_hr_news')
       .select('id')
       .not('source_url', 'is', null)
-      .limit(4);
+      .limit(10);
     
     const totalRSS = finalCount?.length || 0;
     console.log(`Total RSS articles in DB after insert: ${totalRSS}`);
     
-    // If still under 4, add AI fallback to fill the gap
-    if (totalRSS < 4) {
-      console.log(`Only ${totalRSS} RSS articles, generating ${4 - totalRSS} AI fallback articles...`);
-      const aiNews = await generateAIFallbackNews(supabase);
-      if (aiNews.length > 0) {
-        // Only insert enough to reach 4 total
-        const needed = Math.min(4 - totalRSS, aiNews.length);
-        const toInsert = aiNews.slice(0, needed);
-        await supabase.from('daily_hr_news').insert(toInsert);
-        console.log(`Added ${needed} AI fallback articles to reach 4 total`);
-      }
+    // Remove any old AI fallback articles since we now have real RSS news
+    if (totalRSS > 0) {
+      await supabase
+        .from('daily_hr_news')
+        .delete()
+        .eq('source', 'Parium')
+        .is('source_url', null);
+      console.log('Cleared AI fallback articles - real RSS news is available');
     }
     
     return new Response(JSON.stringify({ 
