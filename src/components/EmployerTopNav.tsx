@@ -253,20 +253,19 @@ function EmployerTopNav() {
           <DropdownMenu open={dashboardOpen} onOpenChange={setDashboardOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150
-                  ${isDropdownActive(dashboardItems) 
-                    ? 'bg-white/20 text-white' 
-                    : 'text-white hover:bg-white/10'
-                  }
-                `}
+                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
               >
-                <LayoutDashboard className="h-4 w-4" />
-                <span>Annonser</span>
+                <span 
+                  className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
+                    isDropdownActive(dashboardItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
+                  }`} 
+                />
+                <LayoutDashboard className="h-4 w-4 relative z-10" />
+                <span className="relative z-10">Annonser</span>
                 {getDashboardCount() && (
-                  <span className="text-white text-xs">({getDashboardCount()})</span>
+                  <span className="text-white text-xs relative z-10">({getDashboardCount()})</span>
                 )}
-                <ChevronDown className="h-3 w-3 text-white" />
+                <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
@@ -293,20 +292,19 @@ function EmployerTopNav() {
             <DropdownMenuTrigger asChild>
               <button
                 onMouseEnter={prefetchApplications}
-                className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150
-                  ${isDropdownActive(candidateItems) 
-                    ? 'bg-white/20 text-white' 
-                    : 'text-white hover:bg-white/10'
-                  }
-                `}
+                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
               >
-                <Users className="h-4 w-4" />
-                <span>Kandidater</span>
+                <span 
+                  className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
+                    isDropdownActive(candidateItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
+                  }`} 
+                />
+                <Users className="h-4 w-4 relative z-10" />
+                <span className="relative z-10">Kandidater</span>
                 {getCandidatesCount() && (
-                  <span className="text-white text-xs">({getCandidatesCount()})</span>
+                  <span className="text-white text-xs relative z-10">({getCandidatesCount()})</span>
                 )}
-                <ChevronDown className="h-3 w-3 text-white" />
+                <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
@@ -337,18 +335,17 @@ function EmployerTopNav() {
           {/* Meddelanden Button */}
           <button
             onClick={() => handleNavigation('/messages')}
-            className={`
-              flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 relative
-              ${isActiveUrl('/messages') 
-                ? 'bg-white/20 text-white' 
-                : 'text-white hover:bg-white/10'
-              }
-            `}
+            className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
           >
-            <MessageCircle className="h-4 w-4" />
-            <span>Meddelanden</span>
+            <span 
+              className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
+                isActiveUrl('/messages') ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
+              }`} 
+            />
+            <MessageCircle className="h-4 w-4 relative z-10" />
+            <span className="relative z-10">Meddelanden</span>
             {preloadedUnreadMessages > 0 && (
-              <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+              <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center relative z-10">
                 {preloadedUnreadMessages}
               </span>
             )}
@@ -358,29 +355,28 @@ function EmployerTopNav() {
           <DropdownMenu open={businessOpen} onOpenChange={setBusinessOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150
-                  ${isDropdownActive(businessItems) 
-                    ? 'bg-white/20 text-white' 
-                    : 'text-white hover:bg-white/10'
-                  }
-                `}
+                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
               >
+                <span 
+                  className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
+                    isDropdownActive(businessItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
+                  }`} 
+                />
                 {preloadedCompanyLogoUrl ? (
                   <img 
                     src={preloadedCompanyLogoUrl} 
                     alt="Företagslogo" 
-                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30"
+                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30 relative z-10"
                   />
                 ) : profile?.company_name ? (
-                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white">
+                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white relative z-10">
                     {profile.company_name.substring(0, 2).toUpperCase()}
                   </div>
                 ) : (
-                  <Building className="h-4 w-4" />
+                  <Building className="h-4 w-4 relative z-10" />
                 )}
-                <span>Företag</span>
-                <ChevronDown className="h-3 w-3 text-white" />
+                <span className="relative z-10">Företag</span>
+                <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
