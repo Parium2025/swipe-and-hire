@@ -9,11 +9,16 @@ import {
   Globe,
   Newspaper,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Briefcase,
+  UserPlus,
+  Wallet,
+  Rocket,
+  Building2,
 } from 'lucide-react';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
 
-// Map icon names to components
+// Map icon names to components - supports all category icons
 const iconMap: Record<string, React.ElementType> = {
   Cpu,
   TrendingUp,
@@ -21,6 +26,11 @@ const iconMap: Record<string, React.ElementType> = {
   Globe,
   Newspaper,
   Sparkles,
+  Briefcase,
+  UserPlus,
+  Wallet,
+  Rocket,
+  Building2,
 };
 
 // Default gradients if not specified - order: green, blue, purple, orange (top-to-bottom, left-to-right)
