@@ -35,9 +35,10 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(4);
 
-  // Happy path: we have 4 valid articles
-  if (!error && allNews && allNews.length >= 4) {
-    console.log('[HR News] ✓ Got 4 articles from DB', { 
+  // Happy path: we have articles (1-4 is fine, we show what's available)
+  if (!error && allNews && allNews.length > 0) {
+    console.log('[HR News] ✓ Got articles from DB', { 
+      count: allNews.length,
       sources: allNews.map(n => n.source) 
     });
     return allNews;
