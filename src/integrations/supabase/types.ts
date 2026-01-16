@@ -1796,6 +1796,14 @@ export type Database = {
         Args: { p_applicant_id: string; p_employer_id: string }
         Returns: boolean
       }
+      is_conversation_admin: {
+        Args: { p_conversation_id: string }
+        Returns: boolean
+      }
+      is_conversation_member: {
+        Args: { p_conversation_id: string }
+        Returns: boolean
+      }
       is_org_admin: { Args: { p_user_id: string }; Returns: boolean }
       queue_cv_analysis: {
         Args: {
