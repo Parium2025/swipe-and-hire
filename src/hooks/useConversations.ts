@@ -103,8 +103,9 @@ export function useConversations() {
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-      // Fetch last message for each conversation
-      const { data: lastMessages } = await supabase
+      // Fetch ALL messages for these conversations in ONE query
+      // We'll use this to calculate both last_message AND unread_count
+      const { data: allMessages } = await supabase
         .from('conversation_messages')
         .select('*')
         .in('conversation_id', conversationIds)
@@ -112,38 +113,32 @@ export function useConversations() {
 
       // Group last messages by conversation
       const lastMessageMap = new Map<string, ConversationMessage>();
-      lastMessages?.forEach(msg => {
+      const unreadCounts = new Map<string, number>();
+      
+      // Initialize unread counts
+      conversationIds.forEach(id => unreadCounts.set(id, 0));
+      
+      // Process all messages in memory (much faster than N database calls)
+      allMessages?.forEach(msg => {
+        // Track last message per conversation
         if (!lastMessageMap.has(msg.conversation_id)) {
           lastMessageMap.set(msg.conversation_id, {
             ...msg,
             sender_profile: profileMap.get(msg.sender_id) || undefined,
           });
         }
-      });
-
-      // Count unread messages per conversation
-      const unreadCounts = new Map<string, number>();
-      for (const conv of conversations) {
-        const lastRead = lastReadMap.get(conv.id);
-        if (!lastRead) {
-          // Count all messages
-          const { count } = await supabase
-            .from('conversation_messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('conversation_id', conv.id)
-            .neq('sender_id', user.id);
-          unreadCounts.set(conv.id, count || 0);
-        } else {
-          // Count messages after last read
-          const { count } = await supabase
-            .from('conversation_messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('conversation_id', conv.id)
-            .neq('sender_id', user.id)
-            .gt('created_at', lastRead);
-          unreadCounts.set(conv.id, count || 0);
+        
+        // Count unread messages (not from current user, after last_read)
+        if (msg.sender_id !== user.id) {
+          const lastRead = lastReadMap.get(msg.conversation_id);
+          if (!lastRead || new Date(msg.created_at) > new Date(lastRead)) {
+            unreadCounts.set(
+              msg.conversation_id, 
+              (unreadCounts.get(msg.conversation_id) || 0) + 1
+            );
+          }
         }
-      }
+      });
 
       // Build final conversation objects
       return conversations.map(conv => {
