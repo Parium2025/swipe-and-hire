@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useConversations, useConversationMessages, Conversation, ConversationMessage, useCreateConversation } from '@/hooks/useConversations';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
@@ -381,6 +382,7 @@ function ChatView({
   onBack: () => void;
 }) {
   const { messages, isLoading, sendMessage, markAsRead } = useConversationMessages(conversation.id);
+  const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -389,6 +391,15 @@ function ChatView({
   const otherMembers = conversation.members.filter(m => m.user_id !== currentUserId);
   const displayMember = otherMembers[0];
 
+  // Get current user's display name for typing indicator
+  const getCurrentUserName = () => {
+    const currentMember = conversation.members.find(m => m.user_id === currentUserId);
+    if (!currentMember?.profile) return 'Någon';
+    const p = currentMember.profile;
+    if (p.role === 'employer' && p.company_name) return p.company_name;
+    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Någon';
+  };
+
   // Mark as read when opening
   useEffect(() => {
     if (conversation.unread_count > 0) {
@@ -396,13 +407,24 @@ function ChatView({
     }
   }, [conversation.id, conversation.unread_count, markAsRead]);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom when messages change or typing indicator appears
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, typingUsers]);
+
+  // Handle input change with typing indicator
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewMessage(e.target.value);
+    if (e.target.value.trim()) {
+      startTyping(getCurrentUserName());
+    }
+  };
 
   const handleSend = async () => {
     if (!newMessage.trim() || sending) return;
+    
+    // Stop typing indicator when sending
+    stopTyping(getCurrentUserName());
     
     setSending(true);
     try {
@@ -559,13 +581,38 @@ function ChatView({
         )}
       </ScrollArea>
 
+      {/* Typing indicator */}
+      <AnimatePresence>
+        {typingUsers.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="px-4 py-2 border-t border-white/5"
+          >
+            <div className="flex items-center gap-2 text-white/60 text-sm">
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+              <span>
+                {typingUsers.length === 1 
+                  ? `${typingUsers[0].name} skriver...`
+                  : `${typingUsers.map(u => u.name).join(', ')} skriver...`}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Input */}
       <div className="p-4 border-t border-white/10 flex-shrink-0">
         <div className="flex items-end gap-2">
           <Textarea
             ref={textareaRef}
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Skriv ett meddelande..."
             className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
