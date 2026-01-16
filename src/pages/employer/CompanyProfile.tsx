@@ -19,7 +19,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
-import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle } from 'lucide-react';
+import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare } from 'lucide-react';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
@@ -98,6 +98,10 @@ const CompanyProfile = () => {
       company_logo_url: (profile as any)?.company_logo_url || '',
       company_logo_original_url: (profile as any)?.company_logo_original_url || '',
       social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
+      // Interview settings
+      interview_default_message: (profile as any)?.interview_default_message || '',
+      interview_office_address: (profile as any)?.interview_office_address || '',
+      interview_office_instructions: (profile as any)?.interview_office_instructions || '',
     };
   };
 
@@ -157,6 +161,10 @@ const CompanyProfile = () => {
         employee_count: profile.employee_count || '',
         company_logo_url: (profile as any)?.company_logo_url || '',
         social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
+        // Interview settings
+        interview_default_message: (profile as any)?.interview_default_message || '',
+        interview_office_address: (profile as any)?.interview_office_address || '',
+        interview_office_instructions: (profile as any)?.interview_office_instructions || '',
       };
       
       // Only reset form if there's no saved session state
@@ -948,6 +956,64 @@ const CompanyProfile = () => {
                     Lägg till
                     <Plus className="h-4 w-4 ml-2" />
                   </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Interview Settings Section */}
+            <div className="border-t border-white/10 pt-5 space-y-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <CalendarDays className="h-5 w-5 text-white" />
+                  <h4 className="text-base font-semibold text-white">Intervjuinställningar</h4>
+                </div>
+                <p className="text-sm text-white">Standardvärden som fylls i automatiskt när du bokar intervjuer</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="interview_office_address" className="text-white flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5" />
+                    Intervjuadress
+                  </Label>
+                  <Input
+                    id="interview_office_address"
+                    value={formData.interview_office_address}
+                    onChange={(e) => setFormData({...formData, interview_office_address: e.target.value})}
+                    placeholder="Storgatan 1, 111 22 Stockholm"
+                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
+                  />
+                  <p className="text-xs text-white/60">Adressen som visas för kandidater vid fysiska intervjuer</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="interview_office_instructions" className="text-white">
+                    Instruktioner till kandidaten
+                  </Label>
+                  <Textarea
+                    id="interview_office_instructions"
+                    value={formData.interview_office_instructions}
+                    onChange={(e) => setFormData({...formData, interview_office_instructions: e.target.value})}
+                    placeholder="T.ex. parkering, ingång, vem de ska fråga efter..."
+                    rows={2}
+                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="interview_default_message" className="text-white flex items-center gap-1.5">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Standardmeddelande
+                  </Label>
+                  <Textarea
+                    id="interview_default_message"
+                    value={formData.interview_default_message}
+                    onChange={(e) => setFormData({...formData, interview_default_message: e.target.value})}
+                    placeholder="Hej!&#10;&#10;Tack för din ansökan. Vi skulle gärna vilja träffa dig på en intervju.&#10;&#10;Vänliga hälsningar"
+                    rows={4}
+                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                  />
+                  <p className="text-xs text-white/60">Detta meddelande skickas till kandidaten vid intervjubokning</p>
                 </div>
               </div>
             </div>

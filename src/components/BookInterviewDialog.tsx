@@ -28,7 +28,7 @@ interface BookInterviewDialogProps {
   onSuccess?: () => void;
 }
 
-const DEFAULT_MESSAGE = `Hej!
+const FALLBACK_MESSAGE = `Hej!
 
 Tack för din ansökan. Vi skulle gärna vilja träffa dig på en intervju.
 
@@ -55,13 +55,15 @@ export const BookInterviewDialog = ({
   const [locationType, setLocationType] = useState<'video' | 'office'>('video');
   const [locationDetails, setLocationDetails] = useState('');
   const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState(DEFAULT_MESSAGE);
+  const [message, setMessage] = useState('');
 
-  // Get employer's office address from profile
-  const officeAddress = profile?.address || '';
+  // Get employer's settings from profile
+  const officeAddress = (profile as any)?.interview_office_address || profile?.address || '';
+  const defaultMessage = (profile as any)?.interview_default_message || FALLBACK_MESSAGE;
+  const officeInstructions = (profile as any)?.interview_office_instructions || '';
   const companyName = profile?.company_name || '';
 
-  // Set default subject when dialog opens
+  // Set default values when dialog opens
   useEffect(() => {
     if (open) {
       setSubject(`Intervju för ${jobTitle}`);
@@ -71,18 +73,22 @@ export const BookInterviewDialog = ({
       setDuration('30');
       setLocationType('video');
       setLocationDetails('');
-      setMessage(DEFAULT_MESSAGE);
+      setMessage(defaultMessage);
     }
-  }, [open, jobTitle]);
+  }, [open, jobTitle, defaultMessage]);
 
   // Update location details when type changes
   useEffect(() => {
-    if (locationType === 'office' && officeAddress) {
-      setLocationDetails(officeAddress);
+    if (locationType === 'office') {
+      // Combine address with instructions if both exist
+      const details = officeInstructions 
+        ? `${officeAddress}\n\n${officeInstructions}`
+        : officeAddress;
+      setLocationDetails(details);
     } else if (locationType === 'video') {
       setLocationDetails('Videosamtal via Parium');
     }
-  }, [locationType, officeAddress]);
+  }, [locationType, officeAddress, officeInstructions]);
 
   const handleSubmit = async () => {
     if (!user || !date) {
