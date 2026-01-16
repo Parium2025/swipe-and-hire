@@ -171,12 +171,12 @@ export default function Messages() {
 
           {/* Search */}
           <div className="relative mb-3 flex-shrink-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Sök konversationer..."
-              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/70"
             />
           </div>
 
@@ -690,12 +690,12 @@ function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
       <div className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center mb-4">
-        <MessageSquare className="h-7 w-7 text-white/40" />
+        <MessageSquare className="h-7 w-7 text-white" />
       </div>
       <h3 className="text-lg font-medium text-white mb-1">
         {hasSearch ? 'Inga resultat' : 'Inga konversationer'}
       </h3>
-      <p className="text-white/50 text-sm max-w-xs">
+      <p className="text-white text-sm max-w-xs">
         {hasSearch 
           ? 'Prova ett annat sökord' 
           : 'Starta en konversation med en kandidat eller kollega för att komma igång'}
@@ -708,10 +708,10 @@ function EmptyChatState() {
   return (
     <div className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
       <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-        <MessageSquare className="h-8 w-8 text-white/30" />
+        <MessageSquare className="h-8 w-8 text-white" />
       </div>
       <h3 className="text-lg font-medium text-white mb-1">Välj en konversation</h3>
-      <p className="text-white/50 text-sm text-center max-w-xs">
+      <p className="text-white text-sm text-center max-w-xs">
         Välj en konversation från listan till vänster för att börja chatta
       </p>
     </div>
