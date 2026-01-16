@@ -983,7 +983,7 @@ const CompanyProfile = () => {
                     placeholder="Storgatan 1, 111 22 Stockholm"
                     className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
                   />
-                  <p className="text-xs text-white/60">Adressen som visas för kandidater vid fysiska intervjuer</p>
+                  <p className="text-xs text-white">Adressen som visas för kandidater vid fysiska intervjuer</p>
                 </div>
 
                 <div className="space-y-1.5">
@@ -1013,7 +1013,7 @@ const CompanyProfile = () => {
                     rows={4}
                     className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
                   />
-                  <p className="text-xs text-white/60">Detta meddelande skickas till kandidaten vid intervjubokning</p>
+                  <p className="text-xs text-white">Detta meddelande skickas till kandidaten vid intervjubokning</p>
                 </div>
               </div>
             </div>

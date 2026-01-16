@@ -54,11 +54,12 @@ export const BookInterviewDialog = ({
   const [duration, setDuration] = useState('30');
   const [locationType, setLocationType] = useState<'video' | 'office'>('video');
   const [locationDetails, setLocationDetails] = useState('');
+  const [editableAddress, setEditableAddress] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
 
   // Get employer's settings from profile
-  const officeAddress = (profile as any)?.interview_office_address || profile?.address || '';
+  const savedOfficeAddress = (profile as any)?.interview_office_address || profile?.address || '';
   const defaultMessage = (profile as any)?.interview_default_message || FALLBACK_MESSAGE;
   const officeInstructions = (profile as any)?.interview_office_instructions || '';
   const companyName = profile?.company_name || '';
@@ -73,22 +74,23 @@ export const BookInterviewDialog = ({
       setDuration('30');
       setLocationType('video');
       setLocationDetails('');
+      setEditableAddress(savedOfficeAddress);
       setMessage(defaultMessage);
     }
-  }, [open, jobTitle, defaultMessage]);
+  }, [open, jobTitle, defaultMessage, savedOfficeAddress]);
 
-  // Update location details when type changes
+  // Update location details when type or address changes
   useEffect(() => {
     if (locationType === 'office') {
       // Combine address with instructions if both exist
       const details = officeInstructions 
-        ? `${officeAddress}\n\n${officeInstructions}`
-        : officeAddress;
+        ? `${editableAddress}\n\n${officeInstructions}`
+        : editableAddress;
       setLocationDetails(details);
     } else if (locationType === 'video') {
       setLocationDetails('Videosamtal via Parium');
     }
-  }, [locationType, officeAddress, officeInstructions]);
+  }, [locationType, editableAddress, officeInstructions]);
 
   const handleSubmit = async () => {
     if (!user || !date) {
@@ -302,16 +304,24 @@ export const BookInterviewDialog = ({
             </div>
           </div>
 
-          {/* Location details */}
+          {/* Location details - Address and Instructions */}
           {locationType === 'office' && (
-            <div className="space-y-2">
-              <Label className="text-white">Adress</Label>
-              <Input
-                value={locationDetails}
-                onChange={(e) => setLocationDetails(e.target.value)}
-                placeholder="Ange adress för mötet"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              />
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label className="text-white">Adress</Label>
+                <Input
+                  value={editableAddress}
+                  onChange={(e) => setEditableAddress(e.target.value)}
+                  placeholder="Ange adress för mötet"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                />
+              </div>
+              {officeInstructions && (
+                <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                  <Label className="text-white/80 text-xs uppercase tracking-wide mb-1.5 block">Instruktioner till kandidaten</Label>
+                  <p className="text-white text-sm whitespace-pre-wrap">{officeInstructions}</p>
+                </div>
+              )}
             </div>
           )}
 
