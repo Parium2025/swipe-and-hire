@@ -115,14 +115,14 @@ export default function Messages() {
   
   if (isLoading && !hasData) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-white/50" />
+      <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col opacity-0">
+        {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
   }
 
   return (
-    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col">
+    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">
