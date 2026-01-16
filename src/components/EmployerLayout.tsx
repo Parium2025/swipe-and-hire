@@ -288,6 +288,116 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
     });
   }, [user, queryClient]);
 
+  // Prefetch conversations for instant /messages load
+  useEffect(() => {
+    if (!user) return;
+
+    queryClient.prefetchQuery({
+      queryKey: ['conversations', user.id],
+      queryFn: async () => {
+        // Get all conversation IDs where user is a member
+        const { data: memberships, error: memberError } = await supabase
+          .from('conversation_members')
+          .select('conversation_id, last_read_at')
+          .eq('user_id', user.id);
+
+        if (memberError) throw memberError;
+        if (!memberships || memberships.length === 0) return [];
+
+        const conversationIds = memberships.map(m => m.conversation_id);
+        const lastReadMap = new Map(memberships.map(m => [m.conversation_id, m.last_read_at]));
+
+        // Fetch conversations with job info
+        const { data: conversations, error: convError } = await supabase
+          .from('conversations')
+          .select(`
+            *,
+            job:job_id (title)
+          `)
+          .in('id', conversationIds)
+          .order('last_message_at', { ascending: false, nullsFirst: false });
+
+        if (convError) throw convError;
+        if (!conversations) return [];
+
+        // Fetch all members for these conversations
+        const { data: allMembers, error: membersError } = await supabase
+          .from('conversation_members')
+          .select('conversation_id, user_id, is_admin, last_read_at')
+          .in('conversation_id', conversationIds);
+
+        if (membersError) throw membersError;
+
+        // Get unique user IDs to fetch profiles
+        const allUserIds = [...new Set(allMembers?.map(m => m.user_id) || [])];
+        
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
+          .in('user_id', allUserIds);
+
+        const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
+        // Fetch last message for each conversation
+        const { data: lastMessages } = await supabase
+          .from('conversation_messages')
+          .select('*')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false });
+
+        // Group last messages by conversation
+        const lastMessageMap = new Map<string, any>();
+        lastMessages?.forEach(msg => {
+          if (!lastMessageMap.has(msg.conversation_id)) {
+            lastMessageMap.set(msg.conversation_id, {
+              ...msg,
+              sender_profile: profileMap.get(msg.sender_id) || undefined,
+            });
+          }
+        });
+
+        // Count unread messages per conversation
+        const unreadCounts = new Map<string, number>();
+        for (const conv of conversations) {
+          const lastRead = lastReadMap.get(conv.id);
+          if (!lastRead) {
+            const { count } = await supabase
+              .from('conversation_messages')
+              .select('*', { count: 'exact', head: true })
+              .eq('conversation_id', conv.id)
+              .neq('sender_id', user.id);
+            unreadCounts.set(conv.id, count || 0);
+          } else {
+            const { count } = await supabase
+              .from('conversation_messages')
+              .select('*', { count: 'exact', head: true })
+              .eq('conversation_id', conv.id)
+              .neq('sender_id', user.id)
+              .gt('created_at', lastRead);
+            unreadCounts.set(conv.id, count || 0);
+          }
+        }
+
+        // Build final conversation objects
+        return conversations.map(conv => {
+          const members = (allMembers || [])
+            .filter(m => m.conversation_id === conv.id)
+            .map(m => ({
+              ...m,
+              profile: profileMap.get(m.user_id),
+            }));
+
+          return {
+            ...conv,
+            members,
+            last_message: lastMessageMap.get(conv.id),
+            unread_count: unreadCounts.get(conv.id) || 0,
+          };
+        });
+      },
+    });
+  }, [user, queryClient]);
+
   // Desktop layout with top navigation
   if (isDesktop) {
     return (
