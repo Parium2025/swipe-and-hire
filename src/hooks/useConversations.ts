@@ -232,9 +232,9 @@ export function useConversationMessages(conversationId: string | null) {
     enabled: !!conversationId,
   });
 
-  // Subscribe to realtime messages for this conversation
+  // Subscribe to realtime messages for this conversation - instant cache update
   useEffect(() => {
-    if (!conversationId) return;
+    if (!conversationId || !user) return;
 
     const channel = supabase
       .channel(`messages-${conversationId}`)
@@ -246,8 +246,41 @@ export function useConversationMessages(conversationId: string | null) {
           table: 'conversation_messages',
           filter: `conversation_id=eq.${conversationId}`,
         },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['conversation-messages', conversationId] });
+        async (payload) => {
+          const newMessage = payload.new as {
+            id: string;
+            conversation_id: string;
+            sender_id: string;
+            content: string;
+            created_at: string;
+            is_system_message: boolean;
+          };
+
+          // Skip if it's our own message (we already added it optimistically)
+          if (newMessage.sender_id === user.id) return;
+
+          // Fetch sender profile for the new message
+          const { data: senderProfile } = await supabase
+            .from('profiles')
+            .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
+            .eq('user_id', newMessage.sender_id)
+            .single();
+
+          // Add message directly to cache - instant update!
+          queryClient.setQueryData<ConversationMessage[]>(
+            ['conversation-messages', conversationId],
+            (old) => {
+              if (!old) return [{ ...newMessage, sender_profile: senderProfile || undefined }];
+              
+              // Check if message already exists
+              if (old.some(m => m.id === newMessage.id)) return old;
+              
+              return [...old, { ...newMessage, sender_profile: senderProfile || undefined }];
+            }
+          );
+
+          // Also update conversation list to show new last message
+          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
         }
       )
       .subscribe();
@@ -255,7 +288,7 @@ export function useConversationMessages(conversationId: string | null) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, queryClient]);
+  }, [conversationId, user, queryClient]);
 
   // Mark conversation as read
   const markAsRead = useCallback(async () => {
@@ -270,23 +303,57 @@ export function useConversationMessages(conversationId: string | null) {
     queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
   }, [conversationId, user, queryClient]);
 
-  // Send message
+  // Send message with optimistic update - instant UI feedback
   const sendMessage = useCallback(async (content: string) => {
     if (!conversationId || !user || !content.trim()) return;
 
-    const { error } = await supabase
-      .from('conversation_messages')
-      .insert({
-        conversation_id: conversationId,
-        sender_id: user.id,
-        content: content.trim(),
-      });
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage: ConversationMessage = {
+      id: tempId,
+      conversation_id: conversationId,
+      sender_id: user.id,
+      content: content.trim(),
+      created_at: new Date().toISOString(),
+      is_system_message: false,
+      sender_profile: undefined, // Will be filled by realtime update
+    };
 
-    if (error) throw error;
+    // Add message to cache immediately (optimistic)
+    queryClient.setQueryData<ConversationMessage[]>(
+      ['conversation-messages', conversationId],
+      (old) => [...(old || []), optimisticMessage]
+    );
 
-    // Update last read
-    await markAsRead();
-  }, [conversationId, user, markAsRead]);
+    try {
+      const { data, error } = await supabase
+        .from('conversation_messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          content: content.trim(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Replace temp message with real one
+      queryClient.setQueryData<ConversationMessage[]>(
+        ['conversation-messages', conversationId],
+        (old) => old?.map(m => m.id === tempId ? { ...data, sender_profile: optimisticMessage.sender_profile } : m) || []
+      );
+
+      // Update last read
+      await markAsRead();
+    } catch (error) {
+      // Rollback on error
+      queryClient.setQueryData<ConversationMessage[]>(
+        ['conversation-messages', conversationId],
+        (old) => old?.filter(m => m.id !== tempId) || []
+      );
+      throw error;
+    }
+  }, [conversationId, user, markAsRead, queryClient]);
 
   return {
     messages: messagesQuery.data || [],
