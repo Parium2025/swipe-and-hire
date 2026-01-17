@@ -62,8 +62,12 @@ export const BookInterviewDialog = ({
   const savedOfficeAddress = (profile as any)?.interview_office_address || profile?.address || '';
   const officeDefaultMessage = (profile as any)?.interview_default_message || FALLBACK_MESSAGE;
   const videoDefaultMessage = (profile as any)?.interview_video_default_message || FALLBACK_MESSAGE;
+  const savedVideoLink = (profile as any)?.interview_video_link || '';
   const officeInstructions = (profile as any)?.interview_office_instructions || '';
   const companyName = profile?.company_name || '';
+
+  // State for editable video link
+  const [editableVideoLink, setEditableVideoLink] = useState(savedVideoLink);
 
   // Get the correct default message based on location type
   const getDefaultMessageForType = (type: 'video' | 'office') => {
@@ -81,9 +85,10 @@ export const BookInterviewDialog = ({
       setLocationType('video');
       setLocationDetails('');
       setEditableAddress(savedOfficeAddress);
+      setEditableVideoLink(savedVideoLink);
       setMessage(videoDefaultMessage); // Start with video message since video is default
     }
-  }, [open, jobTitle, videoDefaultMessage, savedOfficeAddress]);
+  }, [open, jobTitle, videoDefaultMessage, savedOfficeAddress, savedVideoLink]);
 
   // Update message when location type changes
   useEffect(() => {
@@ -101,9 +106,10 @@ export const BookInterviewDialog = ({
         : editableAddress;
       setLocationDetails(details);
     } else if (locationType === 'video') {
-      setLocationDetails('Videosamtal via Parium');
+      // Use video link if available, otherwise show generic message
+      setLocationDetails(editableVideoLink || 'Videosamtal via Parium');
     }
-  }, [locationType, editableAddress, officeInstructions]);
+  }, [locationType, editableAddress, officeInstructions, editableVideoLink]);
 
   const handleSubmit = async () => {
     if (!user || !date) {
@@ -316,6 +322,20 @@ export const BookInterviewDialog = ({
               </button>
             </div>
           </div>
+
+          {/* Video link input */}
+          {locationType === 'video' && (
+            <div className="space-y-2">
+              <Label className="text-white">Videolänk</Label>
+              <Input
+                value={editableVideoLink}
+                onChange={(e) => setEditableVideoLink(e.target.value)}
+                placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              />
+              <p className="text-white/50 text-xs">Din Teams, Zoom eller Google Meet-länk</p>
+            </div>
+          )}
 
           {/* Location details - Address and Instructions */}
           {locationType === 'office' && (
