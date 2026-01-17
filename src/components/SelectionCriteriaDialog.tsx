@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -76,6 +77,7 @@ export function SelectionCriteriaDialog({
   candidates = []
 }: SelectionCriteriaDialogProps) {
   const { user } = useAuth();
+  const { isOnline, showOfflineToast } = useOnline();
   const [criteria, setCriteria] = useState<JobCriterion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -162,6 +164,10 @@ export function SelectionCriteriaDialog({
 
   const addNewCriterion = async () => {
     if (!user) return;
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
     
     try {
       const { data, error } = await supabase
@@ -192,6 +198,11 @@ export function SelectionCriteriaDialog({
   };
 
   const deleteCriterion = async (id: string) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('job_criteria')
@@ -218,6 +229,11 @@ export function SelectionCriteriaDialog({
   };
 
   const handleSaveAndActivate = async () => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     // Validate all criteria
     let hasErrors = false;
     const validCriteria: { id: string; title: string; prompt: string }[] = [];

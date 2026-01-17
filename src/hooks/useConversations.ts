@@ -293,6 +293,7 @@ export function useConversationMessages(conversationId: string | null) {
   // Mark conversation as read
   const markAsRead = useCallback(async () => {
     if (!conversationId || !user) return;
+    if (!navigator.onLine) return; // Silent fail for mark as read - non-critical
 
     await supabase
       .from('conversation_members')
@@ -306,6 +307,7 @@ export function useConversationMessages(conversationId: string | null) {
   // Send message with optimistic update - instant UI feedback
   const sendMessage = useCallback(async (content: string) => {
     if (!conversationId || !user || !content.trim()) return;
+    if (!navigator.onLine) throw new Error('Du är offline');
 
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage: ConversationMessage = {
@@ -384,6 +386,7 @@ export function useCreateConversation() {
       initialMessage?: string;
     }) => {
       if (!user) throw new Error('Not authenticated');
+      if (!navigator.onLine) throw new Error('Du är offline');
 
       // For 1-1 chats, check if conversation already exists
       if (!isGroup && memberIds.length === 1) {

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Trash2, GripVertical, HelpCircle, Search } from 'lucide-react';
 import {
@@ -179,6 +180,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
   const [questionDraft, setQuestionDraft] = useState<JobQuestion | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
+  const { isOnline, showOfflineToast } = useOnline();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -335,6 +337,11 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
   const saveQuestions = async () => {
     if (!jobId) return;
+    
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
 
     setLoading(true);
     try {

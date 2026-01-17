@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +52,9 @@ interface CreateTemplateWizardProps {
 }
 
 const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateToEdit, onBack }: CreateTemplateWizardProps) => {
+  const { user } = useAuth();
+  const { isOnline, showOfflineToast } = useOnline();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   // isReady controls opacity transition - starts false to prevent flash
   const [isReady, setIsReady] = useState(false);
@@ -87,8 +91,6 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const workEndTimeRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
-  const { toast } = useToast();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -816,6 +818,11 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
   const handleSubmit = async () => {
     if (!user || !validateCurrentStep()) return;
+    
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
 
     setLoading(true);
 

@@ -540,6 +540,8 @@ export const useApplicationsData = (searchQuery: string = '') => {
   // Mark application as viewed
   const markAsViewed = useMutation({
     mutationFn: async (applicationId: string) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
+      
       const { error } = await supabase
         .from('job_applications')
         .update({ viewed_at: new Date().toISOString() })

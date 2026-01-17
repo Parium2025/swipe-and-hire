@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,6 +68,7 @@ function checkForDiscrimination(text: string): { isDiscriminatory: boolean; reas
 
 export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManagerProps) {
   const { user } = useAuth();
+  const { isOnline, showOfflineToast } = useOnline();
   const [criteria, setCriteria] = useState<JobCriterion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -146,6 +148,11 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
       toast.error('Kriteriet innehåller diskriminerande innehåll');
       return;
     }
+    
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -190,6 +197,11 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
   };
 
   const handleDelete = async (criterionId: string) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('job_criteria')

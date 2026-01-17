@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useOnline } from '@/hooks/useOnlineStatus';
 import { Shield, Check, X, Users } from 'lucide-react';
 
 export const DataSharingConsent = () => {
@@ -14,7 +15,7 @@ export const DataSharingConsent = () => {
   const [updating, setUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-
+  const { isOnline, showOfflineToast } = useOnline();
   // Fetch current consent status
   useEffect(() => {
     const fetchConsentStatus = async () => {
@@ -45,6 +46,11 @@ export const DataSharingConsent = () => {
 
   const updateConsent = async (newConsentValue: boolean) => {
     if (!user?.id) return;
+    
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
     
     setUpdating(true);
     try {

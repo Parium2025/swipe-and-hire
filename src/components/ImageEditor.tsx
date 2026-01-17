@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { ZoomIn, ZoomOut, RotateCcw, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ImageEditorProps {
   isOpen: boolean;
@@ -283,6 +284,13 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const handleSaveClick = async () => {
     if (isSaving || !canvasRef.current) {
       console.log('ImageEditor: Already saving or no canvas');
+      return;
+    }
+    
+    if (!navigator.onLine) {
+      toast.error('Ingen anslutning', {
+        description: 'Kontrollera din internetanslutning och försök igen',
+      });
       return;
     }
     
