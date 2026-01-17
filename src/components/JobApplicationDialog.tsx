@@ -5,6 +5,7 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
@@ -61,9 +62,12 @@ interface JobApplicationDialogProps {
 
 const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: JobApplicationDialogProps) => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [initialAnswers, setInitialAnswers] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [draftRestored, setDraftRestored] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const { isOnline, showOfflineToast } = useOnline();
@@ -130,6 +134,13 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
     }
   }, [answers, job?.id, open, draftRestored]);
 
+  // Track unsaved changes
+  useEffect(() => {
+    if (!open || Object.keys(initialAnswers).length === 0) return;
+    const hasChanges = JSON.stringify(answers) !== JSON.stringify(initialAnswers);
+    setHasUnsavedChanges(hasChanges);
+  }, [answers, initialAnswers, open]);
+
   useEffect(() => {
     if (user && open) {
       fetchProfile();
@@ -147,19 +158,45 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
       if (data) {
         setProfile(data);
         // Auto-fill standard questions from profile
-        setAnswers(prev => ({
-          ...prev,
+        const profileAnswers = {
           first_name: data.first_name || '',
           last_name: data.last_name || '',
           age: data.birth_date ? new Date().getFullYear() - new Date(data.birth_date).getFullYear() : '',
           email: user?.email || '',
           phone: data.phone || '',
           location: data.home_location || data.location || ''
-        }));
+        };
+        setAnswers(prev => ({ ...prev, ...profileAnswers }));
+        setInitialAnswers(prev => ({ ...prev, ...profileAnswers }));
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
+  };
+
+  // Handle close with unsaved changes check
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleConfirmClose = () => {
+    // Clear draft when user confirms leaving without saving
+    if (job?.id) {
+      clearJobDialogDraft(job.id);
+    }
+    setShowUnsavedDialog(false);
+    setHasUnsavedChanges(false);
+    setAnswers({});
+    setInitialAnswers({});
+    onOpenChange(false);
+  };
+
+  const handleCancelClose = () => {
+    setShowUnsavedDialog(false);
   };
 
   const handleAnswerChange = (questionId: string, value: any) => {
@@ -459,58 +496,71 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus className="max-w-md max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
-        <div className="relative flex flex-col max-h-[90vh]">
-          {/* Header */}
-          <div className="p-2 md:p-4 border-b border-white/20 bg-background/10 rounded-t-[24px] flex-shrink-0">
-            <div className="flex items-center justify-between text-white">
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <Heart className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-                <span className="font-semibold text-xs md:text-sm">Ansökan</span>
+    <>
+      <Dialog open={open} onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          handleClose();
+        }
+      }}>
+        <DialogContentNoFocus className="max-w-md max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
+          <div className="relative flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="p-2 md:p-4 border-b border-white/20 bg-background/10 rounded-t-[24px] flex-shrink-0">
+              <div className="flex items-center justify-between text-white">
+                <div className="flex items-center gap-1.5 md:gap-2">
+                  <Heart className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                  <span className="font-semibold text-xs md:text-sm">Ansökan</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleClose}
+                  className="text-white hover:text-white hover:bg-white/10 h-6 w-6 md:h-8 md:w-8 p-0"
+                >
+                  ✕
+                </Button>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => onOpenChange(false)}
-                className="text-white hover:text-white hover:bg-white/10 h-6 w-6 md:h-8 md:w-8 p-0"
+              <div className="mt-1.5 md:mt-2">
+                <h3 className="font-semibold text-sm md:text-lg leading-tight">{job.title}</h3>
+                <p className="text-xs md:text-sm text-white">{companyName}</p>
+              </div>
+            </div>
+
+            {/* All questions in scrollable list */}
+            <div className="flex-1 overflow-y-auto px-4">
+              <div className="py-2">
+                {allQuestions.map((question, index) => renderQuestionRow(question, index))}
+              </div>
+            </div>
+
+            {/* Submit button */}
+            <div className="p-4 border-t border-white/20 bg-background/10 flex-shrink-0">
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting || !canSubmit() || !isOnline}
+                variant="glassGreen"
+                className={`w-full ${!isOnline ? 'opacity-50' : ''}`}
+                size="lg"
               >
-                ✕
+                {!isOnline ? (
+                  <WifiOff className="h-4 w-4 mr-2" />
+                ) : (
+                  <Heart className="h-4 w-4 mr-2" />
+                )}
+                {submitting ? 'Skickar...' : !isOnline ? 'Offline' : 'Skicka ansökan'}
               </Button>
             </div>
-            <div className="mt-1.5 md:mt-2">
-              <h3 className="font-semibold text-sm md:text-lg leading-tight">{job.title}</h3>
-              <p className="text-xs md:text-sm text-white">{companyName}</p>
-            </div>
           </div>
+        </DialogContentNoFocus>
+      </Dialog>
 
-          {/* All questions in scrollable list */}
-          <div className="flex-1 overflow-y-auto px-4">
-            <div className="py-2">
-              {allQuestions.map((question, index) => renderQuestionRow(question, index))}
-            </div>
-          </div>
-
-          {/* Submit button */}
-          <div className="p-4 border-t border-white/20 bg-background/10 flex-shrink-0">
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting || !canSubmit() || !isOnline}
-              variant="glassGreen"
-              className={`w-full ${!isOnline ? 'opacity-50' : ''}`}
-              size="lg"
-            >
-              {!isOnline ? (
-                <WifiOff className="h-4 w-4 mr-2" />
-              ) : (
-                <Heart className="h-4 w-4 mr-2" />
-              )}
-              {submitting ? 'Skickar...' : !isOnline ? 'Offline' : 'Skicka ansökan'}
-            </Button>
-          </div>
-        </div>
-      </DialogContentNoFocus>
-    </Dialog>
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onConfirm={handleConfirmClose}
+        onCancel={handleCancelClose}
+      />
+    </>
   );
 };
 
