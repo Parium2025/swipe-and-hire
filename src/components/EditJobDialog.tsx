@@ -208,6 +208,65 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // localStorage draft key for this specific job
+  const draftKey = job?.id ? `parium_draft_edit-job-${job.id}` : null;
+  
+  // Save form state to localStorage for persistence across page refreshes
+  useEffect(() => {
+    if (!open || !draftKey || !job) return;
+    
+    // Check if there's meaningful content that differs from original
+    const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    
+    if (hasChanges && hasUnsavedChanges) {
+      try {
+        localStorage.setItem(draftKey, JSON.stringify({
+          formData,
+          customQuestions,
+          savedAt: Date.now()
+        }));
+        console.log('💾 Edit job draft saved');
+      } catch (e) {
+        console.warn('Failed to save edit job draft');
+      }
+    }
+  }, [formData, customQuestions, open, draftKey, hasUnsavedChanges, initialFormData, job]);
+  
+  // Restore draft from localStorage when opening
+  useEffect(() => {
+    if (!open || !draftKey || !job) return;
+    
+    try {
+      const savedDraft = localStorage.getItem(draftKey);
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        // Only restore if saved recently (within 24 hours)
+        if (parsed.savedAt && Date.now() - parsed.savedAt < 24 * 60 * 60 * 1000) {
+          if (parsed.formData) {
+            console.log('📝 Restoring edit job draft from localStorage');
+            setFormData(parsed.formData);
+            if (parsed.customQuestions) {
+              setCustomQuestions(parsed.customQuestions);
+            }
+          }
+        } else {
+          // Clear old draft
+          localStorage.removeItem(draftKey);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to restore edit job draft');
+    }
+  }, [open, draftKey, job?.id]);
+  
+  // Clear draft after successful save
+  const clearEditJobDraft = () => {
+    if (draftKey) {
+      localStorage.removeItem(draftKey);
+      console.log('🗑️ Edit job draft cleared');
+    }
+  };
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -1406,6 +1465,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       }
 
       toast({ title: 'Annons uppdaterad!', description: 'Dina ändringar har sparats.' });
+      clearEditJobDraft(); // Clear localStorage draft after successful save
       setHasUnsavedChanges(false);
       onOpenChange(false);
       onJobUpdated();

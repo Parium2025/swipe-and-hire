@@ -41,6 +41,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   
   // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
   const WELCOME_LOCAL_MEDIA_KEY = 'parium_welcome_local_media';
+  // localStorage key for form data persistence across page refreshes
+  const WELCOME_DRAFT_KEY = 'parium_draft_welcome-tunnel';
   
   interface WelcomeLocalMediaState {
     profileImageUrl: string;
@@ -157,6 +159,69 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       }
     }
   }, [profile]);
+  
+  // Save form data to localStorage for persistence across page refreshes
+  useEffect(() => {
+    // Check if there's meaningful content to save
+    const hasContent = formData.firstName.trim() || formData.lastName.trim() || 
+                       formData.bio.trim() || formData.phone.trim() ||
+                       formData.employmentStatus || formData.workingHours ||
+                       formData.availability || formData.birthDate ||
+                       postalCode;
+    
+    if (hasContent) {
+      try {
+        localStorage.setItem(WELCOME_DRAFT_KEY, JSON.stringify({
+          formData,
+          postalCode,
+          userLocation,
+          currentStep,
+          savedAt: Date.now()
+        }));
+      } catch (e) {
+        console.warn('Failed to save welcome tunnel draft');
+      }
+    }
+  }, [formData, postalCode, userLocation, currentStep]);
+  
+  // Restore draft from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedDraft = localStorage.getItem(WELCOME_DRAFT_KEY);
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        // Only restore if saved recently (within 7 days)
+        if (parsed.savedAt && Date.now() - parsed.savedAt < 7 * 24 * 60 * 60 * 1000) {
+          if (parsed.formData) {
+            console.log('📝 Restoring welcome tunnel draft from localStorage');
+            setFormData(prev => ({
+              ...prev,
+              ...parsed.formData,
+              // Don't override media URLs from profile
+              profileImageUrl: prev.profileImageUrl || parsed.formData.profileImageUrl,
+            }));
+          }
+          if (parsed.postalCode) setPostalCode(parsed.postalCode);
+          if (parsed.userLocation) setUserLocation(parsed.userLocation);
+        } else {
+          // Clear old draft
+          localStorage.removeItem(WELCOME_DRAFT_KEY);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to restore welcome tunnel draft');
+    }
+  }, []); // Run only on mount
+  
+  // Clear draft helper
+  const clearWelcomeDraft = () => {
+    try {
+      localStorage.removeItem(WELCOME_DRAFT_KEY);
+      console.log('🗑️ Welcome tunnel draft cleared');
+    } catch (e) {
+      console.warn('Failed to clear welcome draft');
+    }
+  };
  
   // Use mediaUrl hooks for signed URLs
   const signedProfileImageUrl = useMediaUrl(
@@ -948,6 +1013,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       setCurrentStep(totalSteps - 1); // Go to completion step
       setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
+      clearWelcomeDraft(); // Clear localStorage draft after successful save
 
       setTimeout(() => {
         toast({
