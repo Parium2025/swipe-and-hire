@@ -28,6 +28,7 @@ import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useDevice } from "@/hooks/use-device";
 import { useGlobalImagePreloader } from "@/hooks/useGlobalImagePreloader";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { OnlineStatusProvider } from "@/components/OnlineStatusProvider";
 import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 import { PushNotificationProvider } from "@/components/PushNotificationProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,30 +102,32 @@ const App = () => {
   }, []);
 
   return (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider delayDuration={0}>
-      <Toaster />
-      <SonnerToaster position="top-center" />
-      <OfflineIndicator />
-      <SystemHealthPanel />
-      <BrowserRouter>
-        <UnsavedChangesProvider>
-          <PushNotificationProvider />
-          <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
-            <div className="relative z-10">
-              {showHeader && <Header />}
-              <main className={showHeader ? "pt-16" : ""}>
-                <AuthTokenBridge />
-                <AnimatedRoutes />
-            </main>
-          </div>
-        </div>
-      </UnsavedChangesProvider>
-    </BrowserRouter>
-    </TooltipProvider>
-  </AuthProvider>
-</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <OnlineStatusProvider>
+          <TooltipProvider delayDuration={0}>
+            <Toaster />
+            <SonnerToaster position="top-center" />
+            <OfflineIndicator />
+            <SystemHealthPanel />
+            <BrowserRouter>
+              <UnsavedChangesProvider>
+                <PushNotificationProvider />
+                <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
+                  <div className="relative z-10">
+                    {showHeader && <Header />}
+                    <main className={showHeader ? "pt-16" : ""}>
+                      <AuthTokenBridge />
+                      <AnimatedRoutes />
+                    </main>
+                  </div>
+                </div>
+              </UnsavedChangesProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </OnlineStatusProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 };
 

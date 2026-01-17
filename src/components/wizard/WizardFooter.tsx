@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, CheckCircle, WifiOff } from 'lucide-react';
+import { useOnline } from '@/hooks/useOnlineStatus';
 import type { MouseEvent, TouchEvent } from 'react';
 
 export interface WizardFooterProps {
@@ -32,6 +33,7 @@ export interface WizardFooterProps {
 /**
  * Shared wizard footer navigation component.
  * Handles blur-on-click to prevent focus ring flashing.
+ * Now with offline awareness - disables submit when offline.
  */
 export const WizardFooter = ({
   currentStep,
@@ -47,6 +49,7 @@ export const WizardFooter = ({
   hideBackOnFirstStep = false,
   className = '',
 }: WizardFooterProps) => {
+  const { isOnline, showOfflineToast } = useOnline();
   const showBackButton = hideBackOnFirstStep ? currentStep > 0 : true;
   const backDisabled = currentStep === 0;
   
@@ -76,6 +79,10 @@ export const WizardFooter = ({
 
   const handleSubmitClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.blur();
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
     onSubmit();
   };
 
@@ -86,13 +93,19 @@ export const WizardFooter = ({
   const nextButtonClasses = 
     'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
 
-  const submitButtonClasses = 
-    'rounded-full bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
+  const submitButtonClasses = `rounded-full text-white px-8 py-2 transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${
+    isOnline 
+      ? 'bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600' 
+      : 'bg-gray-500/50 cursor-not-allowed'
+  }`;
 
   // Justify: if back button hidden on first step, center the next/submit button
   const justifyClass = (hideBackOnFirstStep && currentStep === 0) 
     ? 'justify-center' 
     : 'justify-between';
+
+  // Submit is disabled if offline, loading, or externally disabled
+  const submitDisabled = loading || disabled || !isOnline;
 
   return (
     <div
@@ -117,13 +130,18 @@ export const WizardFooter = ({
       {isLastStep ? (
         <Button
           onClick={handleSubmitClick}
-          disabled={loading || disabled}
+          disabled={submitDisabled}
           className={submitButtonClasses}
         >
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               {loadingLabel}
+            </>
+          ) : !isOnline ? (
+            <>
+              <WifiOff className="h-4 w-4 mr-2" />
+              Offline
             </>
           ) : (
             <>
