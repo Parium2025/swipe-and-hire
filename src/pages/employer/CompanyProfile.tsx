@@ -1152,7 +1152,7 @@ const CompanyProfile = () => {
                       </Collapsible>
                     </div>
 
-                    <div className="space-y-1.5 mt-4">
+                    <div className="space-y-1.5 pt-4 mt-2 border-t border-white/10">
                       <Label htmlFor="interview_video_default_message" className="text-white flex items-center gap-1.5">
                         <MessageSquare className="h-3.5 w-3.5" />
                         Standardmeddelande för video
