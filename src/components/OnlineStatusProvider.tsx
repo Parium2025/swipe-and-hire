@@ -1,6 +1,7 @@
 import { useCallback, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useOnlineStatusWithToast, OnlineContext, type OnlineContextValue } from '@/hooks/useOnlineStatus';
+import { getLatestDraftTime } from '@/lib/draftUtils';
 
 interface OnlineStatusProviderProps {
   children: ReactNode;
@@ -12,11 +13,16 @@ interface OnlineStatusProviderProps {
 export function OnlineStatusProvider({ children }: OnlineStatusProviderProps) {
   const isOnline = useOnlineStatusWithToast();
   
-  // Visa offline-toast - matchar appens stil (vit text, mörk bakgrund)
+  // Visa offline-toast med draft-tid om tillgänglig
   const showOfflineToast = useCallback(() => {
+    const draftTime = getLatestDraftTime();
+    const description = draftTime 
+      ? `Dina ändringar är sparade (${draftTime}). Kontrollera din anslutning.`
+      : 'Kontrollera din internetanslutning och försök igen';
+    
     toast.error('Ingen anslutning', {
-      description: 'Kontrollera din internetanslutning och försök igen',
-      duration: 3000,
+      description,
+      duration: 4000,
     });
   }, []);
   

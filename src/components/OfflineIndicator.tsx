@@ -1,7 +1,8 @@
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { WifiOff, Loader2 } from 'lucide-react';
+import { WifiOff, Loader2, Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { getLatestDraftTime } from '@/lib/draftUtils';
 
 export const OfflineIndicator = () => {
   const isOnline = useOnlineStatus();
@@ -9,7 +10,16 @@ export const OfflineIndicator = () => {
   const [secondsOffline, setSecondsOffline] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
+  const [draftTime, setDraftTime] = useState<string | null>(null);
   const wasOnlineRef = useRef(true);
+
+  // Hämta senaste draft-tid när vi går offline
+  useEffect(() => {
+    if (!isOnline) {
+      const time = getLatestDraftTime();
+      setDraftTime(time);
+    }
+  }, [isOnline]);
 
   // Hantera fade in/out animation
   useEffect(() => {
@@ -31,6 +41,7 @@ export const OfflineIndicator = () => {
         setShouldRender(false);
         setSecondsOffline(0);
         setShowReconnecting(false);
+        setDraftTime(null);
       }, 300);
       wasOnlineRef.current = true;
       return () => clearTimeout(timer);
@@ -58,6 +69,17 @@ export const OfflineIndicator = () => {
     return null;
   }
 
+  // Bygg meddelande med draft-tid om tillgänglig
+  const getMessage = () => {
+    if (showReconnecting) {
+      return 'Återansluter...';
+    }
+    if (draftTime) {
+      return `Offline – dina ändringar är sparade (${draftTime})`;
+    }
+    return 'Offline – visar sparad data';
+  };
+
   return (
     <div 
       className={`fixed left-0 right-0 z-40 px-4 transition-all duration-300 ease-out ${
@@ -71,14 +93,13 @@ export const OfflineIndicator = () => {
         <div className="flex items-center justify-center gap-2">
           {showReconnecting ? (
             <Loader2 className="h-4 w-4 animate-spin text-white" />
+          ) : draftTime ? (
+            <Check className="h-4 w-4 text-green-400" />
           ) : (
             <WifiOff className="h-4 w-4 text-white" />
           )}
           <AlertDescription className="text-center font-medium text-white">
-            {showReconnecting 
-              ? 'Återansluter...' 
-              : 'Offline - visar sparad data'
-            }
+            {getMessage()}
           </AlertDescription>
         </div>
       </Alert>
