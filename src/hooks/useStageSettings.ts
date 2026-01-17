@@ -85,6 +85,48 @@ interface DbStageSetting {
   updated_at: string;
 }
 
+// LocalStorage caching for instant display (no flash of default stages)
+const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
+const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+interface CachedStageSettings {
+  settings: DbStageSetting[];
+  timestamp: number;
+}
+
+function readCachedSettings(userId: string): DbStageSetting[] | null {
+  try {
+    const key = STAGE_SETTINGS_CACHE_KEY + userId;
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+
+    const cached: CachedStageSettings = JSON.parse(raw);
+    const age = Date.now() - cached.timestamp;
+
+    if (age > CACHE_EXPIRY_MS) {
+      localStorage.removeItem(key);
+      return null;
+    }
+
+    return cached.settings;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedSettings(userId: string, settings: DbStageSetting[]): void {
+  try {
+    const key = STAGE_SETTINGS_CACHE_KEY + userId;
+    const cached: CachedStageSettings = {
+      settings,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(key, JSON.stringify(cached));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export function useStageSettings() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -101,10 +143,27 @@ export function useStageSettings() {
         .order('order_index', { ascending: true });
       
       if (error) throw error;
-      return (data || []) as DbStageSetting[];
+      const settings = (data || []) as DbStageSetting[];
+      
+      // Cache for instant display on next visit
+      writeCachedSettings(user.id, settings);
+      
+      return settings;
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
+    // Use cached data as initial data for instant display
+    initialData: () => {
+      if (!user) return undefined;
+      const cached = readCachedSettings(user.id);
+      return cached ?? undefined;
+    },
+    // If we have cached data, don't show loading state initially
+    initialDataUpdatedAt: () => {
+      if (!user) return undefined;
+      const cached = readCachedSettings(user.id);
+      return cached ? Date.now() - 1000 : undefined; // Trigger background refetch
+    },
   });
 
   // Get deleted default stages (marked with __DELETED__)
