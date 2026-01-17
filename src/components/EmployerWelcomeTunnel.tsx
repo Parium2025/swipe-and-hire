@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,18 @@ import { motion } from 'framer-motion';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
 
+const EMPLOYER_WELCOME_DRAFT_KEY = 'parium_draft_employer-welcome-tunnel';
+
+// Clear draft helper (exported for use elsewhere if needed)
+export const clearEmployerWelcomeDraft = () => {
+  try {
+    localStorage.removeItem(EMPLOYER_WELCOME_DRAFT_KEY);
+    console.log('💾 Employer welcome tunnel draft cleared');
+  } catch (e) {
+    console.warn('Failed to clear employer welcome tunnel draft');
+  }
+};
+
 interface EmployerWelcomeTunnelProps {
   onComplete: () => void;
 }
@@ -24,6 +36,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -33,6 +46,49 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const [formData, setFormData] = useState({
     companyLogoUrl: (profile as any)?.company_logo_url || '',
   });
+
+  // Restore draft on mount
+  useEffect(() => {
+    if (!draftRestored) {
+      try {
+        const saved = localStorage.getItem(EMPLOYER_WELCOME_DRAFT_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.formData) {
+            setFormData(parsed.formData);
+          }
+          if (typeof parsed.currentStep === 'number') {
+            setCurrentStep(parsed.currentStep);
+          }
+          console.log('💾 Employer welcome tunnel draft restored');
+        }
+      } catch (e) {
+        console.warn('Failed to restore employer welcome tunnel draft');
+      }
+      setDraftRestored(true);
+    }
+  }, [draftRestored]);
+
+  // Auto-save draft to localStorage
+  useEffect(() => {
+    if (!draftRestored) return;
+    
+    // Check if there's any content to save
+    const hasContent = formData.companyLogoUrl || currentStep > 0;
+    
+    if (hasContent) {
+      try {
+        localStorage.setItem(EMPLOYER_WELCOME_DRAFT_KEY, JSON.stringify({
+          formData,
+          currentStep,
+          savedAt: Date.now()
+        }));
+        console.log('💾 Employer welcome tunnel draft saved');
+      } catch (e) {
+        console.warn('Failed to save employer welcome tunnel draft');
+      }
+    }
+  }, [formData, currentStep, draftRestored]);
 
   const totalSteps = 4; // Välkomst, Logo, Instruktioner, Slutför
   const progress = (currentStep / (totalSteps - 1)) * 100;
@@ -121,6 +177,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         company_logo_url: formData.companyLogoUrl,
         onboarding_completed: true
       } as any);
+
+      // Clear draft after successful submission
+      clearEmployerWelcomeDraft();
 
       toast({
         title: "Välkommen till Parium!",
