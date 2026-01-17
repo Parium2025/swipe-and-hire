@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +24,18 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { useOnline } from '@/hooks/useOnlineStatus';
 
+// Draft key for localStorage
+const PROFILE_BUILDER_DRAFT_KEY = 'parium_draft_profile-builder';
+
+// Clear draft
+export const clearProfileBuilderDraft = () => {
+  try {
+    localStorage.removeItem(PROFILE_BUILDER_DRAFT_KEY);
+  } catch (e) {
+    console.warn('Failed to clear profile builder draft');
+  }
+};
+
 interface ProfileBuilderProps {
   onProfileCompleted: () => void;
 }
@@ -32,6 +44,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
   const { profile, updateProfile } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
   
   // Form data
   const [formData, setFormData] = useState({
@@ -44,6 +57,49 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
     cvUrl: '',
     videoUrl: profile?.video_url || ''
   });
+
+  // Restore draft on mount
+  useEffect(() => {
+    if (!draftRestored) {
+      try {
+        const saved = localStorage.getItem(PROFILE_BUILDER_DRAFT_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.formData) {
+            setFormData(parsed.formData);
+          }
+          if (parsed.currentStep) {
+            setCurrentStep(parsed.currentStep);
+          }
+          console.log('💾 Profile builder draft restored');
+        }
+      } catch (e) {
+        console.warn('Failed to restore profile builder draft');
+      }
+      setDraftRestored(true);
+    }
+  }, [draftRestored]);
+
+  // Auto-save draft to localStorage
+  useEffect(() => {
+    if (!draftRestored) return;
+    
+    // Check if there's any content to save
+    const hasContent = Object.values(formData).some(value => value && value !== '');
+    
+    if (hasContent) {
+      try {
+        localStorage.setItem(PROFILE_BUILDER_DRAFT_KEY, JSON.stringify({
+          formData,
+          currentStep,
+          savedAt: Date.now()
+        }));
+        console.log('💾 Profile builder draft saved');
+      } catch (e) {
+        console.warn('Failed to save profile builder draft');
+      }
+    }
+  }, [formData, currentStep, draftRestored]);
 
   const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
@@ -84,6 +140,11 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
         
         video_url: formData.videoUrl
       });
+      
+      // Clear draft on successful submission
+      clearProfileBuilderDraft();
+      console.log('💾 Profile builder draft cleared after submission');
+      
       toast({ title: 'Profil skapad!', description: 'Välkommen till Parium!' });
       onProfileCompleted();
     } catch (error) {
