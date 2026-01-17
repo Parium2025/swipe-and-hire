@@ -163,7 +163,8 @@ const CompanyProfile = () => {
       if (saved) {
         const parsed = JSON.parse(saved);
         console.log('💾 Company profile draft restored');
-        return parsed;
+        // Handle both old format (direct formData) and new format (with savedAt)
+        return parsed.formData || parsed;
       }
     } catch (e) {
       console.warn('Failed to restore company profile state from localStorage');
@@ -226,7 +227,10 @@ const CompanyProfile = () => {
   useEffect(() => {
     if (hasUnsavedChanges) {
       try {
-        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({
+          formData,
+          savedAt: Date.now()
+        }));
         console.log('💾 Company profile draft saved');
       } catch (e) {
         console.warn('Failed to save company profile state to localStorage');
