@@ -251,6 +251,41 @@ const EmployerHome = memo(() => {
       <GpsPrompt />
       <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />
       <div className="space-y-8 max-w-5xl mx-auto px-4 md:px-8 py-6 animate-fade-in relative z-10">
+        {/* System Health badge - admin only, positioned top-right under navbar */}
+        {isSystemAdmin && systemHealth && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="flex justify-end -mb-6"
+          >
+            <div 
+              className={`flex items-center gap-2 backdrop-blur-sm rounded-full px-3 py-1.5 cursor-pointer transition-colors text-xs ${
+                systemHealth.worstPercent > 70 
+                  ? 'bg-orange-500/20 hover:bg-orange-500/30' 
+                  : 'bg-white/10 hover:bg-white/20'
+              }`}
+              title="Klicka på grafikonen i navbaren för detaljer"
+            >
+              {systemHealth.worstPercent > 70 ? (
+                <AlertTriangle className="h-3 w-3 text-orange-400" />
+              ) : (
+                <Database className="h-3 w-3 text-emerald-400" />
+              )}
+              <span className="text-white">
+                System: <span className={`font-semibold ${
+                  systemHealth.worstPercent > 70 ? 'text-orange-300' : 'text-emerald-300'
+                }`}>
+                  {systemHealth.worstPercent > 70 
+                    ? `${systemHealth.worstMetric} ${systemHealth.worstPercent.toFixed(0)}%`
+                    : 'OK'
+                  }
+                </span>
+              </span>
+            </div>
+          </motion.div>
+        )}
+
         {/* Personal greeting */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -287,41 +322,6 @@ const EmployerHome = memo(() => {
             </button>
           ) : null}
         </motion.div>
-
-        {/* System Health badge - admin only, positioned right-aligned near navbar */}
-        {isSystemAdmin && systemHealth && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-            className="flex justify-end -mt-2 mb-2"
-          >
-            <div 
-              className={`flex items-center gap-2 backdrop-blur-sm rounded-full px-3 py-1.5 cursor-pointer transition-colors text-xs ${
-                systemHealth.worstPercent > 70 
-                  ? 'bg-orange-500/20 hover:bg-orange-500/30' 
-                  : 'bg-white/10 hover:bg-white/20'
-              }`}
-              title="Klicka på grafikonen i navbaren för detaljer"
-            >
-              {systemHealth.worstPercent > 70 ? (
-                <AlertTriangle className="h-3 w-3 text-orange-400" />
-              ) : (
-                <Database className="h-3 w-3 text-emerald-400" />
-              )}
-              <span className="text-white">
-                System: <span className={`font-semibold ${
-                  systemHealth.worstPercent > 70 ? 'text-orange-300' : 'text-emerald-300'
-                }`}>
-                  {systemHealth.worstPercent > 70 
-                    ? `${systemHealth.worstMetric} ${systemHealth.worstPercent.toFixed(0)}%`
-                    : 'OK'
-                  }
-                </span>
-              </span>
-            </div>
-          </motion.div>
-        )}
 
         {/* Quick summary */}
         {(stats.activeJobs > 0 || stats.pendingApplications > 0) && (
