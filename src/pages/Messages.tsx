@@ -46,6 +46,8 @@ export default function Messages() {
   const rightEmptyIconRef = useRef<HTMLDivElement | null>(null);
   const leftEmptyPanelRef = useRef<HTMLDivElement | null>(null);
   const rightEmptyPanelRef = useRef<HTMLDivElement | null>(null);
+  const leftEmptyContentRef = useRef<HTMLDivElement | null>(null);
+  const rightEmptyContentRef = useRef<HTMLDivElement | null>(null);
 
   const [leftEmptyAlignOffset, setLeftEmptyAlignOffset] = useState(0);
 
@@ -129,22 +131,28 @@ export default function Messages() {
 
     const leftIcon = leftEmptyIconRef.current;
     const rightIcon = rightEmptyIconRef.current;
+    const leftContent = leftEmptyContentRef.current;
+    const rightContent = rightEmptyContentRef.current;
     const leftPanel = leftEmptyPanelRef.current;
     const rightPanel = rightEmptyPanelRef.current;
+
     if (!leftIcon || !rightIcon) return;
+
+    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+    const roundToDevicePixel = (v: number) => Math.round(v * dpr) / dpr;
 
     // Micro-adjustment if needed (negative = move left empty state up)
     const FINE_TUNE_PX = 0;
 
     const compute = () => {
-      const leftTopWithTransform = leftIcon.getBoundingClientRect().top;
-      const rightTop = rightIcon.getBoundingClientRect().top;
+      setLeftEmptyAlignOffset((prev) => {
+        const leftTop = leftIcon.getBoundingClientRect().top;
+        const rightTop = rightIcon.getBoundingClientRect().top;
 
-      // Derive the left icon's "base" top (without our applied translateY)
-      const leftTopBase = leftTopWithTransform - leftEmptyAlignOffset;
-
-      const next = rightTop - leftTopBase + FINE_TUNE_PX;
-      setLeftEmptyAlignOffset((prev) => (Math.abs(prev - next) < 0.25 ? prev : next));
+        // Move from current offset toward the target in one step.
+        const next = roundToDevicePixel(prev + (rightTop - leftTop) + FINE_TUNE_PX);
+        return Math.abs(prev - next) < 0.01 ? prev : next;
+      });
     };
 
     // Let layout settle (fonts, scrollbars) then compute multiple times.
@@ -156,24 +164,40 @@ export default function Messages() {
       });
     });
 
+    // Observe the *content blocks* so text wrapping / font loading triggers recalculation.
     const ro = new ResizeObserver(compute);
+    if (leftContent) ro.observe(leftContent);
+    if (rightContent) ro.observe(rightContent);
+
+    // Fallback observers
     ro.observe(leftIcon);
     ro.observe(rightIcon);
     if (leftPanel) ro.observe(leftPanel);
     if (rightPanel) ro.observe(rightPanel);
 
+    // Catch mutations that can move content without changing the icon's own size.
+    const mo = new MutationObserver(() => compute());
+    if (leftContent) mo.observe(leftContent, { subtree: true, childList: true, characterData: true });
+    if (rightContent) mo.observe(rightContent, { subtree: true, childList: true, characterData: true });
+
     window.addEventListener('resize', compute);
 
-    // Re-compute after a short delay to catch any late layout shifts
-    const timeout = setTimeout(compute, 100);
+    // Re-compute after a short delay to catch late layout shifts.
+    const timeout = setTimeout(compute, 150);
+
+    const fontsReady = document.fonts?.ready;
+    if (fontsReady) {
+      fontsReady.then(() => requestAnimationFrame(compute)).catch(() => {});
+    }
 
     return () => {
       cancelAnimationFrame(raf1);
       clearTimeout(timeout);
       ro.disconnect();
+      mo.disconnect();
       window.removeEventListener('resize', compute);
     };
-  }, [showEmptyConversationList, showEmptyChatState, leftEmptyAlignOffset]);
+  }, [showEmptyConversationList, showEmptyChatState]);
 
   const handleSelectConversation = (convId: string) => {
     setSelectedConversationId(convId);
@@ -265,7 +289,11 @@ export default function Messages() {
                 className="h-full flex items-center justify-center"
                 style={leftEmptyAlignOffset ? { transform: `translateY(${leftEmptyAlignOffset}px)` } : undefined}
               >
-                <EmptyConversationList hasSearch={!!searchQuery.trim()} iconRef={leftEmptyIconRef} />
+                <EmptyConversationList
+                  hasSearch={!!searchQuery.trim()}
+                  iconRef={leftEmptyIconRef}
+                  contentRef={leftEmptyContentRef}
+                />
               </div>
             ) : (
               <ScrollArea className="h-full">
@@ -301,6 +329,7 @@ export default function Messages() {
             <EmptyChatState
               iconRef={rightEmptyIconRef}
               containerRef={rightEmptyPanelRef}
+              contentRef={rightEmptyContentRef}
             />
           )}
         </div>
@@ -821,12 +850,14 @@ function MessageBubble({
 function EmptyConversationList({
   hasSearch,
   iconRef,
+  contentRef,
 }: {
   hasSearch: boolean;
   iconRef?: Ref<HTMLDivElement>;
+  contentRef?: Ref<HTMLDivElement>;
 }) {
   return (
-    <div className="flex flex-col items-center px-4 text-center">
+    <div ref={contentRef} className="flex flex-col items-center px-4 text-center">
       <div
         ref={iconRef}
         className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3"
@@ -848,23 +879,27 @@ function EmptyConversationList({
 function EmptyChatState({
   iconRef,
   containerRef,
+  contentRef,
 }: {
   iconRef?: Ref<HTMLDivElement>;
   containerRef?: Ref<HTMLDivElement>;
+  contentRef?: Ref<HTMLDivElement>;
 }) {
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm"
+      className="relative flex-1 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm"
     >
-      <div
-        ref={iconRef}
-        className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3"
-      >
-        <MessageSquare className="h-6 w-6 text-white" />
+      <div ref={contentRef} className="flex flex-col items-center px-4 text-center">
+        <div
+          ref={iconRef}
+          className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3"
+        >
+          <MessageSquare className="h-6 w-6 text-white" />
+        </div>
+        <h3 className="text-base font-medium text-white mb-0.5">Välj en konversation</h3>
+        <p className="text-white text-sm">Välj en konversation från listan</p>
       </div>
-      <h3 className="text-base font-medium text-white mb-0.5">Välj en konversation</h3>
-      <p className="text-white text-sm">Välj en konversation från listan</p>
     </div>
   );
 }
