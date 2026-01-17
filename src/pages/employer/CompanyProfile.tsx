@@ -1056,12 +1056,12 @@ const CompanyProfile = () => {
                           <ChevronDown className="h-3 w-3" />
                         </CollapsibleTrigger>
                         <CollapsibleContent className="mt-2">
-                          <div className="bg-white/5 rounded-lg p-3 space-y-3 text-xs text-white/80">
+                          <div className="bg-white/5 rounded-lg p-3 space-y-3 text-xs text-white">
                             <div className="space-y-1">
                               <p className="font-medium text-white flex items-center gap-1.5">
                                 <span className="text-blue-400">Microsoft Teams</span>
                               </p>
-                              <ol className="list-decimal list-inside space-y-0.5 ml-1">
+                              <ol className="list-decimal list-inside space-y-0.5 ml-1 text-white">
                                 <li>Öppna Teams → Kalender</li>
                                 <li>Klicka "Nytt möte" eller "Möt nu"</li>
                                 <li>Kopiera möteslänken</li>
@@ -1071,7 +1071,7 @@ const CompanyProfile = () => {
                               <p className="font-medium text-white flex items-center gap-1.5">
                                 <span className="text-green-400">Google Meet</span>
                               </p>
-                              <ol className="list-decimal list-inside space-y-0.5 ml-1">
+                              <ol className="list-decimal list-inside space-y-0.5 ml-1 text-white">
                                 <li>Gå till <span className="text-primary">meet.google.com</span></li>
                                 <li>Klicka "Nytt möte" → "Skapa ett möte för senare"</li>
                                 <li>Kopiera länken</li>
@@ -1081,13 +1081,13 @@ const CompanyProfile = () => {
                               <p className="font-medium text-white flex items-center gap-1.5">
                                 <span className="text-blue-300">Zoom</span>
                               </p>
-                              <ol className="list-decimal list-inside space-y-0.5 ml-1">
+                              <ol className="list-decimal list-inside space-y-0.5 ml-1 text-white">
                                 <li>Öppna Zoom-appen</li>
                                 <li>Gå till "Profil" → "Personal Meeting ID"</li>
                                 <li>Kopiera din personliga möteslänk</li>
                               </ol>
                             </div>
-                            <p className="text-white/60 pt-1 border-t border-white/10">
+                            <p className="text-white pt-1 border-t border-white/10">
                               💡 Tips: Använd din personliga möteslänk så behöver du bara fylla i den en gång!
                             </p>
                           </div>
