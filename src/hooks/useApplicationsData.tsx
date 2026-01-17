@@ -38,7 +38,6 @@ const PAGE_SIZE = 25;
 const SNAPSHOT_KEY_PREFIX = 'applications_snapshot_';
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const SNAPSHOT_EXPIRY_MS = 5 * 60 * 1000; // 5 min
-const RATINGS_CACHE_EXPIRY_MS = 60 * 60 * 1000; // 1 hour - betyg ändras sällan
 
 interface SnapshotData {
   items: ApplicationData[];
@@ -51,6 +50,7 @@ interface RatingsCacheData {
 }
 
 // Read cached ratings from localStorage for instant display
+// No expiry - realtime sync keeps this up to date
 const readCachedRatings = (userId: string): Record<string, number> => {
   try {
     const key = RATINGS_CACHE_PREFIX + userId;
@@ -58,13 +58,6 @@ const readCachedRatings = (userId: string): Record<string, number> => {
     if (!raw) return {};
     
     const cache: RatingsCacheData = JSON.parse(raw);
-    const age = Date.now() - cache.timestamp;
-    
-    if (age > RATINGS_CACHE_EXPIRY_MS) {
-      localStorage.removeItem(key);
-      return {};
-    }
-    
     return cache.ratings || {};
   } catch {
     return {};
