@@ -237,7 +237,7 @@ export function CandidatesTable({
     }
   }, [sortField, sortDirection]);
 
-  // Get average rating for an application from team candidates
+  // Get average rating for an application from team candidates (for colleagues)
   const getTeamInfo = useCallback((appId: string) => {
     const info = teamCandidates[appId];
     if (!info || info.length === 0) return null;
@@ -252,6 +252,17 @@ export function CandidatesTable({
       count: info.length,
     };
   }, [teamCandidates]);
+
+  // Get display rating - prefer direct application rating, fallback to team info
+  const getDisplayRating = useCallback((application: ApplicationData) => {
+    // Direct rating from batch fetch (instant)
+    if (application.rating !== undefined && application.rating !== null) {
+      return application.rating;
+    }
+    // Fallback to team info (for colleague ratings)
+    const teamInfo = getTeamInfo(application.id);
+    return teamInfo?.maxRating || 0;
+  }, [getTeamInfo]);
 
   // Sort applications
   const sortedApplications = useMemo(() => {
@@ -268,8 +279,8 @@ export function CandidatesTable({
           comparison = nameA.localeCompare(nameB, 'sv');
           break;
         case 'rating':
-          const ratingA = getTeamInfo(a.id)?.maxRating || 0;
-          const ratingB = getTeamInfo(b.id)?.maxRating || 0;
+          const ratingA = getDisplayRating(a);
+          const ratingB = getDisplayRating(b);
           comparison = ratingA - ratingB;
           break;
         case 'applied_at':
@@ -286,7 +297,7 @@ export function CandidatesTable({
 
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [applications, sortField, sortDirection, getTeamInfo]);
+  }, [applications, sortField, sortDirection, getDisplayRating]);
 
   // Sort icon helper - shows both arrows when neutral
   const SortIcon = ({ field }: { field: SortField }) => {
@@ -512,7 +523,7 @@ export function CandidatesTable({
                   <TableCell>
                     <div className="flex items-center gap-0.5">
                       {[1, 2, 3, 4, 5].map((star) => {
-                        const rating = teamInfo?.maxRating || 0;
+                        const rating = getDisplayRating(application);
                         return (
                           <Star
                             key={star}
