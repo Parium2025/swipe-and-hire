@@ -2052,9 +2052,13 @@ const MobileJobWizard = ({
     setShowCompanyProfile(false);
     setShowCompanyTooltip(false);
     
-    // Clear sessionStorage when user confirms close
-    sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
-    
+    // Clear sessionStorage and localStorage drafts when user confirms close ("Lämna utan att spara")
+    try {
+      sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+    } catch {}
+    try {
+      localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
+    } catch {}
     if (onBack) {
       onBack();
     } else {

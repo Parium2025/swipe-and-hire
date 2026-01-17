@@ -850,6 +850,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     setShowUnsavedDialog(false);
     setPendingClose(false);
     setHasUnsavedChanges(false);
+    clearEditJobDraft();
     onOpenChange(false);
   };
 
