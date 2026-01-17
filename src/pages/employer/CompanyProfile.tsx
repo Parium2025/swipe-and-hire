@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-
+import { motion } from 'framer-motion';
 
 import {
   AlertDialog,
@@ -35,6 +35,51 @@ const SOCIAL_PLATFORMS = [
   { value: 'instagram', label: 'Instagram', icon: Instagram },
   { value: 'annat', label: 'Annat', icon: Globe },
 ];
+
+// Interview Type Tabs Component
+type InterviewType = 'video' | 'kontor';
+
+interface InterviewTypeTabsProps {
+  activeType: InterviewType;
+  onTypeChange: (type: InterviewType) => void;
+}
+
+const InterviewTypeTabs = ({ activeType, onTypeChange }: InterviewTypeTabsProps) => {
+  return (
+    <div className="relative flex bg-white/5 rounded-lg p-1 border border-white/10 w-fit">
+      <motion.div
+        className="absolute top-1 bottom-1 bg-white/20 rounded-md"
+        initial={false}
+        animate={{
+          left: activeType === 'video' ? '4px' : '50%',
+          width: 'calc(50% - 4px)',
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 35,
+          mass: 0.8,
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => onTypeChange('video')}
+        className="relative z-10 flex items-center gap-1.5 py-1.5 px-4 rounded-md text-sm font-medium text-white transition-colors"
+      >
+        <Video className="h-3.5 w-3.5" />
+        <span>Video</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => onTypeChange('kontor')}
+        className="relative z-10 flex items-center gap-1.5 py-1.5 px-4 rounded-md text-sm font-medium text-white transition-colors"
+      >
+        <Building2 className="h-3.5 w-3.5" />
+        <span>Kontor</span>
+      </button>
+    </div>
+  );
+};
 
 const CompanyProfile = () => {
   const { profile, updateProfile } = useAuth();
@@ -113,6 +158,7 @@ const CompanyProfile = () => {
   });
 
   const [platformMenuOpen, setPlatformMenuOpen] = useState(false);
+  const [interviewType, setInterviewType] = useState<'video' | 'kontor'>('video');
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -971,65 +1017,64 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-4">
+                {/* Interview Type Tabs */}
+                <InterviewTypeTabs 
+                  activeType={interviewType} 
+                  onTypeChange={setInterviewType} 
+                />
+
                 {/* Video Interview Settings */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm bg-white/20 border-white/40 text-white"
-                    >
-                      <Video className="h-3.5 w-3.5" />
-                      <span>Video</span>
-                    </button>
-                  </div>
-                  <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                {interviewType === 'video' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="bg-white/5 border border-white/10 rounded-lg p-3"
+                  >
                     <p className="text-white/80 text-sm">
                       Videosamtal hanteras automatiskt via Parium. Inga ytterligare inställningar behövs.
                     </p>
-                  </div>
-                </div>
+                  </motion.div>
+                )}
 
                 {/* Office Interview Settings */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm bg-white/20 border-white/40 text-white"
-                    >
-                      <Building2 className="h-3.5 w-3.5" />
-                      <span>Kontor</span>
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <Label htmlFor="interview_office_address" className="text-white flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5" />
-                      Intervjuadress
-                    </Label>
-                    <Input
-                      id="interview_office_address"
-                      value={formData.interview_office_address}
-                      onChange={(e) => setFormData({...formData, interview_office_address: e.target.value})}
-                      placeholder="Storgatan 1, 111 22 Stockholm"
-                      className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
-                    />
-                    <p className="text-xs text-white">Adressen som visas för kandidater vid fysiska intervjuer</p>
-                  </div>
+                {interviewType === 'kontor' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-3"
+                  >
+                    <div className="space-y-1.5">
+                      <Label htmlFor="interview_office_address" className="text-white flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5" />
+                        Intervjuadress
+                      </Label>
+                      <Input
+                        id="interview_office_address"
+                        value={formData.interview_office_address}
+                        onChange={(e) => setFormData({...formData, interview_office_address: e.target.value})}
+                        placeholder="Storgatan 1, 111 22 Stockholm"
+                        className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
+                      />
+                      <p className="text-xs text-white">Adressen som visas för kandidater vid fysiska intervjuer</p>
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="interview_office_instructions" className="text-white">
-                      Instruktioner till kandidaten
-                    </Label>
-                    <Textarea
-                      id="interview_office_instructions"
-                      value={formData.interview_office_instructions}
-                      onChange={(e) => setFormData({...formData, interview_office_instructions: e.target.value})}
-                      placeholder="T.ex. parkering, ingång, vem de ska fråga efter..."
-                      rows={2}
-                      className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
-                    />
-                  </div>
-                </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="interview_office_instructions" className="text-white">
+                        Instruktioner till kandidaten
+                      </Label>
+                      <Textarea
+                        id="interview_office_instructions"
+                        value={formData.interview_office_instructions}
+                        onChange={(e) => setFormData({...formData, interview_office_instructions: e.target.value})}
+                        placeholder="T.ex. parkering, ingång, vem de ska fråga efter..."
+                        rows={2}
+                        className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                      />
+                    </div>
+                  </motion.div>
+                )}
 
                 {/* Default Message */}
                 <div className="space-y-1.5 pt-2 border-t border-white/10">
