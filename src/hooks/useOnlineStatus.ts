@@ -64,6 +64,7 @@ export const useOnlineStatusWithToast = () => {
         toast.success('Ansluten igen', {
           description: 'Du är nu online och kan fortsätta arbeta',
           duration: 3000,
+          closeButton: false,
         });
       }
       
@@ -88,6 +89,7 @@ export const useOnlineStatusWithToast = () => {
         toast.success('Ansluten igen', {
           description: 'Du är nu online och kan fortsätta arbeta',
           duration: 3000,
+          closeButton: false,
         });
       }
       
