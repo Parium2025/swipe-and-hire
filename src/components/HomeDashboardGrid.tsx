@@ -786,31 +786,33 @@ const formatInterviewTime = (dateStr: string): string => {
   return format(new Date(dateStr), 'HH:mm');
 };
 
-// Interviews Card (Orange - Bottom Right)
+// Helper function to get relative time until interview
+const getTimeUntil = (scheduledAt: string): string => {
+  const now = new Date();
+  const scheduled = new Date(scheduledAt);
+  const diffMs = scheduled.getTime() - now.getTime();
+  
+  if (diffMs < 0) return 'Pågår/passerad';
+  
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffMins < 60) return `Om ${diffMins} min`;
+  if (diffHours < 24) return `Om ${diffHours} tim`;
+  if (diffDays === 1) return 'Imorgon';
+  if (diffDays < 7) return `Om ${diffDays} dagar`;
+  return formatInterviewDate(scheduledAt);
+};
+
+// Interviews Card (Orange - Bottom Right) - List View
 const InterviewsCard = memo(() => {
   const { interviews, isLoading } = useInterviews();
   const navigate = useNavigate();
-  const [currentIndex, setCurrentIndex] = useState(0);
   
-  // Show max 4 upcoming interviews
-  const upcomingInterviews = interviews.slice(0, 4);
-
-  const goNext = useCallback(() => {
-    if (upcomingInterviews.length > 1) {
-      setCurrentIndex(prev => (prev + 1) % upcomingInterviews.length);
-    }
-  }, [upcomingInterviews.length]);
-
-  const goPrev = useCallback(() => {
-    if (upcomingInterviews.length > 1) {
-      setCurrentIndex(prev => (prev - 1 + upcomingInterviews.length) % upcomingInterviews.length);
-    }
-  }, [upcomingInterviews.length]);
-
-  const swipeHandlers = useSwipeGesture({
-    onSwipeLeft: goNext,
-    onSwipeRight: goPrev,
-  });
+  // Show max 5 upcoming interviews
+  const upcomingInterviews = interviews.slice(0, 5);
+  const hasMore = interviews.length > 5;
 
   const getLocationIcon = (type: Interview['location_type']) => {
     switch (type) {
@@ -818,6 +820,15 @@ const InterviewsCard = memo(() => {
       case 'office': return Building2;
       case 'phone': return Phone;
       default: return Calendar;
+    }
+  };
+
+  const getLocationLabel = (type: Interview['location_type']) => {
+    switch (type) {
+      case 'video': return 'Video';
+      case 'office': return 'Kontor';
+      case 'phone': return 'Telefon';
+      default: return '';
     }
   };
 
@@ -836,96 +847,93 @@ const InterviewsCard = memo(() => {
     );
   }
 
-  const currentInterview = upcomingInterviews[currentIndex];
-
   return (
-    <Card 
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px] touch-pan-y`}
-      {...swipeHandlers}
-    >
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[200px]`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-4 h-full flex flex-col">
+      <CardContent className="relative p-3 h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="p-2 rounded-xl bg-white/10">
-            <Calendar className="h-5 w-5 text-white" strokeWidth={1.5} />
+        <div className="flex items-center justify-between mb-2">
+          <div className="p-1.5 rounded-lg bg-white/10">
+            <Calendar className="h-4 w-4 text-white" strokeWidth={1.5} />
           </div>
           <span className="text-[10px] text-white uppercase tracking-wider font-medium">INTERVJUER</span>
         </div>
         
         {/* Content */}
-        <div className="flex-1 flex flex-col justify-center py-2">
+        <div className="flex-1 overflow-hidden">
           {upcomingInterviews.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center">
-              <Calendar className="h-8 w-8 text-white mb-2" />
+            <div className="flex flex-col items-center justify-center text-center h-full">
+              <Calendar className="h-8 w-8 text-white/60 mb-2" />
               <p className="text-sm font-medium text-white">Inga bokade intervjuer</p>
             </div>
           ) : (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentInterview.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="cursor-pointer"
-                onClick={() => navigate('/my-candidates')}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg font-bold text-white">
-                    {formatInterviewDate(currentInterview.scheduled_at)}
-                  </span>
-                  <span className="text-sm text-white/80">
-                    kl {formatInterviewTime(currentInterview.scheduled_at)}
-                  </span>
-                </div>
-                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-1">
-                  {currentInterview.candidate_name}
-                </h3>
-                <div className="flex items-center gap-2 text-xs text-white/80">
-                  {(() => {
-                    const Icon = getLocationIcon(currentInterview.location_type);
-                    return <Icon className="h-3 w-3" />;
-                  })()}
-                  <span className="line-clamp-1">
-                    {currentInterview.location_type === 'video' ? 'Videosamtal' : 
-                     currentInterview.location_type === 'phone' ? 'Telefonintervju' :
-                     currentInterview.location_details || 'Kontor'}
-                  </span>
-                </div>
-                <p className="text-xs text-white/60 mt-1 line-clamp-1">
-                  {currentInterview.job_title}
-                </p>
-              </motion.div>
-            </AnimatePresence>
+            <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
+              {upcomingInterviews.map((interview) => {
+                const LocationIcon = getLocationIcon(interview.location_type);
+                const timeUntil = getTimeUntil(interview.scheduled_at);
+                const isUrgent = timeUntil.includes('min') || timeUntil.includes('tim');
+                
+                return (
+                  <motion.div
+                    key={interview.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="bg-white/10 rounded-lg p-2 cursor-pointer hover:bg-white/15 transition-colors"
+                    onClick={() => navigate('/my-candidates')}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        {/* Candidate name & job */}
+                        <p className="text-xs font-semibold text-white truncate">
+                          {interview.candidate_name}
+                        </p>
+                        <p className="text-[10px] text-white/60 truncate">
+                          {interview.job_title}
+                        </p>
+                      </div>
+                      
+                      {/* Time until - highlighted if urgent */}
+                      <span className={cn(
+                        "text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap",
+                        isUrgent 
+                          ? "bg-white/20 text-white" 
+                          : "text-white/70"
+                      )}>
+                        {timeUntil}
+                      </span>
+                    </div>
+                    
+                    {/* Date, time & location */}
+                    <div className="flex items-center gap-2 mt-1 text-[10px] text-white/70">
+                      <span>{formatInterviewDate(interview.scheduled_at)}</span>
+                      <span>kl {formatInterviewTime(interview.scheduled_at)}</span>
+                      <span className="flex items-center gap-0.5">
+                        <LocationIcon className="h-2.5 w-2.5" />
+                        {getLocationLabel(interview.location_type)}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
           )}
         </div>
         
-        {/* Dot navigation */}
-        {upcomingInterviews.length > 1 && (
-          <div className="flex items-center gap-2 mt-auto">
-            {upcomingInterviews.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={cn(
-                  "w-2.5 h-2.5 rounded-full transition-colors duration-200",
-                  i === currentIndex 
-                    ? "bg-white" 
-                    : "bg-white/30 hover:bg-white/50"
-                )}
-                aria-label={`Gå till intervju ${i + 1}`}
-              />
-            ))}
-          </div>
+        {/* See all link */}
+        {hasMore && (
+          <button
+            onClick={() => navigate('/my-candidates')}
+            className="text-[10px] text-white/80 hover:text-white underline underline-offset-2 mt-1 text-center"
+          >
+            Se alla ({interviews.length})
+          </button>
         )}
       </CardContent>
     </Card>
   );
 });
-
 InterviewsCard.displayName = 'InterviewsCard';
 
 // Main Dashboard Grid
