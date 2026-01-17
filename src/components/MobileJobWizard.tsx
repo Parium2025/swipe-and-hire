@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { clearDraftByKey } from '@/hooks/useFormDraft';
 // ... keep existing imports
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -105,8 +106,9 @@ interface MobileJobWizardProps {
   existingJob?: ExistingJob | null;
 }
 
-// Session storage key for persisting unsaved job form state across tab switches
+// Storage keys for persisting unsaved job form state
 const JOB_WIZARD_SESSION_KEY = 'job-wizard-unsaved-state';
+const JOB_WIZARD_DRAFT_KEY = 'parium_draft_job-wizard';
 
 const MobileJobWizard = ({
   open, 
@@ -149,6 +151,28 @@ const MobileJobWizard = ({
       
       // Clear sessionStorage to prevent false unsaved changes detection
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+      
+      // Check for localStorage draft ONLY if not editing an existing job AND no template selected
+      // (drafts are only for new jobs created from scratch)
+      if (!existingJob && !selectedTemplate) {
+        try {
+          const savedDraft = localStorage.getItem(JOB_WIZARD_DRAFT_KEY);
+          if (savedDraft) {
+            const parsed = JSON.parse(savedDraft);
+            if (parsed.formData && Object.values(parsed.formData).some((v: any) => v && v !== '' && (!Array.isArray(v) || v.length > 0))) {
+              console.log('📝 Restoring job wizard draft from localStorage');
+              setFormData(parsed.formData);
+              setCustomQuestions(parsed.customQuestions || []);
+              setInitialFormData(parsed.formData);
+              setInitialCustomQuestions(parsed.customQuestions || []);
+              setHasUnsavedChanges(false);
+              return; // Don't continue to empty form initialization
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore job wizard draft');
+        }
+      }
       
       // Reset form state for fresh load
       setInitialFormData(null);
@@ -649,25 +673,46 @@ const MobileJobWizard = ({
     job_image_desktop_url: ''
   });
   
-  // Save form state to sessionStorage when there are unsaved changes
+  // Save form state to localStorage for persistence across page refreshes
+  // AND sessionStorage for tab switching
   useEffect(() => {
-    if (open && hasUnsavedChanges) {
+    if (!open) return;
+    
+    // Don't save drafts when editing existing jobs (they're already saved in DB)
+    if (existingJob) return;
+    
+    // Check if there's meaningful content to save
+    const hasContent = Object.entries(formData).some(([key, value]) => {
+      if (key === 'title' && value === jobTitle) return false; // Ignore default title
+      if (key === 'positions_count' && value === '1') return false; // Ignore default
+      if (key === 'work_location_type' && value === 'på-plats') return false; // Ignore default
+      if (key === 'remote_work_possible' && value === 'nej') return false; // Ignore default
+      if (typeof value === 'string') return value.trim() !== '';
+      if (Array.isArray(value)) return value.length > 0;
+      return false;
+    });
+    
+    if (hasContent) {
       try {
-        sessionStorage.setItem(JOB_WIZARD_SESSION_KEY, JSON.stringify({
+        const draftData = JSON.stringify({
           formData,
           currentStep,
-          customQuestions
-        }));
+          customQuestions,
+          savedAt: Date.now()
+        });
+        
+        // Save to both storages
+        sessionStorage.setItem(JOB_WIZARD_SESSION_KEY, draftData);
+        localStorage.setItem(JOB_WIZARD_DRAFT_KEY, draftData);
+        console.log('💾 Job wizard draft saved');
       } catch (e) {
-        console.warn('Failed to save job wizard state to sessionStorage');
+        console.warn('Failed to save job wizard state');
       }
     }
-  }, [formData, currentStep, customQuestions, hasUnsavedChanges, open]);
+  }, [formData, currentStep, customQuestions, open, existingJob, jobTitle]);
   
-  // NOTE: Removed sessionStorage restoration useEffect as it caused race conditions
-  // with the initialization useEffect at the top. The init useEffect handles all
-  // state loading from existingJob or selectedTemplate, and clears sessionStorage
-  // to prevent false "unsaved changes" detection when opening a fresh wizard.
+  // NOTE: localStorage restoration is now handled in the main 'open' useEffect at the top
+  // to prevent race conditions with initialization.
 
   // Smart text fit for occupation - uses break-words but reduces font-size if it would wrap
   const occupationRef = useSmartTextFit<HTMLDivElement>(formData.occupation || '', { minFontPx: 10 });
@@ -2135,8 +2180,9 @@ const MobileJobWizard = ({
           : "Annonsen har sparats som utkast. Du hittar den i 'Mina annonser'."
       });
 
-      // Clear sessionStorage after successful save
+      // Clear both sessionStorage and localStorage drafts after successful save
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+      localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
 
       // Reset and close
       setIsSavingDraft(false);
@@ -2299,9 +2345,10 @@ const MobileJobWizard = ({
         description: "Din annons är nu publicerad och synlig för jobbsökare."
       });
 
-      // Clear sessionStorage and reset unsaved state BEFORE calling handleClose
+      // Clear both sessionStorage and localStorage drafts BEFORE calling handleClose
       // This prevents the unsaved changes dialog from appearing
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
+      localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
       setHasUnsavedChanges(false);
       setInitialFormData(null);
       setInitialCustomQuestions([]);
