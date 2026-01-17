@@ -13,6 +13,9 @@ export function PushNotificationProvider() {
     // Handle navigation based on notification data
     if (data?.route) {
       navigate(data.route);
+    } else if (data?.type === 'interview_reminder') {
+      // Navigate to applications page for candidates or employer dashboard
+      navigate(data.route || '/my-applications');
     } else if (data?.job_id) {
       navigate(`/job-details/${data.job_id}`);
     } else if (data?.type === 'message') {

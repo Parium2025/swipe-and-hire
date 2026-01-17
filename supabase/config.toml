@@ -55,3 +55,11 @@ verify_jwt = false
 verify_jwt = false
 # Kör kl 06, 11, 15, 18 UTC = 07, 12, 16, 19 svensk tid (vintertid)
 schedule = "0 6,11,15,18 * * *"
+
+[functions.interview-reminders]
+verify_jwt = false
+# Kör varje minut för att fånga intervjuer som börjar om 10 minuter
+schedule = "* * * * *"
+
+[functions.send-push-notification]
+verify_jwt = false
