@@ -753,16 +753,14 @@ function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
 
 function EmptyChatState() {
   return (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="flex flex-col items-center p-6 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2">
-          <MessageSquare className="h-5 w-5 text-white/60" />
-        </div>
-        <h3 className="text-sm font-medium text-white/80">Välj en konversation</h3>
-        <p className="text-white/50 text-xs text-center max-w-[180px]">
-          Välj en konversation från listan till vänster för att börja chatta
-        </p>
+    <div className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+      <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+        <MessageSquare className="h-8 w-8 text-white" />
       </div>
+      <h3 className="text-lg font-medium text-white mb-1">Välj en konversation</h3>
+      <p className="text-white text-sm text-center max-w-xs">
+        Välj en konversation från listan till vänster för att börja chatta
+      </p>
     </div>
   );
 }
