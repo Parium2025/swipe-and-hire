@@ -19,7 +19,8 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
-import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare, Video, HelpCircle, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare, Video, HelpCircle, AlertCircle, CheckCircle2, WifiOff } from 'lucide-react';
+import { useOnline } from '@/hooks/useOnlineStatus';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
@@ -118,6 +119,7 @@ const InterviewTypeTabs = ({ activeType, onTypeChange }: InterviewTypeTabsProps)
 const CompanyProfile = () => {
   const { profile, updateProfile } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+  const { isOnline, showOfflineToast } = useOnline();
   const [loading, setLoading] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
@@ -550,6 +552,10 @@ const CompanyProfile = () => {
   };
 
   const handleSave = async () => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
     // Validate organization number before saving
     if (formData.org_number && formData.org_number.replace(/-/g, '').length !== 10) {
       toast({

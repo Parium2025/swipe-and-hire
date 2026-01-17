@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 export const useSavedJobs = () => {
   const { user } = useAuth();
@@ -61,9 +62,16 @@ export const useSavedJobs = () => {
     };
   }, [user, fetchSavedJobs]);
 
+  const { isOnline, showOfflineToast } = useOnline();
+
   const toggleSaveJob = useCallback(async (jobId: string) => {
     if (!user) {
       toast.error('Du måste vara inloggad för att spara jobb');
+      return;
+    }
+
+    if (!isOnline) {
+      showOfflineToast();
       return;
     }
 
@@ -114,7 +122,7 @@ export const useSavedJobs = () => {
       console.error('Error toggling saved job:', err);
       toast.error('Kunde inte spara jobbet');
     }
-  }, [user, savedJobIds]);
+  }, [user, savedJobIds, isOnline, showOfflineToast]);
 
   const isJobSaved = useCallback((jobId: string) => {
     return savedJobIds.has(jobId);
