@@ -183,12 +183,14 @@ export default function Messages() {
 
           {/* Conversation list */}
           <div className="flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-            <ScrollArea className="h-full">
-              {filteredConversations.length === 0 ? (
+            {filteredConversations.length === 0 ? (
+              <div className="h-full flex items-center justify-center">
                 <EmptyConversationList hasSearch={!!searchQuery.trim()} />
-              ) : (
+              </div>
+            ) : (
+              <ScrollArea className="h-full">
                 <div className="p-2 space-y-1">
-                  {filteredConversations.map(conv => (
+                  {filteredConversations.map((conv) => (
                     <ConversationItem
                       key={conv.id}
                       conversation={conv}
@@ -199,8 +201,8 @@ export default function Messages() {
                     />
                   ))}
                 </div>
-              )}
-            </ScrollArea>
+              </ScrollArea>
+            )}
           </div>
         </div>
 
@@ -735,7 +737,7 @@ function MessageBubble({
 // Empty states
 function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 text-center py-20">
+    <div className="flex flex-col items-center px-4 text-center">
       <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
         <MessageSquare className="h-6 w-6 text-white" />
       </div>
@@ -743,8 +745,8 @@ function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
         {hasSearch ? 'Inga resultat' : 'Inga konversationer'}
       </h3>
       <p className="text-white text-sm">
-        {hasSearch 
-          ? 'Prova ett annat sökord' 
+        {hasSearch
+          ? 'Prova ett annat sökord'
           : 'Starta en konversation med en kandidat eller kollega'}
       </p>
     </div>
