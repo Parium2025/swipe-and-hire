@@ -9,10 +9,11 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TeamMember } from '@/hooks/useTeamMembers';
-import { UserCheck, Users } from 'lucide-react';
+import { UserCheck, Users, WifiOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface AddToColleagueListDialogProps {
   open: boolean;
@@ -35,8 +36,14 @@ export function AddToColleagueListDialog({
 }: AddToColleagueListDialogProps) {
   const { user } = useAuth();
   const [isAdding, setIsAdding] = useState<string | null>(null);
+  const { isOnline, showOfflineToast } = useOnline();
 
   const handleAddToList = async (recruiterId: string, isOwnList: boolean) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     setIsAdding(recruiterId);
     try {
       const { error } = await supabase
@@ -85,14 +92,20 @@ export function AddToColleagueListDialog({
           {user && (
             <Button
               variant="outline"
-              className="w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white"
+              className={`w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white ${!isOnline ? 'opacity-50' : ''}`}
               onClick={() => handleAddToList(user.id, true)}
-              disabled={isAdding !== null}
+              disabled={isAdding !== null || !isOnline}
             >
-              <UserCheck className="h-5 w-5 text-fuchsia-400" />
+              {!isOnline ? (
+                <WifiOff className="h-5 w-5 text-white/50" />
+              ) : (
+                <UserCheck className="h-5 w-5 text-fuchsia-400" />
+              )}
               <div className="text-left">
-                <div className="font-medium">Min lista</div>
-                <div className="text-xs text-white/60">Lägg till i din kandidatlista</div>
+                <div className="font-medium">{!isOnline ? 'Offline' : 'Min lista'}</div>
+                <div className="text-xs text-white/60">
+                  {!isOnline ? 'Ingen anslutning' : 'Lägg till i din kandidatlista'}
+                </div>
               </div>
               {isAdding === user.id && (
                 <div className="ml-auto animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
@@ -105,9 +118,9 @@ export function AddToColleagueListDialog({
             <Button
               key={member.userId}
               variant="outline"
-              className="w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white"
+              className={`w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white ${!isOnline ? 'opacity-50' : ''}`}
               onClick={() => handleAddToList(member.userId, false)}
-              disabled={isAdding !== null}
+              disabled={isAdding !== null || !isOnline}
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={member.profileImageUrl || undefined} />

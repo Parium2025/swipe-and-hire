@@ -9,7 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Users, UserPlus, Trash2, Crown, Loader2, Mail } from 'lucide-react';
+import { Users, UserPlus, Trash2, Crown, Loader2, Mail, WifiOff } from 'lucide-react';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface TeamMember {
   user_id: string;
@@ -41,6 +42,7 @@ const TeamManagement = () => {
   const [inviteRole, setInviteRole] = useState('recruiter');
   const [inviting, setInviting] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const { isOnline, showOfflineToast } = useOnline();
 
   useEffect(() => {
     fetchTeamMembers();
@@ -103,6 +105,11 @@ const TeamManagement = () => {
   };
 
   const handleInvite = async () => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     if (!inviteEmail.trim() || !organizationId) {
       toast({
         title: "Fel",
@@ -134,6 +141,11 @@ const TeamManagement = () => {
   };
 
   const handleRemoveMember = async (memberId: string) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     if (memberId === user?.id) {
       toast({
         title: "Fel",
@@ -169,6 +181,11 @@ const TeamManagement = () => {
   };
 
   const handleRoleChange = async (memberId: string, newRole: string) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     if (memberId === user?.id && newRole !== 'admin') {
       toast({
         title: "Fel",
@@ -251,12 +268,18 @@ const TeamManagement = () => {
           </Select>
           <Button 
             onClick={handleInvite}
-            disabled={inviting || !inviteEmail.trim()}
+            disabled={inviting || !inviteEmail.trim() || !isOnline}
             variant="glass"
-            className="h-9 px-4 text-sm"
+            className={`h-9 px-4 text-sm ${!isOnline ? 'opacity-50' : ''}`}
           >
-            {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
-            Bjud in
+            {inviting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : !isOnline ? (
+              <WifiOff className="h-4 w-4 mr-2" />
+            ) : (
+              <Mail className="h-4 w-4 mr-2" />
+            )}
+            {!isOnline ? 'Offline' : 'Bjud in'}
           </Button>
         </div>
       </div>

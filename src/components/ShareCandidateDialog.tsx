@@ -5,8 +5,9 @@ import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { Loader2, Check, Users } from 'lucide-react';
+import { Loader2, Check, Users, WifiOff } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface ShareCandidateDialogProps {
   open: boolean;
@@ -38,8 +39,14 @@ export function ShareCandidateDialog({
   const { teamMembers, hasTeam, isLoading } = useTeamMembers();
   const [sharing, setSharing] = useState<string | null>(null);
   const [shared, setShared] = useState<Set<string>>(new Set());
+  const { isOnline, showOfflineToast } = useOnline();
 
   const handleShare = async (memberId: string, memberName: string) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     setSharing(memberId);
     try {
       // Check if already in their list
@@ -120,11 +127,14 @@ export function ShareCandidateDialog({
                     <Button
                       size="sm"
                       variant={isShared ? 'outline' : 'glassBlue'}
-                      disabled={isSharing || isShared}
+                      disabled={isSharing || isShared || !isOnline}
                       onClick={() => handleShare(member.userId, fullName)}
+                      className={!isOnline ? 'opacity-50' : ''}
                     >
                       {isSharing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : !isOnline ? (
+                        <WifiOff className="h-4 w-4" />
                       ) : isShared ? (
                         <>
                           <Check className="h-4 w-4 mr-1" />

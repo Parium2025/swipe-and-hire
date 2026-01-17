@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, File, Video, FileText, Check } from 'lucide-react';
+import { Upload, X, File, Video, FileText, Check, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { openCvFile } from '@/utils/cvUtils';
 import { CvViewer } from '@/components/CvViewer';
 import { uploadMedia, getMediaUrl, deleteMedia, type MediaType } from '@/lib/mediaManager';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface FileUploadProps {
   onFileUploaded: (url: string, fileName: string) => void;
@@ -36,6 +37,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [previewFile, setPreviewFile] = useState<{ file: File; url: string } | null>(null);
   const { toast } = useToast();
+  const { isOnline, showOfflineToast } = useOnline();
 
   const getFileIcon = (fileName: string) => {
     const extension = fileName.toLowerCase().split('.').pop();
@@ -113,6 +115,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     const file = acceptedFiles[0];
     if (file) {
       // Check if it's a video file for preview
@@ -125,7 +132,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         uploadFile(file);
       }
     }
-  }, []);
+  }, [isOnline, showOfflineToast]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
@@ -288,16 +295,27 @@ const FileUpload: React.FC<FileUploadProps> = ({
         className={`border-2 border-dashed rounded-lg p-3 sm:p-4 text-center cursor-pointer transition-all duration-300 ${
           isDragActive
             ? 'border-primary bg-primary/5'
-            : 'border-white/20 md:hover:border-white/40 md:hover:bg-white/10 bg-white/5 backdrop-blur-sm'
-        } ${uploading ? 'pointer-events-none' : ''}`}
+            : !isOnline
+              ? 'border-white/10 bg-white/5 opacity-50'
+              : 'border-white/20 md:hover:border-white/40 md:hover:bg-white/10 bg-white/5 backdrop-blur-sm'
+        } ${uploading || !isOnline ? 'pointer-events-none' : ''}`}
         onClick={(e) => {
           e.preventDefault();
+          if (!isOnline) {
+            showOfflineToast();
+            return;
+          }
           open(); // Explicitly open file dialog
         }}
       >
         <div className="space-y-1.5 sm:space-y-2">
           <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto text-[#FFFFFF]" />
-          {uploading ? (
+          {!isOnline ? (
+            <>
+              <WifiOff className="h-6 w-6 sm:h-8 sm:w-8 mx-auto text-white/50" />
+              <p className="text-xs sm:text-sm text-white/50">Offline - uppladdning inte tillgänglig</p>
+            </>
+          ) : uploading ? (
             <>
               <p className="text-xs sm:text-sm text-[#FFFFFF]">Laddar upp...</p>
               {uploadProgress > 0 && (
