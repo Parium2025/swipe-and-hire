@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -11,6 +10,7 @@ import { Clock, CheckCircle, AlertCircle, ChevronDown, Check, WifiOff } from 'lu
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useOnline } from '@/hooks/useOnlineStatus';
+import { useFieldDraft } from '@/hooks/useFormDraft';
 
 interface SupportTicket {
   id: string;
@@ -24,7 +24,8 @@ interface SupportTicket {
 
 const Support = () => {
   const [category, setCategory] = useState('');
-  const [message, setMessage] = useState('');
+  // Auto-save message draft to localStorage
+  const [message, setMessage, clearMessageDraft, hasMessageDraft] = useFieldDraft('support-message');
   const [loading, setLoading] = useState(false);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [ticketsLoading, setTicketsLoading] = useState(true);
@@ -102,6 +103,7 @@ const Support = () => {
       
       setCategory('');
       setMessage('');
+      clearMessageDraft(); // Rensa sparad draft efter lyckad submit
       fetchTickets(); // Uppdatera listan
     } catch (error) {
       console.error('Error creating ticket:', error);
