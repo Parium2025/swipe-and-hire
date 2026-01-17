@@ -174,19 +174,34 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
     });
   }
 
-  // Hämta aktivitetsdata batch
+  // Hämta aktivitetsdata och betyg batch parallellt
   const activityMap: Record<string, any> = {};
-  const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
-    p_applicant_ids: applicantIds,
-    p_employer_id: userId,
-  });
+  const ratingsMap: Record<string, number> = {};
+  
+  const [activityResult, ratingsResult] = await Promise.all([
+    supabase.rpc('get_applicant_latest_activity', {
+      p_applicant_ids: applicantIds,
+      p_employer_id: userId,
+    }),
+    supabase
+      .from('candidate_ratings')
+      .select('applicant_id, rating')
+      .eq('recruiter_id', userId)
+      .in('applicant_id', applicantIds)
+  ]);
 
-  if (activityData) {
-    activityData.forEach((item: any) => {
+  if (activityResult.data) {
+    activityResult.data.forEach((item: any) => {
       activityMap[item.applicant_id] = {
         latest_application_at: item.latest_application_at,
         last_active_at: item.last_active_at,
       };
+    });
+  }
+  
+  if (ratingsResult.data) {
+    ratingsResult.data.forEach((row: any) => {
+      ratingsMap[row.applicant_id] = row.rating;
     });
   }
 
@@ -194,6 +209,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
   const items = baseData.map((item: any) => {
     const media = profileMediaMap[item.applicant_id] || {};
     const activity = activityMap[item.applicant_id] || {};
+    const rating = ratingsMap[item.applicant_id] ?? null;
 
     return {
       ...item,
@@ -204,6 +220,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       is_profile_video: media.is_profile_video || false,
       last_active_at: activity.last_active_at || media.last_active_at || null,
       latest_application_at: activity.latest_application_at || item.applied_at,
+      rating,
       job_postings: undefined,
     };
   });
