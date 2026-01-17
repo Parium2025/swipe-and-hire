@@ -240,6 +240,12 @@ export function useColleagueCandidates(colleagueId: string | null) {
 
   // Remove candidate from colleague's list
   const removeCandidateFromColleagueList = async (candidateId: string) => {
+    // Check if online before removing
+    if (!navigator.onLine) {
+      toast.error('Du måste vara online för att ta bort kandidater');
+      return;
+    }
+    
     const previousCandidates = [...candidates];
     setCandidates(prev => prev.filter(c => c.id !== candidateId));
 
@@ -267,6 +273,12 @@ export function useColleagueCandidates(colleagueId: string | null) {
     stage: CandidateStage = 'to_contact'
   ) => {
     if (!colleagueId) return;
+    
+    // Check if online before adding
+    if (!navigator.onLine) {
+      toast.error('Du måste vara online för att lägga till kandidater');
+      return;
+    }
 
     try {
       const { data, error } = await supabase

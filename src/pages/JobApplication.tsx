@@ -160,6 +160,16 @@ const JobApplication = () => {
       });
       return;
     }
+    
+    // Check if online before submitting
+    if (!navigator.onLine) {
+      toast({
+        title: 'Offline',
+        description: 'Du måste vara online för att skicka din ansökan',
+        variant: 'destructive'
+      });
+      return;
+    }
 
     setSubmitting(true);
     try {

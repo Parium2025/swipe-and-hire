@@ -114,6 +114,16 @@ const EmployerDashboard = memo(() => {
 
   const confirmDeleteJob = async () => {
     if (!jobToDelete) return;
+    
+    // Check if online before deleting
+    if (!navigator.onLine) {
+      toast({
+        title: 'Offline',
+        description: 'Du måste vara online för att ta bort annonser',
+        variant: 'destructive'
+      });
+      return;
+    }
 
     try {
       const { error } = await supabase
