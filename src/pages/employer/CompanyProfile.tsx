@@ -145,6 +145,7 @@ const CompanyProfile = () => {
       social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
       // Interview settings
       interview_default_message: (profile as any)?.interview_default_message || '',
+      interview_video_default_message: (profile as any)?.interview_video_default_message || '',
       interview_office_address: (profile as any)?.interview_office_address || '',
       interview_office_instructions: (profile as any)?.interview_office_instructions || '',
     };
@@ -1029,11 +1030,29 @@ const CompanyProfile = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="bg-white/5 border border-white/10 rounded-lg p-3"
+                    className="space-y-3"
                   >
-                    <p className="text-white/80 text-sm">
-                      Videosamtal hanteras automatiskt via Parium. Inga ytterligare inställningar behövs.
-                    </p>
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                      <p className="text-white/80 text-sm">
+                        Videosamtal hanteras automatiskt via Parium. Inga ytterligare inställningar behövs.
+                      </p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="interview_video_default_message" className="text-white flex items-center gap-1.5">
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        Standardmeddelande för video
+                      </Label>
+                      <Textarea
+                        id="interview_video_default_message"
+                        value={formData.interview_video_default_message}
+                        onChange={(e) => setFormData({...formData, interview_video_default_message: e.target.value})}
+                        placeholder="Hej!&#10;&#10;Tack för din ansökan. Vi skulle gärna vilja träffa dig på en videointervju.&#10;&#10;Vänliga hälsningar"
+                        rows={4}
+                        className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                      />
+                      <p className="text-xs text-white">Detta meddelande skickas till kandidaten vid videobokning</p>
+                    </div>
                   </motion.div>
                 )}
 
@@ -1073,25 +1092,24 @@ const CompanyProfile = () => {
                         className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
                       />
                     </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="interview_default_message" className="text-white flex items-center gap-1.5">
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        Standardmeddelande för kontor
+                      </Label>
+                      <Textarea
+                        id="interview_default_message"
+                        value={formData.interview_default_message}
+                        onChange={(e) => setFormData({...formData, interview_default_message: e.target.value})}
+                        placeholder="Hej!&#10;&#10;Tack för din ansökan. Vi skulle gärna vilja träffa dig på en intervju.&#10;&#10;Vänliga hälsningar"
+                        rows={4}
+                        className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                      />
+                      <p className="text-xs text-white">Detta meddelande skickas till kandidaten vid kontorsbokning</p>
+                    </div>
                   </motion.div>
                 )}
-
-                {/* Default Message */}
-                <div className="space-y-1.5 pt-2 border-t border-white/10">
-                  <Label htmlFor="interview_default_message" className="text-white flex items-center gap-1.5">
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    Standardmeddelande
-                  </Label>
-                  <Textarea
-                    id="interview_default_message"
-                    value={formData.interview_default_message}
-                    onChange={(e) => setFormData({...formData, interview_default_message: e.target.value})}
-                    placeholder="Hej!&#10;&#10;Tack för din ansökan. Vi skulle gärna vilja träffa dig på en intervju.&#10;&#10;Vänliga hälsningar"
-                    rows={4}
-                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
-                  />
-                  <p className="text-xs text-white">Detta meddelande skickas till kandidaten vid intervjubokning</p>
-                </div>
               </div>
             </div>
 

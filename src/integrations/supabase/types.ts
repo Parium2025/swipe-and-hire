@@ -1398,6 +1398,7 @@ export type Database = {
           interview_default_message: string | null
           interview_office_address: string | null
           interview_office_instructions: string | null
+          interview_video_default_message: string | null
           is_profile_video: boolean | null
           last_active_at: string | null
           last_name: string | null
@@ -1444,6 +1445,7 @@ export type Database = {
           interview_default_message?: string | null
           interview_office_address?: string | null
           interview_office_instructions?: string | null
+          interview_video_default_message?: string | null
           is_profile_video?: boolean | null
           last_active_at?: string | null
           last_name?: string | null
@@ -1490,6 +1492,7 @@ export type Database = {
           interview_default_message?: string | null
           interview_office_address?: string | null
           interview_office_instructions?: string | null
+          interview_video_default_message?: string | null
           is_profile_video?: boolean | null
           last_active_at?: string | null
           last_name?: string | null
