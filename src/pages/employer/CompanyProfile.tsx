@@ -19,11 +19,44 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
-import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare, Video, HelpCircle } from 'lucide-react';
+import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare, Video, HelpCircle, AlertCircle } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+
+// Video meeting link validation
+const VALID_MEETING_PATTERNS = [
+  // Google Meet
+  /^https?:\/\/(meet\.google\.com|hangouts\.google\.com)\/.+/i,
+  // Microsoft Teams
+  /^https?:\/\/teams\.microsoft\.com\/.+/i,
+  // Zoom
+  /^https?:\/\/([\w-]+\.)?zoom\.us\/.+/i,
+  // Webex
+  /^https?:\/\/([\w-]+\.)?webex\.com\/.+/i,
+  // Whereby
+  /^https?:\/\/whereby\.com\/.+/i,
+  // Jitsi
+  /^https?:\/\/meet\.jit\.si\/.+/i,
+  // Skype
+  /^https?:\/\/join\.skype\.com\/.+/i,
+  // GoToMeeting
+  /^https?:\/\/(gotomeet\.me|gotomeeting\.com)\/.+/i,
+  // BlueJeans
+  /^https?:\/\/([\w-]+\.)?bluejeans\.com\/.+/i,
+  // Around
+  /^https?:\/\/around\.co\/.+/i,
+  // Daily.co
+  /^https?:\/\/([\w-]+\.)?daily\.co\/.+/i,
+  // Huddle
+  /^https?:\/\/([\w-]+\.)?huddle\.team\/.+/i,
+];
+
+const isValidMeetingLink = (url: string): boolean => {
+  if (!url || url.trim() === '') return true; // Empty is valid (optional field)
+  return VALID_MEETING_PATTERNS.some(pattern => pattern.test(url.trim()));
+};
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -1046,6 +1079,17 @@ const CompanyProfile = () => {
                         placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
                         className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
                       />
+                      
+                      {/* Video link validation warning */}
+                      {formData.interview_video_link && !isValidMeetingLink(formData.interview_video_link) && (
+                        <div className="flex items-start gap-2 text-amber-400 text-xs mt-1">
+                          <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+                          <span>
+                            Länken ser inte ut som en giltig möteslänk. Se till att den kommer från Teams, Zoom, Google Meet, Webex, Whereby, Jitsi, Skype, GoToMeeting eller BlueJeans.
+                          </span>
+                        </div>
+                      )}
+                      
                       <p className="text-xs text-white">Din Teams, Zoom eller Google Meet-länk som visas för kandidater</p>
                       
                       {/* Expandable help section */}
