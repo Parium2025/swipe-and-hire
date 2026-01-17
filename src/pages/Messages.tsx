@@ -118,8 +118,8 @@ export default function Messages() {
       return;
     }
 
+    // On mobile the right pane isn't visible, so don't try to align.
     if (typeof window !== 'undefined' && !window.matchMedia('(min-width: 768px)').matches) {
-      // On mobile the right pane isn't visible, so don't try to align.
       setLeftEmptyAlignOffset(0);
       return;
     }
@@ -128,13 +128,18 @@ export default function Messages() {
     const rightIcon = rightEmptyIconRef.current;
     if (!leftIcon || !rightIcon) return;
 
-    // If you need a micro-adjustment, change this (negative = move left empty state up)
+    // Micro-adjustment if needed (negative = move left empty state up)
     const FINE_TUNE_PX = 0;
 
     const compute = () => {
-      const delta = rightIcon.getBoundingClientRect().top - leftIcon.getBoundingClientRect().top;
-      const next = delta + FINE_TUNE_PX;
-      setLeftEmptyAlignOffset((prev) => (Math.abs(prev - next) < 0.5 ? prev : next));
+      const leftTopWithTransform = leftIcon.getBoundingClientRect().top;
+      const rightTop = rightIcon.getBoundingClientRect().top;
+
+      // Derive the left icon's "base" top (without our applied translateY)
+      const leftTopBase = leftTopWithTransform - leftEmptyAlignOffset;
+
+      const next = rightTop - leftTopBase + FINE_TUNE_PX;
+      setLeftEmptyAlignOffset((prev) => (Math.abs(prev - next) < 0.25 ? prev : next));
     };
 
     // Let layout settle (fonts, scrollbars) then compute a couple times.
@@ -154,7 +159,7 @@ export default function Messages() {
       ro.disconnect();
       window.removeEventListener('resize', compute);
     };
-  }, [showEmptyConversationList, showEmptyChatState]);
+  }, [showEmptyConversationList, showEmptyChatState, leftEmptyAlignOffset]);
 
   const handleSelectConversation = (convId: string) => {
     setSelectedConversationId(convId);
