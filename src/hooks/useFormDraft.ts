@@ -94,12 +94,14 @@ export function useFormDraft<T extends Record<string, any>>(
     try {
       const stored = localStorage.getItem(storageKey);
       if (stored) {
-        const parsed = JSON.parse(stored) as T;
+        const parsed = JSON.parse(stored);
+        // Handle both old format (direct data) and new format (with savedAt)
+        const actualData = (parsed.formData || parsed) as T;
         
         // Kontrollera att det är giltig data med verkligt innehåll
-        if (hasContent(parsed) && hasDataChanged(parsed, initialData)) {
+        if (hasContent(actualData) && hasDataChanged(actualData, initialData)) {
           // Merge med initial data för att hantera nya fält
-          const mergedData = { ...initialData, ...parsed };
+          const mergedData = { ...initialData, ...actualData };
           setData(mergedData);
           setHasDraft(true);
           setIsRestored(true);
@@ -125,7 +127,10 @@ export function useFormDraft<T extends Record<string, any>>(
       try {
         // Spara bara om det finns verkligt innehåll som skiljer sig från initial
         if (hasContent(newData) && hasDataChanged(newData, initialDataRef.current)) {
-          localStorage.setItem(storageKey, JSON.stringify(newData));
+          localStorage.setItem(storageKey, JSON.stringify({
+            formData: newData,
+            savedAt: Date.now()
+          }));
           setHasDraft(true);
         } else {
           // Om ingen meningsfull ändring, ta bort eventuell draft
@@ -227,7 +232,19 @@ export function useFieldDraft(
     try {
       const stored = localStorage.getItem(storageKey);
       if (stored && stored.trim()) {
-        setValue(stored);
+        // Handle both old format (plain string) and new format (with savedAt)
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.value !== undefined) {
+            setValue(parsed.value);
+          } else {
+            // Old format - plain string that happens to be valid JSON
+            setValue(stored);
+          }
+        } catch {
+          // Old format - plain string
+          setValue(stored);
+        }
         setHasDraft(true);
       }
     } catch (error) {
@@ -246,7 +263,10 @@ export function useFieldDraft(
     debounceRef.current = setTimeout(() => {
       try {
         if (newValue.trim()) {
-          localStorage.setItem(storageKey, newValue);
+          localStorage.setItem(storageKey, JSON.stringify({
+            value: newValue,
+            savedAt: Date.now()
+          }));
           setHasDraft(true);
         } else {
           localStorage.removeItem(storageKey);
