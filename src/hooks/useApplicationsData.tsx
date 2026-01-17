@@ -43,7 +43,8 @@ interface SnapshotData {
   timestamp: number;
 }
 
-// Read snapshot from localStorage
+// Read snapshot from localStorage - PRIORITIZE INSTANT DISPLAY
+// We accept slightly stale data to show content immediately on login/refresh
 const readSnapshot = (userId: string): ApplicationData[] => {
   try {
     const key = SNAPSHOT_KEY_PREFIX + userId;
@@ -53,11 +54,13 @@ const readSnapshot = (userId: string): ApplicationData[] => {
     const snapshot: SnapshotData = JSON.parse(raw);
     const age = Date.now() - snapshot.timestamp;
 
-    if (age > SNAPSHOT_EXPIRY_MS) {
+    // Extended expiry for instant display - background fetch will update anyway
+    // 30 min expiry instead of 5 min to ensure returning users see data instantly
+    const EXTENDED_EXPIRY_MS = 30 * 60 * 1000;
+    if (age > EXTENDED_EXPIRY_MS) {
       localStorage.removeItem(key);
       return [];
     }
-
 
     // Invalidate snapshot if it contains legacy profile-media URLs (old format).
     // Those URLs are no longer a reliable source of truth; we only store storage paths.
@@ -97,42 +100,13 @@ const readSnapshot = (userId: string): ApplicationData[] => {
       return [];
     }
 
-    // If schema changed (old snapshot missing fields), ignore it.
-    // Must include profile_image_url field to show candidate avatars correctly
-    // Also invalidate if profile media fields exist but are not properly set
+    // Minimal schema validation - only check essential fields (id, first_name)
+    // More relaxed validation to ensure we show SOMETHING instantly
+    // Background refresh will fill in missing data
     const first = snapshot.items?.[0] as any;
+    const hasBasicFields = !first || ('id' in first && 'applicant_id' in first);
 
-    // Check that all required fields exist
-    const hasRequiredFields =
-      !first ||
-      ('age' in first &&
-        'employment_status' in first &&
-        'work_schedule' in first &&
-        'availability' in first &&
-        'cv_url' in first &&
-        'profile_image_url' in first &&
-        'video_url' in first &&
-        'is_profile_video' in first &&
-        'last_active_at' in first);
-
-    if (!hasRequiredFields) {
-      localStorage.removeItem(key);
-      return [];
-    }
-
-    // CRITICAL: Invalidate snapshots where last_active_at exists but is null for ALL candidates
-    // This ensures fresh data is fetched instead of showing stale "-" in "Senaste aktivitet"
-    const allCandidatesLackLastActive = snapshot.items.every(
-      (item: any) => item.last_active_at === null || item.last_active_at === undefined
-    );
-    if (allCandidatesLackLastActive && snapshot.items.length > 0) {
-      localStorage.removeItem(key);
-      return [];
-    }
-
-    const isValid = hasRequiredFields;
-
-    if (!isValid) {
+    if (!hasBasicFields) {
       localStorage.removeItem(key);
       return [];
     }
