@@ -153,20 +153,30 @@ const MobileJobWizard = ({
       sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
       
       // Check for localStorage draft ONLY if not editing an existing job AND no template selected
-      // (drafts are only for new jobs created from scratch)
+      // Only restore draft if the saved title MATCHES the new jobTitle (same session continuation)
+      // If jobTitle is different, user is creating a NEW job from scratch - clear old draft
       if (!existingJob && !selectedTemplate) {
         try {
           const savedDraft = localStorage.getItem(JOB_WIZARD_DRAFT_KEY);
           if (savedDraft) {
             const parsed = JSON.parse(savedDraft);
-            if (parsed.formData && Object.values(parsed.formData).some((v: any) => v && v !== '' && (!Array.isArray(v) || v.length > 0))) {
-              console.log('📝 Restoring job wizard draft from localStorage');
+            const savedTitle = parsed.formData?.title || '';
+            
+            // Only restore if the title matches (user is continuing the same job)
+            // OR if no jobTitle was provided (user just opened dialog without entering a name)
+            if (parsed.formData && savedTitle === jobTitle && jobTitle !== '') {
+              console.log('📝 Restoring job wizard draft from localStorage (same title)');
               setFormData(parsed.formData);
               setCustomQuestions(parsed.customQuestions || []);
               setInitialFormData(parsed.formData);
               setInitialCustomQuestions(parsed.customQuestions || []);
               setHasUnsavedChanges(false);
               return; // Don't continue to empty form initialization
+            } else if (jobTitle !== '' && savedTitle !== jobTitle) {
+              // User entered a different title - clear old draft and start fresh
+              console.log('🗑️ Clearing old draft - new job title entered');
+              localStorage.removeItem(JOB_WIZARD_DRAFT_KEY);
+              sessionStorage.removeItem(JOB_WIZARD_SESSION_KEY);
             }
           }
         } catch (e) {
