@@ -44,7 +44,13 @@ export default function Messages() {
   // Pixel-perfect alignment: keep icon + text on the exact same row between the two empty states.
   const leftEmptyIconRef = useRef<HTMLDivElement | null>(null);
   const rightEmptyIconRef = useRef<HTMLDivElement | null>(null);
+  const leftEmptyPanelRef = useRef<HTMLDivElement | null>(null);
+  const rightEmptyPanelRef = useRef<HTMLDivElement | null>(null);
+
+  const showAlignmentDebug = import.meta.env.DEV;
   const [leftEmptyAlignOffset, setLeftEmptyAlignOffset] = useState(0);
+  const [debugLeftLineTop, setDebugLeftLineTop] = useState<number | null>(null);
+  const [debugRightLineTop, setDebugRightLineTop] = useState<number | null>(null);
 
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
@@ -161,6 +167,55 @@ export default function Messages() {
     };
   }, [showEmptyConversationList, showEmptyChatState, leftEmptyAlignOffset]);
 
+  useLayoutEffect(() => {
+    if (!showAlignmentDebug) return;
+
+    if (!showEmptyConversationList || !showEmptyChatState) {
+      setDebugLeftLineTop(null);
+      setDebugRightLineTop(null);
+      return;
+    }
+
+    // Only relevant on desktop split view.
+    if (typeof window !== 'undefined' && !window.matchMedia('(min-width: 768px)').matches) {
+      setDebugLeftLineTop(null);
+      setDebugRightLineTop(null);
+      return;
+    }
+
+    const leftIcon = leftEmptyIconRef.current;
+    const rightIcon = rightEmptyIconRef.current;
+    const leftPanel = leftEmptyPanelRef.current;
+    const rightPanel = rightEmptyPanelRef.current;
+
+    if (!leftIcon || !rightIcon || !leftPanel || !rightPanel) return;
+
+    const measure = () => {
+      const leftTop = leftIcon.getBoundingClientRect().top - leftPanel.getBoundingClientRect().top;
+      const rightTop = rightIcon.getBoundingClientRect().top - rightPanel.getBoundingClientRect().top;
+
+      setDebugLeftLineTop((prev) => (prev === null || Math.abs(prev - leftTop) > 0.25 ? leftTop : prev));
+      setDebugRightLineTop((prev) => (prev === null || Math.abs(prev - rightTop) > 0.25 ? rightTop : prev));
+    };
+
+    const raf = requestAnimationFrame(() => {
+      measure();
+      requestAnimationFrame(measure);
+    });
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(leftIcon);
+    ro.observe(rightIcon);
+    ro.observe(leftPanel);
+    ro.observe(rightPanel);
+
+    window.addEventListener('resize', measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [showAlignmentDebug, showEmptyConversationList, showEmptyChatState, leftEmptyAlignOffset]);
 
   const handleSelectConversation = (convId: string) => {
     setSelectedConversationId(convId);
@@ -245,7 +300,15 @@ export default function Messages() {
           </div>
 
           {/* Conversation list */}
-          <div className="flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+          <div ref={leftEmptyPanelRef} className="relative flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+            {showAlignmentDebug && debugLeftLineTop !== null && (
+              <div
+                className="pointer-events-none absolute left-0 right-0 h-px bg-destructive/80"
+                style={{ top: `${debugLeftLineTop}px` }}
+                aria-hidden="true"
+              />
+            )}
+
             {filteredConversations.length === 0 ? (
               <div
                 className="h-full flex items-center justify-center"
@@ -284,7 +347,12 @@ export default function Messages() {
               onBack={handleBackToList}
             />
           ) : (
-            <EmptyChatState iconRef={rightEmptyIconRef} />
+            <EmptyChatState
+              iconRef={rightEmptyIconRef}
+              containerRef={rightEmptyPanelRef}
+              showDebug={showAlignmentDebug}
+              debugLineTop={debugRightLineTop}
+            />
           )}
         </div>
       </div>
@@ -828,9 +896,30 @@ function EmptyConversationList({
   );
 }
 
-function EmptyChatState({ iconRef }: { iconRef?: Ref<HTMLDivElement> }) {
+function EmptyChatState({
+  iconRef,
+  containerRef,
+  showDebug,
+  debugLineTop,
+}: {
+  iconRef?: Ref<HTMLDivElement>;
+  containerRef?: Ref<HTMLDivElement>;
+  showDebug?: boolean;
+  debugLineTop?: number | null;
+}) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+    <div
+      ref={containerRef}
+      className="relative flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm"
+    >
+      {showDebug && debugLineTop !== null && debugLineTop !== undefined && (
+        <div
+          className="pointer-events-none absolute left-0 right-0 h-px bg-destructive/80"
+          style={{ top: `${debugLineTop}px` }}
+          aria-hidden="true"
+        />
+      )}
+
       <div
         ref={iconRef}
         className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3"
