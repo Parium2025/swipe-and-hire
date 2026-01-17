@@ -123,7 +123,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in">
+    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-6xl mx-auto px-3 md:px-12">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -753,7 +753,7 @@ function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
 
 function EmptyChatState() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm max-w-2xl">
+    <div className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
       <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
         <MessageSquare className="h-6 w-6 text-white/50" />
       </div>
