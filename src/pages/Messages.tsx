@@ -123,7 +123,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-6xl mx-auto px-3 md:px-12">
+    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-6xl mx-auto px-3 md:px-12 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -735,7 +735,7 @@ function MessageBubble({
 // Empty states
 function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
   return (
-    <div className="h-full min-h-[400px] flex flex-col items-center justify-center px-4 text-center">
+    <div className="flex-1 flex flex-col items-center justify-center px-4 text-center py-20">
       <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
         <MessageSquare className="h-6 w-6 text-white" />
       </div>
