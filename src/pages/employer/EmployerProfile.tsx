@@ -99,7 +99,9 @@ const EmployerProfile = () => {
     try {
       const stored = localStorage.getItem(DRAFT_KEY);
       if (stored) {
-        savedDraft = JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        // Handle both old format (direct formData) and new format (with savedAt)
+        savedDraft = parsed.formData || parsed;
       }
     } catch (e) {
       console.warn('Failed to load draft:', e);
@@ -161,7 +163,10 @@ const EmployerProfile = () => {
     // Auto-save draft to localStorage when there are changes
     if (hasChanges) {
       try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          formData,
+          savedAt: Date.now()
+        }));
       } catch (e) {
         console.warn('Failed to save draft:', e);
       }
