@@ -146,6 +146,7 @@ const CompanyProfile = () => {
       // Interview settings
       interview_default_message: (profile as any)?.interview_default_message || '',
       interview_video_default_message: (profile as any)?.interview_video_default_message || '',
+      interview_video_link: (profile as any)?.interview_video_link || '',
       interview_office_address: (profile as any)?.interview_office_address || '',
       interview_office_instructions: (profile as any)?.interview_office_instructions || '',
     };
@@ -1032,10 +1033,19 @@ const CompanyProfile = () => {
                     exit={{ opacity: 0, y: -10 }}
                     className="space-y-3"
                   >
-                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-                      <p className="text-white/80 text-sm">
-                        Videosamtal hanteras automatiskt via Parium. Inga ytterligare inställningar behövs.
-                      </p>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="interview_video_link" className="text-white flex items-center gap-1.5">
+                        <Video className="h-3.5 w-3.5" />
+                        Videolänk
+                      </Label>
+                      <Input
+                        id="interview_video_link"
+                        value={formData.interview_video_link}
+                        onChange={(e) => setFormData({...formData, interview_video_link: e.target.value})}
+                        placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
+                        className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
+                      />
+                      <p className="text-xs text-white">Din Teams, Zoom eller Google Meet-länk som visas för kandidater</p>
                     </div>
 
                     <div className="space-y-1.5">
