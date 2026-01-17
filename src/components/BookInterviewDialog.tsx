@@ -60,9 +60,15 @@ export const BookInterviewDialog = ({
 
   // Get employer's settings from profile
   const savedOfficeAddress = (profile as any)?.interview_office_address || profile?.address || '';
-  const defaultMessage = (profile as any)?.interview_default_message || FALLBACK_MESSAGE;
+  const officeDefaultMessage = (profile as any)?.interview_default_message || FALLBACK_MESSAGE;
+  const videoDefaultMessage = (profile as any)?.interview_video_default_message || FALLBACK_MESSAGE;
   const officeInstructions = (profile as any)?.interview_office_instructions || '';
   const companyName = profile?.company_name || '';
+
+  // Get the correct default message based on location type
+  const getDefaultMessageForType = (type: 'video' | 'office') => {
+    return type === 'video' ? videoDefaultMessage : officeDefaultMessage;
+  };
 
   // Set default values when dialog opens
   useEffect(() => {
@@ -75,9 +81,16 @@ export const BookInterviewDialog = ({
       setLocationType('video');
       setLocationDetails('');
       setEditableAddress(savedOfficeAddress);
-      setMessage(defaultMessage);
+      setMessage(videoDefaultMessage); // Start with video message since video is default
     }
-  }, [open, jobTitle, defaultMessage, savedOfficeAddress]);
+  }, [open, jobTitle, videoDefaultMessage, savedOfficeAddress]);
+
+  // Update message when location type changes
+  useEffect(() => {
+    if (open) {
+      setMessage(getDefaultMessageForType(locationType));
+    }
+  }, [locationType]);
 
   // Update location details when type or address changes
   useEffect(() => {
