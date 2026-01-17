@@ -129,6 +129,8 @@ export default function Messages() {
 
     const leftIcon = leftEmptyIconRef.current;
     const rightIcon = rightEmptyIconRef.current;
+    const leftPanel = leftEmptyPanelRef.current;
+    const rightPanel = rightEmptyPanelRef.current;
     if (!leftIcon || !rightIcon) return;
 
     // Micro-adjustment if needed (negative = move left empty state up)
@@ -145,20 +147,29 @@ export default function Messages() {
       setLeftEmptyAlignOffset((prev) => (Math.abs(prev - next) < 0.25 ? prev : next));
     };
 
-    // Let layout settle (fonts, scrollbars) then compute a couple times.
+    // Let layout settle (fonts, scrollbars) then compute multiple times.
     const raf1 = requestAnimationFrame(() => {
       compute();
-      requestAnimationFrame(compute);
+      requestAnimationFrame(() => {
+        compute();
+        requestAnimationFrame(compute);
+      });
     });
 
     const ro = new ResizeObserver(compute);
     ro.observe(leftIcon);
     ro.observe(rightIcon);
+    if (leftPanel) ro.observe(leftPanel);
+    if (rightPanel) ro.observe(rightPanel);
 
     window.addEventListener('resize', compute);
 
+    // Re-compute after a short delay to catch any late layout shifts
+    const timeout = setTimeout(compute, 100);
+
     return () => {
       cancelAnimationFrame(raf1);
+      clearTimeout(timeout);
       ro.disconnect();
       window.removeEventListener('resize', compute);
     };
