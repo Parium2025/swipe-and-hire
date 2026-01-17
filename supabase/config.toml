@@ -63,3 +63,6 @@ schedule = "* * * * *"
 
 [functions.send-push-notification]
 verify_jwt = false
+
+[functions.send-interview-invitation]
+verify_jwt = false

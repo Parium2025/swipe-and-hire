@@ -156,7 +156,52 @@ export const BookInterviewDialog = ({
 
       if (error) throw error;
 
-      toast.success(`Intervjukallelse skickad till ${candidateName}`);
+      // Get candidate email from job_applications table
+      const { data: applicationData } = await supabase
+        .from('job_applications')
+        .select('email')
+        .eq('id', applicationId)
+        .single();
+
+      // Send email notification to candidate
+      if (applicationData?.email) {
+        try {
+          const { error: emailError } = await supabase.functions.invoke('send-interview-invitation', {
+            body: {
+              candidateEmail: applicationData.email,
+              candidateName,
+              companyName: companyName || 'Arbetsgivaren',
+              jobTitle,
+              scheduledAt: scheduledAt.toISOString(),
+              durationMinutes: parseInt(duration),
+              locationType,
+              locationDetails: locationDetails || null,
+              message: message || null,
+            },
+          });
+
+          if (emailError) {
+            console.error('Error sending interview email:', emailError);
+            toast.success(`Intervju bokad för ${candidateName}`, {
+              description: 'OBS: E-postbekräftelse kunde inte skickas',
+            });
+          } else {
+            toast.success(`Intervjukallelse skickad till ${candidateName}`, {
+              description: 'En bekräftelse har skickats via e-post',
+            });
+          }
+        } catch (emailErr) {
+          console.error('Error invoking email function:', emailErr);
+          toast.success(`Intervju bokad för ${candidateName}`, {
+            description: 'OBS: E-postbekräftelse kunde inte skickas',
+          });
+        }
+      } else {
+        toast.success(`Intervju bokad för ${candidateName}`, {
+          description: 'Kandidaten har ingen e-postadress registrerad',
+        });
+      }
+
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
       onOpenChange(false);
       onSuccess?.();
