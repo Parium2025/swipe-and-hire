@@ -234,6 +234,13 @@ export default function Messages() {
           "flex-1 flex flex-col min-w-0",
           !showMobileChat && "hidden md:flex"
         )}>
+          {/* Spacer to align the right pane with the left pane's header (tabs + search) on desktop */}
+          <div
+            className="hidden md:block flex-shrink-0"
+            style={listHeaderHeight ? { height: `${listHeaderHeight}px` } : undefined}
+            aria-hidden="true"
+          />
+
           {selectedConversation ? (
             <ChatView 
               conversation={selectedConversation} 
@@ -241,7 +248,7 @@ export default function Messages() {
               onBack={handleBackToList}
             />
           ) : (
-            <EmptyChatState offsetY={listHeaderHeight / 2} />
+            <EmptyChatState />
           )}
         </div>
       </div>
@@ -776,12 +783,9 @@ function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
   );
 }
 
-function EmptyChatState({ offsetY = 0 }: { offsetY?: number }) {
+function EmptyChatState() {
   return (
-    <div
-      className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm"
-      style={offsetY ? { transform: `translateY(${offsetY}px)` } : undefined}
-    >
+    <div className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
       <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
         <MessageSquare className="h-6 w-6 text-white" />
       </div>
