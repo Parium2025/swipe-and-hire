@@ -4,9 +4,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2, Send, MessageSquare, WifiOff } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
+import { useFieldDraft } from '@/hooks/useFormDraft';
 
 interface SendMessageDialogProps {
   open: boolean;
@@ -25,7 +26,8 @@ export function SendMessageDialog({
 }: SendMessageDialogProps) {
   const { user } = useAuth();
   const { isOnline, showOfflineToast } = useOnline();
-  const [message, setMessage] = useState('');
+  // Auto-save message draft to localStorage (unique per recipient)
+  const [message, setMessage, clearMessageDraft] = useFieldDraft(`message-${recipientId}`);
   const [sending, setSending] = useState(false);
 
   const handleSend = async () => {
@@ -51,6 +53,7 @@ export function SendMessageDialog({
 
       toast.success(`Meddelande skickat till ${recipientName}`);
       setMessage('');
+      clearMessageDraft(); // Rensa sparad draft efter lyckad skickning
       onOpenChange(false);
     } catch (error) {
       console.error('Error sending message:', error);

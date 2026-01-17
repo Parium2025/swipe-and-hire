@@ -22,6 +22,7 @@ import { CvViewer } from '@/components/CvViewer';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
 import { useCandidateActivities } from '@/hooks/useCandidateActivities';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { useFieldDraft } from '@/hooks/useFormDraft';
 import {
   Select,
   SelectContent,
@@ -156,7 +157,10 @@ export const CandidateProfileDialog = ({
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'comments'>('activity');
   const [notes, setNotes] = useState<CandidateNote[]>([]);
-  const [newNote, setNewNote] = useState('');
+  // Auto-save note draft to localStorage (unique per candidate)
+  const [newNote, setNewNote, clearNoteDraft] = useFieldDraft(
+    `candidate-note-${application?.applicant_id || 'unknown'}`
+  );
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
@@ -546,6 +550,7 @@ export const CandidateProfileDialog = ({
 
       toast.success('Anteckning sparad');
       setNewNote('');
+      clearNoteDraft(); // Rensa sparad draft efter lyckad sparning
       fetchNotes();
     } catch (error) {
       console.error('Error saving note:', error);

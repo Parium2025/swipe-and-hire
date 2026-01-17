@@ -8,6 +8,7 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
+import { clearAllDrafts } from '@/hooks/useFormDraft';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -983,6 +984,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Låt backend sköta sessionen
       await supabase.auth.signOut({ scope: 'global' });
+      
+      // Rensa alla sparade formulärutkast vid utloggning
+      clearAllDrafts();
       
       // Vänta resterande tid för smooth övergång
       await new Promise(resolve => setTimeout(resolve, 550));

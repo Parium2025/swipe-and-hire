@@ -32,6 +32,9 @@ import { supabase } from '@/integrations/supabase/client';
 import ImageEditor from '@/components/ImageEditor';
 import { uploadMedia, getMediaUrl } from '@/lib/mediaManager';
 
+// localStorage key för draft
+const DRAFT_KEY = 'parium_draft_employer-profile';
+
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
   url: string;
@@ -83,13 +86,24 @@ const EmployerProfile = () => {
 
   const [platformMenuOpen, setPlatformMenuOpen] = useState(false);
 
-  // Update form data when profile changes
+  // Update form data when profile changes OR restore from localStorage draft
   useEffect(() => {
     if (!profile) return;
 
     // Viktigt: skriv inte över lokala (osparade) ändringar, annars "kommer bilden tillbaka"
     // om profilen råkar uppdateras i bakgrunden.
     if (didInitRef.current && hasUnsavedChanges) return;
+
+    // Check for saved draft in localStorage
+    let savedDraft = null;
+    try {
+      const stored = localStorage.getItem(DRAFT_KEY);
+      if (stored) {
+        savedDraft = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.warn('Failed to load draft:', e);
+    }
 
     const values = {
       first_name: profile.first_name || '',
@@ -100,6 +114,25 @@ const EmployerProfile = () => {
       profile_image_url: profile.profile_image_url || '',
       social_media_links: (profile as any)?.social_media_links || [],
     };
+
+    // If we have a saved draft with different content, use it
+    if (savedDraft && !didInitRef.current) {
+      const hasDraftContent = Object.keys(savedDraft).some(key => {
+        if (key === 'social_media_links') {
+          return JSON.stringify(savedDraft[key]) !== JSON.stringify(values[key as keyof typeof values]);
+        }
+        return savedDraft[key] !== values[key as keyof typeof values];
+      });
+
+      if (hasDraftContent) {
+        setFormData(savedDraft);
+        setOriginalValues(values);
+        setHasUnsavedChanges(true);
+        didInitRef.current = true;
+        console.log('📝 Draft restored for employer-profile');
+        return;
+      }
+    }
 
     setFormData(values);
     setOriginalValues(values);
@@ -121,10 +154,19 @@ const EmployerProfile = () => {
     return hasChanges;
   }, [originalValues, formData, setHasUnsavedChanges]);
 
-  // Check for changes whenever form values change
+  // Check for changes whenever form values change + auto-save to localStorage
   useEffect(() => {
-    checkForChanges();
-  }, [checkForChanges]);
+    const hasChanges = checkForChanges();
+    
+    // Auto-save draft to localStorage when there are changes
+    if (hasChanges) {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
+      } catch (e) {
+        console.warn('Failed to save draft:', e);
+      }
+    }
+  }, [checkForChanges, formData]);
 
   // Prevent leaving page with unsaved changes (browser/tab close)
   useEffect(() => {
@@ -453,6 +495,14 @@ const EmployerProfile = () => {
       setFormData(updatedValues);
       setOriginalValues(updatedValues);
       setHasUnsavedChanges(false);
+      
+      // Clear localStorage draft after successful save
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+        console.log('🗑️ Draft cleared for employer-profile');
+      } catch (e) {
+        console.warn('Failed to clear draft:', e);
+      }
 
       toast({
         title: "Profil uppdaterad",
