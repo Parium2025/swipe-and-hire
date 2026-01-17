@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, createContext, useContext, useRef } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext, useRef, createElement } from 'react';
 import { toast } from 'sonner';
 
 // Global state för forcerad offline (för dev/test)
@@ -61,19 +61,33 @@ export const useOnlineStatusWithToast = () => {
       
       // Visa återanslutnings-toast om vi var offline och nu är online
       if (showReconnectToast && wasOfflineRef.current && newOnlineStatus) {
-        const toastId = toast.success('Ansluten igen', {
-          description: 'Du är nu online och kan fortsätta arbeta',
+        let reconnectToastId: string | number = '';
+        const dismiss = () => toast.dismiss(reconnectToastId);
+
+        const content = createElement(
+          'div',
+          {
+            role: 'button',
+            tabIndex: 0,
+            className: 'w-full select-none cursor-pointer',
+            onClick: dismiss,
+            onTouchStart: dismiss,
+            onKeyDown: (e: any) => {
+              if (e.key === 'Enter' || e.key === ' ') dismiss();
+            },
+          },
+          createElement('div', { className: 'font-medium leading-none' }, 'Ansluten igen'),
+          createElement(
+            'div',
+            { className: 'mt-1 text-sm opacity-90' },
+            'Du är nu online och kan fortsätta arbeta'
+          )
+        );
+
+        reconnectToastId = toast.success(content, {
           duration: 3000,
           closeButton: false,
         });
-        // Gör toasten klickbar för att stänga
-        setTimeout(() => {
-          const toastElement = document.querySelector(`[data-sonner-toast][data-id="${toastId}"]`);
-          if (toastElement) {
-            (toastElement as HTMLElement).style.cursor = 'pointer';
-            toastElement.addEventListener('click', () => toast.dismiss(toastId), { once: true });
-          }
-        }, 50);
       }
       
       wasOfflineRef.current = !newOnlineStatus;
@@ -94,19 +108,33 @@ export const useOnlineStatusWithToast = () => {
       const newOnlineStatus = navigator.onLine && !forceOfflineMode;
       
       if (wasOfflineRef.current && newOnlineStatus) {
-        const toastId = toast.success('Ansluten igen', {
-          description: 'Du är nu online och kan fortsätta arbeta',
+        let reconnectToastId: string | number = '';
+        const dismiss = () => toast.dismiss(reconnectToastId);
+
+        const content = createElement(
+          'div',
+          {
+            role: 'button',
+            tabIndex: 0,
+            className: 'w-full select-none cursor-pointer',
+            onClick: dismiss,
+            onTouchStart: dismiss,
+            onKeyDown: (e: any) => {
+              if (e.key === 'Enter' || e.key === ' ') dismiss();
+            },
+          },
+          createElement('div', { className: 'font-medium leading-none' }, 'Ansluten igen'),
+          createElement(
+            'div',
+            { className: 'mt-1 text-sm opacity-90' },
+            'Du är nu online och kan fortsätta arbeta'
+          )
+        );
+
+        reconnectToastId = toast.success(content, {
           duration: 3000,
           closeButton: false,
         });
-        // Gör toasten klickbar för att stänga
-        setTimeout(() => {
-          const toastElement = document.querySelector(`[data-sonner-toast][data-id="${toastId}"]`);
-          if (toastElement) {
-            (toastElement as HTMLElement).style.cursor = 'pointer';
-            toastElement.addEventListener('click', () => toast.dismiss(toastId), { once: true });
-          }
-        }, 50);
       }
       
       wasOfflineRef.current = !newOnlineStatus;
