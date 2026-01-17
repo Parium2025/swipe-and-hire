@@ -12,7 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileText, Video, CheckSquare, List, Heart } from 'lucide-react';
+import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileText, Video, CheckSquare, List, Heart, WifiOff } from 'lucide-react';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface JobQuestion {
   id: string;
@@ -50,6 +51,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   const [profile, setProfile] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isOnline, showOfflineToast } = useOnline();
 
   // Standard questions that are auto-filled from profile
   const standardQuestions = [
@@ -107,6 +109,11 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   };
 
   const handleSubmit = async () => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     // Validate required questions
     const requiredQuestions = questions.filter(q => q.is_required);
     const missingAnswers = requiredQuestions.filter(q => {
@@ -420,13 +427,17 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
           <div className="p-4 border-t border-white/20 bg-background/10 flex-shrink-0">
             <Button
               onClick={handleSubmit}
-              disabled={submitting || !canSubmit()}
+              disabled={submitting || !canSubmit() || !isOnline}
               variant="glassGreen"
-              className="w-full"
+              className={`w-full ${!isOnline ? 'opacity-50' : ''}`}
               size="lg"
             >
-              <Heart className="h-4 w-4 mr-2" />
-              {submitting ? 'Skickar...' : 'Skicka ansökan'}
+              {!isOnline ? (
+                <WifiOff className="h-4 w-4 mr-2" />
+              ) : (
+                <Heart className="h-4 w-4 mr-2" />
+              )}
+              {submitting ? 'Skickar...' : !isOnline ? 'Offline' : 'Skicka ansökan'}
             </Button>
           </div>
         </div>

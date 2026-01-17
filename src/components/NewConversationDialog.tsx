@@ -27,8 +27,10 @@ import {
   Send,
   Briefcase,
   UserCheck,
+  WifiOff,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface NewConversationDialogProps {
   open: boolean;
@@ -57,6 +59,7 @@ export function NewConversationDialog({
   const { teamMembers, isLoading: loadingTeam } = useTeamMembers();
   const { candidates, isLoading: loadingCandidates } = useMyCandidatesData();
   const createConversation = useCreateConversation();
+  const { isOnline, showOfflineToast } = useOnline();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
@@ -137,6 +140,11 @@ export function NewConversationDialog({
   };
 
   const handleCreate = async () => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     if (selectedContacts.length === 0) return;
 
     try {
@@ -337,15 +345,17 @@ export function NewConversationDialog({
               <Button
                 variant="glass"
                 onClick={handleCreate}
-                disabled={createConversation.isPending}
-                className="bg-blue-500/20 border-blue-500/40"
+                disabled={createConversation.isPending || !isOnline}
+                className={`bg-blue-500/20 border-blue-500/40 ${!isOnline ? 'opacity-50' : ''}`}
               >
                 {createConversation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                ) : !isOnline ? (
+                  <WifiOff className="h-4 w-4 mr-1.5" />
                 ) : (
                   <Send className="h-4 w-4 mr-1.5" />
                 )}
-                {isGroup ? 'Skapa grupp' : 'Starta chatt'}
+                {!isOnline ? 'Offline' : isGroup ? 'Skapa grupp' : 'Starta chatt'}
               </Button>
             </div>
           </>
