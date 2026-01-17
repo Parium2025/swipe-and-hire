@@ -13,9 +13,45 @@ export const setForceOfflineMode = (enabled: boolean) => {
 export const getForceOfflineMode = () => forceOfflineMode;
 
 /**
- * Hook för att övervaka online/offline status
+ * Hook för att övervaka online/offline status (utan toast - använd useOnlineStatusWithToast för det)
  */
 export const useOnlineStatus = () => {
+  const [isOnline, setIsOnline] = useState(navigator.onLine && !forceOfflineMode);
+
+  useEffect(() => {
+    const updateStatus = () => {
+      setIsOnline(navigator.onLine && !forceOfflineMode);
+    };
+
+    const handleOnline = () => {
+      console.log('📡 Online');
+      updateStatus();
+    };
+
+    const handleOffline = () => {
+      console.log('🔌 Offline');
+      updateStatus();
+    };
+
+    forceOfflineListeners.add(updateStatus);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      forceOfflineListeners.delete(updateStatus);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return isOnline;
+};
+
+/**
+ * Hook för online-status MED återanslutnings-toast (endast för OnlineStatusProvider)
+ */
+export const useOnlineStatusWithToast = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine && !forceOfflineMode);
   const wasOfflineRef = useRef(false);
 
@@ -31,7 +67,6 @@ export const useOnlineStatus = () => {
         });
       }
       
-      // Uppdatera wasOffline-referensen
       wasOfflineRef.current = !newOnlineStatus;
       setIsOnline(newOnlineStatus);
     };
@@ -46,11 +81,9 @@ export const useOnlineStatus = () => {
       updateStatus(false);
     };
 
-    // Lyssna på force offline changes (med reconnect toast)
     const handleForceOfflineChange = () => {
       const newOnlineStatus = navigator.onLine && !forceOfflineMode;
       
-      // Visa toast vid återanslutning från forcerat offline-läge
       if (wasOfflineRef.current && newOnlineStatus) {
         toast.success('Ansluten igen', {
           description: 'Du är nu online och kan fortsätta arbeta',
