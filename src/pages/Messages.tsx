@@ -753,8 +753,8 @@ function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
 
 function EmptyChatState() {
   return (
-    <div className="flex-1 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-      <div className="flex flex-col items-center p-6">
+    <div className="flex-1 flex items-center justify-center">
+      <div className="flex flex-col items-center p-6 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
         <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2">
           <MessageSquare className="h-5 w-5 text-white/60" />
         </div>
