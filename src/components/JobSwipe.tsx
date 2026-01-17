@@ -9,6 +9,7 @@ import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info, Briefcase,
 import JobApplicationDialog from './JobApplicationDialog';
 import { toast } from '@/hooks/use-toast';
 import { preloadImages } from '@/lib/serviceWorkerManager';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 // Map benefit keys to Swedish labels
 const getBenefitLabel = (benefit: string): string => {
@@ -225,7 +226,14 @@ const JobSwipe = () => {
     }
   };
 
+  const { isOnline, showOfflineToast } = useOnline();
+
   const handleApplicationSubmit = async (answers: Record<string, any>) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     try {
       // Fetch user profile to get contact info
       const { data: profile } = await supabase

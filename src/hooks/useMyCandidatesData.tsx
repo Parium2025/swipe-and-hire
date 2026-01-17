@@ -707,6 +707,8 @@ export function useMyCandidatesData(searchQuery: string = '') {
   // Move candidate to different stage
   const moveCandidate = useMutation({
     mutationFn: async ({ id, stage }: { id: string; stage: CandidateStage }) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
+
       const { data, error } = await supabase
         .from('my_candidates')
         .update({ stage })
@@ -754,6 +756,8 @@ export function useMyCandidatesData(searchQuery: string = '') {
   // Remove candidate from my list
   const removeCandidate = useMutation({
     mutationFn: async (id: string) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
+
       const { error } = await supabase
         .from('my_candidates')
         .delete()
@@ -773,6 +777,8 @@ export function useMyCandidatesData(searchQuery: string = '') {
   // Update notes - also saves to persistent candidate_notes table
   const updateNotes = useMutation({
     mutationFn: async ({ id, notes, applicantId }: { id: string; notes: string; applicantId?: string }) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
+
       // Update my_candidates notes
       const { data, error } = await supabase
         .from('my_candidates')
@@ -828,6 +834,11 @@ export function useMyCandidatesData(searchQuery: string = '') {
   // Update rating - also saves to persistent candidate_ratings table
   const updateRating = useMutation({
     mutationFn: async ({ id, rating, applicantId }: { id: string; rating: number; applicantId?: string }) => {
+      // Check if online first
+      if (!navigator.onLine) {
+        throw new Error('Du är offline');
+      }
+
       // Update my_candidates rating
       const { data, error } = await supabase
         .from('my_candidates')

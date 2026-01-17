@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Building2, Upload, CheckCircle, ArrowRight, ArrowLeft, Briefcase, Users, Target, Sparkles, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { createSignedUrl } from '@/utils/storageUtils';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface EmployerWelcomeTunnelProps {
   onComplete: () => void;
@@ -106,7 +107,14 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     }
   };
 
+  const { isOnline, showOfflineToast } = useOnline();
+
   const handleSubmit = async () => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await updateProfile({

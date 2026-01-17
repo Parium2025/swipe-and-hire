@@ -1244,8 +1244,15 @@ const Profile = () => {
       });
     }
   };
+  const { isOnline, showOfflineToast } = useOnline();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
 
     // Validate required fields before saving
     const valid = validateRequiredFields();
