@@ -48,23 +48,23 @@ export const BookInterviewDialog = ({
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Form state
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [time, setTime] = useState('10:00');
-  const [duration, setDuration] = useState('30');
-  const [locationType, setLocationType] = useState<'video' | 'office'>('video');
-  const [locationDetails, setLocationDetails] = useState('');
-  const [editableAddress, setEditableAddress] = useState('');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
-
-  // Get employer's settings from profile
+  // Get employer's settings from profile FIRST (before using in state initialization)
   const savedOfficeAddress = (profile as any)?.interview_office_address || profile?.address || '';
   const officeDefaultMessage = (profile as any)?.interview_default_message || FALLBACK_MESSAGE;
   const videoDefaultMessage = (profile as any)?.interview_video_default_message || FALLBACK_MESSAGE;
   const savedVideoLink = (profile as any)?.interview_video_link || '';
   const officeInstructions = (profile as any)?.interview_office_instructions || '';
   const companyName = profile?.company_name || '';
+  
+  // Form state - use functions to reset to defaults based on open state
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [time, setTime] = useState('10:00');
+  const [duration, setDuration] = useState('30');
+  const [locationType, setLocationType] = useState<'video' | 'office'>('video');
+  const [locationDetails, setLocationDetails] = useState('');
+  const [editableAddress, setEditableAddress] = useState(savedOfficeAddress);
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
 
   // State for editable video link
   const [editableVideoLink, setEditableVideoLink] = useState(savedVideoLink);
@@ -74,21 +74,35 @@ export const BookInterviewDialog = ({
     return type === 'video' ? videoDefaultMessage : officeDefaultMessage;
   };
 
+  // Reset form immediately when dialog CLOSES to prevent stale state flash
+  // This ensures next open starts with clean defaults
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Reset to defaults immediately when closing
+      setLocationType('video');
+      setDate(undefined);
+      setTime('10:00');
+      setDuration('30');
+      setLocationDetails('');
+      setEditableAddress(savedOfficeAddress);
+      setEditableVideoLink(savedVideoLink);
+      setMessage(videoDefaultMessage);
+      setSubject('');
+    }
+    onOpenChange(newOpen);
+  };
+
   // Set default values when dialog opens
   useEffect(() => {
     if (open) {
       setSubject(`Intervju för ${jobTitle}`);
-      // Reset form with today as default date
+      // Set date to today
       setDate(new Date());
-      setTime('10:00');
-      setDuration('30');
+      // Ensure video is selected (should already be from close reset, but be safe)
       setLocationType('video');
-      setLocationDetails('');
-      setEditableAddress(savedOfficeAddress);
-      setEditableVideoLink(savedVideoLink);
-      setMessage(videoDefaultMessage); // Start with video message since video is default
+      setMessage(videoDefaultMessage);
     }
-  }, [open, jobTitle, videoDefaultMessage, savedOfficeAddress, savedVideoLink]);
+  }, [open, jobTitle, videoDefaultMessage]);
 
   // Update message when location type changes
   useEffect(() => {
@@ -193,14 +207,14 @@ export const BookInterviewDialog = ({
   const endTime = getEndTime(time, duration);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContentNoFocus 
         hideClose
         className="w-[min(90vw,480px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden flex flex-col"
       >
         <DialogHeader className="px-5 pt-5 pb-3 relative">
           <button
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
             className="absolute right-0 top-0 h-8 w-8 flex items-center justify-center text-white/70 hover:text-white transition-colors"
           >
             <X className="h-4 w-4" />
@@ -386,7 +400,7 @@ export const BookInterviewDialog = ({
         <div className="flex justify-center gap-3 px-5 pb-5 pt-2 border-t border-white/10">
           <Button 
             variant="glass" 
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
           >
             Avbryt
           </Button>
