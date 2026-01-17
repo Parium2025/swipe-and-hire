@@ -889,24 +889,22 @@ const InterviewsCard = memo(() => {
                         <p className="text-xs font-semibold text-white truncate">
                           {interview.candidate_name}
                         </p>
-                        <p className="text-[10px] text-white/60 truncate">
+                        <p className="text-[10px] text-white truncate">
                           {interview.job_title}
                         </p>
                       </div>
                       
                       {/* Time until - highlighted if urgent */}
                       <span className={cn(
-                        "text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap",
-                        isUrgent 
-                          ? "bg-white/20 text-white" 
-                          : "text-white/70"
+                        "text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap text-white",
+                        isUrgent && "bg-white/20"
                       )}>
                         {timeUntil}
                       </span>
                     </div>
                     
                     {/* Date, time & location */}
-                    <div className="flex items-center gap-2 mt-1 text-[10px] text-white/70">
+                    <div className="flex items-center gap-2 mt-1 text-[10px] text-white">
                       <span>{formatInterviewDate(interview.scheduled_at)}</span>
                       <span>kl {formatInterviewTime(interview.scheduled_at)}</span>
                       <span className="flex items-center gap-0.5">
