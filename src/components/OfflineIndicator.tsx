@@ -95,8 +95,6 @@ export const OfflineIndicator = () => {
         <div className="flex items-center justify-center gap-2">
           {showReconnecting ? (
             <Loader2 className="h-4 w-4 animate-spin text-white" />
-          ) : draftTime ? (
-            <Check className="h-4 w-4 text-green-400" />
           ) : (
             <WifiOff className="h-4 w-4 text-white" />
           )}
