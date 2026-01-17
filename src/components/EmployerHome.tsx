@@ -291,7 +291,7 @@ const EmployerHome = memo(() => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="text-center md:text-left space-y-1"
+          className="text-center md:text-left flex flex-col gap-2"
         >
           <div className="flex items-center gap-2 justify-center md:justify-start">
             <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
@@ -301,7 +301,7 @@ const EmployerHome = memo(() => {
           <DateTimeDisplay />
           {gpsGranted && !weather.isLoading && !weather.error && weather.description ? (
             <p className="text-white text-base">
-            {weather.city ? `${weather.city}, ` : ''}{weather.temperature}°
+              {weather.city ? `${weather.city}, ` : ''}{weather.temperature}°
               {weather.feelsLike !== weather.temperature && (
                 <span className="text-white"> (känns som {weather.feelsLike}°)</span>
               )}
@@ -316,7 +316,7 @@ const EmployerHome = memo(() => {
                   { timeout: 10000 }
                 );
               }}
-              className="text-white/60 hover:text-white/90 mt-2 text-sm underline underline-offset-2 transition-colors"
+              className="text-white/60 hover:text-white/90 text-sm underline underline-offset-2 transition-colors"
             >
               Aktivera plats för väder
             </button>
