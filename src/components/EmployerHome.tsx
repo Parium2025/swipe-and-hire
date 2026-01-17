@@ -250,14 +250,14 @@ const EmployerHome = memo(() => {
     <>
       <GpsPrompt />
       <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />
-      <div className="space-y-8 max-w-5xl mx-auto px-4 md:px-8 py-6 animate-fade-in relative z-10">
+      <div className="space-y-6 max-w-5xl mx-auto px-4 md:px-8 py-3 animate-fade-in relative z-10">
         {/* System Health badge - admin only, positioned top-right under navbar */}
         {isSystemAdmin && systemHealth && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="flex justify-end -mb-6"
+            className="flex justify-end -mb-4"
           >
             <div 
               className={`flex items-center gap-2 backdrop-blur-sm rounded-full px-3 py-1.5 cursor-pointer transition-colors text-xs ${
@@ -291,16 +291,16 @@ const EmployerHome = memo(() => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="text-center md:text-left"
+          className="text-center md:text-left space-y-1"
         >
           <div className="flex items-center gap-2 justify-center md:justify-start">
-            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
               {greetingText}, {firstName} 👋
             </h1>
           </div>
           <DateTimeDisplay />
           {gpsGranted && !weather.isLoading && !weather.error && weather.description ? (
-            <p className="text-white mt-2 text-base">
+            <p className="text-white text-base">
             {weather.city ? `${weather.city}, ` : ''}{weather.temperature}°
               {weather.feelsLike !== weather.temperature && (
                 <span className="text-white"> (känns som {weather.feelsLike}°)</span>
