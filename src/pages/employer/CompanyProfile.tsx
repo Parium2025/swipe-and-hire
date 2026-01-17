@@ -19,7 +19,8 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
-import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare, Video } from 'lucide-react';
+import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare, Video, HelpCircle } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
@@ -1046,6 +1047,52 @@ const CompanyProfile = () => {
                         className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
                       />
                       <p className="text-xs text-white">Din Teams, Zoom eller Google Meet-länk som visas för kandidater</p>
+                      
+                      {/* Expandable help section */}
+                      <Collapsible>
+                        <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors mt-1">
+                          <HelpCircle className="h-3.5 w-3.5" />
+                          <span>Hur får jag min videolänk?</span>
+                          <ChevronDown className="h-3 w-3" />
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-2">
+                          <div className="bg-white/5 rounded-lg p-3 space-y-3 text-xs text-white/80">
+                            <div className="space-y-1">
+                              <p className="font-medium text-white flex items-center gap-1.5">
+                                <span className="text-blue-400">Microsoft Teams</span>
+                              </p>
+                              <ol className="list-decimal list-inside space-y-0.5 ml-1">
+                                <li>Öppna Teams → Kalender</li>
+                                <li>Klicka "Nytt möte" eller "Möt nu"</li>
+                                <li>Kopiera möteslänken</li>
+                              </ol>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-medium text-white flex items-center gap-1.5">
+                                <span className="text-green-400">Google Meet</span>
+                              </p>
+                              <ol className="list-decimal list-inside space-y-0.5 ml-1">
+                                <li>Gå till <span className="text-primary">meet.google.com</span></li>
+                                <li>Klicka "Nytt möte" → "Skapa ett möte för senare"</li>
+                                <li>Kopiera länken</li>
+                              </ol>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-medium text-white flex items-center gap-1.5">
+                                <span className="text-blue-300">Zoom</span>
+                              </p>
+                              <ol className="list-decimal list-inside space-y-0.5 ml-1">
+                                <li>Öppna Zoom-appen</li>
+                                <li>Gå till "Profil" → "Personal Meeting ID"</li>
+                                <li>Kopiera din personliga möteslänk</li>
+                              </ol>
+                            </div>
+                            <p className="text-white/60 pt-1 border-t border-white/10">
+                              💡 Tips: Använd din personliga möteslänk så behöver du bara fylla i den en gång!
+                            </p>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
                     </div>
 
                     <div className="space-y-1.5">
