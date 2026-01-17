@@ -207,7 +207,10 @@ export default function Messages() {
           {/* Conversation list */}
           <div className="flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
             {filteredConversations.length === 0 ? (
-              <div className="h-full flex items-center justify-center">
+              <div
+                className="h-full flex items-center justify-center"
+                style={listHeaderHeight ? { transform: `translateY(-${listHeaderHeight / 2}px)` } : undefined}
+              >
                 <EmptyConversationList hasSearch={!!searchQuery.trim()} />
               </div>
             ) : (
@@ -234,13 +237,6 @@ export default function Messages() {
           "flex-1 flex flex-col min-w-0",
           !showMobileChat && "hidden md:flex"
         )}>
-          {/* Spacer to align the right pane with the left pane's header (tabs + search) on desktop */}
-          <div
-            className="hidden md:block flex-shrink-0"
-            style={listHeaderHeight ? { height: `${listHeaderHeight}px` } : undefined}
-            aria-hidden="true"
-          />
-
           {selectedConversation ? (
             <ChatView 
               conversation={selectedConversation} 
