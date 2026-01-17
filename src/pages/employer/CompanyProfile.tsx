@@ -1072,7 +1072,7 @@ const CompanyProfile = () => {
                         <Label htmlFor="interview_video_link" className="text-white flex items-center gap-1.5">
                           <Video className="h-3.5 w-3.5" />
                           Videolänk
-                          <span className="text-white/60 font-normal">(Din Teams, Zoom eller Google Meet-länk som visas för kandidater)</span>
+                          <span className="text-white font-normal">(Din Teams, Zoom eller Google Meet-länk som visas för kandidater)</span>
                         </Label>
                       </div>
                       
@@ -1152,7 +1152,7 @@ const CompanyProfile = () => {
                       </Collapsible>
                     </div>
 
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 mt-4">
                       <Label htmlFor="interview_video_default_message" className="text-white flex items-center gap-1.5">
                         <MessageSquare className="h-3.5 w-3.5" />
                         Standardmeddelande för video
