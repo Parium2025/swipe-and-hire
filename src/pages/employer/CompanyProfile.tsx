@@ -1050,7 +1050,7 @@ const CompanyProfile = () => {
                       
                       {/* Expandable help section */}
                       <Collapsible>
-                        <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors mt-1">
+                        <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-white hover:text-white/80 transition-colors mt-1">
                           <HelpCircle className="h-3.5 w-3.5" />
                           <span>Hur får jag min videolänk?</span>
                           <ChevronDown className="h-3 w-3" />
