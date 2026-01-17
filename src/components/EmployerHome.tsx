@@ -288,8 +288,43 @@ const EmployerHome = memo(() => {
           ) : null}
         </motion.div>
 
+        {/* System Health badge - admin only, positioned right-aligned near navbar */}
+        {isSystemAdmin && systemHealth && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="flex justify-end -mt-2 mb-2"
+          >
+            <div 
+              className={`flex items-center gap-2 backdrop-blur-sm rounded-full px-3 py-1.5 cursor-pointer transition-colors text-xs ${
+                systemHealth.worstPercent > 70 
+                  ? 'bg-orange-500/20 hover:bg-orange-500/30' 
+                  : 'bg-white/10 hover:bg-white/20'
+              }`}
+              title="Klicka på grafikonen i navbaren för detaljer"
+            >
+              {systemHealth.worstPercent > 70 ? (
+                <AlertTriangle className="h-3 w-3 text-orange-400" />
+              ) : (
+                <Database className="h-3 w-3 text-emerald-400" />
+              )}
+              <span className="text-white">
+                System: <span className={`font-semibold ${
+                  systemHealth.worstPercent > 70 ? 'text-orange-300' : 'text-emerald-300'
+                }`}>
+                  {systemHealth.worstPercent > 70 
+                    ? `${systemHealth.worstMetric} ${systemHealth.worstPercent.toFixed(0)}%`
+                    : 'OK'
+                  }
+                </span>
+              </span>
+            </div>
+          </motion.div>
+        )}
+
         {/* Quick summary */}
-        {(stats.activeJobs > 0 || stats.pendingApplications > 0 || (isSystemAdmin && systemHealth)) && (
+        {(stats.activeJobs > 0 || stats.pendingApplications > 0) && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -309,33 +344,6 @@ const EmployerHome = memo(() => {
                 <Users className="h-4 w-4 text-blue-400" />
                 <span className="text-white text-sm">
                   <span className="font-semibold">{stats.pendingApplications}</span> nya ansökningar
-                </span>
-              </div>
-            )}
-            {/* System Health badge - admin only */}
-            {isSystemAdmin && systemHealth && (
-              <div 
-                className={`flex items-center gap-2 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-colors ${
-                  systemHealth.worstPercent > 70 
-                    ? 'bg-orange-500/20 hover:bg-orange-500/30' 
-                    : 'bg-white/10 hover:bg-white/20'
-                }`}
-                title="Klicka på grafikonen i navbaren för detaljer"
-              >
-                {systemHealth.worstPercent > 70 ? (
-                  <AlertTriangle className="h-4 w-4 text-orange-400" />
-                ) : (
-                  <Database className="h-4 w-4 text-emerald-400" />
-                )}
-                <span className="text-white text-sm">
-                  System: <span className={`font-semibold ${
-                    systemHealth.worstPercent > 70 ? 'text-orange-300' : 'text-emerald-300'
-                  }`}>
-                    {systemHealth.worstPercent > 70 
-                      ? `${systemHealth.worstMetric} ${systemHealth.worstPercent.toFixed(0)}%`
-                      : 'OK'
-                    }
-                  </span>
                 </span>
               </div>
             )}
