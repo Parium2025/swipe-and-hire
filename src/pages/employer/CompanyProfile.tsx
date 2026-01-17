@@ -1072,7 +1072,7 @@ const CompanyProfile = () => {
                                 <span className="text-green-400">Google Meet</span>
                               </p>
                               <ol className="list-decimal list-inside space-y-0.5 ml-1 text-white">
-                                <li>Gå till <span className="text-primary">meet.google.com</span></li>
+                                <li>Gå till <a href="https://meet.google.com" target="_blank" rel="noopener noreferrer" className="text-white underline hover:text-white/80">meet.google.com</a></li>
                                 <li>Klicka "Nytt möte" → "Skapa ett möte för senare"</li>
                                 <li>Kopiera länken</li>
                               </ol>
