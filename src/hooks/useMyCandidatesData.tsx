@@ -554,6 +554,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
   // Add candidate to my list
   const addCandidate = useMutation({
     mutationFn: async ({ applicationId, applicantId, jobId }: { applicationId: string; applicantId: string; jobId?: string }) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
       if (!user) throw new Error('Not authenticated');
 
       // Add to the first available stage (avoids adding to deleted stages)
@@ -622,6 +623,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
   // Add multiple candidates at once (bulk action)
   const addCandidates = useMutation({
     mutationFn: async (candidates: Array<{ applicationId: string; applicantId: string; jobId?: string }>) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
       if (!user) throw new Error('Not authenticated');
 
       // First, check which candidates already exist in my_candidates

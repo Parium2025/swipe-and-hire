@@ -240,6 +240,16 @@ const AuthDesktop = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Check if online before attempting auth
+    if (!navigator.onLine) {
+      toast({
+        title: "Ingen anslutning",
+        description: "Du måste vara online för att logga in eller registrera dig",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Förhindra submit om användaren redan har registrerat sig
     if (hasRegistered) {
       return;

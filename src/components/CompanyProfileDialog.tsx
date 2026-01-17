@@ -218,6 +218,16 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   };
 
   const handleSubmitReview = async () => {
+    // Check if online before submitting
+    if (!navigator.onLine) {
+      toast({
+        title: "Offline",
+        description: "Du måste vara online för att skicka en kommentar",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!newComment.trim()) {
       toast({
         title: "Kommentar krävs",

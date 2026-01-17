@@ -151,6 +151,11 @@ export function useEvaluateCandidate() {
       applicantId: string; 
       applicationId?: string;
     }) => {
+      // Check if online before triggering evaluation
+      if (!navigator.onLine) {
+        throw new Error('Du är offline');
+      }
+
       const { data, error } = await supabase.functions.invoke('evaluate-candidate', {
         body: { 
           job_id: jobId, 
@@ -186,6 +191,11 @@ export function useEvaluateAllCandidates() {
       jobId: string; 
       candidates: { applicant_id: string; application_id?: string }[];
     }) => {
+      // Check if online before batch evaluation
+      if (!navigator.onLine) {
+        throw new Error('Du är offline');
+      }
+
       // Process in batches to avoid overwhelming the API
       const batchSize = 3;
       const results = [];
