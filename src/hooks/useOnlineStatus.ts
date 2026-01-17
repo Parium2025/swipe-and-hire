@@ -61,11 +61,19 @@ export const useOnlineStatusWithToast = () => {
       
       // Visa återanslutnings-toast om vi var offline och nu är online
       if (showReconnectToast && wasOfflineRef.current && newOnlineStatus) {
-        toast.success('Ansluten igen', {
+        const toastId = toast.success('Ansluten igen', {
           description: 'Du är nu online och kan fortsätta arbeta',
           duration: 3000,
           closeButton: false,
         });
+        // Gör toasten klickbar för att stänga
+        setTimeout(() => {
+          const toastElement = document.querySelector(`[data-sonner-toast][data-id="${toastId}"]`);
+          if (toastElement) {
+            (toastElement as HTMLElement).style.cursor = 'pointer';
+            toastElement.addEventListener('click', () => toast.dismiss(toastId), { once: true });
+          }
+        }, 50);
       }
       
       wasOfflineRef.current = !newOnlineStatus;
@@ -86,11 +94,19 @@ export const useOnlineStatusWithToast = () => {
       const newOnlineStatus = navigator.onLine && !forceOfflineMode;
       
       if (wasOfflineRef.current && newOnlineStatus) {
-        toast.success('Ansluten igen', {
+        const toastId = toast.success('Ansluten igen', {
           description: 'Du är nu online och kan fortsätta arbeta',
           duration: 3000,
           closeButton: false,
         });
+        // Gör toasten klickbar för att stänga
+        setTimeout(() => {
+          const toastElement = document.querySelector(`[data-sonner-toast][data-id="${toastId}"]`);
+          if (toastElement) {
+            (toastElement as HTMLElement).style.cursor = 'pointer';
+            toastElement.addEventListener('click', () => toast.dismiss(toastId), { once: true });
+          }
+        }, 50);
       }
       
       wasOfflineRef.current = !newOnlineStatus;
