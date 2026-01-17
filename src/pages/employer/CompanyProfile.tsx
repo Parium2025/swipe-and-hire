@@ -153,19 +153,20 @@ const CompanyProfile = () => {
   const industryRef = useRef<HTMLDivElement>(null);
   const platformRef = useRef<HTMLDivElement>(null);
   
-  // Session storage key for persisting unsaved state across tab switches
-  const SESSION_STORAGE_KEY = 'company-profile-unsaved-state';
+  // localStorage key for persisting unsaved state (survives refresh/offline)
+  const DRAFT_STORAGE_KEY = 'parium_draft_company-profile';
 
   const getInitialFormData = () => {
-    // Try to restore from sessionStorage first (for tab switches)
+    // Try to restore from localStorage first (survives refresh/offline)
     try {
-      const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        console.log('💾 Company profile draft restored');
         return parsed;
       }
     } catch (e) {
-      console.warn('Failed to restore company profile state from sessionStorage');
+      console.warn('Failed to restore company profile state from localStorage');
     }
     
     return {
@@ -221,13 +222,14 @@ const CompanyProfile = () => {
   // Validation state
   const [orgNumberError, setOrgNumberError] = useState('');
 
-  // Save unsaved state to sessionStorage when formData changes
+  // Save unsaved state to localStorage when formData changes (survives refresh/offline)
   useEffect(() => {
     if (hasUnsavedChanges) {
       try {
-        sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(formData));
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
+        console.log('💾 Company profile draft saved');
       } catch (e) {
-        console.warn('Failed to save company profile state to sessionStorage');
+        console.warn('Failed to save company profile state to localStorage');
       }
     }
   }, [formData, hasUnsavedChanges]);
@@ -251,8 +253,8 @@ const CompanyProfile = () => {
         interview_office_instructions: (profile as any)?.interview_office_instructions || '',
       };
       
-      // Only reset form if there's no saved session state
-      const savedState = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      // Only reset form if there's no saved draft state
+      const savedState = localStorage.getItem(DRAFT_STORAGE_KEY);
       if (!savedState) {
         setFormData(values);
       }
@@ -295,12 +297,19 @@ const CompanyProfile = () => {
     };
   }, [hasUnsavedChanges]);
 
-  // Reset form to original values when user confirms leaving without saving
+  // Reset form to original values and clear draft when user confirms leaving without saving
   useEffect(() => {
     const onUnsavedConfirm = () => {
       if (!originalValues) return;
       setFormData({ ...originalValues });
       setHasUnsavedChanges(false);
+      // Clear draft when user discards changes
+      try {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+        console.log('💾 Company profile draft cleared (discarded)');
+      } catch (e) {
+        console.warn('Failed to clear company profile draft');
+      }
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
     return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
@@ -593,8 +602,13 @@ const CompanyProfile = () => {
       setOriginalValues(updatedValues);
       setHasUnsavedChanges(false);
       
-      // Clear sessionStorage after successful save
-      sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      // Clear draft after successful save
+      try {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+        console.log('💾 Company profile draft cleared (saved)');
+      } catch (e) {
+        console.warn('Failed to clear company profile draft');
+      }
 
       toast({
         title: "Företagsprofil uppdaterad",
