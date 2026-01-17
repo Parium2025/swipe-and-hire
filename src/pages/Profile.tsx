@@ -33,6 +33,18 @@ import { isValidSwedishPhone } from '@/lib/phoneValidation';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCachedImage } from '@/hooks/useCachedImage';
 
+// Draft key for localStorage
+const PROFILE_DRAFT_KEY = 'parium_draft_profile';
+
+// Clear draft
+export const clearProfileDraft = () => {
+  try {
+    localStorage.removeItem(PROFILE_DRAFT_KEY);
+  } catch (e) {
+    console.warn('Failed to clear profile draft');
+  }
+};
+
 interface CvSummary {
   summary_text: string | null;
   is_valid_cv: boolean;
@@ -341,13 +353,26 @@ const Profile = () => {
         coverFileName: '',
       };
 
-      setFirstName(values.firstName);
-      setLastName(values.lastName);
-      setBio(values.bio);
-      setUserLocation(values.userLocation);
-      setPostalCode(values.postalCode);
-      setPhone(values.phone);
-      setBirthDate(values.birthDate);
+      // Try to restore localStorage draft for text fields
+      let draftData: any = null;
+      try {
+        const saved = localStorage.getItem(PROFILE_DRAFT_KEY);
+        if (saved) {
+          draftData = JSON.parse(saved);
+          console.log('💾 Profile draft found');
+        }
+      } catch (e) {
+        console.warn('Failed to restore profile draft');
+      }
+
+      // Use draft values if they differ from DB (means user had unsaved changes)
+      setFirstName(draftData?.firstName && draftData.firstName !== values.firstName ? draftData.firstName : values.firstName);
+      setLastName(draftData?.lastName && draftData.lastName !== values.lastName ? draftData.lastName : values.lastName);
+      setBio(draftData?.bio && draftData.bio !== values.bio ? draftData.bio : values.bio);
+      setUserLocation(draftData?.userLocation && draftData.userLocation !== values.userLocation ? draftData.userLocation : values.userLocation);
+      setPostalCode(draftData?.postalCode && draftData.postalCode !== values.postalCode ? draftData.postalCode : values.postalCode);
+      setPhone(draftData?.phone && draftData.phone !== values.phone ? draftData.phone : values.phone);
+      setBirthDate(draftData?.birthDate && draftData.birthDate !== values.birthDate ? draftData.birthDate : values.birthDate);
       
       // 🔒 CRITICAL: Restore local media state from sessionStorage if it exists
       // This survives component remounts from tab switches or screenshot tools
@@ -390,17 +415,29 @@ const Profile = () => {
       } else {
         setCvFileName('');
       }
-      setCompanyName(values.companyName);
-      setOrgNumber(values.orgNumber);
-      setEmploymentStatus(values.employmentStatus);
-      setWorkingHours(values.workingHours);
-      setAvailability(values.availability);
+      
+      // Restore employer fields from draft if different
+      setCompanyName(draftData?.companyName && draftData.companyName !== values.companyName ? draftData.companyName : values.companyName);
+      setOrgNumber(draftData?.orgNumber && draftData.orgNumber !== values.orgNumber ? draftData.orgNumber : values.orgNumber);
+      setEmploymentStatus(draftData?.employmentStatus && draftData.employmentStatus !== values.employmentStatus ? draftData.employmentStatus : values.employmentStatus);
+      setWorkingHours(draftData?.workingHours && draftData.workingHours !== values.workingHours ? draftData.workingHours : values.workingHours);
+      setAvailability(draftData?.availability && draftData.availability !== values.availability ? draftData.availability : values.availability);
 
       // Store original values for comparison
       setOriginalValues(values);
       
-      // Only reset unsaved changes flag if we don't have local media changes
-      if (!getHasLocalMediaChanges()) {
+      // Only reset unsaved changes flag if we don't have local media changes AND no draft was restored
+      const hasDraftChanges = draftData && (
+        (draftData.firstName && draftData.firstName !== values.firstName) ||
+        (draftData.lastName && draftData.lastName !== values.lastName) ||
+        (draftData.bio && draftData.bio !== values.bio) ||
+        (draftData.userLocation && draftData.userLocation !== values.userLocation) ||
+        (draftData.postalCode && draftData.postalCode !== values.postalCode) ||
+        (draftData.phone && draftData.phone !== values.phone) ||
+        (draftData.birthDate && draftData.birthDate !== values.birthDate)
+      );
+      
+      if (!getHasLocalMediaChanges() && !hasDraftChanges) {
         setHasUnsavedChanges(false);
       }
     }
@@ -452,6 +489,38 @@ const Profile = () => {
   useEffect(() => {
     checkForChanges();
   }, [checkForChanges]);
+
+  // Auto-save draft to localStorage for text fields
+  useEffect(() => {
+    // Only save if there are actual changes
+    if (!hasUnsavedChanges) return;
+    
+    const hasContent = firstName || lastName || bio || userLocation || postalCode || phone || birthDate;
+    
+    if (hasContent) {
+      try {
+        localStorage.setItem(PROFILE_DRAFT_KEY, JSON.stringify({
+          firstName,
+          lastName,
+          bio,
+          userLocation,
+          postalCode,
+          phone,
+          birthDate,
+          employmentStatus,
+          workingHours,
+          availability,
+          companyName,
+          orgNumber,
+          savedAt: Date.now()
+        }));
+        console.log('💾 Profile draft saved');
+      } catch (e) {
+        console.warn('Failed to save profile draft');
+      }
+    }
+  }, [firstName, lastName, bio, userLocation, postalCode, phone, birthDate, 
+      employmentStatus, workingHours, availability, companyName, orgNumber, hasUnsavedChanges]);
 
   // Clear location error when a valid location is detected
   useEffect(() => {
@@ -1424,6 +1493,8 @@ const Profile = () => {
         setOriginalValues(newOriginalValues);
         setHasUnsavedChanges(false);
         setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
+        clearProfileDraft(); // 🔒 Clear localStorage draft after successful save
+        console.log('💾 Profile draft cleared after save');
         
         // Clear undo states after successful save
         setDeletedProfileMedia(null);

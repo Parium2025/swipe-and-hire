@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +11,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Upload, Send } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
+
+// Draft key for localStorage
+const JOB_APPLICATION_DRAFT_PREFIX = 'parium_draft_job-application-';
+
+const getDraftKey = (jobId: string) => `${JOB_APPLICATION_DRAFT_PREFIX}${jobId}`;
+
+// Clear draft for a specific job
+export const clearJobApplicationDraft = (jobId: string) => {
+  try {
+    localStorage.removeItem(getDraftKey(jobId));
+  } catch (e) {
+    console.warn('Failed to clear job application draft');
+  }
+};
 
 interface JobPosting {
   id: string;
@@ -46,6 +60,7 @@ const JobApplication = () => {
   const [questions, setQuestions] = useState<JobQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
   
   // Form data
   const [formData, setFormData] = useState({
@@ -72,6 +87,53 @@ const JobApplication = () => {
     // Custom questions answers
     customAnswers: {} as Record<string, any>
   });
+
+  // Restore draft on mount
+  useEffect(() => {
+    if (jobId && !draftRestored) {
+      try {
+        const saved = localStorage.getItem(getDraftKey(jobId));
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.formData) {
+            setFormData(parsed.formData);
+            console.log('💾 Job application draft restored');
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to restore job application draft');
+      }
+      setDraftRestored(true);
+    }
+  }, [jobId, draftRestored]);
+
+  // Auto-save draft to localStorage
+  useEffect(() => {
+    if (!jobId || !draftRestored) return;
+    
+    // Check if there's any content to save
+    const hasContent = Object.entries(formData).some(([key, value]) => {
+      if (key === 'customAnswers') {
+        return Object.keys(value as Record<string, any>).length > 0;
+      }
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      return value && value !== '';
+    });
+    
+    if (hasContent) {
+      try {
+        localStorage.setItem(getDraftKey(jobId), JSON.stringify({
+          formData,
+          savedAt: Date.now()
+        }));
+        console.log('💾 Job application draft saved');
+      } catch (e) {
+        console.warn('Failed to save job application draft');
+      }
+    }
+  }, [formData, jobId, draftRestored]);
 
   useEffect(() => {
     if (jobId) {
@@ -200,6 +262,12 @@ const JobApplication = () => {
         });
 
       if (error) throw error;
+
+      // Clear draft on successful submission
+      if (jobId) {
+        clearJobApplicationDraft(jobId);
+        console.log('💾 Job application draft cleared after submission');
+      }
 
       toast({
         title: "Ansökan skickad!",

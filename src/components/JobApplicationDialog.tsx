@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import FileUpload from './FileUpload';
 import { Dialog } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
@@ -14,6 +14,20 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileText, Video, CheckSquare, List, Heart, WifiOff } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
+
+// Draft key for localStorage
+const JOB_DIALOG_DRAFT_PREFIX = 'parium_draft_job-dialog-';
+
+const getDraftKey = (jobId: string) => `${JOB_DIALOG_DRAFT_PREFIX}${jobId}`;
+
+// Clear draft for a specific job
+export const clearJobDialogDraft = (jobId: string) => {
+  try {
+    localStorage.removeItem(getDraftKey(jobId));
+  } catch (e) {
+    console.warn('Failed to clear job dialog draft');
+  }
+};
 
 interface JobQuestion {
   id: string;
@@ -49,6 +63,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [draftRestored, setDraftRestored] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const { isOnline, showOfflineToast } = useOnline();
@@ -68,6 +83,52 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
     ...standardQuestions,
     ...questions.map(q => ({ ...q, id: `custom_${q.id}` }))
   ];
+
+  // Restore draft when dialog opens
+  useEffect(() => {
+    if (open && job?.id && !draftRestored) {
+      try {
+        const saved = localStorage.getItem(getDraftKey(job.id));
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.answers) {
+            setAnswers(prev => ({ ...prev, ...parsed.answers }));
+            console.log('💾 Job dialog draft restored');
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to restore job dialog draft');
+      }
+      setDraftRestored(true);
+    }
+    
+    // Reset draft restored flag when dialog closes
+    if (!open) {
+      setDraftRestored(false);
+    }
+  }, [open, job?.id, draftRestored]);
+
+  // Auto-save draft to localStorage
+  useEffect(() => {
+    if (!open || !job?.id || !draftRestored) return;
+    
+    // Check if there's any content to save (beyond auto-filled profile data)
+    const hasCustomAnswers = Object.keys(answers).some(key => 
+      key.startsWith('custom_') && answers[key]
+    );
+    
+    if (hasCustomAnswers || Object.keys(answers).length > 6) { // More than just profile fields
+      try {
+        localStorage.setItem(getDraftKey(job.id), JSON.stringify({
+          answers,
+          savedAt: Date.now()
+        }));
+        console.log('💾 Job dialog draft saved');
+      } catch (e) {
+        console.warn('Failed to save job dialog draft');
+      }
+    }
+  }, [answers, job?.id, open, draftRestored]);
 
   useEffect(() => {
     if (user && open) {
@@ -136,6 +197,13 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
     setSubmitting(true);
     try {
       await onSubmit(answers);
+      
+      // Clear draft on successful submission
+      if (job?.id) {
+        clearJobDialogDraft(job.id);
+        console.log('💾 Job dialog draft cleared after submission');
+      }
+      
       onOpenChange(false);
       setAnswers({});
     } catch (error) {
