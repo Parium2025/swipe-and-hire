@@ -16,6 +16,7 @@ import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useDevice } from '@/hooks/use-device';
 import { useEmployerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCandidateBackgroundSync } from '@/hooks/useCandidateBackgroundSync';
+import { DevOfflineToggle } from '@/components/DevOfflineToggle';
 
 interface EmployerLayoutProps {
   children: ReactNode;
@@ -445,6 +446,9 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
           <main className="flex-1 overflow-hidden p-3 relative z-10">
             {children}
           </main>
+          
+          {/* Floating dev offline toggle */}
+          <DevOfflineToggle />
         </div>
       </>
     );
@@ -502,6 +506,9 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
           <main className="flex-1 overflow-hidden p-3">
             {children}
           </main>
+          
+          {/* Floating dev offline toggle */}
+          <DevOfflineToggle />
         </div>
       </div>
     </SidebarProvider>
