@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { useConversations, useConversationMessages, Conversation, ConversationMessage, useCreateConversation } from '@/hooks/useConversations';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
@@ -41,25 +41,11 @@ export default function Messages() {
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [activeTab, setActiveTab] = useState<ConversationTab>(hasTeam ? 'all' : 'candidates');
 
-  // Used to align empty states between the left list and right chat pane.
-  const listHeaderRef = useRef<HTMLDivElement | null>(null);
-  const [listHeaderHeight, setListHeaderHeight] = useState(0);
+  // Pixel-perfect alignment: keep icon + text on the exact same row between the two empty states.
+  const leftEmptyIconRef = useRef<HTMLDivElement | null>(null);
+  const rightEmptyIconRef = useRef<HTMLDivElement | null>(null);
+  const [leftEmptyAlignOffset, setLeftEmptyAlignOffset] = useState(0);
 
-  useEffect(() => {
-    const el = listHeaderRef.current;
-    if (!el) return;
-
-    const update = () => {
-      const h = el.getBoundingClientRect().height;
-      setListHeaderHeight(Number.isFinite(h) ? h : 0);
-    };
-
-    update();
-
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [hasTeam]);
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
@@ -122,6 +108,39 @@ export default function Messages() {
     return false;
   });
 
+  const showEmptyConversationList = filteredConversations.length === 0;
+  const showEmptyChatState = !selectedConversation;
+
+  useLayoutEffect(() => {
+    // Only align when BOTH empty states are visible.
+    if (!showEmptyConversationList || !showEmptyChatState) {
+      setLeftEmptyAlignOffset(0);
+      return;
+    }
+
+    const leftIcon = leftEmptyIconRef.current;
+    const rightIcon = rightEmptyIconRef.current;
+    if (!leftIcon || !rightIcon) return;
+
+    const update = () => {
+      const delta = rightIcon.getBoundingClientRect().top - leftIcon.getBoundingClientRect().top;
+      if (Math.abs(delta) < 0.5) return;
+      setLeftEmptyAlignOffset((prev) => prev + delta);
+    };
+
+    // Run twice to let layout settle (fonts, scrollbars).
+    const raf = requestAnimationFrame(() => {
+      update();
+      requestAnimationFrame(update);
+    });
+
+    window.addEventListener('resize', update);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', update);
+    };
+  }, [showEmptyConversationList, showEmptyChatState]);
+
   const handleSelectConversation = (convId: string) => {
     setSelectedConversationId(convId);
     setShowMobileChat(true);
@@ -180,7 +199,7 @@ export default function Messages() {
           showMobileChat && "hidden md:flex"
         )}>
           {/* Header area (tabs + search). Used to align empty state between columns. */}
-          <div ref={listHeaderRef} className="flex-shrink-0">
+          <div className="flex-shrink-0">
             {/* Tab filter - only show tabs if there are colleagues */}
             {hasTeam ? (
               <MessagesTabs 
@@ -209,9 +228,9 @@ export default function Messages() {
             {filteredConversations.length === 0 ? (
               <div
                 className="h-full flex items-center justify-center"
-                style={listHeaderHeight ? { transform: `translateY(-${listHeaderHeight / 2}px)` } : undefined}
+                style={leftEmptyAlignOffset ? { transform: `translateY(${leftEmptyAlignOffset}px)` } : undefined}
               >
-                <EmptyConversationList hasSearch={!!searchQuery.trim()} />
+                <EmptyConversationList hasSearch={!!searchQuery.trim()} iconRef={leftEmptyIconRef} />
               </div>
             ) : (
               <ScrollArea className="h-full">
@@ -244,7 +263,7 @@ export default function Messages() {
               onBack={handleBackToList}
             />
           ) : (
-            <EmptyChatState />
+            <EmptyChatState iconRef={rightEmptyIconRef} />
           )}
         </div>
       </div>
@@ -761,10 +780,19 @@ function MessageBubble({
 }
 
 // Empty states
-function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
+function EmptyConversationList({
+  hasSearch,
+  iconRef,
+}: {
+  hasSearch: boolean;
+  iconRef?: React.Ref<HTMLDivElement>;
+}) {
   return (
     <div className="flex flex-col items-center px-4 text-center">
-      <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
+      <div
+        ref={iconRef}
+        className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3"
+      >
         <MessageSquare className="h-6 w-6 text-white" />
       </div>
       <h3 className="text-base font-medium text-white mb-0.5">
@@ -779,10 +807,13 @@ function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
   );
 }
 
-function EmptyChatState() {
+function EmptyChatState({ iconRef }: { iconRef?: React.Ref<HTMLDivElement> }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-      <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
+      <div
+        ref={iconRef}
+        className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3"
+      >
         <MessageSquare className="h-6 w-6 text-white" />
       </div>
       <h3 className="text-base font-medium text-white mb-0.5">Välj en konversation</h3>
