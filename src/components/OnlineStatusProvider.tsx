@@ -1,16 +1,16 @@
 import { useCallback, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { useOnlineStatus, OnlineContext, type OnlineContextValue } from '@/hooks/useOnlineStatus';
+import { useOnlineStatusWithToast, OnlineContext, type OnlineContextValue } from '@/hooks/useOnlineStatus';
 
 interface OnlineStatusProviderProps {
   children: ReactNode;
 }
 
 /**
- * Provider för online-status context
+ * Provider för online-status context (endast denna visar återanslutnings-toast)
  */
 export function OnlineStatusProvider({ children }: OnlineStatusProviderProps) {
-  const isOnline = useOnlineStatus();
+  const isOnline = useOnlineStatusWithToast();
   
   // Visa offline-toast - matchar appens stil (vit text, mörk bakgrund)
   const showOfflineToast = useCallback(() => {
