@@ -859,9 +859,8 @@ const InterviewsCard = memo(() => {
         <div className="flex-1 flex flex-col justify-center py-2">
           {upcomingInterviews.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center">
-              <Calendar className="h-8 w-8 text-white/40 mb-2" />
+              <Calendar className="h-8 w-8 text-white mb-2" />
               <p className="text-sm font-medium text-white">Inga bokade intervjuer</p>
-              <p className="text-xs text-white/60">Boka via kandidatprofilen</p>
             </div>
           ) : (
             <AnimatePresence mode="wait">
