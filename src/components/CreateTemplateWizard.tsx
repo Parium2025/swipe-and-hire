@@ -43,6 +43,24 @@ import {
   createEmptyQuestion,
 } from '@/types/jobWizard';
 
+// localStorage keys for draft persistence
+const TEMPLATE_DRAFT_KEY = 'parium_draft_template-wizard';
+const getEditDraftKey = (templateId: string) => `parium_draft_template-edit-${templateId}`;
+
+// Clear draft helper (exported for use elsewhere if needed)
+export const clearTemplateDraft = (templateId?: string) => {
+  try {
+    if (templateId) {
+      localStorage.removeItem(getEditDraftKey(templateId));
+    } else {
+      localStorage.removeItem(TEMPLATE_DRAFT_KEY);
+    }
+    console.log('💾 Template wizard draft cleared');
+  } catch (e) {
+    console.warn('Failed to clear template wizard draft');
+  }
+};
+
 interface CreateTemplateWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -220,7 +238,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     }
 
     if (templateToEdit && open) {
-      // First hide content
+      // Editing existing template - first hide content
       setIsReady(false);
       
       const loadedFormData = {
@@ -252,69 +270,152 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         location: '',
         benefits: templateToEdit.benefits || []
       };
-      setFormData(loadedFormData);
-      setInitialFormData(loadedFormData);
       
+      let loadedQuestions: JobQuestion[] = [];
       if (templateToEdit.questions && Array.isArray(templateToEdit.questions)) {
-        // Ensure each question has a unique ID
-        const questionsWithIds = templateToEdit.questions.map((q: JobQuestion, index: number) => ({
+        loadedQuestions = templateToEdit.questions.map((q: JobQuestion, index: number) => ({
           ...q,
           id: q.id || `temp_${Date.now()}_${index}`,
           order_index: index
         }));
-        setCustomQuestions(questionsWithIds);
-        setInitialCustomQuestions(questionsWithIds);
-      } else {
-        setCustomQuestions([]);
-        setInitialCustomQuestions([]);
       }
       
-      setCurrentStep(0);
-      setHasUnsavedChanges(false);
+      // Try to restore from localStorage draft for this specific template
+      let restoredFromDraft = false;
+      try {
+        const saved = localStorage.getItem(getEditDraftKey(templateToEdit.id));
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.formData) {
+            setFormData(parsed.formData);
+            if (parsed.customQuestions) {
+              setCustomQuestions(parsed.customQuestions);
+            } else {
+              setCustomQuestions(loadedQuestions);
+            }
+            if (typeof parsed.currentStep === 'number') {
+              setCurrentStep(parsed.currentStep);
+            }
+            // Set initial to DB values so changes are detected
+            setInitialFormData(loadedFormData);
+            setInitialCustomQuestions(loadedQuestions);
+            setHasUnsavedChanges(true);
+            restoredFromDraft = true;
+            console.log('💾 Template edit draft restored');
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to restore template edit draft:', e);
+      }
+      
+      if (!restoredFromDraft) {
+        setFormData(loadedFormData);
+        setInitialFormData(loadedFormData);
+        setCustomQuestions(loadedQuestions);
+        setInitialCustomQuestions(loadedQuestions);
+        setCurrentStep(0);
+        setHasUnsavedChanges(false);
+      }
       
       // Show content after state is settled
       readyTimerRef.current = setTimeout(() => {
         setIsReady(true);
       }, 50);
     } else if (open && !templateToEdit) {
-      // New template - first hide content, then set empty state
+      // New template - first hide content, then check for saved draft
       setIsReady(false);
       
-      const emptyFormData: TemplateFormData = {
-        name: '',
-        title: '',
-        description: '',
-        requirements: '',
-        location: '',
-        occupation: '',
-        salary_min: '',
-        salary_max: '',
-        employment_type: '',
-        salary_type: '',
-        salary_transparency: '',
-        positions_count: '1',
-        work_location_type: 'på-plats',
-        remote_work_possible: 'nej',
-        workplace_name: '',
-        workplace_address: '',
-        workplace_postal_code: '',
-        workplace_city: '',
-        workplace_county: '',
-        workplace_municipality: '',
-        work_schedule: '',
-        work_start_time: '',
-        work_end_time: '',
-        contact_email: '',
-        application_instructions: '',
-        pitch: '',
-        benefits: []
-      };
-      setFormData(emptyFormData);
-      setInitialFormData(emptyFormData);
-      setCustomQuestions([]);
-      setInitialCustomQuestions([]);
-      setCurrentStep(0);
-      setHasUnsavedChanges(false);
+      // Try to restore from localStorage draft
+      let restoredFromDraft = false;
+      try {
+        const saved = localStorage.getItem(TEMPLATE_DRAFT_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.formData) {
+            setFormData(parsed.formData);
+            if (parsed.customQuestions) {
+              setCustomQuestions(parsed.customQuestions);
+            }
+            if (typeof parsed.currentStep === 'number') {
+              setCurrentStep(parsed.currentStep);
+            }
+            // Set initial values to empty so changes are detected
+            setInitialFormData({
+              name: '',
+              title: '',
+              description: '',
+              requirements: '',
+              location: '',
+              occupation: '',
+              salary_min: '',
+              salary_max: '',
+              employment_type: '',
+              salary_type: '',
+              salary_transparency: '',
+              positions_count: '1',
+              work_location_type: 'på-plats',
+              remote_work_possible: 'nej',
+              workplace_name: '',
+              workplace_address: '',
+              workplace_postal_code: '',
+              workplace_city: '',
+              workplace_county: '',
+              workplace_municipality: '',
+              work_schedule: '',
+              work_start_time: '',
+              work_end_time: '',
+              contact_email: '',
+              application_instructions: '',
+              pitch: '',
+              benefits: []
+            });
+            setInitialCustomQuestions([]);
+            setHasUnsavedChanges(true);
+            restoredFromDraft = true;
+            console.log('💾 Template wizard draft restored');
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to restore template wizard draft:', e);
+      }
+      
+      if (!restoredFromDraft) {
+        const emptyFormData: TemplateFormData = {
+          name: '',
+          title: '',
+          description: '',
+          requirements: '',
+          location: '',
+          occupation: '',
+          salary_min: '',
+          salary_max: '',
+          employment_type: '',
+          salary_type: '',
+          salary_transparency: '',
+          positions_count: '1',
+          work_location_type: 'på-plats',
+          remote_work_possible: 'nej',
+          workplace_name: '',
+          workplace_address: '',
+          workplace_postal_code: '',
+          workplace_city: '',
+          workplace_county: '',
+          workplace_municipality: '',
+          work_schedule: '',
+          work_start_time: '',
+          work_end_time: '',
+          contact_email: '',
+          application_instructions: '',
+          pitch: '',
+          benefits: []
+        };
+        setFormData(emptyFormData);
+        setInitialFormData(emptyFormData);
+        setCustomQuestions([]);
+        setInitialCustomQuestions([]);
+        setCurrentStep(0);
+        setHasUnsavedChanges(false);
+      }
       
       // Show content after state is settled
       readyTimerRef.current = setTimeout(() => {
@@ -379,15 +480,32 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     };
   }, [templateToEdit, open]);
 
-  // Track unsaved changes
+  // Track unsaved changes + auto-save to localStorage
   useEffect(() => {
     if (!initialFormData || !open) return;
     
     const formChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
     const questionsChanged = JSON.stringify(customQuestions) !== JSON.stringify(initialCustomQuestions);
+    const hasChanges = formChanged || questionsChanged;
     
-    setHasUnsavedChanges(formChanged || questionsChanged);
-  }, [formData, customQuestions, initialFormData, initialCustomQuestions, open]);
+    setHasUnsavedChanges(hasChanges);
+    
+    // Auto-save draft to localStorage when there are changes
+    if (hasChanges) {
+      try {
+        const draftKey = templateToEdit?.id ? getEditDraftKey(templateToEdit.id) : TEMPLATE_DRAFT_KEY;
+        localStorage.setItem(draftKey, JSON.stringify({
+          formData,
+          customQuestions,
+          currentStep,
+          savedAt: Date.now()
+        }));
+        console.log('💾 Template wizard draft saved');
+      } catch (e) {
+        console.warn('Failed to save template wizard draft:', e);
+      }
+    }
+  }, [formData, customQuestions, initialFormData, initialCustomQuestions, open, currentStep, templateToEdit]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -776,6 +894,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   };
 
   const resetAndClose = () => {
+    // Clear draft when user discards changes (or when closing without changes)
+    clearTemplateDraft(templateToEdit?.id);
+    
     setCurrentStep(0);
     setFormData({
       name: '',
