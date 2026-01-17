@@ -15,6 +15,7 @@ import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useDevice } from '@/hooks/use-device';
 import { useEmployerDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useCandidateBackgroundSync } from '@/hooks/useCandidateBackgroundSync';
 
 interface EmployerLayoutProps {
   children: ReactNode;
@@ -58,6 +59,10 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
   
   // Update browser tab title with unread message count
   useEmployerDocumentTitle();
+  
+  // Kontinuerlig bakgrundssynk av kandidatdata (30s intervall)
+  // Gör att /candidates och /my-candidates alltid har färsk data utan laddningstid
+  useCandidateBackgroundSync();
 
   // Keyboard shortcut: Cmd+N / Ctrl+N to open "Create New Job" dialog
   const handleKeyDown = useCallback((e: KeyboardEvent) => {

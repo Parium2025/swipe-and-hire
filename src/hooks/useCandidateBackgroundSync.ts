@@ -1,0 +1,324 @@
+import { useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { useAuth } from '@/hooks/useAuth';
+
+const SYNC_INTERVAL = 30_000; // 30 sekunder mellan bakgrundsuppdateringar
+const PAGE_SIZE = 25;
+
+/**
+ * Hook som kontinuerligt förladdar kandidatdata i bakgrunden.
+ * Detta gör att /candidates och /my-candidates alltid har färsk data
+ * utan att visa laddningsindikator när användaren navigerar dit.
+ */
+export const useCandidateBackgroundSync = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isRunningRef = useRef(false);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const userId = user.id;
+
+    const syncCandidates = async () => {
+      if (isRunningRef.current) return;
+      isRunningRef.current = true;
+
+      try {
+        // 1. Synka "Alla kandidater" (/candidates) data
+        await syncApplicationsData(userId, queryClient);
+
+        // 2. Synka "Mina kandidater" (/my-candidates) data
+        await syncMyCandidatesData(userId, queryClient);
+
+      } catch (error) {
+        console.warn('Background candidate sync failed:', error);
+      } finally {
+        isRunningRef.current = false;
+      }
+    };
+
+    // Kör direkt vid mount
+    syncCandidates();
+
+    // Starta kontinuerlig polling
+    intervalRef.current = setInterval(syncCandidates, SYNC_INTERVAL);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [user, queryClient]);
+};
+
+/**
+ * Synka "Alla kandidater" data (job_applications)
+ */
+async function syncApplicationsData(userId: string, queryClient: ReturnType<typeof useQueryClient>) {
+  const queryKey = ['applications', userId, ''];
+
+  // Hämta första sidan med kandidater
+  const { data: baseData, error: baseError } = await supabase
+    .from('job_applications')
+    .select(`
+      id,
+      job_id,
+      applicant_id,
+      first_name,
+      last_name,
+      email,
+      phone,
+      location,
+      bio,
+      cv_url,
+      age,
+      employment_status,
+      work_schedule,
+      availability,
+      custom_answers,
+      status,
+      applied_at,
+      updated_at,
+      viewed_at,
+      job_postings!inner(title, occupation)
+    `)
+    .order('applied_at', { ascending: false })
+    .range(0, PAGE_SIZE - 1);
+
+  if (baseError || !baseData) return;
+
+  // Hämta media batch
+  const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
+  const profileMediaMap: Record<string, any> = {};
+
+  const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+    p_applicant_ids: applicantIds,
+    p_employer_id: userId,
+  });
+
+  if (batchMediaData && Array.isArray(batchMediaData)) {
+    batchMediaData.forEach((row: any) => {
+      profileMediaMap[row.applicant_id] = {
+        profile_image_url: row.profile_image_url,
+        video_url: row.video_url,
+        is_profile_video: row.is_profile_video,
+        last_active_at: row.last_active_at,
+      };
+    });
+  }
+
+  // Hämta aktivitetsdata batch
+  const activityMap: Record<string, any> = {};
+  const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
+    p_applicant_ids: applicantIds,
+    p_employer_id: userId,
+  });
+
+  if (activityData) {
+    activityData.forEach((item: any) => {
+      activityMap[item.applicant_id] = {
+        latest_application_at: item.latest_application_at,
+        last_active_at: item.last_active_at,
+      };
+    });
+  }
+
+  // Bygg items
+  const items = baseData.map((item: any) => {
+    const media = profileMediaMap[item.applicant_id] || {};
+    const activity = activityMap[item.applicant_id] || {};
+
+    return {
+      ...item,
+      job_title: item.job_postings?.title || 'Okänt jobb',
+      job_occupation: item.job_postings?.occupation || null,
+      profile_image_url: media.profile_image_url || null,
+      video_url: media.video_url || null,
+      is_profile_video: media.is_profile_video || false,
+      last_active_at: activity.last_active_at || media.last_active_at || null,
+      latest_application_at: activity.latest_application_at || item.applied_at,
+      job_postings: undefined,
+    };
+  });
+
+  // Uppdatera React Query cache UTAN att trigga re-render om data är samma
+  const existingData: any = queryClient.getQueryData(queryKey);
+  
+  // Jämför om datan har ändrats (baserat på updated_at timestamps)
+  const newTimestamps = items.map((i: any) => i.updated_at).join(',');
+  const existingTimestamps = existingData?.pages?.[0]?.items?.map((i: any) => i.updated_at)?.join(',');
+  
+  if (newTimestamps !== existingTimestamps) {
+    // Data har ändrats - uppdatera cache
+    queryClient.setQueryData(queryKey, {
+      pages: [{ items, hasMore: items.length === PAGE_SIZE, nextCursor: items.length === PAGE_SIZE ? items.length : null }],
+      pageParams: [0],
+    });
+  }
+
+  // Förladda bilder i bakgrunden
+  const imagePaths = items
+    .map((i: any) => i.profile_image_url)
+    .filter((p: any): p is string => typeof p === 'string' && p.trim() !== '')
+    .slice(0, 25);
+
+  if (imagePaths.length > 0) {
+    Promise.all(imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {}))).catch(() => {});
+  }
+
+  // Uppdatera localStorage snapshot för instant first paint
+  try {
+    const snapshot = {
+      items: items.slice(0, 50),
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
+  } catch {}
+}
+
+/**
+ * Synka "Mina kandidater" data (my_candidates)
+ */
+async function syncMyCandidatesData(userId: string, queryClient: ReturnType<typeof useQueryClient>) {
+  const queryKey = ['my-candidates', userId, ''];
+
+  // Hämta första sidan med mina kandidater
+  const { data: myCandidates, error: mcError } = await supabase
+    .from('my_candidates')
+    .select(`
+      id,
+      recruiter_id,
+      applicant_id,
+      application_id,
+      job_id,
+      stage,
+      notes,
+      rating,
+      created_at,
+      updated_at
+    `)
+    .eq('recruiter_id', userId)
+    .order('updated_at', { ascending: false })
+    .range(0, PAGE_SIZE - 1);
+
+  if (mcError || !myCandidates || myCandidates.length === 0) return;
+
+  // Hämta job_applications data
+  const applicationIds = myCandidates.map((mc) => mc.application_id);
+  const applicantIds = [...new Set(myCandidates.map((mc) => mc.applicant_id))];
+
+  const { data: applications } = await supabase
+    .from('job_applications')
+    .select(`
+      id, applicant_id, first_name, last_name, email, phone, location, bio,
+      cv_url, age, employment_status, work_schedule, availability, custom_answers,
+      status, applied_at, viewed_at, job_postings!inner(title)
+    `)
+    .in('id', applicationIds);
+
+  const appMap = new Map(applications?.map((app) => [app.id, app]) || []);
+
+  // Hämta media batch
+  const profileMediaMap: Record<string, any> = {};
+  const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+    p_applicant_ids: applicantIds,
+    p_employer_id: userId,
+  });
+
+  if (batchMediaData) {
+    batchMediaData.forEach((row: any) => {
+      profileMediaMap[row.applicant_id] = {
+        profile_image_url: row.profile_image_url,
+        video_url: row.video_url,
+        is_profile_video: row.is_profile_video,
+        last_active_at: row.last_active_at,
+      };
+    });
+  }
+
+  // Hämta aktivitetsdata batch
+  const activityMap: Record<string, any> = {};
+  const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
+    p_applicant_ids: applicantIds,
+    p_employer_id: userId,
+  });
+
+  if (activityData) {
+    activityData.forEach((item: any) => {
+      activityMap[item.applicant_id] = {
+        latest_application_at: item.latest_application_at,
+        last_active_at: item.last_active_at,
+      };
+    });
+  }
+
+  // Bygg items
+  const items = myCandidates.map((mc) => {
+    const app = appMap.get(mc.application_id);
+    const media = profileMediaMap[mc.applicant_id] || {};
+    const activity = activityMap[mc.applicant_id] || {};
+
+    return {
+      id: mc.id,
+      recruiter_id: mc.recruiter_id,
+      applicant_id: mc.applicant_id,
+      application_id: mc.application_id,
+      job_id: mc.job_id,
+      stage: mc.stage,
+      notes: mc.notes,
+      rating: mc.rating,
+      created_at: mc.created_at,
+      updated_at: mc.updated_at,
+      first_name: app?.first_name || null,
+      last_name: app?.last_name || null,
+      email: app?.email || null,
+      phone: app?.phone || null,
+      location: app?.location || null,
+      bio: app?.bio || null,
+      cv_url: app?.cv_url || null,
+      age: app?.age || null,
+      employment_status: app?.employment_status || null,
+      work_schedule: app?.work_schedule || null,
+      availability: app?.availability || null,
+      custom_answers: app?.custom_answers || null,
+      status: app?.status || null,
+      applied_at: app?.applied_at || null,
+      viewed_at: app?.viewed_at || null,
+      job_title: (app as any)?.job_postings?.title || 'Okänt jobb',
+      profile_image_url: media.profile_image_url || null,
+      video_url: media.video_url || null,
+      is_profile_video: media.is_profile_video || false,
+      last_active_at: activity.last_active_at || media.last_active_at || null,
+      latest_application_at: activity.latest_application_at || app?.applied_at,
+    };
+  });
+
+  // Uppdatera React Query cache
+  const existingData: any = queryClient.getQueryData(queryKey);
+  const newTimestamps = items.map((i) => i.updated_at).join(',');
+  const existingTimestamps = existingData?.pages?.[0]?.items?.map((i: any) => i.updated_at)?.join(',');
+
+  if (newTimestamps !== existingTimestamps) {
+    queryClient.setQueryData(queryKey, {
+      pages: [{ items, nextCursor: items.length === PAGE_SIZE ? items[items.length - 1].updated_at : null }],
+      pageParams: [null],
+    });
+  }
+
+  // Förladda bilder
+  const imagePaths = items
+    .map((i) => i.profile_image_url)
+    .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
+    .slice(0, 25);
+
+  if (imagePaths.length > 0) {
+    Promise.all(imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {}))).catch(() => {});
+  }
+}
+
+export default useCandidateBackgroundSync;
