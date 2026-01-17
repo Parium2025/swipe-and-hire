@@ -132,6 +132,12 @@ export const BookInterviewDialog = ({
       toast.error('Välj ett datum för intervjun');
       return;
     }
+    
+    // Check if online before booking
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
 
     setIsSubmitting(true);
 

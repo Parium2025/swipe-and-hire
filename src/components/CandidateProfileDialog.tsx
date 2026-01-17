@@ -350,6 +350,13 @@ export const CandidateProfileDialog = ({
   // Generate AI summary on-demand - based ONLY on the uploaded document
   const generateAiSummary = async (silent = false) => {
     if (!activeApplication?.applicant_id) return;
+    
+    // Check if online before generating
+    if (!navigator.onLine) {
+      if (!silent) toast.error('Du måste vara online för att generera sammanfattning');
+      return;
+    }
+    
     setGeneratingSummary(true);
 
     try {
@@ -415,7 +422,8 @@ export const CandidateProfileDialog = ({
     if (!open || !activeApplication || aiSummary || loadingSummary) return;
 
     const pollInterval = setInterval(async () => {
-      if (!activeApplication.cv_url) return;
+      // Skip polling if offline
+      if (!navigator.onLine || !activeApplication.cv_url) return;
 
       try {
         const { data } = await supabase
@@ -508,6 +516,13 @@ export const CandidateProfileDialog = ({
 
   const saveNote = async () => {
     if (!newNote.trim() || !application || !user) return;
+    
+    // Check if online before saving
+    if (!navigator.onLine) {
+      toast.error('Du måste vara online för att spara anteckningar');
+      return;
+    }
+    
     setSavingNote(true);
     try {
       const { error } = await supabase
@@ -542,6 +557,13 @@ export const CandidateProfileDialog = ({
 
   const deleteNote = async (noteId: string) => {
     if (!application) return;
+    
+    // Check if online before deleting
+    if (!navigator.onLine) {
+      toast.error('Du måste vara online för att ta bort anteckningar');
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('candidate_notes')
