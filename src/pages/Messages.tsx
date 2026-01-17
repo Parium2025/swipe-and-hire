@@ -735,7 +735,7 @@ function MessageBubble({
 // Empty states
 function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center py-16 px-4 text-center">
+    <div className="h-full min-h-[400px] flex flex-col items-center justify-center px-4 text-center">
       <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
         <MessageSquare className="h-6 w-6 text-white" />
       </div>
