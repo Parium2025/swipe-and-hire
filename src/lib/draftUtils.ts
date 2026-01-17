@@ -83,3 +83,58 @@ export function getDraftCount(): number {
     return 0;
   }
 }
+
+/**
+ * Clean up old drafts from localStorage
+ * Removes drafts older than the specified max age (default: 1 day)
+ * @param maxAgeMs - Maximum age in milliseconds (default: 24 hours)
+ * @returns Number of drafts cleaned up
+ */
+export function cleanupOldDrafts(maxAgeMs: number = 24 * 60 * 60 * 1000): number {
+  try {
+    const now = Date.now();
+    const keysToRemove: string[] = [];
+    
+    // Collect keys to remove (can't modify localStorage while iterating)
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key?.startsWith(STORAGE_PREFIX)) continue;
+      
+      try {
+        const value = localStorage.getItem(key);
+        if (!value) continue;
+        
+        const parsed = JSON.parse(value);
+        
+        // Check for savedAt timestamp
+        if (parsed.savedAt && typeof parsed.savedAt === 'number') {
+          const age = now - parsed.savedAt;
+          if (age > maxAgeMs) {
+            keysToRemove.push(key);
+          }
+        } else {
+          // No savedAt timestamp - this is an old format draft
+          // Consider it stale and mark for removal
+          keysToRemove.push(key);
+        }
+      } catch {
+        // Invalid JSON - mark for removal
+        keysToRemove.push(key);
+      }
+    }
+    
+    // Remove old drafts
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+    });
+    
+    if (keysToRemove.length > 0) {
+      console.log(`🧹 Cleaned up ${keysToRemove.length} old draft(s)`);
+    }
+    
+    return keysToRemove.length;
+  } catch (error) {
+    console.warn('Failed to cleanup old drafts:', error);
+    return 0;
+  }
+}
