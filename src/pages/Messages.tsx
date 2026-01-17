@@ -41,6 +41,26 @@ export default function Messages() {
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [activeTab, setActiveTab] = useState<ConversationTab>(hasTeam ? 'all' : 'candidates');
 
+  // Used to align empty states between the left list and right chat pane.
+  const listHeaderRef = useRef<HTMLDivElement | null>(null);
+  const [listHeaderHeight, setListHeaderHeight] = useState(0);
+
+  useEffect(() => {
+    const el = listHeaderRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const h = el.getBoundingClientRect().height;
+      setListHeaderHeight(Number.isFinite(h) ? h : 0);
+    };
+
+    update();
+
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [hasTeam]);
+
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
   // Categorize conversations
@@ -159,26 +179,29 @@ export default function Messages() {
           "w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col",
           showMobileChat && "hidden md:flex"
         )}>
-          {/* Tab filter - only show tabs if there are colleagues */}
-          {hasTeam ? (
-            <MessagesTabs 
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              totalUnreadCount={totalUnreadCount}
-              candidateUnread={candidateUnread}
-              colleagueUnread={colleagueUnread}
-            />
-          ) : null}
+          {/* Header area (tabs + search). Used to align empty state between columns. */}
+          <div ref={listHeaderRef} className="flex-shrink-0">
+            {/* Tab filter - only show tabs if there are colleagues */}
+            {hasTeam ? (
+              <MessagesTabs 
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                totalUnreadCount={totalUnreadCount}
+                candidateUnread={candidateUnread}
+                colleagueUnread={colleagueUnread}
+              />
+            ) : null}
 
-          {/* Search */}
-          <div className="relative mb-3 flex-shrink-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Sök konversationer..."
-              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/70"
-            />
+            {/* Search */}
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Sök konversationer..."
+                className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/70"
+              />
+            </div>
           </div>
 
           {/* Conversation list */}
@@ -737,7 +760,7 @@ function MessageBubble({
 // Empty states
 function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
   return (
-    <div className="relative -top-3 flex flex-col items-center px-4 text-center">
+    <div className="flex flex-col items-center px-4 text-center">
       <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
         <MessageSquare className="h-6 w-6 text-white" />
       </div>
@@ -753,16 +776,17 @@ function EmptyConversationList({ hasSearch }: { hasSearch: boolean }) {
   );
 }
 
-function EmptyChatState() {
+function EmptyChatState({ offsetY = 0 }: { offsetY?: number }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+    <div
+      className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm"
+      style={offsetY ? { transform: `translateY(${offsetY}px)` } : undefined}
+    >
       <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
         <MessageSquare className="h-6 w-6 text-white" />
       </div>
       <h3 className="text-base font-medium text-white mb-0.5">Välj en konversation</h3>
-      <p className="text-white text-sm">
-        Välj en konversation från listan
-      </p>
+      <p className="text-white text-sm">Välj en konversation från listan</p>
     </div>
   );
 }
