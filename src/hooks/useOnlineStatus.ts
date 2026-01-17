@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext, useRef } from 'react';
 import { toast } from 'sonner';
 
 // Global state för forcerad offline (för dev/test)
@@ -17,30 +17,58 @@ export const getForceOfflineMode = () => forceOfflineMode;
  */
 export const useOnlineStatus = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine && !forceOfflineMode);
+  const wasOfflineRef = useRef(false);
 
   useEffect(() => {
-    const updateStatus = () => {
-      setIsOnline(navigator.onLine && !forceOfflineMode);
+    const updateStatus = (showReconnectToast = false) => {
+      const newOnlineStatus = navigator.onLine && !forceOfflineMode;
+      
+      // Visa återanslutnings-toast om vi var offline och nu är online
+      if (showReconnectToast && wasOfflineRef.current && newOnlineStatus) {
+        toast.success('Ansluten igen', {
+          description: 'Du är nu online och kan fortsätta arbeta',
+          duration: 3000,
+        });
+      }
+      
+      // Uppdatera wasOffline-referensen
+      wasOfflineRef.current = !newOnlineStatus;
+      setIsOnline(newOnlineStatus);
     };
 
     const handleOnline = () => {
       console.log('📡 Online');
-      updateStatus();
+      updateStatus(true);
     };
 
     const handleOffline = () => {
       console.log('🔌 Offline');
-      updateStatus();
+      updateStatus(false);
     };
 
-    // Lyssna på force offline changes
-    forceOfflineListeners.add(updateStatus);
+    // Lyssna på force offline changes (med reconnect toast)
+    const handleForceOfflineChange = () => {
+      const newOnlineStatus = navigator.onLine && !forceOfflineMode;
+      
+      // Visa toast vid återanslutning från forcerat offline-läge
+      if (wasOfflineRef.current && newOnlineStatus) {
+        toast.success('Ansluten igen', {
+          description: 'Du är nu online och kan fortsätta arbeta',
+          duration: 3000,
+        });
+      }
+      
+      wasOfflineRef.current = !newOnlineStatus;
+      setIsOnline(newOnlineStatus);
+    };
+
+    forceOfflineListeners.add(handleForceOfflineChange);
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
     return () => {
-      forceOfflineListeners.delete(updateStatus);
+      forceOfflineListeners.delete(handleForceOfflineChange);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
