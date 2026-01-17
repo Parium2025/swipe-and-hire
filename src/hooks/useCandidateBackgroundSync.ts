@@ -257,6 +257,14 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       timestamp: Date.now(),
     };
     localStorage.setItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
+    
+    // Spara betyg separat för snabb åtkomst
+    if (Object.keys(ratingsMap).length > 0) {
+      localStorage.setItem(`ratings_cache_${userId}`, JSON.stringify({
+        ratings: ratingsMap,
+        timestamp: Date.now()
+      }));
+    }
   } catch {}
 }
 

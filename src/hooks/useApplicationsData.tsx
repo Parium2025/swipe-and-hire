@@ -36,12 +36,54 @@ export interface ApplicationData {
 
 const PAGE_SIZE = 25;
 const SNAPSHOT_KEY_PREFIX = 'applications_snapshot_';
+const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const SNAPSHOT_EXPIRY_MS = 5 * 60 * 1000; // 5 min
+const RATINGS_CACHE_EXPIRY_MS = 60 * 60 * 1000; // 1 hour - betyg ändras sällan
 
 interface SnapshotData {
   items: ApplicationData[];
   timestamp: number;
 }
+
+interface RatingsCacheData {
+  ratings: Record<string, number>;
+  timestamp: number;
+}
+
+// Read cached ratings from localStorage for instant display
+const readCachedRatings = (userId: string): Record<string, number> => {
+  try {
+    const key = RATINGS_CACHE_PREFIX + userId;
+    const raw = localStorage.getItem(key);
+    if (!raw) return {};
+    
+    const cache: RatingsCacheData = JSON.parse(raw);
+    const age = Date.now() - cache.timestamp;
+    
+    if (age > RATINGS_CACHE_EXPIRY_MS) {
+      localStorage.removeItem(key);
+      return {};
+    }
+    
+    return cache.ratings || {};
+  } catch {
+    return {};
+  }
+};
+
+// Save ratings to localStorage cache
+const writeCachedRatings = (userId: string, ratings: Record<string, number>) => {
+  try {
+    const key = RATINGS_CACHE_PREFIX + userId;
+    const cache: RatingsCacheData = {
+      ratings,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(key, JSON.stringify(cache));
+  } catch {
+    // localStorage full or not available
+  }
+};
 
 // Read snapshot from localStorage - PRIORITIZE INSTANT DISPLAY
 // We accept slightly stale data to show content immediately on login/refresh
@@ -269,7 +311,10 @@ export const useApplicationsData = (searchQuery: string = '') => {
        }
 
        // Fetch current user's ratings for these applicants in batch (instant display)
-       const ratingsMap: Record<string, number> = {};
+       // Start with cached ratings for immediate display
+       const cachedRatings = readCachedRatings(user.id);
+       const ratingsMap: Record<string, number> = { ...cachedRatings };
+       
        const { data: ratingsData } = await supabase
          .from('candidate_ratings')
          .select('applicant_id, rating')
@@ -280,6 +325,8 @@ export const useApplicationsData = (searchQuery: string = '') => {
          ratingsData.forEach((row: any) => {
            ratingsMap[row.applicant_id] = row.rating;
          });
+         // Update cache with fresh data
+         writeCachedRatings(user.id, ratingsMap);
        }
 
        // Transform data to flatten job_postings and add profile media + last_active_at + rating
