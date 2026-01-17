@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-
+import { useOnline } from '@/hooks/useOnlineStatus';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash, Timer, CheckCircle } from 'lucide-react';
@@ -416,7 +416,14 @@ const JobView = () => {
     }
   };
 
+  const { isOnline, showOfflineToast } = useOnline();
+
   const handleApplicationSubmit = async () => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+
     // Validate required questions
     const missingRequired = jobQuestions
       .filter(q => q.is_required)

@@ -37,6 +37,7 @@ import { cn } from '@/lib/utils';
 import { useInterviews, Interview } from '@/hooks/useInterviews';
 import { format, isToday, isTomorrow } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 // Format relative time for news (e.g. "idag 08:30" or "igår 22:15")
 const formatNewsTime = (publishedAt: string | null): string => {
@@ -639,6 +640,12 @@ const NotesCard = memo(() => {
     if (content === serverContent) return;
 
     const timer = setTimeout(async () => {
+      // Check if online before saving
+      if (!navigator.onLine) {
+        console.log('Offline - skipping note save');
+        return;
+      }
+
       setIsSaving(true);
       try {
         if (noteData?.id) {

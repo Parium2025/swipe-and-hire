@@ -22,6 +22,7 @@ import {
   Check
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface ProfileBuilderProps {
   onProfileCompleted: () => void;
@@ -63,7 +64,14 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
     }
   };
 
+  const { isOnline, showOfflineToast } = useOnline();
+
   const handleSubmit = async () => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await updateProfile({

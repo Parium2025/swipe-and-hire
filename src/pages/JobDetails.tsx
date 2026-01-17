@@ -656,6 +656,12 @@ const JobDetails = () => {
   };
 
   const updateCandidateRating = async (applicantId: string, newRating: number) => {
+    // Check if online first
+    if (!navigator.onLine) {
+      toast({ title: 'Offline', description: 'Du måste vara online för att uppdatera betyg' });
+      return;
+    }
+
     const myCandidateId = myCandidatesMap.get(applicantId);
     if (!myCandidateId) {
       toast({ title: 'Info', description: 'Lägg först till kandidaten i din lista för att ge betyg' });
