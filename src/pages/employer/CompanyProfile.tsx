@@ -1068,40 +1068,46 @@ const CompanyProfile = () => {
                     className="space-y-3"
                   >
                     <div className="space-y-1.5">
-                      <Label htmlFor="interview_video_link" className="text-white flex items-center gap-1.5">
-                        <Video className="h-3.5 w-3.5" />
-                        Videolänk
-                      </Label>
-                      <Input
-                        id="interview_video_link"
-                        value={formData.interview_video_link}
-                        onChange={(e) => setFormData({...formData, interview_video_link: e.target.value})}
-                        placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
-                        className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
-                      />
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="interview_video_link" className="text-white flex items-center gap-1.5">
+                          <Video className="h-3.5 w-3.5" />
+                          Videolänk
+                          <span className="text-white/60 font-normal">(Din Teams, Zoom eller Google Meet-länk som visas för kandidater)</span>
+                        </Label>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="interview_video_link"
+                          value={formData.interview_video_link}
+                          onChange={(e) => setFormData({...formData, interview_video_link: e.target.value})}
+                          placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
+                          className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white flex-1"
+                        />
+                        
+                        {/* Validation icons inline */}
+                        {formData.interview_video_link && isValidMeetingLink(formData.interview_video_link) && (
+                          <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0" />
+                        )}
+                        {formData.interview_video_link && !isValidMeetingLink(formData.interview_video_link) && (
+                          <AlertCircle className="h-5 w-5 text-amber-400 flex-shrink-0" />
+                        )}
+                      </div>
                       
                       {/* Video link validation feedback */}
                       {formData.interview_video_link && !isValidMeetingLink(formData.interview_video_link) && (
-                        <div className="flex items-start gap-2 text-amber-400 text-xs mt-1">
-                          <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
-                          <span>
-                            Länken ser inte ut som en giltig möteslänk. Se till att den kommer från Teams, Zoom, Google Meet, Webex, Whereby, Jitsi, Skype, GoToMeeting eller BlueJeans.
-                          </span>
-                        </div>
+                        <p className="text-amber-400 text-xs">
+                          Länken ser inte ut som en giltig möteslänk från Teams, Zoom, Google Meet, Webex, Whereby, Jitsi, Skype, GoToMeeting eller BlueJeans.
+                        </p>
                       )}
                       
                       {formData.interview_video_link && isValidMeetingLink(formData.interview_video_link) && (
-                        <div className="flex items-center gap-2 text-green-400 text-xs mt-1">
-                          <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
-                          <span>Giltig möteslänk</span>
-                        </div>
+                        <p className="text-green-400 text-xs">Giltig möteslänk</p>
                       )}
-                      
-                      <p className="text-xs text-white">Din Teams, Zoom eller Google Meet-länk som visas för kandidater</p>
                       
                       {/* Expandable help section */}
                       <Collapsible>
-                        <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-white hover:text-white/80 transition-colors mt-1">
+                        <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-white hover:text-white/80 transition-colors">
                           <HelpCircle className="h-3.5 w-3.5" />
                           <span>Hur får jag min videolänk?</span>
                           <ChevronDown className="h-3 w-3" />
