@@ -31,6 +31,7 @@ export interface ApplicationData {
   is_profile_video?: boolean | null;
   viewed_at?: string | null;
   last_active_at?: string | null;
+  rating?: number | null;
 }
 
 const PAGE_SIZE = 25;
@@ -293,13 +294,28 @@ export const useApplicationsData = (searchQuery: string = '') => {
          });
        }
 
-       // Transform data to flatten job_postings and add profile media + last_active_at
+       // Fetch current user's ratings for these applicants in batch (instant display)
+       const ratingsMap: Record<string, number> = {};
+       const { data: ratingsData } = await supabase
+         .from('candidate_ratings')
+         .select('applicant_id, rating')
+         .eq('recruiter_id', user.id)
+         .in('applicant_id', applicantIds);
+
+       if (ratingsData) {
+         ratingsData.forEach((row: any) => {
+           ratingsMap[row.applicant_id] = row.rating;
+         });
+       }
+
+       // Transform data to flatten job_postings and add profile media + last_active_at + rating
        const items = baseData.map((item: any) => {
          const media =
            profileMediaMap[item.applicant_id] ||
            ({ profile_image_url: null, video_url: null, is_profile_video: null, last_active_at: null } as const);
 
          const activityLastActive = activityMap[item.applicant_id]?.last_active_at ?? null;
+         const rating = ratingsMap[item.applicant_id] ?? null;
 
          return {
            ...item,
@@ -311,6 +327,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
            // Prefer activity RPC to stay 1:1 with "Mina kandidater"
            last_active_at: activityLastActive ?? media.last_active_at,
            viewed_at: item.viewed_at,
+           rating,
            job_postings: undefined,
          };
        }) as ApplicationData[];
