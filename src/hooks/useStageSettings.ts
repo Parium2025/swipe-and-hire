@@ -257,6 +257,7 @@ export function useStageSettings() {
       color?: string;
       iconName?: string;
     }) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
       if (!user) throw new Error('Not authenticated');
 
       const existingSetting = dbSettings?.find(s => s.stage_key === stageKey);
@@ -304,6 +305,7 @@ export function useStageSettings() {
       color: string;
       iconName: string;
     }) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
       if (!user) throw new Error('Not authenticated');
 
       // Generate unique stage key
@@ -337,6 +339,7 @@ export function useStageSettings() {
 
   const deleteCustomStage = useMutation({
     mutationFn: async (stageKey: string) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
       if (!user) throw new Error('Not authenticated');
 
       // Verify it's a custom stage
@@ -358,6 +361,7 @@ export function useStageSettings() {
   // Delete any stage (custom or default) - for when stage is empty
   const deleteStage = useMutation({
     mutationFn: async (stageKey: string) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
       if (!user) throw new Error('Not authenticated');
 
       const isDefault = DEFAULT_STAGE_KEYS.includes(stageKey as any);
