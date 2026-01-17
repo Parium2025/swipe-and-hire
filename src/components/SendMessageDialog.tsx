@@ -5,7 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { Loader2, Send, MessageSquare } from 'lucide-react';
+import { Loader2, Send, MessageSquare, WifiOff } from 'lucide-react';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface SendMessageDialogProps {
   open: boolean;
@@ -23,10 +24,16 @@ export function SendMessageDialog({
   jobId,
 }: SendMessageDialogProps) {
   const { user } = useAuth();
+  const { isOnline, showOfflineToast } = useOnline();
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
 
   const handleSend = async () => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     if (!user || !message.trim()) return;
 
     setSending(true);
@@ -53,6 +60,8 @@ export function SendMessageDialog({
     }
   };
 
+  const isDisabled = !message.trim() || sending || !isOnline;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md">
@@ -72,6 +81,7 @@ export function SendMessageDialog({
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Skriv ditt meddelande här..."
             className="min-h-[120px] bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none"
+            disabled={!isOnline}
           />
         </div>
 
@@ -81,15 +91,18 @@ export function SendMessageDialog({
           </Button>
           <Button
             variant="glassBlue"
-            disabled={!message.trim() || sending}
+            disabled={isDisabled}
             onClick={handleSend}
+            className={!isOnline ? 'opacity-50 cursor-not-allowed' : ''}
           >
             {sending ? (
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+            ) : !isOnline ? (
+              <WifiOff className="h-4 w-4 mr-1.5" />
             ) : (
               <Send className="h-4 w-4 mr-1.5" />
             )}
-            Skicka
+            {!isOnline ? 'Offline' : 'Skicka'}
           </Button>
         </div>
       </DialogContent>

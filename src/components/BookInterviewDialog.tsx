@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X } from 'lucide-react';
+import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X, WifiOff } from 'lucide-react';
 import { format, startOfDay, isToday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface BookInterviewDialogProps {
   open: boolean;
@@ -45,6 +46,7 @@ export const BookInterviewDialog = ({
   onSuccess,
 }: BookInterviewDialogProps) => {
   const { user, profile } = useAuth();
+  const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -451,14 +453,30 @@ export const BookInterviewDialog = ({
           </Button>
           <Button 
             variant="outline"
-            onClick={handleSubmit} 
-            disabled={isSubmitting || !date}
-            className="rounded-full bg-primary md:hover:bg-primary md:hover:text-white border border-white/20 text-white px-8 py-2"
+            onClick={() => {
+              if (!isOnline) {
+                showOfflineToast();
+                return;
+              }
+              handleSubmit();
+            }} 
+            disabled={isSubmitting || !date || !isOnline}
+            className={cn(
+              "rounded-full border border-white/20 text-white px-8 py-2",
+              isOnline 
+                ? "bg-primary md:hover:bg-primary md:hover:text-white" 
+                : "bg-gray-500/50 cursor-not-allowed"
+            )}
           >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Skickar...
+              </>
+            ) : !isOnline ? (
+              <>
+                <WifiOff className="mr-2 h-4 w-4" />
+                Offline
               </>
             ) : (
               'Skicka intervjukallelse'
