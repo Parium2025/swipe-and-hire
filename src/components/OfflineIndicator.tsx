@@ -60,11 +60,12 @@ export const OfflineIndicator = () => {
 
   return (
     <div 
-      className={`fixed top-0 left-0 right-0 z-50 px-4 pt-4 transition-all duration-300 ease-out ${
+      className={`fixed left-0 right-0 z-40 px-4 transition-all duration-300 ease-out ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
           : 'opacity-0 -translate-y-2'
       }`}
+      style={{ top: '3.5rem' }} // Under headern (h-14 = 3.5rem)
     >
       <Alert className="border-white/20 bg-slate-900/90 backdrop-blur-xl text-white shadow-lg">
         <div className="flex items-center justify-center gap-2">
