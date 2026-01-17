@@ -19,7 +19,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
-import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare } from 'lucide-react';
+import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare, Video } from 'lucide-react';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
@@ -971,36 +971,68 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="interview_office_address" className="text-white flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5" />
-                    Intervjuadress
-                  </Label>
-                  <Input
-                    id="interview_office_address"
-                    value={formData.interview_office_address}
-                    onChange={(e) => setFormData({...formData, interview_office_address: e.target.value})}
-                    placeholder="Storgatan 1, 111 22 Stockholm"
-                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
-                  />
-                  <p className="text-xs text-white">Adressen som visas för kandidater vid fysiska intervjuer</p>
+                {/* Video Interview Settings */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm bg-white/20 border-white/40 text-white"
+                    >
+                      <Video className="h-3.5 w-3.5" />
+                      <span>Video</span>
+                    </button>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                    <p className="text-white/80 text-sm">
+                      Videosamtal hanteras automatiskt via Parium. Inga ytterligare inställningar behövs.
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="interview_office_instructions" className="text-white">
-                    Instruktioner till kandidaten
-                  </Label>
-                  <Textarea
-                    id="interview_office_instructions"
-                    value={formData.interview_office_instructions}
-                    onChange={(e) => setFormData({...formData, interview_office_instructions: e.target.value})}
-                    placeholder="T.ex. parkering, ingång, vem de ska fråga efter..."
-                    rows={2}
-                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
-                  />
+                {/* Office Interview Settings */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm bg-white/20 border-white/40 text-white"
+                    >
+                      <Building2 className="h-3.5 w-3.5" />
+                      <span>Kontor</span>
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <Label htmlFor="interview_office_address" className="text-white flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5" />
+                      Intervjuadress
+                    </Label>
+                    <Input
+                      id="interview_office_address"
+                      value={formData.interview_office_address}
+                      onChange={(e) => setFormData({...formData, interview_office_address: e.target.value})}
+                      placeholder="Storgatan 1, 111 22 Stockholm"
+                      className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
+                    />
+                    <p className="text-xs text-white">Adressen som visas för kandidater vid fysiska intervjuer</p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="interview_office_instructions" className="text-white">
+                      Instruktioner till kandidaten
+                    </Label>
+                    <Textarea
+                      id="interview_office_instructions"
+                      value={formData.interview_office_instructions}
+                      onChange={(e) => setFormData({...formData, interview_office_instructions: e.target.value})}
+                      placeholder="T.ex. parkering, ingång, vem de ska fråga efter..."
+                      rows={2}
+                      className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-1.5">
+                {/* Default Message */}
+                <div className="space-y-1.5 pt-2 border-t border-white/10">
                   <Label htmlFor="interview_default_message" className="text-white flex items-center gap-1.5">
                     <MessageSquare className="h-3.5 w-3.5" />
                     Standardmeddelande
