@@ -4,19 +4,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 
-const SYNC_INTERVAL = 30_000; // 30 sekunder mellan bakgrundsuppdateringar
-const PAGE_SIZE = 25;
+const SYNC_INTERVAL = 10_000; // 10 sekunder som backup-polling
+const PAGE_SIZE = 50; // Större batch för att ha mer data redo
 
 /**
- * Hook som kontinuerligt förladdar kandidatdata i bakgrunden.
+ * Hook som kontinuerligt förladdar kandidatdata i bakgrunden via:
+ * 1. Supabase Realtime - pushar ändringar DIREKT när något ändras i databasen
+ * 2. Polling var 10:e sekund som backup
+ * 
  * Detta gör att /candidates och /my-candidates alltid har färsk data
- * utan att visa laddningsindikator när användaren navigerar dit.
+ * och visas DIREKT utan laddningsindikator - "bam!"
  */
 export const useCandidateBackgroundSync = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isRunningRef = useRef(false);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -28,12 +32,11 @@ export const useCandidateBackgroundSync = () => {
       isRunningRef.current = true;
 
       try {
-        // 1. Synka "Alla kandidater" (/candidates) data
-        await syncApplicationsData(userId, queryClient);
-
-        // 2. Synka "Mina kandidater" (/my-candidates) data
-        await syncMyCandidatesData(userId, queryClient);
-
+        // Synka all data parallellt för maximal hastighet
+        await Promise.all([
+          syncApplicationsData(userId, queryClient),
+          syncMyCandidatesData(userId, queryClient),
+        ]);
       } catch (error) {
         console.warn('Background candidate sync failed:', error);
       } finally {
@@ -41,16 +44,74 @@ export const useCandidateBackgroundSync = () => {
       }
     };
 
-    // Kör direkt vid mount
+    // Kör DIREKT vid mount
     syncCandidates();
 
-    // Starta kontinuerlig polling
+    // Starta kontinuerlig backup-polling (var 10:e sekund)
     intervalRef.current = setInterval(syncCandidates, SYNC_INTERVAL);
+
+    // Sätt upp Supabase Realtime för INSTANT uppdateringar
+    // När någon ändrar job_applications eller my_candidates pushas det direkt hit
+    channelRef.current = supabase
+      .channel(`candidate-sync-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_applications',
+        },
+        () => {
+          // Ny ansökan eller uppdatering - synka direkt!
+          syncCandidates();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'my_candidates',
+        },
+        () => {
+          // Kandidat flyttad/tillagd/borttagen - synka direkt!
+          syncCandidates();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'candidate_ratings',
+        },
+        () => {
+          // Betyg ändrat - synka direkt!
+          syncCandidates();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'candidate_notes',
+        },
+        () => {
+          // Anteckning ändrad - synka direkt!
+          syncCandidates();
+        }
+      )
+      .subscribe();
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
+      }
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
       }
     };
   }, [user, queryClient]);
@@ -61,6 +122,7 @@ export const useCandidateBackgroundSync = () => {
  */
 async function syncApplicationsData(userId: string, queryClient: ReturnType<typeof useQueryClient>) {
   const queryKey = ['applications', userId, ''];
+  const PAGE_SIZE = 50;
 
   // Hämta första sidan med kandidater
   const { data: baseData, error: baseError } = await supabase
@@ -186,6 +248,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
  */
 async function syncMyCandidatesData(userId: string, queryClient: ReturnType<typeof useQueryClient>) {
   const queryKey = ['my-candidates', userId, ''];
+  const PAGE_SIZE = 50;
 
   // Hämta första sidan med mina kandidater
   const { data: myCandidates, error: mcError } = await supabase
