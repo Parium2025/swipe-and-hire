@@ -128,21 +128,33 @@ export default function Messages() {
     const rightIcon = rightEmptyIconRef.current;
     if (!leftIcon || !rightIcon) return;
 
-    const update = () => {
+    // If you need a micro-adjustment, change this (negative = move left empty state up)
+    const FINE_TUNE_PX = 0;
+
+    const compute = () => {
       const delta = rightIcon.getBoundingClientRect().top - leftIcon.getBoundingClientRect().top;
-      if (Math.abs(delta) < 0.5) return;
-      setLeftEmptyAlignOffset((prev) => prev + delta);
+      const next = delta + FINE_TUNE_PX;
+      setLeftEmptyAlignOffset((prev) => (Math.abs(prev - next) < 0.5 ? prev : next));
     };
 
-    const raf = requestAnimationFrame(update);
-    const onResize = () => requestAnimationFrame(update);
+    // Let layout settle (fonts, scrollbars) then compute a couple times.
+    const raf1 = requestAnimationFrame(() => {
+      compute();
+      requestAnimationFrame(compute);
+    });
 
-    window.addEventListener('resize', onResize);
+    const ro = new ResizeObserver(compute);
+    ro.observe(leftIcon);
+    ro.observe(rightIcon);
+
+    window.addEventListener('resize', compute);
+
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', onResize);
+      cancelAnimationFrame(raf1);
+      ro.disconnect();
+      window.removeEventListener('resize', compute);
     };
-  }, [showEmptyConversationList, showEmptyChatState, leftEmptyAlignOffset]);
+  }, [showEmptyConversationList, showEmptyChatState]);
 
   const handleSelectConversation = (convId: string) => {
     setSelectedConversationId(convId);
