@@ -351,6 +351,10 @@ const EmployerProfile = () => {
     const onUnsavedConfirm = () => {
       if (!originalValues) return;
       setFormData({ ...originalValues });
+      // IMPORTANT: user chose to discard changes -> clear local draft as well
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {}
       setHasUnsavedChanges(false);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);

@@ -574,6 +574,8 @@ const Profile = () => {
       try {
         sessionStorage.removeItem(LOCAL_MEDIA_KEY);
       } catch {}
+      // IMPORTANT: user chose to discard changes -> clear local draft as well
+      clearProfileDraft();
       setHasUnsavedChanges(false);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
