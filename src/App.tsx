@@ -32,6 +32,10 @@ import { OnlineStatusProvider } from "@/components/OnlineStatusProvider";
 import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 import { PushNotificationProvider } from "@/components/PushNotificationProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { cleanupOldDrafts } from "@/lib/draftUtils";
+
+// Run draft cleanup once on app load (removes drafts older than 1 day)
+cleanupOldDrafts(24 * 60 * 60 * 1000);
 
 const queryClient = new QueryClient({
   defaultOptions: {
