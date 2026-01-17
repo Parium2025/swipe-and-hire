@@ -17,12 +17,15 @@ import {
   Building2,
   Loader2,
   Timer,
-  Users
+  Users,
+  Video
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { getTimeRemaining } from '@/lib/date';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { useCandidateInterviews } from '@/hooks/useInterviews';
+import CandidateInterviewCard from '@/components/CandidateInterviewCard';
 
 interface Application {
   id: string;
@@ -104,6 +107,9 @@ const MyApplications = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  
+  // Get candidate's interviews
+  const { interviews, isLoading: interviewsLoading } = useCandidateInterviews();
 
   const { data: applications, isLoading, error } = useQuery({
     queryKey: ['my-applications', user?.id],
@@ -236,22 +242,46 @@ const MyApplications = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-3 md:px-6 animate-fade-in">
-      <div className="text-center mb-8">
-        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
-        <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
-      </div>
+    <div className="max-w-4xl mx-auto px-3 md:px-6 animate-fade-in space-y-8">
+      {/* Interviews Section */}
+      {interviews && interviews.length > 0 && (
+        <section>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
+              <Video className="h-5 w-5 text-secondary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white">Kommande intervjuer</h2>
+              <p className="text-sm text-white/70">
+                {interviews.length === 1 ? '1 inbokad intervju' : `${interviews.length} inbokade intervjuer`}
+              </p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {interviews.map((interview: any) => (
+              <CandidateInterviewCard key={interview.id} interview={interview} />
+            ))}
+          </div>
+        </section>
+      )}
 
-      {!applications || applications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
-          <Briefcase className="h-12 w-12 text-white mb-4" />
-          <p className="text-white text-center mb-2">Inga ansökningar än</p>
-          <p className="text-white text-sm text-center">
-            När du söker jobb kommer dina ansökningar att visas här
-          </p>
+      {/* Applications Section */}
+      <section>
+        <div className="text-center mb-8">
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
+          <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
         </div>
-      ) : (
-        <div className="space-y-4">
+
+        {!applications || applications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
+            <Briefcase className="h-12 w-12 text-white mb-4" />
+            <p className="text-white text-center mb-2">Inga ansökningar än</p>
+            <p className="text-white text-sm text-center">
+              När du söker jobb kommer dina ansökningar att visas här
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
           {applications.map((application) => {
             const job = application.job_postings;
             const company = job?.profiles;
@@ -351,7 +381,8 @@ const MyApplications = () => {
             );
           })}
         </div>
-      )}
+        )}
+      </section>
     </div>
   );
 };
