@@ -151,6 +151,8 @@ export function useMessages() {
   // Mark message as read
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId: string) => {
+      if (!navigator.onLine) return; // Silent fail for mark as read - non-critical
+      
       const { error } = await supabase
         .from('messages')
         .update({ is_read: true })

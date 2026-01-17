@@ -68,6 +68,8 @@ export const useInterviews = () => {
       interviewId: string; 
       status: Interview['status'];
     }) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
+      
       const { error } = await supabase
         .from('interviews')
         .update({ status })
@@ -83,6 +85,8 @@ export const useInterviews = () => {
   // Cancel interview
   const cancelInterview = useMutation({
     mutationFn: async (interviewId: string) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
+      
       const { error } = await supabase
         .from('interviews')
         .update({ status: 'cancelled' })
@@ -142,6 +146,8 @@ export const useCandidateInterviews = () => {
       interviewId: string; 
       accept: boolean;
     }) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
+      
       const { error } = await supabase
         .from('interviews')
         .update({ status: accept ? 'confirmed' : 'declined' })

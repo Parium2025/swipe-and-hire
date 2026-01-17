@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { useToast } from '@/hooks/use-toast';
+import { useOnline } from '@/hooks/useOnlineStatus';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { Plus, Edit, Trash2, Calendar, Loader2, Star, StarOff } from 'lucide-react';
 
@@ -55,6 +56,7 @@ const JobTemplatesOverview = () => {
 
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isOnline, showOfflineToast } = useOnline();
 
   const fetchTemplates = async () => {
     if (!user) return;
@@ -110,6 +112,11 @@ const JobTemplatesOverview = () => {
 
   const handleCreate = async () => {
     if (!user) return;
+    
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -163,6 +170,11 @@ const JobTemplatesOverview = () => {
 
   const handleEdit = async () => {
     if (!user || !editingTemplate) return;
+    
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -214,6 +226,11 @@ const JobTemplatesOverview = () => {
 
   const handleDelete = async (templateId: string, templateName: string) => {
     if (!confirm(`Är du säker på att du vill ta bort mallen "${templateName}"?`)) return;
+    
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -246,6 +263,11 @@ const JobTemplatesOverview = () => {
   };
 
   const toggleDefault = async (templateId: string) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    
     try {
       // First, remove default status from all templates
       await supabase
