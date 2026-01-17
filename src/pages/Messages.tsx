@@ -241,7 +241,7 @@ export default function Messages() {
               onBack={handleBackToList}
             />
           ) : (
-            <EmptyChatState />
+            <EmptyChatState offsetY={listHeaderHeight / 2} />
           )}
         </div>
       </div>
