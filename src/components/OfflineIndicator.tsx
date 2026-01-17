@@ -71,8 +71,10 @@ export const OfflineIndicator = () => {
 
   // Bygg meddelande med draft-tid om tillgänglig
   const getMessage = () => {
+    const draftSuffix = draftTime ? ` – sparat ${draftTime}` : '';
+    
     if (showReconnecting) {
-      return 'Återansluter...';
+      return `Återansluter...${draftSuffix}`;
     }
     if (draftTime) {
       return `Offline – dina ändringar är sparade (${draftTime})`;
