@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,12 +56,14 @@ const JobApplication = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { setHasUnsavedChanges } = useUnsavedChanges();
   
   const [job, setJob] = useState<JobPosting | null>(null);
   const [questions, setQuestions] = useState<JobQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<any>(null);
   
   // Form data
   const [formData, setFormData] = useState({
@@ -134,6 +137,33 @@ const JobApplication = () => {
       }
     }
   }, [formData, jobId, draftRestored]);
+
+  // Track unsaved changes for navigation guard
+  useEffect(() => {
+    if (!initialFormData) return;
+    const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    setHasUnsavedChanges(hasChanges);
+  }, [formData, initialFormData, setHasUnsavedChanges]);
+
+  // Listen for unsaved-confirm event to clear draft when user chooses "Lämna utan att spara"
+  useEffect(() => {
+    const onUnsavedConfirm = () => {
+      if (jobId) {
+        clearJobApplicationDraft(jobId);
+        console.log('🗑️ Job application draft cleared on discard');
+      }
+      setHasUnsavedChanges(false);
+    };
+    window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
+    return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
+  }, [jobId, setHasUnsavedChanges]);
+
+  // Store initial form data after restore to detect changes
+  useEffect(() => {
+    if (draftRestored && !initialFormData) {
+      setInitialFormData(JSON.parse(JSON.stringify(formData)));
+    }
+  }, [draftRestored, initialFormData, formData]);
 
   useEffect(() => {
     if (jobId) {
