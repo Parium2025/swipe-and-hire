@@ -19,7 +19,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
-import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare, Video, HelpCircle, AlertCircle } from 'lucide-react';
+import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle, CalendarDays, MapPin, MessageSquare, Video, HelpCircle, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
@@ -1080,13 +1080,20 @@ const CompanyProfile = () => {
                         className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-9 [&]:text-white"
                       />
                       
-                      {/* Video link validation warning */}
+                      {/* Video link validation feedback */}
                       {formData.interview_video_link && !isValidMeetingLink(formData.interview_video_link) && (
                         <div className="flex items-start gap-2 text-amber-400 text-xs mt-1">
                           <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
                           <span>
                             Länken ser inte ut som en giltig möteslänk. Se till att den kommer från Teams, Zoom, Google Meet, Webex, Whereby, Jitsi, Skype, GoToMeeting eller BlueJeans.
                           </span>
+                        </div>
+                      )}
+                      
+                      {formData.interview_video_link && isValidMeetingLink(formData.interview_video_link) && (
+                        <div className="flex items-center gap-2 text-green-400 text-xs mt-1">
+                          <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span>Giltig möteslänk</span>
                         </div>
                       )}
                       
