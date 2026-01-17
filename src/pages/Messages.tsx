@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, type Ref } from 'react';
 import { useConversations, useConversationMessages, Conversation, ConversationMessage, useCreateConversation } from '@/hooks/useConversations';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
@@ -112,8 +112,14 @@ export default function Messages() {
   const showEmptyChatState = !selectedConversation;
 
   useLayoutEffect(() => {
-    // Only align when BOTH empty states are visible.
+    // Only align when BOTH empty states are visible (desktop split view).
     if (!showEmptyConversationList || !showEmptyChatState) {
+      setLeftEmptyAlignOffset(0);
+      return;
+    }
+
+    if (typeof window !== 'undefined' && !window.matchMedia('(min-width: 768px)').matches) {
+      // On mobile the right pane isn't visible, so don't try to align.
       setLeftEmptyAlignOffset(0);
       return;
     }
@@ -128,18 +134,15 @@ export default function Messages() {
       setLeftEmptyAlignOffset((prev) => prev + delta);
     };
 
-    // Run twice to let layout settle (fonts, scrollbars).
-    const raf = requestAnimationFrame(() => {
-      update();
-      requestAnimationFrame(update);
-    });
+    const raf = requestAnimationFrame(update);
+    const onResize = () => requestAnimationFrame(update);
 
-    window.addEventListener('resize', update);
+    window.addEventListener('resize', onResize);
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener('resize', update);
+      window.removeEventListener('resize', onResize);
     };
-  }, [showEmptyConversationList, showEmptyChatState]);
+  }, [showEmptyConversationList, showEmptyChatState, leftEmptyAlignOffset]);
 
   const handleSelectConversation = (convId: string) => {
     setSelectedConversationId(convId);
@@ -785,7 +788,7 @@ function EmptyConversationList({
   iconRef,
 }: {
   hasSearch: boolean;
-  iconRef?: React.Ref<HTMLDivElement>;
+  iconRef?: Ref<HTMLDivElement>;
 }) {
   return (
     <div className="flex flex-col items-center px-4 text-center">
@@ -807,7 +810,7 @@ function EmptyConversationList({
   );
 }
 
-function EmptyChatState({ iconRef }: { iconRef?: React.Ref<HTMLDivElement> }) {
+function EmptyChatState({ iconRef }: { iconRef?: Ref<HTMLDivElement> }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
       <div
