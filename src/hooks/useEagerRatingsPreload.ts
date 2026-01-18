@@ -1,9 +1,11 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { preloadWeatherLocation } from './useWeather';
 
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
+const WEATHER_CACHE_KEY = 'parium_weather_data';
 
 interface RatingsCacheData {
   ratings: Record<string, number>;
@@ -11,14 +13,15 @@ interface RatingsCacheData {
 }
 
 /**
- * Hook som förladddar ratings och stage-settings DIREKT vid första användaraktivitet.
+ * Hook som förladddar ratings, stage-settings OCH väderdata DIREKT vid första användaraktivitet.
  * 
  * Problemet: useCandidateBackgroundSync körs först när EmployerLayout monteras,
  * men om användaren varit inaktiv i 2 timmar och sen navigerar till /candidates
  * så är ratings-cachen tom → flicker där betyg syns efter millisekunder.
+ * Samma gäller väder - cachen går ut efter 5 min, så snö/regn flickrar.
  * 
  * Lösningen: Lyssna på FÖRSTA användarinteraktion (tab-focus, musrörelse, klick)
- * och förladda ratings INNAN användaren hinner navigera.
+ * och förladda ratings + väder INNAN användaren hinner navigera.
  * 
  * Detta körs i EmployerLayout och triggas EN GÅNG per session.
  */
@@ -27,31 +30,44 @@ export const useEagerRatingsPreload = () => {
   const hasPreloadedRef = useRef(false);
   const isPreloadingRef = useRef(false);
 
-  const preloadRatings = useCallback(async () => {
-    if (!user || hasPreloadedRef.current || isPreloadingRef.current) return;
-    
-    isPreloadingRef.current = true;
-    const userId = user.id;
-
+  // Preload väder om cache är gammal
+  const preloadWeatherIfStale = useCallback(async () => {
     try {
-      // Kolla om cache är fräsch (under 5 min) - skippa då
-      const existingCache = localStorage.getItem(RATINGS_CACHE_PREFIX + userId);
-      if (existingCache) {
-        try {
-          const parsed: RatingsCacheData = JSON.parse(existingCache);
-          const age = Date.now() - parsed.timestamp;
-          if (age < 5 * 60 * 1000 && Object.keys(parsed.ratings).length > 0) {
-            // Cache är fräsch - skippa preload
-            hasPreloadedRef.current = true;
-            isPreloadingRef.current = false;
-            return;
-          }
-        } catch {
-          // Korrupt cache - fortsätt med preload
+      const existingWeather = localStorage.getItem(WEATHER_CACHE_KEY);
+      if (existingWeather) {
+        const parsed = JSON.parse(existingWeather);
+        const age = Date.now() - parsed.timestamp;
+        // Om cache är under 5 min - skippa
+        if (age < 5 * 60 * 1000) {
+          return;
         }
       }
+      // Cache är gammal eller saknas - förladda väder
+      await preloadWeatherLocation();
+    } catch (error) {
+      console.warn('Weather preload failed:', error);
+    }
+  }, []);
 
-      // Hämta alla ratings för denna användare
+  // Preload ratings och stage-settings
+  const preloadRatingsAndStages = useCallback(async (userId: string) => {
+    // Kolla om cache är fräsch (under 5 min) - skippa då
+    const existingCache = localStorage.getItem(RATINGS_CACHE_PREFIX + userId);
+    let shouldFetchRatings = true;
+    
+    if (existingCache) {
+      try {
+        const parsed: RatingsCacheData = JSON.parse(existingCache);
+        const age = Date.now() - parsed.timestamp;
+        if (age < 5 * 60 * 1000 && Object.keys(parsed.ratings).length > 0) {
+          shouldFetchRatings = false;
+        }
+      } catch {
+        // Korrupt cache - fortsätt med preload
+      }
+    }
+
+    if (shouldFetchRatings) {
       const { data: ratingsData, error: ratingsError } = await supabase
         .from('candidate_ratings')
         .select('applicant_id, rating')
@@ -63,7 +79,6 @@ export const useEagerRatingsPreload = () => {
           ratingsMap[row.applicant_id] = row.rating;
         });
 
-        // Spara till localStorage
         if (Object.keys(ratingsMap).length > 0) {
           localStorage.setItem(RATINGS_CACHE_PREFIX + userId, JSON.stringify({
             ratings: ratingsMap,
@@ -71,51 +86,66 @@ export const useEagerRatingsPreload = () => {
           }));
         }
       }
+    }
 
-      // Hämta stage-settings också (för Kanban-vy utan flicker)
-      const existingStageCache = localStorage.getItem(STAGE_SETTINGS_CACHE_KEY + userId);
-      let shouldFetchStages = true;
-      
-      if (existingStageCache) {
-        try {
-          const parsed = JSON.parse(existingStageCache);
-          const age = Date.now() - parsed.timestamp;
-          if (age < 5 * 60 * 1000) {
-            shouldFetchStages = false;
-          }
-        } catch {
-          // Korrupt cache - fortsätt
+    // Hämta stage-settings också (för Kanban-vy utan flicker)
+    const existingStageCache = localStorage.getItem(STAGE_SETTINGS_CACHE_KEY + userId);
+    let shouldFetchStages = true;
+    
+    if (existingStageCache) {
+      try {
+        const parsed = JSON.parse(existingStageCache);
+        const age = Date.now() - parsed.timestamp;
+        if (age < 5 * 60 * 1000) {
+          shouldFetchStages = false;
         }
+      } catch {
+        // Korrupt cache - fortsätt
       }
+    }
 
-      if (shouldFetchStages) {
-        const { data: stageSettings, error: stageError } = await supabase
-          .from('user_stage_settings')
-          .select('*')
-          .eq('user_id', userId)
-          .order('order_index', { ascending: true });
+    if (shouldFetchStages) {
+      const { data: stageSettings, error: stageError } = await supabase
+        .from('user_stage_settings')
+        .select('*')
+        .eq('user_id', userId)
+        .order('order_index', { ascending: true });
 
-        if (!stageError && stageSettings) {
-          localStorage.setItem(STAGE_SETTINGS_CACHE_KEY + userId, JSON.stringify({
-            settings: stageSettings,
-            timestamp: Date.now()
-          }));
-        }
+      if (!stageError && stageSettings) {
+        localStorage.setItem(STAGE_SETTINGS_CACHE_KEY + userId, JSON.stringify({
+          settings: stageSettings,
+          timestamp: Date.now()
+        }));
       }
+    }
+  }, []);
+
+  const preloadAllData = useCallback(async () => {
+    if (!user || hasPreloadedRef.current || isPreloadingRef.current) return;
+    
+    isPreloadingRef.current = true;
+    const userId = user.id;
+
+    try {
+      // Kör alla preloads parallellt för maximal hastighet
+      await Promise.all([
+        preloadRatingsAndStages(userId),
+        preloadWeatherIfStale(),
+      ]);
 
       hasPreloadedRef.current = true;
     } catch (error) {
-      console.warn('Eager ratings preload failed:', error);
+      console.warn('Eager preload failed:', error);
     } finally {
       isPreloadingRef.current = false;
     }
-  }, [user]);
+  }, [user, preloadRatingsAndStages, preloadWeatherIfStale]);
 
   useEffect(() => {
     if (!user) return;
 
     // Kör preload DIREKT vid mount (användaren är redan aktiv om de är här)
-    preloadRatings();
+    preloadAllData();
 
     // Lyssna på tab-focus (användare kommer tillbaka efter inaktivitet)
     const handleVisibilityChange = () => {
@@ -123,21 +153,23 @@ export const useEagerRatingsPreload = () => {
         // Reset hasPreloaded så vi kan preloada igen vid nästa tab-focus
         // (om det gått mer än 5 min sedan senaste preload)
         const existingCache = localStorage.getItem(RATINGS_CACHE_PREFIX + user.id);
+        let shouldRefresh = true;
+        
         if (existingCache) {
           try {
             const parsed: RatingsCacheData = JSON.parse(existingCache);
             const age = Date.now() - parsed.timestamp;
-            if (age > 5 * 60 * 1000) {
-              hasPreloadedRef.current = false;
-              preloadRatings();
+            if (age < 5 * 60 * 1000) {
+              shouldRefresh = false;
             }
           } catch {
-            hasPreloadedRef.current = false;
-            preloadRatings();
+            // Korrupt cache - refresh
           }
-        } else {
+        }
+        
+        if (shouldRefresh) {
           hasPreloadedRef.current = false;
-          preloadRatings();
+          preloadAllData();
         }
       }
     };
@@ -147,7 +179,7 @@ export const useEagerRatingsPreload = () => {
     const handleFirstInteraction = () => {
       if (firstInteractionHandled) return;
       firstInteractionHandled = true;
-      preloadRatings();
+      preloadAllData();
       // Ta bort lyssnare efter första interaktion
       document.removeEventListener('mousemove', handleFirstInteraction);
       document.removeEventListener('click', handleFirstInteraction);
@@ -168,7 +200,7 @@ export const useEagerRatingsPreload = () => {
       document.removeEventListener('keydown', handleFirstInteraction);
       document.removeEventListener('touchstart', handleFirstInteraction);
     };
-  }, [user, preloadRatings]);
+  }, [user, preloadAllData]);
 };
 
 export default useEagerRatingsPreload;
