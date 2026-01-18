@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X, WifiOff } from 'lucide-react';
 import { format, startOfDay, isToday } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -263,25 +264,35 @@ export const BookInterviewDialog = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContentNoFocus 
         hideClose
-        className="w-[min(90vw,480px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden flex flex-col"
+        className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden flex flex-col"
       >
-        <DialogHeader className="px-5 pt-5 pb-3 relative">
-          <button
-            onClick={() => handleOpenChange(false)}
-            className="absolute right-0 top-0 h-8 w-8 flex items-center justify-center text-white/70 hover:text-white transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <DialogTitle className="flex items-center gap-2 text-white text-xl">
-            <CalendarIcon className="h-5 w-5" />
-            Boka intervju
-          </DialogTitle>
-          <DialogDescription className="text-white">
-            Skicka en intervjukallelse till {candidateName} för tjänsten {jobTitle}
-          </DialogDescription>
+        <DialogHeader className="sr-only">
+          <DialogTitle className="sr-only">Boka intervju</DialogTitle>
+          <DialogDescription className="sr-only">Skicka en intervjukallelse till {candidateName}</DialogDescription>
         </DialogHeader>
+        
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full flex flex-col flex-1 min-h-0">
+          <CardHeader className="pb-4 pt-6">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-white flex-1 text-center text-xl flex items-center justify-center gap-2">
+                <CalendarIcon className="h-5 w-5" />
+                Boka intervju
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleOpenChange(false)}
+                className="absolute right-2 top-2 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <CardDescription className="text-white text-center text-sm leading-snug mt-2">
+              Skicka en intervjukallelse till {candidateName} för tjänsten {jobTitle}
+            </CardDescription>
+          </CardHeader>
 
-        <div className="space-y-4 px-5 pb-5 overflow-y-auto flex-1 min-h-0">
+        <CardContent className="space-y-4 px-4 pb-4 overflow-y-auto flex-1 min-h-0">
           {/* Date picker */}
           <div className="space-y-2">
             <Label className="text-white">Datum</Label>
@@ -446,49 +457,48 @@ export const BookInterviewDialog = ({
               rows={4}
               className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
             />
-          </div>
-        </div>
+            </div>
 
-        {/* Actions */}
-        <div className="flex justify-center gap-3 px-5 pb-5 pt-2 border-t border-white/10">
-          <Button 
-            variant="glass" 
-            onClick={() => handleOpenChange(false)}
-          >
-            Avbryt
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={() => {
-              if (!isOnline) {
-                showOfflineToast();
-                return;
-              }
-              handleSubmit();
-            }} 
-            disabled={isSubmitting || !date || !isOnline}
-            className={cn(
-              "rounded-full border border-white/20 text-white px-8 py-2",
-              isOnline 
-                ? "bg-primary md:hover:bg-primary md:hover:text-white" 
-                : "bg-gray-500/50 cursor-not-allowed"
-            )}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Skickar...
-              </>
-            ) : !isOnline ? (
-              <>
-                <WifiOff className="mr-2 h-4 w-4" />
-                Offline
-              </>
-            ) : (
-              'Skicka intervjukallelse'
-            )}
-          </Button>
-        </div>
+            {/* Actions */}
+            <div className="flex gap-2 pt-4">
+              <Button 
+                onClick={() => {
+                  if (!isOnline) {
+                    showOfflineToast();
+                    return;
+                  }
+                  handleSubmit();
+                }} 
+                disabled={isSubmitting || !date || !isOnline}
+                className={`flex-1 min-h-[44px] rounded-full transition-all duration-150 active:scale-95 ${
+                  !isSubmitting && date && isOnline ? 'border border-white/30' : ''
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                    Skickar...
+                  </>
+                ) : !isOnline ? (
+                  <>
+                    <WifiOff className="h-4 w-4 mr-1.5" />
+                    Offline
+                  </>
+                ) : (
+                  'Skicka intervjukallelse'
+                )}
+              </Button>
+              <Button 
+                variant="glass" 
+                onClick={() => handleOpenChange(false)}
+                className="min-h-[44px] rounded-full"
+              >
+                Avbryt
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
       </DialogContentNoFocus>
     </Dialog>
   );
