@@ -104,16 +104,17 @@ export function SendMessageDialog({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Skriv ditt meddelande här..."
-              className="min-h-[120px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-none transition-all duration-150"
+              className="min-h-[160px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-none transition-all duration-150"
               disabled={!isOnline}
             />
 
-            <div className="flex justify-center gap-3 pt-2">
+            <div className="flex gap-2 pt-2">
               <Button
-                variant="glassBlue"
-                disabled={isDisabled}
                 onClick={handleSend}
-                className={!isOnline ? 'opacity-50 cursor-not-allowed' : ''}
+                disabled={isDisabled}
+                className={`flex-1 min-h-[44px] rounded-full transition-all duration-150 active:scale-95 ${
+                  !sending && message.trim() && isOnline ? 'border border-white/30' : ''
+                }`}
               >
                 {sending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
@@ -125,8 +126,9 @@ export function SendMessageDialog({
                 {!isOnline ? 'Offline' : 'Skicka'}
               </Button>
               <Button 
+                variant="glass"
                 onClick={() => onOpenChange(false)}
-                className="bg-white/10 hover:bg-white/20 text-white border-0"
+                className="min-h-[44px] rounded-full"
               >
                 Avbryt
               </Button>
