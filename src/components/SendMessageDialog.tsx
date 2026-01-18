@@ -99,36 +99,38 @@ export function SendMessageDialog({
             </CardDescription>
           </CardHeader>
           
-          <CardContent className="space-y-6 px-4 pb-6 pt-2">
+          <CardContent className="space-y-4 px-4 pb-5 pt-2">
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Skriv ditt meddelande här..."
-              className="min-h-[120px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-none transition-all duration-150 text-base"
+              className="min-h-[180px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-none transition-all duration-150 text-base"
               disabled={!isOnline}
             />
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2">
               <Button
                 onClick={handleSend}
                 disabled={isDisabled}
-                className={`flex-1 min-h-[44px] rounded-full transition-all duration-150 active:scale-95 ${
+                size="sm"
+                className={`flex-1 min-h-[38px] text-sm rounded-full transition-all duration-150 active:scale-95 ${
                   !sending && message.trim() && isOnline ? 'border border-white/30' : ''
                 }`}
               >
                 {sending ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
                 ) : !isOnline ? (
-                  <WifiOff className="h-4 w-4 mr-1.5" />
+                  <WifiOff className="h-3.5 w-3.5 mr-1.5" />
                 ) : (
-                  <Send className="h-4 w-4 mr-1.5" />
+                  <Send className="h-3.5 w-3.5 mr-1.5" />
                 )}
                 {!isOnline ? 'Offline' : 'Skicka'}
               </Button>
               <Button 
                 variant="glass"
+                size="sm"
                 onClick={() => onOpenChange(false)}
-                className="min-h-[44px] rounded-full"
+                className="min-h-[38px] text-sm rounded-full"
               >
                 Avbryt
               </Button>
