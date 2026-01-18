@@ -8,6 +8,8 @@ const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
 const WEATHER_CACHE_KEY = 'parium_weather_data';
 const APPLICATIONS_SNAPSHOT_PREFIX = 'applications_snapshot_';
 const SNAPSHOT_EXPIRY_MS = 30 * 60 * 1000; // 30 min
+const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min
+const PERIODIC_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 min - refresh all data periodically
 
 interface RatingsCacheData {
   ratings: Record<string, number>;
@@ -15,39 +17,66 @@ interface RatingsCacheData {
 }
 
 /**
- * Hook som förladddar ratings, stage-settings OCH väderdata DIREKT vid första användaraktivitet.
+ * 🚀 BACKGROUND SYNC ENGINE
  * 
- * Problemet: useCandidateBackgroundSync körs först när EmployerLayout monteras,
- * men om användaren varit inaktiv i 2 timmar och sen navigerar till /candidates
- * så är ratings-cachen tom → flicker där betyg syns efter millisekunder.
- * Samma gäller väder - cachen går ut efter 5 min, så snö/regn flickrar.
+ * Premium preloading som triggas DIREKT vid:
+ * 1. Login (via triggerBackgroundSync export)
+ * 2. Första användarinteraktion (musrörelse, klick, touch)
+ * 3. Tab-focus efter inaktivitet
  * 
- * Lösningen: Lyssna på FÖRSTA användarinteraktion (tab-focus, musrörelse, klick)
- * och förladda ratings + väder INNAN användaren hinner navigera.
+ * Håller ALL data färsk genom:
+ * - Periodisk refresh var 5:e minut
+ * - Omedelbar preload vid aktivitet
+ * - Smart cache-validering (ignorerar gammal data)
  * 
- * Detta körs i EmployerLayout och triggas EN GÅNG per session.
+ * Synkar: Väder, Betyg, Stage-settings, Kandidat-snapshots
  */
+
+// Global state för att kunna trigga från useAuth vid login
+let globalPreloadFunction: (() => Promise<void>) | null = null;
+let lastPreloadTimestamp = 0;
+
+/**
+ * Trigga bakgrundssynk - anropas från useAuth vid login
+ */
+export const triggerBackgroundSync = async () => {
+  if (globalPreloadFunction) {
+    await globalPreloadFunction();
+  }
+};
+
+/**
+ * Validera väder-cache - returnerar true om cachen är giltig (under 5 min)
+ */
+const isWeatherCacheValid = (): boolean => {
+  try {
+    const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+    if (!cached) return false;
+    
+    const parsed = JSON.parse(cached);
+    const age = Date.now() - parsed.timestamp;
+    return age < WEATHER_CACHE_MAX_AGE;
+  } catch {
+    return false;
+  }
+};
+
 export const useEagerRatingsPreload = () => {
   const { user } = useAuth();
   const hasPreloadedRef = useRef(false);
   const isPreloadingRef = useRef(false);
+  const periodicRefreshRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Preload väder om cache är gammal
+  // Preload väder - ALLTID om cache är gammal eller saknas
   const preloadWeatherIfStale = useCallback(async () => {
+    if (isWeatherCacheValid()) {
+      return; // Cache är färsk - skippa
+    }
+    
     try {
-      const existingWeather = localStorage.getItem(WEATHER_CACHE_KEY);
-      if (existingWeather) {
-        const parsed = JSON.parse(existingWeather);
-        const age = Date.now() - parsed.timestamp;
-        // Om cache är under 5 min - skippa
-        if (age < 5 * 60 * 1000) {
-          return;
-        }
-      }
-      // Cache är gammal eller saknas - förladda väder
       await preloadWeatherLocation();
     } catch (error) {
-      console.warn('Weather preload failed:', error);
+      console.warn('[BackgroundSync] Weather preload failed:', error);
     }
   }, []);
 
@@ -61,7 +90,7 @@ export const useEagerRatingsPreload = () => {
       try {
         const parsed: RatingsCacheData = JSON.parse(existingCache);
         const age = Date.now() - parsed.timestamp;
-        if (age < 5 * 60 * 1000 && Object.keys(parsed.ratings).length > 0) {
+        if (age < WEATHER_CACHE_MAX_AGE && Object.keys(parsed.ratings).length > 0) {
           shouldFetchRatings = false;
         }
       } catch {
@@ -98,7 +127,7 @@ export const useEagerRatingsPreload = () => {
       try {
         const parsed = JSON.parse(existingStageCache);
         const age = Date.now() - parsed.timestamp;
-        if (age < 5 * 60 * 1000) {
+        if (age < WEATHER_CACHE_MAX_AGE) {
           shouldFetchStages = false;
         }
       } catch {
@@ -185,10 +214,20 @@ export const useEagerRatingsPreload = () => {
     }));
   }, []);
 
-  const preloadAllData = useCallback(async () => {
-    if (!user || hasPreloadedRef.current || isPreloadingRef.current) return;
+  // 🚀 HUVUDFUNKTION: Förladda ALL data parallellt
+  const preloadAllData = useCallback(async (force = false) => {
+    if (!user) return;
+    
+    // Undvik dubbla preloads (inom 2 sekunder)
+    const now = Date.now();
+    if (!force && now - lastPreloadTimestamp < 2000) {
+      return;
+    }
+    
+    if (isPreloadingRef.current) return;
     
     isPreloadingRef.current = true;
+    lastPreloadTimestamp = now;
     const userId = user.id;
 
     try {
@@ -201,11 +240,47 @@ export const useEagerRatingsPreload = () => {
 
       hasPreloadedRef.current = true;
     } catch (error) {
-      console.warn('Eager preload failed:', error);
+      console.warn('[BackgroundSync] Preload failed:', error);
     } finally {
       isPreloadingRef.current = false;
     }
   }, [user, preloadRatingsAndStages, preloadWeatherIfStale, preloadCandidateSnapshot]);
+
+  // Exponera preload-funktionen globalt så useAuth kan trigga den vid login
+  useEffect(() => {
+    if (user) {
+      globalPreloadFunction = () => preloadAllData(true);
+    } else {
+      globalPreloadFunction = null;
+    }
+    
+    return () => {
+      globalPreloadFunction = null;
+    };
+  }, [user, preloadAllData]);
+
+  // 🔄 PERIODISK REFRESH: Håll all data färsk var 5:e minut
+  useEffect(() => {
+    if (!user) {
+      if (periodicRefreshRef.current) {
+        clearInterval(periodicRefreshRef.current);
+        periodicRefreshRef.current = null;
+      }
+      return;
+    }
+
+    // Starta periodisk refresh
+    periodicRefreshRef.current = setInterval(() => {
+      preloadAllData(true); // Force refresh
+    }, PERIODIC_REFRESH_INTERVAL);
+
+    return () => {
+      if (periodicRefreshRef.current) {
+        clearInterval(periodicRefreshRef.current);
+        periodicRefreshRef.current = null;
+      }
+    };
+  }, [user, preloadAllData]);
 
   useEffect(() => {
     if (!user) return;
@@ -216,27 +291,9 @@ export const useEagerRatingsPreload = () => {
     // Lyssna på tab-focus (användare kommer tillbaka efter inaktivitet)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // Reset hasPreloaded så vi kan preloada igen vid nästa tab-focus
-        // (om det gått mer än 5 min sedan senaste preload)
-        const existingCache = localStorage.getItem(RATINGS_CACHE_PREFIX + user.id);
-        let shouldRefresh = true;
-        
-        if (existingCache) {
-          try {
-            const parsed: RatingsCacheData = JSON.parse(existingCache);
-            const age = Date.now() - parsed.timestamp;
-            if (age < 5 * 60 * 1000) {
-              shouldRefresh = false;
-            }
-          } catch {
-            // Korrupt cache - refresh
-          }
-        }
-        
-        if (shouldRefresh) {
-          hasPreloadedRef.current = false;
-          preloadAllData();
-        }
+        // Alltid refresh vid tab-focus om cache är gammal
+        hasPreloadedRef.current = false;
+        preloadAllData(true);
       }
     };
 
