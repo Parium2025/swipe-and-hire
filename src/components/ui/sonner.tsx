@@ -1,12 +1,10 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { useTheme } from "next-themes";
 import { Toaster as Sonner } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -41,7 +39,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
   return createPortal(
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme="dark"
       className="toaster group"
       style={{ zIndex: 99999 }}
       duration={4000}
