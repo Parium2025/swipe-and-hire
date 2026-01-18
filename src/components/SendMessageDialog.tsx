@@ -10,6 +10,16 @@ import { useState } from 'react';
 import { Loader2, Send, MessageSquare, WifiOff, X } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useFieldDraft } from '@/hooks/useFormDraft';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface SendMessageDialogProps {
   open: boolean;
@@ -31,6 +41,7 @@ export function SendMessageDialog({
   // Auto-save message draft to localStorage (unique per recipient)
   const [message, setMessage, clearMessageDraft] = useFieldDraft(`message-${recipientId}`);
   const [sending, setSending] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   const handleSend = async () => {
     if (!isOnline) {
@@ -55,7 +66,7 @@ export function SendMessageDialog({
 
       toast.success(`Meddelande skickat till ${recipientName}`);
       setMessage('');
-      clearMessageDraft(); // Rensa sparad draft efter lyckad skickning
+      clearMessageDraft();
       onOpenChange(false);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -65,79 +76,114 @@ export function SendMessageDialog({
     }
   };
 
+  const handleClose = () => {
+    if (message.trim()) {
+      setShowDiscardConfirm(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardAndClose = () => {
+    setMessage('');
+    clearMessageDraft();
+    setShowDiscardConfirm(false);
+    onOpenChange(false);
+  };
+
   const isDisabled = !message.trim() || sending || !isOnline;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus 
-        hideClose
-        className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-x-hidden overflow-y-auto"
-      >
-        <DialogHeader className="sr-only">
-          <DialogTitle className="sr-only">Skicka meddelande</DialogTitle>
-          <DialogDescription className="sr-only">Skriv ett meddelande till {recipientName}</DialogDescription>
-        </DialogHeader>
-        
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full">
-          <CardHeader className="pb-4 pt-6">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-white flex-1 text-center text-xl flex items-center justify-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                Skicka meddelande
-              </CardTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onOpenChange(false)}
-                className="absolute right-2 top-2 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <CardDescription className="text-white text-center text-sm leading-snug mt-2">
-              Skriv ett meddelande till {recipientName}
-            </CardDescription>
-          </CardHeader>
+    <>
+      <Dialog open={open} onOpenChange={(newOpen) => {
+        if (!newOpen && message.trim()) {
+          setShowDiscardConfirm(true);
+        } else {
+          onOpenChange(newOpen);
+        }
+      }}>
+        <DialogContentNoFocus 
+          hideClose
+          className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-x-hidden overflow-y-auto"
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle className="sr-only">Skicka meddelande</DialogTitle>
+            <DialogDescription className="sr-only">Skriv ett meddelande till {recipientName}</DialogDescription>
+          </DialogHeader>
           
-          <CardContent className="space-y-4 px-4 pb-5 pt-2">
-            <Textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Skriv ditt meddelande här..."
-              className="h-[260px] md:h-[320px] min-h-[260px] md:min-h-[320px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-y transition-all duration-150 text-base"
-              disabled={!isOnline}
-            />
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full">
+            <CardHeader className="pb-4 pt-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white flex-1 text-center text-xl flex items-center justify-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Skicka meddelande
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleClose}
+                  className="absolute right-2 top-2 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <CardDescription className="text-white text-center text-sm leading-snug mt-2">
+                Skriv ett meddelande till {recipientName}
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="space-y-4 px-4 pb-5 pt-2">
+              <Textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Skriv ditt meddelande här..."
+                className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-y transition-all duration-150 text-base"
+                disabled={!isOnline}
+              />
 
-            <div className="flex gap-2">
               <Button
                 onClick={handleSend}
                 disabled={isDisabled}
-                size="sm"
-                className={`flex-1 min-h-[38px] text-sm rounded-full transition-all duration-150 active:scale-95 ${
+                className={`w-full min-h-[44px] rounded-full transition-all duration-150 active:scale-95 ${
                   !sending && message.trim() && isOnline ? 'border border-white/30' : ''
                 }`}
               >
                 {sending ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                  <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
                 ) : !isOnline ? (
-                  <WifiOff className="h-3.5 w-3.5 mr-1.5" />
+                  <WifiOff className="h-4 w-4 mr-1.5" />
                 ) : (
-                  <Send className="h-3.5 w-3.5 mr-1.5" />
+                  <Send className="h-4 w-4 mr-1.5" />
                 )}
                 {!isOnline ? 'Offline' : 'Skicka'}
               </Button>
-              <Button 
-                variant="glass"
-                size="sm"
-                onClick={() => onOpenChange(false)}
-                className="min-h-[38px] text-sm rounded-full"
-              >
-                Avbryt
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </DialogContentNoFocus>
-    </Dialog>
+            </CardContent>
+          </Card>
+        </DialogContentNoFocus>
+      </Dialog>
+
+      {/* Discard confirmation dialog */}
+      <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
+        <AlertDialogContent className="bg-card-parium border-white/20 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Lämna utan att spara?</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/70">
+              Du har skrivit ett meddelande som inte skickats. Om du lämnar nu kommer meddelandet att raderas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+              Fortsätt skriva
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDiscardAndClose}
+              className="bg-red-500/20 border border-red-500/40 text-white hover:bg-red-500/30"
+            >
+              Lämna utan att spara
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
