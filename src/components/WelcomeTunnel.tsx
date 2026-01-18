@@ -532,7 +532,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       video.crossOrigin = 'anonymous'; // Hjälper med vissa videofiler
 
       const revoke = () => {
-        try { URL.revokeObjectURL(video.src); } catch {}
+        try { URL.revokeObjectURL(video.src); } catch (revokeError) {
+          console.warn('Failed to revoke video object URL:', revokeError);
+        }
       };
 
       const showError = (title: string, description: string) => {

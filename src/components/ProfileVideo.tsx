@@ -100,7 +100,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           try {
             videoRef.current.muted = true;
             await videoRef.current.play();
-          } catch {}
+          } catch (mutedPlayError) {
+            console.warn('Failed to play video even when muted:', mutedPlayError);
+          }
         }
       }
     } else {
