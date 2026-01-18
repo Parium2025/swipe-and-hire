@@ -90,9 +90,10 @@ export function SendMessageDialog({
 
         <div className="flex justify-end gap-3">
           <Button
+            variant="glassBlue"
             disabled={isDisabled}
             onClick={handleSend}
-            className={`bg-white/10 hover:bg-white/20 text-white border-0 ${!isOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={!isOnline ? 'opacity-50 cursor-not-allowed' : ''}
           >
             {sending ? (
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
@@ -104,8 +105,8 @@ export function SendMessageDialog({
             {!isOnline ? 'Offline' : 'Skicka'}
           </Button>
           <Button 
-            variant="glassRed"
             onClick={() => onOpenChange(false)}
+            className="bg-white/10 hover:bg-white/20 text-white border-0"
           >
             Avbryt
           </Button>
