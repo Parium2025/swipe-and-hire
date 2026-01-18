@@ -63,6 +63,15 @@ const CandidatesContent = () => {
     hasNextPage,
     isFetchingNextPage 
   } = useApplicationsData(searchQuery);
+  
+  // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => setShowContent(true), 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
 
   // Safety check to prevent null crash
   const safeApplications = applications || [];
@@ -126,6 +135,14 @@ const CandidatesContent = () => {
     hired: filteredApplications.filter(app => app.status === 'hired').length,
     rejected: filteredApplications.filter(app => app.status === 'rejected').length,
   }), [filteredApplications]);
+
+  if (isLoading || !showContent) {
+    return (
+      <div className="max-w-6xl mx-auto px-3 md:px-12 opacity-0">
+        {/* Invisible placeholder to prevent layout shift */}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
