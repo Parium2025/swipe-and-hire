@@ -71,7 +71,7 @@ export function SendMessageDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContentNoFocus 
         hideClose
-        className="w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden"
+        className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden"
       >
         <DialogHeader className="sr-only">
           <DialogTitle className="sr-only">Skicka meddelande</DialogTitle>
