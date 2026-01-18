@@ -71,7 +71,7 @@ export function SendMessageDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContentNoFocus 
         hideClose
-        className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[85vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden"
+        className="w-[min(90vw,500px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-x-hidden overflow-y-auto"
       >
         <DialogHeader className="sr-only">
           <DialogTitle className="sr-only">Skicka meddelande</DialogTitle>
@@ -104,7 +104,7 @@ export function SendMessageDialog({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Skriv ditt meddelande här..."
-              className="min-h-[180px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-none transition-all duration-150 text-base"
+              className="h-[260px] md:h-[320px] min-h-[260px] md:min-h-[320px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-y transition-all duration-150 text-base"
               disabled={!isOnline}
             />
 
