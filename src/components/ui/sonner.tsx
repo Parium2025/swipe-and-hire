@@ -1,12 +1,21 @@
-import { useTheme } from "next-themes"
-import { Toaster as Sonner, toast } from "sonner"
+import * as React from "react";
+import { createPortal } from "react-dom";
+import { useTheme } from "next-themes";
+import { Toaster as Sonner, toast } from "sonner";
 
-type ToasterProps = React.ComponentProps<typeof Sonner>
+type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const { theme = "system" } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
 
-  return (
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
@@ -23,12 +32,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "group-[.toast]:bg-white/10 group-[.toast]:text-white group-[.toast]:border group-[.toast]:border-white/20",
           cancelButton:
             "group-[.toast]:bg-white/10 group-[.toast]:text-white group-[.toast]:border group-[.toast]:border-white/20",
-          closeButton: "group-[.toast]:bg-white/10 group-[.toast]:text-white group-[.toast]:border group-[.toast]:border-white/20 hover:group-[.toast]:bg-white/20",
+          closeButton:
+            "group-[.toast]:bg-white/10 group-[.toast]:text-white group-[.toast]:border group-[.toast]:border-white/20 hover:group-[.toast]:bg-white/20",
         },
       }}
       {...props}
-    />
-  )
-}
+    />,
+    document.body
+  );
+};
 
-export { Toaster, toast }
+export { Toaster, toast };
+
