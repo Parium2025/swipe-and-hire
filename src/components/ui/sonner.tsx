@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { useTheme } from "next-themes";
-import { Toaster as Sonner, toast } from "sonner";
+import { Toaster as Sonner } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -21,17 +21,20 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       style={{ zIndex: 99999 }}
       duration={4000}
-      closeButton={false}
+      closeButton
       richColors
       toastOptions={{
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-slate-900/85 group-[.toaster]:backdrop-blur-xl group-[.toaster]:text-white group-[.toaster]:border group-[.toaster]:border-white/20 group-[.toaster]:shadow-lg cursor-pointer select-none",
+            "group toast relative group-[.toaster]:bg-slate-900/85 group-[.toaster]:backdrop-blur-xl group-[.toaster]:text-white group-[.toaster]:border group-[.toaster]:border-white/20 group-[.toaster]:shadow-lg cursor-pointer select-none",
+          // Gör hela toasten klickbar utan att visa ett X
+          closeButton:
+            "absolute inset-0 h-full w-full opacity-0 hover:opacity-0 focus:opacity-0",
           description: "group-[.toast]:text-white",
           actionButton:
-            "group-[.toast]:bg-white/10 group-[.toast]:text-white group-[.toast]:border group-[.toast]:border-white/20",
+            "relative z-10 group-[.toast]:bg-white/10 group-[.toast]:text-white group-[.toast]:border group-[.toast]:border-white/20",
           cancelButton:
-            "group-[.toast]:bg-white/10 group-[.toast]:text-white group-[.toast]:border group-[.toast]:border-white/20",
+            "relative z-10 group-[.toast]:bg-white/10 group-[.toast]:text-white group-[.toast]:border group-[.toast]:border-white/20",
         },
       }}
       {...props}
@@ -40,5 +43,4 @@ const Toaster = ({ ...props }: ToasterProps) => {
   );
 };
 
-export { Toaster, toast };
-
+export { Toaster };
