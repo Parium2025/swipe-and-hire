@@ -110,7 +110,8 @@ function readCachedSettings(userId: string): DbStageSetting[] | null {
     }
 
     return cached.settings;
-  } catch {
+  } catch (parseError) {
+    console.warn('Failed to parse cached stage settings:', parseError);
     return null;
   }
 }
@@ -123,8 +124,8 @@ function writeCachedSettings(userId: string, settings: DbStageSetting[]): void {
       timestamp: Date.now(),
     };
     localStorage.setItem(key, JSON.stringify(cached));
-  } catch {
-    // Ignore storage errors
+  } catch (cacheError) {
+    console.warn('Failed to cache stage settings:', cacheError);
   }
 }
 

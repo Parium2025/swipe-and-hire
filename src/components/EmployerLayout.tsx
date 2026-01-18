@@ -195,7 +195,9 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
               timestamp: Date.now(),
             };
             localStorage.setItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
-          } catch {}
+          } catch (cacheError) {
+            console.warn('Failed to cache applications snapshot:', cacheError);
+          }
         }
 
         // Prime:a cache i bakgrunden (bild + video-signed URL) så det känns "bam"

@@ -28,7 +28,9 @@ const Auth = () => {
           !!(sp.get('reset') === 'true' && sp.get('issued')); // Lägg till stöd för issued parameter
         if (hasAnyRecovery) return false;
       }
-    } catch {}
+    } catch (urlParseError) {
+      console.warn('Failed to parse URL for intro detection:', urlParseError);
+    }
     return !sessionStorage.getItem('parium-intro-seen');
   });
   const [isPasswordReset, setIsPasswordReset] = useState(() => {
@@ -177,7 +179,9 @@ const Auth = () => {
       } else {
         // Register mode: Allow scroll (no global class toggles)
       }
-    } catch {}
+    } catch (scrollError) {
+      console.warn('Failed to handle scroll lock:', scrollError);
+    }
   }, [isLoginMode, isRefreshing]);
 
   useEffect(() => {

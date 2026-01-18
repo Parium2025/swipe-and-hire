@@ -269,7 +269,9 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
         timestamp: Date.now()
       }));
     }
-  } catch {}
+  } catch (cacheError) {
+    console.warn('Failed to cache applications snapshot:', cacheError);
+  }
 }
 
 /**
@@ -437,8 +439,8 @@ async function syncStageSettings(userId: string, queryClient: ReturnType<typeof 
       settings,
       timestamp: Date.now(),
     }));
-  } catch {
-    // Ignore errors
+  } catch (cacheError) {
+    console.warn('Failed to cache stage settings:', cacheError);
   }
 }
 

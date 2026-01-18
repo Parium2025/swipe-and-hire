@@ -128,7 +128,9 @@ export class StorageOptimizer {
       // Remove corrupted data
       try {
         storage.removeItem(key);
-      } catch {}
+      } catch (removeError) {
+        console.warn(`Failed to remove corrupted storage item (${key}):`, removeError);
+      }
       return null;
     }
   }
@@ -165,8 +167,9 @@ export class StorageOptimizer {
           if (data.expiry && now - data.timestamp > data.expiry) {
             keysToRemove.push(key);
           }
-        } catch {
+        } catch (parseError) {
           // Remove corrupted entries
+          console.warn(`Corrupted storage entry (${key}), marking for removal:`, parseError);
           keysToRemove.push(key);
         }
       }
@@ -174,7 +177,9 @@ export class StorageOptimizer {
       keysToRemove.forEach(key => {
         try {
           storage.removeItem(key);
-        } catch {}
+        } catch (removeError) {
+          console.warn(`Failed to remove expired storage item (${key}):`, removeError);
+        }
       });
 
       if (keysToRemove.length > 0) {
@@ -202,7 +207,9 @@ export class StorageOptimizer {
       keysToRemove.forEach(key => {
         try {
           localStorage.removeItem(key);
-        } catch {}
+        } catch (removeError) {
+          console.warn(`Failed to clear app data item (${key}):`, removeError);
+        }
       });
     } catch (e) {
       console.error('Clear app data failed:', e);

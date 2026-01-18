@@ -133,7 +133,9 @@ const AuthMobile = ({
         window.scrollTo(0, top);
         (html as any).style.scrollBehavior = prev || '';
       });
-    } catch {}
+    } catch (scrollError) {
+      console.warn('Failed to hard scroll:', scrollError);
+    }
   };
 
   // Handle scroll-lock directly for instant response
@@ -147,7 +149,9 @@ const AuthMobile = ({
     }
 
     // Scroll BEFORE state change to prevent layout jump
-    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
+    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch (blurError) {
+      console.warn('Failed to blur active element:', blurError);
+    }
     const targetTop = newIsLogin ? 0 : (signupScrollRef.current || 0);
     if (typeof window !== 'undefined') hardScrollTo(targetTop);
 

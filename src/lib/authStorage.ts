@@ -186,10 +186,14 @@ export class AuthStorageAdapter implements Storage {
     if (key.includes('supabase')) {
       try {
         localStorage.setItem(key, value);
-      } catch {}
+      } catch (lsError) {
+        console.warn('Failed to write auth key to localStorage:', lsError);
+      }
       try {
         sessionStorage.setItem(key, value);
-      } catch {}
+      } catch (ssError) {
+        console.warn('Failed to write auth key to sessionStorage:', ssError);
+      }
       updateLastActivity();
     } else {
       // For non-auth keys, use preferred storage
@@ -201,10 +205,14 @@ export class AuthStorageAdapter implements Storage {
     // Remove from both storages to be safe
     try {
       localStorage.removeItem(key);
-    } catch {}
+    } catch (lsError) {
+      console.warn('Failed to remove auth key from localStorage:', lsError);
+    }
     try {
       sessionStorage.removeItem(key);
-    } catch {}
+    } catch (ssError) {
+      console.warn('Failed to remove auth key from sessionStorage:', ssError);
+    }
   }
 
   clear(): void {
@@ -233,8 +241,12 @@ export class AuthStorageAdapter implements Storage {
     
     // Remove all auth keys
     keysToRemove.forEach(key => {
-      try { localStorage.removeItem(key); } catch {}
-      try { sessionStorage.removeItem(key); } catch {}
+      try { localStorage.removeItem(key); } catch (lsError) {
+        console.warn(`Failed to clear auth key (${key}) from localStorage:`, lsError);
+      }
+      try { sessionStorage.removeItem(key); } catch (ssError) {
+        console.warn(`Failed to clear auth key (${key}) from sessionStorage:`, ssError);
+      }
     });
   }
 }
