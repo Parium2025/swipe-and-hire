@@ -997,20 +997,20 @@ export const CandidateProfileDialog = ({
                 {/* Action buttons row */}
                 <div className="flex justify-center gap-2 flex-wrap">
                   <Button
-                    onClick={() => setBookInterviewOpen(true)}
-                    variant="glassBlue"
-                    size="default"
-                  >
-                    <CalendarPlus className="h-4 w-4 mr-1.5" />
-                    Boka möte
-                  </Button>
-                  <Button
                     onClick={() => setSendMessageOpen(true)}
                     variant="glassPurple"
                     size="default"
                   >
                     <MessageSquare className="h-4 w-4 mr-1.5" />
                     Meddelande
+                  </Button>
+                  <Button
+                    onClick={() => setBookInterviewOpen(true)}
+                    variant="glassBlue"
+                    size="default"
+                  >
+                    <CalendarPlus className="h-4 w-4 mr-1.5" />
+                    Boka möte
                   </Button>
                   {hasTeam && (
                     <Button
