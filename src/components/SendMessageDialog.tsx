@@ -93,9 +93,7 @@ export function SendMessageDialog({
             variant="glassBlue"
             disabled={isDisabled}
             onClick={handleSend}
-            className={`min-h-[44px] rounded-full transition-all duration-150 active:scale-95 ${
-              !isDisabled ? 'border border-white/30' : ''
-            } ${!isOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={!isOnline ? 'opacity-50 cursor-not-allowed' : ''}
           >
             {sending ? (
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
