@@ -45,21 +45,27 @@ export const hasSessionExpiredDueToInactivity = (): boolean => {
     const localActivity = localStorage.getItem(LAST_ACTIVITY_KEY);
     const sessionActivity = sessionStorage.getItem(LAST_ACTIVITY_KEY);
     
-    // Use the most recent activity from either storage
-    const lastActivityStr = localActivity || sessionActivity;
+    // Use the most recent activity from either storage - pick the later one
+    let lastActivityTime = 0;
     
-    if (!lastActivityStr) {
-      // No activity recorded yet - user just logged in, don't expire
-      // Instead, set the activity now to prevent future issues
-      updateLastActivity();
-      return false;
+    if (localActivity) {
+      const parsed = parseInt(localActivity, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        lastActivityTime = parsed;
+      }
     }
     
-    const lastActivityTime = parseInt(lastActivityStr, 10);
+    if (sessionActivity) {
+      const parsed = parseInt(sessionActivity, 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed > lastActivityTime) {
+        lastActivityTime = parsed;
+      }
+    }
     
-    // Validate the parsed timestamp
-    if (isNaN(lastActivityTime) || lastActivityTime <= 0) {
-      console.warn('⚠️ Invalid activity timestamp, resetting');
+    if (lastActivityTime === 0) {
+      // No valid activity recorded yet - user just logged in, don't expire
+      // Instead, set the activity now to prevent future issues
+      console.log('📝 No activity timestamp found, setting now');
       updateLastActivity();
       return false;
     }
@@ -74,7 +80,14 @@ export const hasSessionExpiredDueToInactivity = (): boolean => {
       return false;
     }
     
-    return timeSinceLastActivity > INACTIVITY_TIMEOUT_MS;
+    const hoursSinceActivity = timeSinceLastActivity / (1000 * 60 * 60);
+    const isExpired = timeSinceLastActivity > INACTIVITY_TIMEOUT_MS;
+    
+    if (isExpired) {
+      console.log(`⏰ Session expired: ${hoursSinceActivity.toFixed(2)} hours since last activity (threshold: 24h)`);
+    }
+    
+    return isExpired;
   } catch (e) {
     console.warn('⚠️ Error checking inactivity:', e);
     return false; // Never expire on error
