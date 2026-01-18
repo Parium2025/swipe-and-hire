@@ -834,6 +834,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
   });
 
   // Update rating - also saves to persistent candidate_ratings table
+  // AND updates localStorage cache for instant sync with /candidates
   const updateRating = useMutation({
     mutationFn: async ({ id, rating, applicantId }: { id: string; rating: number; applicantId?: string }) => {
       // Check if online first
@@ -863,11 +864,24 @@ export function useMyCandidatesData(searchQuery: string = '') {
           }, {
             onConflict: 'recruiter_id,applicant_id',
           });
+        
+        // CRITICAL: Update localStorage ratings cache for instant sync with /candidates
+        // This eliminates the "millisecond delay" when switching between views
+        try {
+          const cacheKey = `ratings_cache_${user.id}`;
+          const raw = localStorage.getItem(cacheKey);
+          const cache = raw ? JSON.parse(raw) : { ratings: {}, timestamp: Date.now() };
+          cache.ratings[targetApplicantId] = rating;
+          cache.timestamp = Date.now();
+          localStorage.setItem(cacheKey, JSON.stringify(cache));
+        } catch {
+          // Ignore localStorage errors
+        }
       }
 
       return data;
     },
-    onMutate: async ({ id, rating }) => {
+    onMutate: async ({ id, rating, applicantId }) => {
       // Optimistic update (paginated structure)
       await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
       const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
@@ -885,6 +899,22 @@ export function useMyCandidatesData(searchQuery: string = '') {
         };
       });
       
+      // Also optimistically update applications cache for /candidates
+      if (applicantId) {
+        queryClient.setQueryData(['applications', user?.id, ''], (old: any) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              items: (page.items || []).map((app: any) =>
+                app.applicant_id === applicantId ? { ...app, rating } : app
+              ),
+            })),
+          };
+        });
+      }
+      
       return { previousCandidates };
     },
     onError: (err, variables, context) => {
@@ -894,6 +924,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
+      queryClient.invalidateQueries({ queryKey: ['applications', user?.id] });
     },
   });
 

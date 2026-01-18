@@ -87,7 +87,8 @@ interface DbStageSetting {
 
 // LocalStorage caching for instant display (no flash of default stages)
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
-const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+// Extended to 7 days - background sync updates this frequently anyway
+const CACHE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 interface CachedStageSettings {
   settings: DbStageSetting[];
@@ -131,7 +132,10 @@ export function useStageSettings() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: dbSettings, isLoading } = useQuery({
+  // Check if we have cached data BEFORE the query runs
+  const hasCachedData = user ? readCachedSettings(user.id) !== null : false;
+
+  const { data: dbSettings, isLoading: queryLoading } = useQuery({
     queryKey: ['stage-settings', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -165,6 +169,10 @@ export function useStageSettings() {
       return cached ? Date.now() - 1000 : undefined; // Trigger background refetch
     },
   });
+
+  // CRITICAL: Only show loading if we DON'T have cached data
+  // This prevents the "default stages flash" when cached data exists
+  const isLoading = queryLoading && !hasCachedData;
 
   // Get deleted default stages (marked with __DELETED__)
   const deletedDefaultStages = new Set(
