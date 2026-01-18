@@ -19,6 +19,18 @@ export const useInactivityTimeout = (isAuthenticated: boolean) => {
     if (!isAuthenticated) return;
 
     const checkExpiration = async () => {
+      // Log current activity status for debugging
+      const localActivity = localStorage.getItem('parium-last-activity');
+      const sessionActivity = sessionStorage.getItem('parium-last-activity');
+      const lastActivityStr = localActivity || sessionActivity;
+      
+      if (lastActivityStr) {
+        const lastActivityTime = parseInt(lastActivityStr, 10);
+        const now = Date.now();
+        const hoursSinceActivity = (now - lastActivityTime) / (1000 * 60 * 60);
+        console.log(`📊 Activity check: Last activity ${hoursSinceActivity.toFixed(2)} hours ago`);
+      }
+      
       if (hasSessionExpiredDueToInactivity()) {
         console.log('⏰ Session expired due to 24h inactivity - logging out');
         clearActivityTracking();
