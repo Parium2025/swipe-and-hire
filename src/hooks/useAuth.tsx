@@ -9,6 +9,7 @@ import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
+import { triggerBackgroundSync } from '@/hooks/useEagerRatingsPreload';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -888,6 +889,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       await Promise.all([minDelayPromise, mediaPromise]);
+
+      // 🚀 BACKGROUND SYNC ENGINE: Starta all preloading DIREKT vid login
+      // Kör i bakgrunden - blockera inte UI
+      triggerBackgroundSync().catch(console.warn);
 
       setLoading(false);
       setAuthAction(null);
