@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import type { MouseEvent, TouchEvent } from 'react';
 import { Loader2, Send, MessageSquare, WifiOff, X } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useFieldDraft } from '@/hooks/useFormDraft';
@@ -14,12 +15,11 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 
 interface SendMessageDialogProps {
   open: boolean;
@@ -162,27 +162,34 @@ export function SendMessageDialog({
         </DialogContentNoFocus>
       </Dialog>
 
-      {/* Discard confirmation dialog */}
+      {/* Discard confirmation dialog - matching UnsavedChangesDialog design */}
       <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
-        <AlertDialogContent className="bg-card-parium border-white/20 text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Lämna utan att spara?</AlertDialogTitle>
-            <AlertDialogDescription className="text-white/70">
-              Du har skrivit ett meddelande som inte skickats. Om du lämnar nu kommer meddelandet att raderas.
+        <AlertDialogContentNoFocus
+          className="max-w-lg bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden"
+        >
+          <AlertDialogHeader className="text-center">
+            <AlertDialogTitle className="text-center">Osparade ändringar</AlertDialogTitle>
+            <AlertDialogDescription className="text-white text-center">
+              Du har skrivit ett meddelande som inte skickats. Vad vill du göra?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+
+          <div className="flex flex-row gap-2 justify-center pt-2">
+            <AlertDialogCancel
+              onClick={() => setShowDiscardConfirm(false)}
+              className="rounded-full px-3 py-2 text-sm bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50 mt-0 outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
               Fortsätt skriva
             </AlertDialogCancel>
-            <AlertDialogAction 
+
+            <AlertDialogAction
               onClick={handleDiscardAndClose}
-              className="bg-red-500/20 border border-red-500/40 text-white hover:bg-red-500/30"
+              className="rounded-full px-3 py-2 text-sm bg-red-500/20 backdrop-blur-sm text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300 whitespace-nowrap outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Lämna utan att spara
             </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+          </div>
+        </AlertDialogContentNoFocus>
       </AlertDialog>
     </>
   );
