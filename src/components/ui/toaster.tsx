@@ -1,4 +1,5 @@
 import { useToast } from "@/hooks/use-toast"
+import * as ToastPrimitives from "@radix-ui/react-toast"
 import {
   Toast,
   ToastDescription,
@@ -8,7 +9,7 @@ import {
 } from "@/components/ui/toast"
 
 export function Toaster() {
-  const { toasts, dismiss } = useToast()
+  const { toasts } = useToast()
 
   return (
     <ToastProvider duration={4000}>
@@ -17,16 +18,16 @@ export function Toaster() {
           <Toast
             key={id}
             {...props}
-            onClick={() => dismiss(id)}
-            onTouchStart={() => dismiss(id)}
             className="cursor-pointer"
           >
-            <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
-              {description && (
-                <ToastDescription>{description}</ToastDescription>
-              )}
-            </div>
+            <ToastPrimitives.Close asChild>
+              <div className="grid gap-1 w-full">
+                {title && <ToastTitle>{title}</ToastTitle>}
+                {description && (
+                  <ToastDescription>{description}</ToastDescription>
+                )}
+              </div>
+            </ToastPrimitives.Close>
             {action}
           </Toast>
         )
