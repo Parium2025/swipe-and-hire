@@ -73,7 +73,7 @@ export function SendMessageDialog({
             <MessageSquare className="h-5 w-5" />
             Skicka meddelande
           </DialogTitle>
-          <DialogDescription className="text-white/60">
+          <DialogDescription className="text-white">
             Skriv ett meddelande till {recipientName}
           </DialogDescription>
         </DialogHeader>
@@ -88,12 +88,15 @@ export function SendMessageDialog({
           />
         </div>
 
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+        <div className="flex justify-end gap-3">
+          <Button 
+            onClick={() => onOpenChange(false)}
+            className="bg-white/10 hover:bg-white/20 text-white border-0"
+          >
             Avbryt
           </Button>
           <Button
-            variant="glassBlue"
+            variant="glassRed"
             disabled={isDisabled}
             onClick={handleSend}
             className={!isOnline ? 'opacity-50 cursor-not-allowed' : ''}
