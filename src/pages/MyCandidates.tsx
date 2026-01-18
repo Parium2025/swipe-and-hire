@@ -547,6 +547,15 @@ const MyCandidates = () => {
     setIsLoading(hookLoading);
   }, [hookCandidates, hookLoading]);
   
+  // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => setShowContent(true), 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+  
   // Active candidates to display
   const displayedCandidates = isViewingColleague ? colleagueCandidates : candidates;
   
@@ -1173,28 +1182,10 @@ const MyCandidates = () => {
     };
   }, [selectedCandidate]);
 
-  if (isLoading) {
+  if (isLoading || !showContent) {
     return (
-      <div className="max-w-7xl mx-auto px-3 md:px-12 animate-fade-in">
-        <div className="text-center mb-6">
-          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
-            Mina kandidater
-          </h1>
-          <p className="text-sm text-white/90 mt-1">
-            Din personliga rekryteringspipeline
-          </p>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2">
-          {DEFAULT_STAGE_KEYS.map(stage => (
-            <div key={stage} className="flex-1 min-w-[160px] max-w-[240px]">
-              <Skeleton className="h-12 w-full bg-white/10 rounded-lg mb-3" />
-              <div className="space-y-2">
-                <Skeleton className="h-24 w-full bg-white/10 rounded-lg" />
-                <Skeleton className="h-24 w-full bg-white/10 rounded-lg" />
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="max-w-7xl mx-auto px-3 md:px-12 opacity-0">
+        {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
   }
