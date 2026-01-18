@@ -67,28 +67,29 @@ export function SendMessageDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="bg-gradient-to-br from-[#1a4a6e] to-[#0d2a3f] border-white/10 text-white max-w-md p-6">
+        <DialogHeader className="text-center pb-2">
+          <DialogTitle className="flex items-center justify-center gap-2 text-xl">
             <MessageSquare className="h-5 w-5" />
             Skicka meddelande
           </DialogTitle>
-          <DialogDescription className="text-white">
+          <DialogDescription className="text-white/70">
             Skriv ett meddelande till {recipientName}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4 space-y-4">
+        {/* Inner content card - matching Skapa jobb style */}
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 space-y-4 border border-white/10">
           <Textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Skriv ditt meddelande här..."
-            className="min-h-[120px] bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none"
+            className="min-h-[120px] bg-white/10 border-white/20 text-white placeholder:text-white/40 resize-none rounded-lg"
             disabled={!isOnline}
           />
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-center gap-3 pt-2">
           <Button
             variant="glassBlue"
             disabled={isDisabled}
