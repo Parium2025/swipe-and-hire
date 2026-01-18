@@ -994,42 +994,53 @@ export const CandidateProfileDialog = ({
             {/* Actions - show stage navigation + book meeting for my-candidates, only Book meeting for all-candidates */}
             {variant === 'my-candidates' ? (
               <div className="pt-4 border-t border-white/20 space-y-3">
-                {/* Action buttons row */}
-                <div className="flex justify-center gap-2 flex-wrap">
-                  <Button
-                    onClick={() => setSendMessageOpen(true)}
-                    variant="glassPurple"
-                    size="default"
-                  >
-                    <MessageSquare className="h-4 w-4 mr-1.5" />
-                    Meddelande
-                  </Button>
-                  <Button
-                    onClick={() => setBookInterviewOpen(true)}
-                    variant="glassBlue"
-                    size="default"
-                  >
-                    <CalendarPlus className="h-4 w-4 mr-1.5" />
-                    Boka möte
-                  </Button>
-                  {hasTeam && (
+                {/* Action buttons row - grid layout for perfect center alignment */}
+                <div className="grid grid-cols-3 gap-2">
+                  {/* Left column - Meddelande */}
+                  <div className="flex justify-end">
                     <Button
-                      onClick={() => setShareDialogOpen(true)}
-                      variant="glassAmber"
+                      onClick={() => setSendMessageOpen(true)}
+                      variant="glassPurple"
                       size="default"
                     >
-                      <Users className="h-4 w-4 mr-1.5" />
-                      Dela
+                      <MessageSquare className="h-4 w-4 mr-1.5" />
+                      Meddelande
                     </Button>
-                  )}
-                  <Button
-                    onClick={() => setRemoveConfirmOpen(true)}
-                    variant="glassRed"
-                    size="default"
-                  >
-                    <UserMinus className="h-4 w-4 mr-1.5" />
-                    Ta bort
-                  </Button>
+                  </div>
+                  
+                  {/* Center column - Boka möte (perfectly centered) */}
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={() => setBookInterviewOpen(true)}
+                      variant="glassBlue"
+                      size="default"
+                    >
+                      <CalendarPlus className="h-4 w-4 mr-1.5" />
+                      Boka möte
+                    </Button>
+                  </div>
+                  
+                  {/* Right column - Dela + Ta bort */}
+                  <div className="flex justify-start gap-2">
+                    {hasTeam && (
+                      <Button
+                        onClick={() => setShareDialogOpen(true)}
+                        variant="glassAmber"
+                        size="default"
+                      >
+                        <Users className="h-4 w-4 mr-1.5" />
+                        Dela
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => setRemoveConfirmOpen(true)}
+                      variant="glassRed"
+                      size="default"
+                    >
+                      <UserMinus className="h-4 w-4 mr-1.5" />
+                      Ta bort
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Stage navigation buttons */}
