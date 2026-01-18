@@ -1096,7 +1096,15 @@ export const CandidateProfileDialog = ({
               </div>
             ) : (
               /* Fixed footer button for all-candidates view */
-              <div className="border-t border-white/15 pt-4 mt-4 flex justify-center">
+              <div className="border-t border-white/15 pt-4 mt-4 flex justify-center gap-2">
+                <Button
+                  onClick={() => setSendMessageOpen(true)}
+                  variant="glassPurple"
+                  size="default"
+                >
+                  <MessageSquare className="h-4 w-4 mr-1.5" />
+                  Meddelande
+                </Button>
                 <Button
                   onClick={() => setBookInterviewOpen(true)}
                   variant="glassBlue"
