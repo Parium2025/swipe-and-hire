@@ -16,6 +16,7 @@ import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useDevice } from '@/hooks/use-device';
 import { useEmployerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCandidateBackgroundSync } from '@/hooks/useCandidateBackgroundSync';
+import { useEagerRatingsPreload } from '@/hooks/useEagerRatingsPreload';
 import { DevOfflineToggle } from '@/components/DevOfflineToggle';
 
 interface EmployerLayoutProps {
@@ -60,6 +61,10 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
   
   // Update browser tab title with unread message count
   useEmployerDocumentTitle();
+  
+  // EAGER: Förladda ratings vid FÖRSTA aktivitet (tab-focus, musrörelse)
+  // Detta körs INNAN useCandidateBackgroundSync så ratings är redo direkt
+  useEagerRatingsPreload();
   
   // Kontinuerlig bakgrundssynk av kandidatdata (30s intervall)
   // Gör att /candidates och /my-candidates alltid har färsk data utan laddningstid
