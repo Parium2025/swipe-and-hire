@@ -6,6 +6,8 @@ import { preloadWeatherLocation } from './useWeather';
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
 const WEATHER_CACHE_KEY = 'parium_weather_data';
+const APPLICATIONS_SNAPSHOT_PREFIX = 'applications_snapshot_';
+const SNAPSHOT_EXPIRY_MS = 30 * 60 * 1000; // 30 min
 
 interface RatingsCacheData {
   ratings: Record<string, number>;
@@ -120,6 +122,69 @@ export const useEagerRatingsPreload = () => {
     }
   }, []);
 
+  // Preload kandidat-snapshot (första 50 kandidater)
+  const preloadCandidateSnapshot = useCallback(async (userId: string) => {
+    const snapshotKey = APPLICATIONS_SNAPSHOT_PREFIX + userId;
+    const existingSnapshot = localStorage.getItem(snapshotKey);
+    
+    if (existingSnapshot) {
+      try {
+        const parsed = JSON.parse(existingSnapshot);
+        const age = Date.now() - parsed.timestamp;
+        // Om snapshot är under 30 min - skippa
+        if (age < SNAPSHOT_EXPIRY_MS && parsed.items?.length > 0) {
+          return;
+        }
+      } catch {
+        // Korrupt cache - fortsätt
+      }
+    }
+
+    // Hämta första 50 kandidater
+    const { data: baseData, error } = await supabase
+      .from('job_applications')
+      .select(`
+        id,
+        job_id,
+        applicant_id,
+        first_name,
+        last_name,
+        email,
+        phone,
+        location,
+        bio,
+        cv_url,
+        age,
+        employment_status,
+        work_schedule,
+        availability,
+        custom_answers,
+        status,
+        applied_at,
+        updated_at,
+        viewed_at,
+        job_postings!inner(title, occupation)
+      `)
+      .order('applied_at', { ascending: false })
+      .range(0, 49);
+
+    if (error || !baseData) return;
+
+    // Bygg items med job_title
+    const items = baseData.map((item: any) => ({
+      ...item,
+      job_title: item.job_postings?.title || 'Okänt jobb',
+      job_occupation: item.job_postings?.occupation || null,
+      job_postings: undefined,
+    }));
+
+    // Spara snapshot
+    localStorage.setItem(snapshotKey, JSON.stringify({
+      items,
+      timestamp: Date.now(),
+    }));
+  }, []);
+
   const preloadAllData = useCallback(async () => {
     if (!user || hasPreloadedRef.current || isPreloadingRef.current) return;
     
@@ -131,6 +196,7 @@ export const useEagerRatingsPreload = () => {
       await Promise.all([
         preloadRatingsAndStages(userId),
         preloadWeatherIfStale(),
+        preloadCandidateSnapshot(userId),
       ]);
 
       hasPreloadedRef.current = true;
@@ -139,7 +205,7 @@ export const useEagerRatingsPreload = () => {
     } finally {
       isPreloadingRef.current = false;
     }
-  }, [user, preloadRatingsAndStages, preloadWeatherIfStale]);
+  }, [user, preloadRatingsAndStages, preloadWeatherIfStale, preloadCandidateSnapshot]);
 
   useEffect(() => {
     if (!user) return;
