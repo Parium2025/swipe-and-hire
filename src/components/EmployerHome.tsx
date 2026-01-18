@@ -249,7 +249,8 @@ const EmployerHome = memo(() => {
   return (
     <>
       <GpsPrompt />
-      <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />
+      {/* Visa endast vädereffekter om GPS är godkänt OCH väder laddats klart */}
+      {gpsGranted && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
       <div className="space-y-6 max-w-5xl mx-auto px-4 md:px-8 py-3 animate-fade-in relative z-10">
         {/* System Health badge removed - use nav bar icon instead */}
 
