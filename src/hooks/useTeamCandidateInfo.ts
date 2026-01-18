@@ -24,6 +24,7 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
 
   const { data: teamCandidates, isLoading } = useQuery({
     queryKey: ['team-candidate-info', applicationIds.sort().join(',')],
+    placeholderData: (previousData) => previousData, // Keep previous data while loading to prevent flash
     queryFn: async () => {
       if (!user || applicationIds.length === 0) return {};
 
