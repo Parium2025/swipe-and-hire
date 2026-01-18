@@ -52,14 +52,6 @@ const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [questionFilters, setQuestionFilters] = useState<QuestionFilterValue[]>([]);
   const [selectionMode, setSelectionMode] = useState(false);
-  
-  // Track if this is initial mount to only animate on first load
-  const [hasAnimated, setHasAnimated] = useState(false);
-  useEffect(() => {
-    // Mark as animated after first render
-    const timer = setTimeout(() => setHasAnimated(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
 
   const { 
     applications, 
@@ -136,7 +128,7 @@ const CandidatesContent = () => {
   }), [filteredApplications]);
 
   return (
-    <div className={`max-w-6xl mx-auto px-3 md:px-12 ${!hasAnimated ? 'animate-fade-in' : ''}`}>
+    <div className="max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
       {/* Main Content */}
       <div className="space-y-4">
         {/* Header */}

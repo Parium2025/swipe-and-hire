@@ -384,18 +384,11 @@ export const useApplicationsData = (searchQuery: string = '') => {
       const snapshot = readSnapshot(user.id);
       if (snapshot.length === 0) return undefined;
       
-      // Apply cached ratings to snapshot to prevent rating "flash"
-      const cachedRatings = readCachedRatings(user.id);
-      const itemsWithRatings = snapshot.map(item => ({
-        ...item,
-        rating: cachedRatings[item.applicant_id] ?? item.rating ?? null,
-      }));
-      
       // Only show "load more" if snapshot is full page size
-      const hasMore = itemsWithRatings.length >= PAGE_SIZE;
+      const hasMore = snapshot.length >= PAGE_SIZE;
       
       return {
-        pages: [{ items: itemsWithRatings, hasMore }],
+        pages: [{ items: snapshot, hasMore }],
         pageParams: [0],
       };
     },

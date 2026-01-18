@@ -481,13 +481,6 @@ const MyCandidates = () => {
   const { stageConfig, stageOrder, deleteStage } = useStageSettings();
   const { setStageCount } = useKanbanLayout();
   
-  // Track if this is initial mount to only animate on first load
-  const [hasAnimated, setHasAnimated] = useState(false);
-  useEffect(() => {
-    const timer = setTimeout(() => setHasAnimated(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
-  
   // Team members for colleague switching
   const { teamMembers, hasTeam, isLoading: loadingTeam } = useTeamMembers();
   
@@ -1182,7 +1175,7 @@ const MyCandidates = () => {
 
   if (isLoading) {
     return (
-      <div className={`max-w-7xl mx-auto px-3 md:px-12 ${!hasAnimated ? 'animate-fade-in' : ''}`}>
+      <div className="max-w-7xl mx-auto px-3 md:px-12 animate-fade-in">
         <div className="text-center mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
             Mina kandidater
@@ -1207,7 +1200,7 @@ const MyCandidates = () => {
   }
 
   return (
-    <div className={`max-w-7xl mx-auto px-3 md:px-12 ${!hasAnimated ? 'animate-fade-in' : ''}`}>
+    <div className="max-w-7xl mx-auto px-3 md:px-12 animate-fade-in">
       {/* Header with Search and Stage Filters */}
       <div className="mb-6 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4">
         {/* Title and description */}
