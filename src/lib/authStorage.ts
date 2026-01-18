@@ -33,8 +33,38 @@ export const updateLastActivity = (): void => {
     // Always update in BOTH storages to prevent mismatch issues
     localStorage.setItem(LAST_ACTIVITY_KEY, timestamp);
     sessionStorage.setItem(LAST_ACTIVITY_KEY, timestamp);
+    console.log(`📝 Activity updated: ${new Date(Date.now()).toLocaleTimeString('sv-SE')}`);
   } catch (e) {
     console.warn('Failed to update last activity:', e);
+  }
+};
+
+// Get formatted time since last activity (for debugging)
+export const getTimeSinceLastActivity = (): string => {
+  try {
+    const localActivity = localStorage.getItem(LAST_ACTIVITY_KEY);
+    const sessionActivity = sessionStorage.getItem(LAST_ACTIVITY_KEY);
+    
+    let lastActivityTime = 0;
+    if (localActivity) {
+      const parsed = parseInt(localActivity, 10);
+      if (!isNaN(parsed) && parsed > 0) lastActivityTime = parsed;
+    }
+    if (sessionActivity) {
+      const parsed = parseInt(sessionActivity, 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed > lastActivityTime) lastActivityTime = parsed;
+    }
+    
+    if (lastActivityTime === 0) return 'ingen aktivitet sparad';
+    
+    const now = Date.now();
+    const diffMs = now - lastActivityTime;
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours}h ${minutes}m sedan (${new Date(lastActivityTime).toLocaleTimeString('sv-SE')})`;
+  } catch {
+    return 'kunde inte läsa';
   }
 };
 
@@ -124,8 +154,9 @@ export class AuthStorageAdapter implements Storage {
 
   getItem(key: string): string | null {
     // If session expired due to inactivity, clear auth data and return null
-    if (key.includes('supabase') && hasSessionExpiredDueToInactivity()) {
-      console.log('⏰ Session expired due to 24h inactivity');
+    if (key.includes('supabase.auth') && hasSessionExpiredDueToInactivity()) {
+      console.log('⏰ Session expired due to 24h inactivity - logging out');
+      console.log(`📊 Last activity: ${getTimeSinceLastActivity()}`);
       this.clearAuthData();
       clearActivityTracking();
       return null;
