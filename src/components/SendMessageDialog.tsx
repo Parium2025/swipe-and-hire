@@ -104,7 +104,7 @@ export function SendMessageDialog({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Skriv ditt meddelande här..."
-              className="min-h-[300px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-none transition-all duration-150 text-base"
+              className="min-h-[160px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-none transition-all duration-150 text-base"
               disabled={!isOnline}
             />
 
