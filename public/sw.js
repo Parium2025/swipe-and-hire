@@ -211,6 +211,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(request).catch(() => caches.match(request))
   );
+});
 
 // Message event - hantera meddelanden från appen
 self.addEventListener('message', (event) => {
