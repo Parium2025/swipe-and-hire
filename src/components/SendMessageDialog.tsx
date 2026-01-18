@@ -1,11 +1,13 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { useState, useEffect } from 'react';
-import { Loader2, Send, MessageSquare, WifiOff } from 'lucide-react';
+import { useState } from 'react';
+import { Loader2, Send, MessageSquare, WifiOff, X } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useFieldDraft } from '@/hooks/useFormDraft';
 
@@ -67,52 +69,71 @@ export function SendMessageDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gradient-to-br from-[#1a4a6e] to-[#0d2a3f] border-white/10 text-white max-w-md p-6">
-        <DialogHeader className="text-center pb-2">
-          <DialogTitle className="flex items-center justify-center gap-2 text-xl">
-            <MessageSquare className="h-5 w-5" />
-            Skicka meddelande
-          </DialogTitle>
-          <DialogDescription className="text-white/70">
-            Skriv ett meddelande till {recipientName}
-          </DialogDescription>
+      <DialogContentNoFocus 
+        hideClose
+        className="w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden"
+      >
+        <DialogHeader className="sr-only">
+          <DialogTitle className="sr-only">Skicka meddelande</DialogTitle>
+          <DialogDescription className="sr-only">Skriv ett meddelande till {recipientName}</DialogDescription>
         </DialogHeader>
+        
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full">
+          <CardHeader className="pb-4 pt-6">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-white flex-1 text-center text-xl flex items-center justify-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Skicka meddelande
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onOpenChange(false)}
+                className="absolute right-2 top-2 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <CardDescription className="text-white text-center text-sm leading-snug mt-2">
+              Skriv ett meddelande till {recipientName}
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-4 px-4 pb-4">
+            <Textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Skriv ditt meddelande här..."
+              className="min-h-[120px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-none transition-all duration-150"
+              disabled={!isOnline}
+            />
 
-        {/* Inner content card - matching Skapa jobb style */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 space-y-4 border border-white/10">
-          <Textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Skriv ditt meddelande här..."
-            className="min-h-[120px] bg-white/10 border-white/20 text-white placeholder:text-white/40 resize-none rounded-lg"
-            disabled={!isOnline}
-          />
-        </div>
-
-        <div className="flex justify-center gap-3 pt-2">
-          <Button
-            variant="glassBlue"
-            disabled={isDisabled}
-            onClick={handleSend}
-            className={!isOnline ? 'opacity-50 cursor-not-allowed' : ''}
-          >
-            {sending ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-            ) : !isOnline ? (
-              <WifiOff className="h-4 w-4 mr-1.5" />
-            ) : (
-              <Send className="h-4 w-4 mr-1.5" />
-            )}
-            {!isOnline ? 'Offline' : 'Skicka'}
-          </Button>
-          <Button 
-            onClick={() => onOpenChange(false)}
-            className="bg-white/10 hover:bg-white/20 text-white border-0"
-          >
-            Avbryt
-          </Button>
-        </div>
-      </DialogContent>
+            <div className="flex justify-center gap-3 pt-2">
+              <Button
+                variant="glassBlue"
+                disabled={isDisabled}
+                onClick={handleSend}
+                className={!isOnline ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                {sending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                ) : !isOnline ? (
+                  <WifiOff className="h-4 w-4 mr-1.5" />
+                ) : (
+                  <Send className="h-4 w-4 mr-1.5" />
+                )}
+                {!isOnline ? 'Offline' : 'Skicka'}
+              </Button>
+              <Button 
+                onClick={() => onOpenChange(false)}
+                className="bg-white/10 hover:bg-white/20 text-white border-0"
+              >
+                Avbryt
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </DialogContentNoFocus>
     </Dialog>
   );
 }
