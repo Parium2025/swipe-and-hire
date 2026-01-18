@@ -6,11 +6,13 @@ import { useAuth } from '@/hooks/useAuth';
 
 const SYNC_INTERVAL = 10_000; // 10 sekunder som backup-polling
 const PAGE_SIZE = 50; // Större batch för att ha mer data redo
+const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
 
 /**
  * Hook som kontinuerligt förladdar kandidatdata i bakgrunden via:
  * 1. Supabase Realtime - pushar ändringar DIREKT när något ändras i databasen
  * 2. Polling var 10:e sekund som backup
+ * 3. Stage-settings prefetch - så Kanban-steg är redo vid navigation
  * 
  * Detta gör att /candidates och /my-candidates alltid har färsk data
  * och visas DIREKT utan laddningsindikator - "bam!"
@@ -33,9 +35,11 @@ export const useCandidateBackgroundSync = () => {
 
       try {
         // Synka all data parallellt för maximal hastighet
+        // Inkluderar nu stage-settings för att eliminera "default steg" flicker
         await Promise.all([
           syncApplicationsData(userId, queryClient),
           syncMyCandidatesData(userId, queryClient),
+          syncStageSettings(userId, queryClient),
         ]);
       } catch (error) {
         console.warn('Background candidate sync failed:', error);
@@ -406,6 +410,35 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
 
   if (imagePaths.length > 0) {
     Promise.all(imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {}))).catch(() => {});
+  }
+}
+
+/**
+ * Synka stage-settings för instant Kanban-vy (ingen "default steg" flicker)
+ */
+async function syncStageSettings(userId: string, queryClient: ReturnType<typeof useQueryClient>) {
+  const queryKey = ['stage-settings', userId];
+  
+  try {
+    const { data: settings, error } = await supabase
+      .from('user_stage_settings')
+      .select('*')
+      .eq('user_id', userId)
+      .order('order_index', { ascending: true });
+    
+    if (error || !settings) return;
+    
+    // Uppdatera React Query cache
+    queryClient.setQueryData(queryKey, settings);
+    
+    // Spara till localStorage för instant first paint nästa gång
+    const cacheKey = STAGE_SETTINGS_CACHE_KEY + userId;
+    localStorage.setItem(cacheKey, JSON.stringify({
+      settings,
+      timestamp: Date.now(),
+    }));
+  } catch {
+    // Ignore errors
   }
 }
 

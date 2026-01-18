@@ -80,6 +80,7 @@ const writeCachedRatings = (userId: string, ratings: Record<string, number>) => 
 
 // Read snapshot from localStorage - PRIORITIZE INSTANT DISPLAY
 // We accept slightly stale data to show content immediately on login/refresh
+// Now also merges cached ratings for instant rating display (no flicker)
 const readSnapshot = (userId: string): ApplicationData[] => {
   try {
     const key = SNAPSHOT_KEY_PREFIX + userId;
@@ -144,6 +145,16 @@ const readSnapshot = (userId: string): ApplicationData[] => {
     if (!hasBasicFields) {
       localStorage.removeItem(key);
       return [];
+    }
+
+    // CRITICAL: Merge cached ratings into snapshot items for instant rating display
+    // This eliminates the "millisecond flicker" where ratings appear after the list
+    const cachedRatings = readCachedRatings(userId);
+    if (Object.keys(cachedRatings).length > 0) {
+      return snapshot.items.map(item => ({
+        ...item,
+        rating: cachedRatings[item.applicant_id] ?? item.rating ?? null,
+      }));
     }
 
     return snapshot.items;
@@ -613,6 +624,64 @@ export const useApplicationsData = (searchQuery: string = '') => {
     },
   });
 
+  // Update rating for a candidate - saves to persistent candidate_ratings table
+  // AND updates localStorage cache for instant sync across views
+  const updateRating = useMutation({
+    mutationFn: async ({ applicantId, rating }: { applicantId: string; rating: number }) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!user) throw new Error('Ej inloggad');
+
+      // Upsert to candidate_ratings table
+      const { error } = await supabase
+        .from('candidate_ratings')
+        .upsert({
+          recruiter_id: user.id,
+          applicant_id: applicantId,
+          rating,
+        }, {
+          onConflict: 'recruiter_id,applicant_id',
+        });
+
+      if (error) throw error;
+
+      // Update localStorage ratings cache for instant sync
+      try {
+        const cacheKey = `ratings_cache_${user.id}`;
+        const raw = localStorage.getItem(cacheKey);
+        const cache = raw ? JSON.parse(raw) : { ratings: {}, timestamp: Date.now() };
+        cache.ratings[applicantId] = rating;
+        cache.timestamp = Date.now();
+        localStorage.setItem(cacheKey, JSON.stringify(cache));
+      } catch {
+        // Ignore localStorage errors
+      }
+
+      return { applicantId, rating };
+    },
+    onMutate: async ({ applicantId, rating }) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['applications', user?.id] });
+
+      queryClient.setQueryData(['applications', user?.id, searchQuery], (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((app: ApplicationData) =>
+              app.applicant_id === applicantId ? { ...app, rating } : app
+            ),
+          })),
+        };
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['applications'] });
+      queryClient.invalidateQueries({ queryKey: ['my-candidates'] });
+      queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
+    },
+  });
+
   return {
     applications: enrichedApplications,
     stats,
@@ -621,6 +690,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
     refetch,
     invalidateApplications,
     markAsViewed,
+    updateRating,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
