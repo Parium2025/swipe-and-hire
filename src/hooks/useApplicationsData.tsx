@@ -35,6 +35,7 @@ export interface ApplicationData {
 }
 
 const PAGE_SIZE = 25;
+const MAX_AUTO_PREFETCH_PAGES = 20; // 500 kandidater innan "Vill du fortsätta?"
 const SNAPSHOT_KEY_PREFIX = 'applications_snapshot_';
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const SNAPSHOT_EXPIRY_MS = 5 * 60 * 1000; // 5 min
@@ -406,16 +407,33 @@ export const useApplicationsData = (searchQuery: string = '') => {
   });
 
   // PRE-FETCHING: Automatically load next batch in background after each page loads
-  // This makes scrolling feel instant - data is ready before user reaches bottom
+  // BUT STOP after 500 candidates (20 pages) - user must click "Fortsätt" to load more
+  // This prevents 20,000 API calls for 500k candidates!
+  const [hasReachedLimit, setHasReachedLimit] = useState(false);
+  
   useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage && data?.pages && data.pages.length > 0) {
-      // Small delay to avoid blocking the main thread
+    const currentPageCount = data?.pages?.length || 0;
+    
+    // Om vi nått 20 sidor (500 kandidater), sluta auto-prefetcha
+    if (currentPageCount >= MAX_AUTO_PREFETCH_PAGES) {
+      setHasReachedLimit(true);
+      return;
+    }
+    
+    // Fortsätt auto-prefetch för första 500 kandidater
+    if (hasNextPage && !isFetchingNextPage && currentPageCount > 0) {
       const timer = setTimeout(() => {
         fetchNextPage();
       }, 100);
       return () => clearTimeout(timer);
     }
   }, [data?.pages?.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Funktion för att fortsätta ladda nästa 500 kandidater
+  const continueLoading = useCallback(() => {
+    setHasReachedLimit(false);
+    fetchNextPage();
+  }, [fetchNextPage]);
 
   // Flatten all pages
   const applications = data?.pages.flatMap(page => page.items) || [];
@@ -694,5 +712,9 @@ export const useApplicationsData = (searchQuery: string = '') => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    // Nya för "Vill du fortsätta?" banner
+    hasReachedLimit,
+    continueLoading,
+    loadedCount: data?.pages?.length ? data.pages.length * PAGE_SIZE : 0,
   };
 };

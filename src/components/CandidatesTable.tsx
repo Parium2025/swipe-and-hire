@@ -79,6 +79,10 @@ interface CandidatesTableProps {
   isLoadingMore?: boolean;
   selectionMode?: boolean;
   onSelectionModeChange?: (mode: boolean) => void;
+  // Nya props för "Vill du fortsätta?" banner
+  hasReachedLimit?: boolean;
+  onContinueLoading?: () => void;
+  loadedCount?: number;
 }
 
 const statusConfig = {
@@ -96,6 +100,9 @@ export function CandidatesTable({
   isLoadingMore = false,
   selectionMode = false,
   onSelectionModeChange,
+  hasReachedLimit = false,
+  onContinueLoading,
+  loadedCount = 0,
 }: CandidatesTableProps) {
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -595,12 +602,33 @@ export function CandidatesTable({
         </Table>
       </div>
       
-      {/* Infinite scroll sentinel */}
-      {hasMore && (
+      {/* Infinite scroll sentinel - endast om vi inte nått gränsen */}
+      {hasMore && !hasReachedLimit && (
         <InfiniteScrollSentinel 
           onIntersect={onLoadMore} 
           isLoading={isLoadingMore} 
         />
+      )}
+
+      {/* "Vill du fortsätta?" banner efter 500 kandidater */}
+      {hasReachedLimit && hasMore && (
+        <div className="flex flex-col items-center justify-center py-8 px-4 bg-gradient-to-b from-background/50 to-background border-t border-border/50">
+          <div className="text-center space-y-3 max-w-md">
+            <p className="text-muted-foreground text-sm">
+              Du har laddat <span className="font-semibold text-foreground">{loadedCount}+</span> kandidater
+            </p>
+            <p className="text-muted-foreground/80 text-xs">
+              Vill du ladda fler? Du kan också använda sökfältet för att hitta specifika kandidater snabbare.
+            </p>
+            <Button
+              variant="outline"
+              onClick={onContinueLoading}
+              className="mt-2"
+            >
+              Ladda fler kandidater
+            </Button>
+          </div>
+        </div>
       )}
 
       <CandidateProfileDialog
