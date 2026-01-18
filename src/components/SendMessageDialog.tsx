@@ -99,12 +99,12 @@ export function SendMessageDialog({
             </CardDescription>
           </CardHeader>
           
-          <CardContent className="space-y-4 px-4 pb-4">
+          <CardContent className="space-y-6 px-4 pb-6 pt-2">
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Skriv ditt meddelande här..."
-              className="min-h-[160px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-none transition-all duration-150 text-base"
+              className="min-h-[120px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 resize-none transition-all duration-150 text-base"
               disabled={!isOnline}
             />
 
