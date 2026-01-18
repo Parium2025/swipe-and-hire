@@ -61,7 +61,10 @@ const CandidatesContent = () => {
     refetch,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage 
+    isFetchingNextPage,
+    hasReachedLimit,
+    continueLoading,
+    loadedCount,
   } = useApplicationsData(searchQuery);
   
   // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
@@ -258,6 +261,9 @@ const CandidatesContent = () => {
             isLoadingMore={isFetchingNextPage}
             selectionMode={selectionMode}
             onSelectionModeChange={setSelectionMode}
+            hasReachedLimit={hasReachedLimit}
+            onContinueLoading={continueLoading}
+            loadedCount={loadedCount}
           />
         )}
       </div>
