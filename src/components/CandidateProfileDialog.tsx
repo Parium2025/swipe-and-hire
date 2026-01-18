@@ -994,19 +994,7 @@ export const CandidateProfileDialog = ({
             {/* Actions - show stage navigation + book meeting for my-candidates, only Book meeting for all-candidates */}
             {variant === 'my-candidates' ? (
               <div className="pt-4 border-t border-white/20 space-y-3">
-                {/* Boka möte - centered on its own row */}
-                <div className="flex justify-center">
-                  <Button
-                    onClick={() => setBookInterviewOpen(true)}
-                    variant="glassBlue"
-                    size="default"
-                  >
-                    <CalendarPlus className="h-4 w-4 mr-1.5" />
-                    Boka möte
-                  </Button>
-                </div>
-                
-                {/* Other action buttons row */}
+                {/* Action buttons row */}
                 <div className="flex justify-center gap-2 flex-wrap">
                   <Button
                     onClick={() => setSendMessageOpen(true)}
@@ -1015,6 +1003,14 @@ export const CandidateProfileDialog = ({
                   >
                     <MessageSquare className="h-4 w-4 mr-1.5" />
                     Meddelande
+                  </Button>
+                  <Button
+                    onClick={() => setBookInterviewOpen(true)}
+                    variant="glassBlue"
+                    size="default"
+                  >
+                    <CalendarPlus className="h-4 w-4 mr-1.5" />
+                    Boka möte
                   </Button>
                   {hasTeam && (
                     <Button
