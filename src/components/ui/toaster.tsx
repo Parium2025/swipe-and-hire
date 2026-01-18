@@ -1,7 +1,6 @@
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
-  ToastClose,
   ToastDescription,
   ToastProvider,
   ToastTitle,
@@ -12,7 +11,7 @@ export function Toaster() {
   const { toasts, dismiss } = useToast()
 
   return (
-    <ToastProvider duration={2000}>
+    <ToastProvider duration={4000}>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast
@@ -29,7 +28,6 @@ export function Toaster() {
               )}
             </div>
             {action}
-            <ToastClose />
           </Toast>
         )
       })}
