@@ -264,11 +264,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
                 
                 <button
                   onClick={handleDismiss}
-                  className={`p-1 transition-colors shrink-0 ${
-                    isDenied 
-                      ? 'text-amber-400 hover:text-amber-100' 
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className="p-1 transition-colors shrink-0 text-white hover:text-white/80"
                   aria-label="Stäng"
                 >
                   <X className="h-4 w-4" />
