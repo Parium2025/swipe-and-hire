@@ -158,24 +158,56 @@ export const useEagerRatingsPreload = () => {
   }, []);
 
   // Preload kandidat-snapshot (första 50 kandidater)
+  // Inkluderar nu betyg direkt i snapshot för att eliminera "millisekund-popin" i /candidates.
   const preloadCandidateSnapshot = useCallback(async (userId: string) => {
     const snapshotKey = APPLICATIONS_SNAPSHOT_PREFIX + userId;
     const existingSnapshot = localStorage.getItem(snapshotKey);
-    
+
+    // 1) Om snapshot redan finns och är färsk: patcha in betyg från ratings-cache och returnera.
+    //    (Viktigt eftersom tidigare versioner sparade snapshot UTAN rating.)
     if (existingSnapshot) {
       try {
         const parsed = JSON.parse(existingSnapshot);
         const age = Date.now() - parsed.timestamp;
-        // Om snapshot är under 30 min - skippa
+
         if (age < SNAPSHOT_EXPIRY_MS && parsed.items?.length > 0) {
+          try {
+            const rawRatings = localStorage.getItem(RATINGS_CACHE_PREFIX + userId);
+            if (rawRatings) {
+              const ratingsCache: RatingsCacheData = JSON.parse(rawRatings);
+              const ratings = ratingsCache?.ratings || {};
+
+              if (Object.keys(ratings).length > 0) {
+                let changed = false;
+                const patchedItems = (parsed.items as any[]).map((item: any) => {
+                  const nextRating = ratings[item.applicant_id] ?? item.rating ?? null;
+                  if (item.rating !== nextRating) changed = true;
+                  return { ...item, rating: nextRating };
+                });
+
+                if (changed) {
+                  localStorage.setItem(
+                    snapshotKey,
+                    JSON.stringify({
+                      items: patchedItems,
+                      timestamp: Date.now(),
+                    })
+                  );
+                }
+              }
+            }
+          } catch {
+            // ignore cache parse errors
+          }
+
           return;
         }
       } catch {
-        // Korrupt cache - fortsätt
+        // Korrupt snapshot - fortsätt med ny preload
       }
     }
 
-    // Hämta första 50 kandidater
+    // 2) Hämta första 50 kandidater
     const { data: baseData, error } = await supabase
       .from('job_applications')
       .select(`
@@ -205,19 +237,63 @@ export const useEagerRatingsPreload = () => {
 
     if (error || !baseData) return;
 
-    // Bygg items med job_title
+    const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id).filter(Boolean))] as string[];
+
+    // 3) Hämta betyg för dessa 50 (snabb batch) och uppdatera ratings-cache
+    const ratingsMap: Record<string, number> = {};
+
+    // Seed från befintlig cache (om den finns)
+    try {
+      const raw = localStorage.getItem(RATINGS_CACHE_PREFIX + userId);
+      if (raw) {
+        const cache: RatingsCacheData = JSON.parse(raw);
+        Object.assign(ratingsMap, cache?.ratings || {});
+      }
+    } catch {
+      // ignore
+    }
+
+    if (navigator.onLine && applicantIds.length > 0) {
+      const { data: ratingsData, error: ratingsError } = await supabase
+        .from('candidate_ratings')
+        .select('applicant_id, rating')
+        .eq('recruiter_id', userId)
+        .in('applicant_id', applicantIds);
+
+      if (!ratingsError && ratingsData) {
+        ratingsData.forEach((row: any) => {
+          ratingsMap[row.applicant_id] = row.rating;
+        });
+
+        // Spara cache även här så /candidates kan merge:a direkt i readSnapshot
+        try {
+          localStorage.setItem(
+            RATINGS_CACHE_PREFIX + userId,
+            JSON.stringify({ ratings: ratingsMap, timestamp: Date.now() })
+          );
+        } catch {
+          // ignore
+        }
+      }
+    }
+
+    // 4) Bygg items med job_title + rating
     const items = baseData.map((item: any) => ({
       ...item,
       job_title: item.job_postings?.title || 'Okänt jobb',
       job_occupation: item.job_postings?.occupation || null,
+      rating: ratingsMap[item.applicant_id] ?? null,
       job_postings: undefined,
     }));
 
-    // Spara snapshot
-    localStorage.setItem(snapshotKey, JSON.stringify({
-      items,
-      timestamp: Date.now(),
-    }));
+    // 5) Spara snapshot
+    localStorage.setItem(
+      snapshotKey,
+      JSON.stringify({
+        items,
+        timestamp: Date.now(),
+      })
+    );
   }, []);
 
   // 📋 Preload jobbannonser (för dashboard stats + My Jobs)
