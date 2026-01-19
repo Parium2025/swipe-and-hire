@@ -199,7 +199,7 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
               <div className="p-6 pt-2 flex gap-2 justify-center shrink-0">
                 <button
                   onClick={onClose}
-                  className="rounded-full px-3 py-2 text-sm bg-white/5 backdrop-blur-[2px] border border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50"
+                  className="rounded-full px-4 py-2 text-sm bg-white/5 backdrop-blur-[2px] border border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50"
                 >
                   Stäng
                 </button>
@@ -212,7 +212,7 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
                       { timeout: 5000 }
                     );
                   }}
-                  className="rounded-full px-3 py-2 text-sm bg-white/10 backdrop-blur-sm text-white border border-white/30 md:hover:bg-white/20 md:hover:border-white/50 transition-all duration-300 whitespace-nowrap"
+                  className="rounded-full px-4 py-2 text-sm bg-emerald-500/20 backdrop-blur-sm text-white border border-emerald-500/40 md:hover:bg-emerald-500/30 md:hover:border-emerald-500/50 transition-all duration-300 whitespace-nowrap"
                 >
                   Jag har aktiverat – testa igen
                 </button>
