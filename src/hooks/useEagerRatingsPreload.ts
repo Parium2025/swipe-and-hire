@@ -43,14 +43,11 @@ let lastPreloadTimestamp = 0;
 
 /**
  * Trigga bakgrundssynk - anropas från useAuth vid login
- * FÖRST rensas all gammal cache för att garantera att ingen stale data visas,
- * SEDAN körs preload för att hämta färsk data.
  */
 export const triggerBackgroundSync = async () => {
-  // 🗑️ ALLTID rensa först - garanterar att ingen gammal data visas
-  clearAllAppCaches();
-  
-  // Sedan preload färsk data
+  // OBS: Vi rensar INTE cache här.
+  // Preloading bygger på att kunna visa snapshot/ratings direkt.
+  // Cache rensas vid logout (och vid faktisk invalidation), inte vid login.
   if (globalPreloadFunction) {
     await globalPreloadFunction();
   }
@@ -229,6 +226,16 @@ export const useEagerRatingsPreload = () => {
         const age = Date.now() - parsed.timestamp;
 
         if (age < SNAPSHOT_EXPIRY_MS && parsed.items?.length > 0) {
+          const snapshotItems = (parsed.items as any[]) || [];
+
+          // Legacy-snapshot saknar ibland "rating" helt. Då MÅSTE vi patcha/fetcha här
+          // annars blir betygen aldrig "instant" från snapshot.
+          const hasMissingRatingField = snapshotItems.some((it) => it?.rating === undefined);
+
+          let patchedItems: any[] = snapshotItems;
+          let didWriteSnapshot = false;
+
+          // 1) Försök patcha från ratings-cache (billigt, offline-safe)
           try {
             const rawRatings = localStorage.getItem(RATINGS_CACHE_PREFIX + userId);
             if (rawRatings) {
@@ -237,7 +244,7 @@ export const useEagerRatingsPreload = () => {
 
               if (Object.keys(ratings).length > 0) {
                 let changed = false;
-                const patchedItems = (parsed.items as any[]).map((item: any) => {
+                patchedItems = patchedItems.map((item: any) => {
                   const nextRating = ratings[item.applicant_id] ?? item.rating ?? null;
                   if (item.rating !== nextRating) changed = true;
                   return { ...item, rating: nextRating };
@@ -248,14 +255,77 @@ export const useEagerRatingsPreload = () => {
                     snapshotKey,
                     JSON.stringify({
                       items: patchedItems,
-                      timestamp: Date.now(),
+                      // behåll original-timestamp (förläng inte snapshot TTL av misstag)
+                      timestamp: parsed.timestamp,
                     })
                   );
+                  didWriteSnapshot = true;
                 }
               }
             }
           } catch {
             // ignore cache parse errors
+          }
+
+          // 2) Om snapshot saknar rating-fält: fetcha betyg för just dessa kandidater en gång
+          //    och skriv både snapshot + ratings-cache.
+          if (hasMissingRatingField && navigator.onLine) {
+            const applicantIds = [
+              ...new Set(patchedItems.map((i: any) => i?.applicant_id).filter(Boolean)),
+            ] as string[];
+
+            if (applicantIds.length > 0) {
+              const { data: ratingsData, error: ratingsError } = await supabase
+                .from('candidate_ratings')
+                .select('applicant_id, rating')
+                .eq('recruiter_id', userId)
+                .in('applicant_id', applicantIds);
+
+              if (!ratingsError && ratingsData) {
+                const fetchedRatings: Record<string, number> = {};
+                ratingsData.forEach((row: any) => {
+                  fetchedRatings[row.applicant_id] = row.rating;
+                });
+
+                // uppdatera snapshot
+                patchedItems = patchedItems.map((item: any) => ({
+                  ...item,
+                  rating: fetchedRatings[item.applicant_id] ?? item.rating ?? null,
+                }));
+
+                try {
+                  localStorage.setItem(
+                    snapshotKey,
+                    JSON.stringify({
+                      items: patchedItems,
+                      timestamp: parsed.timestamp,
+                    })
+                  );
+                  didWriteSnapshot = true;
+                } catch {
+                  // ignore
+                }
+
+                // uppdatera ratings-cache (så readSnapshot i useApplicationsData kan merge:a direkt)
+                if (Object.keys(fetchedRatings).length > 0) {
+                  try {
+                    const existingRaw = localStorage.getItem(RATINGS_CACHE_PREFIX + userId);
+                    const existing: RatingsCacheData | null = existingRaw ? JSON.parse(existingRaw) : null;
+                    const merged = { ...(existing?.ratings || {}), ...fetchedRatings };
+                    localStorage.setItem(
+                      RATINGS_CACHE_PREFIX + userId,
+                      JSON.stringify({ ratings: merged, timestamp: Date.now() })
+                    );
+                  } catch {
+                    // ignore
+                  }
+                }
+              }
+            }
+          }
+
+          if (didWriteSnapshot) {
+            console.log('✅ Patched legacy candidate snapshot with ratings');
           }
 
           return;
