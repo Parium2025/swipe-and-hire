@@ -10,6 +10,8 @@ const WEATHER_CACHE_KEY = 'parium_weather_data';
 const APPLICATIONS_SNAPSHOT_PREFIX = 'applications_snapshot_';
 const JOBS_CACHE_KEY = 'jobs_snapshot_';
 const CONVERSATIONS_CACHE_KEY = 'conversations_snapshot_';
+const INTERVIEWS_CACHE_KEY = 'interviews_snapshot_';
+const JOB_TEMPLATES_CACHE_KEY = 'job_templates_snapshot_';
 const SNAPSHOT_EXPIRY_MS = 30 * 60 * 1000; // 30 min
 const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min
 const PERIODIC_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 min - refresh all data periodically
@@ -32,7 +34,7 @@ interface RatingsCacheData {
  * - Omedelbar preload vid aktivitet
  * - Smart cache-validering (ignorerar gammal data)
  * 
- * Synkar: Väder, Betyg, Stage-settings, Kandidat-snapshots, Jobbannonser, Meddelanden
+ * Synkar: Väder, Betyg, Stage-settings, Kandidat-snapshots, Jobbannonser, Meddelanden, Intervjuer, Jobbmallar
  */
 
 // Global state för att kunna trigga från useAuth vid login
@@ -331,6 +333,89 @@ export const useEagerRatingsPreload = () => {
     }
   }, [queryClient]);
 
+  // 📅 Preload intervjuer (kommande bokade intervjuer)
+  const preloadInterviews = useCallback(async (userId: string) => {
+    const cacheKey = INTERVIEWS_CACHE_KEY + userId;
+    const existingCache = localStorage.getItem(cacheKey);
+    
+    if (existingCache) {
+      try {
+        const parsed = JSON.parse(existingCache);
+        const age = Date.now() - parsed.timestamp;
+        if (age < WEATHER_CACHE_MAX_AGE && parsed.items?.length >= 0) {
+          return; // Cache är färsk
+        }
+      } catch {
+        // Korrupt cache - fortsätt
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('interviews')
+      .select(`
+        *,
+        job_postings(title),
+        job_applications(first_name, last_name)
+      `)
+      .eq('employer_id', userId)
+      .gte('scheduled_at', new Date().toISOString())
+      .in('status', ['pending', 'confirmed'])
+      .order('scheduled_at', { ascending: true });
+
+    if (!error && data) {
+      const items = data.map((interview: any) => ({
+        ...interview,
+        candidate_name: interview.job_applications 
+          ? `${interview.job_applications.first_name || ''} ${interview.job_applications.last_name || ''}`.trim() || 'Okänd'
+          : 'Okänd',
+        job_title: interview.job_postings?.title || 'Okänd tjänst',
+      }));
+
+      localStorage.setItem(cacheKey, JSON.stringify({
+        items,
+        timestamp: Date.now(),
+      }));
+      
+      // Uppdatera React Query cache
+      queryClient.setQueryData(['interviews', userId], items);
+    }
+  }, [queryClient]);
+
+  // 📋 Preload jobbmallar
+  const preloadJobTemplates = useCallback(async (userId: string) => {
+    const cacheKey = JOB_TEMPLATES_CACHE_KEY + userId;
+    const existingCache = localStorage.getItem(cacheKey);
+    
+    if (existingCache) {
+      try {
+        const parsed = JSON.parse(existingCache);
+        const age = Date.now() - parsed.timestamp;
+        if (age < WEATHER_CACHE_MAX_AGE && parsed.items?.length >= 0) {
+          return; // Cache är färsk
+        }
+      } catch {
+        // Korrupt cache - fortsätt
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('job_templates')
+      .select('*')
+      .eq('employer_id', userId)
+      .order('is_default', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      localStorage.setItem(cacheKey, JSON.stringify({
+        items: data,
+        timestamp: Date.now(),
+      }));
+      
+      // Uppdatera React Query cache
+      queryClient.setQueryData(['job-templates', userId], data);
+    }
+  }, [queryClient]);
+
   // 🚀 HUVUDFUNKTION: Förladda ALL data parallellt
   const preloadAllData = useCallback(async (force = false) => {
     if (!user) return;
@@ -355,6 +440,8 @@ export const useEagerRatingsPreload = () => {
         preloadCandidateSnapshot(userId),
         preloadJobPostings(userId, profile?.organization_id),
         preloadConversations(userId),
+        preloadInterviews(userId),
+        preloadJobTemplates(userId),
       ]);
 
       hasPreloadedRef.current = true;
@@ -363,7 +450,7 @@ export const useEagerRatingsPreload = () => {
     } finally {
       isPreloadingRef.current = false;
     }
-  }, [user, profile, preloadRatingsAndStages, preloadWeatherIfStale, preloadCandidateSnapshot, preloadJobPostings, preloadConversations]);
+  }, [user, profile, preloadRatingsAndStages, preloadWeatherIfStale, preloadCandidateSnapshot, preloadJobPostings, preloadConversations, preloadInterviews, preloadJobTemplates]);
 
   // Exponera preload-funktionen globalt så useAuth kan trigga den vid login
   useEffect(() => {
@@ -443,6 +530,68 @@ export const useEagerRatingsPreload = () => {
       document.removeEventListener('touchstart', handleFirstInteraction);
     };
   }, [user, preloadAllData]);
+
+  // 📡 REALTIME SUBSCRIPTIONS för employer
+  useEffect(() => {
+    if (!user) return;
+
+    // Realtime för intervjuer
+    const interviewsChannel = supabase
+      .channel(`employer-interviews-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'interviews',
+          filter: `employer_id=eq.${user.id}`
+        },
+        () => {
+          preloadInterviews(user.id);
+        }
+      )
+      .subscribe();
+
+    // Realtime för jobbmallar
+    const templatesChannel = supabase
+      .channel(`employer-templates-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_templates',
+          filter: `employer_id=eq.${user.id}`
+        },
+        () => {
+          preloadJobTemplates(user.id);
+        }
+      )
+      .subscribe();
+
+    // Realtime för stage-settings
+    const stageSettingsChannel = supabase
+      .channel(`employer-stage-settings-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_stage_settings',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          preloadRatingsAndStages(user.id);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(interviewsChannel);
+      supabase.removeChannel(templatesChannel);
+      supabase.removeChannel(stageSettingsChannel);
+    };
+  }, [user, preloadInterviews, preloadJobTemplates, preloadRatingsAndStages]);
 };
 
 export default useEagerRatingsPreload;
