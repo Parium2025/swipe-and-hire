@@ -18,7 +18,6 @@ import JobDetails from "./pages/JobDetails";
 import JobView from "./pages/JobView";
 import NotFound from "./pages/NotFound";
 import CvTunnel from "./pages/CvTunnel";
-// import MyJobs from "./pages/MyJobs";
 import MediaMigration from "./pages/MediaMigration";
 import { AuthProvider } from "@/hooks/useAuth";
 import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";

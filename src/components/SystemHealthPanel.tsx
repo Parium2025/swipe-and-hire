@@ -740,5 +740,4 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
   );
 };
 
-// Legacy export for App.tsx (does nothing now)
 export const SystemHealthPanel = () => null;
