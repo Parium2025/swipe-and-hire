@@ -503,9 +503,9 @@ const EmployerDashboard = memo(() => {
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus 
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col"
         >
-          <AlertDialogHeader className="space-y-4 text-center">
+          <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
             <div className="flex items-center justify-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full">
                 <AlertTriangle className="h-4 w-4 text-red-400" />
@@ -514,15 +514,17 @@ const EmployerDashboard = memo(() => {
                 Ta bort jobbannons
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
+          </AlertDialogHeader>
+          <div className="overflow-y-auto flex-1 my-4">
+            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words text-center">
               {jobToDelete && (
                 <>
                   Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+          </div>
+          <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
             <AlertDialogCancel 
               onClick={() => {
                 setDeleteDialogOpen(false);
