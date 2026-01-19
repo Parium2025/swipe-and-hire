@@ -61,7 +61,7 @@ interface GpsPromptProps {
 
 const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
   const [visible, setVisible] = useState(false);
-  const [expanded, setExpanded] = useState(true); // true = full notification, false = just icon
+  const [expanded, setExpanded] = useState(false); // Always start as icon, user expands manually
   const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
   const [showHelpModal, setShowHelpModal] = useState(false);
 
@@ -91,13 +91,8 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
       if (status === 'denied') {
         if (!gpsPromptDismissedUntilReload) {
           setVisible(true);
-          // If previously shown, start minimized; otherwise expanded
-          if (gpsPromptHasBeenShown) {
-            setExpanded(false);
-          } else {
-            setExpanded(true);
-            gpsPromptHasBeenShown = true;
-          }
+          gpsPromptHasBeenShown = true;
+          // Always start minimized (icon only)
         }
         return;
       }
@@ -110,12 +105,8 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
           checkGpsPermission().then(currentStatus => {
             if (currentStatus === 'prompt') {
               setVisible(true);
-              if (gpsPromptHasBeenShown) {
-                setExpanded(false);
-              } else {
-                setExpanded(true);
-                gpsPromptHasBeenShown = true;
-              }
+              gpsPromptHasBeenShown = true;
+              // Always start minimized (icon only)
             } else if (currentStatus === 'granted') {
               setGpsStatus('granted');
               setVisible(false);
