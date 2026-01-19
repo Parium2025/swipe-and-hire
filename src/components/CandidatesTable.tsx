@@ -106,7 +106,7 @@ export function CandidatesTable({
 }: CandidatesTableProps) {
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { isInMyCandidates, addCandidate, addCandidates } = useMyCandidatesData();
+  const { isInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading } = useMyCandidatesData();
   const { teamMembers, hasTeam } = useTeamMembers();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -562,7 +562,8 @@ export function CandidatesTable({
                     )}
                   </TableCell>
                   <TableCell>
-                    {!isAlreadyAdded && (
+                    {/* Dölj knappen under laddning för att undvika flicker */}
+                    {!isMyCandidatesLoading && !isAlreadyAdded && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
