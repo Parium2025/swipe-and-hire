@@ -144,7 +144,7 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
             transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[calc(100%-2rem)] max-w-md"
           >
-            <div className="bg-card rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+            <div className="bg-[#1a1a2e] rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
               {/* Header */}
               <div className="bg-white/5 p-5 border-b border-white/10">
                 <div className="flex items-center justify-between">
