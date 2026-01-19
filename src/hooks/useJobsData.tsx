@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo, useEffect } from 'react';
+import { isJobExpiredCheck } from '@/lib/date';
 
 export interface JobPosting {
   id: string;
@@ -180,8 +181,11 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
   }, [enableRealtime, user, queryClient, scope, profile?.organization_id]);
 
   // Memoize stats to prevent unnecessary recalculations
-  // Only count active jobs for dashboard stats (exclude drafts)
-  const activeJobsList = useMemo(() => jobs.filter(job => job.is_active), [jobs]);
+  // Only count truly active jobs (is_active AND not expired) for dashboard stats
+  const activeJobsList = useMemo(() => 
+    jobs.filter(job => job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)), 
+    [jobs]
+  );
   
   const stats = useMemo(() => ({
     totalJobs: activeJobsList.length,
