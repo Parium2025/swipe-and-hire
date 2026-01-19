@@ -275,19 +275,6 @@ const EmployerHome = memo(() => {
               )}
               {' '}{weather.description} <span className="text-xl">{displayEmoji}</span>
             </p>
-          ) : !gpsGranted && gpsGranted !== null ? (
-            <button
-              onClick={() => {
-                navigator.geolocation.getCurrentPosition(
-                  () => window.location.reload(),
-                  () => {},
-                  { timeout: 10000 }
-                );
-              }}
-              className="text-white/60 hover:text-white/90 text-sm underline underline-offset-2 transition-colors"
-            >
-              Aktivera plats för väder
-            </button>
           ) : null}
         </motion.div>
 
