@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
@@ -25,6 +26,9 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   
   // Update browser tab title with unread message count
   useJobSeekerDocumentTitle();
+  
+  // 🚀 Background Sync Engine - håller ALL data färsk 24/7
+  useJobSeekerBackgroundSync();
 
   // Prefetch public jobs in background so they're ready instantly when navigating to /search-jobs
   useEffect(() => {
