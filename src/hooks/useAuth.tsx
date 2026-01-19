@@ -9,7 +9,7 @@ import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
-import { triggerBackgroundSync } from '@/hooks/useEagerRatingsPreload';
+import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -351,6 +351,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             sessionStorage.removeItem(VIDEO_CACHE_KEY);
           } catch {}
           try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch {}
+          // 🗑️ Rensa ALLA app-cacher så inget gammalt visas vid nästa login
+          clearAllAppCaches();
           if (event !== 'INITIAL_SESSION') {
             setLoading(false);
           }
@@ -992,6 +994,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Rensa alla sparade formulärutkast vid utloggning
       clearAllDrafts();
+      
+      // 🗑️ Rensa ALLA app-cacher (väder, betyg, snapshots etc) för att 
+      // garantera att ingen gammal data visas vid nästa inloggning
+      clearAllAppCaches();
       
       // Vänta resterande tid för smooth övergång
       await new Promise(resolve => setTimeout(resolve, 550));

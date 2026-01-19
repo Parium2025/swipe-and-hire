@@ -51,6 +51,58 @@ export const triggerBackgroundSync = async () => {
 };
 
 /**
+ * 🗑️ RENSA ALL APP-CACHE
+ * 
+ * Anropas vid logout för att garantera att ingen gammal data
+ * visas vid nästa inloggning. Rensar:
+ * - Väder-cache
+ * - Betyg-cache
+ * - Stage-settings cache
+ * - Kandidat-snapshots
+ * - Jobb-snapshots
+ * - Konversations-snapshots
+ * - Intervju-snapshots
+ * - Jobbmallar-snapshots
+ */
+export const clearAllAppCaches = () => {
+  console.log('🗑️ Clearing all app caches on logout...');
+  
+  const prefixesToClear = [
+    RATINGS_CACHE_PREFIX,
+    STAGE_SETTINGS_CACHE_KEY,
+    APPLICATIONS_SNAPSHOT_PREFIX,
+    JOBS_CACHE_KEY,
+    CONVERSATIONS_CACHE_KEY,
+    INTERVIEWS_CACHE_KEY,
+    JOB_TEMPLATES_CACHE_KEY,
+  ];
+  
+  const exactKeysToRemove = [WEATHER_CACHE_KEY];
+  
+  try {
+    // Rensa exakta nycklar
+    exactKeysToRemove.forEach((key) => {
+      localStorage.removeItem(key);
+    });
+    
+    // Rensa prefix-baserade nycklar
+    const allKeys = Object.keys(localStorage);
+    allKeys.forEach((key) => {
+      if (prefixesToClear.some((prefix) => key.startsWith(prefix))) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Återställ global state
+    lastPreloadTimestamp = 0;
+    
+    console.log('✅ All app caches cleared');
+  } catch (error) {
+    console.warn('⚠️ Failed to clear some app caches:', error);
+  }
+};
+
+/**
  * Validera väder-cache - returnerar true om cachen är giltig (under 5 min)
  */
 const isWeatherCacheValid = (): boolean => {
