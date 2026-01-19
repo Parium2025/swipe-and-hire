@@ -43,8 +43,14 @@ let lastPreloadTimestamp = 0;
 
 /**
  * Trigga bakgrundssynk - anropas från useAuth vid login
+ * FÖRST rensas all gammal cache för att garantera att ingen stale data visas,
+ * SEDAN körs preload för att hämta färsk data.
  */
 export const triggerBackgroundSync = async () => {
+  // 🗑️ ALLTID rensa först - garanterar att ingen gammal data visas
+  clearAllAppCaches();
+  
+  // Sedan preload färsk data
   if (globalPreloadFunction) {
     await globalPreloadFunction();
   }
