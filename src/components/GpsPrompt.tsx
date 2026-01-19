@@ -82,8 +82,8 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
       }
       
       // If prompt (browser hasn't asked yet):
-      // Wait 3 seconds, then show our custom prompt
-      const dismissed = localStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
+      // Wait 3 seconds, then show our custom prompt (use sessionStorage instead of localStorage)
+      const dismissed = sessionStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
       if (status === 'prompt' && !dismissed) {
         timeoutId = setTimeout(() => {
           // Double-check permission hasn't changed during the wait
@@ -140,9 +140,10 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
 
   const handleDismiss = () => {
     setVisible(false);
-    // Only save dismissal if not denied (denied users should always see the help option)
-    if (gpsStatus !== 'denied') {
-      localStorage.setItem(GPS_PROMPT_DISMISSED_KEY, 'true');
+    // Never save dismissal for denied status - always show on page reload
+    // Only save dismissal for 'prompt' status (when user hasn't decided yet)
+    if (gpsStatus === 'prompt') {
+      sessionStorage.setItem(GPS_PROMPT_DISMISSED_KEY, 'true');
     }
   };
 
