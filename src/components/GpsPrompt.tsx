@@ -5,8 +5,10 @@ import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import GpsHelpModal from '@/components/GpsHelpModal';
 
-const GPS_PROMPT_DISMISSED_KEY = 'parium_gps_prompt_dismissed';
 const GPS_PROMPT_DELAY_MS = 3000; // Show after 3 seconds
+
+// Dismissed state that survives SPA navigation (module stays loaded) but resets on full page reload
+let gpsPromptDismissedUntilReload = false;
 
 // Check if running as native app
 const isNativeApp = (): boolean => Capacitor.isNativePlatform();
@@ -75,19 +77,15 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
         return;
       }
       
-      // If denied - check sessionStorage for dismissal (survives navigation, clears on reload)
+      // If denied
       if (status === 'denied') {
-        const dismissed = sessionStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
-        if (!dismissed) {
-          setVisible(true);
-        }
+        setVisible(!gpsPromptDismissedUntilReload);
         return;
       }
       
       // If prompt (browser hasn't asked yet):
-      // Wait 3 seconds, then show our custom prompt (use sessionStorage instead of localStorage)
-      const dismissed = sessionStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
-      if (status === 'prompt' && !dismissed) {
+      // Wait 3 seconds, then show our custom prompt
+      if (status === 'prompt' && !gpsPromptDismissedUntilReload) {
         timeoutId = setTimeout(() => {
           // Double-check permission hasn't changed during the wait
           checkGpsPermission().then(currentStatus => {
@@ -96,6 +94,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
             } else if (currentStatus === 'granted') {
               setGpsStatus('granted');
               setVisible(false);
+              gpsPromptDismissedUntilReload = false;
             }
           });
         }, GPS_PROMPT_DELAY_MS);
@@ -111,6 +110,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
           const handleChange = () => {
             const newState = permissionStatus?.state;
             if (newState === 'granted') {
+              gpsPromptDismissedUntilReload = false;
               setGpsStatus('granted');
               setVisible(false);
               // Cancel any pending timeout
@@ -120,7 +120,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
               }
             } else if (newState === 'denied') {
               setGpsStatus('denied');
-              setVisible(true);
+              setVisible(!gpsPromptDismissedUntilReload);
             }
           };
           
@@ -142,10 +142,8 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
   }, []);
 
   const handleDismiss = () => {
+    gpsPromptDismissedUntilReload = true;
     setVisible(false);
-    // Save dismissal in sessionStorage for both denied and prompt status
-    // This keeps it dismissed during navigation, but reappears on page reload
-    sessionStorage.setItem(GPS_PROMPT_DISMISSED_KEY, 'true');
   };
 
   const handleEnableGps = async () => {
@@ -162,11 +160,13 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
       const granted = await requestGpsPermission();
       if (granted) {
         console.log('Native GPS enabled successfully');
+        gpsPromptDismissedUntilReload = false;
         setGpsStatus('granted');
         onEnableGps?.();
         // Don't reload - let the app handle the state update naturally
       } else {
         console.log('Native GPS permission denied');
+        gpsPromptDismissedUntilReload = false;
         setGpsStatus('denied');
         setVisible(true);
       }
@@ -177,6 +177,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     navigator.geolocation.getCurrentPosition(
       () => {
         console.log('GPS enabled successfully');
+        gpsPromptDismissedUntilReload = false;
         setGpsStatus('granted');
         onEnableGps?.();
         // Don't reload - let the app handle the state update naturally
@@ -184,6 +185,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
       (error) => {
         console.log('GPS permission denied:', error.message);
         // User denied - update status and show help
+        gpsPromptDismissedUntilReload = false;
         setGpsStatus('denied');
         setVisible(true);
       },
