@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Chrome, Smartphone, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -123,7 +124,9 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
 
   const Icon = instructions.icon;
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
@@ -135,48 +138,43 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
             onClick={onClose}
             className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
           />
-          
-          {/* Modal - centrerad */}
+
+          {/* Modal (portaled to body, truly centered in viewport) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[calc(100%-2rem)] max-w-md"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-[#1a1a2e] rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+            <div className="w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-hidden rounded-2xl shadow-2xl border border-white/10 bg-white/5 backdrop-blur-sm flex flex-col">
               {/* Header */}
-              <div className="bg-white/5 p-5 border-b border-white/10">
+              <div className="bg-white/5 p-5 border-b border-white/10 shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-primary/20">
                       <MapPin className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h2 className="font-semibold text-white">
-                        Aktivera plats
-                      </h2>
-                      <p className="text-xs text-white/60 mt-0.5">
-                        {instructions.name}
-                      </p>
+                      <h2 className="font-semibold text-white">Aktivera plats</h2>
+                      <p className="text-xs text-white/60 mt-0.5">{instructions.name}</p>
                     </div>
                   </div>
                   <button
                     onClick={onClose}
                     className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                    aria-label="Stäng"
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="p-5">
+              {/* Content (scrollable so entire message is always readable) */}
+              <div className="p-5 flex-1 min-h-0 overflow-y-auto">
                 <div className="flex items-center gap-2 mb-4">
                   <Icon className="h-4 w-4 text-white/60" />
-                  <span className="text-sm font-medium text-white">
-                    Så här gör du:
-                  </span>
+                  <span className="text-sm font-medium text-white">Så här gör du:</span>
                 </div>
 
                 <ol className="space-y-3">
@@ -185,24 +183,22 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
                       <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-semibold flex items-center justify-center">
                         {index + 1}
                       </span>
-                      <span className="text-sm text-white leading-relaxed pt-0.5">
-                        {step}
-                      </span>
+                      <span className="text-sm text-white leading-relaxed pt-0.5">{step}</span>
                     </li>
                   ))}
                 </ol>
 
                 {instructions.tip && (
-                  <div className="mt-4 p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                    <p className="text-xs text-amber-300">
-                      <span className="font-semibold">💡 Tips:</span> {instructions.tip}
+                  <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10">
+                    <p className="text-xs text-white">
+                      <span className="font-semibold">Tips:</span> {instructions.tip}
                     </p>
                   </div>
                 )}
               </div>
 
               {/* Footer */}
-              <div className="p-5 pt-0 flex gap-3">
+              <div className="p-5 pt-0 flex gap-3 shrink-0">
                 <Button
                   onClick={() => {
                     onClose();
@@ -217,8 +213,8 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
                 >
                   Jag har aktiverat – testa igen
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={onClose}
                   className="border-white/20 text-white hover:bg-white/10"
                 >
@@ -229,7 +225,8 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 });
 
