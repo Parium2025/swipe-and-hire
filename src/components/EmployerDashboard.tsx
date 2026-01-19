@@ -177,8 +177,12 @@ const EmployerDashboard = memo(() => {
     }
   };
 
-  // Count active jobs for stats, but "Mina annonser" shows all jobs (including drafts)
-  const activeJobs = useMemo(() => jobs.filter(j => j.is_active), [jobs]);
+  // Count active jobs for stats - exclude expired jobs from "Aktiva annonser" count
+  // "Mina annonser" shows all jobs (including drafts)
+  const activeJobs = useMemo(() => 
+    jobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at)), 
+    [jobs]
+  );
   
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Mina annonser', value: loading ? preloadedEmployerMyJobs : jobs.length, loading: false },
