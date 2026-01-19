@@ -9,6 +9,8 @@ const GPS_PROMPT_DELAY_MS = 3000; // Show after 3 seconds
 
 // Dismissed state that survives SPA navigation (module stays loaded) but resets on full page reload
 let gpsPromptDismissedUntilReload = false;
+// Track if user has seen and expanded the prompt this session (to know whether to minimize on navigation)
+let gpsPromptHasBeenShown = false;
 
 // Check if running as native app
 const isNativeApp = (): boolean => Capacitor.isNativePlatform();
@@ -59,8 +61,16 @@ interface GpsPromptProps {
 
 const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
   const [visible, setVisible] = useState(false);
+  const [expanded, setExpanded] = useState(true); // true = full notification, false = just icon
   const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
   const [showHelpModal, setShowHelpModal] = useState(false);
+
+  // On mount, if prompt was previously shown but not dismissed, start minimized
+  useEffect(() => {
+    if (gpsPromptHasBeenShown && !gpsPromptDismissedUntilReload) {
+      setExpanded(false);
+    }
+  }, []);
 
   // Check GPS permission on mount and listen for changes
   useEffect(() => {
@@ -79,7 +89,16 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
       
       // If denied
       if (status === 'denied') {
-        setVisible(!gpsPromptDismissedUntilReload);
+        if (!gpsPromptDismissedUntilReload) {
+          setVisible(true);
+          // If previously shown, start minimized; otherwise expanded
+          if (gpsPromptHasBeenShown) {
+            setExpanded(false);
+          } else {
+            setExpanded(true);
+            gpsPromptHasBeenShown = true;
+          }
+        }
         return;
       }
       
@@ -91,6 +110,12 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
           checkGpsPermission().then(currentStatus => {
             if (currentStatus === 'prompt') {
               setVisible(true);
+              if (gpsPromptHasBeenShown) {
+                setExpanded(false);
+              } else {
+                setExpanded(true);
+                gpsPromptHasBeenShown = true;
+              }
             } else if (currentStatus === 'granted') {
               setGpsStatus('granted');
               setVisible(false);
@@ -205,9 +230,27 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     <>
       <GpsHelpModal open={showHelpModal} onClose={() => setShowHelpModal(false)} />
       
-      <AnimatePresence>
-        {visible && (
+      <AnimatePresence mode="wait">
+        {visible && !expanded && (
+          // Minimized state - just the icon
+          <motion.button
+            key="minimized"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setExpanded(true)}
+            className="fixed top-20 right-4 z-50 p-3 rounded-full backdrop-blur-xl shadow-2xl border bg-amber-950/90 border-amber-700/50 hover:bg-amber-900/90 transition-colors"
+            aria-label="Visa platsinformation"
+          >
+            <AlertCircle className="h-5 w-5 text-amber-400" />
+          </motion.button>
+        )}
+        
+        {visible && expanded && (
+          // Expanded state - full notification
           <motion.div
+            key="expanded"
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
