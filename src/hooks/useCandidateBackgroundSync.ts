@@ -232,16 +232,21 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
   // Uppdatera React Query cache UTAN att trigga re-render om data är samma
   const existingData: any = queryClient.getQueryData(queryKey);
   
-  // Jämför om datan har ändrats (baserat på updated_at timestamps)
-  const newTimestamps = items.map((i: any) => i.updated_at).join(',');
-  const existingTimestamps = existingData?.pages?.[0]?.items?.map((i: any) => i.updated_at)?.join(',');
-  
-  if (newTimestamps !== existingTimestamps) {
+  // Jämför om datan har ändrats (baserat på updated_at + rating)
+  // Viktigt: rating ligger i candidate_ratings och ändrar INTE job_applications.updated_at.
+  // Därför måste rating vara med i signaturen, annars uppdateras aldrig UI:t.
+  const newSignature = items.map((i: any) => `${i.id}:${i.updated_at}:${i.rating ?? ''}`).join(',');
+  const existingSignature = existingData?.pages?.[0]?.items
+    ?.map((i: any) => `${i.id}:${i.updated_at}:${i.rating ?? ''}`)
+    ?.join(',');
+
+  if (newSignature !== existingSignature) {
     // Data har ändrats - uppdatera cache
     queryClient.setQueryData(queryKey, {
       pages: [{ items, hasMore: items.length === PAGE_SIZE, nextCursor: items.length === PAGE_SIZE ? items.length : null }],
       pageParams: [0],
     });
+    console.log('🔄 Candidate sync: updated applications cache (ratings included)');
   }
 
   // Förladda bilder i bakgrunden
