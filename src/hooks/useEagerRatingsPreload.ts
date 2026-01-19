@@ -2,11 +2,14 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { preloadWeatherLocation } from './useWeather';
+import { useQueryClient } from '@tanstack/react-query';
 
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
 const WEATHER_CACHE_KEY = 'parium_weather_data';
 const APPLICATIONS_SNAPSHOT_PREFIX = 'applications_snapshot_';
+const JOBS_CACHE_KEY = 'jobs_snapshot_';
+const CONVERSATIONS_CACHE_KEY = 'conversations_snapshot_';
 const SNAPSHOT_EXPIRY_MS = 30 * 60 * 1000; // 30 min
 const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min
 const PERIODIC_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 min - refresh all data periodically
@@ -29,7 +32,7 @@ interface RatingsCacheData {
  * - Omedelbar preload vid aktivitet
  * - Smart cache-validering (ignorerar gammal data)
  * 
- * Synkar: Väder, Betyg, Stage-settings, Kandidat-snapshots
+ * Synkar: Väder, Betyg, Stage-settings, Kandidat-snapshots, Jobbannonser, Meddelanden
  */
 
 // Global state för att kunna trigga från useAuth vid login
@@ -62,7 +65,8 @@ const isWeatherCacheValid = (): boolean => {
 };
 
 export const useEagerRatingsPreload = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const queryClient = useQueryClient();
   const hasPreloadedRef = useRef(false);
   const isPreloadingRef = useRef(false);
   const periodicRefreshRef = useRef<NodeJS.Timeout | null>(null);
@@ -214,6 +218,119 @@ export const useEagerRatingsPreload = () => {
     }));
   }, []);
 
+  // 📋 Preload jobbannonser (för dashboard stats + My Jobs)
+  const preloadJobPostings = useCallback(async (userId: string, organizationId?: string | null) => {
+    const cacheKey = JOBS_CACHE_KEY + userId;
+    const existingCache = localStorage.getItem(cacheKey);
+    
+    if (existingCache) {
+      try {
+        const parsed = JSON.parse(existingCache);
+        const age = Date.now() - parsed.timestamp;
+        if (age < WEATHER_CACHE_MAX_AGE && parsed.items?.length >= 0) {
+          return; // Cache är färsk
+        }
+      } catch {
+        // Korrupt cache - fortsätt
+      }
+    }
+
+    // Hämta jobbannonser
+    let query = supabase
+      .from('job_postings')
+      .select('id, title, is_active, views_count, applications_count, created_at, expires_at, location, employment_type, employer_id')
+      .order('created_at', { ascending: false });
+
+    // Om del av organisation, hämta alla org-jobb
+    if (organizationId) {
+      const { data: orgMembers } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('organization_id', organizationId)
+        .eq('is_active', true);
+      
+      if (orgMembers && orgMembers.length > 0) {
+        const memberIds = orgMembers.map(m => m.user_id);
+        query = query.in('employer_id', memberIds);
+      } else {
+        query = query.eq('employer_id', userId);
+      }
+    } else {
+      query = query.eq('employer_id', userId);
+    }
+
+    const { data, error } = await query.limit(100);
+    
+    if (!error && data) {
+      localStorage.setItem(cacheKey, JSON.stringify({
+        items: data,
+        timestamp: Date.now(),
+      }));
+      
+      // Uppdatera React Query cache också för omedelbar användning
+      queryClient.setQueryData(['jobs', 'all', organizationId, userId], data);
+    }
+  }, [queryClient]);
+
+  // 💬 Preload konversationer/meddelanden
+  const preloadConversations = useCallback(async (userId: string) => {
+    const cacheKey = CONVERSATIONS_CACHE_KEY + userId;
+    const existingCache = localStorage.getItem(cacheKey);
+    
+    if (existingCache) {
+      try {
+        const parsed = JSON.parse(existingCache);
+        const age = Date.now() - parsed.timestamp;
+        if (age < WEATHER_CACHE_MAX_AGE && parsed.items?.length >= 0) {
+          return; // Cache är färsk
+        }
+      } catch {
+        // Korrupt cache - fortsätt
+      }
+    }
+
+    // Hämta konversationer där användaren är medlem
+    const { data: memberData } = await supabase
+      .from('conversation_members')
+      .select('conversation_id, last_read_at')
+      .eq('user_id', userId);
+
+    if (!memberData || memberData.length === 0) {
+      localStorage.setItem(cacheKey, JSON.stringify({
+        items: [],
+        timestamp: Date.now(),
+      }));
+      return;
+    }
+
+    const conversationIds = memberData.map(m => m.conversation_id);
+    
+    const { data: conversations, error } = await supabase
+      .from('conversations')
+      .select(`
+        id,
+        name,
+        is_group,
+        job_id,
+        last_message_at,
+        created_at,
+        conversation_members!inner(user_id, last_read_at)
+      `)
+      .in('id', conversationIds)
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .limit(50);
+
+    if (!error && conversations) {
+      localStorage.setItem(cacheKey, JSON.stringify({
+        items: conversations,
+        timestamp: Date.now(),
+      }));
+      
+      // Uppdatera React Query cache
+      queryClient.setQueryData(['conversations', userId], conversations);
+    }
+  }, [queryClient]);
+
   // 🚀 HUVUDFUNKTION: Förladda ALL data parallellt
   const preloadAllData = useCallback(async (force = false) => {
     if (!user) return;
@@ -236,6 +353,8 @@ export const useEagerRatingsPreload = () => {
         preloadRatingsAndStages(userId),
         preloadWeatherIfStale(),
         preloadCandidateSnapshot(userId),
+        preloadJobPostings(userId, profile?.organization_id),
+        preloadConversations(userId),
       ]);
 
       hasPreloadedRef.current = true;
@@ -244,7 +363,7 @@ export const useEagerRatingsPreload = () => {
     } finally {
       isPreloadingRef.current = false;
     }
-  }, [user, preloadRatingsAndStages, preloadWeatherIfStale, preloadCandidateSnapshot]);
+  }, [user, profile, preloadRatingsAndStages, preloadWeatherIfStale, preloadCandidateSnapshot, preloadJobPostings, preloadConversations]);
 
   // Exponera preload-funktionen globalt så useAuth kan trigga den vid login
   useEffect(() => {
