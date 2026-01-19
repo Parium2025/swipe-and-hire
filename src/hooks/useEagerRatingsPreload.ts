@@ -142,42 +142,29 @@ export const useEagerRatingsPreload = () => {
   }, []);
 
   // Preload ratings och stage-settings
+  // KRITISKT: Ratings måste ALLTID hämtas vid första preload för att garantera instant display
   const preloadRatingsAndStages = useCallback(async (userId: string) => {
-    // Kolla om cache är fräsch (under 5 min) - skippa då
-    const existingCache = localStorage.getItem(RATINGS_CACHE_PREFIX + userId);
-    let shouldFetchRatings = true;
-    
-    if (existingCache) {
-      try {
-        const parsed: RatingsCacheData = JSON.parse(existingCache);
-        const age = Date.now() - parsed.timestamp;
-        if (age < WEATHER_CACHE_MAX_AGE && Object.keys(parsed.ratings).length > 0) {
-          shouldFetchRatings = false;
-        }
-      } catch {
-        // Korrupt cache - fortsätt med preload
-      }
-    }
+    // ALLTID hämta ratings - ingen cache-check här
+    // Detta är kritiskt för att ratings ska finnas INNAN snapshot läses
+    // Cache-check görs nu bara för periodiska refreshes, inte initial preload
+    const { data: ratingsData, error: ratingsError } = await supabase
+      .from('candidate_ratings')
+      .select('applicant_id, rating')
+      .eq('recruiter_id', userId);
 
-    if (shouldFetchRatings) {
-      const { data: ratingsData, error: ratingsError } = await supabase
-        .from('candidate_ratings')
-        .select('applicant_id, rating')
-        .eq('recruiter_id', userId);
+    if (!ratingsError && ratingsData) {
+      const ratingsMap: Record<string, number> = {};
+      ratingsData.forEach((row) => {
+        ratingsMap[row.applicant_id] = row.rating;
+      });
 
-      if (!ratingsError && ratingsData) {
-        const ratingsMap: Record<string, number> = {};
-        ratingsData.forEach((row) => {
-          ratingsMap[row.applicant_id] = row.rating;
-        });
-
-        if (Object.keys(ratingsMap).length > 0) {
-          localStorage.setItem(RATINGS_CACHE_PREFIX + userId, JSON.stringify({
-            ratings: ratingsMap,
-            timestamp: Date.now()
-          }));
-        }
-      }
+      // Spara ALLTID - även tom map (visar att vi har hämtat)
+      localStorage.setItem(RATINGS_CACHE_PREFIX + userId, JSON.stringify({
+        ratings: ratingsMap,
+        timestamp: Date.now()
+      }));
+      
+      console.log(`✅ Ratings preloaded: ${Object.keys(ratingsMap).length} ratings cached`);
     }
 
     // Hämta stage-settings också (för Kanban-vy utan flicker)
@@ -620,7 +607,8 @@ export const useEagerRatingsPreload = () => {
     }
   }, [queryClient]);
 
-  // 🚀 HUVUDFUNKTION: Förladda ALL data parallellt
+  // 🚀 HUVUDFUNKTION: Förladda ALL data
+  // KRITISKT: Ratings MÅSTE laddas FÖRE snapshot så att betyg är tillgängliga för merge
   const preloadAllData = useCallback(async (force = false) => {
     if (!user) return;
     
@@ -637,9 +625,13 @@ export const useEagerRatingsPreload = () => {
     const userId = user.id;
 
     try {
-      // Kör alla preloads parallellt för maximal hastighet
+      // STEG 1: Ladda ratings och stage-settings FÖRST (kritiskt för instant display)
+      // Detta säkerställer att ratings-cache finns INNAN snapshot läses
+      await preloadRatingsAndStages(userId);
+      
+      // STEG 2: Ladda snapshot och övriga data parallellt
+      // Nu kan snapshot merge:a ratings från cache korrekt
       await Promise.all([
-        preloadRatingsAndStages(userId),
         preloadWeatherIfStale(),
         preloadCandidateSnapshot(userId),
         preloadJobPostings(userId, profile?.organization_id),
