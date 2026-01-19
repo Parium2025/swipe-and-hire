@@ -147,32 +147,30 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
             transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-hidden rounded-2xl shadow-2xl border border-white/10 bg-white/5 backdrop-blur-sm flex flex-col">
-              {/* Header */}
-              <div className="bg-white/5 p-5 border-b border-white/10 shrink-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-primary/20">
-                      <MapPin className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h2 className="font-semibold text-white">Aktivera plats</h2>
-                      <p className="text-xs text-white/60 mt-0.5">{instructions.name}</p>
-                    </div>
+            <div className="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-hidden rounded-2xl shadow-lg border border-white/20 bg-white/10 backdrop-blur-sm flex flex-col">
+              {/* Header - centered like UnsavedChangesDialog */}
+              <div className="p-6 pb-2 shrink-0 text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="p-2.5 rounded-xl bg-primary/20">
+                    <MapPin className="h-5 w-5 text-primary" />
                   </div>
-                  <button
-                    onClick={onClose}
-                    className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                    aria-label="Stäng"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
                 </div>
+                <h2 className="font-semibold text-white text-lg">Aktivera plats</h2>
+                <p className="text-sm text-white mt-1">{instructions.name}</p>
+                
+                {/* Close button top right */}
+                <button
+                  onClick={onClose}
+                  className="absolute top-4 right-4 p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  aria-label="Stäng"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
 
               {/* Content (scrollable so entire message is always readable) */}
-              <div className="p-5 flex-1 min-h-0 overflow-y-auto">
-                <div className="flex items-center gap-2 mb-4">
+              <div className="px-6 pb-4 flex-1 min-h-0 overflow-y-auto">
+                <div className="flex items-center gap-2 mb-4 justify-center">
                   <Icon className="h-4 w-4 text-white/60" />
                   <span className="text-sm font-medium text-white">Så här gör du:</span>
                 </div>
@@ -189,7 +187,7 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
                 </ol>
 
                 {instructions.tip && (
-                  <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10">
+                  <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/20">
                     <p className="text-xs text-white">
                       <span className="font-semibold">Tips:</span> {instructions.tip}
                     </p>
@@ -197,29 +195,27 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
                 )}
               </div>
 
-              {/* Footer */}
-              <div className="p-5 pt-0 flex gap-3 shrink-0">
-                <Button
+              {/* Footer - buttons styled like UnsavedChangesDialog */}
+              <div className="p-6 pt-2 flex gap-2 justify-center shrink-0">
+                <button
+                  onClick={onClose}
+                  className="rounded-full px-3 py-2 text-sm bg-white/5 backdrop-blur-[2px] border border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50"
+                >
+                  Stäng
+                </button>
+                <button
                   onClick={() => {
                     onClose();
-                    // Try to trigger GPS permission again (will fail if blocked, but worth trying)
                     navigator.geolocation.getCurrentPosition(
                       () => window.location.reload(),
                       () => {},
                       { timeout: 5000 }
                     );
                   }}
-                  className="flex-1"
+                  className="rounded-full px-3 py-2 text-sm bg-primary/20 backdrop-blur-sm text-white border border-primary/40 md:hover:bg-primary/30 md:hover:border-primary/50 transition-all duration-300 whitespace-nowrap"
                 >
                   Jag har aktiverat – testa igen
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={onClose}
-                  className="border-white/20 text-white hover:bg-white/10"
-                >
-                  Stäng
-                </Button>
+                </button>
               </div>
             </div>
           </motion.div>
