@@ -147,12 +147,12 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
             transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-hidden rounded-2xl shadow-lg border border-white/20 bg-white/10 backdrop-blur-sm flex flex-col">
+            <div className="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-hidden rounded-2xl shadow-lg border border-white/20 bg-black/80 backdrop-blur-md flex flex-col relative">
               {/* Header - centered like UnsavedChangesDialog */}
               <div className="p-6 pb-2 shrink-0 text-center">
                 <div className="flex justify-center mb-3">
-                  <div className="p-2.5 rounded-xl bg-primary/20">
-                    <MapPin className="h-5 w-5 text-primary" />
+                  <div className="p-2.5 rounded-xl bg-white/10">
+                    <MapPin className="h-5 w-5 text-white" />
                   </div>
                 </div>
                 <h2 className="font-semibold text-white text-lg">Aktivera plats</h2>
@@ -178,7 +178,7 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
                 <ol className="space-y-3">
                   {instructions.steps.map((step, index) => (
                     <li key={index} className="flex gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-semibold flex items-center justify-center">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 text-white text-xs font-semibold flex items-center justify-center">
                         {index + 1}
                       </span>
                       <span className="text-sm text-white leading-relaxed pt-0.5">{step}</span>
@@ -212,7 +212,7 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
                       { timeout: 5000 }
                     );
                   }}
-                  className="rounded-full px-3 py-2 text-sm bg-primary/20 backdrop-blur-sm text-white border border-primary/40 md:hover:bg-primary/30 md:hover:border-primary/50 transition-all duration-300 whitespace-nowrap"
+                  className="rounded-full px-3 py-2 text-sm bg-white/10 backdrop-blur-sm text-white border border-white/30 md:hover:bg-white/20 md:hover:border-white/50 transition-all duration-300 whitespace-nowrap"
                 >
                   Jag har aktiverat – testa igen
                 </button>
