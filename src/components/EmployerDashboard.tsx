@@ -282,7 +282,7 @@ const EmployerDashboard = memo(() => {
                             ? "hover:bg-red-500/10" 
                             : isDraft 
                               ? "hover:bg-amber-500/10"
-                              : "hover:bg-white/5"
+                              : "hover:bg-green-500/10"
                         }`}
                         onClick={() => handleJobRowClick(job as JobPosting)}
                         onMouseEnter={() => job.is_active && prefetchJob(job.id)}
