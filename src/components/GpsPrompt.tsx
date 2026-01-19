@@ -230,14 +230,10 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <h4 className={`font-semibold text-sm mb-1 ${
-                    isDenied ? 'text-amber-100' : 'text-white'
-                  }`}>
+                  <h4 className="font-semibold text-sm mb-1 text-white">
                     {isDenied ? 'Plats är blockerad' : 'Aktivera plats för exakt väder'}
                   </h4>
-                  <p className={`text-xs leading-relaxed ${
-                    isDenied ? 'text-amber-200/80' : 'text-slate-300'
-                  }`}>
+                  <p className="text-xs leading-relaxed text-white">
                     {isDenied 
                       ? 'Du har blockerat platsåtkomst. Klicka nedan för att se hur du aktiverar det.'
                       : 'Tillåt GPS för att alltid se rätt väder och plats oavsett var du befinner dig.'
