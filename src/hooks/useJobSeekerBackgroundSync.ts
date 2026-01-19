@@ -7,6 +7,7 @@ const SAVED_JOBS_CACHE_KEY = 'job_seeker_saved_jobs_';
 const MY_APPLICATIONS_CACHE_KEY = 'job_seeker_applications_';
 const MESSAGES_CACHE_KEY = 'job_seeker_messages_';
 const AVAILABLE_JOBS_CACHE_KEY = 'job_seeker_available_jobs_';
+const CANDIDATE_INTERVIEWS_CACHE_KEY = 'job_seeker_interviews_';
 const CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min
 const PERIODIC_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 min
 
@@ -23,7 +24,7 @@ const PERIODIC_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 min
  * - Omedelbar preload vid aktivitet
  * - Smart cache-validering
  * 
- * Synkar: Sparade jobb, Mina ansökningar, Meddelanden, Lediga jobb
+ * Synkar: Sparade jobb, Mina ansökningar, Meddelanden, Lediga jobb, Intervjuer
  */
 
 // Global state för att kunna trigga från useAuth vid login
@@ -257,6 +258,46 @@ export const useJobSeekerBackgroundSync = () => {
     }
   }, [queryClient]);
 
+  // 📅 Preload kandidat-intervjuer (bokade intervjuer för jobbsökaren)
+  const preloadCandidateInterviews = useCallback(async (userId: string) => {
+    const cacheKey = CANDIDATE_INTERVIEWS_CACHE_KEY + userId;
+    const existingCache = localStorage.getItem(cacheKey);
+    
+    if (existingCache) {
+      try {
+        const parsed = JSON.parse(existingCache);
+        const age = Date.now() - parsed.timestamp;
+        if (age < CACHE_MAX_AGE && parsed.items?.length >= 0) {
+          return; // Cache är färsk
+        }
+      } catch {
+        // Korrupt cache - fortsätt
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('interviews')
+      .select(`
+        *,
+        job_postings(title, employer_id),
+        profiles!interviews_employer_id_fkey(company_name, first_name, last_name)
+      `)
+      .eq('applicant_id', userId)
+      .gte('scheduled_at', new Date().toISOString())
+      .in('status', ['pending', 'confirmed'])
+      .order('scheduled_at', { ascending: true });
+
+    if (!error && data) {
+      localStorage.setItem(cacheKey, JSON.stringify({
+        items: data,
+        timestamp: Date.now(),
+      }));
+      
+      // Uppdatera React Query cache
+      queryClient.setQueryData(['candidate-interviews', userId], data);
+    }
+  }, [queryClient]);
+
   // 🚀 HUVUDFUNKTION: Förladda ALL jobbsökardata parallellt
   const preloadAllData = useCallback(async (force = false) => {
     if (!user || !isJobSeeker) return;
@@ -280,6 +321,7 @@ export const useJobSeekerBackgroundSync = () => {
         preloadMyApplications(userId),
         preloadMessages(userId),
         preloadAvailableJobs(),
+        preloadCandidateInterviews(userId),
       ]);
 
       hasPreloadedRef.current = true;
@@ -288,7 +330,7 @@ export const useJobSeekerBackgroundSync = () => {
     } finally {
       isPreloadingRef.current = false;
     }
-  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadMessages, preloadAvailableJobs]);
+  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadMessages, preloadAvailableJobs, preloadCandidateInterviews]);
 
   // Exponera preload-funktionen globalt
   useEffect(() => {
@@ -422,12 +464,51 @@ export const useJobSeekerBackgroundSync = () => {
       )
       .subscribe();
 
+    // Realtime för nya jobb (så jobbsökare ser nya annonser direkt)
+    const newJobsChannel = supabase
+      .channel('job-seeker-new-jobs')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'job_postings',
+        },
+        () => {
+          // Force refresh available jobs cache
+          localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
+          preloadAvailableJobs();
+          queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
+          queryClient.invalidateQueries({ queryKey: ['jobs'] });
+        }
+      )
+      .subscribe();
+
+    // Realtime för intervjuer (bokade intervjuer för kandidaten)
+    const interviewsChannel = supabase
+      .channel(`job-seeker-interviews-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'interviews',
+          filter: `applicant_id=eq.${user.id}`
+        },
+        () => {
+          preloadCandidateInterviews(user.id);
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(savedJobsChannel);
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(newJobsChannel);
+      supabase.removeChannel(interviewsChannel);
     };
-  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, queryClient]);
+  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadAvailableJobs, preloadCandidateInterviews, queryClient]);
 };
 
 export default useJobSeekerBackgroundSync;
