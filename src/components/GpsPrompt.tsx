@@ -75,9 +75,12 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
         return;
       }
       
-      // If denied - show help immediately
+      // If denied - check sessionStorage for dismissal (survives navigation, clears on reload)
       if (status === 'denied') {
-        setVisible(true);
+        const dismissed = sessionStorage.getItem(GPS_PROMPT_DISMISSED_KEY);
+        if (!dismissed) {
+          setVisible(true);
+        }
         return;
       }
       
@@ -140,11 +143,9 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
 
   const handleDismiss = () => {
     setVisible(false);
-    // Never save dismissal for denied status - always show on page reload
-    // Only save dismissal for 'prompt' status (when user hasn't decided yet)
-    if (gpsStatus === 'prompt') {
-      sessionStorage.setItem(GPS_PROMPT_DISMISSED_KEY, 'true');
-    }
+    // Save dismissal in sessionStorage for both denied and prompt status
+    // This keeps it dismissed during navigation, but reappears on page reload
+    sessionStorage.setItem(GPS_PROMPT_DISMISSED_KEY, 'true');
   };
 
   const handleEnableGps = async () => {
