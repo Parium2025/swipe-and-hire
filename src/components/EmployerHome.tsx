@@ -204,6 +204,21 @@ const EmployerHome = memo(() => {
     backgroundLocationEnabled: (profile as any)?.background_location_enabled ?? false,
   });
   
+  // 🎯 KRITISKT: Tracka om väderdata har hämtats DENNA session (inte från gammal cache)
+  // Detta förhindrar att gammal snö/regn visas kort vid inloggning
+  const [weatherFetchedThisSession, setWeatherFetchedThisSession] = useState(false);
+  
+  useEffect(() => {
+    // Markera som hämtad när väderdata är klar och INTE loading
+    if (!weather.isLoading && weather.city && gpsGranted) {
+      // Liten fördröjning för att säkerställa att det är färsk data, inte cache
+      const timer = setTimeout(() => {
+        setWeatherFetchedThisSession(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [weather.isLoading, weather.city, gpsGranted]);
+  
   // Emoji logic based on time of day and weather
   const displayEmoji = useMemo(() => {
     // If GPS not granted, use simple time-based icons
@@ -249,8 +264,8 @@ const EmployerHome = memo(() => {
   return (
     <>
       <GpsPrompt />
-      {/* Visa endast vädereffekter om GPS är godkänt OCH väder laddats klart */}
-      {gpsGranted && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
+      {/* Visa endast vädereffekter om GPS är godkänt OCH väder har hämtats DENNA session */}
+      {gpsGranted && weatherFetchedThisSession && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
       <div className="space-y-6 max-w-5xl mx-auto px-4 md:px-8 py-3 animate-fade-in relative z-10">
         {/* System Health badge removed - use nav bar icon instead */}
 
