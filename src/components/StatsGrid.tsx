@@ -28,12 +28,12 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
           {stat.subItems && stat.subItems.length > 0 ? (
             // Special layout for cards with subItems - unified column structure
             <div className="p-2 md:p-4">
-              <div className="flex">
+              <div className="flex items-start">
                 {/* First column - main stat */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1 md:gap-2 mb-2">
+                <div className="flex-1 min-w-0 pr-2 md:pr-3">
+                  <div className="flex items-center gap-1 md:gap-2 mb-2 min-h-[16px] md:min-h-[20px]">
                     <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-white flex-shrink-0" />
-                    <span className="text-xs md:text-sm font-medium text-white truncate">
+                    <span className="text-[10px] md:text-xs font-medium text-white whitespace-nowrap">
                       {stat.title}
                     </span>
                   </div>
@@ -47,8 +47,8 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                 
                 {/* Sub-item columns with dividers */}
                 {stat.subItems.map((item, idx) => (
-                  <div key={idx} className="flex-1 border-l border-white/30 pl-3 md:pl-4">
-                    <div className="text-xs md:text-sm font-medium text-white mb-2 text-center truncate">
+                  <div key={idx} className="flex-1 border-l border-white/30 px-2 md:px-3">
+                    <div className="text-[10px] md:text-xs font-medium text-white mb-2 text-center whitespace-nowrap min-h-[16px] md:min-h-[20px] flex items-center justify-center">
                       {item.label}
                     </div>
                     <div className="text-lg md:text-xl font-bold text-white text-center">
