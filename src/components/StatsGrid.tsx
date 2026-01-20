@@ -26,32 +26,38 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
       {stats.map((stat, index) => (
         <Card key={index} className="bg-white/5 backdrop-blur-sm border-white/20">
           {stat.subItems && stat.subItems.length > 0 ? (
-            // Special layout for cards with subItems - full height dividers
-            <div className="flex p-2 md:p-4 h-full">
+            // Special layout for cards with subItems - full height dividers, matching standard card height
+            <div className="flex h-full">
               {/* First column - main stat */}
-              <div className="flex-1 flex flex-col justify-between pr-2 md:pr-3">
-                <div className="flex items-center justify-center gap-1 md:gap-2 min-h-[20px] md:min-h-[24px]">
+              <div className="flex-1 flex flex-col">
+                <div className="flex items-center justify-center gap-1 md:gap-2 p-2 md:p-4 min-h-[36px] md:min-h-[40px]">
                   <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-white flex-shrink-0" />
-                  <span className="text-[10px] md:text-xs font-medium text-white whitespace-nowrap">
+                  <span className="text-xs md:text-sm font-medium text-white whitespace-nowrap">
                     {stat.title}
                   </span>
                 </div>
-                <div 
-                  className="text-lg md:text-xl font-bold text-white text-center transition-opacity duration-500"
-                  style={{ opacity: stat.loading ? 0.5 : 1 }}
-                >
-                  {stat.value}
+                <div className="px-2 pb-2 md:px-4 md:pb-4">
+                  <div 
+                    className="text-lg md:text-xl font-bold text-white text-center transition-opacity duration-500"
+                    style={{ opacity: stat.loading ? 0.5 : 1 }}
+                  >
+                    {stat.value}
+                  </div>
                 </div>
               </div>
               
               {/* Sub-item columns with full-height dividers */}
               {stat.subItems.map((item, idx) => (
-                <div key={idx} className="flex-1 flex flex-col justify-between border-l border-white/30 px-2 md:px-3">
-                  <div className="text-[10px] md:text-xs font-medium text-white text-center whitespace-nowrap min-h-[20px] md:min-h-[24px] flex items-center justify-center">
-                    {item.label}
+                <div key={idx} className="flex-1 flex flex-col border-l border-white/30">
+                  <div className="flex items-center justify-center p-2 md:p-4 min-h-[36px] md:min-h-[40px]">
+                    <span className="text-xs md:text-sm font-medium text-white whitespace-nowrap">
+                      {item.label}
+                    </span>
                   </div>
-                  <div className="text-lg md:text-xl font-bold text-white text-center">
-                    {item.value}
+                  <div className="px-2 pb-2 md:px-4 md:pb-4">
+                    <div className="text-lg md:text-xl font-bold text-white text-center">
+                      {item.value}
+                    </div>
                   </div>
                 </div>
               ))}
