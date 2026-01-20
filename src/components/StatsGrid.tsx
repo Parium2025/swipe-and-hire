@@ -27,15 +27,15 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
         <Card key={index} className="bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
             {stat.subItems && stat.subItems.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2 w-full">
-                <div className="flex items-center gap-1 md:gap-2 min-w-0">
+              <div className="flex w-full items-center">
+                <div className="flex-1 flex items-center gap-1 md:gap-2 min-w-0">
                   <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-white flex-shrink-0" />
                   <CardTitle className="text-xs md:text-sm font-medium text-white min-w-0 truncate">
                     {stat.title}
                   </CardTitle>
                 </div>
                 {stat.subItems.map((item, idx) => (
-                  <div key={idx} className="text-center">
+                  <div key={idx} className="flex-1 text-center border-l border-white/20">
                     <span className="text-xs md:text-sm font-medium text-white">{item.label}</span>
                   </div>
                 ))}
@@ -54,8 +54,8 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
           </CardHeader>
           <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
             {stat.subItems && stat.subItems.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2">
-                <div className="text-center">
+              <div className="flex">
+                <div className="flex-1 text-center">
                   <div 
                     className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
                     style={{ opacity: stat.loading ? 0.5 : 1 }}
@@ -64,7 +64,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                   </div>
                 </div>
                 {stat.subItems.map((item, idx) => (
-                  <div key={idx} className="text-center">
+                  <div key={idx} className="flex-1 text-center border-l border-white/20">
                     <div className="text-lg md:text-xl font-bold text-white">
                       {item.value}
                     </div>
