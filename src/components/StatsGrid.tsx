@@ -35,19 +35,32 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
-            <div 
-              className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
-              style={{ opacity: stat.loading ? 0.5 : 1 }}
-            >
-              {stat.value}
-            </div>
-            {stat.subItems && stat.subItems.length > 0 && (
-              <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-xs text-white/70">
+            {stat.subItems && stat.subItems.length > 0 ? (
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-center">
+                  <div 
+                    className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
+                    style={{ opacity: stat.loading ? 0.5 : 1 }}
+                  >
+                    {stat.value}
+                  </div>
+                  <div className="text-[10px] md:text-xs text-white/60 mt-0.5">Aktiva</div>
+                </div>
                 {stat.subItems.map((item, idx) => (
-                  <span key={idx}>
-                    {item.label}: <span className="font-semibold text-white/90">{item.value}</span>
-                  </span>
+                  <div key={idx} className="text-center">
+                    <div className="text-lg md:text-xl font-bold text-white/90">
+                      {item.value}
+                    </div>
+                    <div className="text-[10px] md:text-xs text-white/60 mt-0.5">{item.label}</div>
+                  </div>
                 ))}
+              </div>
+            ) : (
+              <div 
+                className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
+                style={{ opacity: stat.loading ? 0.5 : 1 }}
+              >
+                {stat.value}
               </div>
             )}
           </CardContent>
