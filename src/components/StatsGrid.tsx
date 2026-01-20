@@ -31,7 +31,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
               <div className="flex items-start">
                 {/* First column - main stat */}
                 <div className="flex-1 min-w-0 pr-2 md:pr-3">
-                  <div className="flex items-center gap-1 md:gap-2 mb-2 min-h-[16px] md:min-h-[20px]">
+                  <div className="flex items-center justify-center gap-1 md:gap-2 mb-2 min-h-[16px] md:min-h-[20px]">
                     <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-white flex-shrink-0" />
                     <span className="text-[10px] md:text-xs font-medium text-white whitespace-nowrap">
                       {stat.title}
