@@ -200,7 +200,7 @@ const EmployerDashboard = memo(() => {
     { icon: Briefcase, title: 'Mina annonser', value: loading ? preloadedEmployerMyJobs : jobs.length, loading: false },
     { 
       icon: TrendingUp, 
-      title: 'Aktiva annonser', 
+      title: 'Aktiva', 
       value: loading ? preloadedEmployerActiveJobs : activeJobs.length, 
       loading: false,
       subItems: [
