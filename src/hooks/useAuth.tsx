@@ -873,24 +873,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: { code: 'email_not_confirmed', message: 'Email not confirmed' } };
       }
  
-      // Lyckad inloggning – nollställ media-preload och vänta tills kritiska bilder hunnit laddas klart
-      setMediaPreloadComplete(false);
-      mediaPreloadCompleteRef.current = false;
-
-      const mediaPromise = new Promise<void>((resolve) => {
-        const start = Date.now();
-        const checkMedia = setInterval(() => {
-          if (mediaPreloadCompleteRef.current) {
-            clearInterval(checkMedia);
-            resolve();
-          } else if (Date.now() - start > 1500) {
-            clearInterval(checkMedia);
-            resolve();
-          }
-        }, 50);
-      });
-
-      await Promise.all([minDelayPromise, mediaPromise]);
+      // Lyckad inloggning – vänta på minsta visningstid och låt onAuthStateChange hantera resten
+      // VIKTIG FIX: Istället för att vänta på mediaPreloadComplete (som orsakar race condition)
+      // väntar vi bara på minDelayPromise + en kort fördröjning för att ge fetchUserData tid
+      await minDelayPromise;
+      
+      // Ge fetchUserData tid att starta (onAuthStateChange triggar den asynkront)
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // 🚀 BACKGROUND SYNC ENGINE: Starta all preloading DIREKT vid login
       // Kör i bakgrunden - blockera inte UI
