@@ -204,7 +204,7 @@ const EmployerDashboard = memo(() => {
       value: loading ? preloadedEmployerActiveJobs : activeJobs.length, 
       loading: false,
       subItems: [
-        { label: 'Utgångna', value: expiredJobsCount },
+        { label: 'Utgångna annonser', value: expiredJobsCount },
         { label: 'Utkast', value: draftJobsCount },
       ]
     },
