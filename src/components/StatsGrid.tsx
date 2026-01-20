@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { memo } from 'react';
 
 interface SubItem {
@@ -38,10 +39,14 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                 </div>
                 <div className="px-2 pb-2 md:px-4 md:pb-4">
                   <div 
-                    className="text-lg md:text-xl font-bold text-white text-center transition-opacity duration-500"
+                    className="text-lg md:text-xl font-bold text-white text-center transition-opacity duration-500 flex justify-center"
                     style={{ opacity: stat.loading ? 0.5 : 1 }}
                   >
-                    {stat.value}
+                    {typeof stat.value === 'number' ? (
+                      <AnimatedCounter value={stat.value} className="text-lg md:text-xl font-bold" />
+                    ) : (
+                      stat.value
+                    )}
                   </div>
                 </div>
               </div>
@@ -55,8 +60,8 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                     </span>
                   </div>
                   <div className="px-2 pb-2 md:px-4 md:pb-4">
-                    <div className="text-lg md:text-xl font-bold text-white text-center">
-                      {item.value}
+                    <div className="text-lg md:text-xl font-bold text-white text-center flex justify-center">
+                      <AnimatedCounter value={item.value} className="text-lg md:text-xl font-bold" />
                     </div>
                   </div>
                 </div>
@@ -79,7 +84,11 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                   className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
                   style={{ opacity: stat.loading ? 0.5 : 1 }}
                 >
-                  {stat.value}
+                  {typeof stat.value === 'number' ? (
+                    <AnimatedCounter value={stat.value} className="text-lg md:text-xl font-bold" />
+                  ) : (
+                    stat.value
+                  )}
                 </div>
               </CardContent>
             </>
