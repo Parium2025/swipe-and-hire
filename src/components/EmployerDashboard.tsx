@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, Info } from 'lucide-react';
+import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, Info, FileEdit, Clock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
@@ -184,12 +184,24 @@ const EmployerDashboard = memo(() => {
     [jobs]
   );
   
+  // Count drafts (is_active = false)
+  const draftJobs = useMemo(() => 
+    jobs.filter(j => !j.is_active), 
+    [jobs]
+  );
+  
+  // Count expired jobs (is_active = true but past expiration)
+  const expiredJobs = useMemo(() => 
+    jobs.filter(j => j.is_active && isJobExpiredCheck(j.created_at, j.expires_at)), 
+    [jobs]
+  );
+  
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Mina annonser', value: loading ? preloadedEmployerMyJobs : jobs.length, loading: false },
     { icon: TrendingUp, title: 'Aktiva annonser', value: loading ? preloadedEmployerActiveJobs : activeJobs.length, loading: false },
-    { icon: Eye, title: 'Totala visningar', value: loading ? preloadedEmployerTotalViews : activeJobs.reduce((s, j) => s + j.views_count, 0), loading: false },
+    { icon: FileEdit, title: 'Utkast', value: loading ? '-' : draftJobs.length, loading: false },
+    { icon: Clock, title: 'Utgångna', value: loading ? '-' : expiredJobs.length, loading: false },
     { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : activeJobs.reduce((s, j) => s + j.applications_count, 0), loading: false },
-  ], [jobs, activeJobs, loading, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
+  ], [activeJobs, draftJobs, expiredJobs, loading, preloadedEmployerActiveJobs, preloadedEmployerTotalApplications]);
 
   // Wait for data AND minimum delay before showing content with fade
   if (loading || !showContent) {
