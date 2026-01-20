@@ -25,61 +25,61 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-2">
       {stats.map((stat, index) => (
         <Card key={index} className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
-            {stat.subItems && stat.subItems.length > 0 ? (
-              <div className="flex w-full items-center">
-                <div className="flex-1 flex items-center gap-1 md:gap-2 min-w-0">
-                  <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-white flex-shrink-0" />
-                  <CardTitle className="text-xs md:text-sm font-medium text-white min-w-0 truncate">
-                    {stat.title}
-                  </CardTitle>
+          {stat.subItems && stat.subItems.length > 0 ? (
+            // Special layout for cards with subItems - unified column structure
+            <div className="p-2 md:p-4">
+              <div className="flex">
+                {/* First column - main stat */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1 md:gap-2 mb-2">
+                    <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-white flex-shrink-0" />
+                    <span className="text-xs md:text-sm font-medium text-white truncate">
+                      {stat.title}
+                    </span>
+                  </div>
+                  <div 
+                    className="text-lg md:text-xl font-bold text-white text-center transition-opacity duration-500"
+                    style={{ opacity: stat.loading ? 0.5 : 1 }}
+                  >
+                    {stat.value}
+                  </div>
                 </div>
+                
+                {/* Sub-item columns with dividers */}
                 {stat.subItems.map((item, idx) => (
-                  <div key={idx} className="flex-1 text-center border-l border-white/20">
-                    <span className="text-xs md:text-sm font-medium text-white">{item.label}</span>
+                  <div key={idx} className="flex-1 border-l border-white/30 pl-3 md:pl-4">
+                    <div className="text-xs md:text-sm font-medium text-white mb-2 text-center truncate">
+                      {item.label}
+                    </div>
+                    <div className="text-lg md:text-xl font-bold text-white text-center">
+                      {item.value}
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : (
-              <>
-                <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-white mr-1 md:mr-2" />
+            </div>
+          ) : (
+            // Standard layout for cards without subItems
+            <>
+              <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
+                <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-white" />
                 <CardTitle className="text-xs md:text-sm font-medium text-white min-w-0 flex-1 overflow-hidden">
                   <TruncatedText 
                     text={stat.title} 
                     className="w-full block whitespace-nowrap truncate cursor-pointer"
                   />
                 </CardTitle>
-              </>
-            )}
-          </CardHeader>
-          <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
-            {stat.subItems && stat.subItems.length > 0 ? (
-              <div className="flex">
-                <div className="flex-1 text-center">
-                  <div 
-                    className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
-                    style={{ opacity: stat.loading ? 0.5 : 1 }}
-                  >
-                    {stat.value}
-                  </div>
+              </CardHeader>
+              <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
+                <div 
+                  className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
+                  style={{ opacity: stat.loading ? 0.5 : 1 }}
+                >
+                  {stat.value}
                 </div>
-                {stat.subItems.map((item, idx) => (
-                  <div key={idx} className="flex-1 text-center border-l border-white/20">
-                    <div className="text-lg md:text-xl font-bold text-white">
-                      {item.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div 
-                className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
-                style={{ opacity: stat.loading ? 0.5 : 1 }}
-              >
-                {stat.value}
-              </div>
-            )}
-          </CardContent>
+              </CardContent>
+            </>
+          )}
         </Card>
       ))}
     </div>
