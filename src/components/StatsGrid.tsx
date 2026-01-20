@@ -16,7 +16,7 @@ interface StatsGridProps {
 
 export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-2">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1.5 md:gap-2">
       {stats.map((stat, index) => (
         <Card key={index} className="bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
