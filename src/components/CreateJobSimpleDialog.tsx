@@ -302,6 +302,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
           <Button 
             ref={triggerRef}
             variant="glass"
+            onMouseDown={(e) => e.currentTarget.blur()}
+            onMouseUp={(e) => e.currentTarget.blur()}
           >
             Skapa ny annons
             <Plus size={16} />
@@ -351,7 +353,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white transition-all duration-150 text-sm h-[44px] font-normal"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white transition-all duration-150 text-sm h-[44px] font-normal focus:border-white/20 hover:border-white/20"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
@@ -428,7 +430,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                 onKeyDown={(e) => {
                                   e.stopPropagation();
                                 }}
-                                className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40 rounded-lg"
+                                className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/20 hover:border-white/20 rounded-lg"
                                 autoComplete="off"
                                 autoFocus
                               />
@@ -574,8 +576,11 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
               <div className="flex gap-2 pt-2">
                 <Button 
                   onClick={handleCreateJob}
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  onMouseUp={(e) => e.currentTarget.blur()}
+                  onFocus={(e) => e.currentTarget.blur()}
                   disabled={loading || !jobTitle.trim()}
-                  className={`flex-1 min-h-[44px] rounded-full transition-all duration-150 active:scale-95 ${
+                  className={`flex-1 min-h-[44px] rounded-full transition-all duration-150 active:scale-95 focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none ${
                     !loading && jobTitle.trim() ? 'border border-white/30' : ''
                   }`}
                 >
