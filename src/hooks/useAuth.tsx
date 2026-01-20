@@ -818,6 +818,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthAction('login');
       setLoading(true);
       isSigningInRef.current = true;
+      
+      // 🗑️ KRITISKT: Rensa ALL app-cache DIREKT vid login
+      // Detta förhindrar att gammal data (t.ex. snö-vädereffekt från tidigare session)
+      // visas innan ny data hämtas
+      clearAllAppCaches();
  
       // Minsta visningstid för "Loggar in..." (ca 1–1.1 sekund)
       const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1100));
