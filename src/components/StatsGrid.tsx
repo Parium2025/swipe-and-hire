@@ -38,20 +38,20 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
             {stat.subItems && stat.subItems.length > 0 ? (
               <div className="grid grid-cols-3 gap-2">
                 <div className="text-center">
+                  <div className="text-[10px] md:text-xs text-white font-medium mb-1">Aktiva</div>
                   <div 
                     className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
                     style={{ opacity: stat.loading ? 0.5 : 1 }}
                   >
                     {stat.value}
                   </div>
-                  <div className="text-[10px] md:text-xs text-white/60 mt-0.5">Aktiva</div>
                 </div>
                 {stat.subItems.map((item, idx) => (
                   <div key={idx} className="text-center">
-                    <div className="text-lg md:text-xl font-bold text-white/90">
+                    <div className="text-[10px] md:text-xs text-white font-medium mb-1">{item.label}</div>
+                    <div className="text-lg md:text-xl font-bold text-white">
                       {item.value}
                     </div>
-                    <div className="text-[10px] md:text-xs text-white/60 mt-0.5">{item.label}</div>
                   </div>
                 ))}
               </div>
