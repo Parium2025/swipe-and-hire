@@ -3,11 +3,17 @@ import { LucideIcon } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { memo } from 'react';
 
+interface SubItem {
+  label: string;
+  value: number;
+}
+
 interface StatCard {
   icon: LucideIcon;
   title: string;
   value: number | string;
   loading?: boolean;
+  subItems?: SubItem[];
 }
 
 interface StatsGridProps {
@@ -16,7 +22,7 @@ interface StatsGridProps {
 
 export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1.5 md:gap-2">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-2">
       {stats.map((stat, index) => (
         <Card key={index} className="bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
@@ -35,6 +41,15 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
             >
               {stat.value}
             </div>
+            {stat.subItems && stat.subItems.length > 0 && (
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-xs text-white/70">
+                {stat.subItems.map((item, idx) => (
+                  <span key={idx}>
+                    {item.label}: <span className="font-semibold text-white/90">{item.value}</span>
+                  </span>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       ))}
@@ -46,8 +61,10 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   
   return prevProps.stats.every((stat, index) => {
     const nextStat = nextProps.stats[index];
+    const subItemsEqual = JSON.stringify(stat.subItems) === JSON.stringify(nextStat.subItems);
     return stat.value === nextStat.value && 
            stat.title === nextStat.title && 
-           stat.loading === nextStat.loading;
+           stat.loading === nextStat.loading &&
+           subItemsEqual;
   });
 });

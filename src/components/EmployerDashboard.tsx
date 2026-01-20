@@ -185,25 +185,32 @@ const EmployerDashboard = memo(() => {
   );
   
   // Count expired jobs
-  const expiredJobs = useMemo(() => 
-    jobs.filter(j => j.is_active && isJobExpiredCheck(j.created_at, j.expires_at)), 
+  const expiredJobsCount = useMemo(() => 
+    jobs.filter(j => j.is_active && isJobExpiredCheck(j.created_at, j.expires_at)).length, 
     [jobs]
   );
   
   // Count draft jobs
-  const draftJobs = useMemo(() => 
-    jobs.filter(j => !j.is_active), 
+  const draftJobsCount = useMemo(() => 
+    jobs.filter(j => !j.is_active).length, 
     [jobs]
   );
   
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Mina annonser', value: loading ? preloadedEmployerMyJobs : jobs.length, loading: false },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: loading ? preloadedEmployerActiveJobs : activeJobs.length, loading: false },
-    { icon: AlertTriangle, title: 'Utgångna', value: expiredJobs.length, loading: false },
-    { icon: Edit, title: 'Utkast', value: draftJobs.length, loading: false },
+    { 
+      icon: TrendingUp, 
+      title: 'Aktiva annonser', 
+      value: loading ? preloadedEmployerActiveJobs : activeJobs.length, 
+      loading: false,
+      subItems: [
+        { label: 'Utgångna', value: expiredJobsCount },
+        { label: 'Utkast', value: draftJobsCount },
+      ]
+    },
     { icon: Eye, title: 'Totala visningar', value: loading ? preloadedEmployerTotalViews : activeJobs.reduce((s, j) => s + j.views_count, 0), loading: false },
     { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : activeJobs.reduce((s, j) => s + j.applications_count, 0), loading: false },
-  ], [jobs, activeJobs, expiredJobs, draftJobs, loading, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
+  ], [jobs, activeJobs, expiredJobsCount, draftJobsCount, loading, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
   // Wait for data AND minimum delay before showing content with fade
   if (loading || !showContent) {
