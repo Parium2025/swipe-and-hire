@@ -3519,7 +3519,7 @@ const MobileJobWizard = ({
                                        onClick={() => {
                                          setShowCompanyProfile(true);
                                        }}
-                                       className="text-xs font-bold text-white hover:text-white transition-colors cursor-pointer whitespace-normal break-words leading-tight"
+                                       className="text-xs font-bold text-white hover:text-white transition-colors cursor-pointer whitespace-normal break-words leading-tight outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                                      >
                                        {profile?.company_name || 'Företagsnamn'}
                                      </button>

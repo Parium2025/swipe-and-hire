@@ -25,7 +25,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 md:focus:bg-white/20 data-[state=open]:bg-white/20",
+      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 md:focus:bg-white/20 data-[state=open]:bg-white/20",
       inset && "pl-8",
       className
     )}
@@ -81,7 +81,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 transition-colors md:hover:bg-white/10 md:focus:bg-white/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors md:hover:bg-white/10 md:focus:bg-white/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       inset && "pl-8",
       className
     )}
