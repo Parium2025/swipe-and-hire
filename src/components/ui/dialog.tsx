@@ -47,7 +47,7 @@ const DialogContent = React.forwardRef<
     >
       {children}
       {!hideClose && (
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm transition-opacity hover:opacity-80 focus:outline-none disabled:pointer-events-none z-50">
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm transition-opacity hover:opacity-80 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:pointer-events-none z-50">
           <X className="h-5 w-5 text-white" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>

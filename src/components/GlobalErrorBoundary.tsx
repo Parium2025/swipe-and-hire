@@ -66,7 +66,7 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
             </p>
             <button
               onClick={this.handleReload}
-              className="inline-flex items-center justify-center rounded-md px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center justify-center rounded-md px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Ladda om
             </button>

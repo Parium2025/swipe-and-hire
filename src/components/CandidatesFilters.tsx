@@ -33,7 +33,7 @@ export const CandidatesFilters = ({ stats, selectedFilter, onFilterChange }: Can
           <button
             key={filter.id}
             onClick={() => onFilterChange(filter.id)}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${
               isSelected
                 ? 'bg-primary/20 text-primary border border-primary/30'
                 : 'text-muted-foreground hover:bg-white/5 hover:text-foreground border border-transparent hover:border-white/50'
