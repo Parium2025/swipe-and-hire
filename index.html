@@ -81,7 +81,8 @@
       text-align: center;
     }
 
-    @media (orientation: landscape) and (max-height: 600px) {
+    /* Only show on touch devices (phones/tablets), not desktop with mouse */
+    @media (orientation: landscape) and (max-height: 600px) and (pointer: coarse) {
       #portrait-warning {
         display: flex;
       }
