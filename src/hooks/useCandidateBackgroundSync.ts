@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
+import { updateLastSyncTime } from '@/lib/draftUtils';
 
 const SYNC_INTERVAL = 10_000; // 10 sekunder som backup-polling
 const PAGE_SIZE = 50; // Större batch för att ha mer data redo
@@ -41,6 +42,8 @@ export const useCandidateBackgroundSync = () => {
           syncMyCandidatesData(userId, queryClient),
           syncStageSettings(userId, queryClient),
         ]);
+        // Uppdatera sync-tidsstämpel för offline-indikatorn
+        updateLastSyncTime();
       } catch (error) {
         console.warn('Background candidate sync failed:', error);
       } finally {
