@@ -1518,7 +1518,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 variant="ghost"
                 size="icon"
                 onClick={handleClose}
-                className="absolute right-4 top-4 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="absolute right-4 top-4 h-8 w-8 text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -1821,20 +1823,24 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             }}
                             className="bg-white/10 border-white/20 text-white h-9 text-sm focus:border-white/40 flex-1"
                           />
-                          <button
-                            type="button"
-                            onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
-                            className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors"
-                          >
-                            <Minus className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
-                            className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors"
-                          >
-                            <Plus className="h-4 w-4" />
-                          </button>
+                        <button
+                          type="button"
+                          onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
+                          onMouseDown={(e) => e.currentTarget.blur()}
+                          onMouseUp={(e) => e.currentTarget.blur()}
+                          className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-0"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
+                          onMouseDown={(e) => e.currentTarget.blur()}
+                          onMouseUp={(e) => e.currentTarget.blur()}
+                          className="h-9 w-9 flex items-center justify-center bg-white/10 border border-white/20 rounded-md text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-0"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
                         </div>
                       </div>
 
@@ -2031,14 +2037,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
                               <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
-                              <Button
-                                onClick={addCustomQuestion}
-                                size="sm"
-                                className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium"
-                              >
-                                Lägg till fråga
-                                <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
-                              </Button>
+                            <Button
+                              onClick={addCustomQuestion}
+                              onMouseDown={(e) => e.currentTarget.blur()}
+                              onMouseUp={(e) => e.currentTarget.blur()}
+                              size="sm"
+                              className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium focus:outline-none focus:ring-0"
+                            >
+                              Lägg till fråga
+                              <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                            </Button>
                             </div>
                             
                             {customQuestions.length === 0 ? (
@@ -2079,9 +2087,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 setShowQuestionTemplates(false);
                                 setQuestionSearchTerm('');
                               }}
+                              onMouseDown={(e) => e.currentTarget.blur()}
+                              onMouseUp={(e) => e.currentTarget.blur()}
                               variant="ghost"
                               size="sm"
-                              className="text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                              className="text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
                             >
                               <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
                             </Button>
@@ -2097,14 +2107,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           </div>
 
                           <div className="flex justify-center">
-                            <Button
-                              onClick={createNewQuestion}
-                              size="sm"
-                              className="bg-primary hover:bg-primary/90 text-white touch-border-white"
-                            >
-                              Skapa ny fråga
-                              <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
-                            </Button>
+                          <Button
+                            onClick={createNewQuestion}
+                            onMouseDown={(e) => e.currentTarget.blur()}
+                            onMouseUp={(e) => e.currentTarget.blur()}
+                            size="sm"
+                            className="bg-primary hover:bg-primary/90 text-white touch-border-white focus:outline-none focus:ring-0"
+                          >
+                            Skapa ny fråga
+                            <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                          </Button>
                           </div>
 
                           <div className="space-y-3 max-h-[400px] overflow-y-auto">
@@ -2168,7 +2180,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   setShowQuestionTemplates(false);
                                                   setShowQuestionForm(true);
                                                 }}
-                                                className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                                onMouseDown={(e) => e.currentTarget.blur()}
+                                                onMouseUp={(e) => e.currentTarget.blur()}
+                                                className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-colors duration-300 flex-shrink-0 focus:outline-none focus:ring-0"
                                               >
                                                 <Pencil className="h-3.5 w-3.5" />
                                               </button>
@@ -2196,7 +2210,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                     });
                                                   }
                                                 }}
-                                                className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                                onMouseDown={(e) => e.currentTarget.blur()}
+                                                onMouseUp={(e) => e.currentTarget.blur()}
+                                                className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-colors duration-300 flex-shrink-0 focus:outline-none focus:ring-0"
                                               >
                                                 <Trash2 className="h-3.5 w-3.5" />
                                               </button>
@@ -2218,18 +2234,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             <h3 className="text-white font-medium text-lg">
                               {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
                             </h3>
-                            <Button
-                              onClick={() => {
-                                setShowQuestionForm(false);
-                                setEditingQuestion(null);
-                                setShowQuestionTemplates(true);
-                              }}
-                              variant="ghost"
-                              size="sm"
-                              className="text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
+                          <Button
+                            onClick={() => {
+                              setShowQuestionForm(false);
+                              setEditingQuestion(null);
+                              setShowQuestionTemplates(true);
+                            }}
+                            onMouseDown={(e) => e.currentTarget.blur()}
+                            onMouseUp={(e) => e.currentTarget.blur()}
+                            variant="ghost"
+                            size="sm"
+                            className="text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
                           </div>
 
                           <div className="space-y-4">
@@ -2351,42 +2369,48 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                       <button
                                         type="button"
                                         onClick={() => removeOption(index)}
-                                        className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
+                                        onMouseDown={(e) => e.currentTarget.blur()}
+                                        onMouseUp={(e) => e.currentTarget.blur()}
+                                        className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-colors duration-300 flex-shrink-0 focus:outline-none focus:ring-0"
                                       >
                                         <Trash2 className="h-3.5 w-3.5" />
                                       </button>
                                     </div>
                                   ))}
-                                  <Button
-                                    type="button"
-                                    onClick={addOption}
-                                    size="sm"
-                                    className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 transition-all duration-300 mt-2"
-                                  >
-                                    Lägg till alternativ
-                                    <Plus className="h-3.5 w-3.5 ml-1.5" />
-                                  </Button>
+                                    <Button
+                                      type="button"
+                                      onClick={addOption}
+                                      onMouseDown={(e) => e.currentTarget.blur()}
+                                      onMouseUp={(e) => e.currentTarget.blur()}
+                                      size="sm"
+                                      className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 transition-colors duration-300 mt-2 focus:outline-none focus:ring-0"
+                                    >
+                                      Lägg till alternativ
+                                      <Plus className="h-3.5 w-3.5 ml-1.5" />
+                                    </Button>
+                                  </div>
                                 </div>
+                              )}
+
+                              <div className="flex items-center space-x-3">
+                                <Switch
+                                  checked={editingQuestion?.is_required || false}
+                                  onCheckedChange={(checked) => updateQuestionField('is_required', checked)}
+                                />
+                                <Label className="text-white font-medium">Obligatorisk fråga</Label>
                               </div>
-                            )}
 
-                            <div className="flex items-center space-x-3">
-                              <Switch
-                                checked={editingQuestion?.is_required || false}
-                                onCheckedChange={(checked) => updateQuestionField('is_required', checked)}
-                              />
-                              <Label className="text-white font-medium">Obligatorisk fråga</Label>
-                            </div>
-
-                            <div className="flex justify-end pt-4">
-                              <Button
-                                onClick={saveCustomQuestion}
-                                disabled={!editingQuestion?.question_text?.trim()}
-                                className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-all duration-300 focus:outline-none"
-                              >
-                                Spara fråga
-                              </Button>
-                            </div>
+                              <div className="flex justify-end pt-4">
+                                <Button
+                                  onClick={saveCustomQuestion}
+                                  onMouseDown={(e) => e.currentTarget.blur()}
+                                  onMouseUp={(e) => e.currentTarget.blur()}
+                                  disabled={!editingQuestion?.question_text?.trim()}
+                                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-300 focus:outline-none focus:ring-0"
+                                >
+                                  Spara fråga
+                                </Button>
+                              </div>
                           </div>
                         </div>
                       )}
