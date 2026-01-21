@@ -211,7 +211,7 @@ function JobSeekerTopNav() {
             )}
           </button>
 
-          {/* Profil Dropdown */}
+          {/* Profil Dropdown - with user avatar/video instead of icon */}
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>
               <button
@@ -222,7 +222,26 @@ function JobSeekerTopNav() {
                     isDropdownActive(profileItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
-                <User className="h-4 w-4 relative z-10" />
+                {/* Show profile video/image instead of User icon */}
+                {hasVideo && videoUrl ? (
+                  <ProfileVideo
+                    videoUrl={videoUrl}
+                    coverImageUrl={coverUrl || avatarUrl || undefined}
+                    userInitials={getUserInitials()}
+                    alt="Profilvideo"
+                    className="h-6 w-6 ring-1 ring-white/30 rounded-full relative z-10"
+                    showCountdown={false}
+                    showProgressBar={false}
+                  />
+                ) : avatarUrl ? (
+                  <img 
+                    src={avatarUrl} 
+                    alt={getUserDisplayName()} 
+                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30 relative z-10"
+                  />
+                ) : (
+                  <User className="h-4 w-4 relative z-10" />
+                )}
                 <span className="relative z-10">Profil</span>
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
