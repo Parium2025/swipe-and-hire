@@ -45,7 +45,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { TruncatedText } from '@/components/TruncatedText';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { formatCompactTime } from '@/lib/date';
 import {
   DndContext,
@@ -521,7 +521,7 @@ const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
+  // toast is now imported from sonner directly
   
   // Get kanban layout context for dynamic column widths
   const { setStageCount } = useKanbanLayout();
@@ -647,24 +647,20 @@ const JobDetails = () => {
         throw error;
       }
     } catch (error: any) {
-      toast({
-        title: 'Fel',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error('Fel', { description: error.message });
     }
   };
 
   const updateCandidateRating = async (applicantId: string, newRating: number) => {
     // Check if online first
     if (!navigator.onLine) {
-      toast({ title: 'Offline', description: 'Du måste vara online för att uppdatera betyg' });
+      toast('Offline', { description: 'Du måste vara online för att uppdatera betyg' });
       return;
     }
 
     const myCandidateId = myCandidatesMap.get(applicantId);
     if (!myCandidateId) {
-      toast({ title: 'Info', description: 'Lägg först till kandidaten i din lista för att ge betyg' });
+      toast('Info', { description: 'Lägg först till kandidaten i din lista för att ge betyg' });
       return;
     }
     
@@ -681,7 +677,7 @@ const JobDetails = () => {
       const { error } = await supabase.from('my_candidates').update({ rating: newRating }).eq('id', myCandidateId);
       if (error) throw error;
     } catch {
-      toast({ title: 'Fel', description: 'Kunde inte uppdatera betyg', variant: 'destructive' });
+      toast.error('Fel', { description: 'Kunde inte uppdatera betyg' });
       refetch();
     }
   };
@@ -749,6 +745,7 @@ const JobDetails = () => {
     const idsToMove = Array.from(selectedApplicationIds);
     const count = idsToMove.length;
     const targetLabel = stageSettings[targetStage]?.label || targetStage;
+    const stageColor = stageSettings[targetStage]?.color || '#22c55e';
     
     // Optimistic update
     idsToMove.forEach(id => {
@@ -763,10 +760,12 @@ const JobDetails = () => {
         .in('id', idsToMove);
         
       if (error) throw error;
-      toast({ title: `${count} kandidater flyttade till "${targetLabel}"` });
+      toast.success(`${count} kandidater flyttade till "${targetLabel}"`, {
+        icon: <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: stageColor }}><CheckSquare className="w-2.5 h-2.5 text-white" /></div>,
+      });
     } catch (error) {
       refetch();
-      toast({ title: 'Kunde inte flytta kandidaterna', variant: 'destructive' });
+      toast.error('Kunde inte flytta kandidaterna');
     }
   };
 
@@ -942,19 +941,15 @@ const JobDetails = () => {
 
                           if (error) throw error;
 
-                          toast({
-                            title: job.is_active ? 'Jobb inaktiverat' : 'Jobb aktiverat',
-                            description: job.is_active ? 'Jobbet är nu inaktivt.' : 'Jobbet är nu aktivt.',
-                          });
+                          toast.success(
+                            job.is_active ? 'Jobb inaktiverat' : 'Jobb aktiverat',
+                            { description: job.is_active ? 'Jobbet är nu inaktivt.' : 'Jobbet är nu aktivt.' }
+                          );
 
                           updateJobLocally({ is_active: !job.is_active });
                           refetch();
                         } catch (error: any) {
-                          toast({
-                            title: 'Fel',
-                            description: error.message,
-                            variant: 'destructive',
-                          });
+                          toast.error('Fel', { description: error.message });
                         }
                       }}
                     >
@@ -1162,7 +1157,7 @@ const JobDetails = () => {
               application_id: app.id 
             }))}
             onActivate={(count) => {
-              toast({ title: `${count} urvalskriterier aktiverade`, description: 'AI börjar utvärdera kandidater' });
+              toast.success(`${count} urvalskriterier aktiverade`, { description: 'AI börjar utvärdera kandidater' });
               refetch();
             }}
           />
