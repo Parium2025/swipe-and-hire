@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Clock, Euro, Building2, Users, Heart, X, FileText, Video, CheckSquare, List } from 'lucide-react';
+import { MapPin, Clock, Euro, Building2, Users, Heart, FileText, Video, CheckSquare, List, X } from 'lucide-react';
+import { CloseButton } from '@/components/ui/close-button';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 
 interface JobQuestion {
@@ -250,14 +251,11 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
           {/* Första kortet: Jobbinfo (stora kort som täcker hela skärmen) */}
           <div className="min-h-screen snap-start flex flex-col justify-center px-6 py-12 relative">
             {/* Close button */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <CloseButton
               onClick={() => onOpenChange(false)}
-              className="absolute top-4 right-4 z-10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white"
-            >
-              <X className="h-6 w-6" />
-            </Button>
+              size="lg"
+              className="absolute top-4 right-4 z-10"
+            />
 
             {/* Company header - klickbar */}
             <div 
