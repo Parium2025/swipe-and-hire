@@ -61,7 +61,7 @@ export function DevOfflineToggle() {
         </button>
         <button
           onClick={() => setMinimized(true)}
-          className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors ml-2"
+          className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors ml-2"
           title="Minimera"
         >
           <X className="h-4 w-4" />

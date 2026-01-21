@@ -281,7 +281,7 @@ const LocationSearchInput = ({
                   e.stopPropagation();
                   handleClear();
                 }}
-                className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors"
+                className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
                 aria-label="Rensa"
               >
                 <X className="h-4 w-4" />
