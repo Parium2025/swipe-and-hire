@@ -1339,7 +1339,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             {!showQuestionForm && !showQuestionTemplates && (
               <button
                 onClick={handleClose}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1350,7 +1350,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   setShowQuestionForm(false);
                   setEditingQuestion(null);
                 }}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
               >
                 <X className="h-4 w-4" />
               </button>

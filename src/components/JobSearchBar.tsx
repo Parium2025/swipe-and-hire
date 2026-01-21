@@ -316,7 +316,7 @@ export const JobSearchBar = ({
                     onSearchChange('');
                     setSearchExpanded(false);
                   }}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
                 >
                   <X className="h-4 w-4" />
                 </button>

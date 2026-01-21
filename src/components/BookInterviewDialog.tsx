@@ -280,7 +280,7 @@ export const BookInterviewDialog = ({
               </CardTitle>
               <button
                 onClick={() => handleOpenChange(false)}
-                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none"
+                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
               >
                 <X className="h-4 w-4" />
               </button>

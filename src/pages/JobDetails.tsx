@@ -974,7 +974,7 @@ const JobDetails = () => {
             </div>
             <button
               onClick={() => navigate(-1)}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors shrink-0 focus:outline-none"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none"
             >
               <X className="h-5 w-5" />
             </button>
