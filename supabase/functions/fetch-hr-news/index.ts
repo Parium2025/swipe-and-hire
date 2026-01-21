@@ -494,30 +494,45 @@ serve(async (req) => {
       }
     }
 
-    // Final enforce 4 slots (after AI insert)
+    // Final enforce: 4 slots MAX, and MAX 2 per source
     const { data: finalItems } = await supabase
       .from('daily_hr_news')
-      .select('id, source, category')
+      .select('id, source, category, published_at')
       .order('published_at', { ascending: false, nullsFirst: false })
       .limit(50);
 
     const finalList = finalItems || [];
-    if (finalList.length > 4) {
-      const idsToRemove = finalList.slice(4).map((r: any) => r.id);
-      if (idsToRemove.length) {
-        await supabase.from('daily_hr_news').delete().in('id', idsToRemove);
+    
+    // Apply source balance rule: max 2 per source in final selection
+    const finalSourceCount: Record<string, number> = {};
+    const balancedFinal: typeof finalList = [];
+    const idsToRemove: string[] = [];
+    
+    for (const item of finalList) {
+      const count = finalSourceCount[item.source] || 0;
+      if (count < 2 && balancedFinal.length < 4) {
+        balancedFinal.push(item);
+        finalSourceCount[item.source] = count + 1;
+      } else {
+        idsToRemove.push(item.id);
       }
     }
+    
+    // Remove items that exceed source limit or total limit
+    if (idsToRemove.length > 0) {
+      console.log(`Removing ${idsToRemove.length} items (source balance or excess)`);
+      await supabase.from('daily_hr_news').delete().in('id', idsToRemove);
+    }
 
-    const topSources = [...new Set(finalList.slice(0, 4).map((i: any) => i.source))];
-    const topCategories = [...new Set(finalList.slice(0, 4).map((i: any) => i.category))];
+    const topSources = [...new Set(balancedFinal.map((i: any) => i.source))];
+    const topCategories = [...new Set(balancedFinal.map((i: any) => i.category))];
 
     return new Response(
       JSON.stringify({
         message: 'HR news fetched successfully',
         rss_count: insertedRss,
         ai_added: aiAdded,
-        total_after: Math.min(4, finalList.length),
+        total_after: balancedFinal.length,
         sources: topSources,
         categories: topCategories,
       }),
