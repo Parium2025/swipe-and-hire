@@ -122,7 +122,9 @@ export function SendMessageDialog({
                   variant="ghost"
                   size="icon"
                   onClick={handleClose}
-                  className="absolute right-2 top-2 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  onMouseUp={(e) => e.currentTarget.blur()}
+                  className="absolute right-2 top-2 h-8 w-8 text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -143,8 +145,10 @@ export function SendMessageDialog({
 
               <Button
                 onClick={handleSend}
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isDisabled}
-                className={`w-full min-h-[44px] rounded-full transition-all duration-150 active:scale-95 ${
+                className={`w-full min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
                   !sending && message.trim() && isOnline ? 'border border-white/30' : ''
                 }`}
               >

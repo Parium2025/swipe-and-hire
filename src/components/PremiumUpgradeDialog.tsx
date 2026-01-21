@@ -94,14 +94,18 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
               <Button
                 variant="glass"
                 onClick={() => onOpenChange(false)}
-                className="flex-1 text-sm py-2"
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="flex-1 text-sm py-2 transition-colors duration-300 focus:outline-none focus:ring-0"
               >
                 Stäng
               </Button>
               <Button
                 variant="glassGreen"
                 onClick={handleUpgrade}
-                className="flex-1 text-sm py-2"
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="flex-1 text-sm py-2 transition-colors duration-300 focus:outline-none focus:ring-0"
               >
                 Nu kör vi!
               </Button>
@@ -110,7 +114,9 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
             <Button
               variant="glassGreen"
               onClick={() => onOpenChange(false)}
-              className="w-full text-sm py-2"
+              onMouseDown={(e) => e.currentTarget.blur()}
+              onMouseUp={(e) => e.currentTarget.blur()}
+              className="w-full text-sm py-2 transition-colors duration-300 focus:outline-none focus:ring-0"
             >
               Nu kör vi!
             </Button>

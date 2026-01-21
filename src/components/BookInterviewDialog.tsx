@@ -282,7 +282,9 @@ export const BookInterviewDialog = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => handleOpenChange(false)}
-                className="absolute right-2 top-2 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="absolute right-2 top-2 h-8 w-8 text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -375,12 +377,14 @@ export const BookInterviewDialog = ({
               <button
                 type="button"
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm transition-colors",
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
                   locationType === 'video' 
                     ? "bg-white/20 border-white/40 text-white" 
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
                 )}
                 onClick={() => setLocationType('video')}
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
               >
                 <Video className="h-3.5 w-3.5" />
                 <span>Video</span>
@@ -388,12 +392,14 @@ export const BookInterviewDialog = ({
               <button
                 type="button"
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm transition-colors",
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
                   locationType === 'office' 
                     ? "bg-white/20 border-white/40 text-white" 
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
                 )}
                 onClick={() => setLocationType('office')}
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
               >
                 <Building2 className="h-3.5 w-3.5" />
                 <span>Kontor</span>
@@ -469,8 +475,10 @@ export const BookInterviewDialog = ({
                   }
                   handleSubmit();
                 }} 
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isSubmitting || !date || !isOnline}
-                className={`flex-1 min-h-[44px] rounded-full transition-all duration-150 active:scale-95 ${
+                className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
                   !isSubmitting && date && isOnline ? 'border border-white/30' : ''
                 }`}
               >
@@ -491,7 +499,9 @@ export const BookInterviewDialog = ({
               <Button 
                 variant="glass" 
                 onClick={() => handleOpenChange(false)}
-                className="min-h-[44px] rounded-full"
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="min-h-[44px] rounded-full transition-colors duration-300 focus:outline-none focus:ring-0"
               >
                 Avbryt
               </Button>
