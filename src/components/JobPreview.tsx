@@ -250,14 +250,12 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
           {/* Första kortet: Jobbinfo (stora kort som täcker hela skärmen) */}
           <div className="min-h-screen snap-start flex flex-col justify-center px-6 py-12 relative">
             {/* Close button */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={() => onOpenChange(false)}
-              className="absolute top-4 right-4 z-10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white"
+              className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors"
             >
-              <X className="h-6 w-6" />
-            </Button>
+              <X className="h-4 w-4" />
+            </button>
 
             {/* Company header - klickbar */}
             <div 

@@ -367,10 +367,10 @@ export default function ProfilePreview() {
           <div className="relative px-3 pt-4 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 flex-shrink-0">
             <button
               onClick={() => setShowDetailedView(false)}
-              className="absolute right-3 top-2 text-white hover:text-white text-base"
+              className="absolute right-3 top-2 flex h-8 w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors"
               aria-label="Stäng"
             >
-              ✕
+              <X className="h-4 w-4" />
             </button>
             <div className="text-center px-8 w-full">
               <TruncatedText

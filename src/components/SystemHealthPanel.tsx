@@ -417,7 +417,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
               </span>
               {loading && <RefreshCw className="h-3 w-3 text-slate-400 animate-spin" />}
             </div>
-            <button onClick={onClose} className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors">
+            <button onClick={onClose} className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors">
               <X className="h-4 w-4" />
             </button>
           </div>

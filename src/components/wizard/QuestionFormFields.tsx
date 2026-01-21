@@ -77,7 +77,7 @@ export const QuestionFormFields = ({
                 <button
                   type="button"
                   onClick={() => onRemoveOption(index)}
-                  className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300"
+                  className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:text-red-400 hover:bg-red-500/20 transition-colors"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>

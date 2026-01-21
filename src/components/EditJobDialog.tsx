@@ -1514,16 +1514,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   Steg {currentStep + 1} av {steps.length}
                 </div>
               </DialogHeader>
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={handleClose}
-                onMouseDown={(e) => e.currentTarget.blur()}
-                onMouseUp={(e) => e.currentTarget.blur()}
-                className="absolute right-4 top-4 h-8 w-8 text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none"
               >
                 <X className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
 
             {/* Progress Bar */}

@@ -394,7 +394,7 @@ export function CandidatesTable({
               </>
             )}
             <button
-              className="h-7 w-7 flex items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors"
               onClick={clearSelection}
             >
               <X className="h-3.5 w-3.5" />
