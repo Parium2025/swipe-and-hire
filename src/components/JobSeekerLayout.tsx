@@ -2,6 +2,7 @@ import { ReactNode, memo, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/AppSidebar';
+import JobSeekerTopNav from '@/components/JobSeekerTopNav';
 import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useQueryClient } from '@tanstack/react-query';
@@ -10,6 +11,8 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
+import { useDevice } from '@/hooks/use-device';
+import { DevOfflineToggle } from '@/components/DevOfflineToggle';
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
@@ -20,6 +23,10 @@ interface JobSeekerLayoutProps {
 const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
+  const device = useDevice();
+  
+  // Desktop uses top nav, mobile/tablet uses sidebar
+  const isDesktop = device === 'desktop';
   
   // Track user activity for "last seen" feature
   useActivityTracker();
@@ -59,6 +66,55 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
     });
   }, [queryClient]);
 
+  // Desktop layout with top navigation
+  if (isDesktop) {
+    return (
+      <>
+        {/* Fixed gradient background */}
+        <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
+        
+        <div className="min-h-screen flex flex-col w-full overflow-x-hidden relative">
+          <AnimatedBackground showBubbles={false} />
+          
+          {/* Top Navigation for Desktop */}
+          <header className="sticky top-0 z-40">
+            <JobSeekerTopNav />
+            {/* Developer controls */}
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
+              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (
+                <DeveloperControls 
+                  onViewChange={onViewChange}
+                  currentView={developerView || 'dashboard'}
+                />
+              )}
+            </div>
+          </header>
+          
+          {/* Bubbles - positioned below header */}
+          <div className="fixed left-0 right-0 top-14 pointer-events-none z-20" style={{ height: 'calc(100vh - 3.5rem)' }}>
+            <div className="absolute top-12 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2s', animationDelay: '-0.3s' }}></div>
+            <div className="absolute top-24 left-16 w-2 h-2 bg-accent/40 rounded-full animate-soft-bounce" style={{ animationDuration: '2.5s', animationDelay: '-1.2s' }}></div>
+            <div className="absolute top-16 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-soft-bounce" style={{ animationDuration: '3s', animationDelay: '-0.7s' }}></div>
+            <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2.2s', animationDelay: '-0.8s' }}></div>
+            <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-soft-bounce" style={{ animationDuration: '2.8s', animationDelay: '-1.5s' }}></div>
+            <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-soft-bounce" style={{ animationDuration: '2.3s', animationDelay: '-0.5s' }}></div>
+            <div className="absolute top-4 left-8 w-3 h-3 bg-accent/40 rounded-full animate-pulse" style={{ animationDuration: '1.8s', animationDelay: '-0.6s' }}></div>
+            <div className="absolute top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse" style={{ animationDuration: '1.5s', animationDelay: '-0.4s' }}></div>
+            <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s', animationDelay: '-1.0s' }}></div>
+          </div>
+          
+          <main className="flex-1 overflow-hidden p-3 relative z-10">
+            {children}
+          </main>
+          
+          {/* Floating dev offline toggle */}
+          <DevOfflineToggle />
+        </div>
+      </>
+    );
+  }
+
+  // Mobile/Tablet layout with sidebar
   return (
     <SidebarProvider defaultOpen={true}>
       {/* Fixed gradient background - covers viewport */}

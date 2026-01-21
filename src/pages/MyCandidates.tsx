@@ -617,13 +617,17 @@ const MyCandidates = () => {
     const count = idsToMove.length;
     const targetLabel = activeStageConfig[targetStage]?.label || targetStage;
     
+    const stageColor = activeStageConfig[targetStage]?.color || '#22c55e';
+    
     if (isViewingColleague) {
       // Move in colleague's list
       for (const id of idsToMove) {
         await moveCandidateInColleagueList(id, targetStage);
       }
       exitSelectionMode();
-      toast.success(`${count} kandidater flyttade till "${targetLabel}"`);
+      toast.success(`${count} kandidater flyttade till "${targetLabel}"`, {
+        icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
+      });
       return;
     }
     
@@ -640,7 +644,9 @@ const MyCandidates = () => {
         .in('id', idsToMove);
         
       if (error) throw error;
-      toast.success(`${count} kandidater flyttade till "${targetLabel}"`);
+      toast.success(`${count} kandidater flyttade till "${targetLabel}"`, {
+        icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
+      });
     } catch (error) {
       fetchCandidates();
       toast.error('Kunde inte flytta kandidaterna');
@@ -1484,16 +1490,23 @@ const MyCandidates = () => {
         stageOrder={activeStageOrder}
         stageConfig={activeStageConfig}
         onStageChange={(newStage) => {
+          const stageColor = activeStageConfig[newStage]?.color || '#22c55e';
+          const stageLabel = activeStageConfig[newStage]?.label || newStage;
+          
           if (selectedCandidate && !isViewingColleague) {
             // Move candidate to new stage
             handleMoveCandidate(selectedCandidate.id, newStage);
             // Update local state
             setSelectedCandidate(prev => prev ? { ...prev, stage: newStage } : null);
-            toast.success(`Flyttade till ${activeStageConfig[newStage]?.label || newStage}`);
+            toast.success(`Flyttade till ${stageLabel}`, {
+              icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
+            });
           } else if (selectedCandidate && isViewingColleague) {
             moveCandidateInColleagueList(selectedCandidate.id, newStage);
             setSelectedCandidate(prev => prev ? { ...prev, stage: newStage } : null);
-            toast.success(`Flyttade till ${activeStageConfig[newStage]?.label || newStage}`);
+            toast.success(`Flyttade till ${stageLabel}`, {
+              icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
+            });
           }
         }}
         onRemoveFromList={() => {

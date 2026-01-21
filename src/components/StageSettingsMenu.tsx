@@ -224,7 +224,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
           {canDelete ? (
             <DropdownMenuItem 
               onClick={handleDeleteClick}
-              className={`cursor-pointer ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
+              className="cursor-pointer text-red-400 focus:text-red-400"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Ta bort steg

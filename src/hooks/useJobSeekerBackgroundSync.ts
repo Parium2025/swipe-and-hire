@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
+import { updateLastSyncTime } from '@/lib/draftUtils';
 
 const SAVED_JOBS_CACHE_KEY = 'job_seeker_saved_jobs_';
 const MY_APPLICATIONS_CACHE_KEY = 'job_seeker_applications_';
@@ -325,6 +326,8 @@ export const useJobSeekerBackgroundSync = () => {
       ]);
 
       hasPreloadedRef.current = true;
+      // Uppdatera sync-tidsstämpel för offline-indikatorn
+      updateLastSyncTime();
     } catch (error) {
       console.warn('[JobSeekerSync] Preload failed:', error);
     } finally {
