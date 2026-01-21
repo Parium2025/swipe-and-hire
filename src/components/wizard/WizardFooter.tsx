@@ -66,6 +66,17 @@ export const WizardFooter = ({
     }
   };
 
+  // Blur handlers to prevent focus ring flash
+  const handleMouseDown = (e: MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.blur();
+    const activeEl = document.activeElement as HTMLElement;
+    if (activeEl?.blur) activeEl.blur();
+  };
+
+  const handleMouseUp = (e: MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.blur();
+  };
+
   // Wrapper to blur + call handler
   const handleBackClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.blur();
@@ -117,6 +128,8 @@ export const WizardFooter = ({
       {showBackButton && (
         <Button
           variant="outline"
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
           onClick={handleBackClick}
           disabled={backDisabled}
           className={backButtonClasses}
@@ -129,6 +142,8 @@ export const WizardFooter = ({
       {/* Submit button (shown on last step) */}
       {isLastStep ? (
         <Button
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
           onClick={handleSubmitClick}
           disabled={submitDisabled}
           className={submitButtonClasses}
@@ -152,6 +167,8 @@ export const WizardFooter = ({
         </Button>
       ) : (
         <Button
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
           onClick={handleNextClick}
           disabled={disabled}
           className={nextButtonClasses}
