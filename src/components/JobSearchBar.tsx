@@ -311,17 +311,15 @@ export const JobSearchBar = ({
                 className="pl-10 pr-8 bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white focus:outline-none focus-visible:outline-none focus:ring-0"
               />
               {searchInput && (
-                <Button
-                  variant="ghost"
-                  size="icon"
+                <button
                   onClick={() => {
                     onSearchChange('');
                     setSearchExpanded(false);
                   }}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 text-white hover:text-white focus:outline-none focus-visible:outline-none focus:ring-0"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none"
                 >
                   <X className="h-4 w-4" />
-                </Button>
+                </button>
               )}
             </div>
 

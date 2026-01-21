@@ -2527,7 +2527,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             </div>
                                           </div>
                                         )}
-                                        <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white transition-colors md:hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                                        <button onClick={() => setShowApplicationForm(false)} className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors" aria-label="Stäng ansökningsformulär"><X className="h-3.5 w-3.5" /></button>
                                       </div>
                                     </div>
 
@@ -3012,10 +3012,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           )}
                                           <button 
                                             onClick={() => setShowDesktopApplicationForm(false)} 
-                                            className="text-sm text-white hover:text-white"
+                                            className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors"
                                             aria-label="Stäng ansökningsformulär"
                                           >
-                                            ✕
+                                            <X className="h-3.5 w-3.5" />
                                           </button>
                                         </div>
                                       </div>
