@@ -761,7 +761,7 @@ const JobDetails = () => {
         
       if (error) throw error;
       toast.success(`${count} kandidater flyttade till "${targetLabel}"`, {
-        icon: <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: stageColor }}><CheckSquare className="w-2.5 h-2.5 text-white" /></div>,
+        icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
       });
     } catch (error) {
       refetch();
