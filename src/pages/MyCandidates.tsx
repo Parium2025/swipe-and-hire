@@ -626,7 +626,7 @@ const MyCandidates = () => {
       }
       exitSelectionMode();
       toast.success(`${count} kandidater flyttade till "${targetLabel}"`, {
-        icon: <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: stageColor }}><CheckSquare className="w-2.5 h-2.5 text-white" /></div>,
+        icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
       });
       return;
     }
@@ -645,7 +645,7 @@ const MyCandidates = () => {
         
       if (error) throw error;
       toast.success(`${count} kandidater flyttade till "${targetLabel}"`, {
-        icon: <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: stageColor }}><CheckSquare className="w-2.5 h-2.5 text-white" /></div>,
+        icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
       });
     } catch (error) {
       fetchCandidates();
@@ -1499,13 +1499,13 @@ const MyCandidates = () => {
             // Update local state
             setSelectedCandidate(prev => prev ? { ...prev, stage: newStage } : null);
             toast.success(`Flyttade till ${stageLabel}`, {
-              icon: <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: stageColor }}><CheckSquare className="w-2.5 h-2.5 text-white" /></div>,
+              icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
             });
           } else if (selectedCandidate && isViewingColleague) {
             moveCandidateInColleagueList(selectedCandidate.id, newStage);
             setSelectedCandidate(prev => prev ? { ...prev, stage: newStage } : null);
             toast.success(`Flyttade till ${stageLabel}`, {
-              icon: <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: stageColor }}><CheckSquare className="w-2.5 h-2.5 text-white" /></div>,
+              icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
             });
           }
         }}
