@@ -88,37 +88,10 @@ video:focus-visible,
 [tabindex]:focus-visible {
   outline: none !important;
   box-shadow: none !important;
-  -webkit-box-shadow: none !important;
   --tw-ring-offset-width: 0px !important;
   --tw-ring-width: 0px !important;
   --tw-ring-color: transparent !important;
   --tw-ring-offset-color: transparent !important;
-  --tw-ring-offset-shadow: 0 0 #0000 !important;
-  --tw-ring-shadow: 0 0 #0000 !important;
-  --tw-shadow: 0 0 #0000 !important;
-}
-
-/* Dialog/Modal: extra-hard reset to eliminate any UA focus glow/frames */
-[data-parium="dialog-content"] :is(input, textarea, select, button, a, [role="button"]) {
-  -webkit-tap-highlight-color: transparent !important;
-}
-
-[data-parium="dialog-content"] :is(input, textarea, select, button, a, [role="button"]):focus,
-[data-parium="dialog-content"] :is(input, textarea, select, button, a, [role="button"]):focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-  --tw-ring-offset-width: 0px !important;
-  --tw-ring-width: 0px !important;
-  --tw-ring-color: transparent !important;
-  --tw-ring-offset-color: transparent !important;
-  --tw-ring-offset-shadow: 0 0 #0000 !important;
-  --tw-ring-shadow: 0 0 #0000 !important;
-  --tw-shadow: 0 0 #0000 !important;
-}
-
-[data-parium="dialog-content"] :is(input, textarea, select):focus {
-  border-color: hsl(var(--foreground) / 0.2) !important;
 }
 
 
