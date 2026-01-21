@@ -313,7 +313,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
           hideClose
           forceMount
           overlayHidden={!open || !isWarmedUp}
-          className={"w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
+           data-parium-dialog="create-job"
+           className={"w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out data-[state=open]:animate-none data-[state=closed]:animate-none"}
           style={{ display: (!open || !isWarmedUp) ? 'none' : undefined }}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
@@ -353,7 +354,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white transition-all duration-150 text-sm h-[44px] font-normal focus:border-white/20 hover:border-white/20"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white transition-colors duration-150 text-sm h-[44px] font-normal"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
@@ -430,7 +431,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                 onKeyDown={(e) => {
                                   e.stopPropagation();
                                 }}
-                                className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/20 hover:border-white/20 rounded-lg"
+                                className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white rounded-lg transition-colors duration-150"
                                 autoComplete="off"
                                 autoFocus
                               />
@@ -580,7 +581,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                   onMouseUp={(e) => e.currentTarget.blur()}
                   onFocus={(e) => e.currentTarget.blur()}
                   disabled={loading || !jobTitle.trim()}
-                  className={`flex-1 min-h-[44px] rounded-full transition-all duration-150 active:scale-95 focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none ${
+                  className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none ${
                     !loading && jobTitle.trim() ? 'border border-white/30' : ''
                   }`}
                 >
