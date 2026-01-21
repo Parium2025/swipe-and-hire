@@ -92,8 +92,10 @@ export function AddToColleagueListDialog({
           {user && (
             <Button
               variant="outline"
-              className={`w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white ${!isOnline ? 'opacity-50' : ''}`}
+              className={`w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white transition-colors duration-300 focus:outline-none focus:ring-0 ${!isOnline ? 'opacity-50' : ''}`}
               onClick={() => handleAddToList(user.id, true)}
+              onMouseDown={(e) => e.currentTarget.blur()}
+              onMouseUp={(e) => e.currentTarget.blur()}
               disabled={isAdding !== null || !isOnline}
             >
               {!isOnline ? (
@@ -118,8 +120,10 @@ export function AddToColleagueListDialog({
             <Button
               key={member.userId}
               variant="outline"
-              className={`w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white ${!isOnline ? 'opacity-50' : ''}`}
+              className={`w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white transition-colors duration-300 focus:outline-none focus:ring-0 ${!isOnline ? 'opacity-50' : ''}`}
               onClick={() => handleAddToList(member.userId, false)}
+              onMouseDown={(e) => e.currentTarget.blur()}
+              onMouseUp={(e) => e.currentTarget.blur()}
               disabled={isAdding !== null || !isOnline}
             >
               <Avatar className="h-8 w-8">

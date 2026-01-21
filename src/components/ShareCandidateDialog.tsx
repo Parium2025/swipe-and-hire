@@ -129,7 +129,9 @@ export function ShareCandidateDialog({
                       variant={isShared ? 'outline' : 'glassBlue'}
                       disabled={isSharing || isShared || !isOnline}
                       onClick={() => handleShare(member.userId, fullName)}
-                      className={!isOnline ? 'opacity-50' : ''}
+                      onMouseDown={(e) => e.currentTarget.blur()}
+                      onMouseUp={(e) => e.currentTarget.blur()}
+                      className={`transition-colors duration-300 focus:outline-none focus:ring-0 ${!isOnline ? 'opacity-50' : ''}`}
                     >
                       {isSharing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -152,7 +154,13 @@ export function ShareCandidateDialog({
         </div>
 
         <div className="flex justify-end">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <Button 
+            variant="ghost" 
+            onClick={() => onOpenChange(false)}
+            onMouseDown={(e) => e.currentTarget.blur()}
+            onMouseUp={(e) => e.currentTarget.blur()}
+            className="transition-colors duration-300 focus:outline-none focus:ring-0"
+          >
             Stäng
           </Button>
         </div>

@@ -64,7 +64,13 @@ export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: 
         </DialogTrigger>
       ) : (
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onMouseDown={(e) => e.currentTarget.blur()}
+            onMouseUp={(e) => e.currentTarget.blur()}
+            className="border-white/20 text-white hover:bg-white/10 transition-colors duration-300 focus:outline-none focus:ring-0"
+          >
             + Nytt steg
           </Button>
         </DialogTrigger>
@@ -103,7 +109,9 @@ export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: 
                 <button
                   key={name}
                   onClick={() => setIconName(name)}
-                  className={`p-2 rounded hover:bg-white/20 transition-colors ${
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  onMouseUp={(e) => e.currentTarget.blur()}
+                  className={`p-2 rounded hover:bg-white/20 transition-colors duration-300 focus:outline-none focus:ring-0 ${
                     iconName === name ? 'bg-white/20 ring-1 ring-white/40' : ''
                   }`}
                   title={iconLabel}
@@ -119,14 +127,18 @@ export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: 
           <Button
             variant="ghost"
             onClick={() => setOpen(false)}
-            className="text-white hover:bg-white/10"
+            onMouseDown={(e) => e.currentTarget.blur()}
+            onMouseUp={(e) => e.currentTarget.blur()}
+            className="text-white hover:bg-white/10 transition-colors duration-300 focus:outline-none focus:ring-0"
           >
             Avbryt
           </Button>
           <Button
             onClick={handleCreate}
+            onMouseDown={(e) => e.currentTarget.blur()}
+            onMouseUp={(e) => e.currentTarget.blur()}
             disabled={isCreating || !label.trim()}
-            className="bg-primary hover:bg-primary/90"
+            className="bg-primary hover:bg-primary/90 transition-colors duration-300 focus:outline-none focus:ring-0"
           >
             {isCreating ? 'Skapar...' : 'Skapa steg'}
           </Button>
