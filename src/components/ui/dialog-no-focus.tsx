@@ -5,6 +5,8 @@ import { DialogContent } from "@/components/ui/dialog";
  * A wrapper around DialogContent that prevents auto-focus on open/close.
  * This eliminates the "double border" / focus ring flash that occurs when
  * Radix auto-focuses elements by default.
+ * 
+ * Adds data-parium="dialog-content" for CSS focus-ring suppression.
  */
 export const DialogContentNoFocus = React.forwardRef<
   React.ElementRef<typeof DialogContent>,
@@ -12,6 +14,7 @@ export const DialogContentNoFocus = React.forwardRef<
 >(({ onOpenAutoFocus, onCloseAutoFocus, ...props }, ref) => (
   <DialogContent
     ref={ref}
+    data-parium="dialog-content"
     onOpenAutoFocus={(e) => {
       e.preventDefault();
       // Blur any focused element to prevent flash on trigger button
