@@ -2417,23 +2417,12 @@ const MobileJobWizard = ({
               </div>
             </DialogHeader>
             {!showQuestionTemplates && !showQuestionForm && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onMouseDown={(e) => {
-                  e.currentTarget.blur();
-                  const activeEl = document.activeElement as HTMLElement;
-                  if (activeEl?.blur) activeEl.blur();
-                }}
-                onMouseUp={(e) => e.currentTarget.blur()}
-                onClick={(e) => {
-                  e.currentTarget.blur();
-                  handleClose();
-                }}
-                className="absolute right-4 top-4 h-8 w-8 text-white transition-colors duration-150 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              <button
+                onClick={handleClose}
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none"
               >
                 <X className="h-4 w-4" />
-              </Button>
+              </button>
             )}
           </div>
 
@@ -3523,7 +3512,7 @@ const MobileJobWizard = ({
                                      </div>
                                    </div>
                                  )}
-                                 <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                                 <button onClick={() => setShowApplicationForm(false)} className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors" aria-label="Stäng ansökningsformulär"><X className="h-3.5 w-3.5" /></button>
                                </div>
                              </div>
 
@@ -4066,10 +4055,10 @@ const MobileJobWizard = ({
                                     )}
                                     <button 
                                       onClick={() => setShowDesktopApplicationForm(false)} 
-                                      className="text-sm text-white hover:text-white"
+                                      className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors"
                                       aria-label="Stäng ansökningsformulär"
                                     >
-                                      ✕
+                                      <X className="h-3.5 w-3.5" />
                                     </button>
                                   </div>
                                 </div>
