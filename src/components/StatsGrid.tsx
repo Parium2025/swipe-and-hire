@@ -34,10 +34,10 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
           {stat.subItems && stat.subItems.length > 0 ? (
             // Special layout for cards with subItems - full height dividers, matching standard card height
             <div className="flex h-full">
-              {/* First column - main stat (no icon for consistency with sub-items) */}
+              {/* First column - Aktiva (green) */}
               <div className="flex-1 flex flex-col">
                 <div className="flex items-center justify-center p-2 md:p-4 min-h-[36px] md:min-h-[40px]">
-                  <span className="text-xs md:text-sm font-medium text-white whitespace-nowrap">
+                  <span className="text-xs md:text-sm font-medium text-green-400 whitespace-nowrap">
                     {stat.title}
                   </span>
                 </div>
@@ -63,7 +63,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                 return (
                   <div key={idx} className="flex-1 flex flex-col border-l border-white/30">
                     <div className="flex items-center justify-center p-2 md:p-4 min-h-[36px] md:min-h-[40px]">
-                      <span className="text-xs md:text-sm font-medium text-white whitespace-nowrap">
+                      <span className={`text-xs md:text-sm font-medium whitespace-nowrap ${colorClass}`}>
                         {item.label}
                       </span>
                     </div>
