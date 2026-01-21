@@ -351,7 +351,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white transition-all duration-150 text-sm h-[44px] font-normal"
+                  className="bg-white/10 border-white/20 hover:border-white/30 focus:border-white/20 text-white placeholder:text-white transition-colors duration-150 text-sm h-[44px] font-normal outline-none ring-0 focus:ring-0 focus:outline-none"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
@@ -573,10 +573,19 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
 
               <div className="flex gap-2 pt-2">
                 <Button 
+                  onMouseDown={(e) => {
+                    e.currentTarget.blur();
+                    // Blur any focused input to prevent flash
+                    const activeEl = document.activeElement as HTMLElement;
+                    if (activeEl?.blur) activeEl.blur();
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.blur();
+                  }}
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
-                  className={`flex-1 min-h-[44px] rounded-full transition-all duration-150 active:scale-95 ${
-                    !loading && jobTitle.trim() ? 'border border-white/30' : ''
+                  className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 ${
+                    !loading && jobTitle.trim() ? 'border border-white/30' : 'border border-transparent'
                   }`}
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -584,6 +593,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                 </Button>
                 <Button 
                   variant="glass"
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  onMouseUp={(e) => e.currentTarget.blur()}
                   onClick={handleClose}
                   className="min-h-[44px] rounded-full"
                 >
