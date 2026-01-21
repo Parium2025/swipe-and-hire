@@ -166,7 +166,7 @@ const WorkplacePostalCodeSelector = ({
             value={postalCodeValue}
             onChange={handlePostalCodeChange}
             placeholder="XXX XX"
-            className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-9 text-sm pl-10 transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
+            className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-9 text-sm pl-10 transition-colors duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 focus:ring-0 focus:outline-none focus:border-white/50"
             maxLength={6}
             autoComplete="off"
             autoCorrect="off"
@@ -202,7 +202,7 @@ const WorkplacePostalCodeSelector = ({
               ? "Ange ort manuellt"
               : "Fylls i automatiskt"
           }
-          className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-9 text-sm transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
+          className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-9 text-sm transition-colors duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 focus:ring-0 focus:outline-none focus:border-white/50"
           readOnly={foundLocation !== null}
           autoComplete="off"
           autoCorrect="off"
