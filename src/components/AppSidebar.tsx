@@ -51,42 +51,39 @@ export function AppSidebar() {
   const { checkBeforeNavigation } = useUnsavedChanges();
 
   // Använd preloadedAvatarUrl som primär källa, fallback till profile.profile_image_url, sedan cover_image_url
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
-    // Prioritera cache först (identiskt med arbetsgivarsidan)
-    return preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null;
-  });
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null);
   // Använd preloadedVideoUrl från AuthProvider (sessionStorage-cachad precis som arbetsgivarsidan)
-  const [videoUrl, setVideoUrl] = useState<string | null>(() => preloadedVideoUrl ?? null);
-  const [coverUrl, setCoverUrl] = useState<string | null>(() => preloadedCoverUrl || profile?.cover_image_url || null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(preloadedVideoUrl ?? null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(preloadedCoverUrl || profile?.cover_image_url || null);
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   
-  // hasVideo: true om antingen DB har video_url ELLER vi har en preloaded video URL
-  // Detta säkerställer att videon visas även om preloading är asynkron
-  const hasVideo = !!(profile?.video_url || preloadedVideoUrl || videoUrl);
-  
   // Håll avatar i synk med preloader/profile, med cover som fallback
   useEffect(() => {
-    // Prioritera i rätt ordning: preloaded → profile → cover
-    const newAvatarUrl = preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null;
-    if (newAvatarUrl && newAvatarUrl !== avatarUrl) {
-      setAvatarUrl(newAvatarUrl);
+    if (preloadedAvatarUrl) {
+      setAvatarUrl(preloadedAvatarUrl);
+    } else if (preloadedCoverUrl) {
+      setAvatarUrl(preloadedCoverUrl);
+    } else if (profile?.profile_image_url) {
+      setAvatarUrl(profile.profile_image_url);
+    } else if (profile?.cover_image_url) {
+      setAvatarUrl(profile.cover_image_url);
     }
   }, [preloadedAvatarUrl, preloadedCoverUrl, profile?.profile_image_url, profile?.cover_image_url]);
 
   useEffect(() => {
-    const newCoverUrl = preloadedCoverUrl || profile?.cover_image_url || null;
-    if (newCoverUrl !== coverUrl) {
-      setCoverUrl(newCoverUrl);
+    if (preloadedCoverUrl) {
+      setCoverUrl(preloadedCoverUrl);
+    } else if (profile?.cover_image_url) {
+      setCoverUrl(profile.cover_image_url);
     }
   }, [preloadedCoverUrl, profile?.cover_image_url]);
   
-  // Synka videoUrl från preloadedVideoUrl (uppdateras asynkront efter login)
   useEffect(() => {
-    if (preloadedVideoUrl && preloadedVideoUrl !== videoUrl) {
-      setVideoUrl(preloadedVideoUrl);
-    }
+    setVideoUrl(preloadedVideoUrl ?? null);
   }, [preloadedVideoUrl]);
+  
+  const hasVideo = !!profile?.video_url;
 
   const isAdmin = user?.email === 'fredrikandits@hotmail.com';
 

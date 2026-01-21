@@ -4,30 +4,16 @@
  */
 
 const STORAGE_PREFIX = 'parium_draft_';
-const LAST_SYNC_KEY = 'parium_last_sync_time';
 
 /**
- * Update the last sync time (call this when data is successfully fetched/saved)
+ * Get the most recent draft save time from localStorage
+ * Returns formatted time string (e.g., "14:32") or null if no drafts exist
  */
-export function updateLastSyncTime(): void {
+export function getLatestDraftTime(): string | null {
   try {
-    localStorage.setItem(LAST_SYNC_KEY, Date.now().toString());
-  } catch {
-    // Ignore storage errors
-  }
-}
-
-/**
- * Get the most recent sync/activity time
- * Returns formatted time string (e.g., "14:32") or null if no sync recorded
- */
-export function getLatestSyncTime(): string | null {
-  try {
-    // First check last sync time
-    const syncTime = localStorage.getItem(LAST_SYNC_KEY);
-    let latestTime: number | null = syncTime ? parseInt(syncTime, 10) : null;
+    let latestTime: number | null = null;
     
-    // Also check draft times and use the most recent
+    // Scan all localStorage keys for draft entries
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (!key?.startsWith(STORAGE_PREFIX)) continue;
@@ -58,18 +44,9 @@ export function getLatestSyncTime(): string | null {
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   } catch (error) {
-    console.warn('Failed to get latest sync time:', error);
+    console.warn('Failed to get latest draft time:', error);
     return null;
   }
-}
-
-/**
- * Get the most recent draft save time from localStorage
- * Returns formatted time string (e.g., "14:32") or null if no drafts exist
- * @deprecated Use getLatestSyncTime instead
- */
-export function getLatestDraftTime(): string | null {
-  return getLatestSyncTime();
 }
 
 /**
