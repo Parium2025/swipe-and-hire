@@ -161,10 +161,10 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
                 {/* Close button top right */}
                 <button
                   onClick={onClose}
-                  className="absolute top-4 right-4 p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors"
                   aria-label="Stäng"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 

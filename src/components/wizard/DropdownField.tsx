@@ -64,7 +64,7 @@ export const DropdownField = ({
                   e.stopPropagation();
                   onClear();
                 }}
-                className="p-1 hover:bg-white/10 rounded-full transition-all duration-300"
+                className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/20 transition-colors"
               >
                 <X className="h-3 w-3 text-white" />
               </button>

@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileText, Video, CheckSquare, List, Heart, WifiOff } from 'lucide-react';
+import { ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Calendar, FileText, Video, CheckSquare, List, Heart, WifiOff, X } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 
 // Draft key for localStorage
@@ -511,14 +511,12 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
                   <Heart className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                   <span className="font-semibold text-xs md:text-sm">Ansökan</span>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <button 
                   onClick={handleClose}
-                  className="text-white hover:text-white hover:bg-white/10 h-6 w-6 md:h-8 md:w-8 p-0"
+                  className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors"
                 >
-                  ✕
-                </Button>
+                  <X className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                </button>
               </div>
               <div className="mt-1.5 md:mt-2">
                 <h3 className="font-semibold text-sm md:text-lg leading-tight">{job.title}</h3>

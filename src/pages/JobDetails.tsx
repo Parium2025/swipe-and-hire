@@ -972,14 +972,12 @@ const JobDetails = () => {
                 )}
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
               onClick={() => navigate(-1)}
-              className="text-white h-7 w-7 p-0 hover:bg-transparent focus-visible:ring-0 focus:outline-none shrink-0"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors shrink-0 focus:outline-none"
             >
-              <X className="h-6 w-6" />
-            </Button>
+              <X className="h-5 w-5" />
+            </button>
           </div>
 
           <div className="flex items-center gap-3 mt-3">

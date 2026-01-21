@@ -62,7 +62,7 @@ export const BenefitsDropdown = ({
               <button
                 type="button"
                 onClick={() => removeBenefit(benefit)}
-                className="p-0.5 hover:bg-white/10 rounded-full transition-all duration-300"
+                className="flex h-4 w-4 items-center justify-center rounded-full hover:bg-white/20 transition-colors"
               >
                 <X className="h-3 w-3" />
               </button>

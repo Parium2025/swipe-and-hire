@@ -281,10 +281,10 @@ const LocationSearchInput = ({
                   e.stopPropagation();
                   handleClear();
                 }}
-                className="text-white transition-colors"
+                className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors"
                 aria-label="Rensa"
               >
-                <X className="h-4 w-4 text-white" />
+                <X className="h-4 w-4" />
               </button>
             ) : (
               <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />

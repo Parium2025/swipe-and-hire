@@ -744,9 +744,9 @@ const NotesCard = memo(() => {
                 )}
                 <button
                   onClick={handleCloseExpanded}
-                  className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/20 transition-colors"
                 >
-                  <X className="h-5 w-5 text-white" />
+                  <X className="h-4 w-4 text-white" />
                 </button>
               </div>
             </div>
