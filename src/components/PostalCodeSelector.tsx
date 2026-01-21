@@ -91,7 +91,7 @@ const PostalCodeSelector = ({
           value={postalCodeValue}
           onChange={handlePostalCodeChange}
           placeholder="Skriv in ditt postnummer"
-          className="h-9 pl-10 text-sm bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/50 text-white hover:bg-white/10 md:hover:border-white/50 placeholder:text-white"
+          className="h-9 pl-10 text-sm bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/50 text-white hover:bg-white/10 md:hover:border-white/50 placeholder:text-white transition-colors duration-150 focus:ring-0 focus:outline-none focus:border-white/50"
           maxLength={6}
           autoComplete="off"
         />
