@@ -6,8 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, Check, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, UserMinus, AlertTriangle, X } from 'lucide-react';
-import { CloseButton } from '@/components/ui/close-button';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, UserMinus, AlertTriangle } from 'lucide-react';
 import { ShareCandidateDialog } from '@/components/ShareCandidateDialog';
 import { SendMessageDialog } from '@/components/SendMessageDialog';
 import type { StageSettings } from '@/hooks/useStageSettings';
@@ -1149,11 +1148,13 @@ export const CandidateProfileDialog = ({
                 </div>
               </button>
 
-              <CloseButton
+              <button
                 onClick={() => onOpenChange(false)}
-                size="sm"
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-10"
-              />
+                aria-label="Stäng"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <X className="h-4 w-4 text-white" />
+              </button>
             </div>
 
             {/* Tab content */}

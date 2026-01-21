@@ -8,8 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import type { MouseEvent, TouchEvent } from 'react';
-import { Loader2, Send, MessageSquare, WifiOff } from 'lucide-react';
-import { CloseButton } from '@/components/ui/close-button';
+import { Loader2, Send, MessageSquare, WifiOff, X } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useFieldDraft } from '@/hooks/useFormDraft';
 import {
@@ -119,11 +118,16 @@ export function SendMessageDialog({
                   <MessageSquare className="h-5 w-5" />
                   Skicka meddelande
                 </CardTitle>
-                <CloseButton
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={handleClose}
-                  size="sm"
-                  className="absolute right-2 top-2"
-                />
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  onMouseUp={(e) => e.currentTarget.blur()}
+                  className="absolute right-2 top-2 h-8 w-8 text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
               <CardDescription className="text-white text-center text-sm leading-snug mt-2">
                 Skriv ett meddelande till {recipientName}

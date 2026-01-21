@@ -1,9 +1,8 @@
 import { memo, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Chrome, Smartphone, Globe } from 'lucide-react';
+import { X, MapPin, Chrome, Smartphone, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CloseButton } from '@/components/ui/close-button';
 
 interface GpsHelpModalProps {
   open: boolean;
@@ -160,10 +159,13 @@ const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
                 <p className="text-sm text-white mt-1">{instructions.name}</p>
                 
                 {/* Close button top right */}
-                <CloseButton
+                <button
                   onClick={onClose}
-                  className="absolute top-4 right-4"
-                />
+                  className="absolute top-4 right-4 p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  aria-label="Stäng"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
 
               {/* Content (scrollable so entire message is always readable) */}

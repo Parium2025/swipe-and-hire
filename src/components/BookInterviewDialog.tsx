@@ -9,8 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, WifiOff } from 'lucide-react';
-import { CloseButton } from '@/components/ui/close-button';
+import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X, WifiOff } from 'lucide-react';
 import { format, startOfDay, isToday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -279,11 +278,16 @@ export const BookInterviewDialog = ({
                 <CalendarIcon className="h-5 w-5" />
                 Boka intervju
               </CardTitle>
-              <CloseButton
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => handleOpenChange(false)}
-                size="sm"
-                className="absolute right-2 top-2"
-              />
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                className="absolute right-2 top-2 h-8 w-8 text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
             <CardDescription className="text-white text-center text-sm leading-snug mt-2">
               Skicka en intervjukallelse till {candidateName} för tjänsten {jobTitle}
