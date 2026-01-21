@@ -329,7 +329,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                   variant="ghost"
                   size="icon"
                   onClick={handleClose}
-                  className="absolute right-2 top-2 h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                  onMouseDown={(e) => e.currentTarget.blur()}
+                  onMouseUp={(e) => e.currentTarget.blur()}
+                  className="absolute right-2 top-2 h-8 w-8 text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -386,7 +388,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10"
+                        onMouseDown={(e) => e.currentTarget.blur()}
+                        onMouseUp={(e) => e.currentTarget.blur()}
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-colors duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10 focus:outline-none focus:ring-0"
                         title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
                       >
                         <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words font-normal text-white">
@@ -439,7 +443,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                     e.stopPropagation();
                                     setSearchTerm('');
                                   }}
-                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white transition-colors md:hover:text-white"
+                                  onMouseDown={(e) => e.currentTarget.blur()}
+                                  onMouseUp={(e) => e.currentTarget.blur()}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white transition-colors md:hover:text-white focus:outline-none focus:ring-0"
                                   type="button"
                                 >
                                   <X className="h-4 w-4" />
@@ -494,7 +500,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                 <div className="flex items-center justify-between w-full gap-3">
                                   <button
                                     onClick={() => handleTemplateSelect(template.id, template.name)}
-                                    className="flex items-center flex-1 text-left hover:opacity-80 transition-opacity"
+                                    onMouseDown={(e) => e.currentTarget.blur()}
+                                    onMouseUp={(e) => e.currentTarget.blur()}
+                                    className="flex items-center flex-1 text-left hover:opacity-80 transition-opacity focus:outline-none focus:ring-0"
                                   >
                                     <span className="font-medium text-white">{template.name}</span>
                                     {template.is_default && (
@@ -512,7 +520,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                           setShowTemplateWizard(true);
                                         }, 150);
                                       }}
-                                      className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95"
+                                      onMouseDown={(e) => e.currentTarget.blur()}
+                                      onMouseUp={(e) => e.currentTarget.blur()}
+                                      className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-colors duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95 focus:outline-none focus:ring-0"
                                     >
                                       <Edit size={14} />
                                     </button>
@@ -521,7 +531,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                         e.stopPropagation();
                                         setTemplateToDelete(template);
                                       }}
-                                      className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 active:scale-95"
+                                      onMouseDown={(e) => e.currentTarget.blur()}
+                                      onMouseUp={(e) => e.currentTarget.blur()}
+                                      className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-colors duration-300 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 active:scale-95 focus:outline-none focus:ring-0"
                                     >
                                       <Trash2 size={14} />
                                     </button>
@@ -561,7 +573,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef }: CreateJobSimpleDial
                                 }
                               }, 0);
                             }}
-                            className="h-8 w-8 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                            onMouseDown={(e) => e.currentTarget.blur()}
+                            onMouseUp={(e) => e.currentTarget.blur()}
+                            className="h-8 w-8 text-white transition-colors duration-300 md:hover:text-white md:hover:bg-white/10 focus:outline-none focus:ring-0"
                           >
                             <X className="h-4 w-4" />
                           </Button>
