@@ -222,14 +222,14 @@ function JobSeekerTopNav() {
                     isDropdownActive(profileItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
-                {/* Show profile video/image instead of User icon */}
+                {/* Show profile video/image instead of User icon - same size as user menu avatar */}
                 {hasVideo && videoUrl ? (
                   <ProfileVideo
                     videoUrl={videoUrl}
                     coverImageUrl={coverUrl || avatarUrl || undefined}
                     userInitials={getUserInitials()}
                     alt="Profilvideo"
-                    className="h-6 w-6 ring-1 ring-white/30 rounded-full relative z-10"
+                    className="h-8 w-8 ring-2 ring-white/20 rounded-full relative z-10"
                     showCountdown={false}
                     showProgressBar={false}
                   />
@@ -237,7 +237,7 @@ function JobSeekerTopNav() {
                   <img 
                     src={avatarUrl} 
                     alt={getUserDisplayName()} 
-                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30 relative z-10"
+                    className="h-8 w-8 rounded-full object-cover ring-2 ring-white/20 relative z-10"
                   />
                 ) : (
                   <User className="h-4 w-4 relative z-10" />
