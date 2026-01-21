@@ -23,9 +23,14 @@ interface StatsGridProps {
 
 export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-2">
-      {stats.map((stat, index) => (
-        <Card key={index} className="bg-white/5 backdrop-blur-sm border-white/20">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-1.5 md:gap-2">
+      {stats.map((stat, index) => {
+        // Cards with subItems need more space
+        const hasSubItems = stat.subItems && stat.subItems.length > 0;
+        const spanClass = hasSubItems ? 'col-span-2' : '';
+        
+        return (
+        <Card key={index} className={`bg-white/5 backdrop-blur-sm border-white/20 ${spanClass}`}>
           {stat.subItems && stat.subItems.length > 0 ? (
             // Special layout for cards with subItems - full height dividers, matching standard card height
             <div className="flex h-full">
@@ -94,7 +99,8 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
             </>
           )}
         </Card>
-      ))}
+        );
+      })}
     </div>
   );
 }, (prevProps, nextProps) => {
