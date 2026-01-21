@@ -211,57 +211,73 @@ function JobSeekerTopNav() {
             )}
           </button>
 
-          {/* Profil Dropdown - with user avatar/video instead of icon */}
-          <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
-            <DropdownMenuTrigger asChild>
+          {/* Profil - Avatar/Video is clickable separately, text opens dropdown */}
+          <div className="relative flex items-center">
+            {/* Clickable avatar/video that navigates to profile */}
+            {(hasVideo && videoUrl) || avatarUrl ? (
               <button
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+                onClick={() => handleNavigation('/profile')}
+                className="relative z-20 hover:opacity-80 transition-opacity rounded-full"
+                aria-label="Gå till min profil"
               >
-                <span 
-                  className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
-                    isDropdownActive(profileItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
-                  }`} 
-                />
-                {/* Show profile video/image instead of User icon - same size as user menu avatar */}
                 {hasVideo && videoUrl ? (
                   <ProfileVideo
                     videoUrl={videoUrl}
                     coverImageUrl={coverUrl || avatarUrl || undefined}
                     userInitials={getUserInitials()}
                     alt="Profilvideo"
-                    className="h-8 w-8 ring-2 ring-white/20 rounded-full relative z-10"
+                    className="h-8 w-8 ring-2 ring-white/20 rounded-full"
                     showCountdown={false}
                     showProgressBar={false}
                   />
-                ) : avatarUrl ? (
-                  <img 
-                    src={avatarUrl} 
-                    alt={getUserDisplayName()} 
-                    className="h-8 w-8 rounded-full object-cover ring-2 ring-white/20 relative z-10"
-                  />
                 ) : (
-                  <User className="h-4 w-4 relative z-10" />
+                  <img 
+                    src={avatarUrl!} 
+                    alt={getUserDisplayName()} 
+                    className="h-8 w-8 rounded-full object-cover ring-2 ring-white/20"
+                  />
                 )}
-                <span className="relative z-10">Profil</span>
-                <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className={dropdownContentClass}>
-              {profileItems.map((item) => {
-                const isActive = isActiveUrl(item.url);
-                return (
-                  <DropdownMenuItem
-                    key={item.url}
-                    onClick={() => { handleNavigation(item.url); setProfileOpen(false); }}
-                    className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.title}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            ) : null}
+            
+            {/* Dropdown trigger for "Profil" text + chevron */}
+            <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={`relative flex items-center gap-1.5 py-2 rounded-lg text-sm font-medium text-white group ${
+                    (hasVideo && videoUrl) || avatarUrl ? 'pl-2 pr-3' : 'px-3'
+                  }`}
+                >
+                  <span 
+                    className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
+                      isDropdownActive(profileItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
+                    }`} 
+                  />
+                  {/* Only show icon if no avatar/video */}
+                  {!((hasVideo && videoUrl) || avatarUrl) && (
+                    <User className="h-4 w-4 relative z-10" />
+                  )}
+                  <span className="relative z-10">Profil</span>
+                  <ChevronDown className="h-3 w-3 text-white relative z-10" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className={dropdownContentClass}>
+                {profileItems.map((item) => {
+                  const isActive = isActiveUrl(item.url);
+                  return (
+                    <DropdownMenuItem
+                      key={item.url}
+                      onClick={() => { handleNavigation(item.url); setProfileOpen(false); }}
+                      className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.title}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
           {/* Ekonomi Dropdown */}
           <DropdownMenu open={economyOpen} onOpenChange={setEconomyOpen}>
