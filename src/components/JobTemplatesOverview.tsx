@@ -353,7 +353,12 @@ const JobTemplatesOverview = () => {
         </div>
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm} className="flex items-center gap-2">
+            <Button 
+              onClick={resetForm} 
+              onMouseDown={(e) => e.currentTarget.blur()}
+              onMouseUp={(e) => e.currentTarget.blur()}
+              className="flex items-center gap-2 transition-colors duration-300 focus:outline-none focus:ring-0"
+            >
               Skapa ny mall
               <Plus size={16} />
             </Button>
@@ -372,7 +377,12 @@ const JobTemplatesOverview = () => {
               </p>
               <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                 <DialogTrigger asChild>
-                  <Button onClick={resetForm}>
+                  <Button 
+                    onClick={resetForm}
+                    onMouseDown={(e) => e.currentTarget.blur()}
+                    onMouseUp={(e) => e.currentTarget.blur()}
+                    className="transition-colors duration-300 focus:outline-none focus:ring-0"
+                  >
                     Skapa första mallen
                     <Plus size={16} className="ml-2" />
                   </Button>
@@ -404,7 +414,9 @@ const JobTemplatesOverview = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => toggleDefault(template.id)}
-                      className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                      onMouseDown={(e) => e.currentTarget.blur()}
+                      onMouseUp={(e) => e.currentTarget.blur()}
+                      className="bg-white/10 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/20 focus:outline-none focus:ring-0"
                       title={template.is_default ? "Ta bort som standard" : "Sätt som standard"}
                     >
                       {template.is_default ? <StarOff size={14} /> : <Star size={14} />}
@@ -413,7 +425,9 @@ const JobTemplatesOverview = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => startEdit(template)}
-                      className="bg-white/10 border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/20"
+                      onMouseDown={(e) => e.currentTarget.blur()}
+                      onMouseUp={(e) => e.currentTarget.blur()}
+                      className="bg-white/10 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/20 focus:outline-none focus:ring-0"
                     >
                       <Edit size={14} className="mr-1" />
                       Redigera
@@ -422,7 +436,9 @@ const JobTemplatesOverview = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(template.id, template.name)}
-                      className="bg-white/10 border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 hover:text-white md:hover:text-white"
+                      onMouseDown={(e) => e.currentTarget.blur()}
+                      onMouseUp={(e) => e.currentTarget.blur()}
+                      className="bg-white/10 border-white/20 text-white transition-colors duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 hover:text-white md:hover:text-white focus:outline-none focus:ring-0"
                     >
                       <Trash2 size={14} className="mr-1" />
                       Ta bort
@@ -580,15 +596,20 @@ const JobTemplatesOverview = () => {
               <div className="space-y-2">
                 <Label htmlFor="employment_type">Anställningsform</Label>
                 <Select value={formData.employment_type} onValueChange={(value) => setFormData({...formData, employment_type: value})}>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger 
+                    onMouseDown={(e) => e.currentTarget.blur()}
+                    onMouseUp={(e) => e.currentTarget.blur()}
+                    className="bg-white/10 border-white/20 text-white transition-colors duration-300 focus:outline-none focus:ring-0"
+                  >
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900/85 backdrop-blur-xl border-white/20">
+                  <SelectContent className="bg-slate-900/85 backdrop-blur-xl border-white/20 z-50">
                     {EMPLOYMENT_TYPES.map(type => (
                       <SelectItem 
                         key={type.value} 
                         value={type.value}
-                        className="text-white hover:bg-white/20 focus:bg-white/20"
+                        onMouseDown={(e) => e.currentTarget.blur()}
+                        className="text-white hover:bg-white/20 focus:bg-white/20 transition-colors duration-300 focus:outline-none focus:ring-0"
                       >
                         {type.label}
                       </SelectItem>
@@ -639,8 +660,10 @@ const JobTemplatesOverview = () => {
             <div className="flex gap-2 pt-4">
               <Button 
                 onClick={editingTemplate ? handleEdit : handleCreate}
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isSubmitting || !formData.name || !formData.title || !formData.description || !formData.location}
-                className={`flex-1 ${
+                className={`flex-1 transition-colors duration-300 focus:outline-none focus:ring-0 ${
                   !isSubmitting && formData.name && formData.title && formData.description && formData.location 
                     ? 'border border-white/30' 
                     : ''
@@ -657,8 +680,10 @@ const JobTemplatesOverview = () => {
                   setEditingTemplate(null);
                   resetForm();
                 }}
+                onMouseDown={(e) => e.currentTarget.blur()}
+                onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isSubmitting}
-                className="bg-white/10 border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+                className="bg-white/10 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50 focus:outline-none focus:ring-0"
               >
                 Avbryt
               </Button>
