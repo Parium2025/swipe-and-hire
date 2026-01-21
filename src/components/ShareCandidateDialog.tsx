@@ -1,4 +1,5 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
@@ -88,7 +89,7 @@ export function ShareCandidateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md">
+      <DialogContentNoFocus className="bg-slate-900 border-white/10 text-white max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -164,7 +165,7 @@ export function ShareCandidateDialog({
             Stäng
           </Button>
         </div>
-      </DialogContent>
+      </DialogContentNoFocus>
     </Dialog>
   );
 }
