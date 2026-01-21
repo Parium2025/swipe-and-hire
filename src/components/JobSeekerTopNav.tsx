@@ -11,6 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import { 
   Building, 
   Heart,
@@ -24,7 +28,8 @@ import {
   HelpCircle,
   LogOut,
   ChevronDown,
-  Briefcase
+  Briefcase,
+  X
 } from "lucide-react";
 import pariumLogoRings from "@/assets/parium-logo-rings.png";
 
@@ -80,6 +85,7 @@ function JobSeekerTopNav() {
   const [economyOpen, setEconomyOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
 
   // Avatar/Video state
   const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null;
@@ -222,17 +228,25 @@ function JobSeekerTopNav() {
                     isDropdownActive(profileItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
-                {/* Show profile video/image instead of User icon - same size as user menu avatar */}
+                {/* Show profile video/image instead of User icon - clickable to view video */}
                 {hasVideo && videoUrl ? (
-                  <ProfileVideo
-                    videoUrl={videoUrl}
-                    coverImageUrl={coverUrl || avatarUrl || undefined}
-                    userInitials={getUserInitials()}
-                    alt="Profilvideo"
-                    className="h-8 w-8 ring-2 ring-white/20 rounded-full relative z-10"
-                    showCountdown={false}
-                    showProgressBar={false}
-                  />
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setVideoDialogOpen(true);
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <ProfileVideo
+                      videoUrl={videoUrl}
+                      coverImageUrl={coverUrl || avatarUrl || undefined}
+                      userInitials={getUserInitials()}
+                      alt="Profilvideo"
+                      className="h-8 w-8 ring-2 ring-white/20 rounded-full relative z-10"
+                      showCountdown={false}
+                      showProgressBar={false}
+                    />
+                  </div>
                 ) : avatarUrl ? (
                   <img 
                     src={avatarUrl} 
@@ -405,6 +419,29 @@ function JobSeekerTopNav() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Video Preview Dialog */}
+      <Dialog open={videoDialogOpen} onOpenChange={setVideoDialogOpen}>
+        <DialogContent className="sm:max-w-md p-0 bg-black/95 border-white/20 overflow-hidden">
+          <button
+            onClick={() => setVideoDialogOpen(false)}
+            className="absolute top-3 right-3 z-50 p-1.5 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+          >
+            <X className="h-5 w-5 text-white" />
+          </button>
+          {videoUrl && (
+            <div className="aspect-[9/16] w-full max-h-[80vh]">
+              <video
+                src={videoUrl}
+                className="w-full h-full object-cover"
+                controls
+                autoPlay
+                playsInline
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }
