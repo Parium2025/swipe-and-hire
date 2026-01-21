@@ -86,7 +86,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
               </CardHeader>
               <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
                 <div 
-                  className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
+                  className="text-lg md:text-xl font-bold text-white text-center transition-opacity duration-500 flex justify-center"
                   style={{ opacity: stat.loading ? 0.5 : 1 }}
                 >
                   {typeof stat.value === 'number' ? (
