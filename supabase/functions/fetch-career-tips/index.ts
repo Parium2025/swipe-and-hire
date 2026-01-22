@@ -11,7 +11,7 @@ const corsHeaders = {
 // Swedish and international career/job seeking RSS sources
 // VERIFIED: All URLs tested and working
 const RSS_SOURCES = [
-  // Swedish career-focused sources (VERIFIED WORKING)
+  // Swedish career-focused sources
   { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
   { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
@@ -20,8 +20,7 @@ const RSS_SOURCES = [
   { url: 'https://www.va.se/rss/', name: 'Veckans Affärer' },
   { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
   { url: 'https://www.breakit.se/feed/artiklar', name: 'Breakit' },
-  { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
-  // International career sources (FIXED/REPLACED)
+  // International career sources
   { url: 'https://www.fastcompany.com/work-life/rss', name: 'Fast Company' },
   { url: 'https://hbr.org/topic/career-planning/feed', name: 'HBR Career' },
 ];
