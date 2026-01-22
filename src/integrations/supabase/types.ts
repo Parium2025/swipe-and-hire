@@ -1602,6 +1602,51 @@ export type Database = {
           },
         ]
       }
+      rss_source_health: {
+        Row: {
+          consecutive_failures: number
+          created_at: string
+          id: string
+          is_healthy: boolean
+          last_error_message: string | null
+          last_failure_at: string | null
+          last_success_at: string | null
+          source_name: string
+          source_url: string
+          total_failures: number
+          total_successes: number
+          updated_at: string
+        }
+        Insert: {
+          consecutive_failures?: number
+          created_at?: string
+          id?: string
+          is_healthy?: boolean
+          last_error_message?: string | null
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          source_name: string
+          source_url: string
+          total_failures?: number
+          total_successes?: number
+          updated_at?: string
+        }
+        Update: {
+          consecutive_failures?: number
+          created_at?: string
+          id?: string
+          is_healthy?: boolean
+          last_error_message?: string | null
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          source_name?: string
+          source_url?: string
+          total_failures?: number
+          total_successes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       saved_jobs: {
         Row: {
           created_at: string
