@@ -13,9 +13,10 @@ interface ProfileVideoProps {
   showProgressBar?: boolean; // Show progress/scrubbing bar on hover (default: true)
   countdownVariant?: 'default' | 'compact' | 'preview'; // 'compact' for Min Profil, 'preview' for Förhandsgranska Profil, 'default' elsewhere
   onPlayingChange?: (isPlaying: boolean) => void; // Callback when playing state changes
+  onClick?: (e: React.MouseEvent) => void; // Custom click handler (bypasses default play behavior)
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onClick }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -81,7 +82,12 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   // Remove hover-based autoplay to avoid flicker; play only on explicit tap/click
   // (Keeping function names removed to simplify behavior)
 
-  const handleTap = async () => {
+  const handleTap = async (e?: React.MouseEvent) => {
+    // If custom onClick is provided, use that instead
+    if (onClick && e) {
+      onClick(e);
+      return;
+    }
     // Do nothing if we don't have a playable URL yet
     if (!videoUrl) return;
 
@@ -221,7 +227,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     <div 
       className={`relative overflow-hidden ${className}`}
       style={{ contain: 'paint' }}
-      onClick={handleTap}
+      onClick={(e) => handleTap(e)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
