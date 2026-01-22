@@ -335,6 +335,21 @@ async function fetchRSSWithRetry(
   
   if (health.shouldAlert) {
     console.error(`⚠️ ALERT: ${source.name} has failed ${health.consecutiveFailures} times consecutively!`);
+    
+    // Send email alert to admin
+    try {
+      await supabase.functions.invoke('send-admin-alert', {
+        body: {
+          type: 'rss_source_failure',
+          source_name: source.name,
+          consecutive_failures: health.consecutiveFailures,
+          error_message: lastError,
+        },
+      });
+      console.log(`Alert email sent for ${source.name}`);
+    } catch (alertErr) {
+      console.error(`Failed to send alert email:`, alertErr);
+    }
   }
   
   console.error(`Failed to fetch ${source.name} after ${MAX_RETRIES} attempts: ${lastError}`);
