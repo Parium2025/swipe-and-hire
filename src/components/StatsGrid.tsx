@@ -25,8 +25,17 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   // Calculate total columns needed (cards with subItems span more)
   const hasMultiColumnCard = stats.some(s => s.subItems && s.subItems.length > 0);
   
+  // Dynamically set grid columns based on number of cards and whether any have subItems
+  // For simple 4-card layouts (like job seeker), use 4 columns to fill width
+  // For complex layouts with subItems, use 5 columns
+  const gridColsClass = hasMultiColumnCard 
+    ? 'grid-cols-5' 
+    : stats.length === 4 
+      ? 'grid-cols-4' 
+      : 'grid-cols-5';
+  
   return (
-    <div className="grid grid-cols-5 gap-1 sm:gap-1.5 md:gap-2">
+    <div className={`grid ${gridColsClass} gap-1 sm:gap-1.5 md:gap-2`}>
       {stats.map((stat, index) => {
         // Cards with subItems span 2 columns
         const hasSubItems = stat.subItems && stat.subItems.length > 0;
