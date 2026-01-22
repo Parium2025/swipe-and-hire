@@ -89,13 +89,13 @@ function formatTipPublishedTime(publishedAt: string | null): string {
   }
 }
 
-// Career Tips Card (Green - Top Left) - Same structure as HrNewsCards
+// Career Tips Card (Green - Top Left) - EXACT COPY of employer NewsCard structure
 const CareerTipsCard = memo(() => {
   const { data: tips, isLoading, error } = useCareerTips();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   
-  const tipsItems = tips || [];
+  const tipsItems = tips?.slice(0, 4) || [];
 
   const goNext = useCallback(() => {
     if (tipsItems.length > 1) {
@@ -125,36 +125,17 @@ const CareerTipsCard = memo(() => {
     onSwipeRight: goPrev,
   });
 
-  const currentTip = tipsItems[currentIndex];
-  const Icon = currentTip?.icon_name ? (tipIconMap[currentTip.icon_name] || Lightbulb) : Lightbulb;
-  const publishedTime = currentTip ? formatTipPublishedTime(currentTip.published_at) : '';
-
-  const handleClick = () => {
-    if (currentTip?.source_url) {
-      window.open(currentTip.source_url, '_blank', 'noopener,noreferrer');
-    }
-  };
-
-  // Loading state
+  // Loading state - EXACT same as employer
   if (isLoading) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[200px]`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-        <CardContent className="relative p-4 h-full flex flex-col">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-9 w-9 rounded-xl bg-white/20" />
-            <Skeleton className="h-3 w-20 bg-white/20" />
+        <CardContent className="relative p-6 h-full">
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
+            <Skeleton className="h-4 w-32 bg-white/20" />
           </div>
-          <div className="flex-1 flex flex-col justify-center py-2 space-y-2">
-            <Skeleton className="h-4 w-3/4 bg-white/15" />
-            <Skeleton className="h-3 w-full bg-white/10" />
-            <Skeleton className="h-3 w-2/3 bg-white/10" />
-          </div>
-          <div className="flex items-center gap-2 mt-auto">
-            {[0, 1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-2.5 w-2.5 rounded-full bg-white/20" />
-            ))}
-          </div>
+          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
         </CardContent>
       </Card>
     );
@@ -175,113 +156,89 @@ const CareerTipsCard = memo(() => {
     );
   }
 
+  const currentTip = tipsItems[currentIndex];
+
   return (
     <Card 
-      className={cn(
-        `relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[200px] touch-pan-y`,
-        currentTip?.source_url && "cursor-pointer group"
-      )}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[200px] touch-pan-y`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      onClick={currentTip?.source_url ? handleClick : undefined}
       {...swipeHandlers}
     >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
+      <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-5 h-full flex flex-col">
-        {/* Header - Icon left, NYHETER label right (matches HR news exactly) */}
-        <div className="flex items-center justify-between mb-2 flex-shrink-0">
-          <div className="p-2 rounded-xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
-            <Newspaper className="h-4 w-4 text-white" strokeWidth={1.5} />
+      <CardContent className="relative p-4 h-full flex flex-col">
+        {/* Header - EXACT same as employer */}
+        <div className="flex items-center justify-between">
+          <div className="p-2 rounded-xl bg-white/10">
+            <Newspaper className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
           <span className="text-[10px] text-white uppercase tracking-wider font-medium">
             NYHETER
           </span>
         </div>
         
-        {/* Title - truncated to 2 lines */}
-        <AnimatePresence mode="wait">
-          {currentTip && (
-            <motion.h3
-              key={`title-${currentTip.id}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="text-sm font-semibold text-white mb-2 leading-snug line-clamp-2 flex-shrink-0"
-            >
-              {currentTip.title}
-            </motion.h3>
-          )}
-        </AnimatePresence>
-        
-        {/* Summary - scrollable area, truncated properly */}
-        <div 
-          className="flex-1 overflow-y-auto overscroll-contain pr-1 min-h-0"
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'rgba(255,255,255,0.3) transparent'
-          }}
-        >
+        {/* News content - EXACT same structure as employer */}
+        <div className="flex-1 flex flex-col justify-center py-2">
           <AnimatePresence mode="wait">
-            {currentTip && (
-              <motion.p
-                key={`summary-${currentTip.id}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+            {currentTip ? (
+              <motion.div
+                key={currentTip.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="text-xs text-white leading-relaxed line-clamp-3"
+                onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
+                className={currentTip.source_url ? 'cursor-pointer group' : ''}
               >
-                {currentTip.summary}
-              </motion.p>
+                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
+                  {currentTip.title}
+                </h3>
+                <p className="text-xs text-white line-clamp-1 mb-1">
+                  {currentTip.summary || currentTip.title}
+                </p>
+                {currentTip.published_at && (
+                  <div className="flex items-center gap-1.5 text-white text-[10px] mb-1">
+                    <Clock className="h-3 w-3" />
+                    <span>{formatTipPublishedTime(currentTip.published_at)}</span>
+                  </div>
+                )}
+                {currentTip.source_url && (
+                  <div className="flex items-center gap-1.5 text-white transition-colors">
+                    <span className="text-xs">Läs mer</span>
+                    <span className="text-[10px] text-white">· {currentTip.source}</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </div>
+                )}
+              </motion.div>
+            ) : (
+              <p className="text-xs text-white/60 text-center">Inga nyheter just nu</p>
             )}
           </AnimatePresence>
         </div>
         
-        {/* Footer - Time with clock on left, Läs mer · Source on right (matches HR news exactly) */}
-        <div className="flex items-center justify-between mt-3 flex-shrink-0">
-          {/* Left: Time with clock icon */}
-          {publishedTime && (
-            <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3 text-white" />
-              <span className="text-xs text-white">{publishedTime}</span>
+        {/* Footer with dots - EXACT same as employer */}
+        <div className="flex items-center justify-between mt-auto">
+          {/* Dot navigation */}
+          {tipsItems.length > 1 ? (
+            <div className="flex items-center gap-2">
+              {tipsItems.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentIndex(i)}
+                  className={cn(
+                    "w-2.5 h-2.5 rounded-full transition-colors duration-200",
+                    i === currentIndex 
+                      ? "bg-white" 
+                      : "bg-white/30 hover:bg-white/50"
+                  )}
+                  aria-label={`Gå till nyhet ${i + 1}`}
+                />
+              ))}
             </div>
-          )}
-          
-          {/* Right: Läs mer · Source with external link - ALL WHITE, source truncated */}
-          {currentTip?.source_url && (
-            <div className="flex items-center gap-1 text-white transition-colors ml-auto">
-              <span className="text-xs font-medium">Läs mer</span>
-              <span className="text-xs text-white">·</span>
-              <span className="text-xs text-white max-w-[80px] truncate">{currentTip.source}</span>
-              <ExternalLink className="h-3 w-3 flex-shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </div>
-          )}
+          ) : <div />}
         </div>
-        
-        {/* Dots at bottom left - BIGGER dots (same as HR news) */}
-        {tipsItems.length > 1 && (
-          <div className="flex items-center gap-1.5 mt-2">
-            {tipsItems.map((_, i) => (
-              <button
-                key={i}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrentIndex(i);
-                }}
-                className={cn(
-                  "w-3 h-3 rounded-full transition-colors duration-200",
-                  i === currentIndex 
-                    ? "bg-white" 
-                    : "bg-white/30 hover:bg-white/50"
-                )}
-                aria-label={`Gå till nyhet ${i + 1}`}
-              />
-            ))}
-          </div>
-        )}
       </CardContent>
     </Card>
   );
