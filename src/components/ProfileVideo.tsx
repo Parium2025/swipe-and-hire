@@ -83,6 +83,12 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   // (Keeping function names removed to simplify behavior)
 
   const handleTap = async (e?: React.MouseEvent) => {
+    // Always stop propagation to prevent parent elements (like dropdowns) from triggering
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    
     // If custom onClick is provided, use that instead
     if (onClick && e) {
       onClick(e);
