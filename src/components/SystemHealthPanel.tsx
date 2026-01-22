@@ -43,6 +43,7 @@ interface NewsHealthStats {
 interface RssSourceHealth {
   source_name: string;
   source_url: string;
+  source_type: string | null;
   is_healthy: boolean;
   consecutive_failures: number;
   last_success_at: string | null;
@@ -212,7 +213,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
         // Career Tips health
         supabase.from('daily_career_tips').select('id, source, source_url, published_at').order('published_at', { ascending: false }).limit(10),
         // RSS Source Health
-        supabase.from('rss_source_health').select('source_name, source_url, is_healthy, consecutive_failures, last_success_at, last_failure_at, last_error_message, total_successes, total_failures').order('source_name'),
+        supabase.from('rss_source_health').select('source_name, source_url, source_type, is_healthy, consecutive_failures, last_success_at, last_failure_at, last_error_message, total_successes, total_failures').order('source_name'),
       ]);
 
       const rssSourceHealth: RssSourceHealth[] | null = (rssHealthRes.data as RssSourceHealth[]) || null;
@@ -762,20 +763,20 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
             </div>
           </div>
 
-          {/* RSS SOURCE HEALTH */}
-          {stats?.rssSourceHealth && stats.rssSourceHealth.length > 0 && (
+          {/* RSS SOURCE HEALTH - HR NEWS */}
+          {stats?.rssSourceHealth && stats.rssSourceHealth.filter(s => !s.source_type || s.source_type === 'hr_news').length > 0 && (
             <div className="pt-3 border-t border-slate-700">
               <p className="text-xs text-white uppercase tracking-wide mb-2 flex items-center gap-1.5">
                 <Rss className="h-3 w-3" />
-                RSS-källor (Arbetsgivare)
+                RSS-källor (HR-nyheter)
               </p>
               <div className="space-y-1.5">
-                {stats.rssSourceHealth.map((source) => {
+                {stats.rssSourceHealth.filter(s => !s.source_type || s.source_type === 'hr_news').map((source) => {
                   const isUnhealthy = !source.is_healthy;
                   const isCritical = source.consecutive_failures >= 5;
                   return (
                     <div 
-                      key={source.source_name}
+                      key={`hr-${source.source_name}`}
                       className={`bg-slate-800 p-2 rounded text-xs flex items-center justify-between border ${
                         isCritical ? 'border-red-500/50' : isUnhealthy ? 'border-orange-500/30' : 'border-transparent'
                       }`}
@@ -802,10 +803,59 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                   );
                 })}
               </div>
-              {stats.rssSourceHealth.some(s => !s.is_healthy) && (
+              {stats.rssSourceHealth.filter(s => !s.source_type || s.source_type === 'hr_news').some(s => !s.is_healthy) && (
                 <p className="text-xs text-orange-400 mt-2 flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3" />
-                  {stats.rssSourceHealth.filter(s => !s.is_healthy).length} källa(or) har problem
+                  {stats.rssSourceHealth.filter(s => (!s.source_type || s.source_type === 'hr_news') && !s.is_healthy).length} källa(or) har problem
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* RSS SOURCE HEALTH - CAREER TIPS */}
+          {stats?.rssSourceHealth && stats.rssSourceHealth.filter(s => s.source_type === 'career_tips').length > 0 && (
+            <div className="pt-3 border-t border-slate-700">
+              <p className="text-xs text-white uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                <Lightbulb className="h-3 w-3" />
+                RSS-källor (Karriärtips)
+              </p>
+              <div className="space-y-1.5">
+                {stats.rssSourceHealth.filter(s => s.source_type === 'career_tips').map((source) => {
+                  const isUnhealthy = !source.is_healthy;
+                  const isCritical = source.consecutive_failures >= 5;
+                  return (
+                    <div 
+                      key={`career-${source.source_name}`}
+                      className={`bg-slate-800 p-2 rounded text-xs flex items-center justify-between border ${
+                        isCritical ? 'border-red-500/50' : isUnhealthy ? 'border-orange-500/30' : 'border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${
+                          isCritical ? 'bg-red-500 animate-pulse' : 
+                          isUnhealthy ? 'bg-orange-500' : 
+                          'bg-emerald-500'
+                        }`} />
+                        <span className="text-white/90">{source.source_name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {source.consecutive_failures > 0 && (
+                          <span className={`${isCritical ? 'text-red-400' : 'text-orange-400'}`}>
+                            {source.consecutive_failures}x fel
+                          </span>
+                        )}
+                        <span className="text-white/50">
+                          {source.total_successes}✓ {source.total_failures}✗
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {stats.rssSourceHealth.filter(s => s.source_type === 'career_tips').some(s => !s.is_healthy) && (
+                <p className="text-xs text-orange-400 mt-2 flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  {stats.rssSourceHealth.filter(s => s.source_type === 'career_tips' && !s.is_healthy).length} källa(or) har problem
                 </p>
               )}
             </div>
