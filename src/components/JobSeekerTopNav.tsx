@@ -224,20 +224,15 @@ function JobSeekerTopNav() {
                 />
                 {/* Show profile video/image instead of User icon - same size as user menu avatar */}
                 {hasVideo && videoUrl ? (
-                  <div 
-                    onClick={(e) => e.stopPropagation()}
-                    className="relative z-20"
-                  >
-                    <ProfileVideo
-                      videoUrl={videoUrl}
-                      coverImageUrl={coverUrl || avatarUrl || undefined}
-                      userInitials={getUserInitials()}
-                      alt="Profilvideo"
-                      className="h-8 w-8 ring-2 ring-white/20 rounded-full"
-                      showCountdown={false}
-                      showProgressBar={false}
-                    />
-                  </div>
+                  <ProfileVideo
+                    videoUrl={videoUrl}
+                    coverImageUrl={coverUrl || avatarUrl || undefined}
+                    userInitials={getUserInitials()}
+                    alt="Profilvideo"
+                    className="h-8 w-8 ring-2 ring-white/20 rounded-full relative z-10"
+                    showCountdown={false}
+                    showProgressBar={false}
+                  />
                 ) : avatarUrl ? (
                   <img 
                     src={avatarUrl} 
