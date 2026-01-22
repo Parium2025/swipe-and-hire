@@ -405,12 +405,13 @@ serve(async (req) => {
     const existingUrls = new Set((existingRss || []).map((a: any) => a.source_url).filter(Boolean));
     const newItems = balanced.filter(i => !i.source_url || !existingUrls.has(i.source_url));
 
-    // Delete old RSS articles only (not AI insights)
+    // Delete anything older than the 5-day window (RSS or AI) based on published_at.
+    // The 5-day window is the hard guarantee: if it's older than 5 days, it must not remain.
     await supabase
       .from('daily_hr_news')
       .delete()
-      .not('source_url', 'is', null)
-      .lt('news_date', new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+      .not('published_at', 'is', null)
+      .lt('published_at', new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString());
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -492,21 +493,23 @@ serve(async (req) => {
 
     const finalList1 = finalItems1 || [];
 
-    const pickBalanced = (list: any[]) => {
+    // Selection rules:
+    // 1) Hard rule: ALWAYS exactly 4 items.
+    // 2) Prefer: max 2 per external source (source_url != null) WHEN POSSIBLE.
+    // 3) Crisis rule: if enough RSS exists in 5-day window but the max-2 rule would cause <4,
+    //    then relax the max-2 rule to keep 4 RSS items (still within 5 days).
+    // 4) AI only if there are <4 RSS items available in the 5-day window.
+
+    const pickBalancedRss = (rssList: any[]) => {
       const externalSourceCount: Record<string, number> = {};
       const selected: any[] = [];
       const keepIds = new Set<string>();
 
-      for (const item of list) {
+      for (const item of rssList) {
         if (selected.length >= 4) break;
-
-        const isExternal = item.source_url != null;
-        if (isExternal) {
-          const count = externalSourceCount[item.source] || 0;
-          if (count >= 2) continue;
-          externalSourceCount[item.source] = count + 1;
-        }
-
+        const count = externalSourceCount[item.source] || 0;
+        if (count >= 2) continue;
+        externalSourceCount[item.source] = count + 1;
         selected.push(item);
         keepIds.add(item.id);
       }
@@ -514,45 +517,85 @@ serve(async (req) => {
       return { selected, keepIds };
     };
 
-    let { selected: balancedFinal, keepIds } = pickBalanced(finalList1);
+    // Split RSS vs AI
+    const rssPool = finalList1.filter((i: any) => i.source_url != null);
+    const existingAiPool = finalList1.filter((i: any) => i.source_url == null);
 
-    // CRITICAL: Never allow <4 if we can top up with AI.
-    // This fixes the scenario where we had 4 items, but source-balance trimmed one away.
+    // 1) Try strict balanced RSS (max 2 per source)
+    let { selected: balancedFinal, keepIds } = pickBalancedRss(rssPool);
+
+    // 2) Crisis relaxation: if we DO have >=4 RSS items available within the 5-day window,
+    // but strict balancing yields <4, then ignore the per-source cap and take the newest 4 RSS.
+    if (balancedFinal.length < 4 && rssPool.length >= 4) {
+      console.log(`Crisis mode: have ${rssPool.length} RSS items but balancing yields ${balancedFinal.length}; relaxing max-2-per-source to keep 4 RSS.`);
+      balancedFinal = rssPool.slice(0, 4);
+      keepIds = new Set<string>(balancedFinal.map((i: any) => i.id));
+    }
+
+    // 3) If there are <4 RSS items total, fill remaining slots with AI.
     let aiAddedFinal = 0;
     if (balancedFinal.length < 4) {
       const needed = 4 - balancedFinal.length;
-      console.log(`Final selection only ${balancedFinal.length} items after source balance, topping up with ${needed} AI item(s)`);
+      console.log(`Only ${rssPool.length} RSS items available in 5-day window; filling ${needed} slot(s) with AI.`);
 
-      const aiNews = await generateAIFallbackNews(supabase);
-      if (aiNews.length) {
-        const oldestTs = balancedFinal.reduce((minTs: number, r: any) => {
-          const t = r.published_at ? new Date(r.published_at).getTime() : Date.now();
-          return Math.min(minTs, t);
-        }, Date.now());
-
-        const fillers = aiNews.slice(0, needed).map((item: any, idx: number) => ({
-          ...item,
-          news_date: today,
-          order_index: balancedFinal.length + idx,
-          published_at: new Date(oldestTs - (idx + 1) * 60 * 1000).toISOString(),
-        }));
-
-        await supabase.from('daily_hr_news').insert(fillers);
-        aiAddedFinal = fillers.length;
-        console.log(`Inserted ${aiAddedFinal} final AI filler item(s)`);
+      // Prefer existing AI items first (if any)
+      const aiToUse = existingAiPool.slice(0, needed);
+      for (const ai of aiToUse) {
+        balancedFinal.push(ai);
+        keepIds.add(ai.id);
       }
 
-      // Re-read and re-pick after inserting AI fillers
-      const { data: finalItems2 } = await supabase
-        .from('daily_hr_news')
-        .select('id, source, source_url, category, published_at')
-        .order('published_at', { ascending: false, nullsFirst: false })
-        .limit(50);
+      // Generate AI only if we still can't reach 4
+      if (balancedFinal.length < 4) {
+        const stillNeeded = 4 - balancedFinal.length;
+        const aiNews = await generateAIFallbackNews(supabase);
+        if (aiNews.length) {
+          const oldestTs = balancedFinal.reduce((minTs: number, r: any) => {
+            const t = r.published_at ? new Date(r.published_at).getTime() : Date.now();
+            return Math.min(minTs, t);
+          }, Date.now());
 
-      const finalList2 = finalItems2 || [];
-      const repicked = pickBalanced(finalList2);
-      balancedFinal = repicked.selected;
-      keepIds = repicked.keepIds;
+          const fillers = aiNews.slice(0, stillNeeded).map((item: any, idx: number) => ({
+            ...item,
+            news_date: today,
+            order_index: balancedFinal.length + idx,
+            published_at: new Date(oldestTs - (idx + 1) * 60 * 1000).toISOString(),
+          }));
+
+          const { data: insertedFillers } = await supabase.from('daily_hr_news').insert(fillers).select('id');
+          aiAddedFinal = fillers.length;
+          console.log(`Inserted ${aiAddedFinal} AI filler item(s)`);
+
+          // Add inserted IDs to keep-set (to prevent deletion below)
+          for (const row of insertedFillers || []) {
+            keepIds.add(row.id);
+          }
+        }
+
+        // Re-read to ensure we really have 4 chosen after insert
+        const { data: finalItems2 } = await supabase
+          .from('daily_hr_news')
+          .select('id, source, source_url, category, published_at')
+          .order('published_at', { ascending: false, nullsFirst: false })
+          .limit(50);
+
+        const finalList2 = finalItems2 || [];
+        const rssPool2 = finalList2.filter((i: any) => i.source_url != null);
+        const aiPool2 = finalList2.filter((i: any) => i.source_url == null);
+
+        // Final deterministic pick: RSS first (as many as exist), then AI.
+        const picked: any[] = [];
+        for (const r of rssPool2) {
+          if (picked.length >= 4) break;
+          picked.push(r);
+        }
+        for (const a of aiPool2) {
+          if (picked.length >= 4) break;
+          picked.push(a);
+        }
+        balancedFinal = picked.slice(0, 4);
+        keepIds = new Set<string>(balancedFinal.map((i: any) => i.id));
+      }
     }
 
     // Remove everything that's not part of the balanced final 4
