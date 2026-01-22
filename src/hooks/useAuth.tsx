@@ -283,6 +283,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
   const mediaPreloadCompleteRef = useRef(false);
+  const profileLoadedRef = useRef(false); // 🔧 Track when profile is loaded for login flow
   const prefetchedEmployerCandidateMediaForUserRef = useRef<string | null>(null);
   // 🔄 Track current user ID for cross-tab session change detection
   const currentUserIdRef = useRef<string | null>(null);
@@ -393,6 +394,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserRole(null);
           setOrganization(null);
           setMediaPreloadComplete(false);
+          profileLoadedRef.current = false; // 🔧 Reset profile loaded flag on logout
           setPreloadedAvatarUrl(null);
           setPreloadedCoverUrl(null);
           setPreloadedVideoUrl(null);
@@ -464,14 +466,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
  
       if (profileError) {
         console.error('Error fetching profile:', profileError);
-        // Vid fel: nollställ profil men markera media som klar så att login inte fastnar
+        // Vid fel: nollställ profil men markera som klar så att login inte fastnar
         setProfile(null);
         setMediaPreloadComplete(true);
+        profileLoadedRef.current = true; // 🔧 Still mark as "loaded" so login can proceed
         return;
       } else if (!profileData) {
         // Ingen profil än: låt onboarding hantera resten men blockera inte login
         setProfile(null);
         setMediaPreloadComplete(true);
+        profileLoadedRef.current = true; // 🔧 Still mark as "loaded" so login can proceed
         return;
       } else {
         // Convert JSONB interests to string array
@@ -486,6 +490,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             : []
         };
         setProfile(processedProfile);
+        profileLoadedRef.current = true; // 🔧 Mark profile as loaded for login flow
         
         // 🔥 KRITISKT: Förladdda kritiska bilder (avatar + cover) INNAN vi släpper loading-state
         // Video är tung – den cachas i bakgrunden men blockerar inte inloggning
@@ -875,6 +880,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Detta förhindrar att gammal data (t.ex. snö-vädereffekt från tidigare session)
       // visas innan ny data hämtas
       clearAllAppCaches();
+      profileLoadedRef.current = false; // 🔧 Reset before new login attempt
  
       // Minsta visningstid för "Loggar in..." (ca 1–1.1 sekund)
       const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1100));
@@ -930,13 +936,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: { code: 'email_not_confirmed', message: 'Email not confirmed' } };
       }
  
-      // Lyckad inloggning – vänta på minsta visningstid och låt onAuthStateChange hantera resten
-      // VIKTIG FIX: Istället för att vänta på mediaPreloadComplete (som orsakar race condition)
-      // väntar vi bara på minDelayPromise + en kort fördröjning för att ge fetchUserData tid
+      // Lyckad inloggning – vänta på minsta visningstid OCH att profilen laddas
       await minDelayPromise;
       
-      // Ge fetchUserData tid att starta (onAuthStateChange triggar den asynkront)
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // 🔧 KRITISK FIX: Vänta på att fetchUserData faktiskt har laddat profilen
+      // Nu använder vi profileLoadedRef för att veta när profilen är redo
+      const profileCheckStart = Date.now();
+      const maxWaitMs = 3000;
+      
+      await new Promise<void>((resolve) => {
+        const checkProfile = () => {
+          const elapsed = Date.now() - profileCheckStart;
+          
+          // Kolla om profilen har laddats via ref
+          if (profileLoadedRef.current) {
+            resolve();
+          } else if (elapsed >= maxWaitMs) {
+            // Timeout - fortsätt ändå för att inte blockera
+            console.warn('Profile load timeout - continuing anyway');
+            resolve();
+          } else {
+            setTimeout(checkProfile, 50);
+          }
+        };
+        checkProfile();
+      });
 
       // 🚀 BACKGROUND SYNC ENGINE: Starta all preloading DIREKT vid login
       // Kör i bakgrunden - blockera inte UI
