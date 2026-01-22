@@ -10,7 +10,7 @@ const corsHeaders = {
 
 // Swedish career and job seeking RSS sources
 const RSS_SOURCES = [
-  { url: 'https://www.resume.se/feed/', name: 'Resumé' },
+  { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
   { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
   { url: 'https://www.dn.se/rss/ekonomi/', name: 'DN Ekonomi' },
