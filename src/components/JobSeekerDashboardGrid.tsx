@@ -7,20 +7,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Lightbulb,
   Sparkles,
-  FileCheck,
   Calendar,
   Heart,
-  Clock,
   FileText,
   Video,
   Building2,
   Phone,
   X,
   Send,
-  Target,
-  BookOpen,
-  MessageCircle,
-  Award,
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
@@ -41,67 +35,69 @@ const GRADIENTS = {
   interviews: 'from-amber-500/90 via-orange-500/80 to-orange-600/90',
 };
 
-// Static career tips
+// Static career tips (same structure as news items)
 const CAREER_TIPS = [
   {
     id: 1,
-    icon: FileText,
     title: 'Skräddarsy ditt CV',
-    summary: 'Anpassa ditt CV för varje ansökan – matcha nyckelord från jobbannonsen för bättre träff.',
+    summary: 'Anpassa ditt CV för varje ansökan – matcha nyckelord från jobbannonsen för bättre träff hos rekryteraren.',
+    source: 'Karriärcoach',
   },
   {
     id: 2,
-    icon: Target,
     title: 'Förbered intervjufrågor',
-    summary: 'Ha 3-5 frågor redo till arbetsgivaren. Det visar engagemang och nyfikenhet.',
+    summary: 'Ha 3-5 genomtänkta frågor redo till arbetsgivaren. Det visar engagemang och genuin nyfikenhet.',
+    source: 'Rekryteringstips',
   },
   {
     id: 3,
-    icon: BookOpen,
     title: 'Researcha företaget',
-    summary: 'Läs på om företagets kultur, värderingar och senaste nyheter före intervjun.',
+    summary: 'Läs på om företagets kultur, värderingar och senaste nyheter före intervjun för att imponera.',
+    source: 'Intervjuguide',
   },
   {
     id: 4,
-    icon: MessageCircle,
     title: 'Följ upp professionellt',
-    summary: 'Skicka ett kort tack-mejl inom 24 timmar efter intervjun.',
-  },
-  {
-    id: 5,
-    icon: Award,
-    title: 'Lyft fram resultat',
-    summary: 'Beskriv konkreta resultat och siffror istället för bara arbetsuppgifter.',
+    summary: 'Skicka ett kort och personligt tack-mejl inom 24 timmar efter intervjun för att sticka ut.',
+    source: 'Jobbsökartips',
   },
 ];
 
-// Career Tips Card (Green - Top Left)
+// Career Tips Card (Green - Top Left) - Exact same structure as NewsCard
 const CareerTipsCard = memo(() => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const tipsItems = CAREER_TIPS;
 
   const goNext = useCallback(() => {
-    setCurrentIndex(prev => (prev + 1) % CAREER_TIPS.length);
-  }, []);
+    if (tipsItems.length > 1) {
+      setCurrentIndex(prev => (prev + 1) % tipsItems.length);
+    }
+  }, [tipsItems.length]);
 
   const goPrev = useCallback(() => {
-    setCurrentIndex(prev => (prev - 1 + CAREER_TIPS.length) % CAREER_TIPS.length);
-  }, []);
+    if (tipsItems.length > 1) {
+      setCurrentIndex(prev => (prev - 1 + tipsItems.length) % tipsItems.length);
+    }
+  }, [tipsItems.length]);
 
-  // Auto-rotation every 12 seconds
+  // Auto-rotation every 10 seconds (pauses on hover) - same as NewsCard
   useEffect(() => {
-    if (isPaused) return;
-    const interval = setInterval(goNext, 12000);
+    if (tipsItems.length <= 1 || isPaused) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % tipsItems.length);
+    }, 10000);
+    
     return () => clearInterval(interval);
-  }, [isPaused, goNext]);
+  }, [tipsItems.length, isPaused]);
 
   const swipeHandlers = useSwipeGesture({
     onSwipeLeft: goNext,
     onSwipeRight: goPrev,
   });
 
-  const currentTip = CAREER_TIPS[currentIndex];
-  const Icon = currentTip.icon;
+  const currentTip = tipsItems[currentIndex];
 
   return (
     <Card 
@@ -114,7 +110,7 @@ const CareerTipsCard = memo(() => {
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
       <CardContent className="relative p-4 h-full flex flex-col">
-        {/* Header */}
+        {/* Header - same as NewsCard */}
         <div className="flex items-center justify-between">
           <div className="p-2 rounded-xl bg-white/10">
             <Lightbulb className="h-5 w-5 text-white" strokeWidth={1.5} />
@@ -124,44 +120,52 @@ const CareerTipsCard = memo(() => {
           </span>
         </div>
         
-        {/* Tips content */}
+        {/* Tips content - same structure as NewsCard */}
         <div className="flex-1 flex flex-col justify-center py-2">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={currentTip.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Icon className="h-4 w-4 text-white" />
-                <h3 className="text-sm font-semibold text-white leading-snug">
+            {currentTip ? (
+              <motion.div
+                key={currentTip.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
                   {currentTip.title}
                 </h3>
-              </div>
-              <p className="text-xs text-white line-clamp-3">
-                {currentTip.summary}
-              </p>
-            </motion.div>
+                <p className="text-xs text-white line-clamp-2 mb-1">
+                  {currentTip.summary}
+                </p>
+                <div className="flex items-center gap-1.5 text-white transition-colors">
+                  <span className="text-[10px] text-white">· {currentTip.source}</span>
+                </div>
+              </motion.div>
+            ) : (
+              <p className="text-xs text-white/60 text-center">Inga tips just nu</p>
+            )}
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation */}
-        <div className="flex items-center gap-2 mt-auto">
-          {CAREER_TIPS.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              className={cn(
-                "w-2.5 h-2.5 rounded-full transition-colors duration-200",
-                i === currentIndex 
-                  ? "bg-white" 
-                  : "bg-white/30 hover:bg-white/50"
-              )}
-              aria-label={`Gå till tips ${i + 1}`}
-            />
-          ))}
+        {/* Footer with dots - same as NewsCard */}
+        <div className="flex items-center justify-between mt-auto">
+          {tipsItems.length > 1 ? (
+            <div className="flex items-center gap-2">
+              {tipsItems.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentIndex(i)}
+                  className={cn(
+                    "w-2.5 h-2.5 rounded-full transition-colors duration-200",
+                    i === currentIndex 
+                      ? "bg-white" 
+                      : "bg-white/30 hover:bg-white/50"
+                  )}
+                  aria-label={`Gå till tips ${i + 1}`}
+                />
+              ))}
+            </div>
+          ) : <div />}
         </div>
       </CardContent>
     </Card>
