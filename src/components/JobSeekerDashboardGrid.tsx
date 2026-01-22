@@ -190,7 +190,7 @@ const CareerTipsCard = memo(() => {
       <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
       
       <CardContent className="relative p-5 h-full flex flex-col">
-        {/* Header - matches HrNewsCard exactly */}
+        {/* Header - Icon left, NYHETER label right (matches HR news exactly) */}
         <div className="flex items-center justify-between mb-2 flex-shrink-0">
           <div className="p-2 rounded-xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
             <Newspaper className="h-4 w-4 text-white" strokeWidth={1.5} />
@@ -200,7 +200,7 @@ const CareerTipsCard = memo(() => {
           </span>
         </div>
         
-        {/* Title */}
+        {/* Title - truncated to 2 lines */}
         <AnimatePresence mode="wait">
           {currentTip && (
             <motion.h3
@@ -216,7 +216,7 @@ const CareerTipsCard = memo(() => {
           )}
         </AnimatePresence>
         
-        {/* Summary - scrollable area */}
+        {/* Summary - scrollable area, truncated properly */}
         <div 
           className="flex-1 overflow-y-auto overscroll-contain pr-1 min-h-0"
           style={{
@@ -232,7 +232,7 @@ const CareerTipsCard = memo(() => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="text-xs text-white/85 leading-relaxed"
+                className="text-xs text-white leading-relaxed line-clamp-3"
               >
                 {currentTip.summary}
               </motion.p>
@@ -240,47 +240,48 @@ const CareerTipsCard = memo(() => {
           </AnimatePresence>
         </div>
         
-        {/* Footer - time on left with clock icon, dots in middle, source link on right */}
+        {/* Footer - Time with clock on left, Läs mer · Source on right (matches HR news exactly) */}
         <div className="flex items-center justify-between mt-3 flex-shrink-0">
-          {/* Left: Dots + Time with clock icon */}
-          <div className="flex items-center gap-3">
-            {tipsItems.length > 1 && (
-              <div className="flex items-center gap-1.5">
-                {tipsItems.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentIndex(i);
-                    }}
-                    className={cn(
-                      "w-2 h-2 rounded-full transition-colors duration-200",
-                      i === currentIndex 
-                        ? "bg-white" 
-                        : "bg-white/30 hover:bg-white/50"
-                    )}
-                    aria-label={`Gå till nyhet ${i + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-            {publishedTime && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-white/80" />
-                <span className="text-xs text-white/80">{publishedTime}</span>
-              </div>
-            )}
-          </div>
+          {/* Left: Time with clock icon */}
+          {publishedTime && (
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3 text-white" />
+              <span className="text-xs text-white">{publishedTime}</span>
+            </div>
+          )}
           
-          {/* Right: Läs mer · Source with external link */}
+          {/* Right: Läs mer · Source with external link - ALL WHITE, source truncated */}
           {currentTip?.source_url && (
-            <div className="flex items-center gap-1 text-white transition-colors">
+            <div className="flex items-center gap-1 text-white transition-colors ml-auto">
               <span className="text-xs font-medium">Läs mer</span>
-              <span className="text-xs text-white/80">· {currentTip.source}</span>
-              <ExternalLink className="h-3 w-3 ml-0.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <span className="text-xs text-white">·</span>
+              <span className="text-xs text-white max-w-[80px] truncate">{currentTip.source}</span>
+              <ExternalLink className="h-3 w-3 flex-shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </div>
           )}
         </div>
+        
+        {/* Dots at bottom left - BIGGER dots (same as HR news) */}
+        {tipsItems.length > 1 && (
+          <div className="flex items-center gap-1.5 mt-2">
+            {tipsItems.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentIndex(i);
+                }}
+                className={cn(
+                  "w-3 h-3 rounded-full transition-colors duration-200",
+                  i === currentIndex 
+                    ? "bg-white" 
+                    : "bg-white/30 hover:bg-white/50"
+                )}
+                aria-label={`Gå till nyhet ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
