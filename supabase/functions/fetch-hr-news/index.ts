@@ -40,6 +40,10 @@ const CATEGORIES = [
 // AI source identifier - used to identify AI-generated content
 const AI_SOURCE = 'Parium';
 
+// Source limit constants
+const MAX_PER_SOURCE_NORMAL = 2;  // Normal: max 2 articles per source
+const MAX_PER_SOURCE_CRISIS = 3;  // Crisis mode: max 3 articles per source
+
 function isWithin5Days(dateStr: string): boolean {
   try {
     const d = new Date(dateStr);
@@ -117,6 +121,40 @@ function truncateAtSentence(text: string, maxLen: number): string {
     return truncated.slice(0, lastSpace).trim() + '...';
   }
   return truncated.trim() + '...';
+}
+
+// Count articles per source
+function countBySource(items: { source: string }[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const item of items) {
+    counts.set(item.source, (counts.get(item.source) || 0) + 1);
+  }
+  return counts;
+}
+
+// Check if we can add an article from this source given current counts
+function canAddFromSource(source: string, currentCounts: Map<string, number>, maxPerSource: number): boolean {
+  const currentCount = currentCounts.get(source) || 0;
+  return currentCount < maxPerSource;
+}
+
+// Filter new RSS items respecting source limits
+function filterBySourceLimit(
+  newItems: RSSItem[], 
+  existingItems: { source: string }[], 
+  maxPerSource: number
+): RSSItem[] {
+  const counts = countBySource(existingItems);
+  const result: RSSItem[] = [];
+  
+  for (const item of newItems) {
+    if (canAddFromSource(item.source, counts, maxPerSource)) {
+      result.push(item);
+      counts.set(item.source, (counts.get(item.source) || 0) + 1);
+    }
+  }
+  
+  return result;
 }
 
 interface RSSItem {
@@ -435,10 +473,12 @@ serve(async (req) => {
 
     console.log(`After cleanup: ${postCleanupRss.length} RSS, ${postCleanupAi.length} AI`);
 
-    // ===== STEP 6: THE CLOSED-LOOP LOGIC =====
+    // ===== STEP 6: THE CLOSED-LOOP LOGIC WITH SOURCE LIMITS =====
     // Goal: Always exactly 4 items
     // Priority: RSS > AI
     // Rules:
+    // - Max 2 articles per source (normal mode)
+    // - Max 3 articles per source (crisis mode - only if needed to reach 4 items)
     // - RSS items stay for full 5 days (sacred)
     // - When new RSS comes in, it replaces the OLDEST AI item (one at a time)
     // - When we have 4 RSS, new RSS pushes out oldest RSS
@@ -448,31 +488,43 @@ serve(async (req) => {
     let insertedRss = 0;
     let aiReplaced = 0;
     let aiRefreshed = 0;
+    let crisisModeUsed = false;
 
-    // How many slots are currently filled?
     const totalCurrent = postCleanup.length;
-
-    // Determine how many new RSS items we can add
-    // We ALWAYS want exactly 4 items
     const targetSlots = 4;
 
-    if (newRssItems.length > 0) {
-      // Case: We have new RSS items to add
-      
-      // First, see if we have AI items we can replace (one at a time per run)
-      // Only replace ONE AI item per invocation to maintain gradual transition
+    // Check if we're in crisis mode: not enough RSS items to fill 4 slots with max 2 per source
+    const currentSourceCounts = countBySource(postCleanupRss);
+    const availableNewWithLimit = filterBySourceLimit(newRssItems, postCleanupRss, MAX_PER_SOURCE_NORMAL);
+    
+    console.log(`Available new items with max 2/source limit: ${availableNewWithLimit.length}`);
+
+    // Determine if we need crisis mode
+    const potentialRssCount = postCleanupRss.length + availableNewWithLimit.length;
+    const needsCrisisMode = potentialRssCount < targetSlots && newRssItems.length > availableNewWithLimit.length;
+    
+    if (needsCrisisMode) {
+      console.log(`CRISIS MODE: Not enough unique sources, allowing max ${MAX_PER_SOURCE_CRISIS} per source`);
+      crisisModeUsed = true;
+    }
+
+    const maxPerSource = needsCrisisMode ? MAX_PER_SOURCE_CRISIS : MAX_PER_SOURCE_NORMAL;
+    const eligibleNewItems = filterBySourceLimit(newRssItems, postCleanupRss, maxPerSource);
+
+    console.log(`Eligible new items with max ${maxPerSource}/source: ${eligibleNewItems.length}`);
+
+    if (eligibleNewItems.length > 0) {
+      // Case: We have new RSS items to add (respecting source limits)
       
       if (postCleanupAi.length > 0 && totalCurrent >= targetSlots) {
-        // We have AI items and we're at capacity - replace oldest AI with newest RSS
-        const oldestAi = postCleanupAi[postCleanupAi.length - 1]; // Oldest AI
-        const newestRss = newRssItems[0]; // Newest new RSS
+        // We have AI items and we're at capacity - replace oldest AI with newest eligible RSS
+        const oldestAi = postCleanupAi[postCleanupAi.length - 1];
+        const newestRss = eligibleNewItems[0];
         
-        console.log(`Replacing oldest AI "${oldestAi.id}" with new RSS "${newestRss.title}"`);
+        console.log(`Replacing oldest AI "${oldestAi.id}" with new RSS "${newestRss.title}" from ${newestRss.source}`);
         
-        // Delete the oldest AI
         await supabase.from('daily_hr_news').delete().eq('id', oldestAi.id);
         
-        // Insert the new RSS
         const cat = getCatInfo(newestRss.category);
         await supabase.from('daily_hr_news').insert({
           title: newestRss.title,
@@ -490,9 +542,9 @@ serve(async (req) => {
         insertedRss = 1;
         aiReplaced = 1;
       } else if (totalCurrent < targetSlots) {
-        // We have empty slots - fill them with new RSS (up to what's needed)
+        // We have empty slots - fill them with new RSS (up to what's needed, respecting source limits)
         const slotsNeeded = targetSlots - totalCurrent;
-        const toInsert = newRssItems.slice(0, slotsNeeded);
+        const toInsert = eligibleNewItems.slice(0, slotsNeeded);
         
         console.log(`Filling ${toInsert.length} empty slots with new RSS`);
         
@@ -517,12 +569,12 @@ serve(async (req) => {
       } else if (postCleanupAi.length === 0 && totalCurrent >= targetSlots) {
         // All 4 slots are RSS - push out the oldest RSS if new one is newer
         const oldestRss = postCleanupRss[postCleanupRss.length - 1];
-        const newestNewRss = newRssItems[0];
+        const newestNewRss = eligibleNewItems[0];
         
         // Only replace if the new RSS is actually newer
         if (oldestRss.published_at && newestNewRss.published_at && 
             new Date(newestNewRss.published_at) > new Date(oldestRss.published_at)) {
-          console.log(`Replacing oldest RSS with newer RSS`);
+          console.log(`Replacing oldest RSS from ${oldestRss.source} with newer RSS from ${newestNewRss.source}`);
           
           await supabase.from('daily_hr_news').delete().eq('id', oldestRss.id);
           
@@ -580,7 +632,7 @@ serve(async (req) => {
         await supabase.from('daily_hr_news').insert(fillers);
         console.log(`Inserted ${fillers.length} AI filler items`);
       }
-    } else if (afterAi.length > 0 && newRssItems.length === 0) {
+    } else if (afterAi.length > 0 && eligibleNewItems.length === 0) {
       // ===== STEP 8: Daily AI refresh (gradual rotation) =====
       // No new RSS came in, but we have AI items
       // Check if the oldest AI item was created more than 24 hours ago
@@ -634,6 +686,7 @@ serve(async (req) => {
 
     const finalCount = Math.min(finalList.length, targetSlots);
     const finalSources = [...new Set(finalList.slice(0, targetSlots).map(i => i.source))];
+    const finalSourceCounts = countBySource(finalList.slice(0, targetSlots));
     const finalCategories = [...new Set(finalList.slice(0, targetSlots).map(i => i.category))];
 
     return new Response(
@@ -642,8 +695,10 @@ serve(async (req) => {
         rss_inserted: insertedRss,
         ai_replaced: aiReplaced,
         ai_refreshed: aiRefreshed,
+        crisis_mode: crisisModeUsed,
         total: finalCount,
         sources: finalSources,
+        source_counts: Object.fromEntries(finalSourceCounts),
         categories: finalCategories,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
