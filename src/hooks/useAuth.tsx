@@ -1260,13 +1260,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const getRedirectPath = (): string => {
     if (!userRole) return '/';
-    
-    if (userRole.role === 'employer') {
-      return '/home';
-    } else if (userRole.role === 'job_seeker') {
-      return '/search-jobs';
-    }
-    return '/';
+    // Alla roller landar på /home efter inloggning
+    return '/home';
   };
 
   const switchRole = async (newRole: UserRole): Promise<{ error?: any }> => {

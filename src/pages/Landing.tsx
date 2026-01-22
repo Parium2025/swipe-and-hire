@@ -17,8 +17,8 @@ const Landing = () => {
     if (user && profile) {
       const role = (profile as any)?.role;
       if (role) {
-        const target = role === 'employer' ? '/home' : '/search-jobs';
-        navigate(target, { replace: true });
+        // Alla roller landar på /home efter inloggning
+        navigate('/home', { replace: true });
       }
     }
   }, [user, profile, navigate]);

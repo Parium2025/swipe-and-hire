@@ -300,12 +300,8 @@ const Index = () => {
 
     // Both user AND profile loaded -> redirect based on role when on root path
     if (user && profile && location.pathname === '/') {
-      const role = (profile as any)?.role;
-      if (role === 'employer') {
-        navigate('/home', { replace: true });
-      } else {
-        navigate('/search-jobs', { replace: true });
-      }
+      // Alla roller landar på /home
+      navigate('/home', { replace: true });
       setIsInitializing(false);
       return;
     }
