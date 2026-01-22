@@ -53,13 +53,13 @@ verify_jwt = false
 
 [functions.fetch-hr-news]
 verify_jwt = false
-# Kör kl 06, 11, 15, 18 UTC = 07, 12, 16, 19 svensk tid (vintertid)
-schedule = "0 6,11,15,18 * * *"
+# Kör kl 06, 11, 18 UTC + midnatt (23:00 UTC)
+schedule = "0 6,11,18,23 * * *"
 
 [functions.fetch-career-tips]
 verify_jwt = false
-# Kör kl 07, 12, 16, 19 UTC = 08, 13, 17, 20 svensk tid (vintertid)
-schedule = "0 7,12,16,19 * * *"
+# Kör kl 06, 11, 18 UTC + midnatt (23:00 UTC) - SAMMA SOM HR-NYHETER
+schedule = "0 6,11,18,23 * * *"
 
 [functions.interview-reminders]
 verify_jwt = false
