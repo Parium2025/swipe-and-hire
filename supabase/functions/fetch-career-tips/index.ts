@@ -189,12 +189,13 @@ interface FetchResult {
 async function updateSourceHealth(
   supabase: any,
   sourceName: string,
+  sourceUrl: string,
   success: boolean,
   itemCount: number,
   errorMessage?: string
 ): Promise<void> {
   try {
-    // Get current health record
+    // Get current health record - use source_name + source_type as key
     const { data: existing } = await supabase
       .from('rss_source_health')
       .select('*')
@@ -214,12 +215,17 @@ async function updateSourceHealth(
       await supabase
         .from('rss_source_health')
         .update({
+          is_healthy: success,
           last_check_at: now,
           last_success_at: success ? now : existing.last_success_at,
+          last_failure_at: success ? existing.last_failure_at : now,
           consecutive_failures: newConsecutiveFailures,
+          total_successes: (existing.total_successes || 0) + (success ? 1 : 0),
+          total_failures: (existing.total_failures || 0) + (success ? 0 : 1),
           total_fetches: (existing.total_fetches || 0) + 1,
           successful_fetches: (existing.successful_fetches || 0) + (success ? 1 : 0),
           last_error: success ? null : errorMessage,
+          last_error_message: success ? null : errorMessage,
           last_item_count: success ? itemCount : existing.last_item_count,
           updated_at: now,
         })
@@ -248,13 +254,19 @@ async function updateSourceHealth(
         .from('rss_source_health')
         .insert({
           source_name: sourceName,
+          source_url: sourceUrl,
           source_type: 'career_tips',
+          is_healthy: success,
           last_check_at: now,
           last_success_at: success ? now : null,
+          last_failure_at: success ? null : now,
           consecutive_failures: success ? 0 : 1,
+          total_successes: success ? 1 : 0,
+          total_failures: success ? 0 : 1,
           total_fetches: 1,
           successful_fetches: success ? 1 : 0,
           last_error: success ? null : errorMessage,
+          last_error_message: success ? null : errorMessage,
           last_item_count: success ? itemCount : 0,
           is_active: true,
         });
@@ -321,7 +333,7 @@ async function fetchRSSWithRetry(
         console.log(`[${source.name}] ✓ Success: ${relevantItems.length} relevant items`);
         
         // Update health tracking
-        await updateSourceHealth(supabase, source.name, true, relevantItems.length);
+        await updateSourceHealth(supabase, source.name, source.url, true, relevantItems.length);
         
         return { items: relevantItems, success: true, attempts: attempt };
       }
@@ -339,7 +351,7 @@ async function fetchRSSWithRetry(
   console.log(`[${source.name}] ✗ Failed after ${FETCH_RETRIES} attempts: ${lastError}`);
   
   // Update health tracking with failure
-  await updateSourceHealth(supabase, source.name, false, 0, lastError);
+  await updateSourceHealth(supabase, source.name, source.url, false, 0, lastError);
   
   return { items: [], success: false, error: lastError, attempts: FETCH_RETRIES };
 }
