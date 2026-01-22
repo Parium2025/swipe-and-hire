@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProfileVideo from "@/components/ProfileVideo";
-import ProfileVideoDialog from "@/components/ProfileVideoDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -81,7 +80,6 @@ function JobSeekerTopNav() {
   const [economyOpen, setEconomyOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
 
   // Avatar/Video state
   const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null;
@@ -226,20 +224,20 @@ function JobSeekerTopNav() {
                 />
                 {/* Show profile video/image instead of User icon - same size as user menu avatar */}
                 {hasVideo && videoUrl ? (
-                  <ProfileVideo
-                    videoUrl={videoUrl}
-                    coverImageUrl={coverUrl || avatarUrl || undefined}
-                    userInitials={getUserInitials()}
-                    alt="Profilvideo"
-                    className="h-8 w-8 ring-2 ring-white/20 rounded-full relative z-10 cursor-pointer"
-                    showCountdown={false}
-                    showProgressBar={false}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setVideoDialogOpen(true);
-                    }}
-                  />
+                  <div 
+                    onClick={(e) => e.stopPropagation()}
+                    className="relative z-20"
+                  >
+                    <ProfileVideo
+                      videoUrl={videoUrl}
+                      coverImageUrl={coverUrl || avatarUrl || undefined}
+                      userInitials={getUserInitials()}
+                      alt="Profilvideo"
+                      className="h-8 w-8 ring-2 ring-white/20 rounded-full"
+                      showCountdown={false}
+                      showProgressBar={false}
+                    />
+                  </div>
                 ) : avatarUrl ? (
                   <img 
                     src={avatarUrl} 
@@ -412,16 +410,6 @@ function JobSeekerTopNav() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      {/* Video preview dialog */}
-      {hasVideo && videoUrl && (
-        <ProfileVideoDialog
-          open={videoDialogOpen}
-          onOpenChange={setVideoDialogOpen}
-          videoUrl={videoUrl}
-          coverImageUrl={coverUrl || avatarUrl || undefined}
-        />
-      )}
     </nav>
   );
 }
