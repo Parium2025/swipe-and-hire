@@ -90,12 +90,8 @@ function JobSeekerTopNav() {
   const isAdmin = user?.email === 'fredrikandits@hotmail.com';
 
   const handleNavigation = (href: string) => {
-    console.log('JobSeekerTopNav: Navigating to', href);
     if (checkBeforeNavigation(href)) {
-      console.log('JobSeekerTopNav: Navigation allowed, going to', href);
       navigate(href);
-    } else {
-      console.log('JobSeekerTopNav: Navigation blocked by unsaved changes');
     }
   };
 
