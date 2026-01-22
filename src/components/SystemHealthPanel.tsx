@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, RefreshCw, Video, FileUp, AlertTriangle, CheckCircle, Wifi, Calendar, HeadphonesIcon, FileSearch } from 'lucide-react';
+import { Database, Users, HardDrive, Mail, TrendingUp, X, ChevronDown, ChevronUp, Briefcase, RefreshCw, Video, FileUp, AlertTriangle, CheckCircle, Wifi, Calendar, HeadphonesIcon, FileSearch, Newspaper, Lightbulb, Rss } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ADMIN_EMAIL = 'pariumab@hotmail.com';
@@ -20,6 +20,23 @@ interface StorageStats {
     cvs: { count: number; mb: number };
     images: { count: number; mb: number };
     other: { count: number; mb: number };
+  };
+}
+
+interface NewsHealthStats {
+  hrNews: {
+    total: number;
+    rssCount: number;
+    aiCount: number;
+    oldestPublished: string | null;
+    newestPublished: string | null;
+  };
+  careerTips: {
+    total: number;
+    rssCount: number;
+    aiCount: number;
+    oldestPublished: string | null;
+    newestPublished: string | null;
   };
 }
 
@@ -43,6 +60,9 @@ interface RealUsageStats {
   interviewsScheduled: number;
   openSupportTickets: number;
   cvAnalysisQueueSize: number;
+  
+  // News health
+  newsHealth: NewsHealthStats | null;
   
   // Email estimates
   emailsThisMonth: number;
@@ -156,7 +176,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       
-      const [activeJobsRes, applicationsWeekRes, totalJobViewsRes, interviewsRes, supportTicketsRes, cvQueueRes] = await Promise.all([
+      const [activeJobsRes, applicationsWeekRes, totalJobViewsRes, interviewsRes, supportTicketsRes, cvQueueRes, hrNewsRes, careerTipsRes] = await Promise.all([
         supabase.from('job_postings').select('id', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('job_applications').select('id', { count: 'exact', head: true })
           .gte('created_at', oneWeekAgo.toISOString()),
@@ -172,6 +192,10 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
         // CV analysis queue size
         supabase.from('cv_analysis_queue').select('id', { count: 'exact', head: true })
           .eq('status', 'pending'),
+        // HR News health
+        supabase.from('daily_hr_news').select('id, source, source_url, published_at').order('published_at', { ascending: false }).limit(10),
+        // Career Tips health
+        supabase.from('daily_career_tips').select('id, source, source_url, published_at').order('published_at', { ascending: false }).limit(10),
       ]);
 
       const activeJobsCount = activeJobsRes.count || 0;
@@ -182,6 +206,36 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       // Sum all job views (estimate monthly views as total / months active, assume ~1 month for now)
       const totalJobViews = (totalJobViewsRes.data || []).reduce((sum, job) => sum + (job.views_count || 0), 0);
       const jobViewsThisMonth = Math.max(totalJobViews, applicationsThisWeek * 5); // At least 5 views per application
+
+      // Parse news health data
+      const hrNewsItems = hrNewsRes.data || [];
+      const hrRssCount = hrNewsItems.filter((n: any) => n.source_url != null).length;
+      const hrAiCount = hrNewsItems.filter((n: any) => n.source_url == null).length;
+      const hrOldest = hrNewsItems.length > 0 ? hrNewsItems[hrNewsItems.length - 1]?.published_at : null;
+      const hrNewest = hrNewsItems.length > 0 ? hrNewsItems[0]?.published_at : null;
+
+      const careerTipsItems = careerTipsRes.data || [];
+      const careerRssCount = careerTipsItems.filter((n: any) => n.source_url != null).length;
+      const careerAiCount = careerTipsItems.filter((n: any) => n.source_url == null).length;
+      const careerOldest = careerTipsItems.length > 0 ? careerTipsItems[careerTipsItems.length - 1]?.published_at : null;
+      const careerNewest = careerTipsItems.length > 0 ? careerTipsItems[0]?.published_at : null;
+
+      const newsHealth: NewsHealthStats = {
+        hrNews: {
+          total: hrNewsItems.length,
+          rssCount: hrRssCount,
+          aiCount: hrAiCount,
+          oldestPublished: hrOldest,
+          newestPublished: hrNewest,
+        },
+        careerTips: {
+          total: careerTipsItems.length,
+          rssCount: careerRssCount,
+          aiCount: careerAiCount,
+          oldestPublished: careerOldest,
+          newestPublished: careerNewest,
+        },
+      };
 
       let newStats: RealUsageStats;
 
@@ -229,6 +283,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           cvAnalysisQueueSize,
           emailsThisMonth: applicationsThisWeek * 8,
           bandwidthEstimateMB,
+          newsHealth,
           isRealData: false,
           timestamp: new Date().toISOString(),
         };
@@ -287,6 +342,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           cvAnalysisQueueSize,
           emailsThisMonth: (storageData.database.profiles || 0) + (applicationsThisWeek * 4),
           bandwidthEstimateMB,
+          newsHealth,
           isRealData: true,
           timestamp: new Date().toISOString(),
         };
@@ -625,6 +681,62 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
                   {stats?.cvAnalysisQueueSize || 0}
                 </p>
                 <p className="text-white/50 text-[10px]">väntar</p>
+              </div>
+            </div>
+          </div>
+
+          {/* NEWS HEALTH */}
+          <div className="pt-3 border-t border-slate-700">
+            <p className="text-xs text-white uppercase tracking-wide mb-2 flex items-center gap-1.5">
+              <Newspaper className="h-3 w-3" />
+              Nyhetsflöde
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {/* HR News */}
+              <div className={`bg-slate-800 p-2 rounded border ${
+                stats?.newsHealth?.hrNews.total === 4 
+                  ? (stats?.newsHealth?.hrNews.aiCount === 4 ? 'border-orange-500/50' : 'border-transparent')
+                  : 'border-red-500/50'
+              }`}>
+                <div className="flex items-center gap-1 text-white/80 mb-1">
+                  <Rss className="h-3 w-3" />
+                  HR-nyheter
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-semibold">{stats?.newsHealth?.hrNews.rssCount || 0}</span>
+                  <span className="text-white/40">RSS</span>
+                  <span className="text-violet-400 font-semibold">{stats?.newsHealth?.hrNews.aiCount || 0}</span>
+                  <span className="text-white/40">AI</span>
+                </div>
+                {stats?.newsHealth?.hrNews.aiCount === 4 && (
+                  <p className="text-orange-400 text-[10px] mt-1">⚠️ Alla RSS nere</p>
+                )}
+                {stats?.newsHealth?.hrNews.total !== 4 && (
+                  <p className="text-red-400 text-[10px] mt-1">⚠️ Fel antal: {stats?.newsHealth?.hrNews.total || 0}/4</p>
+                )}
+              </div>
+              {/* Career Tips */}
+              <div className={`bg-slate-800 p-2 rounded border ${
+                stats?.newsHealth?.careerTips.total === 4 
+                  ? (stats?.newsHealth?.careerTips.aiCount === 4 ? 'border-orange-500/50' : 'border-transparent')
+                  : 'border-red-500/50'
+              }`}>
+                <div className="flex items-center gap-1 text-white/80 mb-1">
+                  <Lightbulb className="h-3 w-3" />
+                  Karriärtips
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-semibold">{stats?.newsHealth?.careerTips.rssCount || 0}</span>
+                  <span className="text-white/40">RSS</span>
+                  <span className="text-violet-400 font-semibold">{stats?.newsHealth?.careerTips.aiCount || 0}</span>
+                  <span className="text-white/40">AI</span>
+                </div>
+                {stats?.newsHealth?.careerTips.aiCount === 4 && (
+                  <p className="text-orange-400 text-[10px] mt-1">⚠️ Alla RSS nere</p>
+                )}
+                {stats?.newsHealth?.careerTips.total !== 4 && (
+                  <p className="text-red-400 text-[10px] mt-1">⚠️ Fel antal: {stats?.newsHealth?.careerTips.total || 0}/4</p>
+                )}
               </div>
             </div>
           </div>
