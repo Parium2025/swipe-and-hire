@@ -19,18 +19,80 @@ const RSS_SOURCES = [
   { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
 ];
 
-const NEGATIVE_KEYWORDS = ['skandal', 'misslyck', 'konflikt', 'döm', 'åtal', 'brott', 'svek', 'fusk', 'bedrägeri', 'diskriminer', 'mobbing', 'trakasser', 'hot', 'våld', 'varsel', 'uppsägning', 'neddragning', 'konkurs'];
+// NEGATIVE MARKET NEWS - Block these for job seekers (they're in a vulnerable situation)
+// These are FINE for HR-news/employers, but NOT for career tips
+const DEPRESSING_BLOCKLIST = [
+  // Job market doom & gloom
+  'varsel', 'varslar', 'uppsägning', 'uppsägningar', 'avsked', 'neddragning', 'nedskärning',
+  'massuppsägning', 'permittering', 'konkurs', 'insolvens', 'likvidation',
+  // Unemployment/crisis
+  'arbetslöshet', 'arbetslösheten ökar', 'jobbkris', 'lågkonjunktur', 'recession',
+  // Company failures
+  'går i konkurs', 'lägger ner', 'stänger', 'lämnar sverige',
+  // Negative economic news
+  'ekonomisk kris', 'finanskris', 'börskrasch',
+  // AI replacing jobs (scary for job seekers!)
+  'ai ersätter', 'ersätter jobb', 'hotar jobb', 'försvinner', 'automatiseras bort',
+  // Discrimination/inequality (not actionable for job seekers)
+  'könsklyfta', 'diskriminering', 'lönegap', 'ojämställd', 'ojämlik',
+  // Law violations/scandals
+  'kringgår', 'bryter mot', 'lagbrott', 'granskas', 'kritiseras',
+  // Health/personal struggles (sad stories, not career tips)
+  'cancer', 'diagnos', 'sjuk', 'sjukdom', 'trasig', 'depression', 'utmattning', 'utbränd',
+  'funktionsnedsättning', 'handikapp', 'rehabilitering',
+  // System criticism (not actionable)
+  'systemet kräver', 'orättvist', 'byråkrati', 'myndighetshaveri'
+];
 
-const CAREER_KEYWORDS = ['karriär', 'jobb', 'arbete', 'cv', 'intervju', 'ansökan', 'lön', 'förhandl', 'kompetens', 'utbildning', 'utveckling', 'mentor', 'nätverk', 'linkedin', 'rekrytering', 'anställ', 'arbetsgivare', 'arbetsmarknad', 'söka jobb', 'jobbsöka', 'arbetssök', 'tips', 'råd', 'personligt brev', 'befordran', 'feedback', 'prestation', 'målsättning', 'arbetsliv', 'balans', 'motivation', 'engagemang', 'kompetensbredd', 'erfarenhet'];
+// Generic negative words (scandals, crimes, etc.)
+const NEGATIVE_KEYWORDS = [
+  'skandal', 'misslyck', 'konflikt', 'döm', 'åtal', 'brott', 'svek', 'fusk', 
+  'bedrägeri', 'diskriminer', 'mobbing', 'trakasser', 'hot', 'våld',
+  'varnar', 'oroar', 'kris', 'problem', 'svårt', 'hotar', 'risk',
+  'tvingad', 'tvingar', 'måste', 'desperat', 'förtvivlan'
+];
 
-// EXPANDED BLOCKLIST - block politics, legal disputes, celebrities, sports, entertainment
+// POSITIVE/ACTIONABLE keywords - articles with these get priority
+const POSITIVE_KEYWORDS = [
+  'tips', 'råd', 'guide', 'så lyckas du', 'så får du', 'steg för steg',
+  'framgång', 'lyckas', 'öka dina chanser', 'förbättra', 'utveckla',
+  'möjligheter', 'efterfrågan ökar', 'hett', 'eftertraktad', 'brist på',
+  'nyanställer', 'rekryterar', 'växer', 'expanderar', 'satsar'
+];
+
+// STRICT career keywords - must be about JOB SEEKING specifically
+// Removed generic words like 'jobb', 'arbete', 'tips', 'råd' that match too broadly
+const CAREER_KEYWORDS = [
+  // Job seeking specific
+  'söka jobb', 'jobbsöka', 'jobbsökare', 'arbetssök', 'jobbansökan', 'arbetsansökan',
+  'cv', 'curriculum vitae', 'personligt brev', 'ansökan',
+  // Interviews
+  'anställningsintervju', 'jobbintervju', 'intervjutips',
+  // Career development  
+  'karriär', 'karriärutveckling', 'karriärväg', 'befordran', 'avancera',
+  // Salary negotiation
+  'löneförhandling', 'lönesamtal', 'löneökning',
+  // Networking for jobs
+  'linkedin', 'nätverk', 'kontaktnät',
+  // Skills/competence for employment
+  'kompetens', 'vidareutbildning', 'certifiering',
+  // Recruitment (from job seeker perspective)
+  'rekryterare', 'rekryteringsprocess', 'headhunter',
+  // Work-life balance (actionable)
+  'arbetsliv', 'work-life balance',
+  // Specific actionable topics
+  'så får du jobb', 'bästa tips', 'guide till'
+];
+
+// EXPANDED BLOCKLIST - block politics, legal disputes, celebrities, sports, entertainment, consumer news
 const BLOCKLIST = [
   // Geopolitics
   'ukraina', 'ryssland', 'putin', 'gaza', 'israel', 'hamas', 'krig', 'invasion',
   // Politics & politicians (irrelevant to career tips)
   'trump', 'biden', 'obama', 'erdogan', 'xi jinping', 'riksdag', 'statsminister', 'val 2026',
-  // Legal/lawsuits (unless specifically about employment law)
+  // Legal/lawsuits
   'stämmer', 'stämning', 'skadestånd', 'rättegång', 'domstol', 'åklagare', 'advokat',
+  'testamente', 'arv', 'dödsbo', 'skilsmässa',
   // Crypto
   'bitcoin', 'ethereum', 'kryptovaluta', 'crypto', 'nft',
   // Sports
@@ -39,10 +101,13 @@ const BLOCKLIST = [
   'konsert', 'melodifestival', 'eurovision', 'netflix', 'spotify', 'film', 'artist',
   // Celebrities
   'kungahuset', 'prinsessan', 'kronprinsen', 'kändis',
+  // Consumer/product news (not career related)
+  'volvo', 'tesla', 'bil', 'bilar', 'elbil', 'recension', 'test av', 'besviken',
+  // Personal finance (not job seeking)
+  'bedragare', 'bedrägeri', 'lurad', 'bluff', 'sparande', 'pension', 'bostadslån',
   // Finance pure (not career related)
   'aktiekurs', 'börs', 'nasdaq', 'ipo', 'investera', 'utdelning'
 ];
-
 const CATEGORIES = [
   { key: 'cv', label: 'CV & Ansökan', icon: 'FileText', gradient: 'from-emerald-500/90 via-emerald-600/80 to-teal-700/90', keywords: ['cv', 'personligt brev', 'ansökan', 'portfolio'] },
   { key: 'interview', label: 'Intervjutips', icon: 'MessageSquare', gradient: 'from-blue-500/90 via-blue-600/80 to-indigo-700/90', keywords: ['intervju', 'frågor', 'förbereda', 'presentation'] },
@@ -109,15 +174,40 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
   return items;
 }
 
+// SMART FILTER for career tips - block depressing news, prioritize positive content
 function isCareerRelevant(text: string): boolean {
   const t = text.toLowerCase();
+  
+  // 1. Block irrelevant topics (politics, sports, etc.)
   if (BLOCKLIST.some(k => t.includes(k))) return false;
+  
+  // 2. Block depressing job market news (layoffs, unemployment, etc.)
+  // These are fine for employers, but NOT for job seekers who are vulnerable
+  if (DEPRESSING_BLOCKLIST.some(k => t.includes(k))) return false;
+  
+  // 3. Block generic negative news (scandals, crimes, etc.)
+  if (NEGATIVE_KEYWORDS.some(k => t.includes(k))) return false;
+  
+  // 4. Must contain at least one career-related keyword
   return CAREER_KEYWORDS.some(k => t.includes(k));
+}
+
+// Calculate "positivity score" for ranking - higher = more encouraging/actionable
+function getPositivityScore(text: string): number {
+  const t = text.toLowerCase();
+  let score = 0;
+  
+  // Bonus points for positive/actionable keywords
+  for (const keyword of POSITIVE_KEYWORDS) {
+    if (t.includes(keyword)) score += 2;
+  }
+  
+  return score;
 }
 
 function isNegative(text: string): boolean {
   const t = text.toLowerCase();
-  return NEGATIVE_KEYWORDS.some(k => t.includes(k));
+  return NEGATIVE_KEYWORDS.some(k => t.includes(k)) || DEPRESSING_BLOCKLIST.some(k => t.includes(k));
 }
 
 function categorize(text: string): string {
@@ -331,10 +421,11 @@ async function fetchRSSWithRetry(
         const xml = await response.text();
         const items = parseRSSItems(xml);
         
-        // Filter for career relevance but ALLOW negative articles (same as HR-news)
-        const relevantItems = items.slice(0, 15).filter(i => {
+        // SMART FILTER: Only career-relevant, positive content for job seekers
+        // (isCareerRelevant now blocks BLOCKLIST, DEPRESSING_BLOCKLIST, and NEGATIVE_KEYWORDS)
+        const relevantItems = items.slice(0, 20).filter(i => {
           const full = `${i.title} ${i.description}`;
-          return isCareerRelevant(full); // No longer blocking negative articles
+          return isCareerRelevant(full);
         }).map(i => {
           const full = `${i.title} ${i.description}`;
           return {
@@ -344,11 +435,14 @@ async function fetchRSSWithRetry(
             source_url: i.link || null,
             category: categorize(full),
             published_at: i.pubDate,
-            isNegative: isNegative(full), // Mark as negative but don't block
+            isNegative: false, // After our filtering, nothing should be negative
+            positivityScore: getPositivityScore(full), // For sorting later
           };
-        });
+        })
+        // SORT by positivity score - most encouraging/actionable content first
+        .sort((a, b) => b.positivityScore - a.positivityScore);
 
-        console.log(`[${source.name}] ✓ Success: ${relevantItems.length} relevant items`);
+        console.log(`[${source.name}] ✓ Success: ${relevantItems.length} relevant POSITIVE items`);
         
         // Update health tracking
         await updateSourceHealth(supabase, source.name, source.url, true, relevantItems.length);
