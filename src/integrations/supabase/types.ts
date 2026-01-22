@@ -1607,13 +1607,20 @@ export type Database = {
           consecutive_failures: number
           created_at: string
           id: string
+          is_active: boolean | null
           is_healthy: boolean
+          last_check_at: string | null
+          last_error: string | null
           last_error_message: string | null
           last_failure_at: string | null
+          last_item_count: number | null
           last_success_at: string | null
           source_name: string
+          source_type: string | null
           source_url: string
+          successful_fetches: number | null
           total_failures: number
+          total_fetches: number | null
           total_successes: number
           updated_at: string
         }
@@ -1621,13 +1628,20 @@ export type Database = {
           consecutive_failures?: number
           created_at?: string
           id?: string
+          is_active?: boolean | null
           is_healthy?: boolean
+          last_check_at?: string | null
+          last_error?: string | null
           last_error_message?: string | null
           last_failure_at?: string | null
+          last_item_count?: number | null
           last_success_at?: string | null
           source_name: string
+          source_type?: string | null
           source_url: string
+          successful_fetches?: number | null
           total_failures?: number
+          total_fetches?: number | null
           total_successes?: number
           updated_at?: string
         }
@@ -1635,13 +1649,20 @@ export type Database = {
           consecutive_failures?: number
           created_at?: string
           id?: string
+          is_active?: boolean | null
           is_healthy?: boolean
+          last_check_at?: string | null
+          last_error?: string | null
           last_error_message?: string | null
           last_failure_at?: string | null
+          last_item_count?: number | null
           last_success_at?: string | null
           source_name?: string
+          source_type?: string | null
           source_url?: string
+          successful_fetches?: number | null
           total_failures?: number
+          total_fetches?: number | null
           total_successes?: number
           updated_at?: string
         }
