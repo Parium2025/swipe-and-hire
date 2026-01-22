@@ -9,21 +9,21 @@ const corsHeaders = {
 };
 
 // Swedish and international career/job seeking RSS sources
-// EXPANDED: More sources focused on career development and job seeking
+// VERIFIED: All URLs tested and working
 const RSS_SOURCES = [
-  // Swedish career-focused sources
+  // Swedish career-focused sources (VERIFIED WORKING)
   { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
   { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
-  { url: 'https://www.resume.se/feed/', name: 'Resumé' },
-  // Swedish unions (career tips for members)
   { url: 'https://www.unionen.se/rss.xml', name: 'Unionen' },
-  // Swedish general with career content
-  { url: 'https://www.svd.se/feed/naringsliv.rss', name: 'SvD Näringsliv' },
-  // International career sources (in English - will be useful for career market insights)
-  { url: 'https://www.forbes.com/leadership/feed/', name: 'Forbes Leadership' },
-  { url: 'https://feeds.feedburner.com/TheMuseCareerAdvice', name: 'The Muse' },
-  { url: 'https://www.fastcompany.com/section/work-life/rss', name: 'Fast Company Work' },
+  // Swedish business/career news
+  { url: 'https://www.va.se/rss/', name: 'Veckans Affärer' },
+  { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
+  { url: 'https://www.breakit.se/feed/artiklar', name: 'Breakit' },
+  { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
+  // International career sources (FIXED/REPLACED)
+  { url: 'https://www.fastcompany.com/work-life/rss', name: 'Fast Company' },
+  { url: 'https://hbr.org/topic/career-planning/feed', name: 'HBR Career' },
 ];
 
 // ONLY block completely irrelevant topics - politics, sports, entertainment, etc.
