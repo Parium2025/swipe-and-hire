@@ -16,12 +16,13 @@ import {
   X,
   Send,
   ExternalLink,
-  FileText as FileTextIcon,
   MessageSquare,
   Users,
   Wallet,
   Rocket,
   TrendingUp,
+  Newspaper,
+  Clock,
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
@@ -45,13 +46,14 @@ const GRADIENTS = {
 
 // Icon mapping for career tips categories
 const tipIconMap: Record<string, React.ElementType> = {
-  FileText: FileTextIcon,
+  FileText,
   MessageSquare,
   Users,
   Wallet,
   Rocket,
   TrendingUp,
   Lightbulb,
+  Newspaper,
 };
 
 // Default gradients for tips without specific gradient
@@ -185,75 +187,99 @@ const CareerTipsCard = memo(() => {
       {...swipeHandlers}
     >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-      <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
+      <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-4 h-full flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="p-2 rounded-xl bg-white/10 transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
-            <Icon className="h-4 w-4 text-white" strokeWidth={1.5} />
+      <CardContent className="relative p-5 h-full flex flex-col">
+        {/* Header - matches HrNewsCard exactly */}
+        <div className="flex items-center justify-between mb-2 flex-shrink-0">
+          <div className="p-2 rounded-xl bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
+            <Newspaper className="h-4 w-4 text-white" strokeWidth={1.5} />
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs text-white/80 font-medium">{currentTip?.source || 'Karriärtips'}</span>
-          </div>
+          <span className="text-[10px] text-white uppercase tracking-wider font-medium">
+            NYHETER
+          </span>
         </div>
         
-        {/* Tips content */}
-        <div className="flex-1 flex flex-col justify-center py-2">
+        {/* Title */}
+        <AnimatePresence mode="wait">
+          {currentTip && (
+            <motion.h3
+              key={`title-${currentTip.id}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="text-sm font-semibold text-white mb-2 leading-snug line-clamp-2 flex-shrink-0"
+            >
+              {currentTip.title}
+            </motion.h3>
+          )}
+        </AnimatePresence>
+        
+        {/* Summary - scrollable area */}
+        <div 
+          className="flex-1 overflow-y-auto overscroll-contain pr-1 min-h-0"
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+          }}
+        >
           <AnimatePresence mode="wait">
             {currentTip && (
-              <motion.div
-                key={currentTip.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+              <motion.p
+                key={`summary-${currentTip.id}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
+                className="text-xs text-white/85 leading-relaxed"
               >
-                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
-                  {currentTip.title}
-                </h3>
-                <p className="text-xs text-white/85 line-clamp-2 mb-1 leading-relaxed">
-                  {currentTip.summary}
-                </p>
-              </motion.div>
+                {currentTip.summary}
+              </motion.p>
             )}
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots and link */}
-        <div className="flex items-center justify-between mt-auto">
-          {tipsItems.length > 1 ? (
-            <div className="flex items-center gap-2">
-              {tipsItems.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCurrentIndex(i);
-                  }}
-                  className={cn(
-                    "w-2.5 h-2.5 rounded-full transition-colors duration-200",
-                    i === currentIndex 
-                      ? "bg-white" 
-                      : "bg-white/30 hover:bg-white/50"
-                  )}
-                  aria-label={`Gå till tips ${i + 1}`}
-                />
-              ))}
-            </div>
-          ) : <div />}
-          
-          <div className="flex items-center gap-2">
-            {publishedTime && (
-              <span className="text-xs text-white/80">{publishedTime}</span>
+        {/* Footer - time on left with clock icon, dots in middle, source link on right */}
+        <div className="flex items-center justify-between mt-3 flex-shrink-0">
+          {/* Left: Dots + Time with clock icon */}
+          <div className="flex items-center gap-3">
+            {tipsItems.length > 1 && (
+              <div className="flex items-center gap-1.5">
+                {tipsItems.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentIndex(i);
+                    }}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-colors duration-200",
+                      i === currentIndex 
+                        ? "bg-white" 
+                        : "bg-white/30 hover:bg-white/50"
+                    )}
+                    aria-label={`Gå till nyhet ${i + 1}`}
+                  />
+                ))}
+              </div>
             )}
-            {currentTip?.source_url && (
-              <div className="flex items-center gap-1 text-white transition-colors">
-                <span className="text-xs font-medium">Läs mer</span>
-                <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            {publishedTime && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3 text-white/80" />
+                <span className="text-xs text-white/80">{publishedTime}</span>
               </div>
             )}
           </div>
+          
+          {/* Right: Läs mer · Source with external link */}
+          {currentTip?.source_url && (
+            <div className="flex items-center gap-1 text-white transition-colors">
+              <span className="text-xs font-medium">Läs mer</span>
+              <span className="text-xs text-white/80">· {currentTip.source}</span>
+              <ExternalLink className="h-3 w-3 ml-0.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
