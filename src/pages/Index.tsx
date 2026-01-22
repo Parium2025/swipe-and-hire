@@ -15,6 +15,7 @@ import JobSeekerLayout from "@/components/JobSeekerLayout";
 import Dashboard from '@/components/Dashboard';
 import EmployerDashboard from '@/components/EmployerDashboard';
 import EmployerHome from '@/components/EmployerHome';
+import JobSeekerHome from '@/components/JobSeekerHome';
 import JobSwipe from '@/components/JobSwipe';
 // ProfileSetup removed - employers use EmployerWelcomeTunnel only
 import ProfileSelector from '@/components/ProfileSelector';
@@ -434,7 +435,7 @@ const Index = () => {
   // isAdmin is now from database via useIsOrgAdmin hook
 
   // Render sidebar layout for profile pages and employer routes
-  const sidebarRoutes = ['/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
+  const sidebarRoutes = ['/home', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute && role !== 'employer') {
@@ -445,6 +446,8 @@ const Index = () => {
 
     const renderSidebarContent = (path: string) => {
       switch (path) {
+        case '/home':
+          return <JobSeekerHome />;
         case '/profile':
           return <Profile />;
         case '/profile-preview':
@@ -472,7 +475,7 @@ const Index = () => {
             return <Support />;
           }
         default:
-          return <Profile />;
+          return <JobSeekerHome />;
       }
     };
 
