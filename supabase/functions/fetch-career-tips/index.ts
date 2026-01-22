@@ -23,7 +23,25 @@ const NEGATIVE_KEYWORDS = ['skandal', 'misslyck', 'konflikt', 'döm', 'åtal', '
 
 const CAREER_KEYWORDS = ['karriär', 'jobb', 'arbete', 'cv', 'intervju', 'ansökan', 'lön', 'förhandl', 'kompetens', 'utbildning', 'utveckling', 'mentor', 'nätverk', 'linkedin', 'rekrytering', 'anställ', 'arbetsgivare', 'arbetsmarknad', 'söka jobb', 'jobbsöka', 'arbetssök', 'tips', 'råd', 'personligt brev', 'befordran', 'feedback', 'prestation', 'målsättning', 'arbetsliv', 'balans', 'motivation', 'engagemang', 'kompetensbredd', 'erfarenhet'];
 
-const BLOCKLIST = ['ukraina', 'ryssland', 'putin', 'gaza', 'israel', 'hamas', 'bitcoin', 'ethereum', 'kryptovaluta', 'fotboll', 'hockey', 'konsert', 'melodifestival'];
+// EXPANDED BLOCKLIST - block politics, legal disputes, celebrities, sports, entertainment
+const BLOCKLIST = [
+  // Geopolitics
+  'ukraina', 'ryssland', 'putin', 'gaza', 'israel', 'hamas', 'krig', 'invasion',
+  // Politics & politicians (irrelevant to career tips)
+  'trump', 'biden', 'obama', 'erdogan', 'xi jinping', 'riksdag', 'statsminister', 'val 2026',
+  // Legal/lawsuits (unless specifically about employment law)
+  'stämmer', 'stämning', 'skadestånd', 'rättegång', 'domstol', 'åklagare', 'advokat',
+  // Crypto
+  'bitcoin', 'ethereum', 'kryptovaluta', 'crypto', 'nft',
+  // Sports
+  'fotboll', 'hockey', 'allsvenskan', 'nhl', 'premier league', 'champions league', 'os ', 'vm ',
+  // Entertainment
+  'konsert', 'melodifestival', 'eurovision', 'netflix', 'spotify', 'film', 'artist',
+  // Celebrities
+  'kungahuset', 'prinsessan', 'kronprinsen', 'kändis',
+  // Finance pure (not career related)
+  'aktiekurs', 'börs', 'nasdaq', 'ipo', 'investera', 'utdelning'
+];
 
 const CATEGORIES = [
   { key: 'cv', label: 'CV & Ansökan', icon: 'FileText', gradient: 'from-emerald-500/90 via-emerald-600/80 to-teal-700/90', keywords: ['cv', 'personligt brev', 'ansökan', 'portfolio'] },
