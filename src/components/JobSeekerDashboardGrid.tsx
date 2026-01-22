@@ -224,14 +224,19 @@ const CareerTipsCard = memo(() => {
           {tipsItems.length > 1 ? (
             <div className="flex items-center gap-2">
               {tipsItems.map((_, i) => (
-                <button
+                <div
                   key={i}
                   onClick={() => setCurrentIndex(i)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && setCurrentIndex(i)}
                   className={cn(
-                    "w-2.5 h-2.5 rounded-full transition-colors duration-200",
+                    "w-2.5 h-2.5 rounded-full cursor-pointer",
+                    "transition-all duration-300 ease-out",
+                    "transform-gpu will-change-[opacity,background-color]",
                     i === currentIndex 
-                      ? "bg-white" 
-                      : "bg-white/30 hover:bg-white/50"
+                      ? "bg-white opacity-100" 
+                      : "bg-white/30 opacity-100 hover:bg-white/50"
                   )}
                   aria-label={`Gå till nyhet ${i + 1}`}
                 />
