@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const TRUSTED_SOURCES = ['HRnytt.se', 'Chef.se', 'Arbetsvärlden', 'DN Ekonomi', 'Expressen Ekonomi', 'Dagens Industri', 'SvD Näringsliv', 'Breakit'];
+const TRUSTED_SOURCES = ['HRnytt.se', 'Chef.se', 'Arbetsvärlden', 'DN Ekonomi', 'Expressen Ekonomi', 'Dagens Industri', 'Breakit'];
 
 const RSS_SOURCES = [
   { url: 'https://hrnytt.se/feed/', name: 'HRnytt.se' },
@@ -16,7 +16,6 @@ const RSS_SOURCES = [
   { url: 'https://www.dn.se/rss/ekonomi/', name: 'DN Ekonomi' },
   { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
   { url: 'https://feeds.expressen.se/ekonomi', name: 'Expressen Ekonomi' },
-  { url: 'https://www.svd.se/feed/naringsliv', name: 'SvD Näringsliv' },
   { url: 'https://www.breakit.se/feed/artiklar', name: 'Breakit' },
 ];
 
