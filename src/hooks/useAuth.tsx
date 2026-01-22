@@ -284,9 +284,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isSigningInRef = useRef(false);
   const mediaPreloadCompleteRef = useRef(false);
   const prefetchedEmployerCandidateMediaForUserRef = useRef<string | null>(null);
-  // 🔄 Track current user ID and role for cross-tab session change detection
+  // 🔄 Track current user ID for cross-tab session change detection
   const currentUserIdRef = useRef<string | null>(null);
-  const currentUserRoleRef = useRef<string | null>(null);
  
   // Håll en ref i synk med state så att async login kan läsa korrekt värde
   useEffect(() => {
