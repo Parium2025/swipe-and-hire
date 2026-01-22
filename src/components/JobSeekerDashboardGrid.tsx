@@ -15,6 +15,13 @@ import {
   Phone,
   X,
   Send,
+  ExternalLink,
+  FileText as FileTextIcon,
+  MessageSquare,
+  Users,
+  Wallet,
+  Rocket,
+  TrendingUp,
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
@@ -26,6 +33,7 @@ import { cn } from '@/lib/utils';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
 import { format, isToday, isTomorrow } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { useCareerTips, CareerTipItem } from '@/hooks/useCareerTips';
 
 // Gradients for each quadrant
 const GRADIENTS = {
@@ -35,39 +43,57 @@ const GRADIENTS = {
   interviews: 'from-amber-500/90 via-orange-500/80 to-orange-600/90',
 };
 
-// Static career tips (same structure as news items)
-const CAREER_TIPS = [
-  {
-    id: 1,
-    title: 'Skräddarsy ditt CV',
-    summary: 'Anpassa ditt CV för varje ansökan – matcha nyckelord från jobbannonsen för bättre träff hos rekryteraren.',
-    source: 'Karriärcoach',
-  },
-  {
-    id: 2,
-    title: 'Förbered intervjufrågor',
-    summary: 'Ha 3-5 genomtänkta frågor redo till arbetsgivaren. Det visar engagemang och genuin nyfikenhet.',
-    source: 'Rekryteringstips',
-  },
-  {
-    id: 3,
-    title: 'Researcha företaget',
-    summary: 'Läs på om företagets kultur, värderingar och senaste nyheter före intervjun för att imponera.',
-    source: 'Intervjuguide',
-  },
-  {
-    id: 4,
-    title: 'Följ upp professionellt',
-    summary: 'Skicka ett kort och personligt tack-mejl inom 24 timmar efter intervjun för att sticka ut.',
-    source: 'Jobbsökartips',
-  },
+// Icon mapping for career tips categories
+const tipIconMap: Record<string, React.ElementType> = {
+  FileText: FileTextIcon,
+  MessageSquare,
+  Users,
+  Wallet,
+  Rocket,
+  TrendingUp,
+  Lightbulb,
+};
+
+// Default gradients for tips without specific gradient
+const defaultTipGradients = [
+  'from-emerald-500/90 via-emerald-600/80 to-teal-700/90',
+  'from-blue-500/90 via-blue-600/80 to-indigo-700/90',
+  'from-violet-500/90 via-purple-600/80 to-purple-700/90',
+  'from-amber-500/90 via-orange-500/80 to-orange-600/90',
 ];
 
-// Career Tips Card (Green - Top Left) - Exact same structure as NewsCard
+// Format published time as "idag HH:MM" or "igår HH:MM"
+function formatTipPublishedTime(publishedAt: string | null): string {
+  if (!publishedAt) return '';
+  
+  try {
+    const pubDate = new Date(publishedAt);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    const pubDay = new Date(pubDate.getFullYear(), pubDate.getMonth(), pubDate.getDate());
+    
+    const timeStr = pubDate.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    
+    if (pubDay.getTime() === today.getTime()) {
+      return `idag ${timeStr}`;
+    } else if (pubDay.getTime() === yesterday.getTime()) {
+      return `igår ${timeStr}`;
+    } else {
+      return pubDate.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+    }
+  } catch {
+    return '';
+  }
+}
+
+// Career Tips Card (Green - Top Left) - Same structure as HrNewsCards
 const CareerTipsCard = memo(() => {
+  const { data: tips, isLoading, error } = useCareerTips();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const tipsItems = CAREER_TIPS;
+  
+  const tipsItems = tips || [];
 
   const goNext = useCallback(() => {
     if (tipsItems.length > 1) {
@@ -81,7 +107,7 @@ const CareerTipsCard = memo(() => {
     }
   }, [tipsItems.length]);
 
-  // Auto-rotation every 10 seconds (pauses on hover) - same as NewsCard
+  // Auto-rotation every 10 seconds (pauses on hover)
   useEffect(() => {
     if (tipsItems.length <= 1 || isPaused) return;
     
@@ -98,32 +124,84 @@ const CareerTipsCard = memo(() => {
   });
 
   const currentTip = tipsItems[currentIndex];
+  const Icon = currentTip?.icon_name ? (tipIconMap[currentTip.icon_name] || Lightbulb) : Lightbulb;
+  const publishedTime = currentTip ? formatTipPublishedTime(currentTip.published_at) : '';
+
+  const handleClick = () => {
+    if (currentTip?.source_url) {
+      window.open(currentTip.source_url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[200px]`}>
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <CardContent className="relative p-4 h-full flex flex-col">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-9 w-9 rounded-xl bg-white/20" />
+            <Skeleton className="h-3 w-20 bg-white/20" />
+          </div>
+          <div className="flex-1 flex flex-col justify-center py-2 space-y-2">
+            <Skeleton className="h-4 w-3/4 bg-white/15" />
+            <Skeleton className="h-3 w-full bg-white/10" />
+            <Skeleton className="h-3 w-2/3 bg-white/10" />
+          </div>
+          <div className="flex items-center gap-2 mt-auto">
+            {[0, 1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-2.5 w-2.5 rounded-full bg-white/20" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Error or no tips state
+  if (error || !tips || tips.length === 0) {
+    return (
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[200px]`}>
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <CardContent className="relative p-4 h-full flex flex-col items-center justify-center">
+          <Lightbulb className="h-8 w-8 text-white/60 mb-2" />
+          <p className="text-sm text-white/60 text-center">
+            Karriärtips laddas...
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card 
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[200px] touch-pan-y`}
+      className={cn(
+        `relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[200px] touch-pan-y`,
+        currentTip?.source_url && "cursor-pointer group"
+      )}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onClick={currentTip?.source_url ? handleClick : undefined}
       {...swipeHandlers}
     >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
       <CardContent className="relative p-4 h-full flex flex-col">
-        {/* Header - same as NewsCard */}
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="p-2 rounded-xl bg-white/10">
-            <Lightbulb className="h-5 w-5 text-white" strokeWidth={1.5} />
+          <div className="p-2 rounded-xl bg-white/10 transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
+            <Icon className="h-4 w-4 text-white" strokeWidth={1.5} />
           </div>
-          <span className="text-[10px] text-white uppercase tracking-wider font-medium">
-            KARRIÄRTIPS
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-white/80 font-medium">{currentTip?.source || 'Karriärtips'}</span>
+          </div>
         </div>
         
-        {/* Tips content - same structure as NewsCard */}
+        {/* Tips content */}
         <div className="flex-1 flex flex-col justify-center py-2">
           <AnimatePresence mode="wait">
-            {currentTip ? (
+            {currentTip && (
               <motion.div
                 key={currentTip.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -134,27 +212,25 @@ const CareerTipsCard = memo(() => {
                 <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
                   {currentTip.title}
                 </h3>
-                <p className="text-xs text-white line-clamp-2 mb-1">
+                <p className="text-xs text-white/85 line-clamp-2 mb-1 leading-relaxed">
                   {currentTip.summary}
                 </p>
-                <div className="flex items-center gap-1.5 text-white transition-colors">
-                  <span className="text-[10px] text-white">· {currentTip.source}</span>
-                </div>
               </motion.div>
-            ) : (
-              <p className="text-xs text-white/60 text-center">Inga tips just nu</p>
             )}
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots - same as NewsCard */}
+        {/* Footer with dots and link */}
         <div className="flex items-center justify-between mt-auto">
           {tipsItems.length > 1 ? (
             <div className="flex items-center gap-2">
               {tipsItems.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => setCurrentIndex(i)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentIndex(i);
+                  }}
                   className={cn(
                     "w-2.5 h-2.5 rounded-full transition-colors duration-200",
                     i === currentIndex 
@@ -166,6 +242,18 @@ const CareerTipsCard = memo(() => {
               ))}
             </div>
           ) : <div />}
+          
+          <div className="flex items-center gap-2">
+            {publishedTime && (
+              <span className="text-xs text-white/80">{publishedTime}</span>
+            )}
+            {currentTip?.source_url && (
+              <div className="flex items-center gap-1 text-white transition-colors">
+                <span className="text-xs font-medium">Läs mer</span>
+                <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
