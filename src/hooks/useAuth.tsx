@@ -284,6 +284,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isSigningInRef = useRef(false);
   const mediaPreloadCompleteRef = useRef(false);
   const prefetchedEmployerCandidateMediaForUserRef = useRef<string | null>(null);
+  // 🔄 Track current user ID and role for cross-tab session change detection
+  const currentUserIdRef = useRef<string | null>(null);
+  const currentUserRoleRef = useRef<string | null>(null);
  
   // Håll en ref i synk med state så att async login kan läsa korrekt värde
   useEffect(() => {
@@ -298,6 +301,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mounted) return;
+        
+        // 🔄 Detect cross-tab session changes (different user logged in)
+        const newUserId = session?.user?.id ?? null;
+        const previousUserId = currentUserIdRef.current;
+        
+        // Check if user changed (not initial load and not manual sign-in/out)
+        if (
+          previousUserId !== null && 
+          newUserId !== null && 
+          previousUserId !== newUserId &&
+          !isManualSignOutRef.current &&
+          !isSigningInRef.current
+        ) {
+          // Different user logged in from another tab
+          console.log('🔄 Session changed in another tab - different user detected');
+          toast({
+            title: 'Sessionen har ändrats',
+            description: 'Du har loggats in med ett annat konto i en annan flik. Sidan laddas om.',
+            duration: 4000,
+          });
+          // Clear all caches and reload after a short delay
+          setTimeout(() => {
+            clearAllAppCaches();
+            window.location.href = '/auth';
+          }, 1500);
+          return;
+        }
+        
+        // Check if user was logged out from another tab (but not manually)
+        if (
+          previousUserId !== null && 
+          newUserId === null &&
+          !isManualSignOutRef.current &&
+          event !== 'INITIAL_SESSION'
+        ) {
+          console.log('🔄 Session ended in another tab - user was logged out');
+          toast({
+            title: 'Du har loggats ut',
+            description: 'Sessionen avslutades i en annan flik.',
+            duration: 4000,
+          });
+          setTimeout(() => {
+            clearAllAppCaches();
+            window.location.href = '/auth';
+          }, 1500);
+          return;
+        }
+        
+        // Update tracking refs
+        currentUserIdRef.current = newUserId;
         
         // Update session and user state for all events
         setSession(session);
