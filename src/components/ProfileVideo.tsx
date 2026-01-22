@@ -83,12 +83,6 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   // (Keeping function names removed to simplify behavior)
 
   const handleTap = async (e?: React.MouseEvent) => {
-    // Always stop propagation to prevent parent elements (like dropdowns) from triggering
-    if (e) {
-      e.stopPropagation();
-      e.preventDefault();
-    }
-    
     // If custom onClick is provided, use that instead
     if (onClick && e) {
       onClick(e);
@@ -233,6 +227,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     <div 
       className={`relative overflow-hidden ${className}`}
       style={{ contain: 'paint' }}
+      // Viktigt när komponenten ligger inuti t.ex. en dropdown-trigger: låt inte pointerdown bubbla upp
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => handleTap(e)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
