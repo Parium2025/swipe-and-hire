@@ -301,9 +301,10 @@ async function fetchRSSWithRetry(
         const xml = await response.text();
         const items = parseRSSItems(xml);
         
+        // Filter for career relevance but ALLOW negative articles (same as HR-news)
         const relevantItems = items.slice(0, 15).filter(i => {
           const full = `${i.title} ${i.description}`;
-          return isCareerRelevant(full) && !isNegative(full);
+          return isCareerRelevant(full); // No longer blocking negative articles
         }).map(i => {
           const full = `${i.title} ${i.description}`;
           return {
@@ -313,7 +314,7 @@ async function fetchRSSWithRetry(
             source_url: i.link || null,
             category: categorize(full),
             published_at: i.pubDate,
-            isNegative: false,
+            isNegative: isNegative(full), // Mark as negative but don't block
           };
         });
 
