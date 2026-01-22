@@ -40,6 +40,18 @@ interface NewsHealthStats {
   };
 }
 
+interface RssSourceHealth {
+  source_name: string;
+  source_url: string;
+  is_healthy: boolean;
+  consecutive_failures: number;
+  last_success_at: string | null;
+  last_failure_at: string | null;
+  last_error_message: string | null;
+  total_successes: number;
+  total_failures: number;
+}
+
 interface RealUsageStats {
   // Real storage data from edge function
   storage: StorageStats;
@@ -63,6 +75,9 @@ interface RealUsageStats {
   
   // News health
   newsHealth: NewsHealthStats | null;
+  
+  // RSS source health
+  rssSourceHealth: RssSourceHealth[] | null;
   
   // Email estimates
   emailsThisMonth: number;
@@ -176,7 +191,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       
-      const [activeJobsRes, applicationsWeekRes, totalJobViewsRes, interviewsRes, supportTicketsRes, cvQueueRes, hrNewsRes, careerTipsRes] = await Promise.all([
+      const [activeJobsRes, applicationsWeekRes, totalJobViewsRes, interviewsRes, supportTicketsRes, cvQueueRes, hrNewsRes, careerTipsRes, rssHealthRes] = await Promise.all([
         supabase.from('job_postings').select('id', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('job_applications').select('id', { count: 'exact', head: true })
           .gte('created_at', oneWeekAgo.toISOString()),
@@ -196,7 +211,11 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
         supabase.from('daily_hr_news').select('id, source, source_url, published_at').order('published_at', { ascending: false }).limit(10),
         // Career Tips health
         supabase.from('daily_career_tips').select('id, source, source_url, published_at').order('published_at', { ascending: false }).limit(10),
+        // RSS Source Health
+        supabase.from('rss_source_health').select('source_name, source_url, is_healthy, consecutive_failures, last_success_at, last_failure_at, last_error_message, total_successes, total_failures').order('source_name'),
       ]);
+
+      const rssSourceHealth: RssSourceHealth[] | null = (rssHealthRes.data as RssSourceHealth[]) || null;
 
       const activeJobsCount = activeJobsRes.count || 0;
       const applicationsThisWeek = applicationsWeekRes.count || 0;
@@ -284,6 +303,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           emailsThisMonth: applicationsThisWeek * 8,
           bandwidthEstimateMB,
           newsHealth,
+          rssSourceHealth,
           isRealData: false,
           timestamp: new Date().toISOString(),
         };
@@ -343,6 +363,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
           emailsThisMonth: (storageData.database.profiles || 0) + (applicationsThisWeek * 4),
           bandwidthEstimateMB,
           newsHealth,
+          rssSourceHealth,
           isRealData: true,
           timestamp: new Date().toISOString(),
         };
@@ -740,6 +761,55 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
               </div>
             </div>
           </div>
+
+          {/* RSS SOURCE HEALTH */}
+          {stats?.rssSourceHealth && stats.rssSourceHealth.length > 0 && (
+            <div className="pt-3 border-t border-slate-700">
+              <p className="text-xs text-white uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                <Rss className="h-3 w-3" />
+                RSS-källor (Arbetsgivare)
+              </p>
+              <div className="space-y-1.5">
+                {stats.rssSourceHealth.map((source) => {
+                  const isUnhealthy = !source.is_healthy;
+                  const isCritical = source.consecutive_failures >= 5;
+                  return (
+                    <div 
+                      key={source.source_name}
+                      className={`bg-slate-800 p-2 rounded text-xs flex items-center justify-between border ${
+                        isCritical ? 'border-red-500/50' : isUnhealthy ? 'border-orange-500/30' : 'border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${
+                          isCritical ? 'bg-red-500 animate-pulse' : 
+                          isUnhealthy ? 'bg-orange-500' : 
+                          'bg-emerald-500'
+                        }`} />
+                        <span className="text-white/90">{source.source_name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {source.consecutive_failures > 0 && (
+                          <span className={`${isCritical ? 'text-red-400' : 'text-orange-400'}`}>
+                            {source.consecutive_failures}x fel
+                          </span>
+                        )}
+                        <span className="text-white/50">
+                          {source.total_successes}✓ {source.total_failures}✗
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {stats.rssSourceHealth.some(s => !s.is_healthy) && (
+                <p className="text-xs text-orange-400 mt-2 flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  {stats.rssSourceHealth.filter(s => !s.is_healthy).length} källa(or) har problem
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Historical data toggle */}
           <div className="pt-3 border-t border-slate-700">

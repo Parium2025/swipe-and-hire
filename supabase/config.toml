@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.send-interview-invitation]
 verify_jwt = false
+
+[functions.send-admin-alert]
+verify_jwt = false
