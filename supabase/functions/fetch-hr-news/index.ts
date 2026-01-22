@@ -1,4 +1,4 @@
-// HR News Fetcher - Multi-source RSS with smart filtering
+// HR News Fetcher - Multi-source RSS with smart filtering, retry logic, and health tracking
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -43,6 +43,13 @@ const AI_SOURCE = 'Parium';
 // Source limit constants
 const MAX_PER_SOURCE_NORMAL = 2;  // Normal: max 2 articles per source
 const MAX_PER_SOURCE_CRISIS = 3;  // Crisis mode: max 3 articles per source
+
+// Retry configuration
+const MAX_RETRIES = 3;
+const RETRY_DELAYS = [1000, 2000, 4000]; // Exponential backoff in ms
+
+// Health tracking thresholds
+const CONSECUTIVE_FAILURES_ALERT = 5; // Alert after this many consecutive failures
 
 function isWithin5Days(dateStr: string): boolean {
   try {
@@ -157,6 +164,11 @@ function filterBySourceLimit(
   return result;
 }
 
+// Sleep utility for retry delays
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 interface RSSItem {
   title: string;
   summary: string;
@@ -167,33 +179,172 @@ interface RSSItem {
   isNegative: boolean;
 }
 
-async function fetchRSS(source: { url: string; name: string }): Promise<RSSItem[]> {
+interface FetchResult {
+  items: RSSItem[];
+  success: boolean;
+  error?: string;
+  attempts: number;
+}
+
+// Update RSS source health in database
+async function updateSourceHealth(
+  supabase: any,
+  source: { url: string; name: string },
+  success: boolean,
+  errorMessage?: string
+): Promise<{ shouldAlert: boolean; consecutiveFailures: number }> {
   try {
-    const r = await fetch(source.url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Parium/1.0)', 'Accept': 'application/rss+xml, text/xml, */*' } });
-    if (!r.ok) return [];
-    const xml = await r.text();
-    const items = parseRSSItems(xml);
-    
-    return items.slice(0, 15).filter(i => {
-      const full = `${i.title} ${i.description}`;
-      if (source.name === 'HRnytt.se' && i.link?.includes('/event/')) return false;
-      return isHRRelevant(full, source.name);
-    }).map(i => {
-      const full = `${i.title} ${i.description}`;
-      return {
-        title: i.title,
-        summary: truncateAtSentence(i.description, 250) || i.title,
-        source: source.name,
-        source_url: i.link || null,
-        category: categorize(full),
-        published_at: i.pubDate,
-        isNegative: isNegative(full),
+    // Try to get existing health record
+    const { data: existing } = await supabase
+      .from('rss_source_health')
+      .select('*')
+      .eq('source_name', source.name)
+      .single();
+
+    const now = new Date().toISOString();
+
+    if (existing) {
+      // Update existing record
+      const updates: any = {
+        is_healthy: success,
+        updated_at: now,
       };
-    });
+
+      if (success) {
+        updates.last_success_at = now;
+        updates.consecutive_failures = 0;
+        updates.total_successes = (existing.total_successes || 0) + 1;
+        updates.last_error_message = null;
+      } else {
+        updates.last_failure_at = now;
+        updates.consecutive_failures = (existing.consecutive_failures || 0) + 1;
+        updates.total_failures = (existing.total_failures || 0) + 1;
+        updates.last_error_message = errorMessage || 'Unknown error';
+      }
+
+      await supabase
+        .from('rss_source_health')
+        .update(updates)
+        .eq('source_name', source.name);
+
+      return {
+        shouldAlert: !success && updates.consecutive_failures >= CONSECUTIVE_FAILURES_ALERT,
+        consecutiveFailures: updates.consecutive_failures,
+      };
+    } else {
+      // Create new record
+      await supabase.from('rss_source_health').insert({
+        source_name: source.name,
+        source_url: source.url,
+        is_healthy: success,
+        consecutive_failures: success ? 0 : 1,
+        last_success_at: success ? now : null,
+        last_failure_at: success ? null : now,
+        last_error_message: success ? null : errorMessage,
+        total_successes: success ? 1 : 0,
+        total_failures: success ? 0 : 1,
+      });
+
+      return {
+        shouldAlert: false,
+        consecutiveFailures: success ? 0 : 1,
+      };
+    }
   } catch (e) {
-    console.error(`Error ${source.name}:`, e);
-    return [];
+    console.error(`Failed to update health for ${source.name}:`, e);
+    return { shouldAlert: false, consecutiveFailures: 0 };
   }
+}
+
+// Fetch RSS with retry logic
+async function fetchRSSWithRetry(
+  source: { url: string; name: string },
+  supabase: any
+): Promise<FetchResult> {
+  let lastError: string | undefined;
+  
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      
+      const r = await fetch(source.url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; Parium/1.0)',
+          'Accept': 'application/rss+xml, text/xml, */*',
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!r.ok) {
+        lastError = `HTTP ${r.status}: ${r.statusText}`;
+        if (attempt < MAX_RETRIES) {
+          console.log(`Retry ${attempt}/${MAX_RETRIES} for ${source.name} after ${RETRY_DELAYS[attempt - 1]}ms...`);
+          await sleep(RETRY_DELAYS[attempt - 1]);
+          continue;
+        }
+        throw new Error(lastError);
+      }
+      
+      const xml = await r.text();
+      const items = parseRSSItems(xml);
+      
+      const rssItems = items.slice(0, 15).filter(i => {
+        const full = `${i.title} ${i.description}`;
+        if (source.name === 'HRnytt.se' && i.link?.includes('/event/')) return false;
+        return isHRRelevant(full, source.name);
+      }).map(i => {
+        const full = `${i.title} ${i.description}`;
+        return {
+          title: i.title,
+          summary: truncateAtSentence(i.description, 250) || i.title,
+          source: source.name,
+          source_url: i.link || null,
+          category: categorize(full),
+          published_at: i.pubDate,
+          isNegative: isNegative(full),
+        };
+      });
+      
+      // Success - update health tracking
+      await updateSourceHealth(supabase, source, true);
+      
+      return {
+        items: rssItems,
+        success: true,
+        attempts: attempt,
+      };
+    } catch (e: any) {
+      lastError = e.message || 'Unknown error';
+      
+      if (e.name === 'AbortError') {
+        lastError = 'Request timeout (10s)';
+      }
+      
+      if (attempt < MAX_RETRIES) {
+        console.log(`Retry ${attempt}/${MAX_RETRIES} for ${source.name}: ${lastError}`);
+        await sleep(RETRY_DELAYS[attempt - 1]);
+      }
+    }
+  }
+  
+  // All retries failed - update health tracking
+  const health = await updateSourceHealth(supabase, source, false, lastError);
+  
+  if (health.shouldAlert) {
+    console.error(`⚠️ ALERT: ${source.name} has failed ${health.consecutiveFailures} times consecutively!`);
+  }
+  
+  console.error(`Failed to fetch ${source.name} after ${MAX_RETRIES} attempts: ${lastError}`);
+  
+  return {
+    items: [],
+    success: false,
+    error: lastError,
+    attempts: MAX_RETRIES,
+  };
 }
 
 // Generate a SINGLE AI news item (for gradual rotation)
@@ -367,6 +518,30 @@ Svara ENDAST med giltig JSON.`
   }
 }
 
+// Get health summary for response
+async function getHealthSummary(supabase: any): Promise<any> {
+  try {
+    const { data } = await supabase
+      .from('rss_source_health')
+      .select('source_name, is_healthy, consecutive_failures, last_success_at, last_failure_at')
+      .order('source_name');
+
+    if (!data) return null;
+
+    const unhealthySources = data.filter((s: any) => !s.is_healthy);
+    const healthySources = data.filter((s: any) => s.is_healthy);
+
+    return {
+      total_sources: data.length,
+      healthy: healthySources.length,
+      unhealthy: unhealthySources.length,
+      critical: data.filter((s: any) => s.consecutive_failures >= CONSECUTIVE_FAILURES_ALERT).map((s: any) => s.source_name),
+    };
+  } catch {
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -410,7 +585,7 @@ serve(async (req) => {
         });
     }
 
-    console.log('Fetching HR news...');
+    console.log('Fetching HR news with retry logic...');
 
     // ===== STEP 1: Get current state of the database =====
     const { data: currentItems } = await supabase
@@ -434,11 +609,27 @@ serve(async (req) => {
       await supabase.from('daily_hr_news').delete().in('id', expiredRss.map(i => i.id));
     }
 
-    // ===== STEP 3: Fetch new RSS items =====
-    const results = await Promise.all(RSS_SOURCES.map(fetchRSS));
+    // ===== STEP 3: Fetch new RSS items with retry logic =====
+    const fetchResults = await Promise.all(
+      RSS_SOURCES.map(source => fetchRSSWithRetry(source, supabase))
+    );
+    
+    // Log fetch statistics
+    const successfulFetches = fetchResults.filter(r => r.success).length;
+    const failedFetches = fetchResults.filter(r => !r.success).length;
+    const totalRetries = fetchResults.reduce((sum, r) => sum + (r.attempts - 1), 0);
+    
+    console.log(`Fetch results: ${successfulFetches}/${RSS_SOURCES.length} successful, ${totalRetries} retries used`);
+    
+    if (failedFetches > 0) {
+      const failedSources = fetchResults
+        .filter(r => !r.success)
+        .map((r, i) => RSS_SOURCES[i].name);
+      console.warn(`Failed sources: ${failedSources.join(', ')}`);
+    }
     
     const seen = new Set<string>();
-    let allRss = results.flat().filter(i => {
+    let allRss = fetchResults.flatMap(r => r.items).filter(i => {
       if (!i.published_at) return false;
       const n = i.title.toLowerCase().replace(/[^a-zåäö0-9]/g, '').slice(0, 50);
       if (seen.has(n)) return false;
@@ -474,16 +665,6 @@ serve(async (req) => {
     console.log(`After cleanup: ${postCleanupRss.length} RSS, ${postCleanupAi.length} AI`);
 
     // ===== STEP 6: THE CLOSED-LOOP LOGIC WITH SOURCE LIMITS =====
-    // Goal: Always exactly 4 items
-    // Priority: RSS > AI
-    // Rules:
-    // - Max 2 articles per source (normal mode)
-    // - Max 3 articles per source (crisis mode - only if needed to reach 4 items)
-    // - RSS items stay for full 5 days (sacred)
-    // - When new RSS comes in, it replaces the OLDEST AI item (one at a time)
-    // - When we have 4 RSS, new RSS pushes out oldest RSS
-    // - AI items refresh ONE at a time daily (gradual rotation)
-
     const today = new Date().toISOString().split('T')[0];
     let insertedRss = 0;
     let aiReplaced = 0;
@@ -493,7 +674,7 @@ serve(async (req) => {
     const totalCurrent = postCleanup.length;
     const targetSlots = 4;
 
-    // Check if we're in crisis mode: not enough RSS items to fill 4 slots with max 2 per source
+    // Check if we're in crisis mode
     const currentSourceCounts = countBySource(postCleanupRss);
     const availableNewWithLimit = filterBySourceLimit(newRssItems, postCleanupRss, MAX_PER_SOURCE_NORMAL);
     
@@ -514,10 +695,8 @@ serve(async (req) => {
     console.log(`Eligible new items with max ${maxPerSource}/source: ${eligibleNewItems.length}`);
 
     if (eligibleNewItems.length > 0) {
-      // Case: We have new RSS items to add (respecting source limits)
-      
       if (postCleanupAi.length > 0 && totalCurrent >= targetSlots) {
-        // We have AI items and we're at capacity - replace oldest AI with newest eligible RSS
+        // Replace oldest AI with newest eligible RSS
         const oldestAi = postCleanupAi[postCleanupAi.length - 1];
         const newestRss = eligibleNewItems[0];
         
@@ -542,7 +721,7 @@ serve(async (req) => {
         insertedRss = 1;
         aiReplaced = 1;
       } else if (totalCurrent < targetSlots) {
-        // We have empty slots - fill them with new RSS (up to what's needed, respecting source limits)
+        // Fill empty slots with new RSS
         const slotsNeeded = targetSlots - totalCurrent;
         const toInsert = eligibleNewItems.slice(0, slotsNeeded);
         
@@ -567,11 +746,10 @@ serve(async (req) => {
         await supabase.from('daily_hr_news').insert(insertData);
         insertedRss = toInsert.length;
       } else if (postCleanupAi.length === 0 && totalCurrent >= targetSlots) {
-        // All 4 slots are RSS - push out the oldest RSS if new one is newer
+        // All 4 slots are RSS - push out oldest if new is newer
         const oldestRss = postCleanupRss[postCleanupRss.length - 1];
         const newestNewRss = eligibleNewItems[0];
         
-        // Only replace if the new RSS is actually newer
         if (oldestRss.published_at && newestNewRss.published_at && 
             new Date(newestNewRss.published_at) > new Date(oldestRss.published_at)) {
           console.log(`Replacing oldest RSS from ${oldestRss.source} with newer RSS from ${newestNewRss.source}`);
@@ -612,13 +790,11 @@ serve(async (req) => {
     console.log(`After RSS processing: ${afterRssCount} RSS, ${afterAi.length} AI, total: ${totalAfterRss}`);
 
     if (totalAfterRss < targetSlots) {
-      // Need to fill with AI
       const aiNeeded = targetSlots - totalAfterRss;
       console.log(`Need ${aiNeeded} AI items to fill slots`);
       
       const aiNews = await generateAIFallbackNews(aiNeeded);
       if (aiNews.length > 0) {
-        // Place AI items as oldest (so they get replaced first when RSS comes)
         const oldestTime = afterRss.reduce((min, r) => {
           const t = r.published_at ? new Date(r.published_at).getTime() : Date.now();
           return Math.min(min, t);
@@ -633,24 +809,18 @@ serve(async (req) => {
         console.log(`Inserted ${fillers.length} AI filler items`);
       }
     } else if (afterAi.length > 0 && eligibleNewItems.length === 0) {
-      // ===== STEP 8: Daily AI refresh (gradual rotation) =====
-      // No new RSS came in, but we have AI items
-      // Check if the oldest AI item was created more than 24 hours ago
-      
+      // ===== STEP 8: Daily AI refresh =====
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       const oldestAi = afterAi[afterAi.length - 1];
       
       if (oldestAi.created_at && new Date(oldestAi.created_at) < oneDayAgo) {
         console.log(`Refreshing oldest AI item (created ${oldestAi.created_at})`);
         
-        // Generate ONE new AI item
         const newAiItem = await generateSingleAINewsItem();
         
         if (newAiItem) {
-          // Delete the old AI item
           await supabase.from('daily_hr_news').delete().eq('id', oldestAi.id);
           
-          // Insert the new AI item (as oldest to maintain order)
           const rssItems = afterRss.filter(i => i.source_url != null);
           const oldestTime = rssItems.reduce((min, r) => {
             const t = r.published_at ? new Date(r.published_at).getTime() : Date.now();
@@ -668,7 +838,7 @@ serve(async (req) => {
       }
     }
 
-    // ===== STEP 9: Final cleanup - ensure exactly 4 items =====
+    // ===== STEP 9: Final cleanup =====
     const { data: finalItems } = await supabase
       .from('daily_hr_news')
       .select('id, source, source_url, category')
@@ -678,7 +848,6 @@ serve(async (req) => {
     const finalList = finalItems || [];
     
     if (finalList.length > targetSlots) {
-      // Too many items - remove excess (starting from oldest)
       const toRemove = finalList.slice(targetSlots);
       console.log(`Removing ${toRemove.length} excess items`);
       await supabase.from('daily_hr_news').delete().in('id', toRemove.map(i => i.id));
@@ -688,6 +857,9 @@ serve(async (req) => {
     const finalSources = [...new Set(finalList.slice(0, targetSlots).map(i => i.source))];
     const finalSourceCounts = countBySource(finalList.slice(0, targetSlots));
     const finalCategories = [...new Set(finalList.slice(0, targetSlots).map(i => i.category))];
+
+    // Get health summary
+    const healthSummary = await getHealthSummary(supabase);
 
     return new Response(
       JSON.stringify({
@@ -700,6 +872,12 @@ serve(async (req) => {
         sources: finalSources,
         source_counts: Object.fromEntries(finalSourceCounts),
         categories: finalCategories,
+        fetch_stats: {
+          successful: successfulFetches,
+          failed: failedFetches,
+          total_retries: totalRetries,
+        },
+        health: healthSummary,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
