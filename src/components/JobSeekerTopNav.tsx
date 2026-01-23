@@ -349,10 +349,10 @@ function JobSeekerTopNav() {
                     {getUserInitials()}
                   </div>
                 )}
-                <div>
-                  <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
-                  <p className="text-xs text-white/60">{user?.email}</p>
-                </div>
+              <div>
+                <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
+                <p className="text-xs text-white">{user?.email}</p>
+              </div>
               </div>
               
               {profileItems.map((item) => {
