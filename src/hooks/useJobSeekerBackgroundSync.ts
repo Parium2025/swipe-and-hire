@@ -3,13 +3,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
+import { preloadWeatherLocation } from './useWeather';
 
 const SAVED_JOBS_CACHE_KEY = 'job_seeker_saved_jobs_';
 const MY_APPLICATIONS_CACHE_KEY = 'job_seeker_applications_';
 const MESSAGES_CACHE_KEY = 'job_seeker_messages_';
 const AVAILABLE_JOBS_CACHE_KEY = 'job_seeker_available_jobs_';
 const CANDIDATE_INTERVIEWS_CACHE_KEY = 'job_seeker_interviews_';
+const WEATHER_CACHE_KEY = 'parium_weather_data';
 const CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min
+const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min
 const PERIODIC_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 min
 
 /**
@@ -50,6 +53,33 @@ export const useJobSeekerBackgroundSync = () => {
 
   // Endast för jobbsökare
   const isJobSeeker = userRole?.role === 'job_seeker';
+
+  // 🌤️ Validera väder-cache
+  const isWeatherCacheValid = useCallback((): boolean => {
+    try {
+      const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+      if (!cached) return false;
+      
+      const parsed = JSON.parse(cached);
+      const age = Date.now() - parsed.timestamp;
+      return age < WEATHER_CACHE_MAX_AGE;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  // 🌤️ Preload väder om cache är gammal
+  const preloadWeatherIfStale = useCallback(async () => {
+    if (isWeatherCacheValid()) {
+      return; // Cache är färsk
+    }
+    
+    try {
+      await preloadWeatherLocation();
+    } catch (error) {
+      console.warn('[JobSeekerSync] Weather preload failed:', error);
+    }
+  }, [isWeatherCacheValid]);
 
   // 💾 Preload sparade jobb
   const preloadSavedJobs = useCallback(async (userId: string) => {
@@ -331,6 +361,7 @@ export const useJobSeekerBackgroundSync = () => {
         preloadMessages(userId),
         preloadAvailableJobs(),
         preloadCandidateInterviews(userId),
+        preloadWeatherIfStale(),
       ]);
 
       hasPreloadedRef.current = true;
@@ -341,7 +372,7 @@ export const useJobSeekerBackgroundSync = () => {
     } finally {
       isPreloadingRef.current = false;
     }
-  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadMessages, preloadAvailableJobs, preloadCandidateInterviews]);
+  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadMessages, preloadAvailableJobs, preloadCandidateInterviews, preloadWeatherIfStale]);
 
   // Exponera preload-funktionen globalt
   useEffect(() => {
