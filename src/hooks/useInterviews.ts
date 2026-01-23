@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -114,18 +114,17 @@ export const useCandidateInterviews = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Försök läsa från localStorage-cache för omedelbar rendering
-  const getInitialData = () => {
+  // STEG 1: Läs initial data från localStorage DIREKT vid hook-init
+  // Detta gör att kortet renderas omedelbart utan loading state
+  const getInitialData = useCallback(() => {
     if (!user?.id) return undefined;
     
     try {
-      // Samma cache-nyckel som useJobSeekerBackgroundSync använder
       const cacheKey = `job_seeker_interviews_${user.id}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         const parsed = JSON.parse(cached);
         const age = Date.now() - parsed.timestamp;
-        // Använd cache om den är mindre än 5 minuter gammal
         if (age < 5 * 60 * 1000 && parsed.items?.length >= 0) {
           return parsed.items;
         }
@@ -134,7 +133,7 @@ export const useCandidateInterviews = () => {
       // Ignorera cache-fel
     }
     return undefined;
-  };
+  }, [user?.id]);
 
   const { data: interviews = [], isLoading } = useQuery({
     queryKey: ['candidate-interviews', user?.id],
@@ -155,7 +154,7 @@ export const useCandidateInterviews = () => {
 
       if (error) throw error;
 
-      // Spara till localStorage för nästa session (samma nyckel som background sync)
+      // Spara till localStorage
       try {
         const cacheKey = `job_seeker_interviews_${user.id}`;
         localStorage.setItem(cacheKey, JSON.stringify({
@@ -169,11 +168,16 @@ export const useCandidateInterviews = () => {
       return data || [];
     },
     enabled: !!user?.id,
-    staleTime: 30000, // 30 seconds - don't refetch if data is fresh
-    gcTime: 5 * 60 * 1000, // Keep in memory for 5 minutes
-    placeholderData: getInitialData, // Show cached data immediately
-    refetchOnMount: false, // Don't refetch if we have cached data
-    refetchOnWindowFocus: false, // Background sync handles this
+    staleTime: Infinity, // Bakgrundssynk hanterar uppdateringar - ingen automatisk refetch
+    gcTime: 10 * 60 * 1000, // Behåll i minnet 10 min
+    initialData: getInitialData, // Använd initialData istället för placeholderData
+    initialDataUpdatedAt: () => {
+      // Om vi har cache, sätt "gammalt" timestamp för att trigga bakgrunds-refetch
+      const cached = getInitialData();
+      return cached ? Date.now() - 60000 : undefined;
+    },
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Real-time subscription for interview updates
