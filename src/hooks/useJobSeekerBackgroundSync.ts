@@ -260,22 +260,26 @@ export const useJobSeekerBackgroundSync = () => {
   }, [queryClient]);
 
   // 📅 Preload kandidat-intervjuer (bokade intervjuer för jobbsökaren)
+  // KRITISKT: Samma mönster som arbetsgivarsidan - sätter React Query cache DIREKT
   const preloadCandidateInterviews = useCallback(async (userId: string) => {
     const cacheKey = CANDIDATE_INTERVIEWS_CACHE_KEY + userId;
     const existingCache = localStorage.getItem(cacheKey);
     
+    // STEG 1: Sätt React Query cache DIREKT från localStorage för instant rendering
     if (existingCache) {
       try {
         const parsed = JSON.parse(existingCache);
         const age = Date.now() - parsed.timestamp;
+        // Populera React Query cache omedelbart om vi har giltig cache
         if (age < CACHE_MAX_AGE && parsed.items?.length >= 0) {
-          return; // Cache är färsk
+          queryClient.setQueryData(['candidate-interviews', userId], parsed.items);
         }
       } catch {
-        // Korrupt cache - fortsätt
+        // Korrupt cache - fortsätt till fetch
       }
     }
 
+    // STEG 2: Hämta färsk data från servern (i bakgrunden)
     const { data, error } = await supabase
       .from('interviews')
       .select(`
@@ -289,12 +293,13 @@ export const useJobSeekerBackgroundSync = () => {
       .order('scheduled_at', { ascending: true });
 
     if (!error && data) {
+      // Spara till localStorage
       localStorage.setItem(cacheKey, JSON.stringify({
         items: data,
         timestamp: Date.now(),
       }));
       
-      // Uppdatera React Query cache
+      // Uppdatera React Query cache med färsk data
       queryClient.setQueryData(['candidate-interviews', userId], data);
     }
   }, [queryClient]);
