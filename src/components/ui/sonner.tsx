@@ -49,15 +49,21 @@ const Toaster = ({ ...props }: ToasterProps) => {
         closeButton: true,
         classNames: {
           toast:
-            "group toast relative group-[.toaster]:bg-slate-900/85 group-[.toaster]:backdrop-blur-xl group-[.toaster]:text-white group-[.toaster]:border group-[.toaster]:border-white/20 group-[.toaster]:shadow-lg cursor-pointer select-none",
+            "group toast relative group-[.toaster]:backdrop-blur-xl group-[.toaster]:text-white group-[.toaster]:border group-[.toaster]:border-white/20 group-[.toaster]:shadow-lg cursor-pointer select-none",
           // Gör hela toasten klickbar utan att visa ett X
           closeButton:
             "absolute inset-0 z-20 h-full w-full opacity-0 transform-none rounded-none border-0 bg-transparent p-0 m-0 pointer-events-auto hover:opacity-0 focus:opacity-0",
-          description: "group-[.toast]:text-white",
+          description: "group-[.toast]:text-white/90",
           actionButton:
             "relative z-30 group-[.toast]:bg-white/10 group-[.toast]:text-white group-[.toast]:border group-[.toast]:border-white/20",
           cancelButton:
             "relative z-30 group-[.toast]:bg-white/10 group-[.toast]:text-white group-[.toast]:border group-[.toast]:border-white/20",
+          error:
+            "group-[.toaster]:!bg-red-900/90 group-[.toaster]:!border-red-500/30",
+          success:
+            "group-[.toaster]:!bg-emerald-900/90 group-[.toaster]:!border-emerald-500/30",
+          info:
+            "group-[.toaster]:!bg-slate-900/85",
         },
       }}
       {...props}
