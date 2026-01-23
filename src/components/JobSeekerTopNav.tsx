@@ -79,7 +79,6 @@ function JobSeekerTopNav() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Avatar/Video state
   const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null;
@@ -211,58 +210,6 @@ function JobSeekerTopNav() {
             )}
           </button>
 
-          {/* Profil Dropdown - with user avatar/video instead of icon */}
-          <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
-              >
-                <span 
-                  className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
-                    isDropdownActive(profileItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
-                  }`} 
-                />
-                {/* Show profile video/image instead of User icon - same size as user menu avatar */}
-                {hasVideo && videoUrl ? (
-                  <ProfileVideo
-                    videoUrl={videoUrl}
-                    coverImageUrl={coverUrl || avatarUrl || undefined}
-                    userInitials={getUserInitials()}
-                    alt="Profilvideo"
-                    className="h-8 w-8 ring-2 ring-white/20 rounded-full relative z-10"
-                    showCountdown={false}
-                    showProgressBar={false}
-                  />
-                ) : avatarUrl ? (
-                  <img 
-                    src={avatarUrl} 
-                    alt={getUserDisplayName()} 
-                    className="h-8 w-8 rounded-full object-cover ring-2 ring-white/20 relative z-10"
-                  />
-                ) : (
-                  <User className="h-4 w-4 relative z-10" />
-                )}
-                <span className="relative z-10">Profil</span>
-                <ChevronDown className="h-3 w-3 text-white relative z-10" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className={dropdownContentClass}>
-              {profileItems.map((item) => {
-                const isActive = isActiveUrl(item.url);
-                return (
-                  <DropdownMenuItem
-                    key={item.url}
-                    onClick={() => { handleNavigation(item.url); setProfileOpen(false); }}
-                    className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.title}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {/* Ekonomi Dropdown */}
           <DropdownMenu open={economyOpen} onOpenChange={setEconomyOpen}>
             <DropdownMenuTrigger asChild>
@@ -343,9 +290,9 @@ function JobSeekerTopNav() {
         </div>
       </div>
 
-      {/* Right side: User Avatar Menu */}
+      {/* Right side: Profil Dropdown with avatar/video - matches employer side */}
       <div className="flex items-center gap-3">
-        <DropdownMenu open={userMenuOpen} onOpenChange={setUserMenuOpen}>
+        <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
           <DropdownMenuTrigger asChild>
             <button
               className="flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors hover:bg-white/10"
@@ -380,24 +327,54 @@ function JobSeekerTopNav() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className={dropdownContentClass + " min-w-[200px]"}>
             {/* User info header */}
-            <div className="px-3 py-2 border-b border-white/10">
-              <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
-              <p className="text-xs text-white/70">Jobbsökare</p>
+            <div className="flex items-center gap-3 px-3 py-2.5 border-b border-white/10">
+              {hasVideo && videoUrl ? (
+                <ProfileVideo
+                  videoUrl={videoUrl}
+                  coverImageUrl={coverUrl || avatarUrl || undefined}
+                  userInitials={getUserInitials()}
+                  alt="Profilvideo"
+                  className="h-10 w-10 ring-2 ring-white/20 rounded-full"
+                  showCountdown={false}
+                  showProgressBar={false}
+                />
+              ) : avatarUrl ? (
+                <Avatar className="h-10 w-10 ring-2 ring-white/20">
+                  <AvatarImage src={avatarUrl} alt={getUserDisplayName()} />
+                  <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold text-white ring-2 ring-white/20">
+                  {getUserInitials()}
+                </div>
+              )}
+              <div>
+                <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
+                <p className="text-xs text-white/60">{user?.email}</p>
+              </div>
             </div>
             
-            <DropdownMenuItem
-              onClick={() => { handleNavigation('/profile'); setUserMenuOpen(false); }}
-              className={`${dropdownItemClass} ${isActiveUrl('/profile') ? dropdownItemActiveClass : ''}`}
-            >
-              <User className="h-4 w-4" />
-              Min Profil
-            </DropdownMenuItem>
+            {profileItems.map((item) => {
+              const isActive = isActiveUrl(item.url);
+              return (
+                <DropdownMenuItem
+                  key={item.url}
+                  onClick={() => { handleNavigation(item.url); setProfileOpen(false); }}
+                  className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.title}
+                </DropdownMenuItem>
+              );
+            })}
             
             <DropdownMenuSeparator className="bg-white/20" />
             
             <DropdownMenuItem
-              onClick={() => { signOut(); setUserMenuOpen(false); }}
-              className={`${dropdownItemClass} text-red-400 hover:text-red-300`}
+              onClick={() => { signOut(); setProfileOpen(false); }}
+              className={`${dropdownItemClass} text-red-400 hover:text-red-300 hover:bg-red-500/10`}
             >
               <LogOut className="h-4 w-4" />
               Logga ut
