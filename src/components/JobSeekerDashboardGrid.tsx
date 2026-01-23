@@ -835,7 +835,7 @@ const getTimeUntil = (scheduledAt: string): string => {
 
 // Job Seeker Interviews Card (Orange - Bottom Right)
 const JobSeekerInterviewsCard = memo(() => {
-  const { interviews, isLoading } = useCandidateInterviews();
+  const { interviews } = useCandidateInterviews();
   const navigate = useNavigate();
   
   const upcomingInterviews = interviews.slice(0, 5);
@@ -860,21 +860,6 @@ const JobSeekerInterviewsCard = memo(() => {
       default: return '';
     }
   };
-
-  if (isLoading) {
-    return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg h-[200px]`}>
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-        <CardContent className="relative p-4 h-full">
-          <div className="flex items-center gap-2 mb-4">
-            <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
-            <Skeleton className="h-4 w-24 bg-white/20" />
-          </div>
-          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg h-[200px]`}>
@@ -906,8 +891,9 @@ const JobSeekerInterviewsCard = memo(() => {
                 const isUrgent = timeUntil.includes('min') || timeUntil.includes('tim');
                 
                 // Get company name from joined data
-                const companyName = interview.profiles?.company_name || 
-                  `${interview.profiles?.first_name || ''} ${interview.profiles?.last_name || ''}`.trim() ||
+                const employerProfile = interview.job_postings?.profiles ?? (interview as any).profiles;
+                const companyName = employerProfile?.company_name ||
+                  `${employerProfile?.first_name || ''} ${employerProfile?.last_name || ''}`.trim() ||
                   'Okänt företag';
                 
                 return (
