@@ -126,9 +126,10 @@ const EmployerDashboard = memo(() => {
     }
 
     try {
+      // Soft delete: mark as deleted instead of actually deleting
       const { error } = await supabase
         .from('job_postings')
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', jobToDelete.id);
 
       if (error) {

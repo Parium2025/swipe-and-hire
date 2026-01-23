@@ -90,12 +90,13 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             )
           `)
           .in('employer_id', userIds)
+          .is('deleted_at', null)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
         return data || [];
       } else {
-        // Personal scope - only current user's jobs
+        // Personal scope - only current user's jobs (exclude soft-deleted)
         const { data, error } = await supabase
           .from('job_postings')
           .select(`
@@ -106,6 +107,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             )
           `)
           .eq('employer_id', user.id)
+          .is('deleted_at', null)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
