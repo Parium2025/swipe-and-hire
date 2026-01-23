@@ -63,11 +63,18 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
     return format(scheduledDate, 'EEEE d MMMM', { locale: sv });
   };
 
-  // Get company/employer name
+  // Get company/employer name (supports both old and new data structure)
   const getEmployerName = () => {
-    if (interview.profiles?.company_name) return interview.profiles.company_name;
-    if (interview.profiles?.first_name) {
-      return `${interview.profiles.first_name} ${interview.profiles.last_name || ''}`.trim();
+    // New structure: profiles nested under job_postings
+    const nestedProfile = (interview.job_postings as any)?.profiles;
+    // Old structure: profiles directly on interview
+    const directProfile = interview.profiles;
+    
+    const profile = nestedProfile || directProfile;
+    
+    if (profile?.company_name) return profile.company_name;
+    if (profile?.first_name) {
+      return `${profile.first_name} ${profile.last_name || ''}`.trim();
     }
     return 'Arbetsgivare';
   };
