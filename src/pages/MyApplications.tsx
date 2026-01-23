@@ -43,6 +43,7 @@ interface Application {
     is_active: boolean | null;
     created_at: string;
     expires_at: string | null;
+    deleted_at: string | null;
     applications_count: number | null;
     profiles: {
       company_name: string | null;
@@ -134,6 +135,7 @@ const MyApplications = () => {
             is_active,
             created_at,
             expires_at,
+            deleted_at,
             applications_count,
             profiles:employer_id (
               company_name,
@@ -338,8 +340,14 @@ const MyApplications = () => {
                             {job.applications_count ?? 0} sökande
                           </Badge>
                         )}
-                        {/* Days remaining badge */}
-                        {job && (() => {
+                        {/* Deleted badge */}
+                        {job?.deleted_at && (
+                          <Badge variant="glass" className="bg-gray-500/20 text-white border-gray-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-gray-500/30 hover:border-gray-500/50 hover:backdrop-brightness-110">
+                            Borttagen
+                          </Badge>
+                        )}
+                        {/* Days remaining badge - only show if not deleted */}
+                        {job && !job.deleted_at && (() => {
                           const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                           if (isExpired) {
                             return (
@@ -368,8 +376,16 @@ const MyApplications = () => {
                     </Badge>
                   </div>
 
-                  {/* Job inactive warning */}
-                  {job && !job.is_active && (
+                  {/* Job deleted warning */}
+                  {job?.deleted_at && (
+                    <div className="mt-3 px-3 py-2 bg-gray-500/10 border border-gray-500/20 rounded-lg">
+                      <p className="text-gray-300 text-sm">
+                        Denna jobbannons har tagits bort av arbetsgivaren
+                      </p>
+                    </div>
+                  )}
+                  {/* Job inactive warning - only show if not deleted */}
+                  {job && !job.deleted_at && !job.is_active && (
                     <div className="mt-3 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
                       <p className="text-amber-300 text-sm">
                         Denna annons är inte längre aktiv

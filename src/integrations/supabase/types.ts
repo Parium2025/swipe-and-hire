@@ -889,6 +889,7 @@ export type Database = {
           category: string | null
           contact_email: string | null
           created_at: string
+          deleted_at: string | null
           description: string | null
           employer_id: string
           employment_type: string | null
@@ -928,6 +929,7 @@ export type Database = {
           category?: string | null
           contact_email?: string | null
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           employer_id: string
           employment_type?: string | null
@@ -967,6 +969,7 @@ export type Database = {
           category?: string | null
           contact_email?: string | null
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           employer_id?: string
           employment_type?: string | null
