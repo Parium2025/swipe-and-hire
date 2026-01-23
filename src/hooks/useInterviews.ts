@@ -114,6 +114,28 @@ export const useCandidateInterviews = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Försök läsa från localStorage-cache för omedelbar rendering
+  const getInitialData = () => {
+    if (!user?.id) return undefined;
+    
+    try {
+      // Samma cache-nyckel som useJobSeekerBackgroundSync använder
+      const cacheKey = `job_seeker_interviews_${user.id}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const age = Date.now() - parsed.timestamp;
+        // Använd cache om den är mindre än 5 minuter gammal
+        if (age < 5 * 60 * 1000 && parsed.items?.length >= 0) {
+          return parsed.items;
+        }
+      }
+    } catch {
+      // Ignorera cache-fel
+    }
+    return undefined;
+  };
+
   const { data: interviews = [], isLoading } = useQuery({
     queryKey: ['candidate-interviews', user?.id],
     queryFn: async () => {
@@ -133,10 +155,25 @@ export const useCandidateInterviews = () => {
 
       if (error) throw error;
 
+      // Spara till localStorage för nästa session (samma nyckel som background sync)
+      try {
+        const cacheKey = `job_seeker_interviews_${user.id}`;
+        localStorage.setItem(cacheKey, JSON.stringify({
+          items: data || [],
+          timestamp: Date.now(),
+        }));
+      } catch {
+        // Ignorera storage-fel
+      }
+
       return data || [];
     },
     enabled: !!user?.id,
-    staleTime: 30000, // 30 seconds cache like employer side
+    staleTime: 30000, // 30 seconds - don't refetch if data is fresh
+    gcTime: 5 * 60 * 1000, // Keep in memory for 5 minutes
+    placeholderData: getInitialData, // Show cached data immediately
+    refetchOnMount: false, // Don't refetch if we have cached data
+    refetchOnWindowFocus: false, // Background sync handles this
   });
 
   // Real-time subscription for interview updates
