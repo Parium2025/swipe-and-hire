@@ -323,6 +323,27 @@ const JobSeekerStatsCard = memo(() => {
     staleTime: 5000,
   });
 
+  // Query for unread messages count
+  const { data: unreadMessagesCount = 0, isLoading: messagesLoading } = useQuery<number>({
+    queryKey: ['unread-messages-count', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return 0;
+      const { count, error } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_id', user.id)
+        .eq('is_read', false);
+      
+      if (error) {
+        console.error('Error fetching unread messages:', error);
+        return 0;
+      }
+      return count || 0;
+    },
+    enabled: !!user?.id,
+    staleTime: 5000,
+  });
+
   // Real-time subscriptions
   useEffect(() => {
     if (!user?.id) return;
@@ -374,15 +395,32 @@ const JobSeekerStatsCard = memo(() => {
         }
       )
       .subscribe();
+
+    const messagesChannel = supabase
+      .channel('jobseeker-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
+        }
+      )
+      .subscribe();
     
     return () => {
       supabase.removeChannel(applicationsChannel);
       supabase.removeChannel(interviewsChannel);
       supabase.removeChannel(savedChannel);
+      supabase.removeChannel(messagesChannel);
     };
   }, [user?.id, queryClient]);
 
-  const isLoading = applicationsLoading || interviewsLoading || savedLoading;
+  const isLoading = applicationsLoading || interviewsLoading || savedLoading || messagesLoading;
 
   const navigate = useNavigate();
 
@@ -390,7 +428,8 @@ const JobSeekerStatsCard = memo(() => {
     { icon: Send, label: 'Skickade ansökningar', value: applicationsCount, description: 'Dina jobbansökningar', link: '/my-applications' },
     { icon: Calendar, label: 'Bokade intervjuer', value: interviewsCount, description: 'Kommande intervjuer' },
     { icon: Heart, label: 'Sparade jobb', value: savedJobsCount, description: 'Jobb du sparat', link: '/saved-jobs' },
-  ], [applicationsCount, interviewsCount, savedJobsCount]);
+    { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden', link: '/messages' },
+  ], [applicationsCount, interviewsCount, savedJobsCount, unreadMessagesCount]);
 
   const goNext = useCallback(() => {
     setCurrentIndex(prev => (prev + 1) % statsArray.length);
