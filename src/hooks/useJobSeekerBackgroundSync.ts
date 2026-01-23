@@ -284,8 +284,11 @@ export const useJobSeekerBackgroundSync = () => {
       .from('interviews')
       .select(`
         *,
-        job_postings(title, employer_id),
-        profiles!interviews_employer_id_fkey(company_name, first_name, last_name)
+        job_postings(
+          title,
+          employer_id,
+          profiles:employer_id(company_name, first_name, last_name)
+        )
       `)
       .eq('applicant_id', userId)
       .gte('scheduled_at', new Date().toISOString())

@@ -144,8 +144,11 @@ export const useCandidateInterviews = () => {
         .from('interviews')
         .select(`
           *,
-          job_postings(title, employer_id),
-          profiles!interviews_employer_id_fkey(company_name, first_name, last_name)
+          job_postings(
+            title,
+            employer_id,
+            profiles:employer_id(company_name, first_name, last_name)
+          )
         `)
         .eq('applicant_id', user.id)
         .gte('scheduled_at', new Date().toISOString())
@@ -168,6 +171,7 @@ export const useCandidateInterviews = () => {
       return data || [];
     },
     enabled: !!user?.id,
+    retry: 0,
     staleTime: Infinity, // Bakgrundssynk hanterar uppdateringar - ingen automatisk refetch
     gcTime: 10 * 60 * 1000, // Behåll i minnet 10 min
     initialData: getInitialData, // Använd initialData istället för placeholderData
