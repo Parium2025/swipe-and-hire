@@ -35,11 +35,11 @@ interface CandidateInterviewCardProps {
     job_postings?: {
       title: string;
       employer_id: string;
-    } | null;
-    profiles?: {
-      company_name: string | null;
-      first_name: string | null;
-      last_name: string | null;
+      profiles?: {
+        company_name: string | null;
+        first_name: string | null;
+        last_name: string | null;
+      } | null;
     } | null;
   };
 }
@@ -63,14 +63,9 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
     return format(scheduledDate, 'EEEE d MMMM', { locale: sv });
   };
 
-  // Get company/employer name (supports both old and new data structure)
+  // Get company/employer name from job_postings -> profiles
   const getEmployerName = () => {
-    // New structure: profiles nested under job_postings
-    const nestedProfile = (interview.job_postings as any)?.profiles;
-    // Old structure: profiles directly on interview
-    const directProfile = interview.profiles;
-    
-    const profile = nestedProfile || directProfile;
+    const profile = interview.job_postings?.profiles;
     
     if (profile?.company_name) return profile.company_name;
     if (profile?.first_name) {
