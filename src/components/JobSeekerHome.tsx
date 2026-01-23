@@ -212,33 +212,6 @@ const JobSeekerHome = memo(() => {
         {/* Dashboard Grid */}
         <JobSeekerDashboardGrid />
 
-        {/* CTA to search jobs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
-        >
-          <Card className="bg-gradient-to-br from-white/[0.08] to-white/[0.04] backdrop-blur-sm border-white/10">
-            <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
-                  <Sparkles className="h-6 w-6 text-primary" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">Redo att hitta drömjobbet?</h3>
-                  <p className="text-sm text-white/60">Utforska tusentals möjligheter</p>
-                </div>
-              </div>
-              <Button
-                onClick={() => navigate('/search-jobs')}
-                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg shadow-primary/25"
-              >
-                <Search className="mr-2 h-4 w-4" />
-                Sök jobb
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
       </div>
     </>
   );
