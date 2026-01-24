@@ -221,8 +221,8 @@ const getWeatherInfo = (code: number, isNight: boolean): { description: string; 
   return { description: 'Okänt', emoji: '🌡️' };
 };
 
-// Cache helpers - location cache valid for 10 minutes max
-const LOCATION_CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
+// Cache helpers - location cache valid for 3 minutes max (was 10)
+const LOCATION_CACHE_MAX_AGE = 3 * 60 * 1000; // 3 minutes - faster location detection
 
 const getCachedLocation = (): CachedLocation | null => {
   try {
@@ -249,13 +249,16 @@ const setCachedLocation = (location: Omit<CachedLocation, 'timestamp'>) => {
   }
 };
 
+// Weather cache valid for 2 minutes (was 5) - faster updates
+const WEATHER_CACHE_MAX_AGE = 2 * 60 * 1000; // 2 minutes
+
 const getCachedWeather = (): CachedWeather | null => {
   try {
     const cached = localStorage.getItem(WEATHER_CACHE_KEY);
     if (!cached) return null;
     const data = JSON.parse(cached);
-    // Weather cache valid for 5 minutes only (was 15)
-    if (Date.now() - data.timestamp > 5 * 60 * 1000) return null;
+    // Weather cache valid for 2 minutes only
+    if (Date.now() - data.timestamp > WEATHER_CACHE_MAX_AGE) return null;
     return data;
   } catch {
     return null;
