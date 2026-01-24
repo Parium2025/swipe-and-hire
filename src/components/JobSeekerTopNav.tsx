@@ -299,20 +299,10 @@ function JobSeekerTopNav() {
                     isDropdownActive(profileItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
-                {hasVideo && videoUrl ? (
-                  <ProfileVideo
-                    videoUrl={videoUrl}
-                    coverImageUrl={coverUrl || avatarUrl || undefined}
-                    userInitials={getUserInitials()}
-                    alt="Profilvideo"
-                    className="h-7 w-7 ring-2 ring-white/20 rounded-full relative z-10"
-                    showCountdown={false}
-                    showProgressBar={false}
-                    disablePlayback={true}
-                  />
-                ) : avatarUrl ? (
+                {/* Trigger always shows cover image (no play icon) - video playback is only in dropdown */}
+                {(hasVideo && (coverUrl || avatarUrl)) || avatarUrl ? (
                   <Avatar className="h-7 w-7 ring-2 ring-white/20 relative z-10">
-                    <AvatarImage src={avatarUrl} alt={getUserDisplayName()} />
+                    <AvatarImage src={coverUrl || avatarUrl || ''} alt={getUserDisplayName()} />
                     <AvatarFallback className="bg-white/20 text-white text-xs font-semibold">
                       {getUserInitials()}
                     </AvatarFallback>
