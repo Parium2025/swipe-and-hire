@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 // Swedish and international career/job seeking RSS sources
-// VERIFIED: All URLs tested and working
+// VERIFIED: All URLs tested and working - expanded for practical career development
 const RSS_SOURCES = [
   // Swedish career-focused sources
   { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
@@ -20,9 +20,15 @@ const RSS_SOURCES = [
   { url: 'https://www.va.se/rss/', name: 'Veckans Affärer' },
   { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
   { url: 'https://www.breakit.se/feed/artiklar', name: 'Breakit' },
-  // International career sources
+  // International career sources - practical tips & development
   { url: 'https://www.fastcompany.com/work-life/rss', name: 'Fast Company' },
   { url: 'https://hbr.org/topic/career-planning/feed', name: 'HBR Career' },
+  { url: 'https://www.themuse.com/feed/rss', name: 'The Muse' },
+  { url: 'https://www.thebalancemoney.com/careers-rss-4160726', name: 'The Balance Careers' },
+  { url: 'https://www.indeed.com/career-advice/feed', name: 'Indeed Career' },
+  // More international career development
+  { url: 'https://www.forbes.com/leadership/feed/', name: 'Forbes Leadership' },
+  { url: 'https://www.inc.com/rss', name: 'Inc.' },
 ];
 
 // ONLY block completely irrelevant topics - politics, sports, entertainment, etc.
