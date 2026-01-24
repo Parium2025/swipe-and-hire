@@ -308,6 +308,7 @@ function JobSeekerTopNav() {
                     className="h-7 w-7 ring-2 ring-white/20 rounded-full relative z-10"
                     showCountdown={false}
                     showProgressBar={false}
+                    disablePlayback={true}
                   />
                 ) : avatarUrl ? (
                   <Avatar className="h-7 w-7 ring-2 ring-white/20 relative z-10">

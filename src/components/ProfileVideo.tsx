@@ -14,9 +14,10 @@ interface ProfileVideoProps {
   countdownVariant?: 'default' | 'compact' | 'preview'; // 'compact' for Min Profil, 'preview' for Förhandsgranska Profil, 'default' elsewhere
   onPlayingChange?: (isPlaying: boolean) => void; // Callback when playing state changes
   onClick?: (e: React.MouseEvent) => void; // Custom click handler (bypasses default play behavior)
+  disablePlayback?: boolean; // When true, clicking does nothing (just shows thumbnail)
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onClick }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onClick, disablePlayback = false }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -83,6 +84,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   // (Keeping function names removed to simplify behavior)
 
   const handleTap = async (e?: React.MouseEvent) => {
+    // If playback is disabled, do nothing (just act as thumbnail)
+    if (disablePlayback) return;
+    
     // If custom onClick is provided, use that instead
     if (onClick && e) {
       onClick(e);
