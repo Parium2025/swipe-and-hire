@@ -11,9 +11,9 @@ const MESSAGES_CACHE_KEY = 'job_seeker_messages_';
 const AVAILABLE_JOBS_CACHE_KEY = 'job_seeker_available_jobs_';
 const CANDIDATE_INTERVIEWS_CACHE_KEY = 'job_seeker_interviews_';
 const WEATHER_CACHE_KEY = 'parium_weather_data';
-const CACHE_MAX_AGE = 2 * 60 * 1000; // 2 min (was 5)
-const WEATHER_CACHE_MAX_AGE = 2 * 60 * 1000; // 2 min (was 5)
-const PERIODIC_REFRESH_INTERVAL = 2 * 60 * 1000; // 2 min (was 5)
+const CACHE_MAX_AGE = 3 * 60 * 1000; // 3 min (balanced)
+const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min (optimal for weather)
+const PERIODIC_REFRESH_INTERVAL = 3 * 60 * 1000; // 3 min (balanced)
 
 /**
  * 🚀 JOB SEEKER BACKGROUND SYNC ENGINE

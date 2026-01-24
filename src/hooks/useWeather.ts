@@ -249,15 +249,14 @@ const setCachedLocation = (location: Omit<CachedLocation, 'timestamp'>) => {
   }
 };
 
-// Weather cache valid for 2 minutes (was 5) - faster updates
-const WEATHER_CACHE_MAX_AGE = 2 * 60 * 1000; // 2 minutes
+// Weather cache valid for 5 minutes (optimal - weather doesn't change faster)
+const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes
 
 const getCachedWeather = (): CachedWeather | null => {
   try {
     const cached = localStorage.getItem(WEATHER_CACHE_KEY);
     if (!cached) return null;
     const data = JSON.parse(cached);
-    // Weather cache valid for 2 minutes only
     if (Date.now() - data.timestamp > WEATHER_CACHE_MAX_AGE) return null;
     return data;
   } catch {
@@ -606,6 +605,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   // Main initialization effect
   useEffect(() => {
     mountedRef.current = true;
+    let watchId: number | null = null;
     
     // If not enabled, skip weather fetching entirely
     if (!enabled) {
@@ -639,14 +639,46 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       }
     }
 
-    // LIVE GPS TRACKING: Check GPS location every 2 minutes for real-time updates
-    // This ensures the city updates automatically as you move around
+    // 🚀 REAL-TIME GPS: Use watchPosition for instant location updates
+    // This is the browser's built-in continuous GPS tracking - completely free!
+    if ('geolocation' in navigator && !isNativeApp()) {
+      watchId = navigator.geolocation.watchPosition(
+        async (position) => {
+          const newLat = position.coords.latitude;
+          const newLon = position.coords.longitude;
+          
+          const cached = locationRef.current;
+          if (cached) {
+            const distance = getDistanceKm(cached.lat, cached.lon, newLat, newLon);
+            // Only update if moved more than 500 meters (0.5 km)
+            if (distance < 0.5) {
+              return; // Not enough movement
+            }
+            console.log(`📍 GPS watchPosition: moved ${distance.toFixed(2)}km - updating!`);
+          }
+          
+          // Get fresh city name and update
+          const city = await getCityName(newLat, newLon);
+          await updateLocation(newLat, newLon, city, 'gps');
+        },
+        (error) => {
+          console.warn('GPS watchPosition error:', error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 30000, // Accept positions up to 30 seconds old
+        }
+      );
+      console.log('🛰️ Real-time GPS tracking started via watchPosition');
+    }
+
+    // Fallback: Check GPS location every 3 minutes for devices where watchPosition fails
     const gpsTrackingInterval = setInterval(() => {
       if (mountedRef.current) {
-        console.log('Live GPS check - updating location...');
         checkForLocationChange(true);
       }
-    }, 2 * 60 * 1000); // 2 minutes - frequent enough to catch movement
+    }, 3 * 60 * 1000); // 3 minutes fallback
 
     // Listen for network changes - user might have moved to new wifi/location
     const handleOnline = () => {
@@ -658,7 +690,6 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && mountedRef.current) {
         console.log('Tab visible - checking for location change...');
-        // Always do full location check when coming back to app
         checkForLocationChange(true);
       }
     };
@@ -668,11 +699,15 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     return () => {
       mountedRef.current = false;
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        console.log('🛰️ Real-time GPS tracking stopped');
+      }
       clearInterval(gpsTrackingInterval);
       window.removeEventListener('online', handleOnline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather]);
+  }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation]);
 
   return weather;
 };
