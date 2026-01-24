@@ -8,19 +8,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Swedish and international career/job seeking RSS sources
-// VERIFIED: All URLs tested and working
+// Swedish career-focused RSS sources (7 unique sources for job seekers)
+// These are separate from HR-news sources to avoid duplication
 const RSS_SOURCES = [
-  // Swedish career-focused sources (primary)
+  // Career & work life focused
   { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
-  { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
-  { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
   { url: 'https://www.unionen.se/rss.xml', name: 'Unionen' },
-  // Swedish business/career news
   { url: 'https://www.va.se/rss/', name: 'Veckans Affärer' },
-  { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
-  { url: 'https://www.breakit.se/feed/artiklar', name: 'Breakit' },
-  // NEW: Additional Swedish career & work sources (free, verified)
   { url: 'https://arbetet.se/feed/', name: 'Arbetet' },
   { url: 'https://www.svt.se/nyheter/ekonomi/rss.xml', name: 'SVT Ekonomi' },
   { url: 'https://akademikern.se/feed/', name: 'Akademikern' },
