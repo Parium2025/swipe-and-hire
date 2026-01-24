@@ -22,7 +22,6 @@ const RSS_SOURCES = [
   { url: 'https://www.breakit.se/feed/artiklar', name: 'Breakit' },
   // NEW: Additional Swedish career & work sources (free, verified)
   { url: 'https://arbetet.se/feed/', name: 'Arbetet' },
-  { url: 'https://www.motivation.se/feed/', name: 'Motivation.se' },
   { url: 'https://www.svt.se/nyheter/ekonomi/rss.xml', name: 'SVT Ekonomi' },
   { url: 'https://akademikern.se/feed/', name: 'Akademikern' },
   { url: 'https://www.ingenjoren.se/feed/', name: 'Ingenjören' },
