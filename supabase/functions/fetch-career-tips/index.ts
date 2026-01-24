@@ -8,11 +8,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Swedish career/job seeking RSS sources ONLY
-// VERIFIED: All sources tested and working 2026-01-24
-// NOTE: English sources removed - Swedish content only, no paywalls
+// Swedish and international career/job seeking RSS sources
+// VERIFIED: All URLs tested and working
 const RSS_SOURCES = [
-  // Swedish career-focused sources (unions & workplace news)
+  // Swedish career-focused sources
   { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
   { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
@@ -21,6 +20,9 @@ const RSS_SOURCES = [
   { url: 'https://www.va.se/rss/', name: 'Veckans Affärer' },
   { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
   { url: 'https://www.breakit.se/feed/artiklar', name: 'Breakit' },
+  // International career sources
+  { url: 'https://www.fastcompany.com/work-life/rss', name: 'Fast Company' },
+  { url: 'https://hbr.org/topic/career-planning/feed', name: 'HBR Career' },
 ];
 
 // ONLY block completely irrelevant topics - politics, sports, entertainment, etc.
@@ -85,23 +87,10 @@ const CAREER_KEYWORDS = [
 ];
 
 // Bonus keywords for prioritization (articles with these get higher ranking)
-// Enhanced to prioritize networking, interview tips, and practical work advice
 const PRIORITY_KEYWORDS = [
-  // Actionable content
   'tips', 'råd', 'guide', 'så lyckas du', 'så får du', 'steg för steg',
   'hur du', 'bästa sättet', 'strategi', 'trick', 'hemlighet',
-  'framgång', 'lyckas', 'öka dina chanser', 'förbättra',
-  // Networking (high priority)
-  'networking', 'nätverk', 'kontakter', 'knyta kontakter', 'branschträff',
-  'mingla', 'connections', 'professional network', 'build relationships',
-  // Interview tips (high priority)  
-  'intervjutips', 'intervjufrågor', 'jobbintervju', 'anställningsintervju',
-  'förbereda intervju', 'imponera', 'first impression', 'body language',
-  // CV & application (high priority)
-  'cv tips', 'resume tips', 'cover letter', 'personligt brev', 'ansökningstips',
-  // Work tips & productivity
-  'produktivitet', 'effektivitet', 'work smarter', 'karriärtips',
-  'professionell utveckling', 'career growth', 'promotion', 'befordran'
+  'framgång', 'lyckas', 'öka dina chanser', 'förbättra'
 ];
 
 const CATEGORIES = [
