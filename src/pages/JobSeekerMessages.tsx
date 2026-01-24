@@ -1,42 +1,112 @@
-import { useState, useRef, useEffect } from 'react';
-import { useConversations, useConversationMessages, Conversation, ConversationMessage } from '@/hooks/useConversations';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useMessages, Message } from '@/hooks/useMessages';
 import { useAuth } from '@/hooks/useAuth';
-import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageSquare, 
   Send, 
   Loader2, 
   ChevronLeft,
   Briefcase,
-  Building2,
 } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
+interface MessageThread {
+  id: string; // sender_id as thread ID
+  senderProfile: {
+    user_id?: string;
+    first_name: string | null;
+    last_name: string | null;
+    company_name: string | null;
+    profile_image_url: string | null;
+    company_logo_url: string | null;
+    role: 'job_seeker' | 'employer';
+  };
+  lastMessage: Message;
+  unreadCount: number;
+  messages: Message[];
+}
+
 export default function JobSeekerMessages() {
   const { user } = useAuth();
-  const { conversations, isLoading, totalUnreadCount } = useConversations();
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const { inbox, sent, isLoading, unreadCount, markAsRead, refetch } = useMessages();
+  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
 
-  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
+  // Group messages by sender (employer) into threads
+  const threads = useMemo(() => {
+    const threadMap = new Map<string, MessageThread>();
 
-  const handleSelectConversation = (convId: string) => {
-    setSelectedConversationId(convId);
+    // Process inbox messages (received from employers)
+    inbox.forEach(msg => {
+      const senderId = msg.sender_id;
+      if (!threadMap.has(senderId) && msg.sender_profile) {
+        threadMap.set(senderId, {
+          id: senderId,
+          senderProfile: msg.sender_profile,
+          lastMessage: msg,
+          unreadCount: 0,
+          messages: [],
+        });
+      }
+      const thread = threadMap.get(senderId);
+      if (thread) {
+        thread.messages.push(msg);
+        if (!msg.is_read) {
+          thread.unreadCount++;
+        }
+        // Update last message if newer
+        if (new Date(msg.created_at) > new Date(thread.lastMessage.created_at)) {
+          thread.lastMessage = msg;
+        }
+      }
+    });
+
+    // Add sent messages to threads
+    sent.forEach(msg => {
+      const recipientId = msg.recipient_id;
+      const thread = threadMap.get(recipientId);
+      if (thread) {
+        thread.messages.push(msg);
+        // Update last message if newer
+        if (new Date(msg.created_at) > new Date(thread.lastMessage.created_at)) {
+          thread.lastMessage = msg;
+        }
+      }
+    });
+
+    // Sort messages within each thread by date
+    threadMap.forEach(thread => {
+      thread.messages.sort((a, b) => 
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+    });
+
+    // Convert to array and sort by last message date
+    return Array.from(threadMap.values()).sort((a, b) => 
+      new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime()
+    );
+  }, [inbox, sent]);
+
+  const selectedThread = threads.find(t => t.id === selectedThreadId);
+
+  const handleSelectThread = (threadId: string) => {
+    setSelectedThreadId(threadId);
   };
 
   const handleBack = () => {
-    setSelectedConversationId(null);
+    setSelectedThreadId(null);
+    refetch();
   };
 
   // Only show loading if there's no cached data at all
-  const hasData = conversations.length > 0;
+  const hasData = inbox.length > 0 || sent.length > 0;
   
   if (isLoading && !hasData) {
     return (
@@ -46,20 +116,22 @@ export default function JobSeekerMessages() {
     );
   }
 
-  // Show chat view if conversation is selected
-  if (selectedConversation) {
+  // Show chat view if thread is selected
+  if (selectedThread) {
     return (
       <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-4xl mx-auto px-3 md:px-6">
         <ChatView 
-          conversation={selectedConversation} 
+          thread={selectedThread}
           currentUserId={user?.id || ''}
           onBack={handleBack}
+          markAsRead={markAsRead}
+          refetch={refetch}
         />
       </div>
     );
   }
 
-  // Show conversation list
+  // Show thread list
   return (
     <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-4xl mx-auto px-3 md:px-6">
       {/* Header */}
@@ -69,15 +141,15 @@ export default function JobSeekerMessages() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-white">Meddelanden</h1>
-          {totalUnreadCount > 0 && (
-            <p className="text-white/60 text-sm">{totalUnreadCount} olästa meddelanden</p>
+          {unreadCount > 0 && (
+            <p className="text-white/60 text-sm">{unreadCount} olästa meddelanden</p>
           )}
         </div>
       </div>
 
-      {/* Conversation list */}
+      {/* Thread list */}
       <div className="flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-        {conversations.length === 0 ? (
+        {threads.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center px-6 text-center">
             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4">
               <MessageSquare className="h-8 w-8 text-white" />
@@ -90,12 +162,12 @@ export default function JobSeekerMessages() {
         ) : (
           <ScrollArea className="h-full">
             <div className="p-3 space-y-2">
-              {conversations.map((conv) => (
-                <ConversationItem
-                  key={conv.id}
-                  conversation={conv}
+              {threads.map((thread) => (
+                <ThreadItem
+                  key={thread.id}
+                  thread={thread}
                   currentUserId={user?.id || ''}
-                  onClick={() => handleSelectConversation(conv.id)}
+                  onClick={() => handleSelectThread(thread.id)}
                 />
               ))}
             </div>
@@ -106,62 +178,51 @@ export default function JobSeekerMessages() {
   );
 }
 
-// Conversation list item - Slack-style
-function ConversationItem({ 
-  conversation, 
+// Thread list item - Slack-style
+function ThreadItem({ 
+  thread, 
   currentUserId,
   onClick,
 }: { 
-  conversation: Conversation;
+  thread: MessageThread;
   currentUserId: string;
   onClick: () => void;
 }) {
-  const otherMembers = conversation.members.filter(m => m.user_id !== currentUserId);
-  const displayMember = otherMembers[0];
+  const profile = thread.senderProfile;
   
   const getDisplayName = () => {
-    if (conversation.is_group && conversation.name) {
-      return conversation.name;
+    if (profile.role === 'employer' && profile.company_name) {
+      return profile.company_name;
     }
-    if (!displayMember?.profile) return 'Okänd';
-    const p = displayMember.profile;
-    // For job seekers, the other party is typically an employer
-    if (p.role === 'employer' && p.company_name) return p.company_name;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd';
+    return `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Okänd';
   };
 
   const getAvatarUrl = () => {
-    if (!displayMember?.profile) return null;
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_logo_url) return p.company_logo_url;
-    return p.profile_image_url;
+    if (profile.role === 'employer' && profile.company_logo_url) {
+      return profile.company_logo_url;
+    }
+    return profile.profile_image_url;
   };
 
   const getInitials = () => {
-    if (conversation.is_group && conversation.name) {
-      return conversation.name.substring(0, 2).toUpperCase();
+    if (profile.role === 'employer' && profile.company_name) {
+      return profile.company_name.substring(0, 2).toUpperCase();
     }
-    if (!displayMember?.profile) return '?';
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_name) {
-      return p.company_name.substring(0, 2).toUpperCase();
-    }
-    const first = p.first_name?.[0] || '';
-    const last = p.last_name?.[0] || '';
+    const first = profile.first_name?.[0] || '';
+    const last = profile.last_name?.[0] || '';
     return (first + last).toUpperCase() || '?';
   };
 
-  const formatTime = (dateStr: string | null) => {
-    if (!dateStr) return '';
+  const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
     if (isToday(date)) return format(date, 'HH:mm');
     if (isYesterday(date)) return 'Igår';
     return format(date, 'd MMM', { locale: sv });
   };
 
-  const lastMessagePreview = conversation.last_message?.content || 'Inga meddelanden ännu';
-  const isOwnMessage = conversation.last_message?.sender_id === currentUserId;
-  const hasUnread = conversation.unread_count > 0;
+  const lastMessage = thread.lastMessage;
+  const isOwnMessage = lastMessage.sender_id === currentUserId;
+  const hasUnread = thread.unreadCount > 0;
 
   return (
     <button
@@ -182,7 +243,7 @@ function ConversationItem({
         </Avatar>
         {hasUnread && (
           <div className="absolute -top-1 -right-1 min-w-[22px] h-[22px] rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center px-1.5 border-2 border-slate-900">
-            {conversation.unread_count > 99 ? '99+' : conversation.unread_count}
+            {thread.unreadCount > 99 ? '99+' : thread.unreadCount}
           </div>
         )}
       </div>
@@ -197,15 +258,15 @@ function ConversationItem({
             {getDisplayName()}
           </span>
           <span className="text-white/40 text-xs flex-shrink-0">
-            {formatTime(conversation.last_message_at)}
+            {formatTime(lastMessage.created_at)}
           </span>
         </div>
         
         {/* Job context if available */}
-        {conversation.job && (
+        {lastMessage.job && (
           <div className="flex items-center gap-1.5 text-white/50 text-xs mb-1">
             <Briefcase className="h-3 w-3" />
-            <span className="truncate">{conversation.job.title}</span>
+            <span className="truncate">{lastMessage.job.title}</span>
           </div>
         )}
         
@@ -215,7 +276,7 @@ function ConversationItem({
           hasUnread ? "text-white/80 font-medium" : "text-white/50"
         )}>
           {isOwnMessage && <span className="text-white/40">Du: </span>}
-          {lastMessagePreview}
+          {lastMessage.content}
         </p>
       </div>
 
@@ -227,61 +288,58 @@ function ConversationItem({
 
 // Fullscreen chat view
 function ChatView({ 
-  conversation, 
+  thread, 
   currentUserId,
   onBack,
+  markAsRead,
+  refetch,
 }: { 
-  conversation: Conversation;
+  thread: MessageThread;
   currentUserId: string;
   onBack: () => void;
+  markAsRead: (id: string) => void;
+  refetch: () => void;
 }) {
-  const { messages, isLoading, sendMessage, markAsRead } = useConversationMessages(conversation.id);
-  const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const otherMembers = conversation.members.filter(m => m.user_id !== currentUserId);
-  const displayMember = otherMembers[0];
+  const profile = thread.senderProfile;
 
-  // Get current user's display name for typing indicator
-  const getCurrentUserName = () => {
-    const currentMember = conversation.members.find(m => m.user_id === currentUserId);
-    if (!currentMember?.profile) return 'Någon';
-    const p = currentMember.profile;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Någon';
-  };
-
-  // Mark as read when opening
+  // Mark unread messages as read when opening
   useEffect(() => {
-    if (conversation.unread_count > 0) {
-      markAsRead();
-    }
-  }, [conversation.id, conversation.unread_count, markAsRead]);
+    thread.messages.forEach(msg => {
+      if (!msg.is_read && msg.sender_id !== currentUserId) {
+        markAsRead(msg.id);
+      }
+    });
+  }, [thread.messages, currentUserId, markAsRead]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, typingUsers]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNewMessage(e.target.value);
-    if (e.target.value.trim()) {
-      startTyping(getCurrentUserName());
-    }
-  };
+  }, [thread.messages]);
 
   const handleSend = async () => {
     if (!newMessage.trim() || sending) return;
     
-    stopTyping(getCurrentUserName());
-    
     setSending(true);
     try {
-      await sendMessage(newMessage);
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          sender_id: currentUserId,
+          recipient_id: thread.id,
+          content: newMessage.trim(),
+          job_id: thread.lastMessage.job_id,
+        });
+
+      if (error) throw error;
+      
       setNewMessage('');
       textareaRef.current?.focus();
+      refetch();
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Kunde inte skicka meddelande');
@@ -298,43 +356,35 @@ function ChatView({
   };
 
   const getDisplayName = () => {
-    if (conversation.is_group && conversation.name) {
-      return conversation.name;
+    if (profile.role === 'employer' && profile.company_name) {
+      return profile.company_name;
     }
-    if (!displayMember?.profile) return 'Okänd';
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_name) return p.company_name;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd';
+    return `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Okänd';
   };
 
   const getAvatarUrl = () => {
-    if (!displayMember?.profile) return null;
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_logo_url) return p.company_logo_url;
-    return p.profile_image_url;
+    if (profile.role === 'employer' && profile.company_logo_url) {
+      return profile.company_logo_url;
+    }
+    return profile.profile_image_url;
   };
 
   const getInitials = () => {
-    if (conversation.is_group && conversation.name) {
-      return conversation.name.substring(0, 2).toUpperCase();
+    if (profile.role === 'employer' && profile.company_name) {
+      return profile.company_name.substring(0, 2).toUpperCase();
     }
-    if (!displayMember?.profile) return '?';
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_name) {
-      return p.company_name.substring(0, 2).toUpperCase();
-    }
-    const first = p.first_name?.[0] || '';
-    const last = p.last_name?.[0] || '';
+    const first = profile.first_name?.[0] || '';
+    const last = profile.last_name?.[0] || '';
     return (first + last).toUpperCase() || '?';
   };
 
   // Group messages by date
-  const groupedMessages = messages.reduce((groups, msg) => {
+  const groupedMessages = thread.messages.reduce((groups, msg) => {
     const date = format(new Date(msg.created_at), 'yyyy-MM-dd');
     if (!groups[date]) groups[date] = [];
     groups[date].push(msg);
     return groups;
-  }, {} as Record<string, ConversationMessage[]>);
+  }, {} as Record<string, Message[]>);
 
   const formatDateHeader = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -365,10 +415,10 @@ function ChatView({
 
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-white truncate">{getDisplayName()}</h2>
-          {conversation.job && (
+          {thread.lastMessage.job && (
             <p className="text-white/50 text-xs flex items-center gap-1">
               <Briefcase className="h-3 w-3" />
-              {conversation.job.title}
+              {thread.lastMessage.job.title}
             </p>
           )}
         </div>
@@ -376,11 +426,7 @@ function ChatView({
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-6 w-6 animate-spin text-white/50" />
-          </div>
-        ) : messages.length === 0 ? (
+        {thread.messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
               <MessageSquare className="h-6 w-6 text-white/40" />
@@ -409,7 +455,7 @@ function ChatView({
                       message={msg}
                       isOwn={msg.sender_id === currentUserId}
                       showAvatar={idx === 0 || msgs[idx - 1]?.sender_id !== msg.sender_id}
-                      isGroup={conversation.is_group}
+                      senderProfile={thread.senderProfile}
                     />
                   ))}
                 </div>
@@ -420,38 +466,13 @@ function ChatView({
         )}
       </ScrollArea>
 
-      {/* Typing indicator */}
-      <AnimatePresence>
-        {typingUsers.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="px-4 py-2 border-t border-white/5"
-          >
-            <div className="flex items-center gap-2 text-white/60 text-sm">
-              <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-              <span>
-                {typingUsers.length === 1 
-                  ? `${typingUsers[0].name} skriver...`
-                  : `${typingUsers.map(u => u.name).join(', ')} skriver...`}
-              </span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Input */}
       <div className="p-4 border-t border-white/10 flex-shrink-0">
         <div className="flex items-end gap-2">
           <Textarea
             ref={textareaRef}
             value={newMessage}
-            onChange={handleInputChange}
+            onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Skriv ett meddelande..."
             className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
@@ -481,47 +502,28 @@ function MessageBubble({
   message, 
   isOwn, 
   showAvatar,
-  isGroup,
+  senderProfile,
 }: { 
-  message: ConversationMessage;
+  message: Message;
   isOwn: boolean;
   showAvatar: boolean;
-  isGroup: boolean;
+  senderProfile: MessageThread['senderProfile'];
 }) {
-  const getDisplayName = () => {
-    const p = message.sender_profile;
-    if (!p) return 'Okänd';
-    if (p.role === 'employer' && p.company_name) return p.company_name;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd';
-  };
-
   const getAvatarUrl = () => {
-    const p = message.sender_profile;
-    if (!p) return null;
-    if (p.role === 'employer' && p.company_logo_url) return p.company_logo_url;
-    return p.profile_image_url;
+    if (senderProfile.role === 'employer' && senderProfile.company_logo_url) {
+      return senderProfile.company_logo_url;
+    }
+    return senderProfile.profile_image_url;
   };
 
   const getInitials = () => {
-    const p = message.sender_profile;
-    if (!p) return '?';
-    if (p.role === 'employer' && p.company_name) {
-      return p.company_name.substring(0, 2).toUpperCase();
+    if (senderProfile.role === 'employer' && senderProfile.company_name) {
+      return senderProfile.company_name.substring(0, 2).toUpperCase();
     }
-    const first = p.first_name?.[0] || '';
-    const last = p.last_name?.[0] || '';
+    const first = senderProfile.first_name?.[0] || '';
+    const last = senderProfile.last_name?.[0] || '';
     return (first + last).toUpperCase() || '?';
   };
-
-  if (message.is_system_message) {
-    return (
-      <div className="flex justify-center">
-        <span className="text-white/40 text-xs italic px-3 py-1 bg-white/5 rounded-full">
-          {message.content}
-        </span>
-      </div>
-    );
-  }
 
   return (
     <div className={cn(
@@ -545,13 +547,6 @@ function MessageBubble({
         "max-w-[70%] flex flex-col",
         isOwn ? "items-end" : "items-start"
       )}>
-        {/* Sender name for group chats */}
-        {isGroup && showAvatar && !isOwn && (
-          <span className="text-white/50 text-xs mb-1 ml-1">
-            {getDisplayName()}
-          </span>
-        )}
-
         <div className={cn(
           "px-4 py-2 rounded-2xl",
           isOwn 
