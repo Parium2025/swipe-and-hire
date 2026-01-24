@@ -80,10 +80,10 @@ export default function JobSeekerMessages() {
         {conversations.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center px-6 text-center">
             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4">
-              <MessageSquare className="h-8 w-8 text-white/60" />
+              <MessageSquare className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-lg font-medium text-white mb-1">Inga meddelanden</h3>
-            <p className="text-white/60 text-sm max-w-xs">
+            <p className="text-white text-sm max-w-xs">
               När du söker jobb eller arbetsgivare kontaktar dig visas konversationerna här
             </p>
           </div>
