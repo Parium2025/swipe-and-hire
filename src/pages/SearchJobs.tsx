@@ -393,14 +393,14 @@ const SearchJobs = () => {
   );
   
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Aktiva jobb', value: activeJobs.length, loading: false },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: activeJobs.filter(j => j.is_active).length, loading: false },
-    { icon: Building, title: 'Unika företag', value: new Set(activeJobs.map(j => j.company_name)).size, loading: false },
+    { icon: Briefcase, title: 'Aktiva jobb', value: activeJobs.length, loading: false, cacheKey: 'search_active_jobs' },
+    { icon: TrendingUp, title: 'Aktiva annonser', value: activeJobs.filter(j => j.is_active).length, loading: false, cacheKey: 'search_active_ads' },
+    { icon: Building, title: 'Unika företag', value: new Set(activeJobs.map(j => j.company_name)).size, loading: false, cacheKey: 'search_unique_companies' },
     { icon: Users, title: 'Nya denna vecka', value: activeJobs.filter(j => {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return new Date(j.created_at) > weekAgo;
-    }).length, loading: false },
+    }).length, loading: false, cacheKey: 'search_new_this_week' },
   ], [activeJobs]);
 
   const sortLabels = {
