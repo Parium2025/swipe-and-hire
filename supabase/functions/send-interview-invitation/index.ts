@@ -15,7 +15,7 @@ interface InterviewInvitationRequest {
   jobTitle: string;
   scheduledAt: string;
   durationMinutes: number;
-  locationType: 'video' | 'office' | 'phone';
+  locationType: 'video' | 'office';
   locationDetails?: string;
   message?: string;
 }
@@ -42,11 +42,103 @@ const getLocationTypeText = (locationType: string): string => {
       return 'Videointervju';
     case 'office':
       return 'Intervju på plats';
-    case 'phone':
-      return 'Telefonintervju';
     default:
       return 'Intervju';
   }
+};
+
+// Generate iCalendar format date string (UTC)
+const formatIcsDate = (date: Date): string => {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+  return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+};
+
+// Generate unique ID for calendar event
+const generateUid = (): string => {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@parium.se`;
+};
+
+// Escape special characters for iCalendar text
+const escapeIcsText = (text: string): string => {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n');
+};
+
+// Generate .ics calendar file content
+const generateIcsContent = (
+  candidateName: string,
+  companyName: string,
+  jobTitle: string,
+  scheduledAt: string,
+  durationMinutes: number,
+  locationType: string,
+  locationDetails: string,
+  message: string
+): string => {
+  const startDate = new Date(scheduledAt);
+  const endDate = new Date(startDate.getTime() + durationMinutes * 60 * 1000);
+  const now = new Date();
+  
+  const uid = generateUid();
+  const summary = escapeIcsText(`Intervju: ${jobTitle} – ${companyName}`);
+  const location = locationType === 'video' && locationDetails?.startsWith('http')
+    ? escapeIcsText(locationDetails)
+    : locationType === 'office' && locationDetails
+    ? escapeIcsText(locationDetails)
+    : escapeIcsText(getLocationTypeText(locationType));
+  
+  let description = escapeIcsText(`Intervju för tjänsten ${jobTitle} hos ${companyName}.`);
+  if (locationType === 'video' && locationDetails?.startsWith('http')) {
+    description += escapeIcsText(`\n\nMöteslänk: ${locationDetails}`);
+  }
+  if (message) {
+    description += escapeIcsText(`\n\nMeddelande från arbetsgivaren:\n${message}`);
+  }
+  
+  // iCalendar format (RFC 5545)
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Parium//Interview Invitation//SV',
+    'CALSCALE:GREGORIAN',
+    'METHOD:REQUEST',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${formatIcsDate(now)}`,
+    `DTSTART:${formatIcsDate(startDate)}`,
+    `DTEND:${formatIcsDate(endDate)}`,
+    `SUMMARY:${summary}`,
+    `DESCRIPTION:${description}`,
+    `LOCATION:${location}`,
+    `ORGANIZER;CN=${escapeIcsText(companyName)}:mailto:noreply@parium.se`,
+    `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=${escapeIcsText(candidateName)}:mailto:${candidateName}`,
+    'STATUS:CONFIRMED',
+    'SEQUENCE:0',
+    // Add reminder 1 hour before
+    'BEGIN:VALARM',
+    'TRIGGER:-PT1H',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Påminnelse: Intervju om 1 timme',
+    'END:VALARM',
+    // Add reminder 10 minutes before
+    'BEGIN:VALARM',
+    'TRIGGER:-PT10M',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Påminnelse: Intervju om 10 minuter',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+  
+  return icsContent;
 };
 
 const getInterviewTemplate = (
@@ -85,6 +177,27 @@ const getInterviewTemplate = (
               <p style="margin: 0 0 30px 0; font-size: 16px; color: #374151; line-height: 1.6;">
                 Vi vill gärna träffa dig för en intervju gällande tjänsten <strong>${jobTitle}</strong>.
               </p>
+              
+              <!-- Calendar notification -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #ECFDF5; border-radius: 8px; margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 16px;">
+                    <table border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="vertical-align: middle; padding-right: 12px;">
+                          <span style="font-size: 20px;">📆</span>
+                        </td>
+                        <td style="vertical-align: middle;">
+                          <p style="margin: 0; font-size: 14px; color: #065F46; font-weight: 500;">
+                            En kalenderhändelse har bifogats till detta mejl.<br>
+                            Öppna den för att lägga till intervjun i din kalender.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
               
               <!-- Interview Details Card -->
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F0F9FF; border-radius: 12px; margin-bottom: 24px;">
@@ -126,7 +239,7 @@ const getInterviewTemplate = (
                           <table border="0" cellpadding="0" cellspacing="0">
                             <tr>
                               <td style="vertical-align: top; padding-right: 12px;">
-                                <span style="font-size: 24px;">${locationType === 'video' ? '💻' : locationType === 'phone' ? '📞' : '🏢'}</span>
+                                <span style="font-size: 24px;">${locationType === 'video' ? '💻' : '🏢'}</span>
                               </td>
                               <td style="vertical-align: middle;">
                                 <p style="margin: 0; font-size: 14px; color: #6B7280; font-weight: 500;">${getLocationTypeText(locationType).toUpperCase()}</p>
@@ -219,14 +332,38 @@ const handler = async (req: Request): Promise<Response> => {
       message || ''
     );
 
+    // Generate iCalendar content for automatic calendar addition
+    const icsContent = generateIcsContent(
+      candidateName,
+      companyName,
+      jobTitle,
+      scheduledAt,
+      durationMinutes,
+      locationType,
+      locationDetails || '',
+      message || ''
+    );
+    
+    // Convert .ics content to base64 for email attachment
+    const icsBase64 = btoa(unescape(encodeURIComponent(icsContent)));
+
+    console.log(`Generated ICS calendar event for interview at ${scheduledAt}`);
+
     const emailResponse = await resend.emails.send({
       from: `${companyName} via Parium <noreply@parium.se>`,
       to: [candidateEmail],
       subject: `Intervjukallelse: ${jobTitle} – ${companyName}`,
       html: emailHtml,
+      attachments: [
+        {
+          filename: 'intervju.ics',
+          content: icsBase64,
+          content_type: 'text/calendar; method=REQUEST',
+        }
+      ],
     });
 
-    console.log("Interview invitation email sent successfully:", emailResponse);
+    console.log("Interview invitation email with calendar attachment sent successfully:", emailResponse);
 
     return new Response(JSON.stringify({ success: true, ...emailResponse }), {
       status: 200,
