@@ -8,10 +8,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Swedish and international career/job seeking RSS sources
-// VERIFIED: All 15 sources tested and working 2026-01-24
+// Swedish career/job seeking RSS sources ONLY
+// VERIFIED: All sources tested and working 2026-01-24
+// NOTE: English sources removed - Swedish content only, no paywalls
 const RSS_SOURCES = [
-  // Swedish career-focused sources
+  // Swedish career-focused sources (unions & workplace news)
   { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
   { url: 'https://www.chef.se/feed/', name: 'Chef.se' },
   { url: 'https://arbetsvarlden.se/feed/', name: 'Arbetsvärlden' },
@@ -20,16 +21,6 @@ const RSS_SOURCES = [
   { url: 'https://www.va.se/rss/', name: 'Veckans Affärer' },
   { url: 'https://www.di.se/rss', name: 'Dagens Industri' },
   { url: 'https://www.breakit.se/feed/artiklar', name: 'Breakit' },
-  // International career sources - practical tips & development
-  { url: 'https://www.fastcompany.com/work-life/rss', name: 'Fast Company' },
-  { url: 'https://hbr.org/topic/career-planning/feed', name: 'HBR Career' },
-  { url: 'https://www.inc.com/rss', name: 'Inc.' },
-  // NEW: Career development & resume writing sources (testing)
-  { url: 'https://www.workitdaily.com/feeds/blog.rss', name: 'Work It Daily' },
-  { url: 'https://www.careersidekick.com/blog/feed/', name: 'Career Sidekick' },
-  { url: 'https://resumegenius.com/blog/feed', name: 'Resume Genius' },
-  { url: 'https://blog.kickresume.com/feed/', name: 'Kickresume' },
-  { url: 'https://www.glassdoor.com/blog/feed/', name: 'Glassdoor Blog' },
 ];
 
 // ONLY block completely irrelevant topics - politics, sports, entertainment, etc.
