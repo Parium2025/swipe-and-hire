@@ -13,8 +13,8 @@ const CONVERSATIONS_CACHE_KEY = 'conversations_snapshot_';
 const INTERVIEWS_CACHE_KEY = 'interviews_snapshot_';
 const JOB_TEMPLATES_CACHE_KEY = 'job_templates_snapshot_';
 const SNAPSHOT_EXPIRY_MS = 30 * 60 * 1000; // 30 min
-const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min
-const PERIODIC_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 min - refresh all data periodically
+const WEATHER_CACHE_MAX_AGE = 2 * 60 * 1000; // 2 min (was 5)
+const PERIODIC_REFRESH_INTERVAL = 2 * 60 * 1000; // 2 min - faster refresh (was 5)
 
 interface RatingsCacheData {
   ratings: Record<string, number>;
