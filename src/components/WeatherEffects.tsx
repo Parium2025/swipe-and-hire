@@ -245,22 +245,22 @@ const RainEffect = memo(() => {
 RainEffect.displayName = 'RainEffect';
 
 
-// Snow Effect - Continuous gentle snow, appears already in progress
+// Snow Effect - Continuous gentle snow, always falling from top
 const SnowEffect = memo(() => {
   const flakes = useMemo(() => 
     Array.from({ length: 40 }).map((_, i) => {
-      const duration = 12 + Math.random() * 4;
-      // Give each flake a random starting progress (0-100% of screen height)
-      const initialProgress = Math.random() * 100;
+      const duration = 12 + Math.random() * 6; // 12-18 seconds to fall
+      // Stagger start times so flakes are distributed across the fall cycle
+      // This creates the illusion of continuous snow without "popping"
+      const staggerDelay = (i / 40) * duration * 0.8 + Math.random() * 2;
       return {
         id: i,
         left: Math.random() * 100,
-        delay: 0, // No delay - start immediately
+        delay: staggerDelay,
         duration,
         size: 3 + Math.random() * 4,
         opacity: 0.3 + Math.random() * 0.25,
         swayAmount: 10 + Math.random() * 15,
-        initialY: initialProgress, // Start at random position on screen
       };
     }),
   []);
@@ -278,22 +278,31 @@ const SnowEffect = memo(() => {
             opacity: flake.opacity,
             filter: 'blur(0.5px)',
           }}
-          initial={{ y: `${flake.initialY}vh` }}
+          initial={{ y: '-5vh' }} // Always start above viewport
           animate={{
-            y: [`${flake.initialY}vh`, '105vh', '-5vh', '105vh'],
+            y: ['-5vh', '105vh'], // Fall from top to bottom
             x: [0, flake.swayAmount, 0, -flake.swayAmount, 0],
             rotate: [0, 180, 360],
           }}
           transition={{
-            duration: flake.duration,
-            times: [0, (100 - flake.initialY) / 110, (100 - flake.initialY) / 110, 1],
-            repeat: Infinity,
-            ease: 'linear',
+            y: {
+              duration: flake.duration,
+              delay: flake.delay,
+              repeat: Infinity,
+              ease: 'linear',
+            },
             x: {
-              duration: flake.duration * 0.6,
+              duration: flake.duration * 0.5,
+              delay: flake.delay,
               repeat: Infinity,
               repeatType: 'reverse',
               ease: 'easeInOut',
+            },
+            rotate: {
+              duration: flake.duration,
+              delay: flake.delay,
+              repeat: Infinity,
+              ease: 'linear',
             },
           }}
         />
