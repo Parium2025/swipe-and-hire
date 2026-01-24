@@ -263,6 +263,7 @@ type StatData = {
 // Job Seeker Stats Card (Blue - Top Right)
 const JobSeekerStatsCard = memo(() => {
   const { user } = useAuth();
+  const [isPaused, setIsPaused] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const queryClient = useQueryClient();
   
@@ -444,6 +445,15 @@ const JobSeekerStatsCard = memo(() => {
     onSwipeRight: goPrev,
   });
 
+  // Auto-rotation every 6 seconds (pauses on hover)
+  useEffect(() => {
+    if (isPaused || statsArray.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % statsArray.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [isPaused, statsArray.length]);
+
   if (isLoading) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[200px]`}>
@@ -463,6 +473,8 @@ const JobSeekerStatsCard = memo(() => {
     <Card 
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[200px] touch-pan-y`}
       {...swipeHandlers}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
