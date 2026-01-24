@@ -94,10 +94,23 @@ const CAREER_KEYWORDS = [
 ];
 
 // Bonus keywords for prioritization (articles with these get higher ranking)
+// Enhanced to prioritize networking, interview tips, and practical work advice
 const PRIORITY_KEYWORDS = [
+  // Actionable content
   'tips', 'råd', 'guide', 'så lyckas du', 'så får du', 'steg för steg',
   'hur du', 'bästa sättet', 'strategi', 'trick', 'hemlighet',
-  'framgång', 'lyckas', 'öka dina chanser', 'förbättra'
+  'framgång', 'lyckas', 'öka dina chanser', 'förbättra',
+  // Networking (high priority)
+  'networking', 'nätverk', 'kontakter', 'knyta kontakter', 'branschträff',
+  'mingla', 'connections', 'professional network', 'build relationships',
+  // Interview tips (high priority)  
+  'intervjutips', 'intervjufrågor', 'jobbintervju', 'anställningsintervju',
+  'förbereda intervju', 'imponera', 'first impression', 'body language',
+  // CV & application (high priority)
+  'cv tips', 'resume tips', 'cover letter', 'personligt brev', 'ansökningstips',
+  // Work tips & productivity
+  'produktivitet', 'effektivitet', 'work smarter', 'karriärtips',
+  'professionell utveckling', 'career growth', 'promotion', 'befordran'
 ];
 
 const CATEGORIES = [
