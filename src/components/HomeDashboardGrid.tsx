@@ -105,10 +105,9 @@ const GRADIENTS = {
 };
 
 // News Card (Green - Top Left) - Carousel version
-const NewsCard = memo(() => {
+const NewsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaused: (v: boolean) => void }) => {
   const { data: news, isLoading } = useHrNews();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const newsItems = news?.slice(0, 4) || [];
 
   const goNext = useCallback(() => {
@@ -259,7 +258,7 @@ type StatData = {
 };
 
 // Stats Card (Blue - Top Right) - Carousel version with real-time updates
-const StatsCard = memo(() => {
+const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaused: (v: boolean) => void }) => {
   const { jobs, isLoading: jobsLoading } = useJobsData({ scope: 'personal' });
   const { user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -428,6 +427,29 @@ const StatsCard = memo(() => {
     onSwipeRight: goPrev,
   });
 
+  // Auto-rotation every 10 seconds, offset by 5s from green card
+  // Green rotates at 10s, 20s, 30s... Blue at 5s, 15s, 25s... = something changes every 5s
+  // When pausing/resuming, both restart fresh which maintains the sync
+  useEffect(() => {
+    if (isPaused || statsArray.length <= 1) return;
+    
+    let interval: ReturnType<typeof setInterval>;
+    
+    // Start with 5s delay to offset from green card
+    const initialDelay = setTimeout(() => {
+      setCurrentIndex(prev => (prev + 1) % statsArray.length);
+      // THEN start the 10s interval after first rotation
+      interval = setInterval(() => {
+        setCurrentIndex(prev => (prev + 1) % statsArray.length);
+      }, 10000);
+    }, 5000);
+    
+    return () => {
+      clearTimeout(initialDelay);
+      if (interval) clearInterval(interval);
+    };
+  }, [isPaused, statsArray.length]);
+
   if (isLoading) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[200px]`}>
@@ -447,6 +469,8 @@ const StatsCard = memo(() => {
     <Card 
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[200px] touch-pan-y`}
       {...swipeHandlers}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
@@ -948,6 +972,9 @@ InterviewsCard.displayName = 'InterviewsCard';
 
 // Main Dashboard Grid
 export const HomeDashboardGrid = memo(() => {
+  // Shared pause state - hovering on either green or blue card pauses both
+  const [isCardsPaused, setIsCardsPaused] = useState(false);
+
   return (
     <div className="space-y-4">
       <motion.div
@@ -967,7 +994,7 @@ export const HomeDashboardGrid = memo(() => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <NewsCard />
+          <NewsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
         </motion.div>
         
         {/* Top Right - Stats (Blue) */}
@@ -976,7 +1003,7 @@ export const HomeDashboardGrid = memo(() => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.15 }}
         >
-          <StatsCard />
+          <StatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
         </motion.div>
         
         {/* Bottom Left - Notes (Purple) */}
