@@ -47,6 +47,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TruncatedText } from '@/components/TruncatedText';
 import MyCandidates from '@/pages/MyCandidates';
 import Messages from '@/pages/Messages';
+import JobSeekerMessages from '@/pages/JobSeekerMessages';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
 
 const CandidatesContent = () => {
@@ -457,7 +458,7 @@ const Index = () => {
         case '/my-applications':
           return <MyApplications />;
         case '/messages':
-          return <Messages />;
+          return <JobSeekerMessages />;
         case '/subscription':
           return <Subscription />;
         case '/billing':
