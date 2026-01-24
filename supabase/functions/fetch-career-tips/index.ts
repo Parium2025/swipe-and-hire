@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 // Swedish and international career/job seeking RSS sources
-// VERIFIED: All URLs tested 2026-01-24 - only working feeds included
+// VERIFIED: All 15 sources tested and working 2026-01-24
 const RSS_SOURCES = [
   // Swedish career-focused sources
   { url: 'https://www.kollega.se/rss.xml', name: 'Kollega' },
@@ -24,6 +24,12 @@ const RSS_SOURCES = [
   { url: 'https://www.fastcompany.com/work-life/rss', name: 'Fast Company' },
   { url: 'https://hbr.org/topic/career-planning/feed', name: 'HBR Career' },
   { url: 'https://www.inc.com/rss', name: 'Inc.' },
+  // NEW: Career development & resume writing sources (testing)
+  { url: 'https://www.workitdaily.com/feeds/blog.rss', name: 'Work It Daily' },
+  { url: 'https://www.careersidekick.com/blog/feed/', name: 'Career Sidekick' },
+  { url: 'https://resumegenius.com/blog/feed', name: 'Resume Genius' },
+  { url: 'https://blog.kickresume.com/feed/', name: 'Kickresume' },
+  { url: 'https://www.glassdoor.com/blog/feed/', name: 'Glassdoor Blog' },
 ];
 
 // ONLY block completely irrelevant topics - politics, sports, entertainment, etc.
