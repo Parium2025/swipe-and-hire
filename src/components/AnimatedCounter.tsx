@@ -5,27 +5,61 @@ interface AnimatedCounterProps {
   value: number;
   duration?: number;
   className?: string;
+  /** Unique key for persisting the last known value across page loads */
+  cacheKey?: string;
 }
+
+// Helper to read/write cached values
+const getCachedValue = (key: string): number | null => {
+  try {
+    const cached = localStorage.getItem(`counter_${key}`);
+    return cached ? parseInt(cached, 10) : null;
+  } catch {
+    return null;
+  }
+};
+
+const setCachedValue = (key: string, value: number): void => {
+  try {
+    localStorage.setItem(`counter_${key}`, value.toString());
+  } catch {
+    // Ignore storage errors
+  }
+};
 
 export const AnimatedCounter = memo(({ 
   value, 
   duration = 500,
-  className = ''
+  className = '',
+  cacheKey
 }: AnimatedCounterProps) => {
-  const [displayValue, setDisplayValue] = useState(value);
+  // If cacheKey is provided, use cached value as initial; otherwise use current value
+  const cachedInitial = cacheKey ? getCachedValue(cacheKey) : null;
+  const initialValue = cachedInitial !== null ? cachedInitial : value;
+  
+  const [displayValue, setDisplayValue] = useState(initialValue);
   const [direction, setDirection] = useState<'up' | 'down' | null>(null);
-  const previousValue = useRef(value);
+  const previousValue = useRef(initialValue);
   const animationRef = useRef<number | null>(null);
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
     const startValue = previousValue.current;
     const endValue = value;
     
-    // Detect direction of change
-    if (endValue > startValue) {
-      setDirection('up');
-    } else if (endValue < startValue) {
-      setDirection('down');
+    // Detect direction of change - only show arrow if there's actual change
+    const actualChange = endValue !== startValue;
+    if (actualChange) {
+      if (endValue > startValue) {
+        setDirection('up');
+      } else if (endValue < startValue) {
+        setDirection('down');
+      }
+      
+      // Cache the new value for next page load
+      if (cacheKey) {
+        setCachedValue(cacheKey, endValue);
+      }
     }
     
     // Clear direction indicator after animation
@@ -33,11 +67,14 @@ export const AnimatedCounter = memo(({
       setDirection(null);
     }, 1500);
 
-    // If no change, skip animation
-    if (startValue === endValue) {
+    // If no change, just update display without animation
+    if (!actualChange) {
+      setDisplayValue(endValue);
+      previousValue.current = endValue;
       return () => clearTimeout(directionTimeout);
     }
 
+    hasAnimatedRef.current = true;
     const startTime = performance.now();
     const difference = endValue - startValue;
 
@@ -67,7 +104,7 @@ export const AnimatedCounter = memo(({
       }
       clearTimeout(directionTimeout);
     };
-  }, [value, duration]);
+  }, [value, duration, cacheKey]);
 
   return (
     <span className={`inline-flex items-center gap-1 ${className}`}>

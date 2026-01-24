@@ -7,6 +7,8 @@ import { memo } from 'react';
 interface SubItem {
   label: string;
   value: number;
+  /** Unique key for persisting the last known value across page loads */
+  cacheKey?: string;
 }
 
 interface StatCard {
@@ -15,6 +17,8 @@ interface StatCard {
   value: number | string;
   loading?: boolean;
   subItems?: SubItem[];
+  /** Unique key for persisting the last known value across page loads */
+  cacheKey?: string;
 }
 
 interface StatsGridProps {
@@ -59,7 +63,11 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                     style={{ opacity: stat.loading ? 0.5 : 1 }}
                   >
                     {typeof stat.value === 'number' ? (
-                      <AnimatedCounter value={stat.value} className="text-sm sm:text-base md:text-xl font-bold" />
+                      <AnimatedCounter 
+                        value={stat.value} 
+                        className="text-sm sm:text-base md:text-xl font-bold" 
+                        cacheKey={stat.cacheKey}
+                      />
                     ) : (
                       stat.value
                     )}
@@ -81,7 +89,11 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                     </div>
                     <div className="px-1 pb-1 sm:px-1.5 sm:pb-1.5 md:px-3 md:pb-3">
                       <div className={`text-sm sm:text-base md:text-xl font-bold text-center flex justify-center ${colorClass}`}>
-                        <AnimatedCounter value={item.value} className="text-sm sm:text-base md:text-xl font-bold" />
+                        <AnimatedCounter 
+                          value={item.value} 
+                          className="text-sm sm:text-base md:text-xl font-bold" 
+                          cacheKey={item.cacheKey}
+                        />
                       </div>
                     </div>
                   </div>
@@ -103,7 +115,11 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                   style={{ opacity: stat.loading ? 0.5 : 1 }}
                 >
                   {typeof stat.value === 'number' ? (
-                    <AnimatedCounter value={stat.value} className="text-sm sm:text-base md:text-xl font-bold" />
+                    <AnimatedCounter 
+                      value={stat.value} 
+                      className="text-sm sm:text-base md:text-xl font-bold" 
+                      cacheKey={stat.cacheKey}
+                    />
                   ) : (
                     stat.value
                   )}
