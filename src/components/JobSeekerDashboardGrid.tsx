@@ -445,22 +445,24 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
 
   // Auto-rotation every 10 seconds, offset by 5s from green card
   // Green rotates at 10s, 20s, 30s... Blue at 5s, 15s, 25s... = something changes every 5s
+  // When pausing/resuming, both restart fresh which maintains the sync
   useEffect(() => {
     if (isPaused || statsArray.length <= 1) return;
+    
+    let interval: ReturnType<typeof setInterval>;
     
     // Start with 5s delay to offset from green card
     const initialDelay = setTimeout(() => {
       setCurrentIndex(prev => (prev + 1) % statsArray.length);
+      // THEN start the 10s interval after first rotation
+      interval = setInterval(() => {
+        setCurrentIndex(prev => (prev + 1) % statsArray.length);
+      }, 10000);
     }, 5000);
-    
-    // Then continue every 10s (offset by initial 5s delay)
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % statsArray.length);
-    }, 10000);
     
     return () => {
       clearTimeout(initialDelay);
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
   }, [isPaused, statsArray.length]);
 
