@@ -769,33 +769,82 @@ serve(async (req) => {
     console.log(`Eligible new items with max ${maxPerSource}/source: ${eligibleNewItems.length}`);
 
     if (eligibleNewItems.length > 0) {
-      if (postCleanupAi.length > 0 && totalCurrent >= targetSlots) {
-        // Replace oldest AI with newest RSS
-        const oldestAi = postCleanupAi[postCleanupAi.length - 1];
-        const newestRss = eligibleNewItems[0];
+      // BATCH REPLACEMENT: Replace ALL AI articles first, then oldest RSS articles
+      // Priority: AI (oldest first) → RSS (oldest first)
+      
+      const aiCount = postCleanupAi.length;
+      const rssCount = postCleanupRss.length;
+      const newItemsCount = eligibleNewItems.length;
+      
+      console.log(`Batch replacement: ${newItemsCount} new items, ${aiCount} AI to replace, ${rssCount} RSS existing`);
+      
+      if (totalCurrent >= targetSlots) {
+        // Feed is full - need to replace existing items
+        // Calculate how many to replace: min(new items available, slots we can rotate)
+        const maxReplacements = Math.min(newItemsCount, targetSlots);
         
-        console.log(`Replacing oldest AI with new RSS "${newestRss.title}" from ${newestRss.source}`);
+        // First, replace all AI articles (oldest first)
+        const aiToReplace = Math.min(aiCount, maxReplacements);
+        // Then, if we have more new items, replace oldest RSS articles
+        const rssToReplace = Math.min(rssCount, maxReplacements - aiToReplace);
         
-        await supabase.from('daily_career_tips').delete().eq('id', oldestAi.id);
+        const totalToReplace = aiToReplace + rssToReplace;
         
-        const cat = getCatInfo(newestRss.category);
-        await supabase.from('daily_career_tips').insert({
-          title: newestRss.title,
-          summary: newestRss.summary,
-          source: newestRss.source,
-          source_url: newestRss.source_url,
-          category: cat.label,
-          icon_name: cat.icon,
-          gradient: cat.gradient,
-          news_date: today,
-          order_index: 0,
-          published_at: newestRss.published_at,
-        });
+        console.log(`Will replace ${aiToReplace} AI + ${rssToReplace} RSS = ${totalToReplace} total`);
         
-        insertedRss = 1;
-        aiReplaced = 1;
-      } else if (totalCurrent < targetSlots) {
-        // Fill empty slots
+        if (totalToReplace > 0) {
+          // Collect IDs to delete: AI first (oldest = end of array), then oldest RSS
+          const idsToDelete: string[] = [];
+          
+          // Get oldest AI articles (from end of sorted array)
+          for (let i = 0; i < aiToReplace; i++) {
+            const idx = postCleanupAi.length - 1 - i;
+            if (idx >= 0) {
+              idsToDelete.push(postCleanupAi[idx].id);
+            }
+          }
+          
+          // Get oldest RSS articles if needed (from end of sorted array)
+          for (let i = 0; i < rssToReplace; i++) {
+            const idx = postCleanupRss.length - 1 - i;
+            if (idx >= 0) {
+              idsToDelete.push(postCleanupRss[idx].id);
+            }
+          }
+          
+          console.log(`Deleting ${idsToDelete.length} old items to make room for new RSS`);
+          
+          // Delete all marked items
+          for (const id of idsToDelete) {
+            await supabase.from('daily_career_tips').delete().eq('id', id);
+          }
+          
+          // Insert new RSS items
+          const toInsert = eligibleNewItems.slice(0, totalToReplace);
+          const insertData = toInsert.map((i, idx) => {
+            const cat = getCatInfo(i.category);
+            return {
+              title: i.title,
+              summary: i.summary,
+              source: i.source,
+              source_url: i.source_url,
+              category: cat.label,
+              icon_name: cat.icon,
+              gradient: cat.gradient,
+              news_date: today,
+              order_index: idx,
+              published_at: i.published_at,
+            };
+          });
+          
+          await supabase.from('daily_career_tips').insert(insertData);
+          insertedRss = toInsert.length;
+          aiReplaced = aiToReplace;
+          
+          console.log(`Inserted ${insertedRss} new RSS items, replaced ${aiReplaced} AI and ${rssToReplace} old RSS`);
+        }
+      } else {
+        // Feed has empty slots - fill them first
         const slotsNeeded = targetSlots - totalCurrent;
         const toInsert = eligibleNewItems.slice(0, slotsNeeded);
         
@@ -819,33 +868,6 @@ serve(async (req) => {
         
         await supabase.from('daily_career_tips').insert(insertData);
         insertedRss = toInsert.length;
-      } else if (postCleanupAi.length === 0 && totalCurrent >= targetSlots) {
-        // All 4 slots are RSS - push out oldest if new is newer
-        const oldestRss = postCleanupRss[postCleanupRss.length - 1];
-        const newestNewRss = eligibleNewItems[0];
-        
-        if (oldestRss.published_at && newestNewRss.published_at && 
-            new Date(newestNewRss.published_at) > new Date(oldestRss.published_at)) {
-          console.log(`Replacing oldest RSS from ${oldestRss.source} with newer RSS from ${newestNewRss.source}`);
-          
-          await supabase.from('daily_career_tips').delete().eq('id', oldestRss.id);
-          
-          const cat = getCatInfo(newestNewRss.category);
-          await supabase.from('daily_career_tips').insert({
-            title: newestNewRss.title,
-            summary: newestNewRss.summary,
-            source: newestNewRss.source,
-            source_url: newestNewRss.source_url,
-            category: cat.label,
-            icon_name: cat.icon,
-            gradient: cat.gradient,
-            news_date: today,
-            order_index: 0,
-            published_at: newestNewRss.published_at,
-          });
-          
-          insertedRss = 1;
-        }
       }
     }
 
