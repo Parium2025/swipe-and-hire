@@ -90,10 +90,9 @@ function formatTipPublishedTime(publishedAt: string | null): string {
 }
 
 // Career Tips Card (Green - Top Left) - EXACT COPY of employer NewsCard structure
-const CareerTipsCard = memo(() => {
+const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaused: (v: boolean) => void }) => {
   const { data: tips, isLoading, error } = useCareerTips();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   
   const tipsItems = tips?.slice(0, 4) || [];
 
@@ -261,9 +260,8 @@ type StatData = {
 };
 
 // Job Seeker Stats Card (Blue - Top Right)
-const JobSeekerStatsCard = memo(() => {
+const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaused: (v: boolean) => void }) => {
   const { user } = useAuth();
-  const [isPaused, setIsPaused] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const queryClient = useQueryClient();
   
@@ -964,6 +962,9 @@ JobSeekerInterviewsCard.displayName = 'JobSeekerInterviewsCard';
 
 // Main Dashboard Grid for Job Seekers
 export const JobSeekerDashboardGrid = memo(() => {
+  // Shared pause state - hovering on either green or blue card pauses both
+  const [isCardsPaused, setIsCardsPaused] = useState(false);
+
   return (
     <div className="space-y-4">
       <motion.div
@@ -983,7 +984,7 @@ export const JobSeekerDashboardGrid = memo(() => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <CareerTipsCard />
+          <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
         </motion.div>
         
         {/* Top Right - Stats (Blue) */}
@@ -992,7 +993,7 @@ export const JobSeekerDashboardGrid = memo(() => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.15 }}
         >
-          <JobSeekerStatsCard />
+          <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
         </motion.div>
         
         {/* Bottom Left - Notes (Purple) */}
