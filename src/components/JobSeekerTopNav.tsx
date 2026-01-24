@@ -325,7 +325,7 @@ function JobSeekerTopNav() {
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className={dropdownContentClass + " min-w-[220px]"}>
+            <DropdownMenuContent align="center" className={dropdownContentClass + " min-w-[220px]"}>
               {/* User info header */}
               <div className="flex items-center gap-3 px-3 py-2.5 border-b border-white/10">
                 {hasVideo && videoUrl ? (
