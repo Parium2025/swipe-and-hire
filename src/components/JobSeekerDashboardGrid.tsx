@@ -448,7 +448,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
     if (isPaused || statsArray.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % statsArray.length);
-    }, 6000);
+    }, 10000); // Same 10s as green card for perfect sync
     return () => clearInterval(interval);
   }, [isPaused, statsArray.length]);
 
