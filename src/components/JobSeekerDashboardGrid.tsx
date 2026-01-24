@@ -881,7 +881,7 @@ const JobSeekerInterviewsCard = memo(() => {
             <div className="flex flex-col items-center justify-center text-center h-full">
               <Calendar className="h-8 w-8 text-white/60 mb-2" />
               <p className="text-sm font-medium text-white">Inga bokade intervjuer</p>
-              <p className="text-xs text-white/60 mt-1">Fortsätt söka jobb!</p>
+              <p className="text-xs text-white mt-1">Fortsätt söka jobb!</p>
             </div>
           ) : (
             <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
