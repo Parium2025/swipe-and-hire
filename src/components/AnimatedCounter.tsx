@@ -37,38 +37,50 @@ export const AnimatedCounter = memo(({
   const cachedInitial = cacheKey ? getCachedValue(cacheKey) : null;
   const hasCachedValue = cachedInitial !== null;
   
-  // If no cached value, start from current value (no animation on first view)
+  // If we have a cached value, use it as initial display value
+  // This prevents showing 0 briefly before data loads
   const initialValue = hasCachedValue ? cachedInitial : value;
   
   const [displayValue, setDisplayValue] = useState(initialValue);
   const [direction, setDirection] = useState<'up' | 'down' | null>(null);
   const previousValue = useRef(initialValue);
   const animationRef = useRef<number | null>(null);
-  const isFirstRender = useRef(!hasCachedValue);
+  // Track if we've seen "real" data (non-zero value) since mount
+  const hasReceivedRealData = useRef(false);
 
   useEffect(() => {
     const startValue = previousValue.current;
     const endValue = value;
     const actualChange = endValue !== startValue;
     
-    // Always cache the current value for next page load
+    // Ignore zero values - these indicate data is still loading
+    // Don't cache 0 and don't animate from/to 0
+    if (endValue === 0) {
+      return;
+    }
+    
+    // Mark that we've received real data
+    const isFirstRealData = !hasReceivedRealData.current;
+    hasReceivedRealData.current = true;
+    
+    // Cache the current value for next page load (only non-zero values)
     if (cacheKey) {
       setCachedValue(cacheKey, endValue);
     }
     
-    // Only show direction arrows if:
-    // 1. This is NOT the first render (we had a cached value)
-    // 2. There's an actual change in value
-    if (actualChange && !isFirstRender.current) {
+    // Show direction arrows ONLY if:
+    // 1. We had a cached value before
+    // 2. This is not the first time we're seeing real data
+    // 3. The value actually changed from what we last showed
+    const shouldShowArrow = hasCachedValue && !isFirstRealData && actualChange;
+    
+    if (shouldShowArrow) {
       if (endValue > startValue) {
         setDirection('up');
       } else if (endValue < startValue) {
         setDirection('down');
       }
     }
-    
-    // Mark first render as complete
-    isFirstRender.current = false;
     
     // Clear direction indicator after animation
     const directionTimeout = setTimeout(() => {
@@ -77,6 +89,13 @@ export const AnimatedCounter = memo(({
 
     // If no change, just update display without animation
     if (!actualChange) {
+      setDisplayValue(endValue);
+      previousValue.current = endValue;
+      return () => clearTimeout(directionTimeout);
+    }
+
+    // If this is the first real data we're seeing, just set it immediately
+    if (isFirstRealData) {
       setDisplayValue(endValue);
       previousValue.current = endValue;
       return () => clearTimeout(directionTimeout);
@@ -111,7 +130,7 @@ export const AnimatedCounter = memo(({
       }
       clearTimeout(directionTimeout);
     };
-  }, [value, duration, cacheKey]);
+  }, [value, duration, cacheKey, hasCachedValue]);
 
   return (
     <span className={`inline-flex items-center gap-1 ${className}`}>
