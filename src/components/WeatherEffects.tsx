@@ -197,19 +197,20 @@ const CloudyEffect = memo(() => {
 
 CloudyEffect.displayName = 'CloudyEffect';
 
-// Rain Effect - Slanted with wind, appears already in progress
+// Rain Effect - Continuous rain, always falling from top
 const RainEffect = memo(() => {
   const drops = useMemo(() => 
     Array.from({ length: 35 }).map((_, i) => {
       const duration = 1.2 + Math.random() * 0.6;
-      const initialY = Math.random() * 115; // Start at random position
+      // Stagger start times so drops are distributed across the fall cycle
+      const staggerDelay = (i / 35) * duration + Math.random() * 0.3;
       return {
         id: i,
         left: (i / 35) * 120 - 10,
         duration,
+        delay: staggerDelay,
         height: 16 + Math.random() * 14,
         opacity: 0.35 + Math.random() * 0.25,
-        initialY,
       };
     }),
   []);
@@ -226,13 +227,13 @@ const RainEffect = memo(() => {
             height: drop.height,
             opacity: drop.opacity,
           }}
-          initial={{ y: `${drop.initialY}vh` }}
+          initial={{ y: '-5vh' }}
           animate={{
-            y: [`${drop.initialY}vh`, '115vh', '-5vh', '115vh'],
+            y: ['-5vh', '115vh'],
           }}
           transition={{
             duration: drop.duration,
-            times: [0, (115 - drop.initialY) / 120, (115 - drop.initialY) / 120, 1],
+            delay: drop.delay,
             repeat: Infinity,
             ease: 'linear',
           }}
