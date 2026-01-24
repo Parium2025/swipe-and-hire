@@ -257,7 +257,7 @@ function ThreadItem({
           )}>
             {getDisplayName()}
           </span>
-          <span className="text-white/40 text-xs flex-shrink-0">
+          <span className="text-white text-xs flex-shrink-0">
             {formatTime(lastMessage.created_at)}
           </span>
         </div>
