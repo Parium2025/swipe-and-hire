@@ -47,6 +47,50 @@ const getLocationTypeText = (locationType: string): string => {
   }
 };
 
+// Generate Google Calendar URL for manual calendar addition
+const generateGoogleCalendarUrl = (
+  companyName: string,
+  jobTitle: string,
+  scheduledAt: string,
+  durationMinutes: number,
+  locationType: string,
+  locationDetails: string,
+  message: string
+): string => {
+  const startDate = new Date(scheduledAt);
+  const endDate = new Date(startDate.getTime() + durationMinutes * 60 * 1000);
+  
+  // Google Calendar uses format: YYYYMMDDTHHmmssZ
+  const formatGoogleDate = (date: Date): string => {
+    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  };
+  
+  const title = `Intervju: ${jobTitle} – ${companyName}`;
+  let details = `Intervju för tjänsten ${jobTitle} hos ${companyName}.`;
+  if (locationType === 'video' && locationDetails?.startsWith('http')) {
+    details += `\n\nMöteslänk: ${locationDetails}`;
+  }
+  if (message) {
+    details += `\n\nMeddelande från arbetsgivaren:\n${message}`;
+  }
+  
+  const location = locationType === 'video' && locationDetails?.startsWith('http')
+    ? locationDetails
+    : locationType === 'office' && locationDetails
+    ? locationDetails
+    : getLocationTypeText(locationType);
+  
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: title,
+    dates: `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`,
+    details: details,
+    location: location,
+  });
+  
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+};
+
 // Generate iCalendar format date string (UTC)
 const formatIcsDate = (date: Date): string => {
   const year = date.getUTCFullYear();
@@ -149,7 +193,8 @@ const getInterviewTemplate = (
   durationMinutes: number,
   locationType: string,
   locationDetails: string,
-  message: string
+  message: string,
+  googleCalendarUrl: string
 ) => `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -191,6 +236,9 @@ const getInterviewTemplate = (
                           <p style="margin: 0; font-size: 14px; color: #065F46; font-weight: 500;">
                             En kalenderhändelse har bifogats till detta mejl.<br>
                             Öppna den för att lägga till intervjun i din kalender.
+                          </p>
+                          <p style="margin: 8px 0 0 0; font-size: 13px; color: #065F46;">
+                            Ser du inte bilagan? <a href="${googleCalendarUrl}" style="color: #059669; font-weight: 600; text-decoration: underline;">Lägg till i Google Kalender</a>
                           </p>
                         </td>
                       </tr>
@@ -321,6 +369,17 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending interview invitation to ${candidateEmail} for ${jobTitle} at ${companyName}`);
 
+    // Generate Google Calendar URL as fallback for email clients that don't show .ics
+    const googleCalendarUrl = generateGoogleCalendarUrl(
+      companyName,
+      jobTitle,
+      scheduledAt,
+      durationMinutes,
+      locationType,
+      locationDetails || '',
+      message || ''
+    );
+
     const emailHtml = getInterviewTemplate(
       candidateName,
       companyName,
@@ -329,7 +388,8 @@ const handler = async (req: Request): Promise<Response> => {
       durationMinutes,
       locationType,
       locationDetails || '',
-      message || ''
+      message || '',
+      googleCalendarUrl
     );
 
     // Generate iCalendar content for automatic calendar addition
