@@ -264,24 +264,24 @@ function ThreadItem({
         
         {/* Job context if available */}
         {lastMessage.job && (
-          <div className="flex items-center gap-1.5 text-white/50 text-xs mb-1">
-            <Briefcase className="h-3 w-3" />
+          <div className="flex items-center gap-1.5 text-white text-xs mb-1">
+            <Briefcase className="h-3 w-3 text-white" />
             <span className="truncate">{lastMessage.job.title}</span>
           </div>
         )}
         
         {/* Last message preview */}
         <p className={cn(
-          "text-sm truncate",
-          hasUnread ? "text-white/80 font-medium" : "text-white/50"
+          "text-sm truncate text-white",
+          hasUnread && "font-medium"
         )}>
-          {isOwnMessage && <span className="text-white/40">Du: </span>}
+          {isOwnMessage && <span className="text-white/70">Du: </span>}
           {lastMessage.content}
         </p>
       </div>
 
       {/* Chevron indicator */}
-      <ChevronLeft className="h-5 w-5 text-white/30 rotate-180 flex-shrink-0" />
+      <ChevronLeft className="h-5 w-5 text-white rotate-180 flex-shrink-0" />
     </button>
   );
 }
@@ -441,7 +441,7 @@ function ChatView({
                 {/* Date header */}
                 <div className="flex items-center gap-3 my-4">
                   <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-white/40 text-xs font-medium px-2">
+                  <span className="text-white text-xs font-medium px-2">
                     {formatDateHeader(date)}
                   </span>
                   <div className="flex-1 h-px bg-white/10" />
