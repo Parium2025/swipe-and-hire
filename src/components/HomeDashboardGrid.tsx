@@ -832,7 +832,6 @@ const InterviewsCard = memo(() => {
     switch (type) {
       case 'video': return Video;
       case 'office': return Building2;
-      case 'phone': return Phone;
       default: return Calendar;
     }
   };
@@ -841,7 +840,6 @@ const InterviewsCard = memo(() => {
     switch (type) {
       case 'video': return 'Video';
       case 'office': return 'Kontor';
-      case 'phone': return 'Telefon';
       default: return '';
     }
   };
