@@ -33,34 +33,42 @@ export const AnimatedCounter = memo(({
   className = '',
   cacheKey
 }: AnimatedCounterProps) => {
-  // If cacheKey is provided, use cached value as initial; otherwise use current value
+  // If cacheKey is provided, use cached value as starting point
   const cachedInitial = cacheKey ? getCachedValue(cacheKey) : null;
-  const initialValue = cachedInitial !== null ? cachedInitial : value;
+  const hasCachedValue = cachedInitial !== null;
+  
+  // If no cached value, start from current value (no animation on first view)
+  const initialValue = hasCachedValue ? cachedInitial : value;
   
   const [displayValue, setDisplayValue] = useState(initialValue);
   const [direction, setDirection] = useState<'up' | 'down' | null>(null);
   const previousValue = useRef(initialValue);
   const animationRef = useRef<number | null>(null);
-  const hasAnimatedRef = useRef(false);
+  const isFirstRender = useRef(!hasCachedValue);
 
   useEffect(() => {
     const startValue = previousValue.current;
     const endValue = value;
-    
-    // Detect direction of change - only show arrow if there's actual change
     const actualChange = endValue !== startValue;
-    if (actualChange) {
+    
+    // Always cache the current value for next page load
+    if (cacheKey) {
+      setCachedValue(cacheKey, endValue);
+    }
+    
+    // Only show direction arrows if:
+    // 1. This is NOT the first render (we had a cached value)
+    // 2. There's an actual change in value
+    if (actualChange && !isFirstRender.current) {
       if (endValue > startValue) {
         setDirection('up');
       } else if (endValue < startValue) {
         setDirection('down');
       }
-      
-      // Cache the new value for next page load
-      if (cacheKey) {
-        setCachedValue(cacheKey, endValue);
-      }
     }
+    
+    // Mark first render as complete
+    isFirstRender.current = false;
     
     // Clear direction indicator after animation
     const directionTimeout = setTimeout(() => {
@@ -74,7 +82,6 @@ export const AnimatedCounter = memo(({
       return () => clearTimeout(directionTimeout);
     }
 
-    hasAnimatedRef.current = true;
     const startTime = performance.now();
     const difference = endValue - startValue;
 
