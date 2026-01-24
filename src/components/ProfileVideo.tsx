@@ -231,13 +231,14 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     <div 
       className={`relative overflow-hidden ${className}`}
       style={{ contain: 'paint' }}
-      // Viktigt när komponenten ligger inuti t.ex. en dropdown-trigger: låt inte pointerdown bubbla upp
-      onPointerDown={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={(e) => handleTap(e)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
+      // When playback is disabled, let events bubble up to parent (e.g., dropdown trigger)
+      // Otherwise, stop propagation to allow inline playback without triggering dropdown
+      onPointerDown={disablePlayback ? undefined : (e) => e.stopPropagation()}
+      onMouseDown={disablePlayback ? undefined : (e) => e.stopPropagation()}
+      onClick={disablePlayback ? undefined : (e) => handleTap(e)}
+      onMouseEnter={disablePlayback ? undefined : handleMouseEnter}
+      onMouseLeave={disablePlayback ? undefined : handleMouseLeave}
+      onTouchStart={disablePlayback ? undefined : handleTouchStart}
     >
       {/* Cover image or poster frame - always mounted, fade only */}
       {coverImageUrl ? (
