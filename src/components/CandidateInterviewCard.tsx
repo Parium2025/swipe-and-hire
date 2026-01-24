@@ -27,7 +27,7 @@ interface CandidateInterviewCardProps {
     id: string;
     scheduled_at: string;
     duration_minutes: number;
-    location_type: 'video' | 'office' | 'phone';
+    location_type: 'video' | 'office';
     location_details: string | null;
     subject: string | null;
     message: string | null;

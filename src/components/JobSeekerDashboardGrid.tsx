@@ -841,13 +841,12 @@ const JobSeekerInterviewsCard = memo(() => {
   const upcomingInterviews = interviews.slice(0, 5);
   const hasMore = interviews.length > 5;
 
-  type LocationType = 'video' | 'office' | 'phone';
+  type LocationType = 'video' | 'office';
 
   const getLocationIcon = (type: LocationType) => {
     switch (type) {
       case 'video': return Video;
       case 'office': return Building2;
-      case 'phone': return Phone;
       default: return Calendar;
     }
   };
@@ -856,7 +855,6 @@ const JobSeekerInterviewsCard = memo(() => {
     switch (type) {
       case 'video': return 'Video';
       case 'office': return 'Kontor';
-      case 'phone': return 'Telefon';
       default: return '';
     }
   };
