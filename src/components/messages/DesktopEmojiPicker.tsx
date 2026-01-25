@@ -106,7 +106,7 @@ export function DesktopEmojiPicker({ onSelect, disabled }: DesktopEmojiPickerPro
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-80 p-0 bg-slate-900/95 border-white/10 backdrop-blur-xl"
+        className="w-[420px] p-0 bg-slate-900/95 border-white/10 backdrop-blur-xl"
         side="top"
         align="end"
         sideOffset={8}
