@@ -767,9 +767,8 @@ const SearchJobs = () => {
 
             {/* Clear all filters button */}
             <div className="pt-2">
-              <Button 
-                variant="outline" 
-                className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white"
+              <button 
+                className="w-full h-[44px] flex items-center justify-center bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-sm text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/20"
                 onClick={() => {
                   setSelectedPostalCode('');
                   setSelectedCity('');
@@ -780,7 +779,7 @@ const SearchJobs = () => {
                 }}
               >
                 Rensa alla filter
-              </Button>
+              </button>
             </div>
           </div>
         </CardContent>
