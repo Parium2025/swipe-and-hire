@@ -33,80 +33,109 @@ export interface Message {
   };
 }
 
+// Cache key for localStorage
+const MESSAGES_CACHE_KEY = 'parium_messages_cache';
+
+function getMessagesFromCache(): { inbox: Message[]; sent: Message[]; timestamp: number } | null {
+  try {
+    const cached = localStorage.getItem(MESSAGES_CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      // Cache valid for 5 minutes
+      if (Date.now() - parsed.timestamp < 5 * 60 * 1000) {
+        return parsed;
+      }
+    }
+  } catch {
+    // Ignore cache errors
+  }
+  return null;
+}
+
+function setMessagesCache(inbox: Message[], sent: Message[]) {
+  try {
+    localStorage.setItem(MESSAGES_CACHE_KEY, JSON.stringify({
+      inbox,
+      sent,
+      timestamp: Date.now(),
+    }));
+  } catch {
+    // Ignore cache errors
+  }
+}
+
 export function useMessages() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Fetch received messages (inbox)
-  const inboxQuery = useQuery({
-    queryKey: ['messages', 'inbox', user?.id],
+  // Get cached data for instant load
+  const cachedData = getMessagesFromCache();
+
+  // Fetch all messages in a single optimized query
+  const messagesQuery = useQuery({
+    queryKey: ['messages', 'all', user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) return { inbox: [], sent: [] };
 
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          *,
-          job:job_id (title)
-        `)
-        .eq('recipient_id', user.id)
-        .order('created_at', { ascending: false });
+      // Fetch inbox and sent in parallel
+      const [inboxResult, sentResult] = await Promise.all([
+        supabase
+          .from('messages')
+          .select(`
+            *,
+            job:job_id (title)
+          `)
+          .eq('recipient_id', user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('messages')
+          .select(`
+            *,
+            job:job_id (title)
+          `)
+          .eq('sender_id', user.id)
+          .order('created_at', { ascending: false }),
+      ]);
 
-      if (error) throw error;
+      if (inboxResult.error) throw inboxResult.error;
+      if (sentResult.error) throw sentResult.error;
 
-      // Fetch sender profiles separately
-      const senderIds = [...new Set(data?.map(m => m.sender_id) || [])];
-      if (senderIds.length === 0) return [];
-      
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-        .in('user_id', senderIds);
+      // Get unique user IDs for profile lookup
+      const inboxSenderIds = [...new Set(inboxResult.data?.map(m => m.sender_id) || [])];
+      const sentRecipientIds = [...new Set(sentResult.data?.map(m => m.recipient_id) || [])];
+      const allUserIds = [...new Set([...inboxSenderIds, ...sentRecipientIds])];
 
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      // Fetch all profiles in one query (optimized join alternative)
+      let profileMap = new Map<string, Message['sender_profile']>();
+      if (allUserIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
+          .in('user_id', allUserIds);
 
-      return (data || []).map(msg => ({
+        profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      }
+
+      const inbox = (inboxResult.data || []).map(msg => ({
         ...msg,
         sender_profile: profileMap.get(msg.sender_id) || null,
       })) as Message[];
-    },
-    enabled: !!user,
-  });
 
-  // Fetch sent messages
-  const sentQuery = useQuery({
-    queryKey: ['messages', 'sent', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          *,
-          job:job_id (title)
-        `)
-        .eq('sender_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Fetch recipient profiles separately
-      const recipientIds = [...new Set(data?.map(m => m.recipient_id) || [])];
-      if (recipientIds.length === 0) return [];
-      
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-        .in('user_id', recipientIds);
-
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-
-      return (data || []).map(msg => ({
+      const sent = (sentResult.data || []).map(msg => ({
         ...msg,
         recipient_profile: profileMap.get(msg.recipient_id) || null,
       })) as Message[];
+
+      // Update cache
+      setMessagesCache(inbox, sent);
+
+      return { inbox, sent };
     },
     enabled: !!user,
+    // Use cache as initial data for instant load
+    initialData: cachedData ? { inbox: cachedData.inbox, sent: cachedData.sent } : undefined,
+    staleTime: 30 * 1000, // Consider fresh for 30 seconds
+    refetchInterval: 60 * 1000, // Background refresh every minute
   });
 
   // Subscribe to realtime updates
@@ -124,8 +153,8 @@ export function useMessages() {
           filter: `recipient_id=eq.${user.id}`,
         },
         () => {
-          // Invalidate inbox when we receive a new message
-          queryClient.invalidateQueries({ queryKey: ['messages', 'inbox', user.id] });
+          // Invalidate and refetch when we receive a new message
+          queryClient.invalidateQueries({ queryKey: ['messages', 'all', user.id] });
         }
       )
       .on(
@@ -137,8 +166,8 @@ export function useMessages() {
           filter: `sender_id=eq.${user.id}`,
         },
         () => {
-          // Invalidate sent when we send a message
-          queryClient.invalidateQueries({ queryKey: ['messages', 'sent', user.id] });
+          // Invalidate when we send a message
+          queryClient.invalidateQueries({ queryKey: ['messages', 'all', user.id] });
         }
       )
       .subscribe();
@@ -148,10 +177,10 @@ export function useMessages() {
     };
   }, [user, queryClient]);
 
-  // Mark message as read
+  // Mark message as read with optimistic update
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId: string) => {
-      if (!navigator.onLine) return; // Silent fail for mark as read - non-critical
+      if (!navigator.onLine) return;
       
       const { error } = await supabase
         .from('messages')
@@ -160,23 +189,102 @@ export function useMessages() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages', 'inbox'] });
+    onMutate: async (messageId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['messages', 'all'] });
+
+      // Get current data
+      const previousData = queryClient.getQueryData(['messages', 'all', user?.id]);
+
+      // Optimistically update
+      queryClient.setQueryData(['messages', 'all', user?.id], (old: { inbox: Message[]; sent: Message[] } | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          inbox: old.inbox.map(m => 
+            m.id === messageId ? { ...m, is_read: true } : m
+          ),
+        };
+      });
+
+      return { previousData };
+    },
+    onError: (_, __, context) => {
+      // Rollback on error
+      if (context?.previousData) {
+        queryClient.setQueryData(['messages', 'all', user?.id], context.previousData);
+      }
     },
   });
 
   // Get unread count
-  const unreadCount = inboxQuery.data?.filter(m => !m.is_read).length || 0;
+  const unreadCount = messagesQuery.data?.inbox?.filter(m => !m.is_read).length || 0;
 
   return {
-    inbox: inboxQuery.data || [],
-    sent: sentQuery.data || [],
-    isLoading: inboxQuery.isLoading || sentQuery.isLoading,
+    inbox: messagesQuery.data?.inbox || [],
+    sent: messagesQuery.data?.sent || [],
+    isLoading: messagesQuery.isLoading,
     unreadCount,
     markAsRead: markAsReadMutation.mutate,
-    refetch: () => {
-      inboxQuery.refetch();
-      sentQuery.refetch();
-    },
+    refetch: () => messagesQuery.refetch(),
   };
+}
+
+// Hook for background preloading - call this in layout/app component
+export function useMessagesPreload() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Prefetch messages data in background
+    queryClient.prefetchQuery({
+      queryKey: ['messages', 'all', user.id],
+      queryFn: async () => {
+        const [inboxResult, sentResult] = await Promise.all([
+          supabase
+            .from('messages')
+            .select(`*, job:job_id (title)`)
+            .eq('recipient_id', user.id)
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('messages')
+            .select(`*, job:job_id (title)`)
+            .eq('sender_id', user.id)
+            .order('created_at', { ascending: false }),
+        ]);
+
+        const allUserIds = [
+          ...new Set([
+            ...(inboxResult.data?.map(m => m.sender_id) || []),
+            ...(sentResult.data?.map(m => m.recipient_id) || []),
+          ])
+        ];
+
+        let profileMap = new Map();
+        if (allUserIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
+            .in('user_id', allUserIds);
+          profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+        }
+
+        const inbox = (inboxResult.data || []).map(msg => ({
+          ...msg,
+          sender_profile: profileMap.get(msg.sender_id) || null,
+        }));
+
+        const sent = (sentResult.data || []).map(msg => ({
+          ...msg,
+          recipient_profile: profileMap.get(msg.recipient_id) || null,
+        }));
+
+        setMessagesCache(inbox, sent);
+        return { inbox, sent };
+      },
+      staleTime: 30 * 1000,
+    });
+  }, [user, queryClient]);
 }
