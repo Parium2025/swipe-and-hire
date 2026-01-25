@@ -201,11 +201,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
           )}
           <Button
             variant="glass"
-            size="sm"
+            size="icon"
             onClick={handleSaveClick}
-            className="ml-auto h-8 w-8 p-0 rounded-full transition-all duration-300 group-hover:backdrop-brightness-90 hover:backdrop-brightness-110"
+            className="ml-auto h-6 w-6 p-0 rounded-full transition-all duration-300 group-hover:backdrop-brightness-90 hover:backdrop-brightness-110"
           >
-            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : ''}`} />
+            <Heart className={`h-3 w-3 ${isSaved ? 'fill-red-400 text-red-400' : ''}`} />
           </Button>
         </div>
       </div>
