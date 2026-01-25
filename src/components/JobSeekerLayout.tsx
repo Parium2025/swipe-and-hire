@@ -13,6 +13,7 @@ import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
 import { useDevice } from '@/hooks/use-device';
 import { DevOfflineToggle } from '@/components/DevOfflineToggle';
+import { useMessagesPreload } from '@/hooks/useMessages';
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
@@ -36,6 +37,9 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   
   // 🚀 Background Sync Engine - håller ALL data färsk 24/7
   useJobSeekerBackgroundSync();
+  
+  // 📨 Preload messages in background for instant navigation
+  useMessagesPreload();
 
   // Prefetch public jobs in background so they're ready instantly when navigating to /search-jobs
   useEffect(() => {
