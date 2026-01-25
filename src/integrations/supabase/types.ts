@@ -908,6 +908,7 @@ export type Database = {
           salary_min: number | null
           salary_transparency: string | null
           salary_type: string | null
+          search_vector: unknown
           title: string
           updated_at: string
           views_count: number | null
@@ -948,6 +949,7 @@ export type Database = {
           salary_min?: number | null
           salary_transparency?: string | null
           salary_type?: string | null
+          search_vector?: unknown
           title: string
           updated_at?: string
           views_count?: number | null
@@ -988,6 +990,7 @@ export type Database = {
           salary_min?: number | null
           salary_transparency?: string | null
           salary_type?: string | null
+          search_vector?: unknown
           title?: string
           updated_at?: string
           views_count?: number | null
@@ -1963,6 +1966,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      count_search_jobs: {
+        Args: {
+          p_city?: string
+          p_county?: string
+          p_employment_types?: string[]
+          p_search_query?: string
+        }
+        Returns: number
+      }
       delete_note_activities_for_applicant: {
         Args: { p_applicant_id: string }
         Returns: undefined
@@ -2054,6 +2066,54 @@ export type Database = {
       same_organization: {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean
+      }
+      search_jobs: {
+        Args: {
+          p_city?: string
+          p_county?: string
+          p_employment_types?: string[]
+          p_limit?: number
+          p_offset?: number
+          p_search_query?: string
+        }
+        Returns: {
+          application_instructions: string
+          applications_count: number
+          benefits: string[]
+          category: string
+          contact_email: string
+          created_at: string
+          description: string
+          employer_id: string
+          employment_type: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          job_image_desktop_url: string
+          job_image_url: string
+          location: string
+          occupation: string
+          pitch: string
+          positions_count: number
+          remote_work_possible: string
+          requirements: string
+          salary_max: number
+          salary_min: number
+          salary_transparency: string
+          salary_type: string
+          search_rank: number
+          title: string
+          updated_at: string
+          views_count: number
+          work_location_type: string
+          work_schedule: string
+          workplace_address: string
+          workplace_city: string
+          workplace_county: string
+          workplace_municipality: string
+          workplace_name: string
+          workplace_postal_code: string
+        }[]
       }
       search_my_candidates: {
         Args: {

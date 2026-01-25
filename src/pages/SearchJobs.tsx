@@ -14,7 +14,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
-import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { JobTitleCell } from '@/components/JobTitleCell';
@@ -29,6 +28,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useBlurHandlers } from '@/hooks/useBlurHandlers';
+import { useOptimizedJobSearch } from '@/hooks/useOptimizedJobSearch';
 
 interface Job {
   id: string;
@@ -104,162 +104,23 @@ const SearchJobs = () => {
 
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
-  // Real-time prenumeration för applications_count uppdateringar
+  // Debounced search for better performance
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   useEffect(() => {
-    const channel = supabase
-      .channel('job-applications-count')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'job_postings'
-        },
-        (payload) => {
-          // Uppdatera cache med nya applications_count
-          queryClient.setQueryData(['public-jobs', selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes], (oldData: Job[] | undefined) => {
-            if (!oldData) return oldData;
-            return oldData.map(job => 
-              job.id === payload.new.id 
-                ? { ...job, applications_count: payload.new.applications_count }
-                : job
-            );
-          });
-        }
-      )
-      .subscribe();
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes]);
-
-  // Use React Query with lazy loading - load only what's needed
-  const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ['public-jobs', selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes],
-    queryFn: async () => {
-      let query: any = supabase
-        .from('job_postings')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      // Apply smart search
-      if (searchInput) {
-        const smartSearchConditions = createSmartSearchConditions(searchInput);
-        query = query.or(smartSearchConditions);
-      }
-
-      // Apply subcategory filter
-      if (selectedSubcategories.length > 0) {
-        selectedSubcategories.forEach((subcategory, index) => {
-          if (index === 0) {
-            query = query.ilike('title', `%${subcategory}%`);
-          }
-        });
-      } else if (selectedCategory && selectedCategory !== 'all-categories') {
-        const category = OCCUPATION_CATEGORIES.find(cat => cat.value === selectedCategory);
-        if (category) {
-          if (category.keywords.length === 1) {
-            const cleanKeyword = category.keywords[0].replace(/[%_]/g, '\\$&');
-            query = query.or(`title.ilike.%${cleanKeyword}%,description.ilike.%${cleanKeyword}%`);
-          } else {
-            let hasFilter = false;
-            category.keywords.forEach((keyword) => {
-              const cleanKeyword = keyword.replace(/[%_]/g, '\\$&');
-              if (!hasFilter) {
-                query = query.or(`title.ilike.%${cleanKeyword}%,description.ilike.%${cleanKeyword}%`);
-                hasFilter = true;
-              }
-            });
-          }
-        }
-      }
-
-      // Apply location filter (city, postal code, county, or municipality)
-      if (selectedCity) {
-        // Check if selectedCity is a county (ends with "län")
-        if (selectedCity.endsWith(' län')) {
-          query = query.eq('workplace_county', selectedCity);
-        } else {
-          // Search in city, municipality, county, and location fields
-          query = query.or(`workplace_city.ilike.%${selectedCity}%,workplace_municipality.ilike.%${selectedCity}%,workplace_county.ilike.%${selectedCity}%,location.ilike.%${selectedCity}%`);
-        }
-      }
-
-      // Apply employment type filter
-      if (selectedEmploymentTypes.length > 0) {
-        const employmentCodes = selectedEmploymentTypes.map(type => {
-          const foundType = SEARCH_EMPLOYMENT_TYPES.find(t => t.value === type);
-          return foundType?.code || type;
-        });
-        query = query.in('employment_type', employmentCodes);
-      }
-
-      // Load initial batch - faster page load
-      const { data, error } = await query.limit(initialLoadSize);
-      
-      if (error) throw error;
-      
-      // Fetch company names and logos separately to avoid deep type instantiation
-      const employerIds = [...new Set((data || []).map((job: any) => job.employer_id).filter(Boolean))] as string[];
-      let companyData: Record<string, { name: string; logo?: string; avgRating?: number; reviewCount?: number }> = {};
-      
-      if (employerIds.length > 0) {
-        // Fetch profiles and reviews in parallel
-        const [profilesRes, reviewsRes] = await Promise.all([
-          supabase
-            .from('profiles')
-            .select('user_id, company_name, company_logo_url')
-            .in('user_id', employerIds),
-          supabase
-            .from('company_reviews')
-            .select('company_id, rating')
-            .in('company_id', employerIds)
-        ]);
-        
-        // Calculate average ratings per company
-        const ratingsMap: Record<string, { total: number; count: number }> = {};
-        if (reviewsRes.data) {
-          reviewsRes.data.forEach(review => {
-            if (!ratingsMap[review.company_id]) {
-              ratingsMap[review.company_id] = { total: 0, count: 0 };
-            }
-            ratingsMap[review.company_id].total += review.rating;
-            ratingsMap[review.company_id].count++;
-          });
-        }
-        
-        if (profilesRes.data) {
-          companyData = profilesRes.data.reduce((acc, p) => {
-            if (p.company_name) {
-              const ratingData = ratingsMap[p.user_id];
-              acc[p.user_id] = {
-                name: p.company_name,
-                logo: p.company_logo_url || undefined,
-                avgRating: ratingData ? ratingData.total / ratingData.count : undefined,
-                reviewCount: ratingData?.count || 0
-              };
-            }
-            return acc;
-          }, {} as Record<string, { name: string; logo?: string; avgRating?: number; reviewCount?: number }>);
-        }
-      }
-      
-      return (data || []).map((job: any) => ({
-        ...job,
-        company_name: companyData[job.employer_id]?.name || 'Okänt företag',
-        company_logo_url: companyData[job.employer_id]?.logo,
-        company_avg_rating: companyData[job.employer_id]?.avgRating,
-        company_review_count: companyData[job.employer_id]?.reviewCount || 0,
-        views_count: job.views_count || 0,
-        applications_count: job.applications_count || 0,
-      }));
-    },
-    staleTime: 0, // Hämta i bakgrunden vid återbesök
-    gcTime: Infinity, // Behåll cache permanent under sessionen
-    refetchOnWindowFocus: false, // Lägg inte om bilder när man kommer tillbaka
-    refetchOnMount: 'always', // Uppdatera i bakgrunden vid navigation
+  // Use the new optimized job search hook with full-text search
+  const { jobs, isLoading } = useOptimizedJobSearch({
+    searchQuery: debouncedSearch,
+    city: selectedCity,
+    employmentTypes: selectedEmploymentTypes,
+    category: selectedCategory,
+    subcategories: selectedSubcategories,
+    enabled: true,
   });
 
   // Förladdda alla jobbbilder via Service Worker för persistent cache
@@ -283,7 +144,7 @@ const SearchJobs = () => {
         { event: '*', schema: 'public', table: 'job_postings' },
         () => {
           // Invalidera och hämta ny data när jobb ändras
-          queryClient.invalidateQueries({ queryKey: ['public-jobs'] });
+          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
         }
       )
       .subscribe();
@@ -293,37 +154,26 @@ const SearchJobs = () => {
     };
   }, [queryClient]);
 
-  // Filter and sort jobs
+  // Sort jobs (filtering is now done in database for performance)
   const filteredAndSortedJobs = useMemo(() => {
-    // Filter out expired jobs first
-    let filtered = jobs.filter(job => !getTimeRemaining(job.created_at, job.expires_at).isExpired);
+    // Jobs are already filtered by the database - just sort here
+    const result = [...jobs];
 
-    // Search filter
-    if (searchInput) {
-      const searchLower = searchInput.toLowerCase();
-      filtered = filtered.filter(job =>
-        job.title.toLowerCase().includes(searchLower) ||
-        job.company_name.toLowerCase().includes(searchLower) ||
-        job.description.toLowerCase().includes(searchLower) ||
-        job.location.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Sort
+    // Sort based on user preference
     switch (sortBy) {
       case 'newest':
-        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
       case 'oldest':
-        filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
         break;
       case 'most-views':
-        filtered.sort((a, b) => b.views_count - a.views_count);
+        result.sort((a, b) => b.views_count - a.views_count);
         break;
     }
 
-    return filtered;
-  }, [jobs, searchInput, sortBy]);
+    return result;
+  }, [jobs, sortBy]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
