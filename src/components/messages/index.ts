@@ -9,3 +9,4 @@ export * from './MessageReactions';
 export * from './MessageAttachmentPicker';
 export * from './MessageAttachmentDisplay';
 export * from './LinkPreviewCard';
+export * from './DesktopEmojiPicker';
