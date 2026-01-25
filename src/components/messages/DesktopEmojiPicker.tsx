@@ -96,9 +96,10 @@ export function DesktopEmojiPicker({ onSelect, disabled }: DesktopEmojiPickerPro
           className={cn(
             "hidden md:flex h-11 w-11 flex-shrink-0",
             "border border-white/30 text-white",
-            "md:hover:bg-white/10 md:hover:border-white/50",
+            "md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white",
             "transition-all duration-300",
-            "active:scale-95 active:bg-white/20"
+            "active:scale-95 active:bg-white/20",
+            "[&_svg]:text-white [&_svg]:hover:text-white"
           )}
           aria-label="Öppna emoji-väljare"
         >
