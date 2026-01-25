@@ -290,6 +290,7 @@ export function ChatView({
                       isOwn={msg.sender_id === currentUserId}
                       showAvatar={idx === 0 || msgs[idx - 1]?.sender_id !== msg.sender_id}
                       senderProfile={thread.senderProfile}
+                      currentUserId={currentUserId}
                     />
                   ))}
                 </div>

@@ -4,3 +4,7 @@ export * from './ThreadItem';
 export * from './ThreadList';
 export * from './ChatView';
 export * from './SwipeableThreadItem';
+export * from './EmojiReactionPicker';
+export * from './MessageReactions';
+export * from './MessageAttachmentPicker';
+export * from './MessageAttachmentDisplay';
