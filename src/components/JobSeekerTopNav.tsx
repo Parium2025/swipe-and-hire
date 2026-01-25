@@ -204,8 +204,8 @@ function JobSeekerTopNav() {
             <MessageCircle className="h-4 w-4 relative z-10" />
             <span className="relative z-10">Meddelanden</span>
             {preloadedJobSeekerUnreadMessages > 0 && (
-              <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center relative z-10">
-                {preloadedJobSeekerUnreadMessages}
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 border-2 border-slate-900 z-20">
+                {preloadedJobSeekerUnreadMessages > 99 ? '99+' : preloadedJobSeekerUnreadMessages}
               </span>
             )}
           </button>
