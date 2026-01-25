@@ -487,36 +487,33 @@ const SearchJobs = () => {
                 </Label>
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      {...blurHandlers}
-                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 touch-manipulation [@media(hover:hover)]:hover:bg-white/10 [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:border-white/50 [&_svg]:text-white [@media(hover:hover)]:hover:[&_svg]:text-white justify-between text-sm outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
+                    <button
+                      className="w-full flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 py-2.5 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                      aria-label="Välj yrkesområde"
                     >
-                      <span className="truncate">
+                      <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
+                      <span className="text-sm text-white flex-1 truncate">
                         {selectedCategory === 'all-categories'
                           ? 'Alla yrkesområden'
                           : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
                         }
                       </span>
                       {selectedCategory !== 'all-categories' ? (
-                        <span
-                          role="button"
-                          aria-label="Rensa yrkesområde"
-                          tabIndex={0}
-                          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedCategory('all-categories');
                             setSelectedSubcategories([]);
                           }}
-                          className="ml-2 inline-flex items-center justify-center rounded p-1 md:hover:bg-white/10"
+                          className="flex h-6 w-6 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
+                          aria-label="Rensa yrkesområde"
                         >
-                          <X className="h-4 w-4 text-white" />
-                        </span>
+                          <X className="h-4 w-4" />
+                        </button>
                       ) : (
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                        <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
                       )}
-                    </Button>
+                    </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
                     <DropdownMenuItem
@@ -646,19 +643,19 @@ const SearchJobs = () => {
                     </Label>
                     <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          {...blurHandlers}
-                          className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 touch-manipulation [@media(hover:hover)]:hover:bg-white/10 [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:border-white/50 [&_svg]:text-white [@media(hover:hover)]:hover:[&_svg]:text-white justify-between text-sm outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
+                        <button
+                          className="w-full flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 py-2.5 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                          aria-label="Välj anställningstyp"
                         >
-                          <span className="truncate">
+                          <Clock className="h-4 w-4 text-white flex-shrink-0" />
+                          <span className="text-sm text-white flex-1 truncate">
                             {selectedEmploymentTypes.length === 0 
                               ? 'Alla typer' 
                               : `${selectedEmploymentTypes.length} valda`
                             }
                           </span>
-                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                        </Button>
+                          <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
+                        </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
                         <DropdownMenuItem
@@ -703,14 +700,14 @@ const SearchJobs = () => {
                     </Label>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          {...blurHandlers}
-                          className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 touch-manipulation [@media(hover:hover)]:hover:bg-white/10 [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:border-white/50 [&_svg]:text-white [@media(hover:hover)]:hover:[&_svg]:text-white justify-between text-sm outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
+                        <button
+                          className="w-full flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 py-2.5 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                          aria-label="Välj sortering"
                         >
-                          <span className="truncate">{sortLabels[sortBy]}</span>
-                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                        </Button>
+                          <ArrowUpDown className="h-4 w-4 text-white flex-shrink-0" />
+                          <span className="text-sm text-white flex-1 truncate">{sortLabels[sortBy]}</span>
+                          <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
+                        </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[200px] z-[10000] bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white">
                         <DropdownMenuItem 
