@@ -1277,6 +1277,42 @@ export type Database = {
         }
         Relationships: []
       }
+      link_previews: {
+        Row: {
+          created_at: string
+          description: string | null
+          favicon_url: string | null
+          fetched_at: string
+          id: string
+          image_url: string | null
+          site_name: string | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          favicon_url?: string | null
+          fetched_at?: string
+          id?: string
+          image_url?: string | null
+          site_name?: string | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          favicon_url?: string | null
+          fetched_at?: string
+          id?: string
+          image_url?: string | null
+          site_name?: string | null
+          title?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       message_reactions: {
         Row: {
           created_at: string

@@ -74,3 +74,6 @@ verify_jwt = false
 
 [functions.send-admin-alert]
 verify_jwt = false
+
+[functions.fetch-link-preview]
+verify_jwt = false

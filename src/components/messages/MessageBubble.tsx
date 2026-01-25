@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -6,7 +7,9 @@ import { SenderProfile, OptimisticMessage } from './types';
 import { MessageAttachmentDisplay } from './MessageAttachmentDisplay';
 import { MessageReactions } from './MessageReactions';
 import { EmojiReactionPicker } from './EmojiReactionPicker';
+import { LinkPreviewCard } from './LinkPreviewCard';
 import { useMessageReactions } from '@/hooks/useMessageReactions';
+import { extractUrls } from '@/hooks/useLinkPreview';
 import { Clock } from 'lucide-react';
 
 interface MessageBubbleProps {
@@ -32,6 +35,15 @@ export function MessageBubble({
     isOptimistic ? '' : message.id, 
     currentUserId
   );
+
+  // Extract URLs from message content for link previews
+  const urls = useMemo(() => {
+    if (!message.content || isOptimistic || isQueued) return [];
+    return extractUrls(message.content);
+  }, [message.content, isOptimistic, isQueued]);
+
+  // Only show preview for first URL to avoid clutter
+  const previewUrl = urls.length > 0 ? urls[0] : null;
   
   const getAvatarUrl = () => {
     if (senderProfile.role === 'employer' && senderProfile.company_logo_url) {
@@ -108,6 +120,11 @@ export function MessageBubble({
                   {message.content}
                 </p>
               </div>
+            )}
+
+            {/* Link preview */}
+            {previewUrl && (
+              <LinkPreviewCard url={previewUrl} isOwn={isOwn} />
             )}
           </div>
 
