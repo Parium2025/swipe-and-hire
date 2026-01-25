@@ -10,6 +10,7 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { MessageThread, OptimisticMessage } from './types';
 import { MessageBubble } from './MessageBubble';
+import { MessageAttachmentPicker } from './MessageAttachmentPicker';
 import { Message } from '@/hooks/useMessages';
 import { useOfflineMessageQueue } from '@/hooks/useOfflineMessageQueue';
 import { useOnline } from '@/hooks/useOnlineStatus';
@@ -32,6 +33,11 @@ export function ChatView({
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [optimisticMessages, setOptimisticMessages] = useState<OptimisticMessage[]>([]);
+  const [pendingAttachment, setPendingAttachment] = useState<{
+    url: string;
+    type: string;
+    name: string;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
@@ -88,9 +94,10 @@ export function ChatView({
   }, [thread.messages, optimisticMessages.length]);
 
   const handleSend = useCallback(async () => {
-    if (!newMessage.trim() || sending) return;
+    if ((!newMessage.trim() && !pendingAttachment) || sending) return;
     
     const messageContent = newMessage.trim();
+    const attachment = pendingAttachment;
     
     // Create optimistic message
     const optimisticMessage: OptimisticMessage = {
@@ -107,16 +114,25 @@ export function ChatView({
     
     // Clear input immediately for better UX
     setNewMessage('');
+    setPendingAttachment(null);
     textareaRef.current?.focus();
     
-    // If offline, queue the message
-    if (!isOnline) {
+    // If offline and no attachment, queue the message
+    if (!isOnline && !attachment) {
       queueMessage({
         recipient_id: thread.id,
         content: messageContent,
         job_id: thread.lastMessage.job_id,
       });
       toast.info('Meddelande köat', { description: 'Skickas automatiskt när du är online' });
+      return;
+    }
+    
+    // If offline with attachment, show error
+    if (!isOnline && attachment) {
+      toast.error('Kan inte skicka bilaga offline', { description: 'Anslut till internet först' });
+      setNewMessage(messageContent);
+      setPendingAttachment(attachment);
       return;
     }
     
@@ -130,8 +146,11 @@ export function ChatView({
         .insert({
           sender_id: currentUserId,
           recipient_id: thread.id,
-          content: messageContent,
+          content: messageContent || (attachment ? '' : ''),
           job_id: thread.lastMessage.job_id,
+          attachment_url: attachment?.url || null,
+          attachment_type: attachment?.type || null,
+          attachment_name: attachment?.name || null,
         });
 
       if (error) throw error;
@@ -140,8 +159,8 @@ export function ChatView({
     } catch (error) {
       console.error('Error sending message:', error);
       
-      // If network error, queue for retry
-      if (!navigator.onLine) {
+      // If network error and no attachment, queue for retry
+      if (!navigator.onLine && !attachment) {
         queueMessage({
           recipient_id: thread.id,
           content: messageContent,
@@ -151,6 +170,7 @@ export function ChatView({
       } else {
         toast.error('Kunde inte skicka meddelande');
         setNewMessage(messageContent); // Restore the message
+        setPendingAttachment(attachment);
       }
       
       // Remove failed optimistic message
@@ -160,7 +180,7 @@ export function ChatView({
     } finally {
       setSending(false);
     }
-  }, [newMessage, sending, currentUserId, thread.id, thread.lastMessage.job_id, refetch, isOnline, queueMessage]);
+  }, [newMessage, sending, currentUserId, thread.id, thread.lastMessage.job_id, refetch, isOnline, queueMessage, pendingAttachment]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -290,20 +310,28 @@ export function ChatView({
           </div>
         )}
         <div className="flex items-end gap-2">
+          {/* Attachment picker */}
+          <MessageAttachmentPicker
+            userId={currentUserId}
+            recipientId={thread.id}
+            onAttachmentUploaded={setPendingAttachment}
+            disabled={sending || !isOnline}
+          />
+          
           <Textarea
             ref={textareaRef}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={isOnline ? "Skriv ett meddelande..." : "Skriv – skickas när du är online..."}
-            className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+            className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl flex-1"
             rows={1}
           />
           <Button
             variant="glass"
             size="icon"
             onClick={handleSend}
-            disabled={!newMessage.trim() || sending}
+            disabled={(!newMessage.trim() && !pendingAttachment) || sending}
             className="h-11 w-11 flex-shrink-0 bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
           >
             {sending ? (
