@@ -487,7 +487,7 @@ const SearchJobs = () => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
+                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 touch-manipulation [@media(hover:hover)]:hover:bg-white/10 [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:border-white/50 [&_svg]:text-white [@media(hover:hover)]:hover:[&_svg]:text-white justify-between text-sm outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
                     >
                       <span className="truncate">
                         {selectedCategory === 'all-categories'
@@ -645,7 +645,7 @@ const SearchJobs = () => {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
+                          className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 touch-manipulation [@media(hover:hover)]:hover:bg-white/10 [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:border-white/50 [&_svg]:text-white [@media(hover:hover)]:hover:[&_svg]:text-white justify-between text-sm outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
                         >
                           <span className="truncate">
                             {selectedEmploymentTypes.length === 0 
@@ -701,7 +701,7 @@ const SearchJobs = () => {
                       <DropdownMenuTrigger asChild>
                         <Button 
                           variant="outline" 
-                          className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
+                          className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 touch-manipulation [@media(hover:hover)]:hover:bg-white/10 [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:border-white/50 [&_svg]:text-white [@media(hover:hover)]:hover:[&_svg]:text-white justify-between text-sm outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
                         >
                           <span className="truncate">{sortLabels[sortBy]}</span>
                           <ChevronDown className="h-4 w-4 flex-shrink-0" />
