@@ -8,3 +8,4 @@ export * from './EmojiReactionPicker';
 export * from './MessageReactions';
 export * from './MessageAttachmentPicker';
 export * from './MessageAttachmentDisplay';
+export * from './LinkPreviewCard';
