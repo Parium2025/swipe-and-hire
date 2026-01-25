@@ -403,9 +403,9 @@ function ChatView({
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className="text-white border border-white/30 md:hover:bg-white/10 md:hover:border-white/50 transition-all duration-300 active:scale-95 active:bg-white/20"
+          className="text-white hover:text-white border border-white/30 md:hover:bg-white/10 md:hover:border-white/50 transition-all duration-300 active:scale-95 active:bg-white/20"
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5 text-white" />
         </Button>
 
         <Avatar className="h-10 w-10 border border-white/10">
