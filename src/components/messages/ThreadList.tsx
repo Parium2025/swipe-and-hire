@@ -2,6 +2,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageSquare } from 'lucide-react';
 import { MessageThread } from './types';
 import { ThreadItem } from './ThreadItem';
+import { SwipeableThreadItem } from './SwipeableThreadItem';
+import { useDevice } from '@/hooks/use-device';
+import { useDeleteConversation } from '@/hooks/useDeleteConversation';
 
 interface ThreadListProps {
   threads: MessageThread[];
@@ -16,6 +19,14 @@ export function ThreadList({
   unreadCount,
   onSelectThread,
 }: ThreadListProps) {
+  const device = useDevice();
+  const isTouchDevice = device === 'mobile';
+  const { deleteConversation } = useDeleteConversation();
+
+  const handleDeleteThread = (threadId: string) => {
+    deleteConversation(threadId);
+  };
+
   return (
     <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-4xl mx-auto px-3 md:px-6">
       {/* Header */}
@@ -47,12 +58,22 @@ export function ThreadList({
           <ScrollArea className="h-full">
             <div className="p-3 space-y-2">
               {threads.map((thread) => (
-                <ThreadItem
-                  key={thread.id}
-                  thread={thread}
-                  currentUserId={currentUserId}
-                  onClick={() => onSelectThread(thread.id)}
-                />
+                isTouchDevice ? (
+                  <SwipeableThreadItem
+                    key={thread.id}
+                    thread={thread}
+                    currentUserId={currentUserId}
+                    onClick={() => onSelectThread(thread.id)}
+                    onDelete={handleDeleteThread}
+                  />
+                ) : (
+                  <ThreadItem
+                    key={thread.id}
+                    thread={thread}
+                    currentUserId={currentUserId}
+                    onClick={() => onSelectThread(thread.id)}
+                  />
+                )
               ))}
             </div>
           </ScrollArea>

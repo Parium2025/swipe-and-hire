@@ -5,12 +5,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { MessageSquare, Send, Loader2, ChevronLeft, Briefcase } from 'lucide-react';
+import { MessageSquare, Send, Loader2, ChevronLeft, Briefcase, WifiOff } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { MessageThread, OptimisticMessage } from './types';
 import { MessageBubble } from './MessageBubble';
 import { Message } from '@/hooks/useMessages';
+import { useOfflineMessageQueue } from '@/hooks/useOfflineMessageQueue';
+import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface ChatViewProps {
   thread: MessageThread;
@@ -32,16 +34,34 @@ export function ChatView({
   const [optimisticMessages, setOptimisticMessages] = useState<OptimisticMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  const { isOnline } = useOnline();
+  const { queueMessage, queue } = useOfflineMessageQueue(currentUserId);
 
   const profile = thread.senderProfile;
 
-  // Combine real messages with optimistic ones
+  // Combine real messages with optimistic ones and queued offline messages
   const allMessages = useMemo(() => {
-    const combined = [...thread.messages, ...optimisticMessages];
+    // Convert queued messages to OptimisticMessage format
+    const queuedAsOptimistic: OptimisticMessage[] = queue
+      .filter(q => q.recipient_id === thread.id)
+      .map(q => ({
+        id: q.id,
+        sender_id: q.sender_id,
+        recipient_id: q.recipient_id,
+        content: q.content,
+        is_read: false,
+        job_id: q.job_id,
+        created_at: q.created_at,
+        updated_at: q.created_at,
+        isOptimistic: true,
+      }));
+    
+    const combined = [...thread.messages, ...optimisticMessages, ...queuedAsOptimistic];
     return combined.sort((a, b) => 
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
-  }, [thread.messages, optimisticMessages]);
+  }, [thread.messages, optimisticMessages, queue, thread.id]);
 
   // Mark unread messages as read when opening
   useEffect(() => {
@@ -85,10 +105,23 @@ export function ChatView({
       isOptimistic: true,
     };
     
-    // Add optimistic message immediately
-    setOptimisticMessages(prev => [...prev, optimisticMessage]);
+    // Clear input immediately for better UX
     setNewMessage('');
     textareaRef.current?.focus();
+    
+    // If offline, queue the message
+    if (!isOnline) {
+      queueMessage({
+        recipient_id: thread.id,
+        content: messageContent,
+        job_id: thread.lastMessage.job_id,
+      });
+      toast.info('Meddelande köat', { description: 'Skickas automatiskt när du är online' });
+      return;
+    }
+    
+    // Add optimistic message immediately
+    setOptimisticMessages(prev => [...prev, optimisticMessage]);
     
     setSending(true);
     try {
@@ -106,16 +139,28 @@ export function ChatView({
       refetch();
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('Kunde inte skicka meddelande');
+      
+      // If network error, queue for retry
+      if (!navigator.onLine) {
+        queueMessage({
+          recipient_id: thread.id,
+          content: messageContent,
+          job_id: thread.lastMessage.job_id,
+        });
+        toast.info('Meddelande köat', { description: 'Skickas automatiskt när du är online' });
+      } else {
+        toast.error('Kunde inte skicka meddelande');
+        setNewMessage(messageContent); // Restore the message
+      }
+      
       // Remove failed optimistic message
       setOptimisticMessages(prev => 
         prev.filter(m => m.id !== optimisticMessage.id)
       );
-      setNewMessage(messageContent); // Restore the message
     } finally {
       setSending(false);
     }
-  }, [newMessage, sending, currentUserId, thread.id, thread.lastMessage.job_id, refetch]);
+  }, [newMessage, sending, currentUserId, thread.id, thread.lastMessage.job_id, refetch, isOnline, queueMessage]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -237,13 +282,20 @@ export function ChatView({
 
       {/* Input */}
       <div className="p-4 border-t border-white/10 flex-shrink-0">
+        {/* Offline indicator */}
+        {!isOnline && (
+          <div className="flex items-center gap-2 mb-2 text-amber-400 text-xs">
+            <WifiOff className="h-3 w-3" />
+            <span>Offline – meddelanden köas och skickas automatiskt</span>
+          </div>
+        )}
         <div className="flex items-end gap-2">
           <Textarea
             ref={textareaRef}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Skriv ett meddelande..."
+            placeholder={isOnline ? "Skriv ett meddelande..." : "Skriv – skickas när du är online..."}
             className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
             rows={1}
           />
@@ -256,6 +308,8 @@ export function ChatView({
           >
             {sending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
+            ) : !isOnline ? (
+              <WifiOff className="h-4 w-4 text-amber-400" />
             ) : (
               <Send className="h-4 w-4" />
             )}
