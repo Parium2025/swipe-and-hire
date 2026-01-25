@@ -1,20 +1,17 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer, CheckCircle } from 'lucide-react';
+import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, ChevronDown, Star, Timer, CheckCircle } from 'lucide-react';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
-import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
+import { getEmploymentTypeLabel, SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
+import { createSmartSearchConditions } from '@/lib/smartSearch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { JobTitleCell } from '@/components/JobTitleCell';
@@ -22,12 +19,10 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
 import { StatsGrid } from '@/components/StatsGrid';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
-import LocationSearchInput from '@/components/LocationSearchInput';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
+import { JobSearchFilters } from '@/components/JobSearchFilters';
 
 interface Job {
   id: string;
@@ -88,7 +83,6 @@ const SearchJobs = () => {
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
   
   // Company suggestion state
   const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
@@ -424,362 +418,23 @@ const SearchJobs = () => {
 
       <StatsGrid stats={statsCards} />
 
-      {/* Filters Card */}
-      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardContent className="p-4 space-y-4">
-          {/* Search Field - Always visible */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-white flex items-center gap-2">
-              <Search className="h-3 w-3" />
-              Sök jobb
-            </Label>
-            <div className="relative">
-              <Input
-                placeholder="Sök efter jobbtitel, företag, plats..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-4 pr-10 bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white"
-              />
-              {searchInput && (
-                <button
-                  onClick={() => setSearchInput('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/10 rounded p-1 transition-colors"
-                  aria-label="Rensa sökning"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Expand/Collapse Filters Button */}
-          <button
-            onClick={() => setFiltersExpanded(!filtersExpanded)}
-            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-white"
-          >
-            <span>{filtersExpanded ? 'Dölj filter' : 'Visa filter'}</span>
-            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${filtersExpanded ? 'rotate-180' : ''}`} />
-          </button>
-
-          {/* Collapsible Filter Section */}
-          <div className={`space-y-4 overflow-hidden transition-all duration-300 ${filtersExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Location Filter - Postal Code OR City */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-white flex items-center gap-2">
-                  <MapPin className="h-3 w-3" />
-                  Plats
-                </Label>
-                <LocationSearchInput
-                  value={selectedPostalCode || selectedCity}
-                  onLocationChange={handleLocationChange}
-                  onPostalCodeChange={setSelectedPostalCode}
-                />
-              </div>
-
-              {/* Yrkesområde Filter */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-white flex items-center gap-2">
-                  <Briefcase className="h-3 w-3" />
-                  Yrkesområde
-                </Label>
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                    >
-                      <span className="truncate">
-                        {selectedCategory === 'all-categories'
-                          ? 'Alla yrkesområden'
-                          : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
-                        }
-                      </span>
-                      {selectedCategory !== 'all-categories' ? (
-                        <span
-                          role="button"
-                          aria-label="Rensa yrkesområde"
-                          tabIndex={0}
-                          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedCategory('all-categories');
-                            setSelectedSubcategories([]);
-                          }}
-                          className="ml-2 inline-flex items-center justify-center rounded p-1 md:hover:bg-white/10"
-                        >
-                          <X className="h-4 w-4 text-white" />
-                        </span>
-                      ) : (
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setSelectedCategory('all-categories');
-                        setSelectedSubcategories([]);
-                      }}
-                      className="cursor-pointer hover:bg-white/10 text-white font-medium"
-                    >
-                      Alla yrkesområden
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-white/20" />
-                    {OCCUPATION_CATEGORIES.map((category, index) => (
-                      <React.Fragment key={category.value}>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedCategory(category.value);
-                            setSelectedSubcategories([]);
-                          }}
-                          className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                        >
-                          <span>{category.label}</span>
-                          {selectedCategory === category.value && (
-                            <Check className="h-4 w-4 text-white" />
-                          )}
-                        </DropdownMenuItem>
-                        {index < OCCUPATION_CATEGORIES.length - 1 && (
-                          <DropdownMenuSeparator className="bg-white/20" />
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-
-            {/* Subcategories Dropdown - shown only when category is selected */}
-            {selectedCategory && selectedCategory !== 'all-categories' && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-white flex items-center gap-2">
-                  <Users className="h-3 w-3" />
-                  Specifik roll inom {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label}
-                </Label>
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                    >
-                      <span className="truncate">
-                        {selectedSubcategories.length === 0
-                          ? 'Alla roller'
-                          : selectedSubcategories.length === 1
-                          ? selectedSubcategories[0]
-                          : `${selectedSubcategories.length} roller valda`
-                        }
-                      </span>
-                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
-                    <DropdownMenuItem
-                      onClick={() => setSelectedSubcategories([])}
-                      className="cursor-pointer hover:bg-white/10 text-white font-medium"
-                    >
-                      Alla roller
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-white/20" />
-                    {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.map((subcat, index, array) => (
-                      <React.Fragment key={subcat}>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedSubcategories(prev => 
-                              prev.includes(subcat) 
-                                ? prev.filter(s => s !== subcat)
-                                : [...prev, subcat]
-                            );
-                          }}
-                          className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                        >
-                          <span>{subcat}</span>
-                          {selectedSubcategories.includes(subcat) && (
-                            <Check className="h-4 w-4 text-white" />
-                          )}
-                        </DropdownMenuItem>
-                        {index < array.length - 1 && (
-                          <DropdownMenuSeparator className="bg-white/20" />
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Show selected roles as badges */}
-                {selectedSubcategories.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedSubcategories.map((subcat) => (
-                      <Badge 
-                        key={subcat}
-                        variant="secondary"
-                        className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
-                      >
-                        {subcat}
-                        <X 
-                          className="h-3 w-3" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedSubcategories(prev => prev.filter(s => s !== subcat));
-                          }}
-                        />
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Employment Type Filter and Sort */}
-              <div className="space-y-2 md:col-span-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Employment Type */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-white flex items-center gap-2">
-                      <Clock className="h-3 w-3" />
-                      Anställning
-                    </Label>
-                    <DropdownMenu modal={false}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                        >
-                          <span className="truncate">
-                            {selectedEmploymentTypes.length === 0 
-                              ? 'Alla typer' 
-                              : `${selectedEmploymentTypes.length} valda`
-                            }
-                          </span>
-                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
-                        <DropdownMenuItem
-                          onClick={() => setSelectedEmploymentTypes([])}
-                          className="cursor-pointer hover:bg-white/10 text-white font-medium"
-                        >
-                          Alla typer
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-white/20" />
-                        {employmentTypes.map((type, index) => (
-                          <React.Fragment key={type.value}>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                const isSelected = selectedEmploymentTypes.includes(type.value);
-                                if (isSelected) {
-                                  setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
-                                } else {
-                                  setSelectedEmploymentTypes(prev => [...prev, type.value]);
-                                }
-                              }}
-                              className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                            >
-                              <span>{type.label}</span>
-                              {selectedEmploymentTypes.includes(type.value) && (
-                                <Check className="h-4 w-4 text-white" />
-                              )}
-                            </DropdownMenuItem>
-                            {index < employmentTypes.length - 1 && (
-                              <DropdownMenuSeparator className="bg-white/20" />
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  {/* Sort Dropdown */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-white flex items-center gap-2">
-                      <ArrowUpDown className="h-3 w-3" />
-                      Sortering
-                    </Label>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                        >
-                          <span className="truncate">{sortLabels[sortBy]}</span>
-                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[200px] z-[10000] bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white">
-                        <DropdownMenuItem 
-                          onClick={() => setSortBy('newest')}
-                          className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                        >
-                          <span>{sortLabels.newest}</span>
-                          {sortBy === 'newest' && <Check className="h-4 w-4 text-white" />}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-white/20" />
-                        <DropdownMenuItem 
-                          onClick={() => setSortBy('oldest')}
-                          className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                        >
-                          <span>{sortLabels.oldest}</span>
-                          {sortBy === 'oldest' && <Check className="h-4 w-4 text-white" />}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-white/20" />
-                        <DropdownMenuItem 
-                          onClick={() => setSortBy('most-views')}
-                          className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                        >
-                          <span>{sortLabels['most-views']}</span>
-                          {sortBy === 'most-views' && <Check className="h-4 w-4 text-white" />}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-
-                {/* Show selected employment types as badges */}
-                {selectedEmploymentTypes.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedEmploymentTypes.map((type) => (
-                      <Badge 
-                        key={type}
-                        variant="secondary"
-                        className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
-                      >
-                        {employmentTypes.find(t => t.value === type)?.label}
-                        <X 
-                          className="h-3 w-3" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedEmploymentTypes(prev => prev.filter(t => t !== type));
-                          }}
-                        />
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Clear all filters button */}
-            <div className="pt-2">
-              <Button 
-                variant="outline" 
-                className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white"
-                onClick={() => {
-                  setSelectedPostalCode('');
-                  setSelectedCity('');
-                  setSelectedEmploymentTypes([]);
-                  setSelectedCategory('all-categories');
-                  setSelectedSubcategories([]);
-                  setSearchInput('');
-                }}
-              >
-                Rensa alla filter
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* New Simplified Search Filters */}
+      <JobSearchFilters
+        searchInput={searchInput}
+        onSearchChange={setSearchInput}
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
+        selectedPostalCode={selectedPostalCode}
+        onPostalCodeChange={setSelectedPostalCode}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        selectedSubcategories={selectedSubcategories}
+        onSubcategoriesChange={setSelectedSubcategories}
+        selectedEmploymentTypes={selectedEmploymentTypes}
+        onEmploymentTypesChange={setSelectedEmploymentTypes}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+      />
 
       {/* Company Suggestion Card - LinkedIn style */}
       {matchingCompany && searchInput.trim() && (
