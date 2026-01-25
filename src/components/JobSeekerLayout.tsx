@@ -14,6 +14,7 @@ import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
 import { useDevice } from '@/hooks/use-device';
 import { DevOfflineToggle } from '@/components/DevOfflineToggle';
 import { useMessagesPreload } from '@/hooks/useMessages';
+import { useMessagesBackgroundSync } from '@/hooks/useMessagesBackgroundSync';
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
@@ -40,6 +41,9 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   
   // 📨 Preload messages in background for instant navigation
   useMessagesPreload();
+  
+  // 🚀 Messages Background Sync - triggers on login, tab focus, and user interaction
+  useMessagesBackgroundSync();
 
   // Prefetch public jobs in background so they're ready instantly when navigating to /search-jobs
   useEffect(() => {
