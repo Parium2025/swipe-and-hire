@@ -11,6 +11,7 @@ import { sv } from 'date-fns/locale';
 import { MessageThread, OptimisticMessage } from './types';
 import { MessageBubble } from './MessageBubble';
 import { MessageAttachmentPicker } from './MessageAttachmentPicker';
+import { DesktopEmojiPicker } from './DesktopEmojiPicker';
 import { Message } from '@/hooks/useMessages';
 import { useOfflineMessageQueue } from '@/hooks/useOfflineMessageQueue';
 import { useOnline } from '@/hooks/useOnlineStatus';
@@ -328,6 +329,13 @@ export function ChatView({
             className="min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl flex-1"
             rows={1}
           />
+          
+          {/* Desktop emoji picker - only visible on md+ screens */}
+          <DesktopEmojiPicker
+            onSelect={(emoji) => setNewMessage(prev => prev + emoji)}
+            disabled={sending}
+          />
+          
           <Button
             variant="glass"
             size="icon"
