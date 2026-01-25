@@ -788,7 +788,7 @@ const SearchJobs = () => {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {appliedJobIds.has(job.id) ? (
-                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs h-7 px-3">
+                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs h-6 px-2">
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 Redan sökt
                               </Badge>
@@ -796,7 +796,7 @@ const SearchJobs = () => {
                               <Button 
                                 variant="glass"
                                 size="sm"
-                                className="h-7 px-3 text-xs md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
+                                className="h-6 px-2 text-xs md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigate(`/job-view/${job.id}`);
@@ -808,7 +808,7 @@ const SearchJobs = () => {
                             <Button 
                               variant="glass"
                               size="icon"
-                              className="h-7 w-7 md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
+                              className="h-6 w-6 rounded-full md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
