@@ -488,7 +488,7 @@ const SearchJobs = () => {
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className="w-full flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 py-2.5 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="w-full h-[44px] flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                       aria-label="Välj yrkesområde"
                     >
                       <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
@@ -559,11 +559,12 @@ const SearchJobs = () => {
                 </Label>
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
+                    <button
+                      className="w-full h-[44px] flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                      aria-label="Välj specifik roll"
                     >
-                      <span className="truncate">
+                      <Users className="h-4 w-4 text-white flex-shrink-0" />
+                      <span className="text-sm text-white flex-1 truncate">
                         {selectedSubcategories.length === 0
                           ? 'Alla roller'
                           : selectedSubcategories.length === 1
@@ -571,8 +572,8 @@ const SearchJobs = () => {
                           : `${selectedSubcategories.length} roller valda`
                         }
                       </span>
-                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                    </Button>
+                      <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
+                    </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
                     <DropdownMenuItem
@@ -644,7 +645,7 @@ const SearchJobs = () => {
                     <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <button
-                          className="w-full flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 py-2.5 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                          className="w-full h-[44px] flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                           aria-label="Välj anställningstyp"
                         >
                           <Clock className="h-4 w-4 text-white flex-shrink-0" />
@@ -701,7 +702,7 @@ const SearchJobs = () => {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button
-                          className="w-full flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 py-2.5 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                          className="w-full h-[44px] flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                           aria-label="Välj sortering"
                         >
                           <ArrowUpDown className="h-4 w-4 text-white flex-shrink-0" />
