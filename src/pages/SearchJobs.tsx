@@ -786,17 +786,17 @@ const SearchJobs = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 lg:gap-2">
+                          <div className="flex items-center gap-2">
                             {appliedJobIds.has(job.id) ? (
-                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-[10px] lg:text-xs h-5 lg:h-7 px-1.5 lg:px-3">
-                                <CheckCircle className="h-2.5 w-2.5 lg:h-3 lg:w-3 mr-0.5 lg:mr-1" />
+                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs h-7 px-3">
+                                <CheckCircle className="h-3 w-3 mr-1" />
                                 Redan sökt
                               </Badge>
                             ) : (
                               <Button 
                                 variant="glass"
                                 size="sm"
-                                className="h-5 lg:h-7 px-1.5 lg:px-3 text-[10px] lg:text-xs md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
+                                className="h-7 px-3 text-xs md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigate(`/job-view/${job.id}`);
@@ -808,13 +808,13 @@ const SearchJobs = () => {
                             <Button 
                               variant="glass"
                               size="icon"
-                              className="h-5 w-5 lg:h-7 lg:w-7 md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
+                              className="h-7 w-7 md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
                               }}
                             >
-                              <Heart className={`h-2.5 w-2.5 lg:h-3 lg:w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                              <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
                             </Button>
                           </div>
                         </TableCell>
