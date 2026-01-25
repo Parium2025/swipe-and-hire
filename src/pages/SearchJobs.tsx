@@ -651,7 +651,9 @@ const SearchJobs = () => {
                           <Clock className="h-4 w-4 text-white flex-shrink-0" />
                           <span className="text-sm text-white flex-1 truncate">
                             {selectedEmploymentTypes.length === 0 
-                              ? 'Alla typer' 
+                              ? 'Alla anställningar' 
+                              : selectedEmploymentTypes.length === 1
+                              ? '1 vald'
                               : `${selectedEmploymentTypes.length} valda`
                             }
                           </span>
@@ -663,7 +665,7 @@ const SearchJobs = () => {
                           onClick={() => setSelectedEmploymentTypes([])}
                           className="cursor-pointer hover:bg-white/10 text-white font-medium"
                         >
-                          Alla typer
+                          Alla anställningar
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-white/20" />
                         {employmentTypes.map((type, index) => (
