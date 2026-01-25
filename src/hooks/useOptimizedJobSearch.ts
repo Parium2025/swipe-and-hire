@@ -220,8 +220,8 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
 
   // Build category filter for database
   const categoryFilter = useMemo(() => {
-    // Use main category for database filter
-    if (category && category !== 'all') {
+    // Use main category for database filter - handle both 'all' and 'all-categories'
+    if (category && category !== 'all' && category !== 'all-categories') {
       return category;
     }
     return '';
@@ -449,7 +449,7 @@ export function useInfiniteJobSearch(options: UseInfiniteJobSearchOptions) {
   }, [employmentTypes]);
 
   const categoryFilter = useMemo(() => {
-    if (category && category !== 'all') return category;
+    if (category && category !== 'all' && category !== 'all-categories') return category;
     return '';
   }, [category]);
 
@@ -578,7 +578,7 @@ export function useJobSearchCount(options: Omit<UseOptimizedJobSearchOptions, 'e
   }, [employmentTypes]);
 
   const categoryFilter = useMemo(() => {
-    if (category && category !== 'all') return category;
+    if (category && category !== 'all' && category !== 'all-categories') return category;
     return '';
   }, [category]);
 
