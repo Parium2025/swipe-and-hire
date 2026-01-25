@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -35,6 +35,7 @@ export interface Message {
 
 // Cache key for localStorage
 const MESSAGES_CACHE_KEY = 'parium_messages_cache';
+const PAGE_SIZE = 50; // Messages per page
 
 function getMessagesFromCache(): { inbox: Message[]; sent: Message[]; timestamp: number } | null {
   try {
@@ -64,6 +65,49 @@ function setMessagesCache(inbox: Message[], sent: Message[]) {
   }
 }
 
+// Fetch messages with cursor-based pagination
+async function fetchMessagePage(
+  userId: string,
+  type: 'inbox' | 'sent',
+  cursor?: string
+): Promise<{ messages: Message[]; nextCursor: string | null }> {
+  const column = type === 'inbox' ? 'recipient_id' : 'sender_id';
+  
+  let query = supabase
+    .from('messages')
+    .select(`*, job:job_id (title)`)
+    .eq(column, userId)
+    .order('created_at', { ascending: false })
+    .limit(PAGE_SIZE);
+  
+  // Cursor-based: fetch messages older than the cursor
+  if (cursor) {
+    query = query.lt('created_at', cursor);
+  }
+  
+  const { data, error } = await query;
+  if (error) throw error;
+  
+  const messages = data || [];
+  const nextCursor = messages.length === PAGE_SIZE 
+    ? messages[messages.length - 1]?.created_at 
+    : null;
+  
+  return { messages, nextCursor };
+}
+
+// Fetch profile data for a batch of user IDs
+async function fetchProfiles(userIds: string[]): Promise<Map<string, Message['sender_profile']>> {
+  if (userIds.length === 0) return new Map();
+  
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
+    .in('user_id', userIds);
+  
+  return new Map(profiles?.map(p => [p.user_id, p]) || []);
+}
+
 export function useMessages() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -71,57 +115,61 @@ export function useMessages() {
   // Get cached data for instant load
   const cachedData = getMessagesFromCache();
 
-  // Fetch all messages in a single optimized query
-  const messagesQuery = useQuery({
-    queryKey: ['messages', 'all', user?.id],
+  // Infinite query for inbox messages with cursor-based pagination
+  const inboxQuery = useInfiniteQuery({
+    queryKey: ['messages', 'inbox', user?.id],
+    queryFn: async ({ pageParam }) => {
+      if (!user) return { messages: [], nextCursor: null };
+      return fetchMessagePage(user.id, 'inbox', pageParam);
+    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    initialPageParam: undefined as string | undefined,
+    enabled: !!user,
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
+  });
+
+  // Infinite query for sent messages with cursor-based pagination
+  const sentQuery = useInfiniteQuery({
+    queryKey: ['messages', 'sent', user?.id],
+    queryFn: async ({ pageParam }) => {
+      if (!user) return { messages: [], nextCursor: null };
+      return fetchMessagePage(user.id, 'sent', pageParam);
+    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    initialPageParam: undefined as string | undefined,
+    enabled: !!user,
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
+  });
+
+  // Flatten pages into message arrays
+  const rawInbox = useMemo(() => 
+    inboxQuery.data?.pages.flatMap(p => p.messages) || [],
+    [inboxQuery.data]
+  );
+  
+  const rawSent = useMemo(() => 
+    sentQuery.data?.pages.flatMap(p => p.messages) || [],
+    [sentQuery.data]
+  );
+
+  // Fetch and attach profiles to messages
+  const messagesWithProfilesQuery = useQuery({
+    queryKey: ['messages', 'profiles', rawInbox.length, rawSent.length],
     queryFn: async () => {
-      if (!user) return { inbox: [], sent: [] };
-
-      // Fetch inbox and sent in parallel
-      const [inboxResult, sentResult] = await Promise.all([
-        supabase
-          .from('messages')
-          .select(`
-            *,
-            job:job_id (title)
-          `)
-          .eq('recipient_id', user.id)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('messages')
-          .select(`
-            *,
-            job:job_id (title)
-          `)
-          .eq('sender_id', user.id)
-          .order('created_at', { ascending: false }),
-      ]);
-
-      if (inboxResult.error) throw inboxResult.error;
-      if (sentResult.error) throw sentResult.error;
-
-      // Get unique user IDs for profile lookup
-      const inboxSenderIds = [...new Set(inboxResult.data?.map(m => m.sender_id) || [])];
-      const sentRecipientIds = [...new Set(sentResult.data?.map(m => m.recipient_id) || [])];
+      const inboxSenderIds = [...new Set(rawInbox.map(m => m.sender_id))];
+      const sentRecipientIds = [...new Set(rawSent.map(m => m.recipient_id))];
       const allUserIds = [...new Set([...inboxSenderIds, ...sentRecipientIds])];
-
-      // Fetch all profiles in one query (optimized join alternative)
-      let profileMap = new Map<string, Message['sender_profile']>();
-      if (allUserIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-          .in('user_id', allUserIds);
-
-        profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-      }
-
-      const inbox = (inboxResult.data || []).map(msg => ({
+      
+      const profileMap = await fetchProfiles(allUserIds);
+      
+      const inbox = rawInbox.map(msg => ({
         ...msg,
         sender_profile: profileMap.get(msg.sender_id) || null,
       })) as Message[];
 
-      const sent = (sentResult.data || []).map(msg => ({
+      const sent = rawSent.map(msg => ({
         ...msg,
         recipient_profile: profileMap.get(msg.recipient_id) || null,
       })) as Message[];
@@ -131,11 +179,10 @@ export function useMessages() {
 
       return { inbox, sent };
     },
-    enabled: !!user,
-    // Use cache as initial data for instant load
+    enabled: rawInbox.length > 0 || rawSent.length > 0,
+    staleTime: 30 * 1000,
+    // Use cached data for instant load
     initialData: cachedData ? { inbox: cachedData.inbox, sent: cachedData.sent } : undefined,
-    staleTime: 30 * 1000, // Consider fresh for 30 seconds
-    refetchInterval: 60 * 1000, // Background refresh every minute
   });
 
   // Subscribe to realtime updates
@@ -154,7 +201,8 @@ export function useMessages() {
         },
         () => {
           // Invalidate and refetch when we receive a new message
-          queryClient.invalidateQueries({ queryKey: ['messages', 'all', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['messages', 'inbox', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['messages', 'profiles'] });
         }
       )
       .on(
@@ -167,7 +215,8 @@ export function useMessages() {
         },
         () => {
           // Invalidate when we send a message
-          queryClient.invalidateQueries({ queryKey: ['messages', 'all', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['messages', 'sent', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['messages', 'profiles'] });
         }
       )
       .subscribe();
@@ -190,43 +239,60 @@ export function useMessages() {
       if (error) throw error;
     },
     onMutate: async (messageId) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['messages', 'all'] });
-
-      // Get current data
-      const previousData = queryClient.getQueryData(['messages', 'all', user?.id]);
-
-      // Optimistically update
-      queryClient.setQueryData(['messages', 'all', user?.id], (old: { inbox: Message[]; sent: Message[] } | undefined) => {
-        if (!old) return old;
-        return {
-          ...old,
-          inbox: old.inbox.map(m => 
-            m.id === messageId ? { ...m, is_read: true } : m
-          ),
-        };
-      });
-
-      return { previousData };
-    },
-    onError: (_, __, context) => {
-      // Rollback on error
-      if (context?.previousData) {
-        queryClient.setQueryData(['messages', 'all', user?.id], context.previousData);
-      }
+      await queryClient.cancelQueries({ queryKey: ['messages'] });
+      
+      // Optimistically update the profiles query data
+      queryClient.setQueryData(['messages', 'profiles', rawInbox.length, rawSent.length], 
+        (old: { inbox: Message[]; sent: Message[] } | undefined) => {
+          if (!old) return old;
+          return {
+            ...old,
+            inbox: old.inbox.map(m => 
+              m.id === messageId ? { ...m, is_read: true } : m
+            ),
+          };
+        }
+      );
     },
   });
 
+  // Load more functions
+  const loadMoreInbox = useCallback(() => {
+    if (inboxQuery.hasNextPage && !inboxQuery.isFetchingNextPage) {
+      inboxQuery.fetchNextPage();
+    }
+  }, [inboxQuery]);
+
+  const loadMoreSent = useCallback(() => {
+    if (sentQuery.hasNextPage && !sentQuery.isFetchingNextPage) {
+      sentQuery.fetchNextPage();
+    }
+  }, [sentQuery]);
+
   // Get unread count
-  const unreadCount = messagesQuery.data?.inbox?.filter(m => !m.is_read).length || 0;
+  const inbox = messagesWithProfilesQuery.data?.inbox || cachedData?.inbox || [];
+  const sent = messagesWithProfilesQuery.data?.sent || cachedData?.sent || [];
+  const unreadCount = inbox.filter(m => !m.is_read).length;
+
+  const refetch = useCallback(() => {
+    inboxQuery.refetch();
+    sentQuery.refetch();
+  }, [inboxQuery, sentQuery]);
 
   return {
-    inbox: messagesQuery.data?.inbox || [],
-    sent: messagesQuery.data?.sent || [],
-    isLoading: messagesQuery.isLoading,
+    inbox,
+    sent,
+    isLoading: inboxQuery.isLoading || sentQuery.isLoading,
     unreadCount,
     markAsRead: markAsReadMutation.mutate,
-    refetch: () => messagesQuery.refetch(),
+    refetch,
+    // Pagination helpers
+    loadMoreInbox,
+    loadMoreSent,
+    hasMoreInbox: !!inboxQuery.hasNextPage,
+    hasMoreSent: !!sentQuery.hasNextPage,
+    isLoadingMoreInbox: inboxQuery.isFetchingNextPage,
+    isLoadingMoreSent: sentQuery.isFetchingNextPage,
   };
 }
 
