@@ -4,6 +4,9 @@ import { cn } from '@/lib/utils';
 import { Message } from '@/hooks/useMessages';
 import { SenderProfile, OptimisticMessage } from './types';
 import { MessageAttachmentDisplay } from './MessageAttachmentDisplay';
+import { MessageReactions } from './MessageReactions';
+import { EmojiReactionPicker } from './EmojiReactionPicker';
+import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { Clock } from 'lucide-react';
 
 interface MessageBubbleProps {
@@ -11,6 +14,7 @@ interface MessageBubbleProps {
   isOwn: boolean;
   showAvatar: boolean;
   senderProfile: SenderProfile;
+  currentUserId: string;
 }
 
 export function MessageBubble({ 
@@ -18,9 +22,16 @@ export function MessageBubble({
   isOwn, 
   showAvatar,
   senderProfile,
+  currentUserId,
 }: MessageBubbleProps) {
   const isOptimistic = 'isOptimistic' in message && message.isOptimistic;
   const isQueued = message.id.startsWith('offline-');
+  
+  // Only fetch reactions for real messages
+  const { groupedReactions, toggleReaction } = useMessageReactions(
+    isOptimistic ? '' : message.id, 
+    currentUserId
+  );
   
   const getAvatarUrl = () => {
     if (senderProfile.role === 'employer' && senderProfile.company_logo_url) {
@@ -47,7 +58,7 @@ export function MessageBubble({
 
   return (
     <div className={cn(
-      "flex gap-2",
+      "flex gap-2 group",
       isOwn ? "flex-row-reverse" : "flex-row",
       (isOptimistic || isQueued) && "opacity-70"
     )}>
@@ -68,30 +79,54 @@ export function MessageBubble({
         "max-w-[70%] flex flex-col",
         isOwn ? "items-end" : "items-start"
       )}>
-        {/* Attachment if present */}
-        {attachment && (
-          <div className="mb-2">
-            <MessageAttachmentDisplay
-              url={attachment.url}
-              type={attachment.type}
-              name={attachment.name}
+        <div className={cn(
+          "flex items-center gap-1",
+          isOwn ? "flex-row-reverse" : "flex-row"
+        )}>
+          <div className="flex flex-col">
+            {/* Attachment if present */}
+            {attachment && (
+              <div className="mb-2">
+                <MessageAttachmentDisplay
+                  url={attachment.url}
+                  type={attachment.type}
+                  name={attachment.name}
+                  isOwn={isOwn}
+                />
+              </div>
+            )}
+
+            {/* Text content */}
+            {message.content && (
+              <div className={cn(
+                "px-4 py-2 rounded-2xl",
+                isOwn 
+                  ? "bg-blue-500/30 border border-blue-500/40 rounded-br-md" 
+                  : "bg-white/10 border border-white/10 rounded-bl-md"
+              )}>
+                <p className="text-white text-sm whitespace-pre-wrap break-words">
+                  {message.content}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Emoji reaction picker - only for real messages */}
+          {!isOptimistic && !isQueued && (
+            <EmojiReactionPicker 
+              onSelect={toggleReaction}
               isOwn={isOwn}
             />
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Text content */}
-        {message.content && (
-          <div className={cn(
-            "px-4 py-2 rounded-2xl",
-            isOwn 
-              ? "bg-blue-500/30 border border-blue-500/40 rounded-br-md" 
-              : "bg-white/10 border border-white/10 rounded-bl-md"
-          )}>
-            <p className="text-white text-sm whitespace-pre-wrap break-words">
-              {message.content}
-            </p>
-          </div>
+        {/* Reactions display */}
+        {!isOptimistic && groupedReactions.length > 0 && (
+          <MessageReactions 
+            reactions={groupedReactions}
+            onToggle={toggleReaction}
+            isOwn={isOwn}
+          />
         )}
 
         <div className="flex items-center gap-1 mt-1 px-1">
