@@ -127,7 +127,14 @@ export function MessageAttachmentPicker({
         size="icon"
         onClick={() => fileInputRef.current?.click()}
         disabled={disabled || uploading}
-        className="h-11 w-11 flex-shrink-0 text-white/60 hover:text-white hover:bg-white/10"
+        className={cn(
+          "h-11 w-11 flex-shrink-0",
+          "border border-white/30 text-white",
+          "md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white",
+          "transition-all duration-300",
+          "active:scale-95 active:bg-white/20",
+          "[&_svg]:text-white"
+        )}
       >
         {uploading ? (
           <Loader2 className="h-5 w-5 animate-spin" />
