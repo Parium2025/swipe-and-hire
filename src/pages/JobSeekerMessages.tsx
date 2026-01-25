@@ -275,7 +275,7 @@ function ThreadItem({
           "text-sm truncate text-white",
           hasUnread && "font-medium"
         )}>
-          <span className="text-white/70">
+          <span className="text-white">
             {isOwnMessage ? "Du: " : `${getDisplayName()}: `}
           </span>
           {lastMessage.content}
