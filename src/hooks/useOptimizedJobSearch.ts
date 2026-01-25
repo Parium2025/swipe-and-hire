@@ -1,8 +1,8 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo, useEffect, useCallback, useRef } from 'react';
 import { getTimeRemaining } from '@/lib/date';
-import { expandSearchTerms } from '@/lib/smartSearch';
+import { expandSearchTerms, detectSalarySearch } from '@/lib/smartSearch';
 
 export interface SearchJob {
   id: string;
@@ -57,9 +57,119 @@ interface UseOptimizedJobSearchOptions {
   enabled?: boolean;
 }
 
+// ============================================
+// FUZZY SEARCH UTILITIES
+// ============================================
+
+// Normalize Swedish characters for fuzzy matching
+const normalizeSwedish = (text: string): string => {
+  return text
+    .toLowerCase()
+    .replace(/å/g, 'a')
+    .replace(/ä/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/é/g, 'e')
+    .replace(/è/g, 'e');
+};
+
+// Levenshtein distance for typo tolerance
+const levenshteinDistance = (a: string, b: string): number => {
+  const matrix: number[][] = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+};
+
+// Common Swedish job-related typo corrections
+const typoCorrections: Record<string, string[]> = {
+  'utveklare': ['utvecklare'],
+  'utvekalre': ['utvecklare'],
+  'utvecklre': ['utvecklare'],
+  'saljare': ['säljare'],
+  'saeljare': ['säljare'],
+  'seljare': ['säljare'],
+  'ingenjor': ['ingenjör'],
+  'ingenior': ['ingenjör'],
+  'ingenjorr': ['ingenjör'],
+  'sjukskotare': ['sjuksköterska'],
+  'sjukskoetrska': ['sjuksköterska'],
+  'sjukskoterska': ['sjuksköterska'],
+  'larare': ['lärare'],
+  'laerare': ['lärare'],
+  'lerare': ['lärare'],
+  'ekonom': ['ekonom', 'ekonomi'],
+  'bokforing': ['bokföring'],
+  'marknadsforing': ['marknadsföring'],
+  'projektledning': ['projektledare'],
+  'kundtjanst': ['kundtjänst'],
+  'lastbilschauffor': ['lastbilschaufför', 'lastbilsförare'],
+  'chauffeur': ['chaufför', 'förare'],
+  'forare': ['förare'],
+  'programerare': ['programmerare'],
+  'programmare': ['programmerare'],
+  'adminstrator': ['administratör'],
+  'assitent': ['assistent'],
+  'konsullt': ['konsult'],
+  'recptionist': ['receptionist'],
+  'chef': ['chef'],
+  'cheff': ['chef'],
+  'ledre': ['ledare'],
+  'teknker': ['tekniker'],
+};
+
+// Expand search with fuzzy matching for typos
+const expandSearchWithFuzzy = (searchTerm: string): string[] => {
+  const normalizedTerm = normalizeSwedish(searchTerm.trim());
+  const expandedTerms = new Set(expandSearchTerms(searchTerm));
+  
+  // Check for typo matches using Levenshtein distance
+  for (const [typo, corrections] of Object.entries(typoCorrections)) {
+    // Allow 1-2 character differences depending on word length
+    const maxDistance = normalizedTerm.length <= 4 ? 1 : 2;
+    if (levenshteinDistance(normalizedTerm, typo) <= maxDistance) {
+      corrections.forEach(c => expandedTerms.add(c));
+    }
+  }
+  
+  // Also check if any typo is a substring match
+  for (const [typo, corrections] of Object.entries(typoCorrections)) {
+    if (normalizedTerm.includes(typo) || typo.includes(normalizedTerm)) {
+      corrections.forEach(c => expandedTerms.add(c));
+    }
+  }
+  
+  return [...expandedTerms];
+};
+
+// ============================================
+// MAIN HOOK
+// ============================================
+
 /**
  * High-performance job search hook using PostgreSQL full-text search.
  * Designed to handle 100,000+ jobs with sub-100ms query times.
+ * 
+ * Features:
+ * - Full-text search with GIN indexes
+ * - Fuzzy matching (typo tolerance)
+ * - Category filtering at database level
+ * - Salary filtering at database level
+ * - Cursor-based pagination
+ * - Real-time cache invalidation
  */
 export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   const { searchQuery, city, employmentTypes, category, subcategories, enabled = true } = options;
@@ -71,18 +181,30 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   const countyFilter = isCounty ? city : '';
   const cityFilter = isCounty ? '' : city;
 
-  // Expand search terms with synonyms for better matching
-  const expandedSearchQuery = useMemo(() => {
-    if (!searchQuery.trim()) return '';
-    const expanded = expandSearchTerms(searchQuery);
-    // Join with spaces for the database function to parse
-    return expanded.join(' ');
+  // Detect salary search and expand terms with fuzzy matching
+  const { expandedSearchQuery, salarySearch } = useMemo(() => {
+    if (!searchQuery.trim()) return { expandedSearchQuery: '', salarySearch: null };
+    
+    // Check if it's a salary search first
+    const salaryResult = detectSalarySearch(searchQuery);
+    if (salaryResult.isSalarySearch) {
+      return { 
+        expandedSearchQuery: '', 
+        salarySearch: salaryResult 
+      };
+    }
+    
+    // Expand with fuzzy matching for typos
+    const expanded = expandSearchWithFuzzy(searchQuery);
+    return { 
+      expandedSearchQuery: expanded.join(' '),
+      salarySearch: null
+    };
   }, [searchQuery]);
 
   // Map employment type values to database codes
   const employmentCodes = useMemo(() => {
     return employmentTypes.map(type => {
-      // Map common values to their database codes
       const typeMap: Record<string, string> = {
         'heltid': 'heltid',
         'deltid': 'deltid',
@@ -96,12 +218,20 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     });
   }, [employmentTypes]);
 
-  // Build category search terms
+  // Build category filter for database
+  const categoryFilter = useMemo(() => {
+    // Use main category for database filter
+    if (category && category !== 'all') {
+      return category;
+    }
+    return '';
+  }, [category]);
+
+  // Build category search terms for subcategories (added to full-text search)
   const categorySearchTerms = useMemo(() => {
     if (subcategories.length > 0) {
       return subcategories.join(' ');
     }
-    // Don't add category keywords to full-text search - use ILIKE for categories
     return '';
   }, [subcategories]);
 
@@ -113,7 +243,16 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
 
   // Main search query using the optimized database function
   const { data: rawJobs = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['optimized-job-search', fullSearchQuery, cityFilter, countyFilter, employmentCodes],
+    queryKey: [
+      'optimized-job-search', 
+      fullSearchQuery, 
+      cityFilter, 
+      countyFilter, 
+      employmentCodes, 
+      categoryFilter,
+      salarySearch?.targetSalary,
+      salarySearch?.isMinimumSearch
+    ],
     queryFn: async () => {
       // Cancel any in-flight request
       if (abortControllerRef.current) {
@@ -121,14 +260,18 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       }
       abortControllerRef.current = new AbortController();
 
-      // Use the optimized RPC function
+      // Use the optimized RPC function with all filters at database level
       const { data, error } = await supabase.rpc('search_jobs', {
         p_search_query: fullSearchQuery || null,
         p_city: cityFilter || null,
         p_county: countyFilter || null,
         p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
+        p_category: categoryFilter || null,
+        p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
+        p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
         p_limit: 100,
         p_offset: 0,
+        p_cursor_created_at: null,
       });
 
       if (error) {
@@ -252,20 +395,42 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   };
 }
 
+// ============================================
+// INFINITE SCROLL HOOK (Cursor-based pagination)
+// ============================================
+
+interface UseInfiniteJobSearchOptions extends UseOptimizedJobSearchOptions {
+  pageSize?: number;
+}
+
 /**
- * Hook to get total job count for a search (for pagination info)
+ * Infinite scroll job search using cursor-based pagination.
+ * More efficient than offset-based for large datasets.
  */
-export function useJobSearchCount(options: Omit<UseOptimizedJobSearchOptions, 'enabled'>) {
-  const { searchQuery, city, employmentTypes } = options;
-  
+export function useInfiniteJobSearch(options: UseInfiniteJobSearchOptions) {
+  const { 
+    searchQuery, 
+    city, 
+    employmentTypes, 
+    category, 
+    subcategories, 
+    enabled = true,
+    pageSize = 20 
+  } = options;
+  const queryClient = useQueryClient();
+
   const isCounty = city.endsWith(' län');
   const countyFilter = isCounty ? city : '';
   const cityFilter = isCounty ? '' : city;
 
-  const expandedSearchQuery = useMemo(() => {
-    if (!searchQuery.trim()) return '';
-    const expanded = expandSearchTerms(searchQuery);
-    return expanded.join(' ');
+  const { expandedSearchQuery, salarySearch } = useMemo(() => {
+    if (!searchQuery.trim()) return { expandedSearchQuery: '', salarySearch: null };
+    const salaryResult = detectSalarySearch(searchQuery);
+    if (salaryResult.isSalarySearch) {
+      return { expandedSearchQuery: '', salarySearch: salaryResult };
+    }
+    const expanded = expandSearchWithFuzzy(searchQuery);
+    return { expandedSearchQuery: expanded.join(' '), salarySearch: null };
   }, [searchQuery]);
 
   const employmentCodes = useMemo(() => {
@@ -283,14 +448,151 @@ export function useJobSearchCount(options: Omit<UseOptimizedJobSearchOptions, 'e
     });
   }, [employmentTypes]);
 
+  const categoryFilter = useMemo(() => {
+    if (category && category !== 'all') return category;
+    return '';
+  }, [category]);
+
+  const categorySearchTerms = useMemo(() => {
+    return subcategories.length > 0 ? subcategories.join(' ') : '';
+  }, [subcategories]);
+
+  const fullSearchQuery = useMemo(() => {
+    const terms = [expandedSearchQuery, categorySearchTerms].filter(Boolean);
+    return terms.join(' ');
+  }, [expandedSearchQuery, categorySearchTerms]);
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: [
+      'infinite-job-search',
+      fullSearchQuery,
+      cityFilter,
+      countyFilter,
+      employmentCodes,
+      categoryFilter,
+      salarySearch?.targetSalary,
+    ],
+    queryFn: async ({ pageParam }) => {
+      const { data, error } = await supabase.rpc('search_jobs', {
+        p_search_query: fullSearchQuery || null,
+        p_city: cityFilter || null,
+        p_county: countyFilter || null,
+        p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
+        p_category: categoryFilter || null,
+        p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
+        p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
+        p_limit: pageSize,
+        p_offset: 0,
+        p_cursor_created_at: pageParam || null,
+      });
+
+      if (error) throw error;
+      return (data || []) as SearchJob[];
+    },
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < pageSize) return undefined;
+      const lastJob = lastPage[lastPage.length - 1];
+      return lastJob?.created_at || undefined;
+    },
+    enabled,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
+  });
+
+  const allJobs = useMemo(() => {
+    return data?.pages.flat() || [];
+  }, [data]);
+
+  // Real-time subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('infinite-search-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'job_postings' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['infinite-job-search'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return {
+    jobs: allJobs,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    totalCount: allJobs.length,
+  };
+}
+
+/**
+ * Hook to get total job count for a search (for pagination info)
+ */
+export function useJobSearchCount(options: Omit<UseOptimizedJobSearchOptions, 'enabled'>) {
+  const { searchQuery, city, employmentTypes, category, subcategories } = options;
+  
+  const isCounty = city.endsWith(' län');
+  const countyFilter = isCounty ? city : '';
+  const cityFilter = isCounty ? '' : city;
+
+  const { expandedSearchQuery, salarySearch } = useMemo(() => {
+    if (!searchQuery.trim()) return { expandedSearchQuery: '', salarySearch: null };
+    const salaryResult = detectSalarySearch(searchQuery);
+    if (salaryResult.isSalarySearch) {
+      return { expandedSearchQuery: '', salarySearch: salaryResult };
+    }
+    const expanded = expandSearchWithFuzzy(searchQuery);
+    return { expandedSearchQuery: expanded.join(' '), salarySearch: null };
+  }, [searchQuery]);
+
+  const employmentCodes = useMemo(() => {
+    return employmentTypes.map(type => {
+      const typeMap: Record<string, string> = {
+        'heltid': 'heltid',
+        'deltid': 'deltid',
+        'vikariat': 'vikariat',
+        'provanstallning': 'provanstallning',
+        'praktik': 'praktik',
+        'sommarjobb': 'sommarjobb',
+        'timanstallning': 'timanstallning',
+      };
+      return typeMap[type] || type;
+    });
+  }, [employmentTypes]);
+
+  const categoryFilter = useMemo(() => {
+    if (category && category !== 'all') return category;
+    return '';
+  }, [category]);
+
   const { data: count = 0 } = useQuery({
-    queryKey: ['job-search-count', expandedSearchQuery, cityFilter, countyFilter, employmentCodes],
+    queryKey: ['job-search-count', expandedSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('count_search_jobs', {
         p_search_query: expandedSearchQuery || null,
         p_city: cityFilter || null,
         p_county: countyFilter || null,
         p_employment_types: employmentCodes.length > 0 ? employmentCodes : null,
+        p_category: categoryFilter || null,
+        p_salary_min: salarySearch?.isMinimumSearch ? salarySearch.targetSalary : (salarySearch?.targetSalary || null),
+        p_salary_max: salarySearch?.isMinimumSearch ? null : (salarySearch?.targetSalary || null),
       });
 
       if (error) {

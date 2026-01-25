@@ -1968,9 +1968,12 @@ export type Database = {
       }
       count_search_jobs: {
         Args: {
+          p_category?: string
           p_city?: string
           p_county?: string
           p_employment_types?: string[]
+          p_salary_max?: number
+          p_salary_min?: number
           p_search_query?: string
         }
         Returns: number
@@ -2069,11 +2072,15 @@ export type Database = {
       }
       search_jobs: {
         Args: {
+          p_category?: string
           p_city?: string
           p_county?: string
+          p_cursor_created_at?: string
           p_employment_types?: string[]
           p_limit?: number
           p_offset?: number
+          p_salary_max?: number
+          p_salary_min?: number
           p_search_query?: string
         }
         Returns: {
