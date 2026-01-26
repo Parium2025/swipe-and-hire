@@ -122,25 +122,58 @@ const StarsEffect = memo(() => {
         />
       ))}
 
-      {/* Shooting star - simple white dot from top-right going down-left */}
+      {/* Shooting star with realistic tail */}
       {shootingStarActive && (
         <motion.div
-          className="absolute w-1 h-1 bg-white rounded-full"
+          className="absolute"
           style={{
-            right: '5%',
-            top: '3%',
+            right: '10%',
+            top: '5%',
           }}
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 0, scale: 0.5 }}
           animate={{ 
-            opacity: [0, 0.9, 0.9, 0.7, 0],
-            x: [0, -200, -400],
-            y: [0, 160, 320],
+            opacity: [0, 1, 1, 0.8, 0],
+            scale: [0.5, 1, 1, 0.8, 0.3],
+            x: [0, -120, -280, -400],
+            y: [0, 80, 200, 300],
           }}
           transition={{
-            duration: 1.2,
-            ease: 'easeOut',
+            duration: 0.8,
+            ease: [0.25, 0.1, 0.25, 1],
           }}
-        />
+        >
+          {/* Comet head - bright glowing core */}
+          <div 
+            className="absolute w-2 h-2 bg-white rounded-full"
+            style={{
+              boxShadow: '0 0 6px 2px rgba(255,255,255,0.9), 0 0 12px 4px rgba(200,220,255,0.6)',
+            }}
+          />
+          {/* Comet tail - gradient trail */}
+          <div 
+            className="absolute"
+            style={{
+              width: '80px',
+              height: '2px',
+              background: 'linear-gradient(to left, rgba(255,255,255,0.8) 0%, rgba(200,220,255,0.4) 30%, rgba(150,180,255,0.1) 70%, transparent 100%)',
+              transform: 'rotate(-38deg) translateX(4px) translateY(-1px)',
+              transformOrigin: 'left center',
+              borderRadius: '2px',
+              filter: 'blur(0.5px)',
+            }}
+          />
+          {/* Secondary thinner tail for depth */}
+          <div 
+            className="absolute"
+            style={{
+              width: '50px',
+              height: '1px',
+              background: 'linear-gradient(to left, rgba(255,255,255,0.5) 0%, rgba(180,200,255,0.2) 50%, transparent 100%)',
+              transform: 'rotate(-38deg) translateX(6px) translateY(1px)',
+              transformOrigin: 'left center',
+            }}
+          />
+        </motion.div>
       )}
     </>
   );
