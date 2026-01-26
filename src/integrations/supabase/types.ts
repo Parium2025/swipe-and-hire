@@ -1256,6 +1256,38 @@ export type Database = {
         }
         Relationships: []
       }
+      job_views: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_views_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobseeker_notes: {
         Row: {
           content: string | null
@@ -2119,6 +2151,10 @@ export type Database = {
           p_priority?: number
         }
         Returns: string
+      }
+      record_job_view: {
+        Args: { p_job_id: string; p_user_id: string }
+        Returns: boolean
       }
       same_organization: {
         Args: { p_user_id_1: string; p_user_id_2: string }

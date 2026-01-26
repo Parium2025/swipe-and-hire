@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
+import { useJobViewTracker } from '@/hooks/useJobViewTracker';
 import JobSwipe from '@/components/JobSwipe';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -76,6 +77,16 @@ const JobView = () => {
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  
+  // Track job view when user reads content
+  useJobViewTracker({
+    jobId,
+    userId: user?.id,
+    contentRef,
+    scrollThreshold: 0.7, // 70% scrolled
+    minTimeOnPage: 3000, // 3 seconds minimum
+  });
   
   // Preloada bilden när den finns tillgänglig
   useImagePreloader(imageUrl ? [imageUrl] : [], { priority: 'high' });
@@ -525,7 +536,7 @@ const JobView = () => {
   }
 
   return (
-    <div className="min-h-screen bg-parium-gradient animate-fade-in">
+    <div ref={contentRef} className="min-h-screen bg-parium-gradient animate-fade-in overflow-y-auto">
       {/* Back button - fixed top left */}
       <div className="fixed top-4 left-4 z-10">
         <Button
