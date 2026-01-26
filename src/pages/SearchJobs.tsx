@@ -31,6 +31,7 @@ import { useBlurHandlers } from '@/hooks/useBlurHandlers';
 import { useOptimizedJobSearch } from '@/hooks/useOptimizedJobSearch';
 import { useSavedSearches, SearchCriteria } from '@/hooks/useSavedSearches';
 import { SaveSearchDialog } from '@/components/SaveSearchDialog';
+import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
 
 interface Job {
   id: string;
@@ -69,8 +70,30 @@ const SearchJobs = () => {
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const blurHandlers = useBlurHandlers();
-  const { savedSearches, saveSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
+  const { savedSearches, saveSearch, deleteSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
+
+  // Handler to apply a saved search - sets all the filter states
+  const handleApplySavedSearch = useCallback((criteria: SearchCriteria) => {
+    // Clear existing filters first
+    setSearchInput(criteria.search_query || '');
+    setSelectedCity(criteria.city || '');
+    setSelectedPostalCode('');
+    setSelectedCategory(criteria.category || 'all-categories');
+    setSelectedSubcategories([]);
+    setSelectedEmploymentTypes(criteria.employment_types || []);
+    
+    // Expand filters if there are active filters to show
+    if (criteria.city || criteria.category || criteria.employment_types?.length) {
+      setFiltersExpanded(true);
+    }
+    
+    // Reset display count to show fresh results
+    setDisplayCount(20);
+    
+    // Scroll to top of results
+    listTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
   
   // Hämta användarens ansökningar för att visa "Redan sökt"-badge
   const { data: appliedJobIds = new Set<string>() } = useQuery({
@@ -325,22 +348,14 @@ const SearchJobs = () => {
               )}
             </div>
             
-            {/* Saved Searches Indicator */}
-            {savedSearches.length > 0 && (
-              <div className="flex items-center gap-2 text-xs text-white">
-                <Bell className="h-3 w-3 text-white" />
-                <span>{savedSearches.length} sparad{savedSearches.length !== 1 ? 'e' : ''} sökning{savedSearches.length !== 1 ? 'ar' : ''}</span>
-                {totalNewMatches > 0 && (
-                  <Badge 
-                    variant="glass" 
-                    className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-5 px-1.5 cursor-pointer hover:bg-red-500/30"
-                    onClick={() => clearNewMatches()}
-                  >
-                    {totalNewMatches} nya matchningar
-                  </Badge>
-                )}
-              </div>
-            )}
+            {/* Saved Searches Dropdown */}
+            <SavedSearchesDropdown
+              savedSearches={savedSearches}
+              totalNewMatches={totalNewMatches}
+              onApplySearch={handleApplySavedSearch}
+              onDeleteSearch={deleteSearch}
+              onClearNewMatches={clearNewMatches}
+            />
           </div>
 
           {/* Expand/Collapse Filters Button */}
