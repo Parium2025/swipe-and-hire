@@ -630,10 +630,10 @@ const JobView = () => {
                 
                 {/* Text overlay - Simplex style */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-                  {/* Huvudrubrik - stor och centrerad med tooltip FÖRST */}
+                {/* Huvudrubrik - stor och centrerad, tillåt radbrytning */}
                   <TruncatedText
                     text={job.title}
-                    className="text-white text-2xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl w-full truncate text-center"
+                    className="text-white text-2xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl w-full text-center line-clamp-3"
                     tooltipSide="bottom"
                   />
                   
@@ -671,7 +671,7 @@ const JobView = () => {
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
                 <TruncatedText
                   text={job.title}
-                  className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight truncate"
+                  className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight line-clamp-3"
                   tooltipSide="bottom"
                 />
 
