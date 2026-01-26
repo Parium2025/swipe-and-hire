@@ -327,8 +327,8 @@ const SearchJobs = () => {
             
             {/* Saved Searches Indicator */}
             {savedSearches.length > 0 && (
-              <div className="flex items-center gap-2 text-xs text-white/60">
-                <Bell className="h-3 w-3" />
+              <div className="flex items-center gap-2 text-xs text-white">
+                <Bell className="h-3 w-3 text-white" />
                 <span>{savedSearches.length} sparad{savedSearches.length !== 1 ? 'e' : ''} sökning{savedSearches.length !== 1 ? 'ar' : ''}</span>
                 {totalNewMatches > 0 && (
                   <Badge 
