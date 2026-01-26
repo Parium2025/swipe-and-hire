@@ -653,6 +653,7 @@ const JobView = () => {
                   <TruncatedText
                     text={job.title}
                     className="text-white text-2xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl w-full truncate text-center"
+                    tooltipSide="bottom"
                   />
                   
                   {/* Work schedule och lön under */}
@@ -692,6 +693,7 @@ const JobView = () => {
                 <TruncatedText
                   text={job.title}
                   className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight truncate"
+                  tooltipSide="bottom"
                 />
 
                 <div className="space-y-2">
