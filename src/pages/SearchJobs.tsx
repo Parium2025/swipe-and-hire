@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer, CheckCircle } from 'lucide-react';
+import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer, CheckCircle, Bookmark, Bell } from 'lucide-react';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
@@ -29,6 +29,8 @@ import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useBlurHandlers } from '@/hooks/useBlurHandlers';
 import { useOptimizedJobSearch } from '@/hooks/useOptimizedJobSearch';
+import { useSavedSearches, SearchCriteria } from '@/hooks/useSavedSearches';
+import { SaveSearchDialog } from '@/components/SaveSearchDialog';
 
 interface Job {
   id: string;
@@ -67,6 +69,8 @@ const SearchJobs = () => {
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const blurHandlers = useBlurHandlers();
+  const { savedSearches, saveSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
+  const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
   
   // Hämta användarens ansökningar för att visa "Redan sökt"-badge
   const { data: appliedJobIds = new Set<string>() } = useQuery({
@@ -279,12 +283,32 @@ const SearchJobs = () => {
       {/* Filters Card */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
         <CardContent className="p-4 space-y-4">
-          {/* Search Field - Always visible */}
+          {/* Search Field with Save Search Button */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-white flex items-center gap-2">
-              <Search className="h-3 w-3" />
-              Sök jobb
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium text-white flex items-center gap-2">
+                <Search className="h-3 w-3" />
+                Sök jobb
+              </Label>
+              {/* Save Search Button - shows when filters are active */}
+              {hasActiveFilters({
+                search_query: searchInput,
+                city: selectedCity,
+                county: selectedPostalCode,
+                employment_types: selectedEmploymentTypes,
+                category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
+              }) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSaveSearchDialogOpen(true)}
+                  className="h-7 px-2 text-xs text-white/70 hover:text-white hover:bg-white/10 gap-1.5"
+                >
+                  <Bookmark className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Spara sökning</span>
+                </Button>
+              )}
+            </div>
             <div className="relative">
               <Input
                 placeholder="Sök efter jobbtitel, företag, plats..."
@@ -302,6 +326,23 @@ const SearchJobs = () => {
                 </button>
               )}
             </div>
+            
+            {/* Saved Searches Indicator */}
+            {savedSearches.length > 0 && (
+              <div className="flex items-center gap-2 text-xs text-white/60">
+                <Bell className="h-3 w-3" />
+                <span>{savedSearches.length} sparad{savedSearches.length !== 1 ? 'e' : ''} sökning{savedSearches.length !== 1 ? 'ar' : ''}</span>
+                {totalNewMatches > 0 && (
+                  <Badge 
+                    variant="glass" 
+                    className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-5 px-1.5 cursor-pointer hover:bg-red-500/30"
+                    onClick={() => clearNewMatches()}
+                  >
+                    {totalNewMatches} nya matchningar
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Expand/Collapse Filters Button */}
@@ -869,6 +910,20 @@ const SearchJobs = () => {
         open={companyDialogOpen}
         onOpenChange={setCompanyDialogOpen}
         companyId={selectedCompanyId || ''}
+      />
+
+      {/* Save Search Dialog */}
+      <SaveSearchDialog
+        open={saveSearchDialogOpen}
+        onOpenChange={setSaveSearchDialogOpen}
+        criteria={{
+          search_query: searchInput || undefined,
+          city: selectedCity || undefined,
+          county: selectedPostalCode || undefined,
+          employment_types: selectedEmploymentTypes.length > 0 ? selectedEmploymentTypes : undefined,
+          category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
+        }}
+        onSave={saveSearch}
       />
     </div>
   );

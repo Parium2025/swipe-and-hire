@@ -2,6 +2,7 @@ import React, { memo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { useSavedSearches } from "@/hooks/useSavedSearches";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProfileVideo from "@/components/ProfileVideo";
 import {
@@ -24,7 +25,8 @@ import {
   HelpCircle,
   LogOut,
   ChevronDown,
-  Briefcase
+  Briefcase,
+  Bell
 } from "lucide-react";
 import pariumLogoRings from "@/assets/parium-logo-rings.png";
 
@@ -74,6 +76,7 @@ function JobSeekerTopNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
+  const { totalNewMatches } = useSavedSearches();
   
   const [jobsOpen, setJobsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -170,12 +173,20 @@ function JobSeekerTopNav() {
                   <span className="text-white text-xs relative z-10">({getTotalJobsCount()})</span>
                 )}
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
+                {/* Red badge for new search matches */}
+                {totalNewMatches > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 border-2 border-slate-900 z-20">
+                    {totalNewMatches > 99 ? '99+' : totalNewMatches}
+                  </span>
+                )}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
               {jobItems.map((item) => {
                 const count = getJobCount(item.url);
                 const isActive = isActiveUrl(item.url);
+                // Show notification badge on Sök Jobb item
+                const showNewMatchBadge = item.url === '/search-jobs' && totalNewMatches > 0;
                 return (
                   <DropdownMenuItem
                     key={item.url}
@@ -184,7 +195,16 @@ function JobSeekerTopNav() {
                   >
                     <item.icon className="h-4 w-4" />
                     <span className="flex-1">{item.title}</span>
-                    {count !== null && <span className="text-white text-xs">({count})</span>}
+                    {showNewMatchBadge ? (
+                      <span className="flex items-center gap-1.5">
+                        {count !== null && <span className="text-white/60 text-xs">({count})</span>}
+                        <span className="min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
+                          {totalNewMatches > 99 ? '99+' : totalNewMatches}
+                        </span>
+                      </span>
+                    ) : (
+                      count !== null && <span className="text-white text-xs">({count})</span>
+                    )}
                   </DropdownMenuItem>
                 );
               })}
