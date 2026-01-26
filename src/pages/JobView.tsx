@@ -536,22 +536,31 @@ const JobView = () => {
   }
 
   const handleBack = () => {
+    const currentPath = window.location.pathname;
+    const fallback = () => window.location.assign('/search-jobs');
+
     const state = window.history.state as any;
     const idx = typeof state?.idx === 'number' ? state.idx : undefined;
 
-    // If we have history, go back. Otherwise, fallback to the job list.
+    // Prefer going back when possible...
     if ((typeof idx === 'number' && idx > 0) || window.history.length > 1) {
       navigate(-1);
+
+      // ...but if routing/history is broken (or there is no real previous entry), force exit.
+      window.setTimeout(() => {
+        if (window.location.pathname === currentPath) fallback();
+      }, 150);
       return;
     }
 
-    navigate('/search-jobs', { replace: true });
+    // No usable history -> force exit immediately.
+    fallback();
   };
 
   return (
     <div ref={contentRef} className="min-h-screen bg-parium-gradient animate-fade-in overflow-y-auto">
       {/* Back button - fixed top left */}
-      <div className="fixed top-4 left-4 z-50 pointer-events-auto">
+      <div className="fixed top-4 left-4 z-[9999] pointer-events-auto">
         <Button
           type="button"
           onClick={handleBack}
