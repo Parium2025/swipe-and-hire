@@ -93,7 +93,7 @@ export function SavedSearchesDropdown({
       >
         <div className="p-3 border-b border-white/10">
           <h4 className="text-sm font-medium text-white">Sparade sökningar</h4>
-          <p className="text-xs text-white/60 mt-0.5">Klicka för att aktivera sökningen</p>
+          <p className="text-xs text-white mt-0.5">Klicka för att aktivera sökningen</p>
         </div>
         
         <div className="max-h-64 overflow-y-auto">
@@ -107,7 +107,7 @@ export function SavedSearchesDropdown({
                 deletingId === search.id && "opacity-50 pointer-events-none"
               )}
             >
-              <Search className="h-4 w-4 text-white/60 mt-0.5 shrink-0" />
+              <Search className="h-4 w-4 text-white mt-0.5 shrink-0" />
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -123,14 +123,14 @@ export function SavedSearchesDropdown({
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-white/50 truncate mt-0.5">
+                <p className="text-xs text-white truncate mt-0.5">
                   {getCriteriaSummary(search)}
                 </p>
               </div>
               
               <button
                 onClick={(e) => handleDelete(e, search.id)}
-                className="p-1.5 rounded-full text-white md:hover:bg-white/10 transition-colors shrink-0"
+                className="p-1.5 rounded-full text-white md:hover:text-red-400 md:hover:bg-red-500/10 transition-colors shrink-0"
                 aria-label="Ta bort sparad sökning"
               >
                 <Trash2 className="h-3.5 w-3.5" />
