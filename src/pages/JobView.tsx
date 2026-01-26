@@ -652,7 +652,7 @@ const JobView = () => {
                         <span className="text-white">·</span>
                         <div className="flex items-center gap-1.5">
                           <Hash className="h-4 w-4" />
-                          <span>{job.positions_count} tjänster</span>
+                          <span>{job.positions_count} lediga tjänster</span>
                         </div>
                       </>
                     )}
@@ -698,7 +698,7 @@ const JobView = () => {
                   {job.positions_count && job.positions_count > 1 && (
                     <div className="flex items-center text-white text-xs">
                       <Hash className="h-3.5 w-3.5 mr-1.5 text-white" />
-                      <span className="text-white">{job.positions_count} tjänster</span>
+                      <span className="text-white">{job.positions_count} lediga tjänster</span>
                     </div>
                   )}
 
