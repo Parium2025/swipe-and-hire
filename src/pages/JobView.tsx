@@ -630,56 +630,35 @@ const JobView = () => {
                 
                 {/* Text overlay - Simplex style */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-                  {/* Kategori/plats info överst */}
-                  <div className="flex items-center gap-2 text-white text-xs md:text-sm uppercase tracking-wider mb-3">
-                    {job.employment_type && (
-                      <>
-                        <Briefcase className="h-3 w-3 text-white" />
-                        <span className="text-white">{getEmploymentTypeLabel(job.employment_type)}</span>
-                      </>
-                    )}
-                    {job.employment_type && job.location && (
-                      <span className="text-white">·</span>
-                    )}
-                    {job.location && (
-                      <>
-                        <MapPin className="h-3 w-3 text-white" />
-                        <span className="text-white">{job.location}</span>
-                      </>
-                    )}
-                  </div>
-                  
-                  {/* Huvudrubrik - stor och centrerad med tooltip */}
+                  {/* Huvudrubrik - stor och centrerad med tooltip FÖRST */}
                   <TruncatedText
                     text={job.title}
                     className="text-white text-2xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl w-full truncate text-center"
                     tooltipSide="bottom"
                   />
                   
-                  {/* Work schedule och lön under */}
-                  <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-white text-sm md:text-base">
-                    {job.work_schedule && (
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-4 w-4" />
-                        <span>{job.work_schedule}</span>
-                      </div>
-                    )}
-                    {formatSalary(job.salary_min, job.salary_max, job.salary_type) && (
+                  {/* Metadata på en rad under rubriken */}
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm md:text-base text-white">
+                    {job.employment_type && (
                       <>
-                        {job.work_schedule && <span className="text-white">·</span>}
-                        <div className="flex items-center gap-1.5 text-green-300 font-semibold">
-                          <Euro className="h-4 w-4" />
-                          <span>{formatSalary(job.salary_min, job.salary_max, job.salary_type)}</span>
-                        </div>
+                        <Briefcase className="h-3.5 w-3.5 text-white" />
+                        <span className="text-white">{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
+                      </>
+                    )}
+                    {job.employment_type && job.location && (
+                      <span className="text-white/60">·</span>
+                    )}
+                    {job.location && (
+                      <>
+                        <MapPin className="h-3.5 w-3.5 text-white" />
+                        <span className="text-white">{job.location.toUpperCase()}</span>
                       </>
                     )}
                     {job.positions_count && job.positions_count > 1 && (
                       <>
-                        <span className="text-white">·</span>
-                        <div className="flex items-center gap-1.5">
-                          <Hash className="h-4 w-4" />
-                          <span>{job.positions_count} lediga tjänster</span>
-                        </div>
+                        <span className="text-white/60">·</span>
+                        <Hash className="h-3.5 w-3.5 text-white" />
+                        <span className="text-white">{job.positions_count} lediga tjänster</span>
                       </>
                     )}
                   </div>
