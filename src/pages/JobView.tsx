@@ -560,50 +560,51 @@ const JobView = () => {
 
   return (
     <div ref={contentRef} className="min-h-screen bg-parium-gradient animate-fade-in overflow-y-auto">
-      {/* Back button - fixed top left */}
-      <div className="fixed top-4 left-4 z-[9999] pointer-events-auto">
-        <Button
-          type="button"
-          onClick={handleBack}
-          variant="glass"
-          size="sm"
-        >
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          Tillbaka
-        </Button>
-      </div>
-
-      <div className="max-w-3xl mx-auto px-3 md:px-6 py-8">
-        {/* Company header - clickable */}
-        <button
-          onClick={() => setShowCompanyProfile(true)}
-          className="w-full flex items-center space-x-2 mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg hover:bg-white/15 transition-all cursor-pointer"
-        >
-          <Avatar className="h-10 w-10">
-            <AvatarImage 
-              src={job.profiles?.company_logo_url} 
-              alt={job.profiles?.company_name || 'Företagslogga'}
-            />
-            <AvatarFallback className="bg-white/20 text-white font-semibold text-sm">
-              {job.profiles?.company_name
-                ? job.profiles.company_name.substring(0, 2).toUpperCase()
-                : job.profiles?.first_name && job.profiles?.last_name
-                ? `${job.profiles.first_name[0]}${job.profiles.last_name[0]}`.toUpperCase()
-                : 'FÖ'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="text-left">
-            <h3 className="text-white font-bold text-sm">
-              {job.profiles?.company_name || 
-               `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
-               'Företag'}
-            </h3>
+      <div className="max-w-3xl mx-auto px-3 md:px-6 py-4">
+        {/* Combined header: Tillbaka + Företag på samma rad */}
+        <div className="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+          {/* Tillbaka-knapp till vänster */}
+          <Button
+            type="button"
+            onClick={handleBack}
+            variant="glass"
+            size="sm"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" />
+            Tillbaka
+          </Button>
+          
+          {/* Företagsinfo till höger - clickable */}
+          <button
+            onClick={() => setShowCompanyProfile(true)}
+            className="flex items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
+          >
+            <Avatar className="h-10 w-10">
+              <AvatarImage 
+                src={job.profiles?.company_logo_url} 
+                alt={job.profiles?.company_name || 'Företagslogga'}
+              />
+              <AvatarFallback className="bg-white/20 text-white font-semibold text-sm">
+                {job.profiles?.company_name
+                  ? job.profiles.company_name.substring(0, 2).toUpperCase()
+                  : job.profiles?.first_name && job.profiles?.last_name
+                  ? `${job.profiles.first_name[0]}${job.profiles.last_name[0]}`.toUpperCase()
+                  : 'FÖ'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-left">
+              <h3 className="text-white font-bold text-sm">
+                {job.profiles?.company_name || 
+                 `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
+                 'Företag'}
+              </h3>
               <div className="flex items-center text-[10px] mt-0.5 text-white">
-              <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
-              Se företagsprofil
+                <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
+                Se företagsprofil
+              </div>
             </div>
-          </div>
-        </button>
+          </button>
+        </div>
 
         {/* Main content grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
