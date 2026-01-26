@@ -11,11 +11,11 @@ interface JobTitleCellProps {
 
 export function JobTitleCell({ title, employmentType, className }: JobTitleCellProps) {
   return (
-    <div className={cn("flex flex-col gap-1 items-center w-full overflow-hidden max-w-[140px] mx-auto", className)}>
-      {/* Max 2 lines with ellipsis and forced word break for long words */}
+    <div className={cn("flex flex-col gap-1 items-center w-full overflow-hidden max-w-[180px] mx-auto", className)}>
+      {/* Max 2 lines with ellipsis - TruncatedText handles tooltip */}
       <TruncatedText 
         text={title} 
-        className="text-sm w-full text-white font-medium text-center line-clamp-2 break-all"
+        className="text-sm w-full text-white font-medium text-center line-clamp-2 overflow-hidden"
       />
       {employmentType && (
         <Badge

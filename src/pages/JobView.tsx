@@ -19,6 +19,7 @@ import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
+import { TruncatedText } from '@/components/TruncatedText';
 interface JobQuestion {
   id: string;
   question_text: string;
@@ -648,10 +649,11 @@ const JobView = () => {
                     )}
                   </div>
                   
-                  {/* Huvudrubrik - stor och centrerad */}
-                  <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl w-full truncate">
-                    {job.title}
-                  </h1>
+                  {/* Huvudrubrik - stor och centrerad med tooltip */}
+                  <TruncatedText
+                    text={job.title}
+                    className="text-white text-2xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl w-full truncate text-center"
+                  />
                   
                   {/* Work schedule och lön under */}
                   <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-white text-sm md:text-base">
@@ -687,9 +689,10 @@ const JobView = () => {
             {/* Om det inte finns bild, visa info i vanligt kort */}
             {!imageUrl && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
-                <h1 className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight truncate">
-                  {job.title}
-                </h1>
+                <TruncatedText
+                  text={job.title}
+                  className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight truncate"
+                />
 
                 <div className="space-y-2">
                   <div className="flex items-center text-white text-xs">
