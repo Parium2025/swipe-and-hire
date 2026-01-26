@@ -300,9 +300,9 @@ const SearchJobs = () => {
               }) && (
                 <button
                   onClick={() => setSaveSearchDialogOpen(true)}
-                  className="inline-flex items-center gap-1.5 h-7 px-2 text-xs text-white/70 rounded-md transition-all duration-200 md:hover:bg-white/10 md:hover:text-white active:scale-95"
+                  className="inline-flex items-center gap-1.5 h-7 px-2 text-xs text-white rounded-md transition-all duration-200 md:hover:bg-white/10 active:scale-95"
                 >
-                  <Bookmark className="h-3.5 w-3.5" />
+                  <Bookmark className="h-3.5 w-3.5 text-white" />
                   <span className="hidden sm:inline">Spara sökning</span>
                 </button>
               )}
