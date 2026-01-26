@@ -8,7 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer, CheckCircle, Bookmark, Bell } from 'lucide-react';
+import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer, CheckCircle, Bookmark, Bell, Sparkles } from 'lucide-react';
+import { JobSwipeMode } from '@/components/JobSwipeMode';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
@@ -72,6 +74,8 @@ const SearchJobs = () => {
   const blurHandlers = useBlurHandlers();
   const { savedSearches, saveSearch, deleteSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const [swipeModeActive, setSwipeModeActive] = useState(false);
 
   // Handler to apply a saved search - sets all the filter states
   const handleApplySavedSearch = useCallback((criteria: SearchCriteria) => {
@@ -878,9 +882,20 @@ const SearchJobs = () => {
                 </Table>
               </div>
 
-              {/* Mobile: Card view */}
+              {/* Mobile: Card view with Swipe Mode toggle */}
               <div className="md:hidden">
-                <ScrollArea className="h-[calc(100vh-420px)]">
+                {/* Swipe Mode Toggle Button */}
+                <div className="flex justify-center mb-4">
+                  <Button
+                    onClick={() => setSwipeModeActive(true)}
+                    className="bg-gradient-to-r from-parium-blue to-blue-600 hover:from-parium-blue/90 hover:to-blue-600/90 text-white font-medium shadow-lg shadow-parium-blue/25 transition-all active:scale-95"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Swipe Mode
+                  </Button>
+                </div>
+
+                <ScrollArea className="h-[calc(100vh-480px)]">
                   <div className="space-y-2 px-2 py-2">
                     {displayedJobs.map((job) => (
                       <ReadOnlyMobileJobCard
@@ -938,6 +953,23 @@ const SearchJobs = () => {
         }}
         onSave={saveSearch}
       />
+      {/* Swipe Mode Overlay */}
+      {isMobile && swipeModeActive && (
+        <JobSwipeMode
+          jobs={filteredAndSortedJobs.map(job => ({
+            id: job.id,
+            title: job.title,
+            company_name: job.company_name,
+            location: job.location,
+            employment_type: job.employment_type,
+            job_image_url: job.job_image_url,
+            views_count: job.views_count,
+            applications_count: job.applications_count,
+          }))}
+          appliedJobIds={appliedJobIds}
+          onClose={() => setSwipeModeActive(false)}
+        />
+      )}
     </div>
   );
 };
