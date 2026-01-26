@@ -77,3 +77,8 @@ verify_jwt = false
 
 [functions.fetch-link-preview]
 verify_jwt = false
+
+[functions.check-saved-searches]
+verify_jwt = false
+# Kör var 5:e minut för realtidsbevakning av nya jobb
+schedule = "*/5 * * * *"

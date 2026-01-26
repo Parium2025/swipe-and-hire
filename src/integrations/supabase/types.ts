@@ -1780,6 +1780,60 @@ export type Database = {
           },
         ]
       }
+      saved_searches: {
+        Row: {
+          category: string | null
+          city: string | null
+          county: string | null
+          created_at: string
+          employment_types: string[] | null
+          id: string
+          last_checked_at: string
+          last_notified_at: string | null
+          name: string
+          new_matches_count: number
+          salary_max: number | null
+          salary_min: number | null
+          search_query: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          employment_types?: string[] | null
+          id?: string
+          last_checked_at?: string
+          last_notified_at?: string | null
+          name: string
+          new_matches_count?: number
+          salary_max?: number | null
+          salary_min?: number | null
+          search_query?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          employment_types?: string[] | null
+          id?: string
+          last_checked_at?: string
+          last_notified_at?: string | null
+          name?: string
+          new_matches_count?: number
+          salary_max?: number | null
+          salary_min?: number | null
+          search_query?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           created_at: string
