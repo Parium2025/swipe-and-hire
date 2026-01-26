@@ -863,19 +863,20 @@ const SearchJobs = () => {
                                 Ansök
                               </Button>
                             )}
-                            <button
-                              className="relative inline-flex items-center justify-center h-5 px-2 rounded-full bg-white/10 border border-white/20 transition-all duration-200 md:group-hover:backdrop-brightness-90 md:hover:bg-white/20 md:hover:border-white/40"
+                            <Button
+                              variant="glass"
+                              size="sm"
+                              className="relative h-5 px-2 text-[10px] md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
+                              aria-label={isJobSaved(job.id) ? 'Ta bort sparat jobb' : 'Spara jobb'}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
                               }}
                             >
-                              {/* Matcha bredden på Ansök-knappen utan att visa text */}
-                              <span className="invisible text-[10px] font-medium">Ansök</span>
-                              <Heart
-                                className={`absolute h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`}
-                              />
-                            </button>
+                              {/* Matcha exakt storlek/bredd på Ansök-knappen */}
+                              <span className="invisible">Ansök</span>
+                              <Heart className={`absolute h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
