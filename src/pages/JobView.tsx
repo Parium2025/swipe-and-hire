@@ -535,12 +535,26 @@ const JobView = () => {
     );
   }
 
+  const handleBack = () => {
+    const state = window.history.state as any;
+    const idx = typeof state?.idx === 'number' ? state.idx : undefined;
+
+    // If we have history, go back. Otherwise, fallback to the job list.
+    if ((typeof idx === 'number' && idx > 0) || window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+
+    navigate('/search-jobs', { replace: true });
+  };
+
   return (
     <div ref={contentRef} className="min-h-screen bg-parium-gradient animate-fade-in overflow-y-auto">
       {/* Back button - fixed top left */}
-      <div className="fixed top-4 left-4 z-10">
+      <div className="fixed top-4 left-4 z-50 pointer-events-auto">
         <Button
-          onClick={() => navigate(-1)}
+          type="button"
+          onClick={handleBack}
           variant="glass"
           size="sm"
         >
