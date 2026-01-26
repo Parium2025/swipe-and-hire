@@ -863,14 +863,18 @@ const SearchJobs = () => {
                                 Ansök
                               </Button>
                             )}
-                            <button 
-                              className="flex items-center justify-center h-5 w-5 rounded-full bg-white/10 border border-white/20 transition-all duration-200 md:group-hover:backdrop-brightness-90 md:hover:bg-white/20 md:hover:border-white/40"
+                            <button
+                              className="relative inline-flex items-center justify-center h-5 px-2 rounded-full bg-white/10 border border-white/20 transition-all duration-200 md:group-hover:backdrop-brightness-90 md:hover:bg-white/20 md:hover:border-white/40"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
                               }}
                             >
-                              <Heart className={`h-3.5 w-3.5 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                              {/* Matcha bredden på Ansök-knappen utan att visa text */}
+                              <span className="invisible text-[10px] font-medium">Ansök</span>
+                              <Heart
+                                className={`absolute h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`}
+                              />
                             </button>
                           </div>
                         </TableCell>
