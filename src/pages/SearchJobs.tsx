@@ -298,15 +298,13 @@ const SearchJobs = () => {
                 employment_types: selectedEmploymentTypes,
                 category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
               }) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={() => setSaveSearchDialogOpen(true)}
-                  className="h-7 px-2 text-xs text-white/70 hover:text-white hover:bg-white/10 gap-1.5"
+                  className="inline-flex items-center gap-1.5 h-7 px-2 text-xs text-white/70 rounded-md transition-all duration-200 md:hover:bg-white/10 md:hover:text-white active:scale-95"
                 >
                   <Bookmark className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Spara sökning</span>
-                </Button>
+                </button>
               )}
             </div>
             <div className="relative">
