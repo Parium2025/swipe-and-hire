@@ -6,6 +6,7 @@ interface TruncatedTextProps {
   className?: string;
   children?: React.ReactNode;
   alwaysShowTooltip?: boolean | 'desktop-only';
+  tooltipSide?: 'top' | 'bottom' | 'left' | 'right';
   onClick?: () => void;
 }
 
@@ -13,7 +14,7 @@ interface TruncatedTextProps {
  * Component that automatically detects if text is truncated and shows
  * a tooltip with the full text on hover
  */
-export function TruncatedText({ text, className, children, alwaysShowTooltip, onClick }: TruncatedTextProps) {
+export function TruncatedText({ text, className, children, alwaysShowTooltip, tooltipSide = 'top', onClick }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
@@ -164,7 +165,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip, on
           </div>
         </TooltipTrigger>
         <TooltipContent
-          side="top"
+          side={tooltipSide}
           sideOffset={8}
           avoidCollisions={false}
           className="z-[999999] max-w-[320px] max-h-[300px] overflow-y-auto overscroll-contain bg-slate-900/95 border border-white/20 text-white shadow-2xl p-3 pointer-events-auto rounded-lg"
