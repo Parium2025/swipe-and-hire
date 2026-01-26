@@ -853,7 +853,7 @@ const SearchJobs = () => {
                             ) : (
                               <button
                                 type="button"
-                                className="inline-flex items-center justify-center h-5 px-2 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-medium transition-all duration-200 md:hover:bg-white/20 md:hover:border-white/40 active:scale-95"
+                                className="inline-flex items-center justify-center rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 px-2.5 py-0.5 text-white text-[10px] font-semibold transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigate(`/job-view/${job.id}`);
@@ -864,7 +864,7 @@ const SearchJobs = () => {
                             )}
                             <button
                               type="button"
-                              className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-white/10 border border-white/20 transition-all duration-200 md:hover:bg-white/20 md:hover:border-white/40 active:scale-95"
+                              className="inline-flex items-center justify-center h-[22px] w-[22px] rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95"
                               aria-label={isJobSaved(job.id) ? 'Ta bort sparat jobb' : 'Spara jobb'}
                               onClick={(e) => {
                                 e.stopPropagation();
