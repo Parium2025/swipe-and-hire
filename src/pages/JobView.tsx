@@ -649,7 +649,7 @@ const JobView = () => {
                   </div>
                   
                   {/* Huvudrubrik - stor och centrerad */}
-                  <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl">
+                  <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl w-full truncate">
                     {job.title}
                   </h1>
                   
@@ -686,8 +686,8 @@ const JobView = () => {
             
             {/* Om det inte finns bild, visa info i vanligt kort */}
             {!imageUrl && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <h1 className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
+                <h1 className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight truncate">
                   {job.title}
                 </h1>
 
