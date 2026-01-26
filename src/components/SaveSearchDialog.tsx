@@ -87,14 +87,14 @@ export function SaveSearchDialog({
             <Bookmark className="h-5 w-5 text-blue-400" />
             Spara sökning
           </DialogTitle>
-          <DialogDescription className="text-white/70">
+          <DialogDescription className="text-white">
             Få notiser när nya jobb matchar dina kriterier.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="search-name" className="text-white/90">
+            <Label htmlFor="search-name" className="text-white">
               Namn på sökningen
             </Label>
             <Input
@@ -102,7 +102,7 @@ export function SaveSearchDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="T.ex. Utvecklarjobb i Stockholm"
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
+              className="bg-white/5 border-white/20 text-white placeholder:text-white/50"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && name.trim()) {
                   handleSave();
@@ -113,12 +113,12 @@ export function SaveSearchDialog({
 
           {criteriaSummary.length > 0 && (
             <div className="space-y-2">
-              <Label className="text-white/70 text-sm">Sökkriterier</Label>
+              <Label className="text-white text-sm">Sökkriterier</Label>
               <div className="flex flex-wrap gap-2">
                 {criteriaSummary.map((item, i) => (
                   <span 
                     key={i}
-                    className="px-2 py-1 text-xs rounded-full bg-white/10 text-white/80 border border-white/10"
+                    className="px-2 py-1 text-xs rounded-full bg-white/10 text-white border border-white/10"
                   >
                     {item}
                   </span>
@@ -128,8 +128,8 @@ export function SaveSearchDialog({
           )}
 
           <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-            <Bell className="h-5 w-5 text-blue-400 mt-0.5 shrink-0" />
-            <div className="text-sm text-white/80">
+            <Bell className="h-5 w-5 text-white mt-0.5 shrink-0" />
+            <div className="text-sm text-white">
               <p className="font-medium text-white mb-1">Realtidsnotiser</p>
               <p>Du får en notis direkt när nya jobb publiceras som matchar din sökning.</p>
             </div>
