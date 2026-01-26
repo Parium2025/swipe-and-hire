@@ -851,32 +851,28 @@ const SearchJobs = () => {
                                 Redan sökt
                               </Badge>
                             ) : (
-                              <Button 
-                                variant="glass"
-                                size="sm"
-                                className="h-5 px-2 text-[10px] md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
+                              <button
+                                type="button"
+                                className="inline-flex items-center justify-center h-5 px-2 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-medium transition-all duration-200 md:hover:bg-white/20 md:hover:border-white/40 active:scale-95"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigate(`/job-view/${job.id}`);
                                 }}
                               >
                                 Ansök
-                              </Button>
+                              </button>
                             )}
-                            <Button
-                              variant="glass"
-                              size="sm"
-                              className="relative h-5 px-2 text-[10px] md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
+                            <button
+                              type="button"
+                              className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-white/10 border border-white/20 transition-all duration-200 md:hover:bg-white/20 md:hover:border-white/40 active:scale-95"
                               aria-label={isJobSaved(job.id) ? 'Ta bort sparat jobb' : 'Spara jobb'}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
                               }}
                             >
-                              {/* Matcha exakt storlek/bredd på Ansök-knappen */}
-                              <span className="invisible">Ansök</span>
-                              <Heart className={`absolute h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
-                            </Button>
+                              <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
