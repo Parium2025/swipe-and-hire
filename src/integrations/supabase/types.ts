@@ -2231,6 +2231,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      trigger_career_tips_fetch: { Args: never; Returns: undefined }
       trigger_hr_news_fetch: { Args: never; Returns: undefined }
       try_uuid: { Args: { p_text: string }; Returns: string }
     }
