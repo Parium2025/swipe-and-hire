@@ -65,30 +65,40 @@ const StarsEffect = memo(() => {
     })),
   []);
 
-  // Shooting star state
-  const [shootingStarActive, setShootingStarActive] = useState(false);
+  // Shooting star state with random start position
+  const [shootingStar, setShootingStar] = useState<{
+    active: boolean;
+    startX: number;
+    startY: number;
+    size: number;
+  } | null>(null);
 
   useEffect(() => {
     const triggerShootingStar = () => {
-      setShootingStarActive(true);
+      // Random start position in upper right area
+      const startX = 5 + Math.random() * 40; // 5-45% from right
+      const startY = 3 + Math.random() * 25; // 3-28% from top
+      const size = 1 + Math.random() * 1.5; // Same size as stars (1-2.5px)
       
-      // Hide after animation completes
+      setShootingStar({ active: true, startX, startY, size });
+      
+      // Hide after animation completes (5 seconds)
       setTimeout(() => {
-        setShootingStarActive(false);
-      }, 600);
+        setShootingStar(null);
+      }, 5000);
     };
 
-    // Random interval between shooting stars (20-45 seconds)
+    // Random interval between shooting stars (25-50 seconds)
     const scheduleNext = () => {
-      const delay = 20000 + Math.random() * 25000;
+      const delay = 25000 + Math.random() * 25000;
       return setTimeout(() => {
         triggerShootingStar();
         scheduleNext();
       }, delay);
     };
 
-    // First shooting star after 8-15 seconds
-    const initialTimeout = setTimeout(triggerShootingStar, 8000 + Math.random() * 7000);
+    // First shooting star after 10-20 seconds
+    const initialTimeout = setTimeout(triggerShootingStar, 10000 + Math.random() * 10000);
     const intervalId = scheduleNext();
 
     return () => {
@@ -122,24 +132,25 @@ const StarsEffect = memo(() => {
         />
       ))}
 
-      {/* Shooting star - slow movement across vast sky, fading out gradually */}
-      {shootingStarActive && (
+      {/* Shooting star - tiny dot like the stars, flies across entire sky */}
+      {shootingStar?.active && (
         <motion.div
-          className="absolute w-1.5 h-1.5 bg-white rounded-full"
+          className="absolute bg-white rounded-full"
           style={{
-            right: '8%',
-            top: '5%',
-            boxShadow: '0 0 4px 1px rgba(255,255,255,0.6)',
+            right: `${shootingStar.startX}%`,
+            top: `${shootingStar.startY}%`,
+            width: shootingStar.size,
+            height: shootingStar.size,
+            boxShadow: '0 0 2px 0.5px rgba(255,255,255,0.5)',
           }}
           initial={{ opacity: 0 }}
           animate={{ 
-            opacity: [0, 0.9, 0.85, 0.6, 0.3, 0],
-            scale: [0.8, 1, 1, 0.9, 0.7, 0.4],
-            x: [0, -80, -180, -300, -420, -500],
-            y: [0, 50, 120, 200, 280, 340],
+            opacity: [0, 0.7, 0.6, 0.5, 0.3, 0.1, 0],
+            x: [0, -150, -350, -600, -900, -1200, -1500],
+            y: [0, 100, 230, 400, 600, 800, 1000],
           }}
           transition={{
-            duration: 3.5,
+            duration: 5,
             ease: 'linear',
           }}
         />
