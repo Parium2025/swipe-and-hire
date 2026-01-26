@@ -870,7 +870,7 @@ const SearchJobs = () => {
                                 toggleSaveJob(job.id);
                               }}
                             >
-                              <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                              <Heart className={`h-3.5 w-3.5 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
                             </button>
                           </div>
                         </TableCell>
