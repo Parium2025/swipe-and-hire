@@ -42,7 +42,8 @@ export function SaveSearchDialog({
   };
 
   const handleSave = async () => {
-    if (!name.trim()) return;
+    // Prevent double-save: return early if already saving
+    if (!name.trim() || isSaving) return;
     
     setIsSaving(true);
     try {
