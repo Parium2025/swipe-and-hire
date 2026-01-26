@@ -84,7 +84,7 @@ export function SaveSearchDialog({
       <DialogContent className="sm:max-w-[425px] bg-slate-900/95 backdrop-blur-xl border-white/20">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
-            <Bookmark className="h-5 w-5 text-blue-400" />
+            <Bookmark className="h-5 w-5 text-white" />
             Spara sökning
           </DialogTitle>
           <DialogDescription className="text-white">
