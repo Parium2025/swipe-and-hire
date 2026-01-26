@@ -844,17 +844,17 @@ const SearchJobs = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5">
                             {appliedJobIds.has(job.id) ? (
-                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs h-6 px-2">
-                                <CheckCircle className="h-3 w-3 mr-1" />
+                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-[10px] h-5 px-1.5">
+                                <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
                                 Redan sökt
                               </Badge>
                             ) : (
                               <Button 
                                 variant="glass"
                                 size="sm"
-                                className="h-6 px-2 text-xs md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
+                                className="h-5 px-2 text-[10px] md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigate(`/job-view/${job.id}`);
@@ -863,17 +863,15 @@ const SearchJobs = () => {
                                 Ansök
                               </Button>
                             )}
-                            <Button 
-                              variant="glass"
-                              size="icon"
-                              className="h-6 w-6 rounded-full md:group-hover:backdrop-brightness-90 md:hover:backdrop-brightness-110"
+                            <button 
+                              className="flex items-center justify-center h-5 w-5 rounded-full bg-white/10 border border-white/20 transition-all duration-200 md:group-hover:backdrop-brightness-90 md:hover:bg-white/20 md:hover:border-white/40"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
                               }}
                             >
-                              <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
-                            </Button>
+                              <Heart className={`h-2.5 w-2.5 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
