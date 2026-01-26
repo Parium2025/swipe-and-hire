@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
 
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
@@ -31,6 +31,7 @@ import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 import { PushNotificationProvider } from "@/components/PushNotificationProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { cleanupOldDrafts } from "@/lib/draftUtils";
+import { ScrollRestoration } from "@/components/ScrollRestoration";
 
 // Run draft cleanup once on app load (removes drafts older than 1 day)
 cleanupOldDrafts(24 * 60 * 60 * 1000);
@@ -51,7 +52,9 @@ const queryClient = new QueryClient({
 // Routes without animations for instant navigation
 const AnimatedRoutes = () => {
   return (
-    <Routes>
+    <>
+      <ScrollRestoration />
+      <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/home" element={<Index />} />
@@ -85,7 +88,8 @@ const AnimatedRoutes = () => {
       <Route path="/migrate-media" element={<MediaMigration />} />
       <Route path="/cv-tunnel" element={<CvTunnel />} />
       <Route path="*" element={<NotFound />} />
-    </Routes>
+      </Routes>
+    </>
   );
 };
 
