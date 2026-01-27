@@ -3,6 +3,7 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -1182,9 +1183,15 @@ export const CandidateProfileDialog = ({
                     </Button>
                   </div>
 
-                  {/* Existing notes */}
                   {loadingNotes ? (
-                    <p className="text-xs text-white text-center py-2">Laddar...</p>
+                    <div className="space-y-2 py-2">
+                      {Array.from({ length: 2 }).map((_, i) => (
+                        <div key={i} className="p-2 rounded bg-white/5">
+                          <Skeleton className="h-3 w-full bg-white/10 mb-1" />
+                          <Skeleton className="h-3 w-2/3 bg-white/10" />
+                        </div>
+                      ))}
+                    </div>
                   ) : notes.length === 0 ? (
                     <p className="text-xs text-white text-center py-4">Inga anteckningar ännu</p>
                   ) : (

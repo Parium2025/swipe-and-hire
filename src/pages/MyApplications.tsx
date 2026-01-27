@@ -203,11 +203,6 @@ const MyApplications = () => {
           <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
         </div>
         
-        {/* Spinner */}
-        <div className="flex justify-center mb-6">
-          <Loader2 className="h-8 w-8 animate-spin text-white" />
-        </div>
-        
         {/* Skeleton cards */}
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (

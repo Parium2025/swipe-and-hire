@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Upload, Send } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import FileUpload from '@/components/FileUpload';
 
 // Draft key for localStorage
@@ -416,9 +417,30 @@ const JobApplication = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl">Laddar...</h2>
+      <div className="min-h-screen bg-gradient-parium flex items-center justify-center px-4">
+        <div className="w-full max-w-2xl space-y-6">
+          {/* Header skeleton */}
+          <div className="flex items-center gap-3 mb-6">
+            <Skeleton className="h-10 w-10 rounded-full bg-white/10" />
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-48 bg-white/10" />
+              <Skeleton className="h-4 w-32 bg-white/10" />
+            </div>
+          </div>
+          {/* Form sections skeleton */}
+          <div className="space-y-4 p-6 rounded-lg bg-white/5 border border-white/10">
+            <Skeleton className="h-5 w-32 bg-white/10" />
+            <Skeleton className="h-10 w-full bg-white/10 rounded-md" />
+            <Skeleton className="h-10 w-full bg-white/10 rounded-md" />
+          </div>
+          <div className="space-y-4 p-6 rounded-lg bg-white/5 border border-white/10">
+            <Skeleton className="h-5 w-40 bg-white/10" />
+            <Skeleton className="h-24 w-full bg-white/10 rounded-md" />
+          </div>
+          <div className="space-y-4 p-6 rounded-lg bg-white/5 border border-white/10">
+            <Skeleton className="h-5 w-28 bg-white/10" />
+            <Skeleton className="h-20 w-full bg-white/10 rounded-md" />
+          </div>
         </div>
       </div>
     );

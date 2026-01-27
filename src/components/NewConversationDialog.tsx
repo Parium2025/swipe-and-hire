@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -236,8 +237,16 @@ export function NewConversationDialog({
             {/* Contact list */}
             <ScrollArea className="flex-1 -mx-6 px-6 min-h-0">
               {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-white/50" />
+                <div className="space-y-3 py-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-2">
+                      <Skeleton className="h-10 w-10 rounded-full bg-white/10" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-32 bg-white/10" />
+                        <Skeleton className="h-3 w-20 bg-white/10" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : contacts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
