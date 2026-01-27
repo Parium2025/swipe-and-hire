@@ -144,19 +144,19 @@ function JobSeekerTopNav() {
         {/* Parium Logo - Home Button */}
         <button
           onClick={() => handleNavigation('/home')}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0 -mr-[112px]"
           aria-label="Gå till startsidan"
         >
           <div 
             role="img"
             aria-label="Parium"
-            className="h-12 w-12 bg-contain bg-center bg-no-repeat"
+            className="h-10 w-40 bg-contain bg-left bg-no-repeat pointer-events-none"
             style={{ backgroundImage: `url(${pariumLogoRings})` }}
           />
         </button>
 
         {/* Main Navigation Dropdowns */}
-        <div className="flex items-center gap-1">
+        <div className="relative z-10 flex items-center gap-1">
           {/* Jobb Dropdown */}
           <DropdownMenu open={jobsOpen} onOpenChange={setJobsOpen}>
             <DropdownMenuTrigger asChild>
