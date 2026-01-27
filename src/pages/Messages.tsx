@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 import { NewConversationDialog } from '@/components/NewConversationDialog';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -652,8 +653,16 @@ function ChatView({
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-6 w-6 animate-spin text-white/50" />
+          <div className="space-y-4 p-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className={`flex gap-3 ${i % 2 === 0 ? '' : 'flex-row-reverse'}`}>
+                <Skeleton className="h-8 w-8 rounded-full bg-white/10 flex-shrink-0" />
+                <div className={`flex-1 space-y-2 ${i % 2 === 0 ? '' : 'flex flex-col items-end'}`}>
+                  <Skeleton className={`h-4 ${i % 2 === 0 ? 'w-3/4' : 'w-2/3'} bg-white/10`} />
+                  <Skeleton className={`h-12 ${i % 2 === 0 ? 'w-2/3' : 'w-1/2'} rounded-xl bg-white/10`} />
+                </div>
+              </div>
+            ))}
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">

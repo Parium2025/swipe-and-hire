@@ -1,5 +1,6 @@
 import { memo, useMemo, useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Briefcase, Users, Eye, TrendingUp, MapPin, Calendar } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -199,11 +200,36 @@ const Dashboard = memo(() => {
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-white py-8 text-sm">
-                      Laddar...
-                    </TableCell>
-                  </TableRow>
+                  <>
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <TableRow key={i} className="border-white/10">
+                        <TableCell className="text-center px-2 py-3">
+                          <div className="flex flex-col items-center gap-1">
+                            <Skeleton className="h-4 w-3/4 bg-white/10" />
+                            <Skeleton className="h-3 w-16 bg-white/10" />
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-3">
+                          <Skeleton className="h-5 w-16 mx-auto rounded-full bg-white/10" />
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-3">
+                          <Skeleton className="h-5 w-10 mx-auto rounded-full bg-white/10" />
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-3">
+                          <Skeleton className="h-5 w-10 mx-auto rounded-full bg-white/10" />
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-3">
+                          <Skeleton className="h-4 w-20 mx-auto bg-white/10" />
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-3">
+                          <Skeleton className="h-4 w-24 mx-auto bg-white/10" />
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-3">
+                          <Skeleton className="h-4 w-16 mx-auto bg-white/10" />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </>
                 ) : filteredAndSortedJobs.length === 0 ? (
                   <TableRow className="hover:bg-transparent">
                     <TableCell colSpan={7} className="text-center !text-white py-8 font-medium text-sm">
@@ -396,8 +422,22 @@ const Dashboard = memo(() => {
           {/* Mobile: Card list view */}
           <div className="block md:hidden">
             {isLoading ? (
-              <div className="text-center text-white py-8 text-sm">
-                Laddar...
+              <div className="space-y-3 px-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                    <div className="flex items-start gap-3">
+                      <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4 bg-white/10" />
+                        <Skeleton className="h-3 w-1/2 bg-white/10" />
+                        <div className="flex gap-2 mt-2">
+                          <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
+                          <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : filteredAndSortedJobs.length === 0 ? (
               <div className="text-center text-white py-8 font-medium text-sm">
