@@ -764,7 +764,10 @@ serve(async (req) => {
     console.log(`Eligible new items with max ${maxPerSource}/source: ${eligibleNewItems.length}`);
 
     if (eligibleNewItems.length > 0) {
-      // SIMPLE ROTATION: Insert new items, then keep only the 4 newest
+      // RSS-PRIORITERAD ROTATION:
+      // 1. Nya RSS-artiklar läggs alltid in
+      // 2. AI-artiklar raderas FÖRST för att göra plats
+      // 3. Endast om inga AI finns kvar raderas äldsta RSS
       
       console.log(`Inserting ${eligibleNewItems.length} new RSS items...`);
       
@@ -793,27 +796,52 @@ serve(async (req) => {
         console.log(`Successfully inserted ${insertedRss} new RSS items`);
       }
       
-      // Now fetch ALL items and keep only the 4 newest by published_at
+      // RSS-PRIORITERAD BORTTAGNING:
+      // Hämta alla items, separera på typ, och ta bort i rätt ordning
       const { data: allItems } = await supabase
         .from('daily_career_tips')
         .select('id, published_at, source, source_url')
         .order('published_at', { ascending: false, nullsFirst: false });
       
       if (allItems && allItems.length > targetSlots) {
-        // Delete everything beyond the newest 4
-        const itemsToDelete = allItems.slice(targetSlots);
-        const idsToDelete = itemsToDelete.map(i => i.id);
+        const excess = allItems.length - targetSlots;
         
-        // Count how many AI items we're removing
-        aiReplaced = itemsToDelete.filter(i => i.source_url == null).length;
+        // Separera på typ
+        const aiItems = allItems.filter(i => i.source_url == null);
+        const rssItems = allItems.filter(i => i.source_url != null);
         
-        console.log(`Removing ${idsToDelete.length} oldest items (${aiReplaced} AI, ${idsToDelete.length - aiReplaced} RSS) to maintain ${targetSlots} total`);
+        // Sortera båda på published_at (äldst sist)
+        aiItems.sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime());
+        rssItems.sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime());
+        
+        const idsToDelete: string[] = [];
+        let remaining = excess;
+        
+        // STEG 1: Ta bort AI-artiklar först (från äldst till nyast)
+        const aiToDelete = aiItems.slice(-Math.min(remaining, aiItems.length));
+        for (const item of aiToDelete) {
+          idsToDelete.push(item.id);
+          remaining--;
+        }
+        
+        // STEG 2: Om det fortfarande behövs plats, ta bort äldsta RSS
+        if (remaining > 0) {
+          const rssToDelete = rssItems.slice(-remaining);
+          for (const item of rssToDelete) {
+            idsToDelete.push(item.id);
+          }
+        }
+        
+        aiReplaced = aiToDelete.length;
+        const rssRemoved = idsToDelete.length - aiReplaced;
+        
+        console.log(`RSS-PRIORITERAD: Tar bort ${aiReplaced} AI + ${rssRemoved} äldsta RSS för att behålla ${targetSlots} totalt`);
         
         for (const id of idsToDelete) {
           await supabase.from('daily_career_tips').delete().eq('id', id);
         }
         
-        console.log(`Feed now has exactly ${targetSlots} items (the newest ones)`);
+        console.log(`Feed har nu exakt ${targetSlots} items (RSS prioriterat)`);
       }
     }
 
