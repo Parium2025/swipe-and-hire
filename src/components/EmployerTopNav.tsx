@@ -231,7 +231,8 @@ function EmployerTopNav() {
   };
 
   return (
-    <nav className="h-14 flex items-center justify-between px-4 border-b border-white/20 bg-transparent">
+    <nav className="h-14 flex items-center border-b border-white/20 bg-transparent">
+      <div className="w-full max-w-6xl mx-auto px-3 md:px-12 flex items-center justify-between">
       {/* Left side: Logo + Main Nav */}
       <div className="flex items-center gap-1">
         {/* Parium Logo - Home Button */}
@@ -479,6 +480,7 @@ function EmployerTopNav() {
           {/* System Health Button (admin only) - after profile */}
           <SystemHealthButton onClick={() => setHealthPanelOpen(!healthPanelOpen)} />
         </div>
+      </div>
       </div>
 
       {/* System Health Panel */}

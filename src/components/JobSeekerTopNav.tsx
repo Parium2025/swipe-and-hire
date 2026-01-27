@@ -138,7 +138,8 @@ function JobSeekerTopNav() {
   };
 
   return (
-    <nav className="h-14 flex items-center justify-between px-4 border-b border-white/20 bg-transparent">
+    <nav className="h-14 flex items-center border-b border-white/20 bg-transparent">
+      <div className="w-full max-w-6xl mx-auto px-3 md:px-12 flex items-center justify-between">
       {/* Left side: Logo + Main Nav */}
       <div className="flex items-center gap-1">
         {/* Parium Logo - Home Button */}
@@ -393,6 +394,7 @@ function JobSeekerTopNav() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </div>
       </div>
     </nav>
   );
