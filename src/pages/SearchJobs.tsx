@@ -797,15 +797,15 @@ const SearchJobs = () => {
                         <TableCell className="text-center">
                           <TruncatedText 
                             text={job.company_name} 
-                            className="text-sm text-white truncate max-w-[120px] block mx-auto"
+                            className="text-sm text-white line-clamp-2 max-w-[140px] mx-auto text-center"
                           />
                         </TableCell>
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-1">
-                            <MapPin className="h-3 w-3 text-white" />
+                            <MapPin className="h-3 w-3 text-white flex-shrink-0" />
                             <TruncatedText 
                               text={job.location} 
-                              className="text-sm text-white truncate max-w-[100px] block"
+                              className="text-sm text-white line-clamp-2 max-w-[110px]"
                             />
                           </div>
                         </TableCell>
@@ -840,18 +840,6 @@ const SearchJobs = () => {
                                 </Badge>
                               );
                             })()}
-                            {/* Spara-knapp */}
-                            <button
-                              type="button"
-                              className="inline-flex items-center justify-center h-[22px] w-[22px] rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95"
-                              aria-label={isJobSaved(job.id) ? 'Ta bort sparat jobb' : 'Spara jobb'}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleSaveJob(job.id);
-                              }}
-                            >
-                              <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
-                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
