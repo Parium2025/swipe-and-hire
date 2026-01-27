@@ -791,25 +791,25 @@ const SearchJobs = () => {
                         className="group border-white/10 cursor-pointer transition-all duration-300 md:hover:bg-white/10"
                         onClick={() => navigate(`/job-view/${job.id}`)}
                       >
-                        <TableCell className="text-center">
+                        <TableCell className="text-center align-top pt-3">
                           <JobTitleCell title={job.title} employmentType={job.employment_type} className="max-w-none items-center text-center" />
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="text-center align-top pt-3">
                           <TruncatedText 
                             text={job.company_name} 
                             className="text-sm text-white line-clamp-2 max-w-[140px] mx-auto text-center"
                           />
                         </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <MapPin className="h-3 w-3 text-white flex-shrink-0" />
+                        <TableCell className="text-center align-top pt-3">
+                          <div className="flex items-start justify-center gap-1">
+                            <MapPin className="h-3 w-3 text-white flex-shrink-0 mt-0.5" />
                             <TruncatedText 
                               text={job.location} 
-                              className="text-sm text-white line-clamp-2 max-w-[110px]"
+                              className="text-sm text-white truncate lg:line-clamp-2 max-w-[110px]"
                             />
                           </div>
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="text-center align-top pt-3">
                           <div className="flex items-center justify-center gap-2 flex-wrap">
                             <div className="flex items-center gap-1 text-sm text-white">
                               <Calendar className="h-3 w-3" />
