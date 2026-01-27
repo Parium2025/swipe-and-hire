@@ -5,6 +5,38 @@ import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
+import pariumLogoRings from './assets/parium-logo-rings.png'
+
+// Preload + decode critical UI assets ASAP (before React mounts)
+const preloadAndDecodeImage = async (src: string) => {
+  try {
+    // Add a preload hint (helps the browser start fetching earlier)
+    if (typeof document !== 'undefined' && document.head) {
+      const existing = document.querySelector(`link[data-preload-parium-logo="true"]`) as HTMLLinkElement | null;
+      if (!existing) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = src;
+        link.setAttribute('data-preload-parium-logo', 'true');
+        document.head.appendChild(link);
+      }
+    }
+
+    // Fetch + decode into memory cache
+    const img = new Image();
+    img.src = src;
+    // decode() ensures it's ready to paint immediately when the element mounts
+    if ('decode' in img && typeof (img as any).decode === 'function') {
+      await (img as any).decode();
+    }
+  } catch {
+    // Never block app start for a preload
+  }
+};
+
+// Fire-and-forget: ensures top nav logo is instantly ready on back navigation
+void preloadAndDecodeImage(pariumLogoRings);
 
 // Initialize Sentry for error tracking in production
 if (import.meta.env.PROD) {
