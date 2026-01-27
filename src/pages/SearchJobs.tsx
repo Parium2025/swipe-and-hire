@@ -778,11 +778,10 @@ const SearchJobs = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-white/10 transition-all duration-300 md:hover:bg-white/10">
-                      <TableHead className="text-white w-[40%] text-center">Titel</TableHead>
-                      <TableHead className="text-white w-[15%] text-center">Företag</TableHead>
-                      <TableHead className="text-white w-[12%] text-center">Plats</TableHead>
-                      <TableHead className="text-white w-[28%] text-center">Publicerad</TableHead>
-                      <TableHead className="text-white w-[5%]"></TableHead>
+                      <TableHead className="text-white w-[45%] text-center">Titel</TableHead>
+                      <TableHead className="text-white w-[18%] text-center">Företag</TableHead>
+                      <TableHead className="text-white w-[15%] text-center">Plats</TableHead>
+                      <TableHead className="text-white w-[22%] text-center">Publicerad</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -841,20 +840,19 @@ const SearchJobs = () => {
                                 </Badge>
                               );
                             })()}
+                            {/* Spara-knapp */}
+                            <button
+                              type="button"
+                              className="inline-flex items-center justify-center h-[22px] w-[22px] rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95"
+                              aria-label={isJobSaved(job.id) ? 'Ta bort sparat jobb' : 'Spara jobb'}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleSaveJob(job.id);
+                              }}
+                            >
+                              <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                            </button>
                           </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <button
-                            type="button"
-                            className="inline-flex items-center justify-center h-[22px] w-[22px] rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95"
-                            aria-label={isJobSaved(job.id) ? 'Ta bort sparat jobb' : 'Spara jobb'}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleSaveJob(job.id);
-                            }}
-                          >
-                            <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
-                          </button>
                         </TableCell>
                       </TableRow>
                     ))}
