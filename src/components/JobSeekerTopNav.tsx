@@ -144,18 +144,14 @@ function JobSeekerTopNav() {
         {/* Parium Logo - Home Button */}
         <button
           onClick={() => handleNavigation('/home')}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity -mr-16"
           aria-label="Gå till startsidan"
         >
           <div 
             role="img"
             aria-label="Parium"
-            className="h-10 w-10 bg-no-repeat"
-            style={{ 
-              backgroundImage: `url(${pariumLogoRings})`,
-              backgroundSize: '160px 40px',
-              backgroundPosition: 'left center',
-            }}
+            className="h-10 w-40 bg-contain bg-left bg-no-repeat"
+            style={{ backgroundImage: `url(${pariumLogoRings})` }}
           />
         </button>
 
