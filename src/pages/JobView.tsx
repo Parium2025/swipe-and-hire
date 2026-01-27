@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import { useJobViewTracker } from '@/hooks/useJobViewTracker';
+import { useSavedJobs } from '@/hooks/useSavedJobs';
 import JobSwipe from '@/components/JobSwipe';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
-import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash, Timer, CheckCircle } from 'lucide-react';
+import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash, Timer, CheckCircle, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
@@ -70,6 +71,7 @@ const JobView = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const device = useDevice();
+  const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const [job, setJob] = useState<JobPosting | null>(null);
   const [loading, setLoading] = useState(true);
   const [jobQuestions, setJobQuestions] = useState<JobQuestion[]>([]);
@@ -561,18 +563,32 @@ const JobView = () => {
   return (
     <div ref={contentRef} className="min-h-screen bg-parium-gradient animate-fade-in overflow-y-auto">
       <div className="max-w-3xl mx-auto px-3 md:px-6 py-4">
-        {/* Combined header: Tillbaka + Företag på samma rad */}
+        {/* Combined header: Tillbaka + Spara + Företag på samma rad */}
         <div className="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
-          {/* Tillbaka-knapp till vänster */}
-          <Button
-            type="button"
-            onClick={handleBack}
-            variant="glass"
-            size="sm"
-          >
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            Tillbaka
-          </Button>
+          {/* Vänster: Tillbaka + Spara */}
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              onClick={handleBack}
+              variant="glass"
+              size="sm"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Tillbaka
+            </Button>
+            
+            {/* Spara-knapp */}
+            {jobId && (
+              <button
+                type="button"
+                onClick={() => toggleSaveJob(jobId)}
+                className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95"
+                aria-label={isJobSaved(jobId) ? 'Ta bort sparat jobb' : 'Spara jobb'}
+              >
+                <Heart className={`h-4 w-4 text-white ${isJobSaved(jobId) ? 'fill-red-400 text-red-400' : ''}`} />
+              </button>
+            )}
+          </div>
           
           {/* Företagsinfo till höger - clickable */}
           <button
