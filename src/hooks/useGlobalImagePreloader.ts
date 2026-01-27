@@ -2,6 +2,21 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { preloadImages, waitForServiceWorker } from '@/lib/serviceWorkerManager';
 import { getMediaUrl } from '@/lib/mediaManager';
+// Import logo directly so it's bundled and we get the hashed URL
+import pariumLogoRings from '@/assets/parium-logo-rings.png';
+
+/**
+ * Preload an image using native Image() - most reliable method
+ * Returns immediately when image is in browser cache
+ */
+const preloadImageNative = (src: string): Promise<void> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve(); // Don't block on error
+    img.src = src;
+  });
+};
 
 /**
  * Global hook som förladddar alla kritiska bilder vid app-start
@@ -12,18 +27,18 @@ export const useGlobalImagePreloader = () => {
   useEffect(() => {
     const preloadCriticalImages = async () => {
       try {
-        // Vänta på service worker endast i produktion
+        // 🔥 PRIORITET 0: Ladda Parium-logotypen OMEDELBART med native Image()
+        // Detta körs INNAN service worker-väntan för att garantera att loggan alltid finns i cache
+        console.log('🚀 HIGHEST PRIORITY: Preloading Parium logo (native)...');
+        await preloadImageNative(pariumLogoRings);
+        console.log('✅ Parium logo preloaded and ready!');
+        
+        // Vänta på service worker endast i produktion (för övriga assets)
         if (import.meta.env.PROD) {
           await waitForServiceWorker();
         }
 
         const imagesToPreload: string[] = [];
-        
-        // 🔥 PRIORITET 0: Ladda Parium-logotypen FÖRST (för auth-sidan)
-        const logoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
-        console.log('🚀 HIGHEST PRIORITY: Preloading Parium logo...');
-        await preloadImages([logoUrl]);
-        console.log('✅ Parium logo preloaded and ready!');
         
         // 🔥 PRIORITET 1: Ladda inloggad användares profilmedia FÖRST
         const { data: { user } } = await supabase.auth.getUser();
