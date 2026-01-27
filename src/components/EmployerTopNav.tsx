@@ -244,6 +244,11 @@ function EmployerTopNav() {
             src={pariumLogoRings}
             alt="Parium" 
             className="h-10 w-auto"
+            width="40"
+            height="40"
+            loading="eager"
+            decoding="sync"
+            fetchPriority="high"
           />
         </button>
 
