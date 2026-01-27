@@ -52,18 +52,42 @@ const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: Weat
 WeatherEffects.displayName = 'WeatherEffects';
 
 // Stars Effect - White dots like a night sky with occasional shooting star
+// Stars are cached in sessionStorage to persist during navigation
+const STARS_CACHE_KEY = 'parium_stars_config';
+
+const getOrCreateStars = () => {
+  try {
+    const cached = sessionStorage.getItem(STARS_CACHE_KEY);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  
+  // Generate new stars and cache them
+  const stars = Array.from({ length: 50 }).map((_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    top: Math.random() * 70,
+    size: 1 + Math.random() * 2,
+    opacity: 0.3 + Math.random() * 0.5,
+    twinkleDelay: Math.random() * 5,
+    twinkleDuration: 2 + Math.random() * 3,
+  }));
+  
+  try {
+    sessionStorage.setItem(STARS_CACHE_KEY, JSON.stringify(stars));
+  } catch {
+    // Ignore storage errors
+  }
+  
+  return stars;
+};
+
 const StarsEffect = memo(() => {
-  const stars = useMemo(() => 
-    Array.from({ length: 50 }).map((_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      top: Math.random() * 70, // Keep stars in upper portion
-      size: 1 + Math.random() * 2,
-      opacity: 0.3 + Math.random() * 0.5,
-      twinkleDelay: Math.random() * 5,
-      twinkleDuration: 2 + Math.random() * 3,
-    })),
-  []);
+  // Use cached stars - same configuration persists for entire session
+  const stars = useMemo(() => getOrCreateStars(), []);
 
   // Shooting star state with random start position
   const [shootingStar, setShootingStar] = useState<{
