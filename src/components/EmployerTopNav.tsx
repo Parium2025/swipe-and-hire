@@ -240,15 +240,11 @@ function EmployerTopNav() {
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           aria-label="Gå till dashboard"
         >
-          <img 
-            src={pariumLogoRings}
-            alt="Parium" 
-            className="h-10 w-auto"
-            width="40"
-            height="40"
-            loading="eager"
-            decoding="sync"
-            fetchPriority="high"
+          <div 
+            role="img"
+            aria-label="Parium"
+            className="h-10 w-10 bg-contain bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${pariumLogoRings})` }}
           />
         </button>
 
