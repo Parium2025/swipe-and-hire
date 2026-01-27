@@ -778,10 +778,11 @@ const SearchJobs = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-white/10 transition-all duration-300 md:hover:bg-white/10">
-                      <TableHead className="text-white w-[45%]">Titel</TableHead>
-                      <TableHead className="text-white w-[18%]">Företag</TableHead>
-                      <TableHead className="text-white w-[15%]">Plats</TableHead>
-                      <TableHead className="text-white w-[22%]">Publicerad</TableHead>
+                      <TableHead className="text-white w-[40%] text-center">Titel</TableHead>
+                      <TableHead className="text-white w-[15%] text-center">Företag</TableHead>
+                      <TableHead className="text-white w-[12%] text-center">Plats</TableHead>
+                      <TableHead className="text-white w-[28%] text-center">Publicerad</TableHead>
+                      <TableHead className="text-white w-[5%]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -791,17 +792,17 @@ const SearchJobs = () => {
                         className="group border-white/10 cursor-pointer transition-all duration-300 md:hover:bg-white/10"
                         onClick={() => navigate(`/job-view/${job.id}`)}
                       >
-                        <TableCell>
-                          <JobTitleCell title={job.title} employmentType={job.employment_type} className="max-w-none text-left items-start" />
+                        <TableCell className="text-center">
+                          <JobTitleCell title={job.title} employmentType={job.employment_type} className="max-w-none items-center text-center" />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">
                           <TruncatedText 
                             text={job.company_name} 
-                            className="text-sm text-white truncate max-w-[120px] block"
+                            className="text-sm text-white truncate max-w-[120px] block mx-auto"
                           />
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-1">
                             <MapPin className="h-3 w-3 text-white" />
                             <TruncatedText 
                               text={job.location} 
@@ -809,8 +810,8 @@ const SearchJobs = () => {
                             />
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 flex-wrap">
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-2 flex-wrap">
                             <div className="flex items-center gap-1 text-sm text-white">
                               <Calendar className="h-3 w-3" />
                               {formatDateShortSv(job.created_at)}
@@ -841,6 +842,19 @@ const SearchJobs = () => {
                               );
                             })()}
                           </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center h-[22px] w-[22px] rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95"
+                            aria-label={isJobSaved(job.id) ? 'Ta bort sparat jobb' : 'Spara jobb'}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSaveJob(job.id);
+                            }}
+                          >
+                            <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                          </button>
                         </TableCell>
                       </TableRow>
                     ))}
