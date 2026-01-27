@@ -782,7 +782,6 @@ const SearchJobs = () => {
                       <TableHead className="text-white">Företag</TableHead>
                       <TableHead className="text-white">Plats</TableHead>
                       <TableHead className="text-white">Publicerad</TableHead>
-                      <TableHead className="text-white">Åtgärder</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -793,7 +792,20 @@ const SearchJobs = () => {
                         onClick={() => navigate(`/job-view/${job.id}`)}
                       >
                         <TableCell>
-                          <JobTitleCell title={job.title} employmentType={job.employment_type} />
+                          <div className="flex items-center gap-2">
+                            <JobTitleCell title={job.title} employmentType={job.employment_type} className="flex-1" />
+                            <button
+                              type="button"
+                              className="inline-flex items-center justify-center h-[22px] w-[22px] rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95 flex-shrink-0"
+                              aria-label={isJobSaved(job.id) ? 'Ta bort sparat jobb' : 'Spara jobb'}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleSaveJob(job.id);
+                              }}
+                            >
+                              <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                            </button>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <TruncatedText 
@@ -841,38 +853,6 @@ const SearchJobs = () => {
                                 </Badge>
                               );
                             })()}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1.5">
-                            {appliedJobIds.has(job.id) ? (
-                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-[10px] h-5 px-1.5">
-                                <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
-                                Redan sökt
-                              </Badge>
-                            ) : (
-                              <button
-                                type="button"
-                                className="inline-flex items-center justify-center rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 px-2.5 py-0.5 text-white text-[10px] font-semibold transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/job-view/${job.id}`);
-                                }}
-                              >
-                                Ansök
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              className="inline-flex items-center justify-center h-[22px] w-[22px] rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95"
-                              aria-label={isJobSaved(job.id) ? 'Ta bort sparat jobb' : 'Spara jobb'}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleSaveJob(job.id);
-                              }}
-                            >
-                              <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
-                            </button>
                           </div>
                         </TableCell>
                       </TableRow>
