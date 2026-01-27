@@ -733,17 +733,18 @@ serve(async (req) => {
 
     console.log(`After cleanup: ${postCleanupRss.length} RSS, ${postCleanupAi.length} AI`);
 
-    // ===== STEP 6: THE CLOSED-LOOP LOGIC WITH SOURCE LIMITS =====
+    // ===== STEP 6: SIMPLE ROTATION LOGIC =====
+    // Principle: Always keep exactly 4 articles, sorted by published_at
+    // When new articles come in, add them and remove the oldest ones
     const today = new Date().toISOString().split('T')[0];
     let insertedRss = 0;
     let aiReplaced = 0;
     let aiRefreshed = 0;
     let crisisModeUsed = false;
 
-    const totalCurrent = postCleanup.length;
     const targetSlots = 4;
 
-    // Check if we're in crisis mode
+    // Check if we're in crisis mode (need to allow more per source)
     const currentSourceCounts = countBySource(postCleanupRss);
     const availableNewWithLimit = filterBySourceLimit(newRssItems, postCleanupRss, MAX_PER_SOURCE_NORMAL);
     
@@ -763,107 +764,56 @@ serve(async (req) => {
     console.log(`Eligible new items with max ${maxPerSource}/source: ${eligibleNewItems.length}`);
 
     if (eligibleNewItems.length > 0) {
-      // BATCH REPLACEMENT: Replace ALL AI articles first, then oldest RSS articles
-      // Priority: AI (oldest first) → RSS (oldest first)
+      // SIMPLE ROTATION: Insert new items, then keep only the 4 newest
       
-      const aiCount = postCleanupAi.length;
-      const rssCount = postCleanupRss.length;
-      const newItemsCount = eligibleNewItems.length;
+      console.log(`Inserting ${eligibleNewItems.length} new RSS items...`);
       
-      console.log(`Batch replacement: ${newItemsCount} new items, ${aiCount} AI to replace, ${rssCount} RSS existing`);
+      // Insert all eligible new items
+      const insertData = eligibleNewItems.map((i, idx) => {
+        const cat = getCatInfo(i.category);
+        return {
+          title: i.title,
+          summary: i.summary,
+          source: i.source,
+          source_url: i.source_url,
+          category: cat.label,
+          icon_name: cat.icon,
+          gradient: cat.gradient,
+          news_date: today,
+          order_index: idx,
+          published_at: i.published_at,
+        };
+      });
       
-      if (totalCurrent >= targetSlots) {
-        // Feed is full - need to replace existing items
-        // IMPORTANT: Only replace UP TO 2 items per fetch cycle to preserve recent content
-        // This ensures yesterday's articles aren't immediately replaced
-        const maxReplacementsPerCycle = 2;
-        const maxReplacements = Math.min(newItemsCount, maxReplacementsPerCycle);
-        
-        // First, replace all AI articles (oldest first)
-        const aiToReplace = Math.min(aiCount, maxReplacements);
-        // Then, if we have more new items, replace oldest RSS articles
-        const rssToReplace = Math.min(rssCount, maxReplacements - aiToReplace);
-        
-        const totalToReplace = aiToReplace + rssToReplace;
-        
-        console.log(`Will replace ${aiToReplace} AI + ${rssToReplace} RSS = ${totalToReplace} total`);
-        
-        if (totalToReplace > 0) {
-          // Collect IDs to delete: AI first (oldest = end of array), then oldest RSS
-          const idsToDelete: string[] = [];
-          
-          // Get oldest AI articles (from end of sorted array)
-          for (let i = 0; i < aiToReplace; i++) {
-            const idx = postCleanupAi.length - 1 - i;
-            if (idx >= 0) {
-              idsToDelete.push(postCleanupAi[idx].id);
-            }
-          }
-          
-          // Get oldest RSS articles if needed (from end of sorted array)
-          for (let i = 0; i < rssToReplace; i++) {
-            const idx = postCleanupRss.length - 1 - i;
-            if (idx >= 0) {
-              idsToDelete.push(postCleanupRss[idx].id);
-            }
-          }
-          
-          console.log(`Deleting ${idsToDelete.length} old items to make room for new RSS`);
-          
-          // Delete all marked items
-          for (const id of idsToDelete) {
-            await supabase.from('daily_career_tips').delete().eq('id', id);
-          }
-          
-          // Insert new RSS items
-          const toInsert = eligibleNewItems.slice(0, totalToReplace);
-          const insertData = toInsert.map((i, idx) => {
-            const cat = getCatInfo(i.category);
-            return {
-              title: i.title,
-              summary: i.summary,
-              source: i.source,
-              source_url: i.source_url,
-              category: cat.label,
-              icon_name: cat.icon,
-              gradient: cat.gradient,
-              news_date: today,
-              order_index: idx,
-              published_at: i.published_at,
-            };
-          });
-          
-          await supabase.from('daily_career_tips').insert(insertData);
-          insertedRss = toInsert.length;
-          aiReplaced = aiToReplace;
-          
-          console.log(`Inserted ${insertedRss} new RSS items, replaced ${aiReplaced} AI and ${rssToReplace} old RSS`);
-        }
+      const { error: insertError } = await supabase.from('daily_career_tips').insert(insertData);
+      if (insertError) {
+        console.error('Insert error:', insertError);
       } else {
-        // Feed has empty slots - fill them first
-        const slotsNeeded = targetSlots - totalCurrent;
-        const toInsert = eligibleNewItems.slice(0, slotsNeeded);
+        insertedRss = insertData.length;
+        console.log(`Successfully inserted ${insertedRss} new RSS items`);
+      }
+      
+      // Now fetch ALL items and keep only the 4 newest by published_at
+      const { data: allItems } = await supabase
+        .from('daily_career_tips')
+        .select('id, published_at, source, source_url')
+        .order('published_at', { ascending: false, nullsFirst: false });
+      
+      if (allItems && allItems.length > targetSlots) {
+        // Delete everything beyond the newest 4
+        const itemsToDelete = allItems.slice(targetSlots);
+        const idsToDelete = itemsToDelete.map(i => i.id);
         
-        console.log(`Filling ${toInsert.length} empty slots`);
+        // Count how many AI items we're removing
+        aiReplaced = itemsToDelete.filter(i => i.source_url == null).length;
         
-        const insertData = toInsert.map((i, idx) => {
-          const cat = getCatInfo(i.category);
-          return {
-            title: i.title,
-            summary: i.summary,
-            source: i.source,
-            source_url: i.source_url,
-            category: cat.label,
-            icon_name: cat.icon,
-            gradient: cat.gradient,
-            news_date: today,
-            order_index: idx,
-            published_at: i.published_at,
-          };
-        });
+        console.log(`Removing ${idsToDelete.length} oldest items (${aiReplaced} AI, ${idsToDelete.length - aiReplaced} RSS) to maintain ${targetSlots} total`);
         
-        await supabase.from('daily_career_tips').insert(insertData);
-        insertedRss = toInsert.length;
+        for (const id of idsToDelete) {
+          await supabase.from('daily_career_tips').delete().eq('id', id);
+        }
+        
+        console.log(`Feed now has exactly ${targetSlots} items (the newest ones)`);
       }
     }
 
