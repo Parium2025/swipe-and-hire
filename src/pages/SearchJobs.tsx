@@ -778,10 +778,10 @@ const SearchJobs = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-white/10 transition-all duration-300 md:hover:bg-white/10">
-                      <TableHead className="text-white">Titel</TableHead>
-                      <TableHead className="text-white">Företag</TableHead>
-                      <TableHead className="text-white">Plats</TableHead>
-                      <TableHead className="text-white">Publicerad</TableHead>
+                      <TableHead className="text-white w-[45%]">Titel</TableHead>
+                      <TableHead className="text-white w-[18%]">Företag</TableHead>
+                      <TableHead className="text-white w-[15%]">Plats</TableHead>
+                      <TableHead className="text-white w-[22%]">Publicerad</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -792,20 +792,7 @@ const SearchJobs = () => {
                         onClick={() => navigate(`/job-view/${job.id}`)}
                       >
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <JobTitleCell title={job.title} employmentType={job.employment_type} className="flex-1" />
-                            <button
-                              type="button"
-                              className="inline-flex items-center justify-center h-[22px] w-[22px] rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95 flex-shrink-0"
-                              aria-label={isJobSaved(job.id) ? 'Ta bort sparat jobb' : 'Spara jobb'}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleSaveJob(job.id);
-                              }}
-                            >
-                              <Heart className={`h-3 w-3 text-white ${isJobSaved(job.id) ? 'fill-red-400 text-red-400' : ''}`} />
-                            </button>
-                          </div>
+                          <JobTitleCell title={job.title} employmentType={job.employment_type} className="max-w-none text-left items-start" />
                         </TableCell>
                         <TableCell>
                           <TruncatedText 
