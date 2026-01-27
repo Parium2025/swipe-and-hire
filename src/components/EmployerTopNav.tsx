@@ -233,7 +233,7 @@ function EmployerTopNav() {
   return (
     <nav className="h-14 flex items-center justify-between px-4 border-b border-white/20 bg-transparent">
       {/* Left side: Logo + Main Nav */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1">
         {/* Parium Logo - Home Button */}
         <button
           onClick={() => handleNavigation('/home')}
