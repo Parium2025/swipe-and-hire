@@ -150,7 +150,7 @@ function JobSeekerTopNav() {
           <div 
             role="img"
             aria-label="Parium"
-            className="h-10 w-24 bg-contain bg-left bg-no-repeat"
+            className="h-10 w-10 bg-contain bg-center bg-no-repeat origin-left scale-110"
             style={{ backgroundImage: `url(${pariumLogoRings})` }}
           />
         </button>
