@@ -720,8 +720,10 @@ serve(async (req) => {
       
       if (totalCurrent >= targetSlots) {
         // Feed is full - need to replace existing items
-        // Calculate how many to replace: min(new items available, slots we can rotate)
-        const maxReplacements = Math.min(newItemsCount, targetSlots);
+        // IMPORTANT: Only replace UP TO 2 items per fetch cycle to preserve recent content
+        // This ensures yesterday's articles aren't immediately replaced
+        const maxReplacementsPerCycle = 2;
+        const maxReplacements = Math.min(newItemsCount, maxReplacementsPerCycle);
         
         // First, replace all AI articles (oldest first)
         const aiToReplace = Math.min(aiCount, maxReplacements);
