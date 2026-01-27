@@ -150,12 +150,7 @@ function JobSeekerTopNav() {
           <img 
             src={pariumLogoRings}
             alt="Parium" 
-            className="h-10 w-10 object-contain"
-            width={40}
-            height={40}
-            loading="eager"
-            fetchPriority="high"
-            decoding="sync"
+            className="h-10 w-auto"
           />
         </button>
 
