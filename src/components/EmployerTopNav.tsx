@@ -237,13 +237,13 @@ function EmployerTopNav() {
         {/* Parium Logo - Home Button */}
         <button
           onClick={() => handleNavigation('/home')}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity -mr-16"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           aria-label="Gå till dashboard"
         >
           <div 
             role="img"
             aria-label="Parium"
-            className="h-10 w-40 bg-contain bg-left bg-no-repeat"
+            className="h-12 w-12 bg-contain bg-center bg-no-repeat"
             style={{ backgroundImage: `url(${pariumLogoRings})` }}
           />
         </button>
