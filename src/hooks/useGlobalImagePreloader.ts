@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { preloadImages, waitForServiceWorker } from '@/lib/serviceWorkerManager';
 import { getMediaUrl } from '@/lib/mediaManager';
+import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
 /**
  * Global hook som förladddar alla kritiska bilder vid app-start
@@ -19,10 +20,9 @@ export const useGlobalImagePreloader = () => {
 
         const imagesToPreload: string[] = [];
         
-        // 🔥 PRIORITET 0: Ladda Parium-logotypen FÖRST (för auth-sidan)
-        const logoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
+        // 🔥 PRIORITET 0: Ladda Parium-logotypen FÖRST (samma bundle-path som navigationen använder)
         console.log('🚀 HIGHEST PRIORITY: Preloading Parium logo...');
-        await preloadImages([logoUrl]);
+        await preloadImages([pariumLogoRings]);
         console.log('✅ Parium logo preloaded and ready!');
         
         // 🔥 PRIORITET 1: Ladda inloggad användares profilmedia FÖRST
