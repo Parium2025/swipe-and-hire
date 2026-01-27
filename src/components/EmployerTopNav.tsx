@@ -243,8 +243,12 @@ function EmployerTopNav() {
           <div 
             role="img"
             aria-label="Parium"
-            className="h-10 w-10 bg-contain bg-center bg-no-repeat origin-left scale-110"
-            style={{ backgroundImage: `url(${pariumLogoRings})` }}
+            className="h-10 w-10 bg-no-repeat"
+            style={{ 
+              backgroundImage: `url(${pariumLogoRings})`,
+              backgroundSize: '160px 40px',
+              backgroundPosition: 'left center',
+            }}
           />
         </button>
 
