@@ -17,6 +17,7 @@ import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -761,12 +762,63 @@ const SearchJobs = () => {
         </CardHeader>
         <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
           {isLoading ? (
-            <div className="text-center py-12">
-              <div className="inline-flex items-center gap-2">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                <p className="text-sm text-white">Söker jobb...</p>
+            <>
+              {/* Desktop: Skeleton Table */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-white/10">
+                      <TableHead className="text-white w-[45%] text-center">Titel</TableHead>
+                      <TableHead className="text-white w-[18%] text-center">Företag</TableHead>
+                      <TableHead className="text-white w-[15%] text-center">Plats</TableHead>
+                      <TableHead className="text-white w-[22%] text-center">Publicerad</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <TableRow key={i} className="border-white/10">
+                        <TableCell className="text-center align-top pt-3">
+                          <div className="flex flex-col items-center gap-1">
+                            <Skeleton className="h-4 w-3/4 bg-white/10" />
+                            <Skeleton className="h-3 w-16 bg-white/10" />
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center align-top pt-3">
+                          <Skeleton className="h-4 w-24 mx-auto bg-white/10" />
+                        </TableCell>
+                        <TableCell className="text-center align-top pt-3">
+                          <Skeleton className="h-4 w-20 mx-auto bg-white/10" />
+                        </TableCell>
+                        <TableCell className="text-center align-top pt-3">
+                          <div className="flex items-center justify-center gap-2">
+                            <Skeleton className="h-4 w-16 bg-white/10" />
+                            <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-            </div>
+              {/* Mobile: Skeleton Cards */}
+              <div className="md:hidden space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                    <div className="flex items-start gap-3">
+                      <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4 bg-white/10" />
+                        <Skeleton className="h-3 w-1/2 bg-white/10" />
+                        <div className="flex gap-2 mt-2">
+                          <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
+                          <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           ) : filteredAndSortedJobs.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-white">Inga jobb hittades</p>
