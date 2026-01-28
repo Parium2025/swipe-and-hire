@@ -15,13 +15,12 @@ export function PariumLogoButton({ onClick, ariaLabel }: PariumLogoButtonProps) 
       onClick={onClick}
       className="flex items-center hover:opacity-80 transition-opacity shrink-0"
       aria-label={ariaLabel}
-      // -ml-1 (4px) + old -mr-[104px] to visually align and keep menus tight
-      style={{ marginLeft: -4, marginRight: -104 }}
+      style={{ marginLeft: -4, marginRight: -80 }}
     >
       <div
         role="img"
         aria-label="Parium"
-        className="h-10 w-40 bg-contain bg-left bg-no-repeat pointer-events-none"
+        className="h-8 w-32 bg-contain bg-left bg-no-repeat pointer-events-none"
         style={{ backgroundImage: `url(${pariumLogoRings})` }}
       />
     </button>
