@@ -128,11 +128,12 @@ const SearchJobs = () => {
   const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   
-  // Lazy loading state
-  const [displayCount, setDisplayCount] = useState(10);
-  const initialLoadSize = 20; // Load first 20 jobs
-  const loadMoreSize = 10; // Load 10 more each time
+  // Lazy loading state with infinite scroll
+  const [displayCount, setDisplayCount] = useState(20); // Start with 20 jobs
+  const loadMoreSize = 20; // Load 20 more each time
   const listTopRef = useRef<HTMLDivElement>(null);
+  const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
+  const isLoadingMoreRef = useRef(false);
 
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
@@ -251,12 +252,40 @@ const SearchJobs = () => {
 
   // Reset display count when filters change
   useEffect(() => {
-    setDisplayCount(10);
+    setDisplayCount(20);
   }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, sortBy]);
 
-  const handleLoadMore = () => {
+  // Infinite scroll with IntersectionObserver
+  useEffect(() => {
+    const trigger = loadMoreTriggerRef.current;
+    if (!trigger) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMoreJobs && !isLoadingMoreRef.current) {
+          isLoadingMoreRef.current = true;
+          setDisplayCount(prev => {
+            const next = Math.min(prev + loadMoreSize, filteredAndSortedJobs.length);
+            // Reset loading flag after state update
+            setTimeout(() => { isLoadingMoreRef.current = false; }, 100);
+            return next;
+          });
+        }
+      },
+      { 
+        rootMargin: '200px', // Start loading 200px before reaching the trigger
+        threshold: 0.1 
+      }
+    );
+
+    observer.observe(trigger);
+    return () => observer.disconnect();
+  }, [hasMoreJobs, filteredAndSortedJobs.length, loadMoreSize]);
+
+  const handleLoadMore = useCallback(() => {
     setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
-  };
+  }, [filteredAndSortedJobs.length, loadMoreSize]);
 
   const formatSalary = (min?: number, max?: number) => {
     if (min && max) {
@@ -930,22 +959,23 @@ const SearchJobs = () => {
         </CardContent>
       </Card>
 
-      {/* Load More Button */}
+      {/* Infinite Scroll Trigger */}
+      <div ref={loadMoreTriggerRef} className="h-1" />
+      
+      {/* Loading indicator when fetching more */}
       {hasMoreJobs && (
         <div className="flex justify-center py-4">
-          <Button
-            onClick={handleLoadMore}
-            className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
-          >
-            Ladda fler jobb ({displayCount} av {filteredAndSortedJobs.length})
-          </Button>
+          <div className="flex items-center gap-2 text-white/60 text-sm">
+            <div className="w-4 h-4 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
+            <span>Laddar fler jobb...</span>
+          </div>
         </div>
       )}
       
       {/* Show message when all jobs are loaded */}
-      {!hasMoreJobs && filteredAndSortedJobs.length > 10 && (
+      {!hasMoreJobs && filteredAndSortedJobs.length > 20 && (
         <div className="text-center py-4">
-          <p className="text-white text-sm">
+          <p className="text-white/60 text-sm">
             Alla {filteredAndSortedJobs.length} jobb visas
           </p>
         </div>
