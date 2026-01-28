@@ -168,7 +168,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
         )}
         
         {/* Analysis timestamp */}
-        <p className="text-white/40 text-xs pt-2 border-t border-white/10">
+        <p className="text-white text-xs pt-2 border-t border-white/10">
           Analyserad: {format(new Date(summary.analyzed_at), 'd MMMM yyyy, HH:mm', { locale: sv })}
         </p>
       </div>
