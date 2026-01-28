@@ -88,7 +88,11 @@ export function SavedSearchesDropdown({
 
   return (
     <>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={(isOpen) => {
+        // Don't close popover if confirmation dialog is open
+        if (!isOpen && confirmDeleteSearch) return;
+        setOpen(isOpen);
+      }}>
         <PopoverTrigger asChild>
           <button
             className="relative flex items-center gap-2 text-xs text-white rounded-md px-2 py-1.5 transition-all duration-200 md:hover:bg-white/10 active:scale-95"
