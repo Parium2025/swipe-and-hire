@@ -55,7 +55,7 @@ interface CvSummary {
 }
 
 // Component to display the user's CV summary
-const CvSummarySection = ({ userId, cvUrl }: { userId?: string; cvUrl?: string }) => {
+const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUrl?: string; refreshKey?: number }) => {
   const [summary, setSummary] = useState<CvSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [isStale, setIsStale] = useState(false);
@@ -87,6 +87,9 @@ const CvSummarySection = ({ userId, cvUrl }: { userId?: string; cvUrl?: string }
           } else {
             setIsStale(false);
           }
+        } else {
+          setSummary(null);
+          setIsStale(false);
         }
       } finally {
         setLoading(false);
@@ -94,7 +97,7 @@ const CvSummarySection = ({ userId, cvUrl }: { userId?: string; cvUrl?: string }
     };
     
     fetchSummary();
-  }, [userId, cvUrl]);
+  }, [userId, cvUrl, refreshKey]);
 
   if (!cvUrl) {
     return null;
@@ -191,6 +194,7 @@ const Profile = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
+  const [cvSummaryRefreshKey, setCvSummaryRefreshKey] = useState(0);
   
   // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
   // This prevents DB sync from overwriting local changes when screenshot tools or tab switches cause remounts
@@ -1446,26 +1450,29 @@ const Profile = () => {
       const result = await updateProfile(updates);
       
       if (!result.error) {
-        // 🚀 Trigger proactive CV analysis in background if CV was updated
+        // 🚀 Trigger proactive CV analysis if CV was updated
         const cvWasUpdated = cvUrl && cvUrl !== originalValues.cvUrl;
         if (cvWasUpdated && user?.id) {
-          console.log('CV updated, triggering proactive analysis in background');
-          // Fire and forget - don't wait for this to complete
-          supabase.functions.invoke('generate-cv-summary', {
-            body: {
-              applicant_id: user.id,
-              cv_url_override: cvUrl,
-              proactive: true
-            }
-          }).then(res => {
+          console.log('CV updated, triggering proactive analysis...');
+          try {
+            const res = await supabase.functions.invoke('generate-cv-summary', {
+              body: {
+                applicant_id: user.id,
+                cv_url_override: cvUrl,
+                proactive: true
+              }
+            });
+            
             if (res.error) {
               console.error('Proactive CV analysis error:', res.error);
             } else {
-              console.log('Proactive CV analysis triggered successfully');
+              console.log('Proactive CV analysis completed successfully');
+              // 🔄 Trigger re-fetch of CV summary in UI
+              setCvSummaryRefreshKey(prev => prev + 1);
             }
-          }).catch(err => {
+          } catch (err) {
             console.error('Proactive CV analysis failed:', err);
-          });
+          }
         }
         
         // Refresh profile to ensure sidebar is updated immediately
@@ -2161,7 +2168,7 @@ const Profile = () => {
                   </div>
 
                   {/* CV Summary Section */}
-                  <CvSummarySection userId={user?.id} cvUrl={cvUrl || (profile as any)?.cv_url} />
+                  <CvSummarySection userId={user?.id} cvUrl={cvUrl || (profile as any)?.cv_url} refreshKey={cvSummaryRefreshKey} />
                 </>
               )}
 
