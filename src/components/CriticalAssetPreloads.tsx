@@ -1,4 +1,5 @@
-import pariumLogoRings from "@/assets/parium-logo-rings.png";
+// Use public path to match the preload in index.html (no Vite hash)
+const LOGO_SRC = "/assets/parium-logo-rings.png";
 
 /**
  * Keeps critical UI assets warm in the browser cache/decoder so route changes
@@ -7,7 +8,7 @@ import pariumLogoRings from "@/assets/parium-logo-rings.png";
 export function CriticalAssetPreloads() {
   return (
     <img
-      src={pariumLogoRings}
+      src={LOGO_SRC}
       alt=""
       aria-hidden="true"
       loading="eager"

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import pariumLogoRings from "@/assets/parium-logo-rings.png";
+
+// Use public path to match the preload in index.html (no Vite hash)
+const LOGO_SRC = "/assets/parium-logo-rings.png";
 
 type PariumLogoButtonProps = {
   onClick: () => void;
@@ -69,7 +71,7 @@ export function PariumLogoButton({ onClick, ariaLabel }: PariumLogoButtonProps) 
 
   useEffect(() => {
     let alive = true;
-    void ensureLogoReady(pariumLogoRings).finally(() => {
+    void ensureLogoReady(LOGO_SRC).finally(() => {
       if (alive) setReady(true);
     });
     return () => {
@@ -82,7 +84,6 @@ export function PariumLogoButton({ onClick, ariaLabel }: PariumLogoButtonProps) 
       onClick={onClick}
       className="relative z-20 flex items-center hover:opacity-80 transition-opacity shrink-0"
       aria-label={ariaLabel}
-      // Keep a tiny left alignment nudge, but avoid negative right overlap (it can hide the logo).
       style={{ marginLeft: -4 }}
     >
       <div className="relative h-10 w-10 pointer-events-none" aria-hidden="true">
@@ -91,7 +92,7 @@ export function PariumLogoButton({ onClick, ariaLabel }: PariumLogoButtonProps) 
 
         {/* Real PNG (fades in when loaded/decoded; should look identical) */}
         <img
-          src={pariumLogoRings}
+          src={LOGO_SRC}
           alt=""
           aria-hidden="true"
           width={40}
