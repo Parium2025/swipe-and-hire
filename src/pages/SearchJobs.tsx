@@ -331,9 +331,7 @@ const SearchJobs = () => {
   };
 
   return (
-    <>
-      <AnimatedBackground showBubbles={true} />
-      <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
+    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
       <div className="flex justify-center items-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Sök Jobb</h1>
       </div>
@@ -971,8 +969,7 @@ const SearchJobs = () => {
           onClose={() => setSwipeModeActive(false)}
         />
       )}
-      </div>
-    </>
+    </div>
   );
 };
 
