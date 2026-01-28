@@ -6,8 +6,8 @@ type PariumLogoButtonProps = {
 };
 
 /**
- * Home button (logo) with inline margin compensation to avoid any late-applied
- * CSS causing the logo to shift/pop when navigating between routes.
+ * Home button (logo) using a real <img> with sync decoding to guarantee
+ * the logo is painted immediately without any pop-in on route changes.
  */
 export function PariumLogoButton({ onClick, ariaLabel }: PariumLogoButtonProps) {
   return (
@@ -18,11 +18,15 @@ export function PariumLogoButton({ onClick, ariaLabel }: PariumLogoButtonProps) 
       // -ml-1 (4px) + old -mr-[104px] to visually align and keep menus tight
       style={{ marginLeft: -4, marginRight: -104 }}
     >
-      <div
-        role="img"
-        aria-label="Parium"
-        className="h-10 w-40 bg-contain bg-left bg-no-repeat pointer-events-none"
-        style={{ backgroundImage: `url(${pariumLogoRings})` }}
+      <img
+        src={pariumLogoRings}
+        alt="Parium"
+        width={160}
+        height={40}
+        loading="eager"
+        decoding="sync"
+        fetchPriority="high"
+        className="h-10 w-40 object-contain object-left pointer-events-none"
       />
     </button>
   );
