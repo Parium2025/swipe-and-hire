@@ -1,11 +1,21 @@
 import { useState } from 'react';
-import { Bell, X, Trash2, Search } from 'lucide-react';
+import { Bell, X, Trash2, Search, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { SavedSearch, SearchCriteria } from '@/hooks/useSavedSearches';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +36,7 @@ export function SavedSearchesDropdown({
 }: SavedSearchesDropdownProps) {
   const [open, setOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteSearch, setConfirmDeleteSearch] = useState<SavedSearch | null>(null);
 
   if (savedSearches.length === 0) return null;
 
@@ -50,11 +61,17 @@ export function SavedSearchesDropdown({
     setOpen(false);
   };
 
-  const handleDelete = async (e: React.MouseEvent, searchId: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, search: SavedSearch) => {
     e.stopPropagation();
-    setDeletingId(searchId);
-    await onDeleteSearch(searchId);
+    setConfirmDeleteSearch(search);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDeleteSearch) return;
+    setDeletingId(confirmDeleteSearch.id);
+    await onDeleteSearch(confirmDeleteSearch.id);
     setDeletingId(null);
+    setConfirmDeleteSearch(null);
   };
 
   // Build a summary of the search criteria for display
@@ -70,89 +87,124 @@ export function SavedSearchesDropdown({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          className="relative flex items-center gap-2 text-xs text-white rounded-md px-2 py-1.5 transition-all duration-200 md:hover:bg-white/10 active:scale-95"
-        >
-          <Bell className="h-3 w-3 text-white" />
-          <span>{savedSearches.length} sparad{savedSearches.length !== 1 ? 'e' : ''} sökning{savedSearches.length !== 1 ? 'ar' : ''}</span>
-          {totalNewMatches > 0 && (
-            <Badge 
-              variant="glass" 
-              className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-5 px-1.5"
-            >
-              {totalNewMatches} nya
-            </Badge>
-          )}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent 
-        className="w-80 p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
-        align="start"
-      >
-        <div className="p-3 border-b border-white/10">
-          <h4 className="text-sm font-medium text-white">Sparade sökningar</h4>
-          <p className="text-xs text-white mt-0.5">Klicka för att aktivera sökningen</p>
-        </div>
-        
-        <div className="max-h-64 overflow-y-auto">
-          {savedSearches.map((search) => (
-            <div
-              key={search.id}
-              onClick={() => handleApplySearch(search)}
-              className={cn(
-                "flex items-start gap-3 p-3 cursor-pointer transition-colors",
-                "hover:bg-white/5 border-b border-white/5 last:border-b-0",
-                deletingId === search.id && "opacity-50 pointer-events-none"
-              )}
-            >
-              <Search className="h-4 w-4 text-white mt-0.5 shrink-0" />
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-white truncate">
-                    {search.name}
-                  </span>
-                  {search.new_matches_count > 0 && (
-                    <Badge 
-                      variant="glass" 
-                      className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-4 px-1 shrink-0"
-                    >
-                      +{search.new_matches_count}
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-white truncate mt-0.5">
-                  {getCriteriaSummary(search)}
-                </p>
-              </div>
-              
-              <button
-                onClick={(e) => handleDelete(e, search.id)}
-                className="p-1.5 rounded-full text-white md:hover:text-red-400 md:hover:bg-red-500/10 transition-colors shrink-0"
-                aria-label="Ta bort sparad sökning"
+    <>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            className="relative flex items-center gap-2 text-xs text-white rounded-md px-2 py-1.5 transition-all duration-200 md:hover:bg-white/10 active:scale-95"
+          >
+            <Bell className="h-3 w-3 text-white" />
+            <span>{savedSearches.length} sparad{savedSearches.length !== 1 ? 'e' : ''} sökning{savedSearches.length !== 1 ? 'ar' : ''}</span>
+            {totalNewMatches > 0 && (
+              <Badge 
+                variant="glass" 
+                className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-5 px-1.5"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                {totalNewMatches} nya
+              </Badge>
+            )}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent 
+          className="w-80 p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
+          align="start"
+        >
+          <div className="p-3 border-b border-white/10">
+            <h4 className="text-sm font-medium text-white">Sparade sökningar</h4>
+            <p className="text-xs text-white mt-0.5">Klicka för att aktivera sökningen</p>
+          </div>
+          
+          <div className="max-h-64 overflow-y-auto">
+            {savedSearches.map((search) => (
+              <div
+                key={search.id}
+                onClick={() => handleApplySearch(search)}
+                className={cn(
+                  "flex items-start gap-3 p-3 cursor-pointer transition-colors",
+                  "hover:bg-white/5 border-b border-white/5 last:border-b-0",
+                  deletingId === search.id && "opacity-50 pointer-events-none"
+                )}
+              >
+                <Search className="h-4 w-4 text-white mt-0.5 shrink-0" />
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-white truncate">
+                      {search.name}
+                    </span>
+                    {search.new_matches_count > 0 && (
+                      <Badge 
+                        variant="glass" 
+                        className="bg-red-500/20 text-red-300 border-red-500/30 text-[10px] h-4 px-1 shrink-0"
+                      >
+                        +{search.new_matches_count}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-white truncate mt-0.5">
+                    {getCriteriaSummary(search)}
+                  </p>
+                </div>
+                
+                <button
+                  onClick={(e) => handleDeleteClick(e, search)}
+                  className="p-1.5 rounded-full text-white md:hover:text-red-400 md:hover:bg-red-500/10 transition-colors shrink-0"
+                  aria-label="Ta bort sparad sökning"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          {totalNewMatches > 0 && (
+            <div className="p-2 border-t border-white/10">
+              <button
+                onClick={async () => {
+                  await onClearNewMatches();
+                  setOpen(false);
+                }}
+                className="w-full text-xs text-white/60 hover:text-white py-1.5 rounded-md hover:bg-white/5 transition-colors"
+              >
+                Rensa alla notifikationer
               </button>
             </div>
-          ))}
-        </div>
-        
-        {totalNewMatches > 0 && (
-          <div className="p-2 border-t border-white/10">
-            <button
-              onClick={async () => {
-                await onClearNewMatches();
-                setOpen(false);
-              }}
-              className="w-full text-xs text-white/60 hover:text-white py-1.5 rounded-md hover:bg-white/5 transition-colors"
+          )}
+        </PopoverContent>
+      </Popover>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!confirmDeleteSearch} onOpenChange={(open) => !open && setConfirmDeleteSearch(null)}>
+        <AlertDialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/20 max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20">
+                <AlertTriangle className="h-5 w-5 text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-white text-lg">
+                Ta bort sparad sökning
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-white pt-2">
+              Är du säker på att du vill ta bort{' '}
+              <span className="font-semibold text-white">"{confirmDeleteSearch?.name}"</span>?{' '}
+              Denna åtgärd går inte att ångra.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-2">
+            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700 text-white gap-2"
             >
-              Rensa alla notifikationer
-            </button>
-          </div>
-        )}
-      </PopoverContent>
-    </Popover>
+              <Trash2 className="h-4 w-4" />
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
