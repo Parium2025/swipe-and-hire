@@ -292,7 +292,7 @@ const MyApplications = () => {
                 onClick={() => handleApplicationClick(application)}
                 className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
               >
-                <CardContent className="p-4">
+                <CardContent className="p-4 min-h-[120px]">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       {/* Job Title */}
