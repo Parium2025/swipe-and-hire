@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer, CheckCircle, Bookmark, Bell, Sparkles } from 'lucide-react';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { JobSwipeMode } from '@/components/JobSwipeMode';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
@@ -330,7 +331,9 @@ const SearchJobs = () => {
   };
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
+    <>
+      <AnimatedBackground showBubbles={true} />
+      <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
       <div className="flex justify-center items-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Sök Jobb</h1>
       </div>
@@ -869,7 +872,7 @@ const SearchJobs = () => {
                     {displayedJobs.map((job) => (
                        <TableRow 
                         key={job.id} 
-                        className="group border-white/10 cursor-pointer transition-all duration-300 md:hover:bg-white/10"
+                        className="group border-white/10 cursor-pointer transition-all duration-300 md:hover:bg-white/5 md:hover:shadow-[0_4px_20px_-4px_rgba(255,255,255,0.1)] md:hover:-translate-y-[1px]"
                         onClick={() => navigate(`/job-view/${job.id}`)}
                       >
                         <TableCell className="text-center align-top pt-3">
@@ -1018,7 +1021,8 @@ const SearchJobs = () => {
           onClose={() => setSwipeModeActive(false)}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
