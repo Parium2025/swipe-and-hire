@@ -13,7 +13,10 @@ export function PariumLogoButton({ onClick, ariaLabel }: PariumLogoButtonProps) 
   return (
     <button
       onClick={onClick}
-      className="flex items-center hover:opacity-80 transition-opacity shrink-0"
+      // NOTE: We intentionally overlap the following nav items via negative marginRight.
+      // Ensure the logo is always on top so it can't be visually covered ("pop in"/disappear)
+      // when counts/labels change width during navigation.
+      className="relative z-20 flex items-center hover:opacity-80 transition-opacity shrink-0"
       aria-label={ariaLabel}
       // -ml-1 (4px) + old -mr-[104px] to visually align and keep menus tight
       style={{ marginLeft: -4, marginRight: -104 }}
