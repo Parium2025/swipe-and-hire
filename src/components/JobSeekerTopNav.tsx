@@ -28,7 +28,7 @@ import {
   Briefcase,
   Bell
 } from "lucide-react";
-import pariumLogoRings from "@/assets/parium-logo-rings.png";
+import { PariumLogoButton } from "@/components/PariumLogoButton";
 
 // Jobb dropdown items
 const jobItems = [
@@ -143,18 +143,10 @@ function JobSeekerTopNav() {
       {/* Left side: Logo + Main Nav */}
       <div className="flex items-center gap-1">
         {/* Parium Logo - Home Button */}
-        <button
+        <PariumLogoButton
           onClick={() => handleNavigation('/home')}
-          className="flex items-center hover:opacity-80 transition-opacity shrink-0 -ml-1 -mr-[104px]"
-          aria-label="Gå till startsidan"
-        >
-          <div 
-            role="img"
-            aria-label="Parium"
-            className="h-10 w-40 bg-contain bg-left bg-no-repeat pointer-events-none"
-            style={{ backgroundImage: `url(${pariumLogoRings})` }}
-          />
-        </button>
+          ariaLabel="Gå till startsidan"
+        />
 
         {/* Main Navigation Dropdowns */}
         <div className="relative z-10 flex items-center gap-1">

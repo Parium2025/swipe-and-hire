@@ -32,6 +32,7 @@ import { PushNotificationProvider } from "@/components/PushNotificationProvider"
 import { supabase } from "@/integrations/supabase/client";
 import { cleanupOldDrafts } from "@/lib/draftUtils";
 import { ScrollRestoration } from "@/components/ScrollRestoration";
+import { CriticalAssetPreloads } from "@/components/CriticalAssetPreloads";
 
 // Run draft cleanup once on app load (removes drafts older than 1 day)
 cleanupOldDrafts(24 * 60 * 60 * 1000);
@@ -119,6 +120,7 @@ const App = () => {
               <UnsavedChangesProvider>
                 <PushNotificationProvider />
                 <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
+                  <CriticalAssetPreloads />
                   <div className="relative z-10">
                     {showHeader && <Header />}
                     <main className={showHeader ? "pt-16" : ""}>
