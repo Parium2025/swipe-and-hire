@@ -337,7 +337,7 @@ const MyApplications = () => {
                         )}
                         {/* Deleted badge */}
                         {job?.deleted_at && (
-                          <Badge variant="glass" className="bg-gray-500/20 text-white border-gray-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-gray-500/30 hover:border-gray-500/50 hover:backdrop-brightness-110">
+                          <Badge variant="glass" className="bg-gray-500/20 text-white border-gray-500/30 text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-gray-500/30 hover:border-gray-500/50 hover:backdrop-brightness-110">
                             Borttagen
                           </Badge>
                         )}
@@ -346,13 +346,13 @@ const MyApplications = () => {
                           const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                           if (isExpired) {
                             return (
-                              <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50 hover:backdrop-brightness-110">
+                              <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50 hover:backdrop-brightness-110">
                                 Utgången
                               </Badge>
                             );
                           }
                           return (
-                            <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
+                            <Badge variant="glass" className="text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
                               <Timer className="h-3 w-3 mr-1" />
                               {text} kvar
                             </Badge>
