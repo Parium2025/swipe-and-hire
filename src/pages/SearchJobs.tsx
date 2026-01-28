@@ -787,180 +787,129 @@ const SearchJobs = () => {
 
       <div ref={listTopRef} />
 
-      {/* Jobs Table/Cards */}
-      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardHeader className="hidden md:block md:p-4">
-          <CardTitle className="text-sm text-white">Jobbsökresultat</CardTitle>
-        </CardHeader>
-        <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
-          {isLoading ? (
-            <>
-              {/* Desktop: Skeleton Table */}
-              <div className="hidden md:block">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-white/10">
-                      <TableHead className="text-white w-[45%] text-center">Titel</TableHead>
-                      <TableHead className="text-white w-[18%] text-center">Företag</TableHead>
-                      <TableHead className="text-white w-[15%] text-center">Plats</TableHead>
-                      <TableHead className="text-white w-[22%] text-center">Publicerad</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <TableRow key={i} className="border-white/10">
-                        <TableCell className="text-center align-top pt-3">
-                          <div className="flex flex-col items-center gap-1">
-                            <Skeleton className="h-4 w-3/4 bg-white/10" />
-                            <Skeleton className="h-3 w-16 bg-white/10" />
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center align-top pt-3">
-                          <Skeleton className="h-4 w-24 mx-auto bg-white/10" />
-                        </TableCell>
-                        <TableCell className="text-center align-top pt-3">
-                          <Skeleton className="h-4 w-20 mx-auto bg-white/10" />
-                        </TableCell>
-                        <TableCell className="text-center align-top pt-3">
-                          <div className="flex items-center justify-center gap-2">
-                            <Skeleton className="h-4 w-16 bg-white/10" />
-                            <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              {/* Mobile: Skeleton Cards */}
-              <div className="md:hidden space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
-                    <div className="flex items-start gap-3">
-                      <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-3/4 bg-white/10" />
-                        <Skeleton className="h-3 w-1/2 bg-white/10" />
-                        <div className="flex gap-2 mt-2">
-                          <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
-                          <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
-                        </div>
+      {/* Jobs Card List */}
+      <div className="space-y-4">
+        <h2 className="text-sm font-medium text-white">Jobbsökresultat</h2>
+        
+        {isLoading ? (
+          // Skeleton cards
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Card key={i} className="bg-white/5 border-white/10">
+                <CardContent className="p-4 min-h-[120px]">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <Skeleton className="h-6 w-3/4 bg-white/10 mb-3" />
+                      <Skeleton className="h-4 w-1/2 bg-white/10 mb-3" />
+                      <div className="flex gap-4">
+                        <Skeleton className="h-4 w-24 bg-white/10" />
+                        <Skeleton className="h-4 w-20 bg-white/10" />
+                        <Skeleton className="h-4 w-28 bg-white/10" />
                       </div>
                     </div>
+                    <Skeleton className="h-7 w-28 bg-white/10 rounded-full" />
                   </div>
-                ))}
-              </div>
-            </>
-          ) : filteredAndSortedJobs.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-white">Inga jobb hittades</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : filteredAndSortedJobs.length === 0 ? (
+          <div className="text-center py-12 bg-white/5 border border-white/10 rounded-lg">
+            <Briefcase className="h-12 w-12 text-white mx-auto mb-4" />
+            <p className="text-white">Inga jobb hittades</p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile: Swipe Mode Toggle */}
+            <div className="md:hidden flex justify-center mb-4">
+              <Button
+                onClick={() => setSwipeModeActive(true)}
+                className="bg-gradient-to-r from-parium-blue to-blue-600 hover:from-parium-blue/90 hover:to-blue-600/90 text-white font-medium shadow-lg shadow-parium-blue/25 transition-all active:scale-95"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Swipe Mode
+              </Button>
             </div>
-          ) : (
-            <>
-              {/* Desktop: Table view */}
-              <div className="hidden md:block">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-white/10 transition-all duration-300 md:hover:bg-white/10">
-                      <TableHead className="text-white w-[45%] text-center">Titel</TableHead>
-                      <TableHead className="text-white w-[18%] text-center">Företag</TableHead>
-                      <TableHead className="text-white w-[15%] text-center">Plats</TableHead>
-                      <TableHead className="text-white w-[22%] text-center">Publicerad</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {displayedJobs.map((job) => (
-                       <TableRow 
-                        key={job.id} 
-                        className="group border-white/10 cursor-pointer transition-all duration-300 md:hover:bg-white/5 md:hover:shadow-[0_4px_20px_-4px_rgba(255,255,255,0.1)] md:hover:-translate-y-[1px]"
-                        onClick={() => navigate(`/job-view/${job.id}`)}
-                      >
-                        <TableCell className="text-center align-top pt-3">
-                          <JobTitleCell title={job.title} employmentType={job.employment_type} className="max-w-none items-center text-center" />
-                        </TableCell>
-                        <TableCell className="text-center align-top pt-3">
-                          <TruncatedText 
-                            text={job.company_name} 
-                            className="text-sm text-white line-clamp-2 max-w-[140px] mx-auto text-center"
-                          />
-                        </TableCell>
-                        <TableCell className="text-center align-top pt-3">
-                          <div className="flex items-center justify-center gap-1">
-                            <MapPin className="h-3 w-3 text-white flex-shrink-0" />
-                            <TruncatedText 
-                              text={job.location} 
-                              className="text-sm text-white truncate lg:line-clamp-2 max-w-[110px]"
-                            />
+
+            {/* Job Cards */}
+            <div className="space-y-4">
+              {displayedJobs.map((job) => {
+                const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
+                
+                return (
+                  <Card 
+                    key={job.id}
+                    onClick={() => navigate(`/job-view/${job.id}`)}
+                    className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
+                  >
+                    <CardContent className="p-4 min-h-[120px]">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          {/* Job Title */}
+                          <h3 className="text-lg font-semibold text-white truncate group-hover:text-white transition-colors">
+                            {job.title}
+                          </h3>
+
+                          {/* Company */}
+                          <div className="flex items-center gap-2 mt-1 text-white">
+                            <Building2 className="h-4 w-4 flex-shrink-0" />
+                            <span className="truncate">
+                              {job.company_name || 'Okänt företag'}
+                            </span>
                           </div>
-                        </TableCell>
-                        <TableCell className="text-center align-top pt-3">
-                          <div className="flex items-center justify-center gap-2 flex-wrap">
-                            <div className="flex items-center gap-1 text-sm text-white">
-                              <Calendar className="h-3 w-3" />
-                              {formatDateShortSv(job.created_at)}
+
+                          {/* Meta info */}
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm text-white">
+                            {job.location && (
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-3.5 w-3.5" />
+                                <span>{job.location}</span>
+                              </div>
+                            )}
+                            {job.employment_type && (
+                              <div className="flex items-center gap-1">
+                                <Briefcase className="h-3.5 w-3.5" />
+                                <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3.5 w-3.5" />
+                              <span>{formatDateShortSv(job.created_at)}</span>
                             </div>
-                            {/* Visa antal sökande */}
-                            <Badge variant="glass" className="text-xs transition-all duration-300 md:group-hover:backdrop-brightness-90 md:hover:bg-white/15 md:hover:border-white/50">
+                            {/* Antal sökande badge */}
+                            <Badge variant="glass" className="text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50">
                               <Users className="h-3 w-3 mr-1" />
                               {job.applications_count || 0} sökande
                             </Badge>
-                            {/* Visa "dagar kvar" eller "Utgången" */}
-                            {(() => {
-                              const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
-                              if (isExpired) {
-                                return (
-                                  <Badge variant="secondary" className="bg-red-500/20 text-white border-red-500/30 text-xs hover:bg-red-500/30 hover:border-red-500/50 transition-all duration-300">
-                                    Utgången
-                                  </Badge>
-                                );
-                              }
-                              return (
-                                <Badge
-                                  variant="glass"
-                                  className="text-xs transition-all duration-300 md:group-hover:backdrop-brightness-90 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110"
-                                >
-                                  <Timer className="h-3 w-3 mr-1" />
-                                  {text} kvar
-                                </Badge>
-                              );
-                            })()}
+                            {/* Days remaining badge */}
+                            {isExpired ? (
+                              <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50">
+                                Utgången
+                              </Badge>
+                            ) : (
+                              <Badge variant="glass" className="text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50">
+                                <Timer className="h-3 w-3 mr-1" />
+                                {timeText} kvar
+                              </Badge>
+                            )}
+                            {/* Already applied badge */}
+                            {appliedJobIds.has(job.id) && (
+                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2.5 py-1">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Redan sökt
+                              </Badge>
+                            )}
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {/* Mobile: Card view with Swipe Mode toggle */}
-              <div className="md:hidden">
-                {/* Swipe Mode Toggle Button */}
-                <div className="flex justify-center mb-4">
-                  <Button
-                    onClick={() => setSwipeModeActive(true)}
-                    className="bg-gradient-to-r from-parium-blue to-blue-600 hover:from-parium-blue/90 hover:to-blue-600/90 text-white font-medium shadow-lg shadow-parium-blue/25 transition-all active:scale-95"
-                  >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Swipe Mode
-                  </Button>
-                </div>
-
-                <ScrollArea className="h-[calc(100vh-480px)]">
-                  <div className="space-y-2 px-2 py-2">
-                    {displayedJobs.map((job) => (
-                      <ReadOnlyMobileJobCard
-                        key={job.id}
-                        job={job as any}
-                        hasApplied={appliedJobIds.has(job.id)}
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Infinite Scroll Trigger */}
       <div ref={loadMoreTriggerRef} className="h-1" />
