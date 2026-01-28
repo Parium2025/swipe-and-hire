@@ -112,19 +112,50 @@ serve(async (req) => {
             if (contentType.includes('pdf')) {
               console.log('PDF detected - Lovable AI does not support PDF documents directly');
               
-              // PDFs are not supported as image_url, return a helpful response
+              const pdfKeyPoints = [
+                { text: 'Dokumenttyp: PDF', type: 'neutral', meta: { source_cv_url: finalCvUrl, content_type: contentType, analyzed_at: new Date().toISOString() } },
+                { text: 'Status: Uppladdad och tillgänglig', type: 'positive' },
+                { text: 'Notera: Manuell granskning krävs för PDF-dokument', type: 'neutral' }
+              ];
+              const pdfSummaryText = 'CV uppladdat i PDF-format. AI-analys av PDF-dokument stöds inte för tillfället.';
+
+              // Save PDF summary to database so it's not re-processed
+              const saveJobId = job_id || application?.job_id;
+              if (saveJobId) {
+                await supabase.from('candidate_summaries').upsert({
+                  job_id: saveJobId,
+                  applicant_id,
+                  application_id: application?.id || application_id,
+                  summary_text: pdfSummaryText,
+                  key_points: pdfKeyPoints,
+                  generated_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                }, { onConflict: 'job_id,applicant_id' });
+                console.log('PDF summary saved to candidate_summaries');
+              }
+
+              if (isProactiveAnalysis) {
+                await supabase.from('profile_cv_summaries').upsert({
+                  user_id: applicant_id,
+                  cv_url: finalCvUrl,
+                  is_valid_cv: true,
+                  document_type: 'CV (PDF)',
+                  summary_text: pdfSummaryText,
+                  key_points: pdfKeyPoints,
+                  analyzed_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                }, { onConflict: 'user_id' });
+                console.log('PDF summary saved to profile_cv_summaries');
+              }
+
               return new Response(
                 JSON.stringify({
                   success: true,
-                  is_valid_cv: true, // Assume it's a CV since it's a PDF in job-applications bucket
+                  is_valid_cv: true,
                   document_type: 'CV (PDF)',
                   summary: {
-                    summary_text: 'CV uppladdat i PDF-format. AI-analys av PDF-dokument stöds inte för tillfället.',
-                    key_points: [
-                      { text: 'Dokumenttyp: PDF', type: 'neutral' },
-                      { text: 'Status: Uppladdad och tillgänglig', type: 'positive' },
-                      { text: 'Notera: Manuell granskning krävs för PDF-dokument', type: 'neutral' }
-                    ],
+                    summary_text: pdfSummaryText,
+                    key_points: pdfKeyPoints,
                   },
                 }),
                 { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -154,8 +185,10 @@ serve(async (req) => {
                 },
               ];
             } else {
-              // Text-based documents
+              // Text-based documents (DOCX, TXT, etc.)
+              console.log('Text document detected, extracting content...');
               userContent = await docResponse.text();
+              console.log(`Text content length: ${typeof userContent === 'string' ? userContent.length : 0} chars`);
             }
           }
         }
