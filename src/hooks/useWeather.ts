@@ -541,42 +541,60 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     });
 
     if (gpsResult && mountedRef.current) {
+      console.log(`🛰️ GPS coordinates: ${gpsResult.lat.toFixed(6)}, ${gpsResult.lon.toFixed(6)}`);
+      
       // Always get fresh city name from GPS coordinates - never trust cache
       const freshCity = await getCityName(gpsResult.lat, gpsResult.lon);
       
       if (freshCity) {
+        console.log(`📍 Reverse geocoding result: "${freshCity}"`);
         // We have fresh GPS coordinates and fresh city name - use them
         await updateLocation(gpsResult.lat, gpsResult.lon, freshCity, 'gps');
         return;
       }
       
-      // If reverse geocoding failed, still use GPS coords but try to get city name
-      await updateLocation(gpsResult.lat, gpsResult.lon, null, 'gps');
+      // Reverse geocoding failed but we have GPS - use coordinates with cached city name if available
+      const cached = locationRef.current || getCachedLocation();
+      const cityFallback = cached?.source === 'gps' ? cached.city : '';
+      console.log(`⚠️ Reverse geocoding failed, using GPS coords with fallback city: "${cityFallback}"`);
+      await updateLocation(gpsResult.lat, gpsResult.lon, cityFallback || null, 'gps');
       return;
     }
 
-    // GPS not available - fall back to cached location or IP
+    // GPS not available - check if we have recent GPS cache before falling back to IP
     const cached = locationRef.current || getCachedLocation();
+    
+    // If we have a recent GPS cache (less than 10 minutes), prefer it over IP
+    if (cached && cached.source === 'gps' && mountedRef.current) {
+      const cacheAge = Date.now() - cached.timestamp;
+      if (cacheAge < 10 * 60 * 1000) {
+        console.log('Using recent GPS cache instead of IP fallback');
+        await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+        return;
+      }
+    }
 
-    // No GPS available - try IP and compare with cache
+    // No GPS or old cache - try IP (but be aware it can be inaccurate!)
     const ipLocation = await getLocationByIP();
     if (ipLocation && mountedRef.current) {
-      if (cached) {
-        const distance = getDistanceKm(cached.lat, cached.lon, ipLocation.lat, ipLocation.lon);
-        if (distance < MOVEMENT_THRESHOLD_KM) {
-          // Haven't moved much - use cached location for stability
-          await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
-          return;
-        }
-        // Moved significantly - update to new location
-        console.log(`Location changed: moved ${distance.toFixed(1)}km`);
+      // CRITICAL: IP geolocation often returns datacenter locations (like "Ludvika")
+      // Only trust IP if we have NO GPS cache at all
+      if (cached && cached.source === 'gps') {
+        // We have GPS cache - IP result might be wrong, use GPS cache instead
+        console.log('⚠️ Ignoring IP location (might be datacenter), using GPS cache');
+        await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
+        return;
       }
+      
+      // No GPS cache at all - have to use IP as last resort
+      console.log(`📡 Using IP geolocation: ${ipLocation.city} (accuracy may vary)`);
       await updateLocation(ipLocation.lat, ipLocation.lon, ipLocation.city, 'ip');
       return;
     }
 
-    // If we have cache and nothing else worked, use cache
+    // If we have any cache and nothing else worked, use cache
     if (cached && mountedRef.current) {
+      console.log('Using cached location as fallback');
       await fetchWeatherOnly(cached.lat, cached.lon, cached.city);
       return;
     }
