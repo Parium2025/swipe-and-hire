@@ -846,9 +846,10 @@ const SearchJobs = () => {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
                           {/* Job Title */}
-                          <h3 className="text-lg font-semibold text-white truncate group-hover:text-white transition-colors">
-                            {job.title}
-                          </h3>
+                          <TruncatedText 
+                            text={job.title}
+                            className="text-lg font-semibold text-white truncate group-hover:text-white transition-colors block"
+                          />
 
                           {/* Company */}
                           <div className="flex items-center gap-2 mt-1 text-white">
