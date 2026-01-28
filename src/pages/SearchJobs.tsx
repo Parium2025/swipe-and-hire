@@ -882,8 +882,8 @@ const SearchJobs = () => {
                           />
                         </TableCell>
                         <TableCell className="text-center align-top pt-3">
-                          <div className="flex items-start justify-center gap-1">
-                            <MapPin className="h-3 w-3 text-white flex-shrink-0 mt-0.5" />
+                          <div className="flex items-center justify-center gap-1">
+                            <MapPin className="h-3 w-3 text-white flex-shrink-0" />
                             <TruncatedText 
                               text={job.location} 
                               className="text-sm text-white truncate lg:line-clamp-2 max-w-[110px]"
