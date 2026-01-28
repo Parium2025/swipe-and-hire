@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { Buffer } from "node:buffer";
+import pdfParse from "npm:pdf-parse@1.1.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -108,58 +110,89 @@ serve(async (req) => {
             contentType = docResponse.headers.get('content-type') || '';
             console.log('Document content type:', contentType);
 
-            // For PDFs we need to handle differently - Lovable AI doesn't support PDF directly via image_url
+            // For PDFs - extract text and send to AI
             if (contentType.includes('pdf')) {
-              console.log('PDF detected - Lovable AI does not support PDF documents directly');
+              console.log('PDF detected - extracting text with pdf-parse...');
               
-              const pdfKeyPoints = [
-                { text: 'Dokumenttyp: PDF', type: 'neutral', meta: { source_cv_url: finalCvUrl, content_type: contentType, analyzed_at: new Date().toISOString() } },
-                { text: 'Status: Uppladdad och tillgänglig', type: 'positive' },
-                { text: 'Notera: Manuell granskning krävs för PDF-dokument', type: 'neutral' }
-              ];
-              const pdfSummaryText = 'CV uppladdat i PDF-format. AI-analys av PDF-dokument stöds inte för tillfället.';
+              try {
+                const buffer = await docResponse.arrayBuffer();
+                const pdfData = await pdfParse(Buffer.from(buffer));
+                const extractedText = pdfData.text?.trim();
+                
+                if (!extractedText || extractedText.length < 50) {
+                  console.log('PDF text extraction failed or too short, might be scanned/image-based');
+                  // Fall through to return placeholder for image-based PDFs
+                  const pdfKeyPoints = [
+                    { text: 'Dokumenttyp: Skannad PDF (bildbaserad)', type: 'neutral', meta: { source_cv_url: finalCvUrl, content_type: contentType, analyzed_at: new Date().toISOString() } },
+                    { text: 'Status: Uppladdad men kunde inte läsas', type: 'negative' },
+                    { text: 'Tips: Ladda upp ett textbaserat PDF eller bild av ditt CV', type: 'neutral' }
+                  ];
+                  const pdfSummaryText = 'PDF:en verkar vara skannad/bildbaserad och kunde inte läsas. Ladda upp ett textbaserat PDF eller en bild av ditt CV.';
 
-              // Save PDF summary to database so it's not re-processed
-              const saveJobId = job_id || application?.job_id;
-              if (saveJobId) {
-                await supabase.from('candidate_summaries').upsert({
-                  job_id: saveJobId,
-                  applicant_id,
-                  application_id: application?.id || application_id,
-                  summary_text: pdfSummaryText,
-                  key_points: pdfKeyPoints,
-                  generated_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                }, { onConflict: 'job_id,applicant_id' });
-                console.log('PDF summary saved to candidate_summaries');
+                  const saveJobId = job_id || application?.job_id;
+                  if (saveJobId) {
+                    await supabase.from('candidate_summaries').upsert({
+                      job_id: saveJobId,
+                      applicant_id,
+                      application_id: application?.id || application_id,
+                      summary_text: pdfSummaryText,
+                      key_points: pdfKeyPoints,
+                      generated_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                    }, { onConflict: 'job_id,applicant_id' });
+                  }
+
+                  if (isProactiveAnalysis) {
+                    await supabase.from('profile_cv_summaries').upsert({
+                      user_id: applicant_id,
+                      cv_url: finalCvUrl,
+                      is_valid_cv: false,
+                      document_type: 'Skannad PDF',
+                      summary_text: pdfSummaryText,
+                      key_points: pdfKeyPoints,
+                      analyzed_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                    }, { onConflict: 'user_id' });
+                  }
+
+                  return new Response(
+                    JSON.stringify({
+                      success: true,
+                      is_valid_cv: false,
+                      document_type: 'Skannad PDF',
+                      summary: { summary_text: pdfSummaryText, key_points: pdfKeyPoints },
+                    }),
+                    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                  );
+                }
+                
+                console.log(`PDF text extracted successfully: ${extractedText.length} chars`);
+                // Truncate if too long (AI has token limits)
+                const maxChars = 15000;
+                userContent = extractedText.length > maxChars 
+                  ? extractedText.substring(0, maxChars) + '\n\n[Text trunkerad på grund av längd]'
+                  : extractedText;
+                  
+              } catch (pdfError) {
+                console.error('PDF parsing error:', pdfError);
+                // Fallback for corrupted/unreadable PDFs
+                const pdfKeyPoints = [
+                  { text: 'Dokumenttyp: Oläsbar PDF', type: 'negative', meta: { source_cv_url: finalCvUrl, content_type: contentType, analyzed_at: new Date().toISOString() } },
+                  { text: 'Fel: Kunde inte läsa PDF-filen', type: 'negative' },
+                  { text: 'Tips: Kontrollera att filen inte är skadad och ladda upp igen', type: 'neutral' }
+                ];
+                const pdfSummaryText = 'PDF-filen kunde inte läsas. Kontrollera att filen inte är skadad och försök ladda upp igen.';
+
+                return new Response(
+                  JSON.stringify({
+                    success: false,
+                    is_valid_cv: false,
+                    document_type: 'Oläsbar PDF',
+                    summary: { summary_text: pdfSummaryText, key_points: pdfKeyPoints },
+                  }),
+                  { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                );
               }
-
-              if (isProactiveAnalysis) {
-                await supabase.from('profile_cv_summaries').upsert({
-                  user_id: applicant_id,
-                  cv_url: finalCvUrl,
-                  is_valid_cv: true,
-                  document_type: 'CV (PDF)',
-                  summary_text: pdfSummaryText,
-                  key_points: pdfKeyPoints,
-                  analyzed_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                }, { onConflict: 'user_id' });
-                console.log('PDF summary saved to profile_cv_summaries');
-              }
-
-              return new Response(
-                JSON.stringify({
-                  success: true,
-                  is_valid_cv: true,
-                  document_type: 'CV (PDF)',
-                  summary: {
-                    summary_text: pdfSummaryText,
-                    key_points: pdfKeyPoints,
-                  },
-                }),
-                { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-              );
             } else if (contentType.startsWith('image/')) {
               // Images ARE supported - send them to the AI
               const buffer = await docResponse.arrayBuffer();
