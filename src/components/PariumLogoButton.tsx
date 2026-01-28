@@ -6,6 +6,27 @@ type PariumLogoButtonProps = {
   ariaLabel: string;
 };
 
+function PariumRingsMark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+    >
+      <g
+        stroke="currentColor"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="26" cy="32" r="14" />
+        <circle cx="40" cy="32" r="14" />
+      </g>
+    </svg>
+  );
+}
+
 // Module-level cache so the logo stays "warm" across route remounts
 let logoReady = false;
 let logoReadyPromise: Promise<void> | null = null;
@@ -59,33 +80,25 @@ export function PariumLogoButton({ onClick, ariaLabel }: PariumLogoButtonProps) 
   return (
     <button
       onClick={onClick}
-      // NOTE: We intentionally overlap the following nav items via negative marginRight.
-      // Ensure the logo is always on top so it can't be visually covered ("pop in"/disappear)
-      // when counts/labels change width during navigation.
       className="relative z-20 flex items-center hover:opacity-80 transition-opacity shrink-0"
       aria-label={ariaLabel}
-      // -ml-1 (4px) + old -mr-[104px] to visually align and keep menus tight
-      style={{ marginLeft: -4, marginRight: -104 }}
+      // Keep a tiny left alignment nudge, but avoid negative right overlap (it can hide the logo).
+      style={{ marginLeft: -4 }}
     >
-      <div className="relative h-10 w-40 pointer-events-none" aria-hidden="true">
-        {/* Fallback (always visible, like AvatarFallback) */}
-        <div className="absolute inset-0 flex items-center gap-2">
-          <div className="h-9 w-9 rounded-full bg-primary/15 ring-1 ring-primary/25 flex items-center justify-center">
-            <span className="text-primary text-sm font-bold">P</span>
-          </div>
-          <span className="text-foreground font-semibold tracking-wide">Parium</span>
-        </div>
+      <div className="relative h-10 w-10 pointer-events-none" aria-hidden="true">
+        {/* Instant fallback mark (no image loading, never blank) */}
+        <PariumRingsMark className="absolute inset-0 h-10 w-10 text-primary" />
 
-        {/* Real logo (only shown once loaded/decoded) */}
+        {/* Real PNG (fades in when loaded/decoded; should look identical) */}
         <img
           src={pariumLogoRings}
-          alt="Parium"
-          width={160}
+          alt=""
+          aria-hidden="true"
+          width={40}
           height={40}
           loading="eager"
           decoding="sync"
-          fetchPriority="high"
-          className={`absolute inset-0 h-10 w-40 object-contain object-left transition-opacity duration-150 ${
+          className={`absolute inset-0 h-10 w-10 object-contain transition-opacity duration-150 ${
             ready ? "opacity-100" : "opacity-0"
           }`}
         />
