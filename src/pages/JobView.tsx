@@ -571,9 +571,9 @@ const JobView = () => {
               type="button"
               onClick={handleBack}
               variant="glass"
-              size="sm"
+              className="h-9 px-3 text-sm"
             >
-              <ArrowLeft className="mr-1 h-4 w-4" />
+              <ArrowLeft className="mr-1.5 h-4 w-4" />
               Tillbaka
             </Button>
             
