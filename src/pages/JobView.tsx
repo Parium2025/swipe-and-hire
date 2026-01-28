@@ -539,17 +539,25 @@ const JobView = () => {
   }
 
   const handleBack = () => {
+    const currentPath = window.location.pathname;
+    const fallback = () => window.location.assign('/search-jobs');
+
     const state = window.history.state as any;
     const idx = typeof state?.idx === 'number' ? state.idx : undefined;
 
     // Prefer going back when possible...
     if ((typeof idx === 'number' && idx > 0) || window.history.length > 1) {
       navigate(-1);
+
+      // ...but if routing/history is broken (or there is no real previous entry), force exit.
+      window.setTimeout(() => {
+        if (window.location.pathname === currentPath) fallback();
+      }, 150);
       return;
     }
 
     // No usable history -> force exit immediately.
-    navigate('/search-jobs', { replace: true });
+    fallback();
   };
 
   return (
