@@ -10,12 +10,12 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { SavedSearch, SearchCriteria } from '@/hooks/useSavedSearches';
 import { cn } from '@/lib/utils';
 
@@ -175,35 +175,45 @@ export function SavedSearchesDropdown({
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!confirmDeleteSearch} onOpenChange={(open) => !open && setConfirmDeleteSearch(null)}>
-        <AlertDialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/20 max-w-md">
-          <AlertDialogHeader>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20">
-                <AlertTriangle className="h-5 w-5 text-red-400" />
+        <AlertDialogContentNoFocus 
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+        >
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-red-400" />
               </div>
-              <AlertDialogTitle className="text-white text-lg">
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
                 Ta bort sparad sökning
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-white pt-2">
-              Är du säker på att du vill ta bort{' '}
-              <span className="font-semibold text-white">"{confirmDeleteSearch?.name}"</span>?{' '}
-              Denna åtgärd går inte att ångra.
+            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
+              {confirmDeleteSearch && (
+                <>
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{confirmDeleteSearch.name}"</span>? Denna åtgärd går inte att ångra.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-2">
-            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+            <AlertDialogCancel 
+              onClick={() => setConfirmDeleteSearch(null)}
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-[0.6] mt-0 flex items-center justify-center bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-red-600 hover:bg-red-700 text-white gap-2"
+              variant="destructiveSoft"
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-[0.4] text-sm flex items-center justify-center"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogContentNoFocus>
       </AlertDialog>
     </>
   );
