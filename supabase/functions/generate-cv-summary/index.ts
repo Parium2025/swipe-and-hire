@@ -108,8 +108,29 @@ serve(async (req) => {
             contentType = docResponse.headers.get('content-type') || '';
             console.log('Document content type:', contentType);
 
-            // For PDFs/images we send the binary directly to the model (no pre-summarization!)
-            if (contentType.includes('pdf') || contentType.startsWith('image/')) {
+            // For PDFs we need to handle differently - Lovable AI doesn't support PDF directly via image_url
+            if (contentType.includes('pdf')) {
+              console.log('PDF detected - Lovable AI does not support PDF documents directly');
+              
+              // PDFs are not supported as image_url, return a helpful response
+              return new Response(
+                JSON.stringify({
+                  success: true,
+                  is_valid_cv: true, // Assume it's a CV since it's a PDF in job-applications bucket
+                  document_type: 'CV (PDF)',
+                  summary: {
+                    summary_text: 'CV uppladdat i PDF-format. AI-analys av PDF-dokument stöds inte för tillfället.',
+                    key_points: [
+                      { text: 'Dokumenttyp: PDF', type: 'neutral' },
+                      { text: 'Status: Uppladdad och tillgänglig', type: 'positive' },
+                      { text: 'Notera: Manuell granskning krävs för PDF-dokument', type: 'neutral' }
+                    ],
+                  },
+                }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              );
+            } else if (contentType.startsWith('image/')) {
+              // Images ARE supported - send them to the AI
               const buffer = await docResponse.arrayBuffer();
               const bytes = new Uint8Array(buffer);
 
@@ -120,8 +141,6 @@ serve(async (req) => {
               }
               const base64Doc = btoa(binary);
 
-              const mime = contentType.includes('pdf') ? 'application/pdf' : (contentType || 'image/png');
-
               userContent = [
                 {
                   type: 'text',
@@ -130,7 +149,7 @@ serve(async (req) => {
                 {
                   type: 'image_url',
                   image_url: {
-                    url: `data:${mime};base64,${base64Doc}`,
+                    url: `data:${contentType};base64,${base64Doc}`,
                   },
                 },
               ];
