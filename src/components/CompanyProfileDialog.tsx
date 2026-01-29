@@ -333,7 +333,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 <div>
                   <DialogTitle className="text-2xl text-white">{company.company_name}</DialogTitle>
                   <div className="flex items-center gap-2 mt-1">
-                    <Star className="h-5 w-5 fill-transparent text-white stroke-white stroke-[1.5]" />
+                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                     <span className="text-sm text-white">
                       {averageRating} ({reviews.length} {reviews.length === 1 ? 'recension' : 'recensioner'})
                     </span>
@@ -389,7 +389,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                     <Users className="h-5 w-5 text-white" />
                     <div>
                       <p className="text-sm font-medium text-white">Företagsstorlek</p>
-                      <p className="text-sm text-white">{company.employee_count} anställda</p>
+                      <p className="text-sm text-white">{company.employee_count}</p>
                     </div>
                   </div>
                 )}
