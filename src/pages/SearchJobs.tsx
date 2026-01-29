@@ -857,13 +857,22 @@ const SearchJobs = () => {
                             className="text-lg font-semibold text-white truncate group-hover:text-white transition-colors block"
                           />
 
-                          {/* Company */}
-                          <div className="flex items-center gap-2 mt-1 text-white">
+                          {/* Company - clickable to open profile */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (job.employer_id) {
+                                setSelectedCompanyId(job.employer_id);
+                                setCompanyDialogOpen(true);
+                              }
+                            }}
+                            className="flex items-center gap-2 mt-1 text-white hover:text-white/80 transition-colors"
+                          >
                             <Building2 className="h-4 w-4 flex-shrink-0" />
-                            <span className="truncate">
+                            <span className="truncate underline-offset-2 hover:underline">
                               {job.company_name || 'Okänt företag'}
                             </span>
-                          </div>
+                          </button>
 
                           {/* Meta info */}
                           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm text-white">
