@@ -850,11 +850,11 @@ const SearchJobs = () => {
                       )}
                       
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
+                        <div className={`flex-1 min-w-0 ${appliedJobIds.has(job.id) ? 'max-w-[calc(100%-100px)]' : ''}`}>
                           {/* Job Title */}
                           <TruncatedText 
                             text={job.title}
-                            className="text-lg font-semibold text-white truncate group-hover:text-white transition-colors block"
+                            className="text-lg font-semibold text-white truncate group-hover:text-white transition-colors block break-all"
                           />
 
                           {/* Company - clickable to open profile */}
