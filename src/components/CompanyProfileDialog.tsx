@@ -486,45 +486,38 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   </p>
                 ) : (
                   reviews.map((review) => (
-                    <div key={review.id} className="border rounded-lg p-4 space-y-2">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback>
-                              {review.is_anonymous
-                                ? "A"
-                                : review.profiles?.first_name?.[0] || "U"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">
-                              {review.is_anonymous
-                                ? "Anonym"
-                                : `${review.profiles?.first_name || ""} ${
-                                    review.profiles?.last_name?.[0] || ""
-                                  }.`}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`h-5 w-5 ${
-                                      i < (review.rating || 0)
-                                        ? "fill-yellow-400 text-yellow-400"
-                                        : "fill-transparent text-white stroke-white stroke-[1.5]"
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                              <span className="text-sm text-white">
-                                {new Date(review.created_at).toLocaleDateString("sv-SE")}
-                              </span>
-                            </div>
+                    <div key={review.id} className="border border-white/10 rounded-lg p-4 space-y-2">
+                      <div>
+                        <p className="font-medium text-white">
+                          {review.is_anonymous
+                            ? "Anonym"
+                            : `${review.profiles?.first_name || ""} ${
+                                review.profiles?.last_name?.[0] || ""
+                              }.`}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ${
+                                  i < (review.rating || 0)
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "fill-transparent text-white stroke-white stroke-[1.5]"
+                                }`}
+                              />
+                            ))}
                           </div>
+                          <span className="text-sm text-white">
+                            {new Date(review.created_at).toLocaleDateString("sv-SE")}
+                          </span>
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-2">{review.comment}</p>
+                      {review.comment && (
+                        <p className="text-sm text-white mt-2">
+                          <span className="text-white/70">Kommentar:</span> {review.comment}
+                        </p>
+                      )}
                     </div>
                   ))
                 )}
