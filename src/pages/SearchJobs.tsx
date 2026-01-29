@@ -880,29 +880,25 @@ const SearchJobs = () => {
                               <Users className="h-3 w-3 mr-1" />
                               {job.applications_count || 0} sökande
                             </Badge>
+                            {/* Days remaining badge */}
+                            {isExpired ? (
+                              <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50">
+                                Utgången
+                              </Badge>
+                            ) : (
+                              <Badge variant="glass" className="text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50">
+                                <Timer className="h-3 w-3 mr-1" />
+                                {timeText} kvar
+                              </Badge>
+                            )}
+                            {/* Already applied badge */}
+                            {appliedJobIds.has(job.id) && (
+                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2.5 py-1">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Redan sökt
+                              </Badge>
+                            )}
                           </div>
-                        </div>
-
-                        {/* Right corner badges: Days remaining + Already applied */}
-                        <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                          {/* Days remaining badge */}
-                          {isExpired ? (
-                            <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50">
-                              Utgången
-                            </Badge>
-                          ) : (
-                            <Badge variant="glass" className="text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50">
-                              <Timer className="h-3 w-3 mr-1" />
-                              {timeText} kvar
-                            </Badge>
-                          )}
-                          {/* Already applied badge */}
-                          {appliedJobIds.has(job.id) && (
-                            <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2.5 py-1">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Redan sökt
-                            </Badge>
-                          )}
                         </div>
                       </div>
                     </CardContent>
