@@ -515,7 +515,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                       </div>
                       {review.comment && (
                         <p className="text-sm text-white mt-2">
-                          <span className="text-white/70">Kommentar:</span> {review.comment}
+                          <span className="text-white">Kommentar:</span> {review.comment}
                         </p>
                       )}
                     </div>
