@@ -53,57 +53,51 @@ interface Application {
 const getStatusLabel = (status: string) => {
   switch (status) {
     case 'pending':
-      return 'Under granskning';
     case 'reviewed':
-      return 'Granskad';
+    case 'offered':
+      return 'Under granskning';
     case 'hired':
       return 'Anställd';
     case 'rejected':
       return 'Nekad';
     case 'interview':
       return 'Intervju';
-    case 'offered':
-      return 'Erbjudande';
     default:
-      return status;
+      return 'Under granskning';
   }
 };
 
 const getStatusIcon = (status: string) => {
   switch (status) {
     case 'pending':
-      return <Hourglass className="h-3.5 w-3.5" />;
     case 'reviewed':
-      return <Clock className="h-3.5 w-3.5" />;
+    case 'offered':
+      return <Hourglass className="h-3.5 w-3.5" />;
     case 'hired':
       return <CheckCircle2 className="h-3.5 w-3.5" />;
     case 'rejected':
       return <XCircle className="h-3.5 w-3.5" />;
     case 'interview':
       return <Calendar className="h-3.5 w-3.5" />;
-    case 'offered':
-      return <CheckCircle2 className="h-3.5 w-3.5" />;
     default:
-      return <Clock className="h-3.5 w-3.5" />;
+      return <Hourglass className="h-3.5 w-3.5" />;
   }
 };
 
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'pending':
-      return 'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 transition-colors';
     case 'reviewed':
-      return 'bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30 transition-colors';
+    case 'offered':
+      return 'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 transition-colors';
     case 'hired':
       return 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30 transition-colors';
     case 'rejected':
       return 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30 transition-colors';
     case 'interview':
       return 'bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30 transition-colors';
-    case 'offered':
-      return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30 transition-colors';
     default:
-      return 'bg-white/20 text-white border-white/30 hover:bg-white/30 transition-colors';
+      return 'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 transition-colors';
   }
 };
 
