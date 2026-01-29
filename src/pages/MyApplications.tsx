@@ -263,8 +263,7 @@ const MyApplications = () => {
       {/* Applications Section */}
       <section>
         <div className="text-center mb-8">
-          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
-          <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Mina Ansökningar</h1>
         </div>
 
         {!applications || applications.length === 0 ? (
