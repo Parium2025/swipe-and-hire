@@ -15,7 +15,7 @@ export function JobTitleCell({ title, employmentType, className }: JobTitleCellP
       {/* Max 2 lines with ellipsis - TruncatedText handles tooltip */}
       <TruncatedText 
         text={title} 
-        className="text-sm w-full text-white font-medium line-clamp-2 overflow-hidden"
+        className="text-sm w-full text-white font-medium line-clamp-2 overflow-hidden break-all"
       />
       {employmentType && (
         <Badge
