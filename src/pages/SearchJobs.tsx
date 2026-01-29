@@ -914,13 +914,13 @@ const SearchJobs = () => {
                                 e.stopPropagation();
                                 toggleSaveJob(job.id);
                               }}
-                              className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-all duration-300 ${
+                              className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border backdrop-blur-[2px] transition-all duration-300 group-hover:backdrop-brightness-90 ${
                                 isJobSaved(job.id)
-                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30'
+                                  ? 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30 hover:border-red-500/50'
                                   : 'bg-white/10 text-white border-white/25 hover:bg-white/15 hover:border-white/50'
                               }`}
                             >
-                              <Bookmark className={`h-3 w-3 ${isJobSaved(job.id) ? 'fill-amber-300' : ''}`} />
+                              <Heart className={`h-3 w-3 ${isJobSaved(job.id) ? 'fill-red-300' : ''}`} />
                               {isJobSaved(job.id) ? 'Sparad' : 'Spara'}
                             </button>
                           </div>
