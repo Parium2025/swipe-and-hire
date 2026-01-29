@@ -565,30 +565,16 @@ const JobView = () => {
       <div className="max-w-3xl mx-auto px-3 md:px-6 py-4">
         {/* Combined header: Tillbaka + Spara + Företag på samma rad */}
         <div className="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
-          {/* Vänster: Tillbaka + Spara */}
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              onClick={handleBack}
-              variant="glass"
-              className="h-9 px-3 text-sm"
-            >
-              <ArrowLeft className="mr-1.5 h-4 w-4" />
-              Tillbaka
-            </Button>
-            
-            {/* Spara-knapp */}
-            {jobId && (
-              <button
-                type="button"
-                onClick={() => toggleSaveJob(jobId)}
-                className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 md:hover:backdrop-blur-sm md:hover:backdrop-brightness-110 active:scale-95"
-                aria-label={isJobSaved(jobId) ? 'Ta bort sparat jobb' : 'Spara jobb'}
-              >
-                <Heart className={`h-4 w-4 text-white ${isJobSaved(jobId) ? 'fill-red-400 text-red-400' : ''}`} />
-              </button>
-            )}
-          </div>
+          {/* Vänster: Tillbaka */}
+          <Button
+            type="button"
+            onClick={handleBack}
+            variant="glass"
+            className="h-9 px-3 text-sm"
+          >
+            <ArrowLeft className="mr-1.5 h-4 w-4" />
+            Tillbaka
+          </Button>
           
           {/* Företagsinfo till höger - clickable */}
           <button
