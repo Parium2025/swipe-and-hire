@@ -62,6 +62,8 @@ const getStatusLabel = (status: string) => {
       return 'Nekad';
     case 'interview':
       return 'Intervju';
+    case 'offered':
+      return 'Erbjudande';
     default:
       return status;
   }
@@ -79,6 +81,8 @@ const getStatusIcon = (status: string) => {
       return <XCircle className="h-3.5 w-3.5" />;
     case 'interview':
       return <Calendar className="h-3.5 w-3.5" />;
+    case 'offered':
+      return <CheckCircle2 className="h-3.5 w-3.5" />;
     default:
       return <Clock className="h-3.5 w-3.5" />;
   }
@@ -96,6 +100,8 @@ const getStatusColor = (status: string) => {
       return 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30 transition-colors';
     case 'interview':
       return 'bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30 transition-colors';
+    case 'offered':
+      return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30 transition-colors';
     default:
       return 'bg-white/20 text-white border-white/30 hover:bg-white/30 transition-colors';
   }
