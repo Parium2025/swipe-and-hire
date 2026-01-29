@@ -20,9 +20,7 @@ import {
   Users,
   Video
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { sv } from 'date-fns/locale';
-import { getTimeRemaining } from '@/lib/date';
+import { getTimeRemaining, formatDateShortSv } from '@/lib/date';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
 import CandidateInterviewCard from '@/components/CandidateInterviewCard';
@@ -324,9 +322,7 @@ const MyApplications = () => {
                         )}
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />
-                          <span>
-                            Sökt {format(new Date(application.applied_at || application.created_at), 'yyyy-MM-dd', { locale: sv })}
-                          </span>
+                          <span>{formatDateShortSv(application.applied_at || application.created_at)}</span>
                         </div>
                         {/* Antal sökande badge */}
                         {job && (
