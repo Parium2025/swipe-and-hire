@@ -840,7 +840,15 @@ const SearchJobs = () => {
                     onClick={() => navigate(`/job-view/${job.id}`)}
                     className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
                   >
-                    <CardContent className="p-4 min-h-[120px]">
+                    <CardContent className="p-4 min-h-[120px] relative">
+                      {/* Already applied badge - top right corner */}
+                      {appliedJobIds.has(job.id) && (
+                        <Badge variant="glass" className="absolute top-3 right-3 bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2.5 py-1">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Redan sökt
+                        </Badge>
+                      )}
+                      
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
                           {/* Job Title */}
@@ -891,13 +899,21 @@ const SearchJobs = () => {
                                 {timeText} kvar
                               </Badge>
                             )}
-                            {/* Already applied badge */}
-                            {appliedJobIds.has(job.id) && (
-                              <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2.5 py-1">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Redan sökt
-                              </Badge>
-                            )}
+                            {/* Save job button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleSaveJob(job.id);
+                              }}
+                              className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-all duration-300 ${
+                                isJobSaved(job.id)
+                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30'
+                                  : 'bg-white/10 text-white border-white/25 hover:bg-white/15 hover:border-white/50'
+                              }`}
+                            >
+                              <Bookmark className={`h-3 w-3 ${isJobSaved(job.id) ? 'fill-amber-300' : ''}`} />
+                              {isJobSaved(job.id) ? 'Sparad' : 'Spara'}
+                            </button>
                           </div>
                         </div>
                       </div>
