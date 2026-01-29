@@ -16,10 +16,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2, CheckCircle, Users, AlertTriangle } from 'lucide-react';
+import { Heart, MapPin, Building2, Briefcase, Clock, Trash2, Timer, Loader2, CheckCircle, Users, AlertTriangle, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { getTimeRemaining } from '@/lib/date';
+import { getTimeRemaining, formatDateShortSv } from '@/lib/date';
 
 interface SavedJob {
   id: string;
@@ -325,8 +325,8 @@ const SavedJobs = () => {
                           </div>
                         )}
                         <div className="flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>Sparad {new Date(savedJob.created_at).toLocaleDateString('sv-SE')}</span>
+                          <Calendar className="h-3.5 w-3.5" />
+                          <span>{formatDateShortSv(savedJob.created_at)}</span>
                         </div>
                       </div>
                     </div>
