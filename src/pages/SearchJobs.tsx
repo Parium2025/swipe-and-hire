@@ -750,11 +750,11 @@ const SearchJobs = () => {
                   <h3 className="text-base font-semibold text-white truncate mt-1">
                     {matchingCompany.name} - {matchingCompany.jobCount} aktiv{matchingCompany.jobCount !== 1 ? 'a' : 't'} jobb
                   </h3>
-                  <div className="flex items-center gap-2 text-sm text-white/70">
+                  <div className="flex items-center gap-2 text-sm text-white">
                     <span>Se företagsprofil och recensioner</span>
                     {matchingCompany.avgRating && matchingCompany.reviewCount > 0 && (
-                      <span className="flex items-center gap-1 text-amber-400">
-                        <Star className="h-3.5 w-3.5 fill-amber-400" />
+                      <span className="flex items-center gap-1 text-white">
+                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
                         {matchingCompany.avgRating.toFixed(1)} ({matchingCompany.reviewCount})
                       </span>
                     )}
