@@ -126,6 +126,32 @@ export function useCompanyReviewsCache(companyId: string | null) {
     },
   });
 
+  // 📡 REALTIME: Prenumerera på recensionsändringar för detta företag
+  useEffect(() => {
+    if (!companyId) return;
+
+    const channel = supabase
+      .channel(`company-reviews-${companyId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'company_reviews',
+          filter: `company_id=eq.${companyId}`,
+        },
+        () => {
+          // Invalidera cache och hämta färsk data
+          queryClient.invalidateQueries({ queryKey: ['company-reviews-cached', companyId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [companyId, queryClient]);
+
   // Prefetch reviews for a company (call when hovering over company card)
   const prefetchReviews = useCallback((targetCompanyId: string) => {
     queryClient.prefetchQuery({

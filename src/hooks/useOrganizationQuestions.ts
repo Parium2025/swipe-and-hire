@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -48,6 +49,7 @@ function writeOrgQuestionsCache(userId: string, questions: OrganizationQuestion[
  */
 export const useOrganizationQuestions = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   // Check for cached data BEFORE query runs
   const hasCachedData = user ? readOrgQuestionsCache(user.id) !== null : false;
@@ -125,6 +127,31 @@ export const useOrganizationQuestions = () => {
       return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
     },
   });
+
+  // 📡 REALTIME: Prenumerera på jobbfrågaändringar
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`org-questions-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_questions',
+        },
+        () => {
+          // Invalidera cache vid ändringar
+          queryClient.invalidateQueries({ queryKey: ['organization-questions', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
   return {
     ...query,

@@ -197,6 +197,32 @@ export function useColleagueCandidates(colleagueId: string | null) {
     }
   }, [colleagueId, user]);
 
+  // 📡 REALTIME: Prenumerera på kollegans kandidatändringar
+  useEffect(() => {
+    if (!colleagueId || !user) return;
+
+    const channel = supabase
+      .channel(`colleague-candidates-${colleagueId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'my_candidates',
+          filter: `recruiter_id=eq.${colleagueId}`,
+        },
+        () => {
+          // Refresh hela listan vid ändringar
+          fetchColleagueCandidates(false);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [colleagueId, user, fetchColleagueCandidates]);
+
   // PRE-FETCHING: Automatically load next batch in background after each page loads
   // This makes scrolling feel instant - data is ready before user reaches bottom
   useEffect(() => {

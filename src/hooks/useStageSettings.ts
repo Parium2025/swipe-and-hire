@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { 
@@ -170,6 +171,31 @@ export function useStageSettings() {
       return cached ? Date.now() - 1000 : undefined; // Trigger background refetch
     },
   });
+
+  // 📡 REALTIME: Prenumerera på stage settings-ändringar
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`stage-settings-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_stage_settings',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['stage-settings', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
   // CRITICAL: Only show loading if we DON'T have cached data
   // This prevents the "default stages flash" when cached data exists
