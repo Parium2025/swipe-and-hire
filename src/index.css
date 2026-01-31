@@ -21,6 +21,31 @@ html {
   touch-action: manipulation;
 }
 
+/* ============================================
+   GLOBAL TOUCH IMPROVEMENTS
+   Ensures all interactive elements work well on touch devices
+   ============================================ */
+
+/* All interactive elements should have visible touch feedback */
+button, 
+a, 
+[role="button"],
+.cursor-pointer,
+[onclick] {
+  /* Prevent 300ms delay on mobile */
+  touch-action: manipulation;
+  /* Ensure elements are tapable */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Cards and list items should have touch feedback */
+.group:active,
+[class*="cursor-pointer"]:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease-out;
+}
+
 
 body {
   /* Förbättrad touch-hantering */

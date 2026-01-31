@@ -56,8 +56,9 @@ export function ThreadItem({
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-4 p-4 rounded-xl text-left transition-all",
-        "hover:bg-white/10 border border-transparent hover:border-white/10",
+        "w-full flex items-center gap-4 p-4 rounded-xl text-left transition-all min-h-touch",
+        "md:hover:bg-white/10 border border-transparent md:hover:border-white/10",
+        "active:scale-[0.98] active:bg-white/10 active:border-white/10",
         hasUnread && "bg-white/5"
       )}
     >

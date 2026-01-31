@@ -167,10 +167,13 @@ export default {
 					'bounce': 'soft-bounce 2s ease-in-out infinite',
 					'soft-bounce': 'soft-bounce 2s ease-in-out infinite'
 				},
-			minHeight: {
-				'touch': '44px', // Apple's minimum recommendation
-			}
+		minHeight: {
+			'touch': '44px', // Apple's minimum recommendation
+		},
+		minWidth: {
+			'touch': '44px', // Apple's minimum recommendation for touch targets
 		}
+	}
 	},
 	plugins: [
 		require("tailwindcss-animate"),

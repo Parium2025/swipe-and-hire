@@ -162,6 +162,8 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[200px] touch-pan-y`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setTimeout(() => setIsPaused(false), 3000)}
       {...swipeHandlers}
     >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
@@ -217,28 +219,26 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots - EXACT same as employer */}
+        {/* Footer with dots - with proper touch targets */}
         <div className="flex items-center justify-between mt-auto">
           {/* Dot navigation */}
           {tipsItems.length > 1 ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {tipsItems.map((_, i) => (
-                <div
+                <button
                   key={i}
                   onClick={() => setCurrentIndex(i)}
-                  role="button"
-                  tabIndex={0}
                   onKeyDown={(e) => e.key === 'Enter' && setCurrentIndex(i)}
-                  className={cn(
-                    "w-2.5 h-2.5 rounded-full cursor-pointer",
-                    // Important: no transitions here (prevents visible "trails" on some browsers)
-                    "transition-none",
+                  className="p-2 -m-1 touch-target flex items-center justify-center"
+                  aria-label={`Gå till nyhet ${i + 1}`}
+                >
+                  <span className={cn(
+                    "w-2.5 h-2.5 rounded-full transition-none",
                     i === currentIndex 
                       ? "bg-white" 
-                      : "bg-white/30 hover:bg-white/50"
-                  )}
-                  aria-label={`Gå till nyhet ${i + 1}`}
-                />
+                      : "bg-white/30"
+                  )} />
+                </button>
               ))}
             </div>
           ) : <div />}
@@ -492,6 +492,8 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
       {...swipeHandlers}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setTimeout(() => setIsPaused(false), 3000)}
     >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
@@ -531,21 +533,22 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation */}
-        <div className="flex items-center gap-2 mt-auto">
+        {/* Dot navigation - with proper touch targets */}
+        <div className="flex items-center gap-1 mt-auto">
           {statsArray.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
-              className={cn(
-                // Important: no transitions here (prevents visible "trails" on some browsers)
+              className="p-2 -m-1 touch-target flex items-center justify-center"
+              aria-label={`Gå till statistik ${i + 1}`}
+            >
+              <span className={cn(
                 "w-2.5 h-2.5 rounded-full transition-none",
                 i === currentIndex 
                   ? "bg-white" 
-                  : "bg-white/30 hover:bg-white/50"
-              )}
-              aria-label={`Gå till statistik ${i + 1}`}
-            />
+                  : "bg-white/30"
+              )} />
+            </button>
           ))}
         </div>
       </CardContent>
