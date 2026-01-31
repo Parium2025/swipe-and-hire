@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +6,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { 
   Briefcase, 
   MapPin, 
@@ -18,12 +28,15 @@ import {
   Loader2,
   Timer,
   Users,
-  Video
+  Video,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { getTimeRemaining, formatDateShortSv } from '@/lib/date';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
 import CandidateInterviewCard from '@/components/CandidateInterviewCard';
+import { toast } from 'sonner';
 
 interface Application {
   id: string;
@@ -106,6 +119,8 @@ const MyApplications = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
+  const [applicationToRemove, setApplicationToRemove] = useState<{ id: string; title: string } | null>(null);
   
   // Get candidate's interviews
   const { interviews, isLoading: interviewsLoading } = useCandidateInterviews();
@@ -192,6 +207,49 @@ const MyApplications = () => {
       navigate(`/job-view/${application.job_postings.id}`);
     }
   };
+
+  const handleRemoveClick = (applicationId: string, jobTitle: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setApplicationToRemove({ id: applicationId, title: jobTitle });
+  };
+
+  const confirmRemoveApplication = async () => {
+    if (!applicationToRemove) return;
+    
+    const applicationId = applicationToRemove.id;
+    setApplicationToRemove(null);
+    setRemovingIds(prev => new Set(prev).add(applicationId));
+    
+    try {
+      const { error } = await supabase
+        .from('job_applications')
+        .delete()
+        .eq('id', applicationId)
+        .eq('applicant_id', user?.id);
+
+      if (error) throw error;
+
+      // Update cache optimistically
+      queryClient.setQueryData(['my-applications', user?.id], (old: Application[] | undefined) => 
+        old?.filter(app => app.id !== applicationId) || []
+      );
+      
+      // Invalidate the count query
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+      
+      toast.success('Ansökan borttagen');
+    } catch (err) {
+      console.error('Error removing application:', err);
+      toast.error('Kunde inte ta bort ansökan');
+    } finally {
+      setRemovingIds(prev => {
+        const next = new Set(prev);
+        next.delete(applicationId);
+        return next;
+      });
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -282,12 +340,19 @@ const MyApplications = () => {
             const location = job?.workplace_city 
               ? `${job.workplace_city}${job.workplace_county ? `, ${job.workplace_county}` : ''}`
               : job?.location;
+            
+            // Check if job is expired or deleted
+            const timeInfo = job ? getTimeRemaining(job.created_at, job.expires_at) : { isExpired: false, text: '' };
+            const isExpiredOrDeleted = job?.deleted_at || timeInfo.isExpired;
+            const isRemoving = removingIds.has(application.id);
 
             return (
               <Card 
                 key={application.id}
                 onClick={() => handleApplicationClick(application)}
-                className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
+                className={`bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group ${
+                  isRemoving ? 'opacity-50' : ''
+                }`}
               >
                 <CardContent className="p-4 min-h-[120px]">
                   <div className="flex items-start justify-between gap-4">
@@ -338,8 +403,7 @@ const MyApplications = () => {
                         )}
                         {/* Days remaining badge - only show if not deleted */}
                         {job && !job.deleted_at && (() => {
-                          const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
-                          if (isExpired) {
+                          if (timeInfo.isExpired) {
                             return (
                               <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50 hover:backdrop-brightness-110">
                                 Utgången
@@ -349,21 +413,34 @@ const MyApplications = () => {
                           return (
                             <Badge variant="glass" className="text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110">
                               <Timer className="h-3 w-3 mr-1" />
-                              {text} kvar
+                              {timeInfo.text} kvar
                             </Badge>
                           );
                         })()}
                       </div>
                     </div>
 
-                    {/* Status Badge */}
-                    <Badge 
-                      variant="glass"
-                      className={`flex items-center gap-1.5 px-2.5 py-1 border whitespace-nowrap transition-all duration-300 group-hover:backdrop-brightness-90 hover:backdrop-brightness-110 ${getStatusColor(application.status)}`}
-                    >
-                      {getStatusIcon(application.status)}
-                      {getStatusLabel(application.status)}
-                    </Badge>
+                    {/* Status Badge and Delete Button */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Badge 
+                        variant="glass"
+                        className={`flex items-center gap-1.5 px-2.5 py-1 border whitespace-nowrap transition-all duration-300 group-hover:backdrop-brightness-90 hover:backdrop-brightness-110 ${getStatusColor(application.status)}`}
+                      >
+                        {getStatusIcon(application.status)}
+                        {getStatusLabel(application.status)}
+                      </Badge>
+                      
+                      {/* Delete button - only show for expired or deleted jobs */}
+                      {isExpiredOrDeleted && (
+                        <button
+                          onClick={(e) => handleRemoveClick(application.id, job?.title || 'Okänt jobb', e)}
+                          disabled={isRemoving}
+                          className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 hover:backdrop-brightness-110 disabled:opacity-50 flex-shrink-0 active:scale-95"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Job deleted warning */}
@@ -389,6 +466,49 @@ const MyApplications = () => {
         </div>
         )}
       </section>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={!!applicationToRemove} onOpenChange={() => setApplicationToRemove(null)}>
+        <AlertDialogContentNoFocus 
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+        >
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort ansökan
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
+              {applicationToRemove && (
+                <>
+                  Är du säker på att du vill ta bort din ansökan för <span className="font-semibold text-white break-words">"{applicationToRemove.title}"</span>? Denna åtgärd går inte att ångra.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+            <AlertDialogCancel 
+              onClick={() => setApplicationToRemove(null)}
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-[0.6] mt-0 flex items-center justify-center bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemoveApplication}
+              variant="destructiveSoft"
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-[0.4] text-sm flex items-center justify-center"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
     </div>
   );
 };
