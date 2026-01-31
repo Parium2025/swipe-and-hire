@@ -4,12 +4,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { NewConversationDialog } from '@/components/NewConversationDialog';
+import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -373,26 +373,7 @@ function ConversationItem({
     return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd användare';
   };
 
-  const getAvatarUrl = () => {
-    if (!displayMember?.profile) return null;
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_logo_url) return p.company_logo_url;
-    return p.profile_image_url;
-  };
-
-  const getInitials = () => {
-    if (conversation.is_group && conversation.name) {
-      return conversation.name.substring(0, 2).toUpperCase();
-    }
-    if (!displayMember?.profile) return '?';
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_name) {
-      return p.company_name.substring(0, 2).toUpperCase();
-    }
-    const first = p.first_name?.[0] || '';
-    const last = p.last_name?.[0] || '';
-    return (first + last).toUpperCase() || '?';
-  };
+  // Avatar URL resolution is now handled by ConversationAvatar component
 
   const formatTime = (dateStr: string | null) => {
     if (!dateStr) return '';
@@ -417,24 +398,21 @@ function ConversationItem({
     >
       {/* Avatar with category indicator */}
       <div className="relative flex-shrink-0">
-        {conversation.is_group ? (
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 border border-white/20 flex items-center justify-center">
-            <Users className="h-6 w-6 text-white/80" />
-          </div>
-        ) : (
-          <Avatar className={cn(
-            "h-12 w-12 border-2",
-            category === 'candidates' ? "border-emerald-500/50" : "border-blue-500/50"
-          )}>
-            <AvatarImage src={getAvatarUrl() || ''} />
-            <AvatarFallback className={cn(
-              "text-white text-sm",
-              category === 'candidates' ? "bg-emerald-500/20" : "bg-blue-500/20"
-            )} delayMs={150}>
-              {getInitials()}
-            </AvatarFallback>
-          </Avatar>
-        )}
+        <ConversationAvatar
+          profile={displayMember?.profile}
+          isGroup={conversation.is_group}
+          groupName={conversation.name}
+          size="lg"
+          className={cn(
+            "border-2",
+            conversation.is_group 
+              ? "" 
+              : category === 'candidates' 
+                ? "border-emerald-500/50" 
+                : "border-blue-500/50"
+          )}
+          fallbackClassName={category === 'candidates' ? "bg-emerald-500/20" : "bg-blue-500/20"}
+        />
         {/* Category badge */}
         <div className={cn(
           "absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center border-2 border-slate-900",
@@ -571,26 +549,7 @@ function ChatView({
     return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd användare';
   };
 
-  const getAvatarUrl = () => {
-    if (!displayMember?.profile) return null;
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_logo_url) return p.company_logo_url;
-    return p.profile_image_url;
-  };
-
-  const getInitials = () => {
-    if (conversation.is_group && conversation.name) {
-      return conversation.name.substring(0, 2).toUpperCase();
-    }
-    if (!displayMember?.profile) return '?';
-    const p = displayMember.profile;
-    if (p.role === 'employer' && p.company_name) {
-      return p.company_name.substring(0, 2).toUpperCase();
-    }
-    const first = p.first_name?.[0] || '';
-    const last = p.last_name?.[0] || '';
-    return (first + last).toUpperCase() || '?';
-  };
+  // Avatar URL resolution is now handled by ConversationAvatar component
 
   // Group messages by date
   const groupedMessages = messages.reduce((groups, msg) => {
@@ -621,18 +580,12 @@ function ChatView({
           <ChevronLeft className="h-5 w-5" />
         </Button>
 
-        {conversation.is_group ? (
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 border border-white/20 flex items-center justify-center">
-            <Users className="h-5 w-5 text-white/80" />
-          </div>
-        ) : (
-          <Avatar className="h-10 w-10 border border-white/10">
-            <AvatarImage src={getAvatarUrl() || ''} />
-            <AvatarFallback className="bg-white/10 text-white text-sm" delayMs={150}>
-              {getInitials()}
-            </AvatarFallback>
-          </Avatar>
-        )}
+        <ConversationAvatar
+          profile={displayMember?.profile}
+          isGroup={conversation.is_group}
+          groupName={conversation.name}
+          size="md"
+        />
 
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-white truncate">{getDisplayName()}</h2>
@@ -779,23 +732,7 @@ function MessageBubble({
     return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd';
   };
 
-  const getAvatarUrl = () => {
-    const p = message.sender_profile;
-    if (!p) return null;
-    if (p.role === 'employer' && p.company_logo_url) return p.company_logo_url;
-    return p.profile_image_url;
-  };
-
-  const getInitials = () => {
-    const p = message.sender_profile;
-    if (!p) return '?';
-    if (p.role === 'employer' && p.company_name) {
-      return p.company_name.substring(0, 2).toUpperCase();
-    }
-    const first = p.first_name?.[0] || '';
-    const last = p.last_name?.[0] || '';
-    return (first + last).toUpperCase() || '?';
-  };
+  // Avatar URL resolution is now handled by ConversationAvatar component
 
   if (message.is_system_message) {
     return (
@@ -815,12 +752,10 @@ function MessageBubble({
       {/* Avatar space */}
       <div className="w-8 flex-shrink-0">
         {showAvatar && !isOwn && (
-          <Avatar className="h-8 w-8 border border-white/10">
-            <AvatarImage src={getAvatarUrl() || ''} />
-            <AvatarFallback className="bg-white/10 text-white text-xs" delayMs={150}>
-              {getInitials()}
-            </AvatarFallback>
-          </Avatar>
+          <ConversationAvatar
+            profile={message.sender_profile}
+            size="sm"
+          />
         )}
       </div>
 

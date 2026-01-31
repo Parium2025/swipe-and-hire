@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ResolvedAvatar } from '@/components/ui/resolved-avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -155,12 +155,13 @@ const ProfileSetup = () => {
             {/* Profile Image Section */}
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
-                <Avatar className="h-24 w-24 ring-2 ring-primary/20">
-                  <AvatarImage src={profileImageUrl || ''} />
-                  <AvatarFallback className="text-lg bg-primary/10 text-foreground" delayMs={150}>
-                    {profile?.first_name?.[0]}{profile?.last_name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
+                <ResolvedAvatar
+                  src={profileImageUrl}
+                  mediaType="profile-image"
+                  fallback={<span className="text-lg">{profile?.first_name?.[0]}{profile?.last_name?.[0]}</span>}
+                  className="h-24 w-24 ring-2 ring-primary/20"
+                  fallbackClassName="bg-primary/10 text-foreground"
+                />
                 <label htmlFor="profile-image" className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-colors shadow-lg">
                   <Camera className="h-4 w-4" />
                 </label>

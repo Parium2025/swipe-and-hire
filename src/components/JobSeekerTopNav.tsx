@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
+import { useMediaUrl } from "@/hooks/useMediaUrl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProfileVideo from "@/components/ProfileVideo";
 import {
@@ -83,10 +84,14 @@ function JobSeekerTopNav() {
   const [economyOpen, setEconomyOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
 
-  // Avatar/Video state
-  const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null;
+  // Avatar/Video state - fallback uses useMediaUrl for safety
+  const fallbackProfileImageUrl = useMediaUrl(
+    (!preloadedAvatarUrl && !preloadedCoverUrl) ? profile?.profile_image_url : null, 
+    'profile-image'
+  );
+  const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || fallbackProfileImageUrl || null;
   const videoUrl = preloadedVideoUrl ?? null;
-  const coverUrl = preloadedCoverUrl || profile?.cover_image_url || null;
+  const coverUrl = preloadedCoverUrl || null;
   const hasVideo = !!(profile?.video_url || preloadedVideoUrl || videoUrl);
 
   const isAdmin = user?.email === 'fredrikandits@hotmail.com';

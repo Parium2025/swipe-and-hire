@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ResolvedAvatar } from '@/components/ui/resolved-avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -230,12 +230,12 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
 
             <div className="max-w-md mx-auto">
               <div className="text-center mb-4 md:mb-6">
-                <Avatar className="h-24 w-24 md:h-32 md:w-32 mx-auto mb-4">
-                  <AvatarImage src={formData.profileImageUrl || ''} />
-                  <AvatarFallback className="text-2xl" delayMs={150}>
-                    {formData.firstName[0]}{formData.lastName[0]}
-                  </AvatarFallback>
-                </Avatar>
+                <ResolvedAvatar
+                  src={formData.profileImageUrl}
+                  mediaType="profile-image"
+                  fallback={<span className="text-2xl">{formData.firstName[0]}{formData.lastName[0]}</span>}
+                  className="h-24 w-24 md:h-32 md:w-32 mx-auto mb-4"
+                />
                 
                 {formData.profileImageUrl && (
                   <Badge variant="secondary" className="mt-2">
