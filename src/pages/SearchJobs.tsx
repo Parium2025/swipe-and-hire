@@ -36,6 +36,7 @@ import { useOptimizedJobSearch } from '@/hooks/useOptimizedJobSearch';
 import { useSavedSearches, SearchCriteria } from '@/hooks/useSavedSearches';
 import { SaveSearchDialog } from '@/components/SaveSearchDialog';
 import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
+import { useBatchPrefetchReviews } from '@/hooks/useCompanyReviewsCache';
 
 interface Job {
   id: string;
@@ -156,6 +157,19 @@ const SearchJobs = () => {
     subcategories: selectedSubcategories,
     enabled: true,
   });
+
+  // Prefetch reviews for all companies in results for instant dialog load
+  const prefetchReviews = useBatchPrefetchReviews();
+  const companyIds = useMemo(() => {
+    return [...new Set(jobs.map(job => job.employer_id).filter(Boolean))] as string[];
+  }, [jobs]);
+
+  // Prefetch reviews when jobs load
+  useEffect(() => {
+    if (companyIds.length > 0) {
+      prefetchReviews(companyIds);
+    }
+  }, [companyIds, prefetchReviews]);
 
   // Förladdda alla jobbbilder via Service Worker för persistent cache
   const jobImageUrls = useMemo(() => {
