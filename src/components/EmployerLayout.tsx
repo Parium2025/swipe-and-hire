@@ -17,6 +17,7 @@ import { useDevice } from '@/hooks/use-device';
 import { useEmployerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useCandidateBackgroundSync } from '@/hooks/useCandidateBackgroundSync';
 import { useEagerRatingsPreload } from '@/hooks/useEagerRatingsPreload';
+import { useEmployerBackgroundSync } from '@/hooks/useEmployerBackgroundSync';
 import { DevOfflineToggle } from '@/components/DevOfflineToggle';
 
 interface EmployerLayoutProps {
@@ -37,6 +38,9 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
   
   // Desktop uses top nav, mobile/tablet uses sidebar
   const isDesktop = device === 'desktop';
+  
+  // 🔥 Background sync för att hålla all arbetsgivardata färsk
+  useEmployerBackgroundSync();
   
   // Auto-collapse sidebar on pages that need more horizontal space (Kanban views)
   const isKanbanPage = location.pathname.startsWith('/job-details/') || location.pathname === '/my-candidates';

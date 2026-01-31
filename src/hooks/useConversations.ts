@@ -50,9 +50,47 @@ export interface Conversation {
   };
 }
 
+// 🔥 localStorage cache for instant-load
+const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
+
+interface CachedConversations {
+  userId: string;
+  conversations: Conversation[];
+  timestamp: number;
+}
+
+function readConversationsCache(userId: string): Conversation[] | null {
+  try {
+    const raw = localStorage.getItem(CONVERSATIONS_CACHE_KEY);
+    if (!raw) return null;
+    const cached: CachedConversations = JSON.parse(raw);
+    // Only use if same user
+    if (cached.userId !== userId) return null;
+    return cached.conversations;
+  } catch {
+    return null;
+  }
+}
+
+function writeConversationsCache(userId: string, conversations: Conversation[]): void {
+  try {
+    const cached: CachedConversations = {
+      userId,
+      conversations: conversations.slice(0, 50), // Max 50 to save space
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(CONVERSATIONS_CACHE_KEY, JSON.stringify(cached));
+  } catch {
+    // Storage full
+  }
+}
+
 export function useConversations() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Check for cached data BEFORE query runs
+  const hasCachedData = user ? readConversationsCache(user.id) !== null : false;
 
   // Fetch all conversations for current user
   const conversationsQuery = useQuery({
@@ -67,7 +105,10 @@ export function useConversations() {
         .eq('user_id', user.id);
 
       if (memberError) throw memberError;
-      if (!memberships || memberships.length === 0) return [];
+      if (!memberships || memberships.length === 0) {
+        writeConversationsCache(user.id, []);
+        return [];
+      }
 
       const conversationIds = memberships.map(m => m.conversation_id);
       const lastReadMap = new Map(memberships.map(m => [m.conversation_id, m.last_read_at]));
@@ -141,7 +182,7 @@ export function useConversations() {
       });
 
       // Build final conversation objects
-      return conversations.map(conv => {
+      const result = conversations.map(conv => {
         const members = (allMembers || [])
           .filter(m => m.conversation_id === conv.id)
           .map(m => ({
@@ -156,8 +197,25 @@ export function useConversations() {
           unread_count: unreadCounts.get(conv.id) || 0,
         } as Conversation;
       });
+
+      // 🔥 Cache for instant-load on next visit
+      writeConversationsCache(user.id, result);
+
+      return result;
     },
     enabled: !!user,
+    staleTime: 30 * 1000, // 30 seconds
+    // 🔥 Instant-load from localStorage cache
+    initialData: () => {
+      if (!user) return undefined;
+      const cached = readConversationsCache(user.id);
+      return cached ?? undefined;
+    },
+    initialDataUpdatedAt: () => {
+      if (!user) return undefined;
+      const cached = readConversationsCache(user.id);
+      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+    },
   });
 
   // Subscribe to realtime updates for new messages

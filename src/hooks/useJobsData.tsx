@@ -51,16 +51,60 @@ interface UseJobsDataOptions {
   enableRealtime?: boolean;
 }
 
+// 🔥 localStorage cache for employer jobs - instant-load
+const EMPLOYER_JOBS_CACHE_KEY = 'parium_employer_jobs_';
+
+interface CachedJobs {
+  jobs: JobPosting[];
+  scope: string;
+  orgId: string | null;
+  timestamp: number;
+}
+
+function readJobsCache(userId: string, scope: string, orgId: string | null): JobPosting[] | null {
+  try {
+    const key = EMPLOYER_JOBS_CACHE_KEY + userId;
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const cached: CachedJobs = JSON.parse(raw);
+    // Only use if same scope and org
+    if (cached.scope !== scope || cached.orgId !== orgId) return null;
+    return cached.jobs;
+  } catch {
+    return null;
+  }
+}
+
+function writeJobsCache(userId: string, scope: string, orgId: string | null, jobs: JobPosting[]): void {
+  try {
+    const key = EMPLOYER_JOBS_CACHE_KEY + userId;
+    const cached: CachedJobs = {
+      jobs: jobs.slice(0, 100), // Max 100 jobs to save space
+      scope,
+      orgId,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(key, JSON.stringify(cached));
+  } catch {
+    // Storage full
+  }
+}
+
 export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: true }) => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const { scope, enableRealtime = true } = options;
 
+  // Check for cached data BEFORE query runs
+  const hasCachedData = user ? readJobsCache(user.id, scope || 'personal', profile?.organization_id || null) !== null : false;
+
   // For organization scope, we need to fetch jobs from all users in the same organization
-  const { data: jobs = [], isLoading, error, refetch } = useQuery({
+  const { data: jobs = [], isLoading: queryLoading, error, refetch } = useQuery({
     queryKey: ['jobs', scope, profile?.organization_id, user?.id],
     queryFn: async () => {
       if (!user) return [];
+      
+      let result: JobPosting[] = [];
       
       if (scope === 'organization' && profile?.organization_id) {
         // Fetch all jobs from users in the same organization
@@ -94,7 +138,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return data || [];
+        result = data || [];
       } else {
         // Personal scope - only current user's jobs (exclude soft-deleted)
         const { data, error } = await supabase
@@ -111,14 +155,33 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return data || [];
+        result = data || [];
       }
+
+      // 🔥 Cache for instant-load on next visit
+      writeJobsCache(user.id, scope || 'personal', profile?.organization_id || null, result);
+
+      return result;
     },
     enabled: !!user,
     staleTime: 0, // Always refetch in background
     gcTime: Infinity, // Keep in cache permanently during session
     refetchOnWindowFocus: false,
+    // 🔥 Instant-load from localStorage cache
+    initialData: () => {
+      if (!user) return undefined;
+      const cached = readJobsCache(user.id, scope || 'personal', profile?.organization_id || null);
+      return cached ?? undefined;
+    },
+    initialDataUpdatedAt: () => {
+      if (!user) return undefined;
+      const cached = readJobsCache(user.id, scope || 'personal', profile?.organization_id || null);
+      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+    },
   });
+
+  // Only show loading if we don't have cached data
+  const isLoading = queryLoading && !hasCachedData;
 
   // Real-time subscription for job_postings changes
   useEffect(() => {

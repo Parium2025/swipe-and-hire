@@ -232,6 +232,17 @@ export const useJobSeekerBackgroundSync = () => {
       
       // Uppdatera React Query cache
       queryClient.setQueryData(['conversations', userId], conversations);
+      
+      // Uppdatera även den nya konversationscachen för useConversations hooken
+      try {
+        localStorage.setItem('parium_conversations_cache', JSON.stringify({
+          userId,
+          conversations,
+          timestamp: Date.now(),
+        }));
+      } catch {
+        // Ignorera storage-fel
+      }
     }
   }, [queryClient]);
 

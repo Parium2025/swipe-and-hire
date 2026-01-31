@@ -23,12 +23,48 @@ export interface Interview {
   job_title?: string;
 }
 
+// 🔥 localStorage cache for employer interviews - instant-load
+const EMPLOYER_INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
+
+interface CachedInterviews {
+  interviews: Interview[];
+  timestamp: number;
+}
+
+function readEmployerInterviewsCache(userId: string): Interview[] | null {
+  try {
+    const key = EMPLOYER_INTERVIEWS_CACHE_KEY + userId;
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const cached: CachedInterviews = JSON.parse(raw);
+    return cached.interviews;
+  } catch {
+    return null;
+  }
+}
+
+function writeEmployerInterviewsCache(userId: string, interviews: Interview[]): void {
+  try {
+    const key = EMPLOYER_INTERVIEWS_CACHE_KEY + userId;
+    const cached: CachedInterviews = {
+      interviews: interviews.slice(0, 50), // Max 50 to save space
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(key, JSON.stringify(cached));
+  } catch {
+    // Storage full
+  }
+}
+
 export const useInterviews = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Check for cached data BEFORE query runs
+  const hasCachedData = user ? readEmployerInterviewsCache(user.id) !== null : false;
+
   // Fetch upcoming interviews for employer
-  const { data: interviews = [], isLoading, error } = useQuery({
+  const { data: interviews = [], isLoading: queryLoading, error } = useQuery({
     queryKey: ['interviews', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -48,17 +84,61 @@ export const useInterviews = () => {
 
       if (error) throw error;
 
-      return (data || []).map((interview: any) => ({
+      const result = (data || []).map((interview: any) => ({
         ...interview,
         candidate_name: interview.job_applications 
           ? `${interview.job_applications.first_name || ''} ${interview.job_applications.last_name || ''}`.trim() || 'Okänd'
           : 'Okänd',
         job_title: interview.job_postings?.title || 'Okänd tjänst',
       })) as Interview[];
+
+      // 🔥 Cache for instant-load on next visit
+      writeEmployerInterviewsCache(user.id, result);
+
+      return result;
     },
     enabled: !!user?.id,
     staleTime: 30000,
+    // 🔥 Instant-load from localStorage cache
+    initialData: () => {
+      if (!user?.id) return undefined;
+      const cached = readEmployerInterviewsCache(user.id);
+      return cached ?? undefined;
+    },
+    initialDataUpdatedAt: () => {
+      if (!user?.id) return undefined;
+      const cached = readEmployerInterviewsCache(user.id);
+      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+    },
   });
+
+  // Only show loading if we don't have cached data
+  const isLoading = queryLoading && !hasCachedData;
+
+  // Real-time subscription for interview updates
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`employer-interviews-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'interviews',
+          filter: `employer_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['interviews', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
 
   // Update interview status
   const updateStatus = useMutation({
