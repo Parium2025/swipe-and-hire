@@ -6,6 +6,7 @@ import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
+import { hydrateCriticalAssets } from './lib/criticalAssetCache'
 
 // Auth page logo (public) - blue text on dark background
 const authLogoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
@@ -114,8 +115,20 @@ function redirectAuthTokensIfNeeded() {
   return false;
 }
 
-const redirected = redirectAuthTokensIfNeeded();
-if (!redirected) {
+async function start() {
+  const redirected = redirectAuthTokensIfNeeded();
+  if (redirected) return;
+
+  // If we land directly on /auth (hard refresh), hydrate the auth logo from CacheStorage
+  // before React mounts to prevent visible “pop-in”.
+  try {
+    if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
+      await hydrateCriticalAssets([authLogoUrl]);
+    }
+  } catch {
+    // Never block app start due to caching issues
+  }
+
   // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
   if (import.meta.env.PROD) {
     registerServiceWorker().catch(() => {
@@ -123,11 +136,13 @@ if (!redirected) {
     });
   }
 
-  const root = createRoot(document.getElementById("root")!);
+  const root = createRoot(document.getElementById('root')!);
   root.render(
     <GlobalErrorBoundary>
       <App />
     </GlobalErrorBoundary>
   );
 }
+
+void start();
 
