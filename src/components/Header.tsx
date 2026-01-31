@@ -21,7 +21,6 @@ export const Header = () => {
             height="32"
             loading="eager"
             decoding="sync"
-            fetchPriority="high"
           />
         </Button>
         

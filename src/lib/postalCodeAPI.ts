@@ -114,27 +114,15 @@ async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
   }
 }
 
-// Initiera databasen direkt när modulen laddas, men INTE på /auth.
-// Den här initieringen laddar + parsar ~16k rader och kan blockera första rendern
-// (vilket ser ut som att t.ex. loggan "laddar in").
-if (typeof window !== 'undefined') {
-  try {
-    const path = window.location?.pathname || '';
-    if (path !== '/auth') {
-      initializePostalDatabase();
-    }
-  } catch {
-    // fail-safe: never block app start
-  }
-}
+// Initiera databasen direkt när modulen laddas
+initializePostalDatabase();
 
 async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse | null> {
   const cleanedCode = postalCode.replace(/\s+/g, '');
   
   // Använd cachad databas (laddades vid sidstart)
   try {
-    // Ensure the DB is initialized if this code path runs on-demand.
-    const database = await (databaseLoadingPromise ?? initializePostalDatabase());
+    const database = await databaseLoadingPromise;
     if (database) {
       const city = database[cleanedCode];
       if (city) {

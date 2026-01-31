@@ -4,13 +4,6 @@ const IMAGE_CACHE = `parium-images-${CACHE_VERSION}`;
 const STATIC_CACHE = `parium-static-${CACHE_VERSION}`;
 const API_CACHE = `parium-api-${CACHE_VERSION}`;
 
-// Kritiska auth-assets som måste vara omedelbara även vid hård refresh.
-// Dessa ligger i /public (stabila URLs) och kan därför precachas i SW.
-const CRITICAL_IMAGE_ASSETS = [
-  '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png', // auth-logo (Parium)
-  '/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png', // alt white logo
-];
-
 // Kritiska assets som alltid ska cachas (offline-fallback)
 const CRITICAL_ASSETS = [
   '/',
@@ -63,24 +56,10 @@ self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...');
   
   event.waitUntil(
-    Promise.all([
-      caches.open(STATIC_CACHE).then((cache) => {
-        console.log('[SW] Caching critical assets');
-        return cache.addAll(CRITICAL_ASSETS);
-      }),
-      caches.open(IMAGE_CACHE).then(async (cache) => {
-        console.log('[SW] Precaching critical images');
-
-        // addAll kan faila om någon asset inte går att hämta; vi vill inte blockera install.
-        const results = await Promise.allSettled(
-          CRITICAL_IMAGE_ASSETS.map((url) => cache.add(url))
-        );
-        const failed = results.filter((r) => r.status === 'rejected').length;
-        if (failed > 0) {
-          console.warn(`[SW] Precaching: ${failed} critical images failed (continuing)`);
-        }
-      }),
-    ]).then(() => {
+    caches.open(STATIC_CACHE).then((cache) => {
+      console.log('[SW] Caching critical assets');
+      return cache.addAll(CRITICAL_ASSETS);
+    }).then(() => {
       // Aktivera ny worker direkt
       return self.skipWaiting();
     })

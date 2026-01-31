@@ -5,10 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Building2, User, Plus, Settings } from 'lucide-react';
-import { useCachedImage } from '@/hooks/useCachedImage';
-
-// Parium logo (alternative white version for dark backgrounds)
-const pariumLogoUrl = '/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png';
 
 interface ProfileSelectorProps {
   onProfileSelected: () => void;
@@ -17,7 +13,6 @@ interface ProfileSelectorProps {
 const ProfileSelector = ({ onProfileSelected }: ProfileSelectorProps) => {
   const { profile, userRole, user, switchRole } = useAuth();
   const [switching, setSwitching] = useState(false);
-  const { cachedUrl: cachedLogoUrl } = useCachedImage(pariumLogoUrl);
 
   const handleRoleSwitch = async (newRole: 'job_seeker' | 'employer') => {
     setSwitching(true);
@@ -59,12 +54,9 @@ const ProfileSelector = ({ onProfileSelected }: ProfileSelectorProps) => {
           {/* Header */}
           <div className="mb-12">
             <img 
-              src={cachedLogoUrl || pariumLogoUrl}
+              src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
               alt="Parium" 
               className="h-16 w-auto mx-auto mb-8"
-              loading="eager"
-              decoding="sync"
-              fetchPriority="high"
             />
             <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
               Välj din profil

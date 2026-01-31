@@ -5,47 +5,26 @@ import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
-import { hydrateCriticalAssets } from './lib/criticalAssetCache'
 import pariumLogoRings from './assets/parium-logo-rings.png'
-import pariumAuthLogoInline from './assets/parium-auth-logo.png?inline'
-
-// Auth page logo (public) - blue text on dark background
-const authLogoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
-
-// Auth logo (inline data URI) - guarantees first-frame availability even on hard refresh
-const authLogoInlineUrl = pariumAuthLogoInline;
-
-// Alternative logo (white version for dark backgrounds - used in ProfileSelector, ProfileBuilder)
-const altLogoUrl = '/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png';
 
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string) => {
   try {
-    // Don't create <link preload> for data URIs (can bloat DOM and provides no fetch benefit)
-    const isDataUrl = typeof src === 'string' && src.startsWith('data:');
-
     // Add a preload hint (helps the browser start fetching earlier)
-    if (!isDataUrl && typeof document !== 'undefined' && document.head) {
-      const existing = document.querySelector(
-        `link[rel="preload"][as="image"][href="${src}"]`
-      ) as HTMLLinkElement | null;
+    if (typeof document !== 'undefined' && document.head) {
+      const existing = document.querySelector(`link[data-preload-parium-logo="true"]`) as HTMLLinkElement | null;
       if (!existing) {
         const link = document.createElement('link');
         link.rel = 'preload';
         link.as = 'image';
         link.href = src;
+        link.setAttribute('data-preload-parium-logo', 'true');
         document.head.appendChild(link);
       }
     }
 
     // Fetch + decode into memory cache
     const img = new Image();
-    // Hint: keep priority high for critical UI assets
-    try {
-      img.fetchPriority = 'high';
-    } catch {
-      // ignore
-    }
     img.src = src;
     // decode() ensures it's ready to paint immediately when the element mounts
     if ('decode' in img && typeof (img as any).decode === 'function') {
@@ -58,56 +37,6 @@ const preloadAndDecodeImage = async (src: string) => {
 
 // Fire-and-forget: ensures top nav logo is instantly ready on back navigation
 void preloadAndDecodeImage(pariumLogoRings);
-
-// Fire-and-forget: keeps auth logo decoded in memory for route changes
-void preloadAndDecodeImage(authLogoInlineUrl);
-
-// Fire-and-forget: ensures alternative white logo is ready (ProfileSelector, ProfileBuilder)
-void preloadAndDecodeImage(altLogoUrl);
-
-const HTML_AUTH_PRESPLASH_ID = 'auth-presplash'; // Rendered in index.html
-
-function isReactAuthLogoReady(): boolean {
-  if (typeof document === 'undefined') return false;
-  // PariumAuthLogo renders as a <div role="img" aria-label="Parium" ... />
-  const el = document.querySelector(
-    'div[role="img"][aria-label="Parium"]'
-  ) as HTMLDivElement | null;
-  if (!el) return false;
-
-  const rect = el.getBoundingClientRect();
-  // Tailwind not loaded → width/height can be 0, which looks like the logo "loads in" later.
-  if (rect.width < 40 || rect.height < 40) return false;
-
-  // Ensure background-image is set (it is inline, but be defensive)
-  const bg = getComputedStyle(el).backgroundImage || '';
-  if (!bg || bg === 'none') return false;
-  return true;
-}
-
-function hideHtmlPresplash() {
-  if (typeof document === 'undefined') return;
-  const el = document.getElementById(HTML_AUTH_PRESPLASH_ID);
-  if (el) el.style.display = 'none';
-}
-
-function scheduleHtmlPresplashHandoff(timeoutMs: number = 4000) {
-  if (typeof window === 'undefined') return;
-  const start = performance.now();
-
-  const tick = () => {
-    // Remove once the real logo is ready, or after a timeout.
-    if (isReactAuthLogoReady() || performance.now() - start > timeoutMs) {
-      hideHtmlPresplash();
-      return;
-    }
-    requestAnimationFrame(tick);
-  };
-
-  requestAnimationFrame(tick);
-}
-
-// (Legacy JS-based presplash removed – we now rely on index.html for the pre-splash.)
 
 // Initialize Sentry for error tracking in production
 if (import.meta.env.PROD) {
@@ -166,34 +95,8 @@ function redirectAuthTokensIfNeeded() {
   return false;
 }
 
-async function start() {
-  const redirected = redirectAuthTokensIfNeeded();
-  if (redirected) return;
-
-  // NOTE: The HTML pre-splash (#auth-presplash) is shown via inline script in
-  // index.html, so it is visible BEFORE any JS even runs. No need to mount
-  // anything here.
-
-  // Hydrate critical assets from CacheStorage into decoded blob: URLs BEFORE React mounts.
-  // This makes the auth logo paint instantly on hard refresh (after SW has cached it).
-  try {
-    if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
-      await hydrateCriticalAssets([authLogoUrl, altLogoUrl]);
-    }
-  } catch {
-    // Never block app start for cache hydration
-  }
-
-  // If we land directly on /auth (hard refresh), ensure the logo is decoded
-  // BEFORE React mounts so the very first paint already has it.
-  try {
-    if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
-      await preloadAndDecodeImage(authLogoInlineUrl);
-    }
-  } catch {
-    // Never block app start for a decode attempt
-  }
-
+const redirected = redirectAuthTokensIfNeeded();
+if (!redirected) {
   // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
   if (import.meta.env.PROD) {
     registerServiceWorker().catch(() => {
@@ -201,25 +104,11 @@ async function start() {
     });
   }
 
-  const root = createRoot(document.getElementById('root')!);
+  const root = createRoot(document.getElementById("root")!);
   root.render(
     <GlobalErrorBoundary>
       <App />
     </GlobalErrorBoundary>
   );
-
-  // Keep the HTML pre-splash UNTIL the real React auth logo is actually paintable.
-  // This prevents the "splash disappears → empty space → logo pops in" effect.
-  try {
-    if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
-      scheduleHtmlPresplashHandoff(4500);
-    } else {
-      hideHtmlPresplash();
-    }
-  } catch {
-    // ignore
-  }
 }
-
-void start();
 
