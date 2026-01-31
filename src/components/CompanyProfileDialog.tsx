@@ -445,8 +445,8 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                     />
                   </button>
                   
-                  <div className={`overflow-hidden transition-all duration-300 ${
-                    isFormOpen ? 'max-h-[600px] opacity-100 mt-3' : 'max-h-0 opacity-0'
+                  <div className={`overflow-hidden transition-[max-height,margin] duration-300 ease-out ${
+                    isFormOpen ? 'max-h-[600px] mt-3' : 'max-h-0 mt-0'
                   }`}>
                     <div className="bg-white/5 p-4 rounded-lg space-y-3">
                       <div>
