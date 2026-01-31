@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ResolvedAvatar } from '@/components/ui/resolved-avatar';
 import { TeamMember } from '@/hooks/useTeamMembers';
 import { UserCheck, Users, WifiOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -126,12 +126,13 @@ export function AddToColleagueListDialog({
               onMouseUp={(e) => e.currentTarget.blur()}
               disabled={isAdding !== null || !isOnline}
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={member.profileImageUrl || ''} />
-                <AvatarFallback className="text-xs bg-white/20" delayMs={150}>
-                  {member.firstName?.[0]}{member.lastName?.[0]}
-                </AvatarFallback>
-              </Avatar>
+              <ResolvedAvatar
+                src={member.profileImageUrl}
+                mediaType="profile-image"
+                fallback={`${member.firstName?.[0] || ''}${member.lastName?.[0] || ''}`}
+                className="h-8 w-8"
+                fallbackClassName="text-xs bg-white/20"
+              />
               <div className="text-left">
                 <div className="font-medium">{member.firstName} {member.lastName}</div>
                 <div className="text-xs text-white/60">Lägg till i kollegans lista</div>
