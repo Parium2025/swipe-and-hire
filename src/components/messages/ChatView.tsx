@@ -242,8 +242,8 @@ export function ChatView({
         </Button>
 
         <Avatar className="h-10 w-10 border border-white/10">
-          <AvatarImage src={getAvatarUrl() || undefined} />
-          <AvatarFallback className="bg-gradient-to-br from-blue-500/30 to-purple-500/30 text-white text-sm">
+          <AvatarImage src={getAvatarUrl() || ''} />
+          <AvatarFallback className="bg-gradient-to-br from-blue-500/30 to-purple-500/30 text-white text-sm" delayMs={150}>
             {getInitials()}
           </AvatarFallback>
         </Avatar>

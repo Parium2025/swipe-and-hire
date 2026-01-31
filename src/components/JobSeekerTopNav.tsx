@@ -317,7 +317,7 @@ function JobSeekerTopNav() {
                 {(hasVideo && (coverUrl || avatarUrl)) || avatarUrl ? (
                   <Avatar className="h-7 w-7 ring-2 ring-white/20 relative z-10">
                     <AvatarImage src={coverUrl || avatarUrl || ''} alt={getUserDisplayName()} />
-                    <AvatarFallback className="bg-white/20 text-white text-xs font-semibold">
+                    <AvatarFallback className="bg-white/20 text-white text-xs font-semibold" delayMs={150}>
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
@@ -344,8 +344,8 @@ function JobSeekerTopNav() {
                   />
                 ) : avatarUrl ? (
                   <Avatar className="h-10 w-10 ring-2 ring-white/20">
-                    <AvatarImage src={avatarUrl} alt={getUserDisplayName()} />
-                    <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
+                    <AvatarImage src={avatarUrl || ''} alt={getUserDisplayName()} />
+                    <AvatarFallback className="bg-white/20 text-white text-sm font-semibold" delayMs={150}>
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>

@@ -127,8 +127,8 @@ export function AddToColleagueListDialog({
               disabled={isAdding !== null || !isOnline}
             >
               <Avatar className="h-8 w-8">
-                <AvatarImage src={member.profileImageUrl || undefined} />
-                <AvatarFallback className="text-xs bg-white/20">
+                <AvatarImage src={member.profileImageUrl || ''} />
+                <AvatarFallback className="text-xs bg-white/20" delayMs={150}>
                   {member.firstName?.[0]}{member.lastName?.[0]}
                 </AvatarFallback>
               </Avatar>

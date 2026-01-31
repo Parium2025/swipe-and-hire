@@ -262,11 +262,11 @@ export default function ProfilePreview() {
                 /* Om ingen video, visa Avatar med fallback till initialer */
                 <Avatar className="w-[165px] h-[165px] border-2 border-white/40 shadow-2xl">
                   <AvatarImage 
-                    src={profileImageUrl || signedCoverUrl || undefined} 
+                    src={profileImageUrl || signedCoverUrl || ''} 
                     alt="Profilbild"
                     className="object-cover"
                   />
-                  <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold">
+                  <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold" delayMs={200}>
                     {`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -663,8 +663,8 @@ export default function ProfilePreview() {
                  </div>
                ) : (
                  <Avatar className="h-[200px] w-[200px] ring-2 ring-white/20 shadow-xl">
-                   <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
-                   <AvatarFallback className="bg-primary text-white text-5xl">
+                   <AvatarImage src={profileImageUrl || signedCoverUrl || ''} className="object-cover" />
+                   <AvatarFallback className="bg-primary text-white text-5xl" delayMs={200}>
                      {consentedData?.first_name?.[0]}
                    </AvatarFallback>
                  </Avatar>

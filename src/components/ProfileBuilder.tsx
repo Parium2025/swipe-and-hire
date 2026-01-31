@@ -231,8 +231,8 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
             <div className="max-w-md mx-auto">
               <div className="text-center mb-4 md:mb-6">
                 <Avatar className="h-24 w-24 md:h-32 md:w-32 mx-auto mb-4">
-                  <AvatarImage src={formData.profileImageUrl} />
-                  <AvatarFallback className="text-2xl">
+                  <AvatarImage src={formData.profileImageUrl || ''} />
+                  <AvatarFallback className="text-2xl" delayMs={150}>
                     {formData.firstName[0]}{formData.lastName[0]}
                   </AvatarFallback>
                 </Avatar>

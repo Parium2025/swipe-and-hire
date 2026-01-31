@@ -174,8 +174,8 @@ const CompanyReviews = () => {
         <div className="mb-6">
           <div className="flex items-center gap-3">
             <Avatar className="h-12 w-12 bg-transparent">
-              <AvatarImage src={company.company_logo_url} alt={company.company_name} />
-              <AvatarFallback className="bg-transparent">
+              <AvatarImage src={company.company_logo_url || ''} alt={company.company_name} />
+              <AvatarFallback className="bg-transparent" delayMs={150}>
                 <Building2 className="h-8 w-8 text-white" />
               </AvatarFallback>
             </Avatar>

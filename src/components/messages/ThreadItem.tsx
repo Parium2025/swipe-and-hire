@@ -64,8 +64,8 @@ export function ThreadItem({
       {/* Avatar with unread indicator */}
       <div className="relative flex-shrink-0">
         <Avatar className="h-14 w-14 border-2 border-white/10">
-          <AvatarImage src={getAvatarUrl() || undefined} />
-          <AvatarFallback className="bg-gradient-to-br from-blue-500/30 to-purple-500/30 text-white text-base">
+          <AvatarImage src={getAvatarUrl() || ''} />
+          <AvatarFallback className="bg-gradient-to-br from-blue-500/30 to-purple-500/30 text-white text-base" delayMs={150}>
             {getInitials()}
           </AvatarFallback>
         </Avatar>

@@ -691,11 +691,11 @@ export const CandidateProfileDialog = ({
               ) : (
                 <Avatar className="w-40 h-40 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
                   <AvatarImage 
-                    src={profileImageUrl || undefined} 
+                    src={profileImageUrl || ''} 
                     alt={`${displayApp.first_name} ${displayApp.last_name}`}
                     className="object-cover"
                   />
-                  <AvatarFallback className="bg-white/10 text-white text-4xl md:text-5xl font-semibold">
+                  <AvatarFallback className="bg-white/10 text-white text-4xl md:text-5xl font-semibold" delayMs={200}>
                     {initials}
                   </AvatarFallback>
                 </Avatar>

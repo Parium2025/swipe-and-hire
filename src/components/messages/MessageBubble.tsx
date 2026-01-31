@@ -78,8 +78,8 @@ export function MessageBubble({
       <div className="w-8 flex-shrink-0">
         {showAvatar && !isOwn && (
           <Avatar className="h-8 w-8 border border-white/10">
-            <AvatarImage src={getAvatarUrl() || undefined} />
-            <AvatarFallback className="bg-white/10 text-white text-xs">
+            <AvatarImage src={getAvatarUrl() || ''} />
+            <AvatarFallback className="bg-white/10 text-white text-xs" delayMs={150}>
               {getInitials()}
             </AvatarFallback>
           </Avatar>

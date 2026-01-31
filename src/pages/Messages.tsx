@@ -426,11 +426,11 @@ function ConversationItem({
             "h-12 w-12 border-2",
             category === 'candidates' ? "border-emerald-500/50" : "border-blue-500/50"
           )}>
-            <AvatarImage src={getAvatarUrl() || undefined} />
+            <AvatarImage src={getAvatarUrl() || ''} />
             <AvatarFallback className={cn(
               "text-white text-sm",
               category === 'candidates' ? "bg-emerald-500/20" : "bg-blue-500/20"
-            )}>
+            )} delayMs={150}>
               {getInitials()}
             </AvatarFallback>
           </Avatar>
@@ -627,8 +627,8 @@ function ChatView({
           </div>
         ) : (
           <Avatar className="h-10 w-10 border border-white/10">
-            <AvatarImage src={getAvatarUrl() || undefined} />
-            <AvatarFallback className="bg-white/10 text-white text-sm">
+            <AvatarImage src={getAvatarUrl() || ''} />
+            <AvatarFallback className="bg-white/10 text-white text-sm" delayMs={150}>
               {getInitials()}
             </AvatarFallback>
           </Avatar>
@@ -816,8 +816,8 @@ function MessageBubble({
       <div className="w-8 flex-shrink-0">
         {showAvatar && !isOwn && (
           <Avatar className="h-8 w-8 border border-white/10">
-            <AvatarImage src={getAvatarUrl() || undefined} />
-            <AvatarFallback className="bg-white/10 text-white text-xs">
+            <AvatarImage src={getAvatarUrl() || ''} />
+            <AvatarFallback className="bg-white/10 text-white text-xs" delayMs={150}>
               {getInitials()}
             </AvatarFallback>
           </Avatar>

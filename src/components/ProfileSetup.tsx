@@ -156,8 +156,8 @@ const ProfileSetup = () => {
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 <Avatar className="h-24 w-24 ring-2 ring-primary/20">
-                  <AvatarImage src={profileImageUrl} />
-                  <AvatarFallback className="text-lg bg-primary/10 text-foreground">
+                  <AvatarImage src={profileImageUrl || ''} />
+                  <AvatarFallback className="text-lg bg-primary/10 text-foreground" delayMs={150}>
                     {profile?.first_name?.[0]}{profile?.last_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
