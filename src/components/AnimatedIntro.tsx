@@ -61,6 +61,9 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
               src={cachedUrl || logoUrl}
               alt="Parium" 
               className="relative h-60 w-auto lg:h-[280px] z-10"
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
             />
           </div>
         </div>

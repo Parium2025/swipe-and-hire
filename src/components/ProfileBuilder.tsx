@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import FileUpload from '@/components/FileUpload';
 import { Progress } from '@/components/ui/progress';
+import { useCachedImage } from '@/hooks/useCachedImage';
 import { 
   User, 
   Upload, 
@@ -23,6 +24,9 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useOnline } from '@/hooks/useOnlineStatus';
+
+// Parium logo (alternative white version for dark backgrounds)
+const pariumLogoUrl = '/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png';
 
 // Draft key for localStorage
 const PROFILE_BUILDER_DRAFT_KEY = 'parium_draft_profile-builder';
@@ -45,6 +49,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
+  const { cachedUrl: cachedLogoUrl } = useCachedImage(pariumLogoUrl);
   
   // Form data
   const [formData, setFormData] = useState({
@@ -387,9 +392,12 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center justify-between mb-4">
               <img 
-                src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
+                src={cachedLogoUrl || pariumLogoUrl}
                 alt="Parium" 
                 className="h-8 w-auto"
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
               />
               <span className="text-primary-foreground/80 text-sm">
                 Steg {currentStep} av {totalSteps}
