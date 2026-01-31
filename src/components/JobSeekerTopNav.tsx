@@ -316,8 +316,16 @@ function JobSeekerTopNav() {
                 {/* Trigger always shows cover image (no play icon) - video playback is only in dropdown */}
                 {(hasVideo && (coverUrl || avatarUrl)) || avatarUrl ? (
                   <Avatar className="h-7 w-7 ring-2 ring-white/20 relative z-10">
-                    <AvatarImage src={coverUrl || avatarUrl || ''} alt={getUserDisplayName()} />
-                    <AvatarFallback className="bg-white/20 text-white text-xs font-semibold">
+                    <AvatarImage 
+                      src={coverUrl || avatarUrl || ''} 
+                      alt={getUserDisplayName()}
+                      className="object-cover"
+                    />
+                    {/* Only show fallback after a delay to prevent flash */}
+                    <AvatarFallback 
+                      className="bg-white/20 text-white text-xs font-semibold"
+                      delayMs={200}
+                    >
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
@@ -344,8 +352,8 @@ function JobSeekerTopNav() {
                   />
                 ) : avatarUrl ? (
                   <Avatar className="h-10 w-10 ring-2 ring-white/20">
-                    <AvatarImage src={avatarUrl} alt={getUserDisplayName()} />
-                    <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
+                    <AvatarImage src={avatarUrl} alt={getUserDisplayName()} className="object-cover" />
+                    <AvatarFallback className="bg-white/20 text-white text-sm font-semibold" delayMs={200}>
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
