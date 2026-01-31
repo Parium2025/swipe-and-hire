@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ResolvedAvatar } from '@/components/ui/resolved-avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -409,12 +409,13 @@ function ContactItem({
         className="h-4 w-4 border-white/30 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
       />
       
-      <Avatar className="h-9 w-9 border border-white/10">
-        <AvatarImage src={contact.profileImageUrl || ''} />
-        <AvatarFallback className="bg-white/10 text-white text-sm" delayMs={150}>
-          {getInitials()}
-        </AvatarFallback>
-      </Avatar>
+      <ResolvedAvatar
+        src={contact.profileImageUrl}
+        mediaType="profile-image"
+        fallback={getInitials()}
+        className="h-9 w-9 border border-white/10"
+        fallbackClassName="bg-white/10 text-white text-sm"
+      />
 
       <div className="flex-1 min-w-0">
         <span className="font-medium text-white text-sm truncate block">

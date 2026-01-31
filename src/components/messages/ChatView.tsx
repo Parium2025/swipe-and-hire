@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +9,7 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { MessageThread, OptimisticMessage } from './types';
 import { MessageBubble } from './MessageBubble';
+import { MessageAvatar } from './MessageAvatar';
 import { MessageAttachmentPicker } from './MessageAttachmentPicker';
 import { DesktopEmojiPicker } from './DesktopEmojiPicker';
 import { Message } from '@/hooks/useMessages';
@@ -197,22 +197,6 @@ export function ChatView({
     return `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Okänd';
   };
 
-  const getAvatarUrl = () => {
-    if (profile.role === 'employer' && profile.company_logo_url) {
-      return profile.company_logo_url;
-    }
-    return profile.profile_image_url;
-  };
-
-  const getInitials = () => {
-    if (profile.role === 'employer' && profile.company_name) {
-      return profile.company_name.substring(0, 2).toUpperCase();
-    }
-    const first = profile.first_name?.[0] || '';
-    const last = profile.last_name?.[0] || '';
-    return (first + last).toUpperCase() || '?';
-  };
-
   // Group messages by date
   const groupedMessages = allMessages.reduce((groups, msg) => {
     const date = format(new Date(msg.created_at), 'yyyy-MM-dd');
@@ -241,12 +225,11 @@ export function ChatView({
           <ChevronLeft className="h-5 w-5 text-white" />
         </Button>
 
-        <Avatar className="h-10 w-10 border border-white/10">
-          <AvatarImage src={getAvatarUrl() || ''} />
-          <AvatarFallback className="bg-gradient-to-br from-blue-500/30 to-purple-500/30 text-white text-sm" delayMs={150}>
-            {getInitials()}
-          </AvatarFallback>
-        </Avatar>
+        <MessageAvatar 
+          senderProfile={profile} 
+          size="md" 
+          className="border border-white/10"
+        />
 
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-white truncate">{getDisplayName()}</h2>
