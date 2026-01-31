@@ -476,10 +476,10 @@ const MyApplications = () => {
                 Ta bort ansökan
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
+            <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {applicationToRemove && (
                 <>
-                  Är du säker på att du vill ta bort din ansökan för <span className="font-semibold text-white break-words">"{applicationToRemove.title}"</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort din ansökan för <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{applicationToRemove.title}"</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>

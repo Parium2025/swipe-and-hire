@@ -581,10 +581,10 @@ const EmployerDashboard = memo(() => {
             </div>
           </AlertDialogHeader>
           <div className="overflow-y-auto flex-1 my-4">
-            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words text-center">
+            <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
               {jobToDelete && (
                 <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>

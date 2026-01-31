@@ -361,10 +361,10 @@ const SavedJobs = () => {
                 Ta bort sparat jobb
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
+            <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {jobToRemove && (
                 <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{jobToRemove.title}"</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{jobToRemove.title}"</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>
