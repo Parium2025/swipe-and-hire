@@ -115,6 +115,43 @@
     <div id="app-bg" aria-hidden="true"></div>
     <!-- Hidden hero preloader for Safari/iOS -->
     <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
+
+    <!--
+      🚀 AUTH LOGO PRE-SPLASH
+      This element renders BEFORE any JS/CSS so the /auth logo never "pops in".
+      It is removed by main.tsx once React is mounted.
+    -->
+    <div id="auth-presplash" aria-hidden="true" style="
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      pointer-events: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: clamp(72px, 16vh, 160px);
+      background: radial-gradient(circle at 50% 40%, rgba(0,163,255,0.28) 0%, rgba(0,163,255,0.10) 50%, rgba(0,163,255,0) 80%), hsl(215 100% 12%);
+    ">
+      <img
+        src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png"
+        alt=""
+        decoding="sync"
+        fetchpriority="high"
+        style="width: min(460px, 82vw); height: auto; aspect-ratio: 460 / 256; display: block; transform: translateZ(0);"
+      />
+    </div>
+    <script>
+      // Instantly show the presplash ONLY when we are on /auth
+      (function() {
+        try {
+          if (window.location.pathname === '/auth') {
+            var el = document.getElementById('auth-presplash');
+            if (el) el.style.display = 'flex';
+          }
+        } catch (e) { /* noop */ }
+      })();
+    </script>
+
     <div id="root"></div>
     <script>
       try {
