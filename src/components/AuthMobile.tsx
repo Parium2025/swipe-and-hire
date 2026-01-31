@@ -627,7 +627,7 @@ const AuthMobile = ({
 
       <div 
         ref={containerRef} 
-        className="relative z-10 flex flex-col min-h-screen overflow-anchor-none animate-fade-in"
+        className="relative z-10 flex flex-col min-h-screen overflow-anchor-none"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
           WebkitOverflowScrolling: 'touch'
