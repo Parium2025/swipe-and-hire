@@ -299,7 +299,7 @@ const TeamManagement = () => {
               className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10"
             >
               <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-white/10 text-white text-sm">
+                <AvatarFallback className="bg-white/10 text-white text-sm" delayMs={150}>
                   {getInitials(member.first_name, member.last_name)}
                 </AvatarFallback>
               </Avatar>

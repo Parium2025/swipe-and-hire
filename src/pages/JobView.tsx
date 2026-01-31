@@ -583,10 +583,10 @@ const JobView = () => {
           >
             <Avatar className="h-10 w-10">
               <AvatarImage 
-                src={job.profiles?.company_logo_url} 
+                src={job.profiles?.company_logo_url || ''} 
                 alt={job.profiles?.company_name || 'Företagslogga'}
               />
-              <AvatarFallback className="bg-white/20 text-white font-semibold text-sm">
+              <AvatarFallback className="bg-white/20 text-white font-semibold text-sm" delayMs={150}>
                 {job.profiles?.company_name
                   ? job.profiles.company_name.substring(0, 2).toUpperCase()
                   : job.profiles?.first_name && job.profiles?.last_name

@@ -23,8 +23,8 @@ function TeamMemberAvatar({ imageUrl }: { imageUrl: string | null }) {
   const resolvedUrl = useMediaUrl(imageUrl, 'profile-image');
   return (
     <Avatar className="h-10 w-10">
-      <AvatarImage src={resolvedUrl || undefined} />
-      <AvatarFallback className="bg-white/10 text-white">?</AvatarFallback>
+      <AvatarImage src={resolvedUrl || ''} />
+      <AvatarFallback className="bg-white/10 text-white" delayMs={150}>?</AvatarFallback>
     </Avatar>
   );
 }

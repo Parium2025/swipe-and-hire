@@ -1236,8 +1236,8 @@ const MyCandidates = () => {
                       className={`text-white hover:text-white ${viewingColleagueId === member.userId ? 'bg-white/10' : ''}`}
                     >
                       <Avatar className="h-5 w-5 mr-2">
-                        <AvatarImage src={member.profileImageUrl || undefined} />
-                        <AvatarFallback className="text-[10px] bg-white/20">
+                        <AvatarImage src={member.profileImageUrl || ''} />
+                        <AvatarFallback className="text-[10px] bg-white/20" delayMs={150}>
                           {member.firstName?.[0]}{member.lastName?.[0]}
                         </AvatarFallback>
                       </Avatar>

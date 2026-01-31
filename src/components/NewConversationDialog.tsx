@@ -410,8 +410,8 @@ function ContactItem({
       />
       
       <Avatar className="h-9 w-9 border border-white/10">
-        <AvatarImage src={contact.profileImageUrl || undefined} />
-        <AvatarFallback className="bg-white/10 text-white text-sm">
+        <AvatarImage src={contact.profileImageUrl || ''} />
+        <AvatarFallback className="bg-white/10 text-white text-sm" delayMs={150}>
           {getInitials()}
         </AvatarFallback>
       </Avatar>

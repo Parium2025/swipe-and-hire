@@ -70,32 +70,15 @@ function CandidateAvatarBase({
 
   return (
     <Avatar className="h-10 w-10 ring-2 ring-inset ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
-      {resolvedImageUrl && !avatarError ? (
-        <>
-          <AvatarImage 
-            src={resolvedImageUrl} 
-            alt={`${firstName || ''} ${lastName || ''}`}
-            onError={() => setAvatarError(true)}
-            onLoad={() => setImageLoaded(true)}
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            draggable={false}
-            className={imageLoaded ? 'opacity-100' : 'opacity-0'}
-            style={{ transition: 'opacity 150ms ease-in' }}
-          />
-          {/* Visa fallback medan bilden laddar */}
-          {!imageLoaded && (
-            <AvatarFallback className="bg-white/20 text-white font-semibold absolute inset-0">
-              {initials || '?'}
-            </AvatarFallback>
-          )}
-        </>
-      ) : (
-        <AvatarFallback className="bg-white/20 text-white font-semibold">
-          {initials || '?'}
-        </AvatarFallback>
-      )}
+      <AvatarImage 
+        src={resolvedImageUrl || ''} 
+        alt={`${firstName || ''} ${lastName || ''}`}
+        onError={() => setAvatarError(true)}
+        onLoad={() => setImageLoaded(true)}
+      />
+      <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={150}>
+        {initials || '?'}
+      </AvatarFallback>
     </Avatar>
   );
 }

@@ -737,10 +737,8 @@ const SearchJobs = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-12 w-12 flex-shrink-0">
-                  {matchingCompany.logo ? (
-                    <AvatarImage src={matchingCompany.logo} alt={matchingCompany.name} />
-                  ) : null}
-                  <AvatarFallback className="bg-white/20 text-white text-lg font-bold">
+                  <AvatarImage src={matchingCompany.logo || ''} alt={matchingCompany.name} />
+                  <AvatarFallback className="bg-white/20 text-white text-lg font-bold" delayMs={150}>
                     {matchingCompany.name.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
