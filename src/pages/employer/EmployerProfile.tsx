@@ -891,10 +891,10 @@ const EmployerProfile = () => {
                 Ta bort social medier-länk
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
+            <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {linkToDelete && (
                 <>
-                  Är du säker på att du vill ta bort länken till <span className="font-semibold text-white break-words">{getPlatformLabel(linkToDelete.link.platform)}</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort länken till <span className="font-semibold text-white">{getPlatformLabel(linkToDelete.link.platform)}</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>
