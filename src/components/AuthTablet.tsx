@@ -589,8 +589,7 @@ const AuthTablet = ({
                 <PariumAuthLogo
                   src={logoUrl}
                   alt="Parium"
-                  className="relative"
-                  style={{ width: 600, height: 240 }}
+                  className="relative h-[224px] w-[560px] md:h-[240px] md:w-[600px]"
                 />
               </div>
             </div>
