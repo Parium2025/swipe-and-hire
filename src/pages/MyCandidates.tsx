@@ -56,7 +56,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -1235,12 +1235,13 @@ const MyCandidates = () => {
                       onClick={() => setViewingColleagueId(member.userId)}
                       className={`text-white hover:text-white ${viewingColleagueId === member.userId ? 'bg-white/10' : ''}`}
                     >
-                      <Avatar className="h-5 w-5 mr-2">
-                        <AvatarImage src={member.profileImageUrl || ''} />
-                        <AvatarFallback className="text-[10px] bg-white/20" delayMs={150}>
-                          {member.firstName?.[0]}{member.lastName?.[0]}
-                        </AvatarFallback>
-                      </Avatar>
+                      <TeamMemberAvatar
+                        profileImageUrl={member.profileImageUrl}
+                        firstName={member.firstName}
+                        lastName={member.lastName}
+                        size="xs"
+                        className="mr-2"
+                      />
                       {member.firstName} {member.lastName}
                     </DropdownMenuItem>
                   ))}
