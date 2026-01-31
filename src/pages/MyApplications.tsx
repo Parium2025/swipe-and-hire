@@ -63,7 +63,10 @@ interface Application {
   } | null;
 }
 
-const getStatusLabel = (status: string) => {
+const getStatusLabel = (status: string, isExpiredOrDeleted: boolean) => {
+  if (isExpiredOrDeleted) {
+    return 'Avslutad';
+  }
   switch (status) {
     case 'pending':
     case 'reviewed':
@@ -80,7 +83,10 @@ const getStatusLabel = (status: string) => {
   }
 };
 
-const getStatusIcon = (status: string) => {
+const getStatusIcon = (status: string, isExpiredOrDeleted: boolean) => {
+  if (isExpiredOrDeleted) {
+    return <Clock className="h-3.5 w-3.5" />;
+  }
   switch (status) {
     case 'pending':
     case 'reviewed':
@@ -97,7 +103,10 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-const getStatusColor = (status: string) => {
+const getStatusColor = (status: string, isExpiredOrDeleted: boolean) => {
+  if (isExpiredOrDeleted) {
+    return 'bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30 transition-colors';
+  }
   switch (status) {
     case 'pending':
     case 'reviewed':
@@ -343,7 +352,7 @@ const MyApplications = () => {
             
             // Check if job is expired or deleted
             const timeInfo = job ? getTimeRemaining(job.created_at, job.expires_at) : { isExpired: false, text: '' };
-            const isExpiredOrDeleted = job?.deleted_at || timeInfo.isExpired;
+            const isExpiredOrDeleted = !!(job?.deleted_at || timeInfo.isExpired);
             const isRemoving = removingIds.has(application.id);
 
             return (
@@ -424,10 +433,10 @@ const MyApplications = () => {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <Badge 
                         variant="glass"
-                        className={`flex items-center gap-1.5 px-2.5 py-1 border whitespace-nowrap transition-all duration-300 group-hover:backdrop-brightness-90 hover:backdrop-brightness-110 ${getStatusColor(application.status)}`}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 border whitespace-nowrap transition-all duration-300 group-hover:backdrop-brightness-90 hover:backdrop-brightness-110 ${getStatusColor(application.status, isExpiredOrDeleted)}`}
                       >
-                        {getStatusIcon(application.status)}
-                        {getStatusLabel(application.status)}
+                        {getStatusIcon(application.status, isExpiredOrDeleted)}
+                        {getStatusLabel(application.status, isExpiredOrDeleted)}
                       </Badge>
                       
                       {/* Delete button - only show for expired or deleted jobs */}
