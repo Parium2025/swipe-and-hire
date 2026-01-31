@@ -5,6 +5,7 @@ import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
+import { hydrateCriticalAssets } from './lib/criticalAssetCache'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 import pariumAuthLogoInline from './assets/parium-auth-logo.png?inline'
 
@@ -124,6 +125,16 @@ function redirectAuthTokensIfNeeded() {
 async function start() {
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
+
+  // Hydrate critical assets from CacheStorage into decoded blob: URLs BEFORE React mounts.
+  // This makes the auth logo paint instantly on hard refresh (after SW has cached it).
+  try {
+    if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
+      await hydrateCriticalAssets([authLogoUrl, altLogoUrl]);
+    }
+  } catch {
+    // Never block app start for cache hydration
+  }
 
   // If we land directly on /auth (hard refresh), ensure the logo is decoded
   // BEFORE React mounts so the very first paint already has it.
