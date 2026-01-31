@@ -15,8 +15,7 @@ import {
   Briefcase, 
   Star,
   Send,
-  ChevronDown,
-  ChevronUp
+  ChevronDown
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
@@ -438,14 +437,14 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   <CollapsibleTrigger asChild>
                     <button className="flex items-center justify-between w-full bg-white/5 hover:bg-white/10 p-3 rounded-lg transition-colors">
                       <span className="text-sm font-medium text-white">Lämna en recension</span>
-                      {isFormOpen ? (
-                        <ChevronUp className="h-4 w-4 text-white" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 text-white" />
-                      )}
+                      <ChevronDown 
+                        className={`h-4 w-4 text-white transition-transform duration-300 ${
+                          isFormOpen ? 'rotate-180' : ''
+                        }`} 
+                      />
                     </button>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-3">
+                  <CollapsibleContent className="mt-3 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out overflow-hidden">
                     <div className="bg-white/5 p-4 rounded-lg space-y-3">
                       <div>
                         <label className="text-sm font-medium mb-2 block text-white">Betyg</label>
