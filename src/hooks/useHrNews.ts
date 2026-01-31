@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEffect } from 'react';
 
 export interface HrNewsItem {
   id: string;
@@ -15,6 +16,34 @@ export interface HrNewsItem {
   order_index: number;
   published_at: string | null;
   is_translated?: boolean;
+}
+
+// LocalStorage cache for instant load - no expiry, always syncs in background
+const CACHE_KEY = 'parium_hr_news_cache';
+
+interface CachedData {
+  items: HrNewsItem[];
+  timestamp: number;
+}
+
+function readCache(): HrNewsItem[] | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const cached: CachedData = JSON.parse(raw);
+    return cached.items;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(items: HrNewsItem[]): void {
+  try {
+    const cached: CachedData = { items, timestamp: Date.now() };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
+  } catch {
+    // Storage full
+  }
 }
 
 /**
@@ -37,10 +66,8 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
 
   // Happy path: we have articles (1-4 is fine, we show what's available)
   if (!error && allNews && allNews.length > 0) {
-    console.log('[HR News] ✓ Got articles from DB', { 
-      count: allNews.length,
-      sources: allNews.map(n => n.source) 
-    });
+    // Update cache with fresh data
+    writeCache(allNews);
     return allNews;
   }
 
@@ -65,12 +92,11 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
       .limit(4);
 
     if (refreshedNews && refreshedNews.length > 0) {
-      console.log('[HR News] ✓ After refresh:', { count: refreshedNews.length });
+      writeCache(refreshedNews);
       return refreshedNews;
     }
 
     // Return what we originally had (fallback)
-    console.log('[HR News] ⚠ Returning original data as fallback');
     return allNews || [];
   } catch (err) {
     console.error('[HR News] Fatal error:', err);
@@ -79,14 +105,44 @@ const fetchRecentNews = async (): Promise<HrNewsItem[]> => {
 };
 
 export const useHrNews = () => {
+  const queryClient = useQueryClient();
+
+  // Real-time subscription for instant updates when new articles are added
+  useEffect(() => {
+    const channel = supabase
+      .channel('hr-news-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'daily_hr_news',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['hr-news'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   return useQuery({
     queryKey: ['hr-news'],
     queryFn: fetchRecentNews,
-    staleTime: 1000 * 60 * 5, // 5 minutes - check for new articles more often
-    gcTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes - check for new articles
+    gcTime: 1000 * 60 * 60, // 1 hour in memory
     retry: 2,
     retryDelay: 1000,
-    refetchOnWindowFocus: true, // Refetch when user comes back
-    refetchOnMount: 'always', // Always check for fresh articles on mount
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    // Instant load from localStorage cache
+    initialData: () => readCache() ?? undefined,
+    initialDataUpdatedAt: () => {
+      const cached = readCache();
+      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+    },
   });
 };

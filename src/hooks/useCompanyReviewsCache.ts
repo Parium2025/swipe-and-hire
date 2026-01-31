@@ -22,17 +22,15 @@ interface CompanyReviewsData {
 }
 
 const CACHE_KEY = 'parium_company_reviews_cache';
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
-// LocalStorage cache helpers
+// LocalStorage cache helpers - NO EXPIRY, always syncs in background
 const getLocalCache = (companyId: string): { data: CompanyReviewsData; timestamp: number } | null => {
   try {
     const cached = localStorage.getItem(`${CACHE_KEY}_${companyId}`);
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (Date.now() - parsed.timestamp < CACHE_TTL) {
-        return parsed;
-      }
+      // Always return cached data - background sync will update
+      return parsed;
     }
   } catch (e) {
     console.warn('Failed to read reviews cache:', e);

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { useMyApplicationsCache } from '@/hooks/useMyApplicationsCache';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -134,82 +134,8 @@ const MyApplications = () => {
   // Get candidate's interviews
   const { interviews, isLoading: interviewsLoading } = useCandidateInterviews();
 
-  const { data: applications, isLoading, error } = useQuery({
-    queryKey: ['my-applications', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-
-      const { data, error } = await supabase
-        .from('job_applications')
-        .select(`
-          id,
-          job_id,
-          status,
-          applied_at,
-          created_at,
-          job_postings (
-            id,
-            title,
-            location,
-            employment_type,
-            workplace_city,
-            workplace_county,
-            is_active,
-            created_at,
-            expires_at,
-            deleted_at,
-            applications_count,
-            profiles:employer_id (
-              company_name,
-              company_logo_url
-            )
-          )
-        `)
-        .eq('applicant_id', user.id)
-        .order('applied_at', { ascending: false });
-
-      if (error) throw error;
-      return (data || []) as Application[];
-    },
-    enabled: !!user,
-  });
-
-  // Real-time prenumeration för applications_count uppdateringar
-  useEffect(() => {
-    const channel = supabase
-      .channel('my-applications-count')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'job_postings'
-        },
-        (payload) => {
-          // Uppdatera cache med nya applications_count
-          queryClient.setQueryData(['my-applications', user?.id], (oldData: Application[] | undefined) => {
-            if (!oldData) return oldData;
-            return oldData.map(application => {
-              if (application.job_postings && application.job_postings.id === payload.new.id) {
-                return {
-                  ...application,
-                  job_postings: {
-                    ...application.job_postings,
-                    applications_count: payload.new.applications_count
-                  }
-                };
-              }
-              return application;
-            });
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient, user?.id]);
+  // Use cached applications hook for instant load + realtime sync
+  const { applications, isLoading, error, deleteApplication } = useMyApplicationsCache();
 
   const handleApplicationClick = (application: Application) => {
     if (application.job_postings?.id) {
@@ -230,18 +156,7 @@ const MyApplications = () => {
     setRemovingIds(prev => new Set(prev).add(applicationId));
     
     try {
-      const { error } = await supabase
-        .from('job_applications')
-        .delete()
-        .eq('id', applicationId)
-        .eq('applicant_id', user?.id);
-
-      if (error) throw error;
-
-      // Update cache optimistically
-      queryClient.setQueryData(['my-applications', user?.id], (old: Application[] | undefined) => 
-        old?.filter(app => app.id !== applicationId) || []
-      );
+      await deleteApplication(applicationId);
       
       // Invalidate the count query
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
@@ -258,7 +173,6 @@ const MyApplications = () => {
       });
     }
   };
-
 
   if (isLoading) {
     return (
