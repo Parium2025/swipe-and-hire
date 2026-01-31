@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCachedImage } from '@/hooks/useCachedImage';
+import { PariumAuthLogo } from '@/components/PariumAuthLogo';
 import { AnimatedBackground } from './AnimatedBackground';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -576,15 +577,10 @@ const AuthDesktop = ({
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
-                <img 
+                <PariumAuthLogo
                   src={cachedLogoUrl || logoUrl}
-                  alt="Parium" 
-                  className="relative h-56 w-auto lg:h-64"
-                  width="400"
-                  height="160"
-                  loading="eager"
-                  decoding="sync"
-                  fetchPriority="high"
+                  alt="Parium"
+                  className="relative h-56 w-[400px] lg:h-64 lg:w-[460px]"
                 />
               </div>
             </div>
