@@ -20,7 +20,7 @@ export function PariumAuthLogo({ src, alt = 'Parium', className }: PariumAuthLog
       role="img"
       aria-label={alt}
       className={cn(
-        'relative bg-center bg-no-repeat bg-contain pointer-events-none select-none transform-gpu',
+        'relative bg-center bg-no-repeat bg-contain pointer-events-none select-none transform-gpu will-change-transform',
         className
       )}
       style={{ backgroundImage: `url(${src})`, contain: 'paint' }}
