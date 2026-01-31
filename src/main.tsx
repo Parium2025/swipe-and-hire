@@ -67,13 +67,48 @@ void preloadAndDecodeImage(altLogoUrl);
 
 const PREAUTH_SPLASH_ID = 'preauth-splash';
 
+function isReactAuthLogoReady(): boolean {
+  if (typeof document === 'undefined') return false;
+  // PariumAuthLogo renders as a <div role="img" aria-label="Parium" ... />
+  const el = document.querySelector(
+    'div[role="img"][aria-label="Parium"]'
+  ) as HTMLDivElement | null;
+  if (!el) return false;
+
+  const rect = el.getBoundingClientRect();
+  // Tailwind not loaded → width/height can be 0, which looks like the logo "loads in" later.
+  if (rect.width < 40 || rect.height < 40) return false;
+
+  // Ensure background-image is set (it is inline, but be defensive)
+  const bg = getComputedStyle(el).backgroundImage || '';
+  if (!bg || bg === 'none') return false;
+  return true;
+}
+
+function schedulePreAuthSplashHandoff(timeoutMs: number = 4000) {
+  if (typeof window === 'undefined') return;
+  const start = performance.now();
+
+  const tick = () => {
+    // Remove once the real logo is ready, or after a timeout.
+    if (isReactAuthLogoReady() || performance.now() - start > timeoutMs) {
+      unmountPreAuthSplash();
+      return;
+    }
+    requestAnimationFrame(tick);
+  };
+
+  requestAnimationFrame(tick);
+}
+
 function mountPreAuthSplash() {
   if (typeof document === 'undefined') return;
-  if (document.getElementById(PREAUTH_SPLASH_ID)) return;
-
-  const el = document.createElement('div');
-  el.id = PREAUTH_SPLASH_ID;
-  el.setAttribute('aria-hidden', 'true');
+  let el = document.getElementById(PREAUTH_SPLASH_ID) as HTMLDivElement | null;
+  if (!el) {
+    el = document.createElement('div');
+    el.id = PREAUTH_SPLASH_ID;
+    el.setAttribute('aria-hidden', 'true');
+  }
 
   // Inline styles so this works even before Tailwind/CSS is parsed.
   Object.assign(el.style, {
@@ -84,13 +119,18 @@ function mountPreAuthSplash() {
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    // Match app background so we don't get a white flash before CSS loads
-    background:
-      'radial-gradient(circle at 50% 40%, rgba(0,163,255,0.28) 0%, rgba(0,163,255,0.10) 50%, rgba(0,163,255,0) 80%), hsl(215 100% 12%)',
+    // Keep transparent so it never hides the form; we only want to mask the logo pop-in.
+    background: 'transparent',
     paddingTop: 'clamp(72px, 16vh, 160px)',
   } as CSSStyleDeclaration);
 
-  const img = document.createElement('img');
+  // Ensure an <img> exists so something paints even before Tailwind is parsed.
+  let img = el.querySelector('img') as HTMLImageElement | null;
+  if (!img) {
+    img = document.createElement('img');
+    el.appendChild(img);
+  }
+
   img.src = authLogoInlineUrl;
   img.alt = '';
   img.decoding = 'sync';
@@ -107,8 +147,9 @@ function mountPreAuthSplash() {
     transform: 'translateZ(0)',
   } as CSSStyleDeclaration);
 
-  el.appendChild(img);
-  document.body.appendChild(el);
+  if (!el.isConnected) {
+    document.body.appendChild(el);
+  }
 }
 
 function unmountPreAuthSplash() {
@@ -218,10 +259,14 @@ async function start() {
     </GlobalErrorBoundary>
   );
 
-  // Remove the pre-auth splash right after the first React paint.
+  // Keep the splash UNTIL the real auth logo is actually paintable.
+  // This prevents the "splash disappears → empty space → logo pops in" effect
+  // when Tailwind/CSS arrives a beat later.
   try {
     if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
-      requestAnimationFrame(() => requestAnimationFrame(() => unmountPreAuthSplash()));
+      schedulePreAuthSplashHandoff(4500);
+    } else {
+      unmountPreAuthSplash();
     }
   } catch {
     // ignore
