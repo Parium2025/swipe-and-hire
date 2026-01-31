@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCompanyReviewsCache } from "@/hooks/useCompanyReviewsCache";
 
 interface CompanyProfileDialogProps {
   open: boolean;
@@ -52,7 +53,6 @@ interface CompanyReview {
 export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyProfileDialogProps) {
   const { toast } = useToast();
   const [company, setCompany] = React.useState<CompanyProfile | null>(null);
-  const [reviews, setReviews] = React.useState<CompanyReview[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [newComment, setNewComment] = React.useState("");
   const [newRating, setNewRating] = React.useState(0);
@@ -61,10 +61,12 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = React.useState(false);
 
+  // Use cached reviews for instant load
+  const { reviews: cachedReviews, avgRating, reviewCount, refetch: refetchReviews } = useCompanyReviewsCache(open ? companyId : null);
+
   React.useEffect(() => {
     if (open && companyId) {
       fetchCompanyData();
-      fetchReviews();
       getCurrentUser();
     }
   }, [open, companyId]);
@@ -95,7 +97,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     };
   }, [open, companyId]);
 
-  // Real-time lyssning för recensioner
+  // Real-time lyssning för recensioner - triggers refetch from cache hook
   React.useEffect(() => {
     if (!open || !companyId) return;
 
@@ -104,40 +106,14 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'company_reviews',
           filter: `company_id=eq.${companyId}`
         },
         () => {
-          console.log('New review added in dialog');
-          fetchReviews();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'company_reviews',
-          filter: `company_id=eq.${companyId}`
-        },
-        () => {
-          console.log('Review updated in dialog');
-          fetchReviews();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'company_reviews',
-          filter: `company_id=eq.${companyId}`
-        },
-        () => {
-          console.log('Review deleted in dialog');
-          fetchReviews();
+          console.log('Reviews changed in dialog, refetching cache');
+          refetchReviews();
         }
       )
       .subscribe();
@@ -145,7 +121,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     return () => {
       supabase.removeChannel(reviewsChannel);
     };
-  }, [open, companyId]);
+  }, [open, companyId, refetchReviews]);
 
   const getCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -180,44 +156,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     }
   };
 
-  const fetchReviews = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("company_reviews")
-        .select("*")
-        .eq("company_id", companyId)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      // Fetch user profiles separately for non-anonymous reviews
-      if (data && data.length > 0) {
-        const userIds = data
-          .filter(r => !r.is_anonymous)
-          .map(r => r.user_id);
-        
-        if (userIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from("profiles")
-            .select("user_id, first_name, last_name")
-            .in("user_id", userIds);
-
-          const reviewsWithProfiles = data.map(review => ({
-            ...review,
-            profiles: profiles?.find(p => p.user_id === review.user_id)
-          }));
-
-          setReviews(reviewsWithProfiles as CompanyReview[]);
-        } else {
-          setReviews(data as CompanyReview[]);
-        }
-      } else {
-        setReviews([]);
-      }
-    } catch (error) {
-      console.error("Error fetching reviews:", error);
-    }
-  };
+  // Reviews are now fetched via useCompanyReviewsCache hook
 
   const handleSubmitReview = async () => {
     // Check if online before submitting
@@ -293,7 +232,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
       setNewComment("");
       setNewRating(0);
       setIsAnonymous(false);
-      fetchReviews();
+      refetchReviews();
     } catch (error) {
       console.error("Error submitting review:", error);
       toast({
@@ -334,9 +273,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     );
   }
 
-  const averageRating = reviews.length > 0
-    ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
-    : "0";
+  const averageRating = avgRating?.toFixed(1) || "0";
 
   const isOwnProfile = currentUserId === companyId;
 
@@ -358,7 +295,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   <div className="flex items-center gap-2 mt-1">
                     <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                     <span className="text-sm text-white">
-                      {averageRating} ({reviews.length} {reviews.length === 1 ? 'recension' : 'recensioner'})
+                      {averageRating} ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
                     </span>
                   </div>
                 </div>
@@ -521,12 +458,12 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
               {/* Lista med kommentarer */}
               <div className="space-y-4 mt-6">
-                {reviews.length === 0 ? (
+                {cachedReviews.length === 0 ? (
                   <p className="text-center text-white py-8">
                     Inga kommentarer än. Var först med att dela dina erfarenheter!
                   </p>
                 ) : (
-                  reviews.map((review) => (
+                  cachedReviews.map((review) => (
                     <div key={review.id} className="border border-white/10 rounded-lg p-4 space-y-2">
                       <div>
                         <p className="font-medium text-white">
