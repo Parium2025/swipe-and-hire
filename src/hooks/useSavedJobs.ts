@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useOnline } from '@/hooks/useOnlineStatus';
 
 const CACHE_KEY = 'parium_saved_jobs_cache';
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+// No TTL - always use cache for instant load, background sync keeps fresh
 
 interface CacheData {
   jobIds: string[];
@@ -20,9 +20,8 @@ function loadFromCache(userId: string): Set<string> | null {
     
     const data: CacheData = JSON.parse(raw);
     
-    // Check if cache is valid (same user and not expired)
+    // Only check user match - no expiry, background sync keeps fresh
     if (data.userId !== userId) return null;
-    if (Date.now() - data.timestamp > CACHE_TTL) return null;
     
     return new Set(data.jobIds);
   } catch {
