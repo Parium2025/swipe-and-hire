@@ -567,7 +567,7 @@ const AuthTablet = ({
       {/* Animated background with bubbles and glow */}
       <AnimatedBackground />
 
-      <div className="relative z-10 flex flex-col min-h-screen py-safe animate-fade-in">
+      <div className="relative z-10 flex flex-col min-h-screen py-safe">
         {/* Header med logo och text */}
         <div className="flex flex-col items-center px-6 pt-6 pb-4">
           <div className="text-center mb-6">
