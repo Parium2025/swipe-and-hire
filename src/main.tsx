@@ -7,8 +7,11 @@ import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 
-// Auth page logo (public)
+// Auth page logo (public) - blue text on dark background
 const authLogoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
+
+// Alternative logo (white version for dark backgrounds - used in ProfileSelector, ProfileBuilder)
+const altLogoUrl = '/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png';
 
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string) => {
@@ -50,6 +53,9 @@ void preloadAndDecodeImage(pariumLogoRings);
 
 // Fire-and-forget: ensures auth page logo is instantly ready even after logout/reload
 void preloadAndDecodeImage(authLogoUrl);
+
+// Fire-and-forget: ensures alternative white logo is ready (ProfileSelector, ProfileBuilder)
+void preloadAndDecodeImage(altLogoUrl);
 
 // Initialize Sentry for error tracking in production
 if (import.meta.env.PROD) {

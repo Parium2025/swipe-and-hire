@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
+import { useCachedImage } from '@/hooks/useCachedImage';
+
+// Auth logo URL (preloaded in main.tsx and CriticalAssetPreloads)
+const pariumLogoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
 interface LandingNavProps {
   onLoginClick: () => void;
@@ -9,6 +12,7 @@ interface LandingNavProps {
 
 const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { cachedUrl: cachedLogoUrl } = useCachedImage(pariumLogoUrl);
 
   const navItems = [
     { label: 'Produkt', href: '#produkt' },
@@ -24,11 +28,14 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
             {/* Logo */}
             <div className="flex items-center">
               <img
-                src={pariumLogo}
+                src={cachedLogoUrl || pariumLogoUrl}
                 alt="Parium"
                 width={224}
                 height={224}
                 className="h-auto w-32 md:w-48 lg:w-56"
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
               />
             </div>
 
