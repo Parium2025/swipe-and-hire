@@ -9,6 +9,39 @@ export interface OrganizationQuestion {
   job_count: number; // How many jobs have this question
 }
 
+// 🔥 localStorage cache for instant-load
+const ORG_QUESTIONS_CACHE_KEY = 'parium_org_questions_';
+
+interface CachedOrgQuestions {
+  questions: OrganizationQuestion[];
+  timestamp: number;
+}
+
+function readOrgQuestionsCache(userId: string): OrganizationQuestion[] | null {
+  try {
+    const key = ORG_QUESTIONS_CACHE_KEY + userId;
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const cached: CachedOrgQuestions = JSON.parse(raw);
+    return cached.questions;
+  } catch {
+    return null;
+  }
+}
+
+function writeOrgQuestionsCache(userId: string, questions: OrganizationQuestion[]): void {
+  try {
+    const key = ORG_QUESTIONS_CACHE_KEY + userId;
+    const cached: CachedOrgQuestions = {
+      questions,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(key, JSON.stringify(cached));
+  } catch {
+    // Storage full
+  }
+}
+
 /**
  * Fetches all unique questions from job_questions for the current employer's organization.
  * This allows filtering candidates by their answers to any question across all jobs.
@@ -16,7 +49,10 @@ export interface OrganizationQuestion {
 export const useOrganizationQuestions = () => {
   const { user } = useAuth();
 
-  return useQuery({
+  // Check for cached data BEFORE query runs
+  const hasCachedData = user ? readOrgQuestionsCache(user.id) !== null : false;
+
+  const query = useQuery({
     queryKey: ['organization-questions', user?.id],
     queryFn: async (): Promise<OrganizationQuestion[]> => {
       if (!user) return [];
@@ -65,12 +101,34 @@ export const useOrganizationQuestions = () => {
       });
 
       // Sort by job_count (most used first), then alphabetically
-      return Array.from(questionMap.values()).sort((a, b) => {
+      const result = Array.from(questionMap.values()).sort((a, b) => {
         if (b.job_count !== a.job_count) return b.job_count - a.job_count;
         return a.question_text.localeCompare(b.question_text, 'sv');
       });
+
+      // 🔥 Cache for instant-load on next visit
+      writeOrgQuestionsCache(user.id, result);
+
+      return result;
     },
     enabled: !!user,
     staleTime: 10 * 60 * 1000, // 10 minutes
+    // 🔥 Instant-load from localStorage cache
+    initialData: () => {
+      if (!user) return undefined;
+      const cached = readOrgQuestionsCache(user.id);
+      return cached ?? undefined;
+    },
+    initialDataUpdatedAt: () => {
+      if (!user) return undefined;
+      const cached = readOrgQuestionsCache(user.id);
+      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+    },
   });
+
+  return {
+    ...query,
+    // Only show loading if we don't have cached data
+    isLoading: query.isLoading && !hasCachedData,
+  };
 };

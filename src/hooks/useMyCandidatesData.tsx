@@ -53,15 +53,51 @@ export const STAGE_CONFIG = {
 // Page size for pagination - optimized for performance
 const PAGE_SIZE = 50;
 
+// 🔥 localStorage cache for instant-load
+const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_';
+
+interface CachedMyCandidates {
+  items: MyCandidateData[];
+  timestamp: number;
+}
+
+function readMyCandidatesCache(userId: string): MyCandidateData[] | null {
+  try {
+    const key = MY_CANDIDATES_CACHE_KEY + userId;
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const cached: CachedMyCandidates = JSON.parse(raw);
+    return cached.items;
+  } catch {
+    return null;
+  }
+}
+
+function writeMyCandidatesCache(userId: string, items: MyCandidateData[]): void {
+  try {
+    const key = MY_CANDIDATES_CACHE_KEY + userId;
+    const cached: CachedMyCandidates = {
+      items: items.slice(0, 100), // Max 100 to save space
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(key, JSON.stringify(cached));
+  } catch {
+    // Storage full
+  }
+}
+
 export function useMyCandidatesData(searchQuery: string = '') {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
 
+  // Check for cached data BEFORE query runs (only for non-search queries)
+  const hasCachedData = user && !searchQuery ? readMyCandidatesCache(user.id) !== null : false;
+
   // Use infinite query for scalable pagination (handles 100k+ candidates)
   const {
     data,
-    isLoading,
+    isLoading: queryLoading,
     error,
     refetch,
     fetchNextPage,
@@ -332,6 +368,11 @@ export function useMyCandidatesData(searchQuery: string = '') {
       const lastItem = myCandidates[myCandidates.length - 1];
       const nextCursor = myCandidates.length === PAGE_SIZE ? lastItem.updated_at : null;
 
+      // 🔥 Cache first page for instant-load on next visit (only for non-search)
+      if (!pageParam && !searchQuery && items.length > 0) {
+        writeMyCandidatesCache(user.id, items);
+      }
+
       return { items, nextCursor };
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -339,6 +380,21 @@ export function useMyCandidatesData(searchQuery: string = '') {
     staleTime: 0, // Always fresh data for real-time experience
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    // 🔥 Instant-load from localStorage cache (only for non-search queries)
+    initialData: () => {
+      if (!user || searchQuery) return undefined;
+      const cached = readMyCandidatesCache(user.id);
+      if (!cached || cached.length === 0) return undefined;
+      return {
+        pages: [{ items: cached, nextCursor: cached.length >= PAGE_SIZE ? cached[cached.length - 1]?.updated_at : null }],
+        pageParams: [null],
+      };
+    },
+    initialDataUpdatedAt: () => {
+      if (!user || searchQuery) return undefined;
+      const cached = readMyCandidatesCache(user.id);
+      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+    },
   });
 
   // PRE-FETCHING: Automatically load next batch in background after each page loads
@@ -352,6 +408,9 @@ export function useMyCandidatesData(searchQuery: string = '') {
       return () => clearTimeout(timer);
     }
   }, [data?.pages?.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // 🔥 Only show loading if we don't have cached data
+  const isLoading = queryLoading && !hasCachedData;
 
   // Flatten all pages into single array
   const candidates = useMemo(() => {
