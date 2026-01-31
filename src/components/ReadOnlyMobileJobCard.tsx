@@ -203,9 +203,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
             variant="glass"
             size="icon"
             onClick={handleSaveClick}
-            className="ml-auto h-6 w-6 p-0 rounded-full transition-all duration-300 group-hover:backdrop-brightness-90 hover:backdrop-brightness-110"
+            aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
+            className="ml-auto h-10 w-10 min-h-touch min-w-touch p-0 rounded-full transition-all duration-300 group-hover:backdrop-brightness-90 active:scale-95 active:bg-white/20"
           >
-            <Heart className={`h-3 w-3 ${isSaved ? 'fill-red-400 text-red-400' : ''}`} />
+            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : ''}`} />
           </Button>
         </div>
       </div>
