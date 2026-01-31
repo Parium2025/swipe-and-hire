@@ -1,13 +1,78 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useOnline } from '@/hooks/useOnlineStatus';
 
+const CACHE_KEY = 'parium_saved_jobs_cache';
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+interface CacheData {
+  jobIds: string[];
+  userId: string;
+  timestamp: number;
+}
+
+function loadFromCache(userId: string): Set<string> | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    
+    const data: CacheData = JSON.parse(raw);
+    
+    // Check if cache is valid (same user and not expired)
+    if (data.userId !== userId) return null;
+    if (Date.now() - data.timestamp > CACHE_TTL) return null;
+    
+    return new Set(data.jobIds);
+  } catch {
+    return null;
+  }
+}
+
+function saveToCache(userId: string, jobIds: Set<string>): void {
+  try {
+    const data: CacheData = {
+      jobIds: Array.from(jobIds),
+      userId,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export const useSavedJobs = () => {
   const { user } = useAuth();
-  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState(true);
+  const hasInitialized = useRef(false);
+  
+  // Initialize from cache immediately to prevent "fill-in" effect
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(() => {
+    if (typeof window === 'undefined' || !user?.id) return new Set();
+    return loadFromCache(user.id) || new Set();
+  });
+  
+  // Only show loading if we don't have cached data
+  const [isLoading, setIsLoading] = useState(() => {
+    if (typeof window === 'undefined' || !user?.id) return true;
+    return loadFromCache(user.id) === null;
+  });
+
+  // Re-initialize from cache when user changes
+  useEffect(() => {
+    if (!user?.id) {
+      setSavedJobIds(new Set());
+      setIsLoading(false);
+      return;
+    }
+    
+    const cached = loadFromCache(user.id);
+    if (cached) {
+      setSavedJobIds(cached);
+      setIsLoading(false);
+    }
+  }, [user?.id]);
 
   const fetchSavedJobs = useCallback(async () => {
     if (!user) {
@@ -24,7 +89,11 @@ export const useSavedJobs = () => {
 
       if (error) throw error;
 
-      setSavedJobIds(new Set(data?.map(item => item.job_id) || []));
+      const newIds = new Set(data?.map(item => item.job_id) || []);
+      setSavedJobIds(newIds);
+      
+      // Update cache with fresh data
+      saveToCache(user.id, newIds);
     } catch (err) {
       console.error('Error fetching saved jobs:', err);
     } finally {
@@ -32,8 +101,10 @@ export const useSavedJobs = () => {
     }
   }, [user]);
 
-  // Fetch saved job IDs on mount
+  // Fetch saved job IDs on mount (background hydration)
   useEffect(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
     fetchSavedJobs();
   }, [fetchSavedJobs]);
 
@@ -85,6 +156,8 @@ export const useSavedJobs = () => {
       } else {
         next.add(jobId);
       }
+      // Update cache immediately for instant navigation
+      saveToCache(user.id, next);
       return next;
     });
 
@@ -117,6 +190,8 @@ export const useSavedJobs = () => {
         } else {
           next.delete(jobId);
         }
+        // Revert cache
+        saveToCache(user.id, next);
         return next;
       });
       console.error('Error toggling saved job:', err);
