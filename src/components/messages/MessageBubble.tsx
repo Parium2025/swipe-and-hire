@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Message } from '@/hooks/useMessages';
@@ -8,6 +7,7 @@ import { MessageAttachmentDisplay } from './MessageAttachmentDisplay';
 import { MessageReactions } from './MessageReactions';
 import { EmojiReactionPicker } from './EmojiReactionPicker';
 import { LinkPreviewCard } from './LinkPreviewCard';
+import { MessageAvatar } from './MessageAvatar';
 import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { extractUrls } from '@/hooks/useLinkPreview';
 import { Clock } from 'lucide-react';
@@ -44,22 +44,6 @@ export function MessageBubble({
 
   // Only show preview for first URL to avoid clutter
   const previewUrl = urls.length > 0 ? urls[0] : null;
-  
-  const getAvatarUrl = () => {
-    if (senderProfile.role === 'employer' && senderProfile.company_logo_url) {
-      return senderProfile.company_logo_url;
-    }
-    return senderProfile.profile_image_url;
-  };
-
-  const getInitials = () => {
-    if (senderProfile.role === 'employer' && senderProfile.company_name) {
-      return senderProfile.company_name.substring(0, 2).toUpperCase();
-    }
-    const first = senderProfile.first_name?.[0] || '';
-    const last = senderProfile.last_name?.[0] || '';
-    return (first + last).toUpperCase() || '?';
-  };
 
   // Check for attachment (type assertion for extended Message type)
   const attachment = (message as any).attachment_url ? {
@@ -77,12 +61,7 @@ export function MessageBubble({
       {/* Avatar space */}
       <div className="w-8 flex-shrink-0">
         {showAvatar && !isOwn && (
-          <Avatar className="h-8 w-8 border border-white/10">
-            <AvatarImage src={getAvatarUrl() || ''} />
-            <AvatarFallback className="bg-white/10 text-white text-xs" delayMs={150}>
-              {getInitials()}
-            </AvatarFallback>
-          </Avatar>
+          <MessageAvatar senderProfile={senderProfile} size="sm" />
         )}
       </div>
 

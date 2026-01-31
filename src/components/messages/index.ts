@@ -1,5 +1,6 @@
 export * from './types';
 export * from './MessageBubble';
+export * from './MessageAvatar';
 export * from './ThreadItem';
 export * from './ThreadList';
 export * from './ChatView';
