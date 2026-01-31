@@ -17,7 +17,6 @@ import {
   Send,
   ChevronDown
 } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -433,18 +432,22 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   </p>
                 </div>
               ) : (
-                <Collapsible open={isFormOpen} onOpenChange={setIsFormOpen}>
-                  <CollapsibleTrigger asChild>
-                    <button className="flex items-center justify-between w-full bg-white/5 hover:bg-white/10 p-3 rounded-lg transition-colors">
-                      <span className="text-sm font-medium text-white">Lämna en recension</span>
-                      <ChevronDown 
-                        className={`h-4 w-4 text-white transition-transform duration-300 ${
-                          isFormOpen ? 'rotate-180' : ''
-                        }`} 
-                      />
-                    </button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-3 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out overflow-hidden">
+                <div>
+                  <button 
+                    onClick={() => setIsFormOpen(!isFormOpen)}
+                    className="flex items-center justify-between w-full bg-white/5 hover:bg-white/10 p-3 rounded-lg transition-colors"
+                  >
+                    <span className="text-sm font-medium text-white">Lämna en recension</span>
+                    <ChevronDown 
+                      className={`h-4 w-4 text-white transition-transform duration-300 ${
+                        isFormOpen ? 'rotate-180' : ''
+                      }`} 
+                    />
+                  </button>
+                  
+                  <div className={`overflow-hidden transition-all duration-300 ${
+                    isFormOpen ? 'max-h-[600px] opacity-100 mt-3' : 'max-h-0 opacity-0'
+                  }`}>
                     <div className="bg-white/5 p-4 rounded-lg space-y-3">
                       <div>
                         <label className="text-sm font-medium mb-2 block text-white">Betyg</label>
@@ -501,8 +504,8 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                         {submitting ? "Skickar..." : "Skicka kommentar"}
                       </Button>
                     </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                  </div>
+                </div>
               )}
 
               {/* Lista med kommentarer */}
