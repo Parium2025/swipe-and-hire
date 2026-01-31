@@ -60,7 +60,6 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   const [isAnonymous, setIsAnonymous] = React.useState(false);
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = React.useState(false);
-  const [hasExistingReview, setHasExistingReview] = React.useState(false);
 
   React.useEffect(() => {
     if (open && companyId) {
@@ -190,12 +189,6 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-
-      // Check if current user already has a review
-      if (currentUserId && data) {
-        const userReview = data.find(r => r.user_id === currentUserId);
-        setHasExistingReview(!!userReview);
-      }
 
       // Fetch user profiles separately for non-anonymous reviews
       if (data && data.length > 0) {
@@ -447,12 +440,6 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 <div className="bg-white/5 p-3 rounded-lg">
                   <p className="text-sm text-white text-center">
                     (Här lämnar jobbsökarna kommentarer om de vill samt betyg)
-                  </p>
-                </div>
-              ) : hasExistingReview ? (
-                <div className="bg-white/5 p-3 rounded-lg">
-                  <p className="text-sm text-white text-center">
-                    Du har redan lämnat en recension för detta företag
                   </p>
                 </div>
               ) : (
