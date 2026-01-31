@@ -54,7 +54,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   const [reviews, setReviews] = React.useState<CompanyReview[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [newComment, setNewComment] = React.useState("");
-  const [newRating, setNewRating] = React.useState(5);
+  const [newRating, setNewRating] = React.useState(0);
   const [submitting, setSubmitting] = React.useState(false);
   const [isAnonymous, setIsAnonymous] = React.useState(false);
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
@@ -228,6 +228,16 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
       return;
     }
 
+    // Require at least 1 star
+    if (newRating < 1) {
+      toast({
+        title: "Betyg krävs",
+        description: "Vänligen välj minst 1 stjärna",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!newComment.trim()) {
       toast({
         title: "Kommentar krävs",
@@ -268,7 +278,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
       });
 
       setNewComment("");
-      setNewRating(5);
+      setNewRating(0);
       setIsAnonymous(false);
       fetchReviews();
     } catch (error) {
