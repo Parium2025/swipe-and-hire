@@ -579,7 +579,8 @@ const AuthDesktop = ({
                 <PariumAuthLogo
                   src={logoUrl}
                   alt="Parium"
-                  className="relative h-56 w-[400px] lg:h-64 lg:w-[460px]"
+                  className="relative"
+                  style={{ width: 460, height: 256 }}
                 />
               </div>
             </div>
