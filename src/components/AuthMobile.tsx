@@ -654,8 +654,7 @@ const AuthMobile = ({
                 <PariumAuthLogo
                   src={logoUrl}
                   alt="Parium"
-                  className="relative scale-125 will-change-transform"
-                  style={{ width: 400, height: 160 }}
+                  className="relative h-40 w-[400px] scale-125 will-change-transform"
                 />
               </div>
             </div>
