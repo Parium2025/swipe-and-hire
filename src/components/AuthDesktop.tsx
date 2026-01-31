@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PariumAuthLogo } from '@/components/PariumAuthLogo';
-import { getCriticalAssetSrc } from '@/lib/criticalAssetCache';
+import authLogoInline from '@/assets/parium-auth-logo.png?inline';
 import { AnimatedBackground } from './AnimatedBackground';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,7 +48,7 @@ const AuthDesktop = ({
   initialMode,
   initialRole
 }: AuthDesktopProps) => {
-  const logoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
+  const logoUrl = authLogoInline;
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [isLogin, setIsLogin] = useState(initialMode !== 'register');
@@ -577,7 +577,7 @@ const AuthDesktop = ({
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
                 <PariumAuthLogo
-                  src={getCriticalAssetSrc(logoUrl)}
+                  src={logoUrl}
                   alt="Parium"
                   className="relative h-56 w-[400px] lg:h-64 lg:w-[460px]"
                 />

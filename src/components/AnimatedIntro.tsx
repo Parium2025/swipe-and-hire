@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useCachedImage } from '@/hooks/useCachedImage';
+import authLogoInline from '@/assets/parium-auth-logo.png?inline';
 
 interface AnimatedIntroProps {
   onComplete: () => void;
@@ -7,8 +7,7 @@ interface AnimatedIntroProps {
 
 const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
   const [phase, setPhase] = useState<'loading' | 'logo' | 'complete'>('loading');
-  const logoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
-  const { cachedUrl } = useCachedImage(logoUrl);
+  const logoUrl = authLogoInline;
 
   useEffect(() => {
     // Start with logo animation
@@ -58,7 +57,7 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             
             {/* Logo */}
             <img 
-              src={cachedUrl || logoUrl}
+              src={logoUrl}
               alt="Parium" 
               className="relative h-60 w-auto lg:h-[280px] z-10"
               loading="eager"

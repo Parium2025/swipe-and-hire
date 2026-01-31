@@ -6,10 +6,13 @@ import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
-import { hydrateCriticalAssets } from './lib/criticalAssetCache'
+import pariumAuthLogoInline from './assets/parium-auth-logo.png?inline'
 
 // Auth page logo (public) - blue text on dark background
 const authLogoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
+
+// Auth logo (inline data URI) - guarantees first-frame availability even on hard refresh
+const authLogoInlineUrl = pariumAuthLogoInline;
 
 // Alternative logo (white version for dark backgrounds - used in ProfileSelector, ProfileBuilder)
 const altLogoUrl = '/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png';
@@ -17,8 +20,11 @@ const altLogoUrl = '/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png';
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string) => {
   try {
+    // Don't create <link preload> for data URIs (can bloat DOM and provides no fetch benefit)
+    const isDataUrl = typeof src === 'string' && src.startsWith('data:');
+
     // Add a preload hint (helps the browser start fetching earlier)
-    if (typeof document !== 'undefined' && document.head) {
+    if (!isDataUrl && typeof document !== 'undefined' && document.head) {
       const existing = document.querySelector(
         `link[rel="preload"][as="image"][href="${src}"]`
       ) as HTMLLinkElement | null;
@@ -52,8 +58,8 @@ const preloadAndDecodeImage = async (src: string) => {
 // Fire-and-forget: ensures top nav logo is instantly ready on back navigation
 void preloadAndDecodeImage(pariumLogoRings);
 
-// Fire-and-forget: ensures auth page logo is instantly ready even after logout/reload
-void preloadAndDecodeImage(authLogoUrl);
+// Fire-and-forget: keeps auth logo decoded in memory for route changes
+void preloadAndDecodeImage(authLogoInlineUrl);
 
 // Fire-and-forget: ensures alternative white logo is ready (ProfileSelector, ProfileBuilder)
 void preloadAndDecodeImage(altLogoUrl);
@@ -119,14 +125,14 @@ async function start() {
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
-  // If we land directly on /auth (hard refresh), hydrate the auth logo from CacheStorage
-  // before React mounts to prevent visible “pop-in”.
+  // If we land directly on /auth (hard refresh), ensure the logo is decoded
+  // BEFORE React mounts so the very first paint already has it.
   try {
     if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
-      await hydrateCriticalAssets([authLogoUrl]);
+      await preloadAndDecodeImage(authLogoInlineUrl);
     }
   } catch {
-    // Never block app start due to caching issues
+    // Never block app start for a decode attempt
   }
 
   // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
