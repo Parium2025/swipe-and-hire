@@ -65,7 +65,7 @@ void preloadAndDecodeImage(authLogoInlineUrl);
 // Fire-and-forget: ensures alternative white logo is ready (ProfileSelector, ProfileBuilder)
 void preloadAndDecodeImage(altLogoUrl);
 
-const PREAUTH_SPLASH_ID = 'preauth-splash';
+const HTML_AUTH_PRESPLASH_ID = 'auth-presplash'; // Rendered in index.html
 
 function isReactAuthLogoReady(): boolean {
   if (typeof document === 'undefined') return false;
@@ -85,14 +85,20 @@ function isReactAuthLogoReady(): boolean {
   return true;
 }
 
-function schedulePreAuthSplashHandoff(timeoutMs: number = 4000) {
+function hideHtmlPresplash() {
+  if (typeof document === 'undefined') return;
+  const el = document.getElementById(HTML_AUTH_PRESPLASH_ID);
+  if (el) el.style.display = 'none';
+}
+
+function scheduleHtmlPresplashHandoff(timeoutMs: number = 4000) {
   if (typeof window === 'undefined') return;
   const start = performance.now();
 
   const tick = () => {
     // Remove once the real logo is ready, or after a timeout.
     if (isReactAuthLogoReady() || performance.now() - start > timeoutMs) {
-      unmountPreAuthSplash();
+      hideHtmlPresplash();
       return;
     }
     requestAnimationFrame(tick);
@@ -101,62 +107,7 @@ function schedulePreAuthSplashHandoff(timeoutMs: number = 4000) {
   requestAnimationFrame(tick);
 }
 
-function mountPreAuthSplash() {
-  if (typeof document === 'undefined') return;
-  let el = document.getElementById(PREAUTH_SPLASH_ID) as HTMLDivElement | null;
-  if (!el) {
-    el = document.createElement('div');
-    el.id = PREAUTH_SPLASH_ID;
-    el.setAttribute('aria-hidden', 'true');
-  }
-
-  // Inline styles so this works even before Tailwind/CSS is parsed.
-  Object.assign(el.style, {
-    position: 'fixed',
-    inset: '0',
-    zIndex: '2147483647',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    // Keep transparent so it never hides the form; we only want to mask the logo pop-in.
-    background: 'transparent',
-    paddingTop: 'clamp(72px, 16vh, 160px)',
-  } as CSSStyleDeclaration);
-
-  // Ensure an <img> exists so something paints even before Tailwind is parsed.
-  let img = el.querySelector('img') as HTMLImageElement | null;
-  if (!img) {
-    img = document.createElement('img');
-    el.appendChild(img);
-  }
-
-  img.src = authLogoInlineUrl;
-  img.alt = '';
-  img.decoding = 'sync';
-  try {
-    (img as any).fetchPriority = 'high';
-  } catch {
-    // ignore
-  }
-  Object.assign(img.style, {
-    width: 'min(460px, 82vw)',
-    height: 'auto',
-    aspectRatio: '460 / 256',
-    display: 'block',
-    transform: 'translateZ(0)',
-  } as CSSStyleDeclaration);
-
-  if (!el.isConnected) {
-    document.body.appendChild(el);
-  }
-}
-
-function unmountPreAuthSplash() {
-  if (typeof document === 'undefined') return;
-  const el = document.getElementById(PREAUTH_SPLASH_ID);
-  if (el?.parentNode) el.parentNode.removeChild(el);
-}
+// (Legacy JS-based presplash removed – we now rely on index.html for the pre-splash.)
 
 // Initialize Sentry for error tracking in production
 if (import.meta.env.PROD) {
@@ -219,11 +170,9 @@ async function start() {
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
-  // Ensure there's ALWAYS something visible instantly on /auth,
-  // even if the JS bundle/React mount is delayed.
-  if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
-    mountPreAuthSplash();
-  }
+  // NOTE: The HTML pre-splash (#auth-presplash) is shown via inline script in
+  // index.html, so it is visible BEFORE any JS even runs. No need to mount
+  // anything here.
 
   // Hydrate critical assets from CacheStorage into decoded blob: URLs BEFORE React mounts.
   // This makes the auth logo paint instantly on hard refresh (after SW has cached it).
@@ -259,14 +208,13 @@ async function start() {
     </GlobalErrorBoundary>
   );
 
-  // Keep the splash UNTIL the real auth logo is actually paintable.
-  // This prevents the "splash disappears → empty space → logo pops in" effect
-  // when Tailwind/CSS arrives a beat later.
+  // Keep the HTML pre-splash UNTIL the real React auth logo is actually paintable.
+  // This prevents the "splash disappears → empty space → logo pops in" effect.
   try {
     if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
-      schedulePreAuthSplashHandoff(4500);
+      scheduleHtmlPresplashHandoff(4500);
     } else {
-      unmountPreAuthSplash();
+      hideHtmlPresplash();
     }
   } catch {
     // ignore
