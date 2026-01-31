@@ -9,8 +9,7 @@ const INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
 const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_';
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 const ORG_QUESTIONS_CACHE_KEY = 'parium_org_questions_';
-const CACHE_MAX_AGE = 3 * 60 * 1000; // 3 min
-const PERIODIC_REFRESH_INTERVAL = 3 * 60 * 1000; // 3 min
+// Ingen CACHE_MAX_AGE eller PERIODIC_REFRESH - vi förlitar oss på realtime subscriptions
 
 /**
  * 🚀 EMPLOYER BACKGROUND SYNC ENGINE
@@ -41,27 +40,14 @@ export const useEmployerBackgroundSync = () => {
   const queryClient = useQueryClient();
   const hasPreloadedRef = useRef(false);
   const isPreloadingRef = useRef(false);
-  const periodicRefreshRef = useRef<NodeJS.Timeout | null>(null);
+  // Borttaget: periodicRefreshRef - vi använder realtime subscriptions istället
 
   // Endast för arbetsgivare
   const isEmployer = userRole?.role === 'employer';
 
-  // 📋 Preload arbetsgivarens jobb
+  // 📋 Preload arbetsgivarens jobb (alltid hämta färsk data - realtime synkar)
   const preloadJobs = useCallback(async (userId: string, orgId: string | null) => {
     const cacheKey = JOBS_CACHE_KEY + userId;
-    const existingCache = localStorage.getItem(cacheKey);
-    
-    if (existingCache) {
-      try {
-        const parsed = JSON.parse(existingCache);
-        const age = Date.now() - parsed.timestamp;
-        if (age < CACHE_MAX_AGE && parsed.scope === 'personal' && parsed.orgId === orgId) {
-          return; // Cache är färsk
-        }
-      } catch {
-        // Korrupt cache - fortsätt
-      }
-    }
 
     const { data, error } = await supabase
       .from('job_postings')
@@ -89,24 +75,9 @@ export const useEmployerBackgroundSync = () => {
     }
   }, [queryClient]);
 
-  // 📅 Preload arbetsgivarens intervjuer
+  // 📅 Preload arbetsgivarens intervjuer (alltid hämta färsk data - realtime synkar)
   const preloadInterviews = useCallback(async (userId: string) => {
     const cacheKey = INTERVIEWS_CACHE_KEY + userId;
-    const existingCache = localStorage.getItem(cacheKey);
-    
-    if (existingCache) {
-      try {
-        const parsed = JSON.parse(existingCache);
-        const age = Date.now() - parsed.timestamp;
-        if (age < CACHE_MAX_AGE) {
-          // Populera React Query cache direkt
-          queryClient.setQueryData(['interviews', userId], parsed.interviews);
-          return;
-        }
-      } catch {
-        // Korrupt cache - fortsätt
-      }
-    }
 
     const { data, error } = await supabase
       .from('interviews')
@@ -138,22 +109,9 @@ export const useEmployerBackgroundSync = () => {
     }
   }, [queryClient]);
 
-  // 👥 Preload mina kandidater (första 100)
+  // 👥 Preload mina kandidater (alltid hämta färsk data - realtime synkar)
   const preloadMyCandidates = useCallback(async (userId: string) => {
     const cacheKey = MY_CANDIDATES_CACHE_KEY + userId;
-    const existingCache = localStorage.getItem(cacheKey);
-    
-    if (existingCache) {
-      try {
-        const parsed = JSON.parse(existingCache);
-        const age = Date.now() - parsed.timestamp;
-        if (age < CACHE_MAX_AGE && parsed.items?.length >= 0) {
-          return; // Cache är färsk
-        }
-      } catch {
-        // Korrupt cache - fortsätt
-      }
-    }
 
     // Hämta mina kandidater
     const { data: myCandidates, error } = await supabase
@@ -209,23 +167,8 @@ export const useEmployerBackgroundSync = () => {
     }
   }, []);
 
-  // 💬 Preload konversationer
+  // 💬 Preload konversationer (alltid hämta färsk data - realtime synkar)
   const preloadConversations = useCallback(async (userId: string) => {
-    try {
-      const cached = localStorage.getItem(CONVERSATIONS_CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed.userId === userId) {
-          const age = Date.now() - parsed.timestamp;
-          if (age < CACHE_MAX_AGE) {
-            queryClient.setQueryData(['conversations', userId], parsed.conversations);
-            return;
-          }
-        }
-      }
-    } catch {
-      // Continue to fetch
-    }
 
     const { data: memberships } = await supabase
       .from('conversation_members')
@@ -302,27 +245,7 @@ export const useEmployerBackgroundSync = () => {
     };
   }, [user, isEmployer, preloadAllData]);
 
-  // 🔄 PERIODISK REFRESH
-  useEffect(() => {
-    if (!user || !isEmployer) {
-      if (periodicRefreshRef.current) {
-        clearInterval(periodicRefreshRef.current);
-        periodicRefreshRef.current = null;
-      }
-      return;
-    }
-
-    periodicRefreshRef.current = setInterval(() => {
-      preloadAllData(true);
-    }, PERIODIC_REFRESH_INTERVAL);
-
-    return () => {
-      if (periodicRefreshRef.current) {
-        clearInterval(periodicRefreshRef.current);
-        periodicRefreshRef.current = null;
-      }
-    };
-  }, [user, isEmployer, preloadAllData]);
+  // 📡 Realtime ersätter periodisk refresh - ingen polling behövs
 
   // 🖱️ AKTIVITETS-TRIGGERS
   useEffect(() => {

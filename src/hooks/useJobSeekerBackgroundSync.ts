@@ -11,9 +11,8 @@ const MESSAGES_CACHE_KEY = 'job_seeker_messages_';
 const AVAILABLE_JOBS_CACHE_KEY = 'job_seeker_available_jobs_';
 const CANDIDATE_INTERVIEWS_CACHE_KEY = 'job_seeker_interviews_';
 const WEATHER_CACHE_KEY = 'parium_weather_data';
-const CACHE_MAX_AGE = 3 * 60 * 1000; // 3 min (balanced)
 const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min (optimal for weather)
-const PERIODIC_REFRESH_INTERVAL = 3 * 60 * 1000; // 3 min (balanced)
+// Ingen CACHE_MAX_AGE - vi förlitar oss på realtime subscriptions istället för TTL
 
 /**
  * 🚀 JOB SEEKER BACKGROUND SYNC ENGINE
@@ -81,22 +80,9 @@ export const useJobSeekerBackgroundSync = () => {
     }
   }, [isWeatherCacheValid]);
 
-  // 💾 Preload sparade jobb
+  // 💾 Preload sparade jobb (alltid hämta färsk data - realtime synkar)
   const preloadSavedJobs = useCallback(async (userId: string) => {
     const cacheKey = SAVED_JOBS_CACHE_KEY + userId;
-    const existingCache = localStorage.getItem(cacheKey);
-    
-    if (existingCache) {
-      try {
-        const parsed = JSON.parse(existingCache);
-        const age = Date.now() - parsed.timestamp;
-        if (age < CACHE_MAX_AGE) {
-          return; // Cache är färsk
-        }
-      } catch {
-        // Korrupt cache - fortsätt
-      }
-    }
 
     const { data, error } = await supabase
       .from('saved_jobs')
@@ -116,22 +102,9 @@ export const useJobSeekerBackgroundSync = () => {
     }
   }, [queryClient]);
 
-  // 📋 Preload mina ansökningar
+  // 📋 Preload mina ansökningar (alltid hämta färsk data - realtime synkar)
   const preloadMyApplications = useCallback(async (userId: string) => {
     const cacheKey = MY_APPLICATIONS_CACHE_KEY + userId;
-    const existingCache = localStorage.getItem(cacheKey);
-    
-    if (existingCache) {
-      try {
-        const parsed = JSON.parse(existingCache);
-        const age = Date.now() - parsed.timestamp;
-        if (age < CACHE_MAX_AGE && parsed.items?.length >= 0) {
-          return; // Cache är färsk
-        }
-      } catch {
-        // Korrupt cache - fortsätt
-      }
-    }
 
     const { data, error } = await supabase
       .from('job_applications')
@@ -177,22 +150,9 @@ export const useJobSeekerBackgroundSync = () => {
     }
   }, [queryClient]);
 
-  // 💬 Preload konversationer/meddelanden för jobbsökare
+  // 💬 Preload konversationer/meddelanden (alltid hämta färsk data - realtime synkar)
   const preloadMessages = useCallback(async (userId: string) => {
     const cacheKey = MESSAGES_CACHE_KEY + userId;
-    const existingCache = localStorage.getItem(cacheKey);
-    
-    if (existingCache) {
-      try {
-        const parsed = JSON.parse(existingCache);
-        const age = Date.now() - parsed.timestamp;
-        if (age < CACHE_MAX_AGE) {
-          return; // Cache är färsk
-        }
-      } catch {
-        // Korrupt cache - fortsätt
-      }
-    }
 
     // Hämta konversationer där användaren är medlem
     const { data: memberData } = await supabase
@@ -246,22 +206,9 @@ export const useJobSeekerBackgroundSync = () => {
     }
   }, [queryClient]);
 
-  // 🏢 Preload lediga jobb (första 100 för snabb rendering)
+  // 🏢 Preload lediga jobb (alltid hämta färsk data - realtime synkar)
   const preloadAvailableJobs = useCallback(async () => {
     const cacheKey = AVAILABLE_JOBS_CACHE_KEY;
-    const existingCache = localStorage.getItem(cacheKey);
-    
-    if (existingCache) {
-      try {
-        const parsed = JSON.parse(existingCache);
-        const age = Date.now() - parsed.timestamp;
-        if (age < CACHE_MAX_AGE && parsed.items?.length > 0) {
-          return; // Cache är färsk
-        }
-      } catch {
-        // Korrupt cache - fortsätt
-      }
-    }
 
     const { data, error } = await supabase
       .from('job_postings')
@@ -300,8 +247,7 @@ export const useJobSeekerBackgroundSync = () => {
     }
   }, [queryClient]);
 
-  // 📅 Preload kandidat-intervjuer (bokade intervjuer för jobbsökaren)
-  // KRITISKT: Samma mönster som arbetsgivarsidan - sätter React Query cache DIREKT
+  // 📅 Preload kandidat-intervjuer (instant-load + background fetch)
   const preloadCandidateInterviews = useCallback(async (userId: string) => {
     const cacheKey = CANDIDATE_INTERVIEWS_CACHE_KEY + userId;
     const existingCache = localStorage.getItem(cacheKey);
@@ -310,9 +256,8 @@ export const useJobSeekerBackgroundSync = () => {
     if (existingCache) {
       try {
         const parsed = JSON.parse(existingCache);
-        const age = Date.now() - parsed.timestamp;
-        // Populera React Query cache omedelbart om vi har giltig cache
-        if (age < CACHE_MAX_AGE && parsed.items?.length >= 0) {
+        // Populera React Query cache omedelbart (ingen TTL-kontroll - realtime synkar)
+        if (parsed.items?.length >= 0) {
           queryClient.setQueryData(['candidate-interviews', userId], parsed.items);
         }
       } catch {
@@ -398,28 +343,7 @@ export const useJobSeekerBackgroundSync = () => {
     };
   }, [user, isJobSeeker, preloadAllData]);
 
-  // 🔄 PERIODISK REFRESH: Håll all data färsk var 5:e minut
-  useEffect(() => {
-    if (!user || !isJobSeeker) {
-      if (periodicRefreshRef.current) {
-        clearInterval(periodicRefreshRef.current);
-        periodicRefreshRef.current = null;
-      }
-      return;
-    }
-
-    // Starta periodisk refresh
-    periodicRefreshRef.current = setInterval(() => {
-      preloadAllData(true); // Force refresh
-    }, PERIODIC_REFRESH_INTERVAL);
-
-    return () => {
-      if (periodicRefreshRef.current) {
-        clearInterval(periodicRefreshRef.current);
-        periodicRefreshRef.current = null;
-      }
-    };
-  }, [user, isJobSeeker, preloadAllData]);
+  // 📡 Realtime ersätter periodisk refresh - ingen polling behövs
 
   // 🖱️ AKTIVITETS-TRIGGERS
   useEffect(() => {
