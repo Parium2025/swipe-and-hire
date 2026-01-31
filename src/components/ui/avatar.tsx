@@ -1,48 +1,170 @@
 import * as React from "react"
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Custom Avatar implementation that avoids Radix UI's internal loading state
+ * which causes a flash/flicker when images are already cached.
+ * 
+ * This implementation checks if the image is in browser cache synchronously
+ * and renders accordingly to prevent any visible fallback flash.
+ */
+
+interface AvatarContextValue {
+  imageLoaded: boolean;
+  setImageLoaded: (loaded: boolean) => void;
+}
+
+const AvatarContext = React.createContext<AvatarContextValue | null>(null);
+
 const Avatar = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Root
-    ref={ref}
-    className={cn(
-      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
-      className
-    )}
-    {...props}
-  />
-))
-Avatar.displayName = AvatarPrimitive.Root.displayName
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => {
+  const [imageLoaded, setImageLoaded] = React.useState(false);
+  
+  return (
+    <AvatarContext.Provider value={{ imageLoaded, setImageLoaded }}>
+      <div
+        ref={ref}
+        className={cn(
+          "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    </AvatarContext.Provider>
+  );
+})
+Avatar.displayName = "Avatar"
 
-const AvatarImage = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Image>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
-    {...props}
-  />
-))
-AvatarImage.displayName = AvatarPrimitive.Image.displayName
+interface AvatarImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  onLoadingStatusChange?: (status: 'loading' | 'loaded' | 'error') => void;
+}
 
-const AvatarFallback = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Fallback
-    ref={ref}
-    className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted",
-      className
-    )}
-    {...props}
-  />
-))
-AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
+const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
+  ({ className, src, alt, onLoadingStatusChange, ...props }, ref) => {
+    const context = React.useContext(AvatarContext);
+    
+    // Check if image is already in browser cache (synchronous check on mount)
+    const isCached = React.useMemo(() => {
+      if (!src || typeof document === 'undefined') return false;
+      const img = new Image();
+      img.src = src;
+      return img.complete && img.naturalWidth > 0;
+    }, [src]);
+    
+    const [status, setStatus] = React.useState<'loading' | 'loaded' | 'error'>(
+      isCached ? 'loaded' : 'loading'
+    );
+    
+    // Notify context immediately if cached
+    React.useLayoutEffect(() => {
+      if (isCached && context) {
+        context.setImageLoaded(true);
+      }
+    }, [isCached, context]);
+    
+    // Reset state when src changes
+    React.useEffect(() => {
+      if (!src) {
+        setStatus('error');
+        context?.setImageLoaded(false);
+        onLoadingStatusChange?.('error');
+        return;
+      }
+      
+      // Re-check cache on src change
+      const img = new Image();
+      img.src = src;
+      if (img.complete && img.naturalWidth > 0) {
+        setStatus('loaded');
+        context?.setImageLoaded(true);
+        onLoadingStatusChange?.('loaded');
+      } else {
+        setStatus('loading');
+        context?.setImageLoaded(false);
+        onLoadingStatusChange?.('loading');
+      }
+    }, [src, context, onLoadingStatusChange]);
+
+    const handleLoad = React.useCallback(() => {
+      setStatus('loaded');
+      context?.setImageLoaded(true);
+      onLoadingStatusChange?.('loaded');
+    }, [context, onLoadingStatusChange]);
+    
+    const handleError = React.useCallback(() => {
+      setStatus('error');
+      context?.setImageLoaded(false);
+      onLoadingStatusChange?.('error');
+    }, [context, onLoadingStatusChange]);
+
+    if (!src || status === 'error') {
+      return null;
+    }
+
+    return (
+      <img
+        ref={ref}
+        src={src}
+        alt={alt || ''}
+        onLoad={handleLoad}
+        onError={handleError}
+        className={cn("aspect-square h-full w-full object-cover", className)}
+        data-state={status}
+        {...props}
+      />
+    );
+  }
+);
+AvatarImage.displayName = "AvatarImage"
+
+interface AvatarFallbackProps extends React.HTMLAttributes<HTMLSpanElement> {
+  delayMs?: number;
+}
+
+const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarFallbackProps>(
+  ({ className, delayMs, children, ...props }, ref) => {
+    const context = React.useContext(AvatarContext);
+    const [showFallback, setShowFallback] = React.useState(!delayMs);
+    
+    // Delay showing fallback if delayMs is set
+    React.useEffect(() => {
+      if (delayMs && delayMs > 0) {
+        const timeout = setTimeout(() => {
+          setShowFallback(true);
+        }, delayMs);
+        return () => clearTimeout(timeout);
+      }
+    }, [delayMs]);
+    
+    // Don't show fallback if image is already loaded
+    if (context?.imageLoaded) {
+      return null;
+    }
+    
+    // Don't show fallback until delay has passed
+    if (!showFallback) {
+      return null;
+    }
+
+    return (
+      <span
+        ref={ref}
+        className={cn(
+          "flex h-full w-full items-center justify-center rounded-full bg-muted",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </span>
+    );
+  }
+);
+AvatarFallback.displayName = "AvatarFallback"
 
 export { Avatar, AvatarImage, AvatarFallback }
