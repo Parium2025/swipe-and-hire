@@ -194,7 +194,7 @@ export function SavedSearchesDropdown({
             <AlertDialogDescription className="text-white text-sm leading-relaxed">
               {confirmDeleteSearch && (
                 <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[50%] sm:max-w-[60%] truncate align-bottom">"{confirmDeleteSearch.name}"</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{confirmDeleteSearch.name}"</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>
