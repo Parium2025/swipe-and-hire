@@ -19,7 +19,6 @@ import { useAuth } from './useAuth';
 
 const MESSAGES_CACHE_KEY = 'parium_messages_cache';
 const PROFILE_IMAGES_CACHE_KEY = 'parium_message_profiles_cache';
-const SYNC_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes
 const PAGE_SIZE = 50;
 
 // Export for triggering sync from other components (e.g., after login)
@@ -56,7 +55,6 @@ export function useMessagesBackgroundSync() {
   const queryClient = useQueryClient();
   const hasInteractedRef = useRef(false);
   const lastSyncRef = useRef<number>(0);
-  const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const syncMessages = useCallback(async () => {
     if (!user || !navigator.onLine) return;
@@ -223,21 +221,10 @@ export function useMessagesBackgroundSync() {
     };
   }, [user, syncMessages]);
 
-  // Periodic background sync
+  // Initial sync on mount (realtime handles subsequent updates)
   useEffect(() => {
     if (!user) return;
-
-    // Initial sync
     syncMessages();
-
-    // Set up interval
-    syncIntervalRef.current = setInterval(syncMessages, SYNC_INTERVAL_MS);
-
-    return () => {
-      if (syncIntervalRef.current) {
-        clearInterval(syncIntervalRef.current);
-      }
-    };
   }, [user, syncMessages]);
 
   return { syncMessages };
