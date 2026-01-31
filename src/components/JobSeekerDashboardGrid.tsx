@@ -270,10 +270,15 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
     queryKey: ['my-applications-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
-      const { count } = await (supabase as any)
+      const { count, error } = await supabase
         .from('job_applications')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('*', { count: 'exact', head: true })
+        .eq('applicant_id', user.id);
+      
+      if (error) {
+        console.error('Error fetching applications count:', error);
+        return 0;
+      }
       return count ?? 0;
     },
     enabled: !!user?.id,
@@ -355,7 +360,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
           event: '*',
           schema: 'public',
           table: 'job_applications',
-          filter: `user_id=eq.${user.id}`,
+          filter: `applicant_id=eq.${user.id}`,
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
