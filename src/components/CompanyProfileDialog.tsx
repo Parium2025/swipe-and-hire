@@ -14,8 +14,11 @@ import {
   MapPin, 
   Briefcase, 
   Star,
-  Send
+  Send,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -58,6 +61,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   const [submitting, setSubmitting] = React.useState(false);
   const [isAnonymous, setIsAnonymous] = React.useState(false);
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (open && companyId) {
@@ -430,62 +434,76 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   </p>
                 </div>
               ) : (
-                <div className="bg-white/5 p-4 rounded-lg space-y-3">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block text-white">Betyg</label>
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setNewRating(star)}
-                          className="transition-colors"
-                        >
-                          <Star
-                            className={`h-5 w-5 ${
-                              star <= newRating
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "fill-transparent text-white stroke-white stroke-[1.5]"
-                            }`}
-                          />
-                        </button>
-                      ))}
+                <Collapsible open={isFormOpen} onOpenChange={setIsFormOpen}>
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center justify-between w-full bg-white/5 hover:bg-white/10 p-3 rounded-lg transition-colors">
+                      <span className="text-sm font-medium text-white">Lämna en recension</span>
+                      {isFormOpen ? (
+                        <ChevronUp className="h-4 w-4 text-white" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-white" />
+                      )}
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-3">
+                    <div className="bg-white/5 p-4 rounded-lg space-y-3">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block text-white">Betyg</label>
+                        <div className="flex gap-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setNewRating(star)}
+                              className="transition-colors"
+                            >
+                              <Star
+                                className={`h-5 w-5 ${
+                                  star <= newRating
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "fill-transparent text-white stroke-white stroke-[1.5]"
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium mb-2 block text-white">Din kommentar</label>
+                        <Textarea
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="Dela dina erfarenheter av detta företag..."
+                          className="min-h-[100px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="anonymous"
+                          checked={isAnonymous}
+                          onChange={(e) => setIsAnonymous(e.target.checked)}
+                          className="rounded"
+                        />
+                        <label htmlFor="anonymous" className="text-sm text-white">
+                          Publicera anonymt
+                        </label>
+                      </div>
+
+                      <Button 
+                        onClick={handleSubmitReview} 
+                        disabled={submitting}
+                        variant="glass"
+                        className="w-full"
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        {submitting ? "Skickar..." : "Skicka kommentar"}
+                      </Button>
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block text-white">Din kommentar</label>
-                    <Textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Dela dina erfarenheter av detta företag..."
-                      className="min-h-[100px] bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white"
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="anonymous"
-                      checked={isAnonymous}
-                      onChange={(e) => setIsAnonymous(e.target.checked)}
-                      className="rounded"
-                    />
-                    <label htmlFor="anonymous" className="text-sm text-white">
-                      Publicera anonymt
-                    </label>
-                  </div>
-
-                  <Button 
-                    onClick={handleSubmitReview} 
-                    disabled={submitting}
-                    variant="glass"
-                    className="w-full"
-                  >
-                    <Send className="h-4 w-4 mr-2" />
-                    {submitting ? "Skickar..." : "Skicka kommentar"}
-                  </Button>
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
               )}
 
               {/* Lista med kommentarer */}
