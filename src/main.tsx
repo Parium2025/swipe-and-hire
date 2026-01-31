@@ -65,6 +65,58 @@ void preloadAndDecodeImage(authLogoInlineUrl);
 // Fire-and-forget: ensures alternative white logo is ready (ProfileSelector, ProfileBuilder)
 void preloadAndDecodeImage(altLogoUrl);
 
+const PREAUTH_SPLASH_ID = 'preauth-splash';
+
+function mountPreAuthSplash() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(PREAUTH_SPLASH_ID)) return;
+
+  const el = document.createElement('div');
+  el.id = PREAUTH_SPLASH_ID;
+  el.setAttribute('aria-hidden', 'true');
+
+  // Inline styles so this works even before Tailwind/CSS is parsed.
+  Object.assign(el.style, {
+    position: 'fixed',
+    inset: '0',
+    zIndex: '2147483647',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    // Match app background so we don't get a white flash before CSS loads
+    background:
+      'radial-gradient(circle at 50% 40%, rgba(0,163,255,0.28) 0%, rgba(0,163,255,0.10) 50%, rgba(0,163,255,0) 80%), hsl(215 100% 12%)',
+    paddingTop: 'clamp(72px, 16vh, 160px)',
+  } as CSSStyleDeclaration);
+
+  const img = document.createElement('img');
+  img.src = authLogoInlineUrl;
+  img.alt = '';
+  img.decoding = 'sync';
+  try {
+    (img as any).fetchPriority = 'high';
+  } catch {
+    // ignore
+  }
+  Object.assign(img.style, {
+    width: 'min(460px, 82vw)',
+    height: 'auto',
+    aspectRatio: '460 / 256',
+    display: 'block',
+    transform: 'translateZ(0)',
+  } as CSSStyleDeclaration);
+
+  el.appendChild(img);
+  document.body.appendChild(el);
+}
+
+function unmountPreAuthSplash() {
+  if (typeof document === 'undefined') return;
+  const el = document.getElementById(PREAUTH_SPLASH_ID);
+  if (el?.parentNode) el.parentNode.removeChild(el);
+}
+
 // Initialize Sentry for error tracking in production
 if (import.meta.env.PROD) {
   Sentry.init({
@@ -126,6 +178,12 @@ async function start() {
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
+  // Ensure there's ALWAYS something visible instantly on /auth,
+  // even if the JS bundle/React mount is delayed.
+  if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
+    mountPreAuthSplash();
+  }
+
   // Hydrate critical assets from CacheStorage into decoded blob: URLs BEFORE React mounts.
   // This makes the auth logo paint instantly on hard refresh (after SW has cached it).
   try {
@@ -159,6 +217,15 @@ async function start() {
       <App />
     </GlobalErrorBoundary>
   );
+
+  // Remove the pre-auth splash right after the first React paint.
+  try {
+    if (typeof window !== 'undefined' && window.location?.pathname === '/auth') {
+      requestAnimationFrame(() => requestAnimationFrame(() => unmountPreAuthSplash()));
+    }
+  } catch {
+    // ignore
+  }
 }
 
 void start();
