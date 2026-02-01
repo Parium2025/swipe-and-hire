@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
+import { PariumLogoRingsInline } from '@/assets/pariumLogoRingsInline';
 
 interface LandingNavProps {
   onLoginClick: () => void;
@@ -23,11 +23,10 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex items-center">
-              <img
-                src={pariumLogo}
+              <PariumLogoRingsInline
                 alt="Parium"
                 width={224}
-                height={224}
+                height={56}
                 className="h-auto w-32 md:w-48 lg:w-56"
               />
             </div>
