@@ -219,29 +219,25 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots - tight layout with stable positioning */}
-        <div className="flex items-center justify-between mt-auto h-6">
-          {/* Dot navigation - tight gaps, stable vertical alignment */}
-          {tipsItems.length > 1 ? (
-            <div className="flex items-center gap-2">
+        {/* Footer with dots - fixed height, tight layout */}
+        <div className="h-5 flex items-center mt-auto">
+          {tipsItems.length > 1 && (
+            <div className="flex items-center gap-1.5">
               {tipsItems.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrentIndex(i)}
-                  onKeyDown={(e) => e.key === 'Enter' && setCurrentIndex(i)}
-                  className="w-6 h-6 flex items-center justify-center touch-manipulation"
+                  className="w-5 h-5 flex items-center justify-center"
                   aria-label={`Gå till nyhet ${i + 1}`}
                 >
                   <span className={cn(
-                    "w-2 h-2 rounded-full",
-                    i === currentIndex 
-                      ? "bg-white" 
-                      : "bg-white/30"
+                    "w-1.5 h-1.5 rounded-full",
+                    i === currentIndex ? "bg-white" : "bg-white/30"
                   )} />
                 </button>
               ))}
             </div>
-          ) : <div />}
+          )}
         </div>
       </CardContent>
     </Card>
@@ -533,23 +529,23 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation - tight gaps, stable vertical alignment */}
-        <div className="flex items-center gap-2 mt-auto h-6">
-          {statsArray.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              className="w-6 h-6 flex items-center justify-center touch-manipulation"
-              aria-label={`Gå till statistik ${i + 1}`}
-            >
-              <span className={cn(
-                "w-2 h-2 rounded-full",
-                i === currentIndex 
-                  ? "bg-white" 
-                  : "bg-white/30"
-              )} />
-            </button>
-          ))}
+        {/* Dot navigation - fixed height, tight layout */}
+        <div className="h-5 flex items-center mt-auto">
+          <div className="flex items-center gap-1.5">
+            {statsArray.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className="w-5 h-5 flex items-center justify-center"
+                aria-label={`Gå till statistik ${i + 1}`}
+              >
+                <span className={cn(
+                  "w-1.5 h-1.5 rounded-full",
+                  i === currentIndex ? "bg-white" : "bg-white/30"
+                )} />
+              </button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
