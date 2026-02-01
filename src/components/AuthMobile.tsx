@@ -100,8 +100,6 @@ const AuthMobile = ({
   const emailInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const resetSectionRef = useRef<HTMLDivElement>(null);
-  // Independent scroll positions per tab
-  const signupScrollRef = useRef(0);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -114,6 +112,13 @@ const AuthMobile = ({
       }, 0);
     }
   }, [showResetPassword, resetPasswordSent]);
+
+  // CRITICAL: Keep parent (/auth) in sync with the actual visible tab.
+  // If parent stays in "login" it will keep global scroll-lock listeners active
+  // and make the Registrera view impossible to scroll.
+  useEffect(() => {
+    onAuthModeChange?.(isLogin);
+  }, [isLogin, onAuthModeChange]);
 
   // Utility: force top without smooth; works reliably on iOS Safari
   const hardScrollTo = (top: number) => {
@@ -140,18 +145,19 @@ const AuthMobile = ({
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return; // avoid redundant work
 
-    // Save current scroll if leaving signup
-    if (!isLogin && typeof window !== 'undefined') {
-      signupScrollRef.current = window.scrollY || 0;
-    }
-
-    // Scroll BEFORE state change to prevent layout jump
+    // Blur first to avoid iOS keyboard/layout jank
     try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch (blurError) {
       console.warn('Failed to blur active element:', blurError);
     }
-    const targetTop = newIsLogin ? 0 : (signupScrollRef.current || 0);
-    if (typeof window !== 'undefined') hardScrollTo(targetTop);
 
+    // IMPORTANT:
+    // - When switching TO login we must jump to top because login mode locks scrolling.
+    // - When switching TO signup we do NOT force-scroll; it makes the background feel like it "moves".
+    if (newIsLogin && typeof window !== 'undefined') {
+      hardScrollTo(0);
+    }
+
+    // Update parent immediately (no effect-delay) so scroll-lock detaches instantly on signup.
     onAuthModeChange?.(newIsLogin);
 
     // Now swap content
