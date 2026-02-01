@@ -100,9 +100,14 @@ async function bootstrap() {
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
-  // Keep the auth logo warm, but do NOT block app start.
-  // The pre-React placeholder handles “logo-first paint” on hard refresh.
-  void preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
+  // Critical: on /auth we block briefly until the logo is decoded,
+  // so the first paint can include it without any flash.
+  const isAuthRoute = typeof window !== 'undefined' && window.location.pathname === '/auth';
+  if (isAuthRoute) {
+    await preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
+  } else {
+    void preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
+  }
 
   // Nav logo can remain fire-and-forget.
   void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');

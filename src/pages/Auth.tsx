@@ -17,62 +17,13 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
 const AUTH_DEBUG = false;
 
-// Note: We keep a tiny runtime safeguard to hide the pre-React auth splash
-// the moment React has actually mounted, to avoid the splash ever getting stuck.
+// Hide the pre-React splash logo once React mounts (to avoid logo doubling)
+if (typeof document !== 'undefined') {
+  const splash = document.getElementById('auth-splash');
+  if (splash) splash.classList.add('hidden');
+}
 
 const Auth = () => {
-  useEffect(() => {
-    // Desktop hard-refresh: keep the pre-React logo placeholder visible only until
-    // the REAL auth logo has rendered & decoded (img.complete).
-    const splash = document.getElementById('auth-splash') as HTMLElement | null;
-    if (!splash) return;
-
-    let cancelled = false;
-    const startedAt = Date.now();
-    const maxWaitMs = 1500; // safety: never let the placeholder linger
-
-    const hide = () => {
-      if (cancelled) return;
-      splash.style.display = 'none';
-    };
-
-    const tick = () => {
-      if (cancelled) return;
-
-      const isDesktop =
-        typeof window !== 'undefined' &&
-        typeof window.matchMedia === 'function' &&
-        window.matchMedia('(min-width: 768px)').matches;
-
-      // If not desktop, it should never be visible anyway.
-      if (!isDesktop) {
-        hide();
-        return;
-      }
-
-      const logo = document.querySelector('img[data-auth-logo="true"]') as HTMLImageElement | null;
-
-      // Once the real logo is present and decoded, remove the placeholder.
-      if (logo && logo.complete) {
-        hide();
-        return;
-      }
-
-      // Safety net: if React mounts but logo isn't found yet, we still don't want a stuck overlay.
-      if (Date.now() - startedAt > maxWaitMs) {
-        hide();
-        return;
-      }
-
-      requestAnimationFrame(tick);
-    };
-
-    requestAnimationFrame(tick);
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const [showIntro, setShowIntro] = useState(() => {
     try {
       const loc = typeof window !== 'undefined' ? window.location : null;

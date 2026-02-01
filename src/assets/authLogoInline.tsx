@@ -21,7 +21,6 @@ export function AuthLogoInline({ className }: AuthLogoProps) {
     <img
       src={authLogoDataUri}
       alt="Parium"
-      data-auth-logo="true"
       // decode="sync" forces the browser to decode before paint - eliminates flash
       decoding="sync"
       // Eager loading ensures immediate decode

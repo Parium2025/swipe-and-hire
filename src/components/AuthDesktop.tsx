@@ -567,17 +567,29 @@ const AuthDesktop = ({
                  */}
                  <AuthLogoInline className="relative z-10 h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)]" />
 
-                {/* Glow effects - AFTER logo in DOM, behind via z-index, NO animation for instant render */}
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0">
+                {/* Glow effects - AFTER logo in DOM, behind via z-index, delayed fade-in */}
+                <div
+                  className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0 animate-fade-in"
+                  style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}
+                >
                   <div className="w-72 h-52 bg-primary-glow/25 rounded-full blur-[40px]"></div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0">
+                <div
+                  className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0 animate-fade-in"
+                  style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}
+                >
                   <div className="w-52 h-36 bg-primary-glow/22 rounded-full blur-[35px]"></div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0">
+                <div
+                  className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0 animate-fade-in"
+                  style={{ animationDelay: '250ms', animationFillMode: 'backwards' }}
+                >
                   <div className="w-44 h-28 bg-primary-glow/20 rounded-full blur-[30px]"></div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0">
+                <div
+                  className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0 animate-fade-in"
+                  style={{ animationDelay: '300ms', animationFillMode: 'backwards' }}
+                >
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
               </div>
