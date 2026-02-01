@@ -292,7 +292,40 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     return [...new Set(rawJobs.map(job => job.employer_id).filter(Boolean))];
   }, [rawJobs]);
 
-  const { data: companyData = {} } = useQuery({
+  // 🔥 localStorage cache for instant company data - eliminates "Okänt företag" flash
+  const COMPANY_CACHE_KEY = 'parium_company_data_cache';
+  
+  const readCompanyCache = useCallback((): Record<string, { name: string; logo?: string; avgRating?: number; reviewCount: number }> => {
+    try {
+      const raw = localStorage.getItem(COMPANY_CACHE_KEY);
+      if (!raw) return {};
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  }, []);
+
+  const writeCompanyCache = useCallback((data: Record<string, { name: string; logo?: string; avgRating?: number; reviewCount: number }>) => {
+    try {
+      // Merge with existing cache (max 500 companies)
+      const existing = readCompanyCache();
+      const merged = { ...existing, ...data };
+      const keys = Object.keys(merged);
+      if (keys.length > 500) {
+        // Keep only latest 500
+        const toKeep = keys.slice(-500);
+        const trimmed: typeof merged = {};
+        toKeep.forEach(k => { trimmed[k] = merged[k]; });
+        localStorage.setItem(COMPANY_CACHE_KEY, JSON.stringify(trimmed));
+      } else {
+        localStorage.setItem(COMPANY_CACHE_KEY, JSON.stringify(merged));
+      }
+    } catch {
+      // Storage full - ignore
+    }
+  }, [readCompanyCache]);
+
+  const { data: companyData = {}, isLoading: isLoadingCompanies } = useQuery({
     queryKey: ['company-data-batch', employerIds],
     queryFn: async () => {
       if (employerIds.length === 0) return {};
@@ -336,11 +369,33 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         });
       }
 
+      // 🔥 Update localStorage cache for instant load next time
+      writeCompanyCache(result);
+
       return result;
     },
     enabled: employerIds.length > 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
+    // 🔥 Instant-load from localStorage cache
+    initialData: () => {
+      if (employerIds.length === 0) return {};
+      const cached = readCompanyCache();
+      // Return only data for requested employer IDs
+      const filtered: typeof cached = {};
+      let hasAny = false;
+      employerIds.forEach(id => {
+        if (cached[id]) {
+          filtered[id] = cached[id];
+          hasAny = true;
+        }
+      });
+      return hasAny ? filtered : undefined;
+    },
+    initialDataUpdatedAt: () => {
+      // Trigger background refetch after 30 seconds
+      return Date.now() - 30000;
+    },
   });
 
   // Enrich jobs with company data and filter expired
