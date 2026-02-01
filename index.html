@@ -48,6 +48,11 @@
   <meta name="twitter:description" content="Parium">
   <link rel="icon" type="image/png" href="/favicon-v3.png?v=3">
   <style>
+    /* CRITICAL: Prevent white flash on refresh - dark background ALWAYS */
+    html, body {
+      background: hsl(215 100% 12%) !important;
+    }
+    
     /* Dedicated full-screen background layer to eliminate iOS PWA banding/stripes */
     #app-bg { display: none !important; }
     /* Ensure app content sits above background layer */
@@ -59,13 +64,11 @@
     /* In standalone (Add to Home Screen) keep a solid base color under the gradient */
     @media (display-mode: standalone) {
       html, body { 
-        background: hsl(215 100% 12%) !important;
         min-height: calc(100dvh + env(safe-area-inset-bottom, 0px));
         padding-top: max(env(safe-area-inset-top, 0px), 88px);
       }
       :root { --pwa-top-offset: max(env(safe-area-inset-top, 0px), 88px); }
     }
-
     /* iOS hint: keep Tailwind bounce but reduce initial blur */
     .animate-bounce { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
 
