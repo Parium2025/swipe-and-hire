@@ -1,4 +1,4 @@
-import pariumLogoRings from "@/assets/parium-logo-rings.png";
+import { PariumLogoRingsInline } from "@/assets/pariumLogoRingsInline";
 
 type PariumLogoButtonProps = {
   onClick: () => void;
@@ -18,12 +18,14 @@ export function PariumLogoButton({ onClick, ariaLabel }: PariumLogoButtonProps) 
       // -ml-1 (4px) + old -mr-[104px] to visually align and keep menus tight
       style={{ marginLeft: -4, marginRight: -104 }}
     >
-      <div
-        role="img"
-        aria-label="Parium"
-        className="h-10 w-40 bg-contain bg-left bg-no-repeat pointer-events-none"
-        style={{ backgroundImage: `url(${pariumLogoRings})` }}
+      <PariumLogoRingsInline
+        aria-hidden="true"
+        alt=""
+        width={160}
+        height={40}
+        className="h-10 w-40 object-left"
       />
     </button>
   );
 }
+
