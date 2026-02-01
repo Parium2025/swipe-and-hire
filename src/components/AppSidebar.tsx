@@ -1,9 +1,8 @@
-import React, { useEffect, memo, useMemo } from "react";
+import React, { useEffect, useState, memo, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { preloadImages } from "@/lib/serviceWorkerManager";
-import { useMediaUrl } from "@/hooks/useMediaUrl";
 import {
   Sidebar,
   SidebarContent,
@@ -51,21 +50,43 @@ export function AppSidebar() {
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
 
-  // 🔥 SYNKRON CACHE-LÄSNING via useMediaUrl - eliminerar flimmer vid tab-switch
-  // Denna hook har inbyggd synkron cache som returnerar URL direkt vid mount
-  const resolvedProfileImage = useMediaUrl(profile?.profile_image_url, 'profile-image');
-  const resolvedCoverImage = useMediaUrl(profile?.cover_image_url, 'cover-image');
-  const resolvedVideoUrl = useMediaUrl(profile?.video_url, 'profile-video');
+  // Använd preloadedAvatarUrl som primär källa, fallback till profile.profile_image_url, sedan cover_image_url
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
+    // Prioritera cache först (identiskt med arbetsgivarsidan)
+    return preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null;
+  });
+  // Använd preloadedVideoUrl från AuthProvider (sessionStorage-cachad precis som arbetsgivarsidan)
+  const [videoUrl, setVideoUrl] = useState<string | null>(() => preloadedVideoUrl ?? null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(() => preloadedCoverUrl || profile?.cover_image_url || null);
+  const [avatarLoaded, setAvatarLoaded] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   
-  // Kombinera preloaded URLs med resolved URLs - prioritera resolved (synkron cache)
-  const avatarUrl = resolvedProfileImage || preloadedAvatarUrl || resolvedCoverImage || preloadedCoverUrl || null;
-  const coverUrl = resolvedCoverImage || preloadedCoverUrl || null;
-  const videoUrl = resolvedVideoUrl || preloadedVideoUrl || null;
+  // hasVideo: true om antingen DB har video_url ELLER vi har en preloaded video URL
+  // Detta säkerställer att videon visas även om preloading är asynkron
+  const hasVideo = !!(profile?.video_url || preloadedVideoUrl || videoUrl);
   
-  // hasVideo: true om antingen DB har video_url ELLER vi har en resolved/preloaded video URL
-  const hasVideo = !!(profile?.video_url || videoUrl);
+  // Håll avatar i synk med preloader/profile, med cover som fallback
+  useEffect(() => {
+    // Prioritera i rätt ordning: preloaded → profile → cover
+    const newAvatarUrl = preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null;
+    if (newAvatarUrl && newAvatarUrl !== avatarUrl) {
+      setAvatarUrl(newAvatarUrl);
+    }
+  }, [preloadedAvatarUrl, preloadedCoverUrl, profile?.profile_image_url, profile?.cover_image_url]);
+
+  useEffect(() => {
+    const newCoverUrl = preloadedCoverUrl || profile?.cover_image_url || null;
+    if (newCoverUrl !== coverUrl) {
+      setCoverUrl(newCoverUrl);
+    }
+  }, [preloadedCoverUrl, profile?.cover_image_url]);
   
-  // useMediaUrl har redan synkron cache-läsning - ingen manuell synk behövs längre
+  // Synka videoUrl från preloadedVideoUrl (uppdateras asynkront efter login)
+  useEffect(() => {
+    if (preloadedVideoUrl && preloadedVideoUrl !== videoUrl) {
+      setVideoUrl(preloadedVideoUrl);
+    }
+  }, [preloadedVideoUrl]);
 
   const isAdmin = user?.email === 'fredrikandits@hotmail.com';
 
@@ -161,7 +182,12 @@ export function AppSidebar() {
               <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
                 <AvatarImage 
                   src={avatarUrl || ''} 
-                  alt="Profilbild"
+                  alt="Profilbild" 
+                  onError={() => {
+                    setAvatarError(true);
+                    setAvatarUrl(null);
+                  }}
+                  onLoad={() => setAvatarLoaded(true)}
                 />
                 <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={150}>
                   {profile?.first_name?.[0]}{profile?.last_name?.[0]}
@@ -218,7 +244,7 @@ export function AppSidebar() {
                    >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
-                      className="flex items-center gap-3 w-full min-h-[44px] outline-none focus:outline-none active:scale-[0.97] transition-transform"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <div className="relative">
                         <item.icon className="h-4 w-4" />
@@ -276,7 +302,7 @@ export function AppSidebar() {
                    >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
-                      className="flex items-center gap-3 w-full min-h-[44px] outline-none focus:outline-none active:scale-[0.97] transition-transform"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -311,7 +337,7 @@ export function AppSidebar() {
                    >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
-                      className="flex items-center gap-3 w-full min-h-[44px] outline-none focus:outline-none active:scale-[0.97] transition-transform"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -346,7 +372,7 @@ export function AppSidebar() {
                    >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
-                      className="flex items-center gap-3 w-full min-h-[44px] outline-none focus:outline-none active:scale-[0.97] transition-transform"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
