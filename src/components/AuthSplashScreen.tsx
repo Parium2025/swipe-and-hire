@@ -2,6 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useLocation } from 'react-router-dom';
 import { authSplashEvents } from '@/lib/authSplashEvents';
 import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
+import { useDevice } from '@/hooks/use-device';
 
 // Minsta visningstid för att garantera att loggan hinner laddas och avkodas
 const MINIMUM_DISPLAY_MS = 4000;
@@ -9,14 +10,12 @@ const MINIMUM_DISPLAY_MS = 4000;
 /**
  * AuthSplashScreen - Premium "loading shell" för auth-sidan.
  * 
- * Exakt match av referensbilden:
- * - Parium-logga centrerad (240px bred)
- * - "Din karriärresa börjar här" tätt under loggan
- * - Tre långsamma pulserande prickar (2.5s cykel)
- * - Blå gradient-bakgrund
+ * Matchar exakt auth-sidans logo-storlek och position så att
+ * fade-out landar pixel-perfekt på den riktiga loggan.
  */
 export function AuthSplashScreen() {
   const location = useLocation();
+  const device = useDevice();
   
   // Prenumerera på splash-events
   const isTriggered = useSyncExternalStore(
@@ -30,7 +29,6 @@ export function AuthSplashScreen() {
   
   useEffect(() => {
     if (!isTriggered) {
-      // Snabb fade-out om vi avbryter
       if (isVisible) {
         setIsFadingOut(true);
         const timer = setTimeout(() => {
@@ -42,16 +40,12 @@ export function AuthSplashScreen() {
       return;
     }
     
-    // Visa splash omedelbart
     setIsVisible(true);
     setIsFadingOut(false);
     
-    // Starta timer för minsta visningstid
     const showTimer = setTimeout(() => {
-      // Starta fade-out efter 4 sekunder
       setIsFadingOut(true);
       
-      // Göm helt efter fade-out animation
       const hideTimer = setTimeout(() => {
         setIsVisible(false);
         setIsFadingOut(false);
@@ -64,8 +58,27 @@ export function AuthSplashScreen() {
     return () => clearTimeout(showTimer);
   }, [isTriggered, isVisible]);
   
-  // Visa inte om splash inte är triggad
   if (!isVisible) return null;
+  
+  // Beräkna storlek baserat på device för att matcha auth-sidans logo
+  // Desktop: h-56 (224px), lg: h-64 (256px)
+  // Mobile: h-40 (160px) * scale-125 = 200px
+  const isMobile = device === 'mobile';
+  const isLargeDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+  
+  const logoHeight = isMobile ? 200 : (isLargeDesktop ? 256 : 224);
+  
+  // Padding-top matchar auth-sidans layout
+  // Desktop: py-8 (32px) + lite centrering i 260px container ≈ 50px
+  // Mobile: safe-area + pt-6 (24px)
+  const paddingTop = isMobile 
+    ? 'calc(env(safe-area-inset-top, 0px) + 24px)' 
+    : '50px';
+  
+  // Text-storlek matchar auth-sidans h1
+  // Desktop: text-xl (1.25rem), lg: text-2xl (1.5rem)
+  // Mobile: text-2xl (1.5rem)
+  const fontSize = isMobile ? '1.5rem' : (isLargeDesktop ? '1.5rem' : '1.25rem');
   
   return (
     <div
@@ -77,29 +90,40 @@ export function AuthSplashScreen() {
       style={{
         background: 'hsl(215, 100%, 12%)',
         justifyContent: 'flex-start',
-        // Matchar auth-sidans layout: safe-area + pt-6(24px) + center av 200px container
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 24px + 76px)',
+        paddingTop,
         transform: 'translateZ(0)',
         willChange: 'opacity',
       }}
     >
-      {/* Parium Logo - matchar AuthLogoInline storlek: h-40 * scale-125 */}
+      {/* Parium Logo - exakt samma höjd som AuthLogoInline */}
       <img
         src={authLogoDataUri}
         alt="Parium"
-        className="w-[350px] h-auto select-none pointer-events-none"
-        style={{ transform: 'translateZ(0)', marginBottom: '-24px' }}
+        className="select-none pointer-events-none"
+        style={{ 
+          height: `${logoHeight}px`,
+          width: 'auto',
+          transform: 'translateZ(0)',
+        }}
         decoding="sync"
         loading="eager"
         fetchPriority="high"
       />
       
-      {/* Tagline - matchar auth-sidans h1: text-2xl font-semibold + drop-shadow */}
-      <p className="text-white text-2xl font-semibold tracking-tight mb-12 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+      {/* Tagline - matchar auth-sidans h1 */}
+      <p 
+        className="text-white font-semibold drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
+        style={{
+          fontSize,
+          letterSpacing: '-0.01em',
+          marginTop: isMobile ? '4px' : '8px',
+          marginBottom: '40px',
+        }}
+      >
         Din karriärresa börjar här
       </p>
       
-      {/* Pulserande prickar - GPU-accelererade med negativ delay */}
+      {/* Pulserande prickar */}
       <div className="flex items-center gap-2.5">
         <span 
           className="w-2.5 h-2.5 rounded-full bg-white/60"
@@ -130,7 +154,6 @@ export function AuthSplashScreen() {
         />
       </div>
       
-      {/* CSS för mjuk pulsanimation */}
       <style>{`
         @keyframes authSplashPulse {
           0%, 100% {
