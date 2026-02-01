@@ -70,13 +70,16 @@ export function AuthSplashScreen() {
   return (
     <div
       className={`
-        fixed inset-0 z-[9999] flex flex-col items-center justify-center
+        fixed inset-0 z-[9999] flex flex-col items-center
         transition-opacity duration-500 ease-out
         ${isFadingOut ? 'opacity-0' : 'opacity-100'}
       `}
       style={{
         // EXAKT samma bakgrund som auth-sidan
         background: 'hsl(215, 100%, 12%)',
+        // Positionera loggan där auth-sidans logga sitter (~28% från toppen)
+        justifyContent: 'flex-start',
+        paddingTop: 'max(28vh, 140px)',
         // GPU acceleration
         transform: 'translateZ(0)',
         willChange: 'opacity',
@@ -87,7 +90,7 @@ export function AuthSplashScreen() {
         src={authLogoDataUri}
         alt="Parium"
         className="w-[240px] h-auto select-none pointer-events-none"
-        style={{ transform: 'translateZ(0)', marginBottom: '-8px' }}
+        style={{ transform: 'translateZ(0)', marginBottom: '-12px' }}
         decoding="sync"
         loading="eager"
         fetchPriority="high"
