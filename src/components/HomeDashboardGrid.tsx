@@ -76,24 +76,20 @@ const DotNavigation = memo(({
   current: number; 
   onSelect: (index: number) => void;
 }) => (
-  <div className="flex items-center justify-center gap-3 mt-3">
+  <div className="flex items-center justify-center gap-2 mt-3">
     {Array.from({ length: total }).map((_, i) => (
       <button
         key={i}
         onClick={() => onSelect(i)}
         className={cn(
-          // Touch-friendly: 44px min touch target with visible 8px dot
-          "min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-90 transition-transform",
-        )}
-        aria-label={`Gå till ${i + 1}`}
-      >
-        <span className={cn(
+          // Important: no transitions here (prevents visible "trails" on some browsers)
           "w-2 h-2 rounded-full transition-none",
           i === current 
             ? "bg-white" 
-            : "bg-white/30"
-        )} />
-      </button>
+            : "bg-white/30 hover:bg-white/50"
+        )}
+        aria-label={`Gå till ${i + 1}`}
+      />
     ))}
   </div>
 ));
@@ -223,22 +219,24 @@ const NewsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaus
         <div className="flex items-center justify-between mt-auto">
           {/* Dot navigation */}
           {newsItems.length > 1 ? (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {newsItems.map((_, i) => (
-                <button
+                <div
                   key={i}
                   onClick={() => setCurrentIndex(i)}
+                  role="button"
+                  tabIndex={0}
                   onKeyDown={(e) => e.key === 'Enter' && setCurrentIndex(i)}
-                  className="min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-90 transition-transform"
-                  aria-label={`Gå till nyhet ${i + 1}`}
-                >
-                  <span className={cn(
-                    "w-2.5 h-2.5 rounded-full transition-none",
+                  className={cn(
+                    "w-2.5 h-2.5 rounded-full cursor-pointer",
+                    // Important: no transitions here (prevents visible "trails" on some browsers)
+                    "transition-none",
                     i === currentIndex 
                       ? "bg-white" 
-                      : "bg-white/30"
-                  )} />
-                </button>
+                      : "bg-white/30 hover:bg-white/50"
+                  )}
+                  aria-label={`Gå till nyhet ${i + 1}`}
+                />
               ))}
             </div>
           ) : <div />}
@@ -516,21 +514,20 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
         </div>
         
         {/* Dot navigation */}
-        <div className="flex items-center gap-1 mt-auto">
+        <div className="flex items-center gap-2 mt-auto">
           {statsArray.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
-              className="min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-90 transition-transform"
-              aria-label={`Gå till statistik ${i + 1}`}
-            >
-              <span className={cn(
+              className={cn(
+                // Important: no transitions here (prevents visible "trails" on some browsers)
                 "w-2.5 h-2.5 rounded-full transition-none",
                 i === currentIndex 
                   ? "bg-white" 
-                  : "bg-white/30"
-              )} />
-            </button>
+                  : "bg-white/30 hover:bg-white/50"
+              )}
+              aria-label={`Gå till statistik ${i + 1}`}
+            />
           ))}
         </div>
       </CardContent>
