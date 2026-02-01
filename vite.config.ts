@@ -8,6 +8,17 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Lovable preview kör appen bakom en HTTPS-proxy.
+    // Utan dessa inställningar kan Vite-klienten försöka ansluta HMR till
+    // `localhost:8080` (som inte är nåbart från webbläsaren) och då får man
+    // `[vite] failed to connect to websocket`.
+    hmr: {
+      protocol: "wss",
+      clientPort: 443,
+      // Tom sträng gör att Vite-klienten faller tillbaka till importMetaUrl.hostname
+      // (dvs. samma host som preview-sidan) istället för att hårdkoda "localhost".
+      host: "",
+    },
   },
   plugins: [
     react(),
