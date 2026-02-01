@@ -80,9 +80,9 @@ export function AuthTransitionSplash() {
         decoding="sync"
         loading="eager"
         fetchPriority="high"
-        width={560}
-        height={224}
-        className="block w-[min(400px,70vw)] h-auto object-contain"
+        width={240}
+        height={96}
+        className="block w-[min(240px,60vw)] h-auto object-contain"
         draggable={false}
       />
       
