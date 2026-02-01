@@ -1,19 +1,30 @@
 import { memo } from 'react';
 
 /**
- * Animated background with bubbles and glow effects
- * Used across auth and main app for visual consistency
+ * Animated background with bubbles and glow effects.
+ * 
+ * PERFORMANCE: On touch devices animations are disabled to free GPU/CPU for
+ * instant button responsiveness. Only the static glow is rendered.
  */
 interface AnimatedBackgroundProps {
   showBubbles?: boolean;
   variant?: 'viewport' | 'card';
 }
 
+// Detect touch device once (cheap, avoids re-eval on each render)
+const isTouchDevice =
+  typeof window !== 'undefined' &&
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
 export const AnimatedBackground = memo(({ showBubbles = true, variant = 'viewport' }: AnimatedBackgroundProps) => {
   const positionClass = variant === 'card' ? 'absolute' : 'fixed';
+
+  // On touch devices skip animated bubbles entirely for max responsiveness
+  const renderBubbles = showBubbles && !isTouchDevice;
+
   return (
     <div className={`${positionClass} inset-0 pointer-events-none z-0`}>
-      {showBubbles && (
+      {renderBubbles && (
         <>
           {/* Left-side bubbles (top corner) */}
           <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full"></div>
