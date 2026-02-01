@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 // Mobile breakpoint - below this we use mobile layout with sidebar
 const MOBILE_BREAKPOINT = 768;
@@ -7,33 +7,35 @@ export type DeviceType = 'mobile' | 'desktop';
 
 function getDeviceType(): DeviceType {
   if (typeof window === 'undefined') return 'desktop';
-  const width = window.innerWidth;
-  // All devices >= 768px with pointer get desktop top nav (no sidebar)
-  if (width < MOBILE_BREAKPOINT) return 'mobile';
+  return window.innerWidth < MOBILE_BREAKPOINT ? 'mobile' : 'desktop';
+}
+
+// Singleton subscription - shared across all hook instances (no duplicate listeners)
+let deviceListeners: Set<() => void> | null = null;
+function subscribeDevice(callback: () => void): () => void {
+  if (!deviceListeners) {
+    deviceListeners = new Set();
+    const handler = () => deviceListeners!.forEach(fn => fn());
+    window.addEventListener('resize', handler, { passive: true });
+    window.addEventListener('orientationchange', handler, { passive: true });
+  }
+  deviceListeners.add(callback);
+  return () => {
+    deviceListeners!.delete(callback);
+  };
+}
+
+function getDeviceSnapshot(): DeviceType {
+  return getDeviceType();
+}
+
+function getDeviceServerSnapshot(): DeviceType {
   return 'desktop';
 }
 
 export function useDevice(): DeviceType {
-  const [device, setDevice] = useState<DeviceType>(getDeviceType);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setDevice(getDeviceType());
-    };
-
-    // Listen to resize events
-    window.addEventListener('resize', handleResize);
-    
-    // Also listen to orientation change for mobile devices
-    window.addEventListener('orientationchange', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
-    };
-  }, []);
-
-  return device;
+  // useSyncExternalStore: no useEffect delay, instant sync on first render
+  return useSyncExternalStore(subscribeDevice, getDeviceSnapshot, getDeviceServerSnapshot);
 }
 
 // Non-reactive version for SSR or one-time checks
