@@ -236,7 +236,7 @@
       @media (min-width: 768px) {
         html.route-auth #auth-splash { display: flex; }
         /* Hide splash when #root has content (React mounted) - sibling selector works because splash is after root */
-        html.route-auth #root:not(:empty) + #auth-splash { display: none !important; }
+        html.route-auth #root:not(:empty) ~ #auth-splash { display: none !important; }
       }
     </style>
     <script>
