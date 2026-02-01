@@ -93,124 +93,12 @@ const Auth = () => {
     else if (initialMode === 'login') setIsLoginMode(true);
   }, [initialMode]);
 
-  // Smart scroll-locking: Lock only for login on MOBILE devices, allow scroll on desktop
+  // IMPORTANT: /auth must never get stuck in a global "scroll locked" state.
+  // We purposely keep scrolling local to the auth card instead of window-level listeners.
   useEffect(() => {
-    // SAFETY NET: If an older build ever added auth-lock classes, they can get “stuck”
-    // and completely disable scrolling (position:fixed + touch-action: pan-x).
-    // We do not rely on these classes anymore, so always remove them on /auth.
     document.documentElement.classList.remove('auth-locked', 'auth-lock');
     document.body.classList.remove('auth-locked', 'auth-lock');
-
-    // CRITICAL: Desktop must ALWAYS scroll freely - no scroll-lock at all
-    if (device === 'desktop') {
-      return; // Skip scroll-lock entirely on desktop
-    }
-
-    // Only do scroll-locking on coarse pointer devices (real touch).
-    // This prevents “stuck scroll” in desktop preview windows that happen to be <1024px wide.
-    const isCoarsePointer =
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(pointer: coarse)').matches;
-    if (!isCoarsePointer) return;
-
-    // Register mode: Allow scroll freely (no event listeners needed)
-    if (!isLoginMode) {
-      // Make sure UI state doesn’t “stick” from login mode.
-      setPullProgress(0);
-      if (isRefreshing) setIsRefreshing(false);
-      return;
-    }
-
-    // Login mode on mobile: enable pull-to-refresh and block scroll via listeners
-    let startY = 0;
-    let triggered = false;
-    let lastReload = 0;
-    let isInputFocused = false;
-
-    const onFocusIn = (e: FocusEvent) => {
-      if (e.target && (e.target as HTMLElement).tagName === 'INPUT') {
-        isInputFocused = true;
-      }
-    };
-
-    const onFocusOut = (e: FocusEvent) => {
-      if (e.target && (e.target as HTMLElement).tagName === 'INPUT') {
-        isInputFocused = false;
-      }
-    };
-
-    const onTouchStart = (e: TouchEvent) => {
-      startY = e.touches?.[0]?.clientY ?? 0;
-      triggered = false;
-      setPullProgress(0);
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      // Allow scroll when input is focused (keyboard is open)
-      if (isInputFocused) return;
-      
-      const y = e.touches?.[0]?.clientY ?? 0;
-      const dy = y - startY;
-      
-      // Calculate progress (0-1) based on drag distance
-      const maxDrag = 100;
-      const progress = Math.min(Math.max(dy / maxDrag, 0), 1);
-      setPullProgress(progress);
-      
-      // Block all vertical scroll when no input focused
-      e.preventDefault();
-      
-      // Pull-to-refresh
-      if (dy > 70 && !triggered) {
-        triggered = true;
-        const now = Date.now();
-        if (now - lastReload > 1500) {
-          lastReload = now;
-          setIsRefreshing(true);
-          setTimeout(() => {
-            window.location.reload();
-          }, 300);
-        }
-      }
-    };
-
-    const onTouchEnd = () => {
-      if (!isRefreshing) {
-        setPullProgress(0);
-      }
-    };
-
-    const onWheel = (e: WheelEvent) => {
-      if (!isInputFocused) {
-        e.preventDefault();
-      }
-    };
-
-    const onScroll = () => {
-      if (!isInputFocused && window.scrollY !== 0) {
-        window.scrollTo(0, 0);
-      }
-    };
-
-    document.addEventListener('focusin', onFocusIn);
-    document.addEventListener('focusout', onFocusOut);
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: false });
-    window.addEventListener('touchend', onTouchEnd, { passive: true });
-    window.addEventListener('wheel', onWheel, { passive: false });
-    window.addEventListener('scroll', onScroll, { passive: true });
-
-    return () => {
-      document.removeEventListener('focusin', onFocusIn);
-      document.removeEventListener('focusout', onFocusOut);
-      window.removeEventListener('touchstart', onTouchStart as any);
-      window.removeEventListener('touchmove', onTouchMove as any);
-      window.removeEventListener('touchend', onTouchEnd as any);
-      window.removeEventListener('wheel', onWheel as any);
-      window.removeEventListener('scroll', onScroll as any);
-    };
-  }, [device, isLoginMode, isRefreshing]);
+  }, [isLoginMode]);
 
   useEffect(() => {
     const handleAuthFlow = async () => {
