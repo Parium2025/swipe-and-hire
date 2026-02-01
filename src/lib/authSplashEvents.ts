@@ -1,90 +1,112 @@
-/**
- * Event-based auth splash controller for instant branded loading on /auth.
- * 
- * The splash is shown via static HTML (index.html) for hard reloads,
- * and controlled via this event bus for in-app navigation.
- * 
- * Minimum display time: 4 seconds (ensures logo is fully decoded/painted)
- */
+// Simple, dependency-free event bus for showing/hiding the auth transition splash.
+// We keep this outside React so it can be triggered from any layer (pages, hooks).
 
-type SplashEventType = 'show' | 'hide' | 'ready';
-type SplashListener = (event: SplashEventType) => void;
+export const AUTH_SPLASH_SHOW_EVENT = "parium:auth-splash:show";
+export const AUTH_SPLASH_HIDE_EVENT = "parium:auth-splash:hide";
 
-const listeners = new Set<SplashListener>();
-let splashShownAt: number | null = null;
-const MIN_DISPLAY_MS = 4000;
+// Keep refresh-splash and in-app click-splash perfectly identical.
+// This is the minimum time the shell stays visible once shown.
+const AUTH_SPLASH_MIN_MS = 4000;
 
-export const authSplashEvents = {
-  subscribe(listener: SplashListener): () => void {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-  },
+// Track if splash is currently shown to prevent double-triggers
+let splashVisible = false;
 
-  emit(event: SplashEventType): void {
-    if (event === 'show') {
-      splashShownAt = Date.now();
-    }
-    listeners.forEach((fn) => fn(event));
-  },
+let hideTimer: number | null = null;
 
-  /**
-   * Shows the splash element in the DOM (for in-app navigation to /auth)
-   */
-  show(): void {
-    const el = document.getElementById('auth-splash');
-    if (el) {
-      el.style.display = 'flex';
-      el.style.opacity = '1';
-      el.setAttribute('aria-hidden', 'false');
-    }
-    this.emit('show');
-  },
+function getStaticSplashEl(): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  return document.getElementById("auth-splash");
+}
 
-  /**
-   * Hides the splash with a fade-out, respecting minimum display time.
-   * Returns a promise that resolves when the splash is fully hidden.
-   */
-  async hide(): Promise<void> {
-    const el = document.getElementById('auth-splash');
-    if (!el) return;
+function ensureRouteClass(on: boolean) {
+  if (typeof document === "undefined") return;
+  const html = document.documentElement;
+  if (on) html.classList.add("route-outsidan");
+  else html.classList.remove("route-outsidan");
 
-    // Enforce minimum display time for logo decode + paint
-    if (splashShownAt) {
-      const elapsed = Date.now() - splashShownAt;
-      if (elapsed < MIN_DISPLAY_MS) {
-        await new Promise((r) => setTimeout(r, MIN_DISPLAY_MS - elapsed));
-      }
-    }
+  if (document.body) {
+    if (on) document.body.classList.add("route-outsidan");
+    else document.body.classList.remove("route-outsidan");
+  }
+}
 
-    // Fade out
-    el.style.transition = 'opacity 0.4s ease-out';
-    el.style.opacity = '0';
-    
-    await new Promise((r) => setTimeout(r, 400));
-    
-    el.style.display = 'none';
-    el.setAttribute('aria-hidden', 'true');
-    splashShownAt = null;
-    
-    this.emit('hide');
-  },
+function getShownAt(): number | undefined {
+  if (typeof window === "undefined") return undefined;
+  const v = (window as any).__pariumAuthSplashTs as number | undefined;
+  return typeof v === "number" ? v : undefined;
+}
 
-  /**
-   * Signals that the auth page is ready (logo decoded, content painted).
-   * This triggers the hide sequence.
-   */
-  ready(): void {
-    this.emit('ready');
-    this.hide();
-  },
+function setShownAt(ts: number) {
+  if (typeof window === "undefined") return;
+  (window as any).__pariumAuthSplashTs = ts;
+}
 
-  /**
-   * Check if splash is currently visible
-   */
-  isVisible(): boolean {
-    const el = document.getElementById('auth-splash');
-    return el ? el.style.display !== 'none' : false;
-  },
-};
+function showStaticSplashDom() {
+  const el = getStaticSplashEl();
+  if (el) el.classList.remove("hidden");
+  ensureRouteClass(true);
+}
 
-export default authSplashEvents;
+function hideStaticSplashDom() {
+  const el = getStaticSplashEl();
+  if (el) el.classList.add("hidden");
+  ensureRouteClass(false);
+}
+
+// If we refreshed on /auth, the pre-React script may already have shown the static splash.
+// Sync our internal state so hideAuthSplash() behaves consistently.
+if (typeof window !== "undefined" && typeof document !== "undefined") {
+  const el = getStaticSplashEl();
+  const isShownByHtml =
+    (document.documentElement.classList.contains("route-outsidan") ||
+      document.body?.classList.contains("route-outsidan")) &&
+    el &&
+    !el.classList.contains("hidden");
+
+  if (isShownByHtml) {
+    splashVisible = true;
+    if (!getShownAt()) setShownAt(Date.now());
+  }
+}
+
+export function showAuthSplash() {
+  if (typeof window === "undefined") return;
+  if (splashVisible) return; // Already showing
+  splashVisible = true;
+
+  if (hideTimer) {
+    window.clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+
+  setShownAt(Date.now());
+  // Use the exact same DOM splash as refresh to ensure identical visuals.
+  showStaticSplashDom();
+  window.dispatchEvent(new Event(AUTH_SPLASH_SHOW_EVENT));
+}
+
+export function hideAuthSplash() {
+  if (typeof window === "undefined") return;
+  if (!splashVisible) return; // Not showing
+
+  splashVisible = false;
+  window.dispatchEvent(new Event(AUTH_SPLASH_HIDE_EVENT));
+
+  const shownAt = getShownAt();
+  const elapsed = typeof shownAt === "number" ? Date.now() - shownAt : AUTH_SPLASH_MIN_MS;
+  const remaining = Math.max(0, AUTH_SPLASH_MIN_MS - elapsed);
+
+  if (hideTimer) {
+    window.clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+
+  hideTimer = window.setTimeout(() => {
+    hideStaticSplashDom();
+    hideTimer = null;
+  }, remaining);
+}
+
+export function isSplashVisible() {
+  return splashVisible;
+}

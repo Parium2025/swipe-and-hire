@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Eye, Users, MapPin, Calendar, Building2, Heart, Timer, CheckCircle } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
@@ -37,6 +38,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
   const navigate = useNavigate();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Get company name from either direct property or profiles join
   const companyName = job.company_name || job.profiles?.company_name || 'Okänt företag';
@@ -90,15 +92,23 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
       className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-all duration-200 hover:bg-white/10 active:scale-[0.98]"
       onClick={handleCardClick}
     >
-      {/* Job Image - Simplex style */}
+      {/* Job Image - Lazy loaded with skeleton */}
       {imageUrl && (
-        <div className="relative w-full h-48 overflow-hidden">
+        <div className="relative w-full h-48 overflow-hidden" style={{ contain: 'paint' }}>
+          {/* Skeleton placeholder */}
+          {!imageLoaded && (
+            <Skeleton className="absolute inset-0 w-full h-full" />
+          )}
           <img
             src={imageUrl}
             alt={`${job.title} hos ${companyName}`}
-            className="w-full h-full object-cover"
-            loading="eager"
-            fetchPriority="high"
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            loading="lazy"
+            decoding="async"
+            style={{ contentVisibility: 'auto' }}
+            onLoad={() => setImageLoaded(true)}
           />
           {/* Gradient overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

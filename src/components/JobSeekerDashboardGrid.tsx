@@ -229,7 +229,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
                   key={i}
                   onClick={() => setCurrentIndex(i)}
                   onKeyDown={(e) => e.key === 'Enter' && setCurrentIndex(i)}
-                  className="p-2 -m-1 touch-target flex items-center justify-center"
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-90 transition-transform"
                   aria-label={`Gå till nyhet ${i + 1}`}
                 >
                   <span className={cn(
@@ -539,7 +539,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
-              className="p-2 -m-1 touch-target flex items-center justify-center"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-90 transition-transform"
               aria-label={`Gå till statistik ${i + 1}`}
             >
               <span className={cn(

@@ -69,10 +69,11 @@ function CandidateAvatarBase({
   }
 
   return (
-    <Avatar className="h-10 w-10 ring-2 ring-inset ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
+    <Avatar className="h-10 w-10 ring-2 ring-inset ring-white/20 transform-gpu">
       <AvatarImage 
         src={resolvedImageUrl || ''} 
         alt={`${firstName || ''} ${lastName || ''}`}
+        loading="lazy"
         onError={() => setAvatarError(true)}
         onLoad={() => setImageLoaded(true)}
       />

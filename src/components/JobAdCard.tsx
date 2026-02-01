@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Heart, X, Bookmark } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import officeBuilding from '@/assets/office-building.jpg';
 
 interface JobAdCardProps {
@@ -32,6 +33,8 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
   noBackground,
   backgroundGradient,
 }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   return (
     <section aria-label="Jobbannonskort" className="relative w-[140px] h-[280px] mx-auto">
       {/* Telefonram */}
@@ -45,19 +48,28 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
           {/* Notch/status */}
           <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black/60 border border-white/10"></div>
 
-          {/* Bakgrundsbild */}
+          {/* Bakgrundsbild med lazy loading och skeleton */}
           {!noBackground && (
-            imageUrl ? (
-              <img
-                loading="eager"
-                decoding="sync"
-                fetchPriority="high"
-                src={imageUrl}
-                alt={imageAlt || `${title} hos ${company}`}
-                className="absolute inset-0 w-full h-full object-cover will-change-transform"
-                draggable={false}
-                style={{ contentVisibility: 'auto' }}
-              />
+            imageUrl && !imageError ? (
+              <>
+                {/* Skeleton placeholder */}
+                {!imageLoaded && (
+                  <Skeleton className="absolute inset-0 w-full h-full" />
+                )}
+                <img
+                  loading="lazy"
+                  decoding="async"
+                  src={imageUrl}
+                  alt={imageAlt || `${title} hos ${company}`}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+                    imageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  style={{ contentVisibility: 'auto', contain: 'paint' }}
+                  draggable={false}
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => setImageError(true)}
+                />
+              </>
             ) : (
               <div className={`absolute inset-0 ${backgroundGradient || 'bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800'}`} />
             )

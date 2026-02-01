@@ -3,11 +3,10 @@
  *
  * IMPORTANT:
  * - We import the ORIGINAL PNG as a data URI via `?inline`.
- * - We render it as a background-image (same structure as the home logo)
- *   because browsers tend to cache/compose decoded bitmaps more reliably for
- *   <img>/CSS backgrounds than for <svg><image/>.
- * - Size is controlled by the SAME Tailwind classes already used in Auth*
- *   (h-*, w-auto, scale-*). The aspect-ratio wrapper keeps intrinsic sizing.
+ * - We use an <img> element with the data URI directly for INSTANT paint
+ *   on both mobile AND desktop. Background-image can have decode delays
+ *   on desktop browsers that cause the logo to "flash in" after mount.
+ * - The <img> with decode="sync" ensures the bitmap is ready before paint.
  */
 
 import { cn } from "@/lib/utils";
@@ -17,23 +16,28 @@ interface AuthLogoProps {
   className?: string;
 }
 
-// Original PNG is 1080x432 (2.5 aspect ratio)
-const AUTH_LOGO_ASPECT = 1080 / 432;
-
 export function AuthLogoInline({ className }: AuthLogoProps) {
   return (
-    <div
+    <img
+      src={authLogoDataUri}
+      alt="Parium"
+      // decode="sync" forces the browser to decode before paint - eliminates flash
+      decoding="sync"
+      // Eager loading ensures immediate decode
+      loading="eager"
+      // High priority for LCP
+      fetchPriority="high"
       className={cn(
-        "block bg-contain bg-center bg-no-repeat pointer-events-none transform-gpu",
+        "block object-contain pointer-events-none transform-gpu select-none",
         className
       )}
       style={{
-        aspectRatio: String(AUTH_LOGO_ASPECT),
-        backgroundImage: `url(${authLogoDataUri})`,
+        // GPU compositing hint
         willChange: "transform",
+        // Prevent any layout shift
+        contentVisibility: "auto",
       }}
-      aria-label="Parium"
-      role="img"
+      draggable={false}
     />
   );
 }

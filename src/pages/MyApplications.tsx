@@ -360,7 +360,7 @@ const MyApplications = () => {
                         <button
                           onClick={(e) => handleRemoveClick(application.id, job?.title || 'Okänt jobb', e)}
                           disabled={isRemoving}
-                          className="inline-flex items-center justify-center rounded-full border h-8 w-8 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 hover:backdrop-brightness-110 disabled:opacity-50 flex-shrink-0 active:scale-95"
+                          className="inline-flex items-center justify-center rounded-full border min-h-[44px] min-w-[44px] h-11 w-11 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-red-400 md:hover:backdrop-brightness-110 disabled:opacity-50 flex-shrink-0 active:scale-95 active:bg-red-500/20"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>

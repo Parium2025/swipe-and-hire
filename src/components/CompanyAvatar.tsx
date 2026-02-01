@@ -9,10 +9,11 @@ type CompanyAvatarProps = {
 
 function CompanyAvatarBase({ companyLogoUrl, companyName, initials }: CompanyAvatarProps) {
   return (
-    <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
+    <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu">
       <AvatarImage
         src={companyLogoUrl || ''}
         alt={`${companyName || "Företag"} logotyp`}
+        loading="lazy"
       />
       <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={150}>
         {initials}
