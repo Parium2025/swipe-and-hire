@@ -244,7 +244,7 @@ export function AppSidebar() {
                    >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
-                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                      className="flex items-center gap-3 w-full min-h-[44px] outline-none focus:outline-none active:scale-[0.97] transition-transform"
                     >
                       <div className="relative">
                         <item.icon className="h-4 w-4" />
@@ -302,7 +302,7 @@ export function AppSidebar() {
                    >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
-                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                      className="flex items-center gap-3 w-full min-h-[44px] outline-none focus:outline-none active:scale-[0.97] transition-transform"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -337,7 +337,7 @@ export function AppSidebar() {
                    >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
-                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                      className="flex items-center gap-3 w-full min-h-[44px] outline-none focus:outline-none active:scale-[0.97] transition-transform"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -372,7 +372,7 @@ export function AppSidebar() {
                    >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
-                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                      className="flex items-center gap-3 w-full min-h-[44px] outline-none focus:outline-none active:scale-[0.97] transition-transform"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
