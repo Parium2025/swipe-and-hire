@@ -1,11 +1,16 @@
 /**
- * Parium auth logo as INLINE SVG.
- * - 0 network requests (also in dev)
+ * Parium auth logo as INLINE SVG in the JS bundle.
+ *
+ * IMPORTANT:
+ * - We embed the ORIGINAL PNG as a data URI inside an <svg><image/></svg>.
+ *   This keeps it pixel-perfect (identical to the original logo), while still
+ *   being an inline SVG component.
  * - Size is controlled by the SAME Tailwind classes already used in Auth*
- *   (we keep the wrapper element so h-* + w-auto behaves like an <img>).
+ *   (h-*, w-auto, scale-*). The wrapper keeps <img>-like intrinsic sizing.
  */
 
 import { cn } from "@/lib/utils";
+import authLogoDataUri from "./parium-auth-logo.png?inline";
 
 interface AuthLogoProps {
   className?: string;
@@ -25,28 +30,17 @@ export function AuthLogoInline({ className }: AuthLogoProps) {
       <svg
         className="h-full w-full"
         viewBox="0 0 1080 432"
-        fill="none"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMidYMid meet"
       >
-        {/* Rings (use design tokens, not hard-coded colors) */}
-        <g stroke={`hsl(var(--primary))`} strokeWidth="26" fill="none" opacity="0.95">
-          <circle cx="220" cy="216" r="108" />
-          <circle cx="350" cy="216" r="108" />
-        </g>
-
-        {/* Wordmark */}
-        <text
-          x="470"
-          y="264"
-          fill={`hsl(var(--foreground))`}
-          fontSize="150"
-          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-          fontWeight="300"
-          letterSpacing="0.01em"
-        >
-          Parium
-        </text>
+        <image
+          href={authLogoDataUri}
+          // Safari compatibility
+          xlinkHref={authLogoDataUri as unknown as string}
+          width="1080"
+          height="432"
+          preserveAspectRatio="xMidYMid meet"
+        />
       </svg>
     </div>
   );
