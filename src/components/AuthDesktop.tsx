@@ -20,6 +20,7 @@ import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { searchAddresses } from '@/lib/addressSearch';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
+import { AuthLogoInline } from '@/assets/authLogoInline';
 
 interface AuthDesktopProps {
   isPasswordReset: boolean;
@@ -46,7 +47,6 @@ const AuthDesktop = ({
   initialMode,
   initialRole
 }: AuthDesktopProps) => {
-  const logoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [isLogin, setIsLogin] = useState(initialMode !== 'register');
@@ -574,17 +574,7 @@ const AuthDesktop = ({
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
-                <img 
-                  src={logoUrl}
-                  alt="Parium" 
-                  className="relative h-56 w-auto lg:h-64"
-                  width="400"
-                  height="160"
-                  loading="eager"
-                  decoding="sync"
-                  fetchPriority="high"
-                  
-                />
+                <AuthLogoInline className="relative h-56 w-auto lg:h-64" />
               </div>
             </div>
             

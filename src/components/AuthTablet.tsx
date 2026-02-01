@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useCachedImage } from '@/hooks/useCachedImage';
 import { AnimatedBackground } from './AnimatedBackground';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +20,7 @@ import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { searchAddresses } from '@/lib/addressSearch';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
+import { AuthLogoInline } from '@/assets/authLogoInline';
 
 interface AuthTabletProps {
   isPasswordReset: boolean;
@@ -47,8 +47,6 @@ const AuthTablet = ({
   initialMode,
   initialRole
 }: AuthTabletProps) => {
-  const logoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
-  const { cachedUrl: cachedLogoUrl } = useCachedImage(logoUrl);
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [isLogin, setIsLogin] = useState(initialMode !== 'register');
@@ -586,16 +584,7 @@ const AuthTablet = ({
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
-                <img 
-                  src={cachedLogoUrl || logoUrl}
-                  alt="Parium" 
-                  className="relative h-[224px] w-auto md:h-[240px]"
-                  width="400"
-                  height="160"
-                  loading="eager"
-                  decoding="sync"
-                  
-                />
+                <AuthLogoInline className="relative h-[224px] w-auto md:h-[240px]" />
               </div>
             </div>
             
