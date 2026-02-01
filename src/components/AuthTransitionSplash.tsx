@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { AUTH_SPLASH_HIDE_EVENT, AUTH_SPLASH_SHOW_EVENT } from "@/lib/authSplashEvents";
+import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
 
 /**
  * Branded loading splash that acts as a "shell" during navigation to /auth.
@@ -75,7 +76,7 @@ export function AuthTransitionSplash() {
     >
       {/* Logo */}
       <img
-        src="/lovable-uploads/parium-auth-logo.png"
+        src={authLogoDataUri}
         alt="Parium"
         decoding="sync"
         loading="eager"
