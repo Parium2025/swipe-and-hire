@@ -32,6 +32,7 @@ export function AuthLogoInline({ className }: AuthLogoProps) {
         backgroundImage: `url(${authLogoDataUri})`,
         willChange: "transform",
       }}
+      data-auth-logo="true"
       aria-label="Parium"
       role="img"
     />
