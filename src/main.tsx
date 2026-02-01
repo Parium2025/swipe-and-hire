@@ -1,4 +1,3 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import App from './App'
@@ -6,7 +5,7 @@ import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
-import authLogoDataUri from './assets/parium-auth-logo.png?inline'
+import { authSplashEvents } from './lib/authSplashEvents'
 
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
@@ -100,13 +99,13 @@ async function bootstrap() {
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
-  // Critical: on /auth we block briefly until the logo is decoded,
-  // so the first paint can include it without any flash.
   const isAuthRoute = typeof window !== 'undefined' && window.location.pathname === '/auth';
+  
+  // On /auth route: show splash immediately and preload logo
   if (isAuthRoute) {
-    await preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
-  } else {
-    void preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
+    authSplashEvents.show();
+    // Preload the logo used in splash (it's in the static HTML but we ensure it's decoded)
+    await preloadAndDecodeImage('/lovable-uploads/parium-logo-rings.png', 'auth-logo');
   }
 
   // Nav logo can remain fire-and-forget.

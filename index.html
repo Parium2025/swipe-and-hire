@@ -96,6 +96,39 @@
 </head>
 
   <body>
+    <!-- Auth Splash - Branded loading screen for /auth route -->
+    <div id="auth-splash" aria-hidden="true" style="display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,hsl(215 100% 10%) 0%,hsl(215 100% 16%) 50%,hsl(215 100% 12%) 100%);flex-direction:column;align-items:center;justify-content:center;opacity:1;transition:opacity 0.4s ease-out;">
+      <!-- Logo container - 240px for premium feel -->
+      <div style="width:240px;height:60px;margin-bottom:16px;">
+        <img 
+          src="/lovable-uploads/parium-logo-rings.png" 
+          alt="Parium" 
+          width="240" 
+          height="60" 
+          decoding="sync" 
+          loading="eager" 
+          fetchpriority="high"
+          style="width:100%;height:100%;object-fit:contain;"
+        />
+      </div>
+      <!-- Tagline -->
+      <p style="color:rgba(255,255,255,0.8);font-family:Inter,system-ui,sans-serif;font-size:1rem;font-weight:400;margin:0 0 32px 0;letter-spacing:0.01em;">
+        Din karriärresa börjar här
+      </p>
+      <!-- Pulsing dots - 2.5s cycle, GPU-accelerated -->
+      <div style="display:flex;gap:8px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.6);animation:authPulse 2.5s ease-in-out infinite;"></span>
+        <span style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.6);animation:authPulse 2.5s ease-in-out 0.3s infinite;"></span>
+        <span style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.6);animation:authPulse 2.5s ease-in-out 0.6s infinite;"></span>
+      </div>
+      <style>
+        @keyframes authPulse {
+          0%, 100% { opacity: 0.3; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1); }
+        }
+      </style>
+    </div>
+    
     <!-- Portrait-only warning -->
     <div id="portrait-warning" role="alert" aria-live="polite">
       <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 2rem; opacity: 0.9;">
@@ -140,6 +173,20 @@
           }
         }
       } catch (e) { /* noop */ }
+    </script>
+    <script>
+      // Show auth splash immediately on /auth route (hard reload)
+      (function() {
+        try {
+          if (window.location.pathname === '/auth') {
+            var splash = document.getElementById('auth-splash');
+            if (splash) {
+              splash.style.display = 'flex';
+              splash.setAttribute('aria-hidden', 'false');
+            }
+          }
+        } catch (e) { /* noop */ }
+      })();
     </script>
     <script>
       (function() {
