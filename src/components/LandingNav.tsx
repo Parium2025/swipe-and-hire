@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { triggerAuthSplash } from '@/hooks/useAuthNavigation';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 
 interface LandingNavProps {
@@ -9,6 +10,12 @@ interface LandingNavProps {
 
 const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Wrapper som triggar splash först
+  const handleLoginClick = () => {
+    triggerAuthSplash();
+    onLoginClick();
+  };
 
   const navItems = [
     { label: 'Produkt', href: '#produkt' },
@@ -48,7 +55,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
             {/* Desktop CTA */}
             <div className="hidden md:block">
               <Button
-                onClick={onLoginClick}
+                onClick={handleLoginClick}
                 variant="glass"
               >
                 Logga in
@@ -91,7 +98,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
                 <Button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    onLoginClick();
+                    handleLoginClick();
                   }}
                   className="w-full bg-white text-primary hover:bg-white/90"
                   size="lg"
