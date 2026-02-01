@@ -20,7 +20,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
-    <!-- Preload critical images -->
+    <!-- Preload critical images - auth logo preloaded on ALL pages for instant /auth navigation -->
+    <link rel="preload" as="image" href="/lovable-uploads/parium-auth-logo.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/src/assets/parium-logo-rings.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/assets/hero-woman-left-hand-verified.jpg" type="image/jpeg" fetchpriority="high" />
@@ -151,7 +152,7 @@
       pointer-events: none;
     ">
       <img
-        src="/lovable-uploads/parium-logo-transparent.png"
+        src="/lovable-uploads/parium-auth-logo.png"
         alt="Parium"
         decoding="sync"
         fetchpriority="high"
