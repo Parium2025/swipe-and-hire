@@ -59,12 +59,21 @@ export function useMessagesBackgroundSync() {
   const syncMessages = useCallback(async () => {
     if (!user || !navigator.onLine) return;
     
+    // 🌐 NETWORK OPTIMIZATION: Detect slow connection
+    const isSlowConnection = () => {
+      if ('connection' in navigator) {
+        const conn = (navigator as any).connection;
+        if (conn?.effectiveType === '2g' || conn?.effectiveType === 'slow-2g') return true;
+        if (conn?.saveData) return true;
+      }
+      return false;
+    };
+    
     const now = Date.now();
-    // Debounce: don't sync more than once per 30 seconds
-    if (now - lastSyncRef.current < 30000) return;
+    // Debounce: längre intervall på svagt internet
+    const minInterval = isSlowConnection() ? 60000 : 30000;
+    if (now - lastSyncRef.current < minInterval) return;
     lastSyncRef.current = now;
-
-    console.log('[Messages Sync] Starting background sync...');
 
     try {
       // Fetch inbox and sent in parallel
@@ -221,10 +230,22 @@ export function useMessagesBackgroundSync() {
     };
   }, [user, syncMessages]);
 
-  // Initial sync on mount (realtime handles subsequent updates)
+  // Initial sync on mount - DEFERRED på touch/svagt internet
   useEffect(() => {
     if (!user) return;
-    syncMessages();
+    
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    // På touch: defer synken för att inte blocka UI
+    if (isTouchDevice) {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => syncMessages(), { timeout: 5000 });
+      } else {
+        setTimeout(() => syncMessages(), 2000);
+      }
+    } else {
+      syncMessages();
+    }
   }, [user, syncMessages]);
 
   return { syncMessages };
