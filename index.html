@@ -158,19 +158,10 @@
         } catch (e) { /* noop */ }
       })();
     </script>
-    <!-- Service Worker för aggressiv bildcachning -->
+    <!-- Service Worker endast i produktion för att undvika störande reloads i utveckling -->
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-              console.log('[SW] Service Worker registered successfully:', registration.scope);
-            })
-            .catch(error => {
-              console.log('[SW] Service Worker registration failed:', error);
-            });
-        });
-      }
+      // SW disabled in preview - handled by main.tsx in production only
+      // This prevents SW from interfering with HMR and causing slow reloads on touch devices
     </script>
     <script type="module" src="/src/main.tsx?v=20251004-1510"></script>
   </body>
