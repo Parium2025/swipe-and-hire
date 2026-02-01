@@ -219,21 +219,23 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots - fixed height, tight layout */}
-        <div className="h-5 flex items-center mt-auto">
+        {/* Footer with dots - fixed height, ultra-tight, no layout jitter */}
+        <div className="h-4 flex items-center mt-auto shrink-0">
           {tipsItems.length > 1 && (
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-px">
               {tipsItems.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrentIndex(i)}
-                  className="w-5 h-5 flex items-center justify-center"
+                  className="w-3 h-3 p-0 flex items-center justify-center leading-none touch-manipulation"
                   aria-label={`Gå till nyhet ${i + 1}`}
                 >
-                  <span className={cn(
-                    "w-1.5 h-1.5 rounded-full",
-                    i === currentIndex ? "bg-white" : "bg-white/30"
-                  )} />
+                  <span
+                    className={cn(
+                      "block w-1.5 h-1.5 rounded-full",
+                      i === currentIndex ? "bg-white" : "bg-white/30"
+                    )}
+                  />
                 </button>
               ))}
             </div>
@@ -529,20 +531,22 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation - fixed height, tight layout */}
-        <div className="h-5 flex items-center mt-auto">
-          <div className="flex items-center gap-0.5">
+        {/* Dot navigation - fixed height, ultra-tight, no layout jitter */}
+        <div className="h-4 flex items-center mt-auto shrink-0">
+          <div className="flex items-center gap-px">
             {statsArray.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentIndex(i)}
-                className="w-5 h-5 flex items-center justify-center"
+                className="w-3 h-3 p-0 flex items-center justify-center leading-none touch-manipulation"
                 aria-label={`Gå till statistik ${i + 1}`}
               >
-                <span className={cn(
-                  "w-1.5 h-1.5 rounded-full",
-                  i === currentIndex ? "bg-white" : "bg-white/30"
-                )} />
+                <span
+                  className={cn(
+                    "block w-1.5 h-1.5 rounded-full",
+                    i === currentIndex ? "bg-white" : "bg-white/30"
+                  )}
+                />
               </button>
             ))}
           </div>
