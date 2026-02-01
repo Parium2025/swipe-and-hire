@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { preloadImages, waitForServiceWorker } from '@/lib/serviceWorkerManager';
 import { getMediaUrl } from '@/lib/mediaManager';
@@ -23,8 +23,14 @@ const preloadImageNative = (src: string): Promise<void> => {
  * Körs en gång när appen startar
  * PRIORITERAR inloggad användares media FÖRST för omedelbar sidebar-visning
  */
-export const useGlobalImagePreloader = () => {
+export const useGlobalImagePreloader = (enabled: boolean = true) => {
+  const startedRef = useRef(false);
+
   useEffect(() => {
+    if (!enabled) return;
+    if (startedRef.current) return;
+    startedRef.current = true;
+
     const preloadCriticalImages = async () => {
       try {
         // 🔥 PRIORITET 0: Ladda Parium-logotypen OMEDELBART med native Image()
@@ -149,5 +155,5 @@ export const useGlobalImagePreloader = () => {
 
     // Kör preload direkt vid app-start för minimal first-navigation-latens
     preloadCriticalImages();
-  }, []);
+  }, [enabled]);
 };
