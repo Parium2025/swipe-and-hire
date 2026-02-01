@@ -11,6 +11,33 @@ import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 // PNG used by the pre-React + in-app transition splash (preloaded in index.html)
 const AUTH_SPLASH_PNG = '/lovable-uploads/parium-auth-logo.png';
 
+// Minimum display time for the pre-React outsidan splash on hard refresh.
+// This masks first-paint delays while the /auth UI (and logo) becomes ready.
+const STATIC_AUTH_SPLASH_MIN_MS = 1500;
+
+function scheduleHideStaticAuthSplash(minMs: number = STATIC_AUTH_SPLASH_MIN_MS) {
+  try {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    const splash = document.getElementById('auth-splash');
+    if (!splash) return;
+
+    const isOutsidan =
+      document.documentElement.classList.contains('route-outsidan') ||
+      document.body.classList.contains('route-outsidan');
+    if (!isOutsidan) return;
+
+    const shownAt = (window as any).__pariumAuthSplashTs as number | undefined;
+    const elapsed = typeof shownAt === 'number' ? (Date.now() - shownAt) : 0;
+    const remaining = Math.max(0, minMs - elapsed);
+
+    window.setTimeout(() => {
+      splash.classList.add('hidden');
+    }, remaining);
+  } catch {
+    // Never block app start for splash bookkeeping
+  }
+}
+
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
   try {
@@ -118,6 +145,9 @@ async function bootstrap() {
 
   // Nav logo can remain fire-and-forget.
   void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
+
+  // Hide the pre-React outsidan splash only after minimum display time.
+  scheduleHideStaticAuthSplash();
 
   // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
   if (import.meta.env.PROD) {

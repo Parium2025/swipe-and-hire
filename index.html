@@ -116,6 +116,44 @@
       }
     }
   </style>
+  <script>
+    // EARLY outsidan route detection (runs in <head>) so the splash is visible on refresh.
+    // Adds class on <html> (and body when available) to avoid a "late" splash.
+    (function() {
+      try {
+        var path = location.pathname || '';
+        var isOutsidan = path === '/' || path === '/auth' || path.startsWith('/auth/');
+        if (!isOutsidan) return;
+
+        var hasSession = false;
+        try {
+          // Auth session lives in localStorage under sb-{projectId}-auth-token
+          var sessionKey = 'sb-jrjaegapuujushsiofoi-auth-token';
+          var sessionData = localStorage.getItem(sessionKey);
+          if (sessionData) {
+            var parsed = JSON.parse(sessionData);
+            if (parsed && parsed.access_token) {
+              var expiresAt = parsed.expires_at;
+              if (expiresAt && (expiresAt * 1000) > Date.now()) {
+                hasSession = true;
+              }
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        if (!hasSession) {
+          // Timestamp for minimum-display timing in app bootstrap.
+          window.__pariumAuthSplashTs = Date.now();
+          document.documentElement.classList.add('route-outsidan');
+          if (document.body) document.body.classList.add('route-outsidan');
+        }
+      } catch (e) {
+        // ignore
+      }
+    })();
+  </script>
 </head>
 
   <body>
@@ -177,8 +215,10 @@
         50% { opacity: 1; transform: scale(1.1); }
       }
       /* Show splash on outsidan routes (/ or /auth) when NOT logged in */
+      html.route-outsidan #auth-splash,
       body.route-outsidan #auth-splash { display: flex; }
-      body.route-outsidan #root:not(:empty) ~ #auth-splash,
+
+      html.route-outsidan #auth-splash.hidden,
       body.route-outsidan #auth-splash.hidden { display: none !important; }
     </style>
     <script>
