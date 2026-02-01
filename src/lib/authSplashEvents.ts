@@ -4,12 +4,23 @@
 export const AUTH_SPLASH_SHOW_EVENT = "parium:auth-splash:show";
 export const AUTH_SPLASH_HIDE_EVENT = "parium:auth-splash:hide";
 
+// Track if splash is currently shown to prevent double-triggers
+let splashVisible = false;
+
 export function showAuthSplash() {
   if (typeof window === "undefined") return;
+  if (splashVisible) return; // Already showing
+  splashVisible = true;
   window.dispatchEvent(new Event(AUTH_SPLASH_SHOW_EVENT));
 }
 
 export function hideAuthSplash() {
   if (typeof window === "undefined") return;
+  if (!splashVisible) return; // Not showing
+  splashVisible = false;
   window.dispatchEvent(new Event(AUTH_SPLASH_HIDE_EVENT));
+}
+
+export function isSplashVisible() {
+  return splashVisible;
 }
