@@ -17,10 +17,19 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
 const AUTH_DEBUG = false;
 
-// Splash hiding is now handled purely by CSS in index.html
-// When #root gets content, the sibling selector hides #auth-splash automatically
+// Note: We keep a tiny runtime safeguard to hide the pre-React auth splash
+// the moment React has actually mounted, to avoid the splash ever getting stuck.
 
 const Auth = () => {
+  useEffect(() => {
+    // Guarantees the splash can't cover the app if CSS selectors fail for any reason.
+    const splash = document.getElementById('auth-splash');
+    if (splash) {
+      // Inline style wins over any CSS and is the most reliable way to ensure it disappears.
+      splash.style.display = 'none';
+    }
+  }, []);
+
   const [showIntro, setShowIntro] = useState(() => {
     try {
       const loc = typeof window !== 'undefined' ? window.location : null;
