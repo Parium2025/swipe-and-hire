@@ -22,12 +22,55 @@ const AUTH_DEBUG = false;
 
 const Auth = () => {
   useEffect(() => {
-    // Guarantees the splash can't cover the app if CSS selectors fail for any reason.
-    const splash = document.getElementById('auth-splash');
-    if (splash) {
-      // Inline style wins over any CSS and is the most reliable way to ensure it disappears.
+    // Desktop hard-refresh: keep the pre-React logo placeholder visible only until
+    // the REAL auth logo has rendered & decoded (img.complete).
+    const splash = document.getElementById('auth-splash') as HTMLElement | null;
+    if (!splash) return;
+
+    let cancelled = false;
+    const startedAt = Date.now();
+    const maxWaitMs = 1500; // safety: never let the placeholder linger
+
+    const hide = () => {
+      if (cancelled) return;
       splash.style.display = 'none';
-    }
+    };
+
+    const tick = () => {
+      if (cancelled) return;
+
+      const isDesktop =
+        typeof window !== 'undefined' &&
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(min-width: 768px)').matches;
+
+      // If not desktop, it should never be visible anyway.
+      if (!isDesktop) {
+        hide();
+        return;
+      }
+
+      const logo = document.querySelector('img[data-auth-logo="true"]') as HTMLImageElement | null;
+
+      // Once the real logo is present and decoded, remove the placeholder.
+      if (logo && logo.complete) {
+        hide();
+        return;
+      }
+
+      // Safety net: if React mounts but logo isn't found yet, we still don't want a stuck overlay.
+      if (Date.now() - startedAt > maxWaitMs) {
+        hide();
+        return;
+      }
+
+      requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const [showIntro, setShowIntro] = useState(() => {
