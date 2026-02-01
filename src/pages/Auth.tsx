@@ -85,6 +85,14 @@ const Auth = () => {
   const initialMode = (location.state as any)?.mode;
   const initialRole = (location.state as any)?.role;
 
+  // Keep the top-level scroll-lock state in sync with the initial UI mode.
+  // Otherwise, if we land directly on “Registrera”, the child tab change handler
+  // may early-return and never notify the parent, leaving scroll locked.
+  useEffect(() => {
+    if (initialMode === 'register') setIsLoginMode(false);
+    else if (initialMode === 'login') setIsLoginMode(true);
+  }, [initialMode]);
+
   // Smart scroll-locking: Lock only for login on MOBILE devices, allow scroll on desktop
   useEffect(() => {
     // CRITICAL: Desktop must ALWAYS scroll freely - no scroll-lock at all
@@ -94,6 +102,14 @@ const Auth = () => {
       document.body.classList.remove('auth-locked', 'auth-lock');
       return; // Skip scroll-lock entirely on desktop
     }
+
+    // Only do scroll-locking on coarse pointer devices (real touch).
+    // This prevents “stuck scroll” in desktop preview windows that happen to be <1024px wide.
+    const isCoarsePointer =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(pointer: coarse)').matches;
+    if (!isCoarsePointer) return;
 
     // Register mode: Allow scroll freely (no event listeners needed)
     if (!isLoginMode) {
