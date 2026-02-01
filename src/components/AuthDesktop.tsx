@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, startTransition, useCallback } from 'react';
+import { useState, useRef, useEffect, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,13 +20,6 @@ import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
 import { AuthLogoInline } from '@/assets/authLogoInline';
-
-// Helper: hide pre-React splash once React logo is painted
-function hideAuthSplash() {
-  if (typeof document === 'undefined') return;
-  const splash = document.getElementById('auth-splash');
-  if (splash) splash.classList.add('logo-ready');
-}
 
 interface AuthDesktopProps {
   isPasswordReset: boolean;
@@ -574,7 +567,6 @@ const AuthDesktop = ({
                  */}
                  <AuthLogoInline
                    className="relative z-10 h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)]"
-                   onPainted={hideAuthSplash}
                  />
 
                 {/* Glow effects - AFTER logo in DOM, behind via z-index, delayed fade-in */}
