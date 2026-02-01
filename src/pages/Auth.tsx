@@ -13,6 +13,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
+// Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
+// Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
+const AUTH_DEBUG = false;
+
 const Auth = () => {
   const [showIntro, setShowIntro] = useState(() => {
     try {
@@ -193,15 +197,17 @@ const Auth = () => {
       const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
       const hashParams = new URLSearchParams(hash);
       
-      console.log('🔍 AUTH FLOW DEBUG:', {
-        isReset,
-        url: window.location.href,
-        searchParams: Array.from(searchParams.entries()),
-        hasToken: !!searchParams.get('token'),
-        hasTokenHash: !!searchParams.get('token_hash'),
-        hasIssued: !!searchParams.get('issued'),
-        issuedValue: searchParams.get('issued')
-      });
+      if (AUTH_DEBUG) {
+        console.log('🔍 AUTH FLOW DEBUG:', {
+          isReset,
+          url: window.location.href,
+          searchParams: Array.from(searchParams.entries()),
+          hasToken: !!searchParams.get('token'),
+          hasTokenHash: !!searchParams.get('token_hash'),
+          hasIssued: !!searchParams.get('issued'),
+          issuedValue: searchParams.get('issued')
+        });
+      }
       
       // FÖRSTA KONTROLLEN: Är det en reset-länk?
       if (isReset) {
@@ -270,24 +276,28 @@ const Auth = () => {
       const issued = issuedHash || issuedQP || undefined;
       const issuedMs = issued ? parseInt(issued, 10) : undefined;
       
-      console.log('🔍 DETALJERAD TOKEN-DEBUG:', {
-        issuedQP,
-        issuedHash,
-        issued,
-        issuedMs,
-        currentTime: Date.now(),
-        url: window.location.href
-      });
+      if (AUTH_DEBUG) {
+        console.log('🔍 DETALJERAD TOKEN-DEBUG:', {
+          issuedQP,
+          issuedHash,
+          issued,
+          issuedMs,
+          currentTime: Date.now(),
+          url: window.location.href
+        });
+      }
       
-      console.log('Auth useEffect - URL params:', { 
-        isReset, 
-        confirmed, 
-        currentUrl: window.location.href,
-        hasTokens: !!accessToken && !!refreshToken,
-        hasSupabaseToken: !!(tokenParam || tokenHashParam),
-        tokenType,
-        issuedMs
-      });
+      if (AUTH_DEBUG) {
+        console.log('Auth useEffect - URL params:', { 
+          isReset, 
+          confirmed, 
+          currentUrl: window.location.href,
+          hasTokens: !!accessToken && !!refreshToken,
+          hasSupabaseToken: !!(tokenParam || tokenHashParam),
+          tokenType,
+          issuedMs
+        });
+      }
 
       // Fånga fel från Supabase verify endpoint och fall utan tokens
       const errorCode = errorCodeHash || errorCodeQP || undefined;
@@ -297,16 +307,16 @@ const Auth = () => {
 
       if (hasError || (tokenType === 'recovery' && noAnyRecoveryTokens)) {
         const desc = (errorCode || errorDescription || '').toLowerCase();
-        console.log('🔍 AUTH ERROR DETECTED:', { errorCode, errorDescription, desc });
+        if (AUTH_DEBUG) console.log('🔍 AUTH ERROR DETECTED:', { errorCode, errorDescription, desc });
         
         // Om tiden är OK men vi har fel = token redan använd
         if (desc.includes('expire') || desc.includes('invalid') || desc.includes('session') || 
             desc.includes('used') || desc.includes('consumed') || desc.includes('already') ||
             desc.includes('not found') || desc.includes('token')) {
-          console.log('❌ Token already used');
+          if (AUTH_DEBUG) console.log('❌ Token already used');
           setRecoveryStatus('used');
         } else {
-          console.log('❌ Setting recovery status to invalid due to unknown error');
+          if (AUTH_DEBUG) console.log('❌ Setting recovery status to invalid due to unknown error');
           setRecoveryStatus('invalid');
         }
         setShowIntro(false);
@@ -319,7 +329,7 @@ const Auth = () => {
       const hasToken = !!tokenParam;
       
       if (hasAccessPair || hasTokenHash || hasToken) {
-        console.log('🔍 Recovery token detekterad:', {
+        if (AUTH_DEBUG) console.log('🔍 Recovery token detekterad:', {
           hasAccessPair,
           hasTokenHash,
           hasToken,
@@ -329,7 +339,7 @@ const Auth = () => {
           refreshToken: refreshToken ? 'exists' : 'missing'
         });
         
-        console.log('✅ Token är giltig - visar reset-formulär');
+        if (AUTH_DEBUG) console.log('✅ Token är giltig - visar reset-formulär');
         setShowIntro(false);
         setIsPasswordReset(true);
         return;
@@ -339,11 +349,11 @@ const Auth = () => {
       if (confirmed === 'success') {
         setConfirmationStatus('success');
         setConfirmationMessage('Fantastiskt! Ditt konto har aktiverats och du kan nu logga in i Parium.');
-        console.log('Showing success confirmation message');
+        if (AUTH_DEBUG) console.log('Showing success confirmation message');
       } else if (confirmed === 'already') {
         setConfirmationStatus('already-confirmed');
         setConfirmationMessage('Ditt konto är redan aktiverat och redo att användas.');
-        console.log('Showing already confirmed message');
+        if (AUTH_DEBUG) console.log('Showing already confirmed message');
       }
       
       setIsPasswordReset(isReset);
@@ -702,11 +712,6 @@ const Auth = () => {
       </div>
     );
   }
-
-  console.log('🔍 AUTH COMPONENT RENDERING - Debug info:', {
-    isPasswordReset,
-    currentUrl: window.location.href
-  });
 
   // 🎯 Visa "Loggar in..."-sida när användaren är inloggad men media fortfarande laddas
   if (user && loading) {
