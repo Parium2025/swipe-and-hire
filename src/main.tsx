@@ -7,9 +7,6 @@ import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 
-// Auth page logo (from public folder)
-const authLogoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
-
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
   try {
@@ -38,9 +35,9 @@ const preloadAndDecodeImage = async (src: string, id: string) => {
   }
 };
 
-// Fire-and-forget: ensures logos are instantly ready on page load/navigation
+// Fire-and-forget: ensures nav logo is instantly ready on page load/navigation
+// Note: Auth logo is now inline SVG - no preload needed
 void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
-void preloadAndDecodeImage(authLogoUrl, 'auth-logo');
 
 // Initialize Sentry for error tracking in production
 if (import.meta.env.PROD) {
