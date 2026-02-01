@@ -10,6 +10,7 @@ import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
+import { authSplashEvents } from '@/lib/authSplashEvents';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -1099,6 +1100,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Sätt loading state för smooth utloggning
       setLoading(true);
+
+      // 🎬 Trigga auth splash för premium känsla vid utloggning
+      authSplashEvents.show();
 
       // Vänta för smooth känsla
       await new Promise(resolve => setTimeout(resolve, 550));
