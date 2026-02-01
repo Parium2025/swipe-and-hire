@@ -222,7 +222,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
         {/* Footer with dots - fixed height, tight layout */}
         <div className="h-5 flex items-center mt-auto">
           {tipsItems.length > 1 && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               {tipsItems.map((_, i) => (
                 <button
                   key={i}
@@ -531,7 +531,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
         
         {/* Dot navigation - fixed height, tight layout */}
         <div className="h-5 flex items-center mt-auto">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             {statsArray.map((_, i) => (
               <button
                 key={i}
