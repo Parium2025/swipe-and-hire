@@ -625,8 +625,12 @@ const AuthDesktop = ({
           {/* Auth form */}
           <div className="w-full max-w-md">
             <Card className="bg-white/[0.01] backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden flex flex-col max-h-[78svh]">
-              <CardContent className="p-6 flex flex-col min-h-0">
-                 <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
+              <CardContent className="p-6 flex flex-col min-h-0 flex-1">
+                 <Tabs
+                   value={isLogin ? 'login' : 'signup'}
+                   onValueChange={handleTabChange}
+                   className="flex flex-col min-h-0"
+                 >
                   <SlidingTabs isLogin={isLogin} onTabChange={handleTabChange} />
 
                   {/* Forms wrapper for instant swap */}
