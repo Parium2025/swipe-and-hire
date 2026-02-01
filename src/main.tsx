@@ -13,7 +13,7 @@ const AUTH_SPLASH_PNG = '/lovable-uploads/parium-auth-logo.png';
 
 // Minimum display time for the pre-React outsidan splash on hard refresh.
 // This masks first-paint delays while the /auth UI (and logo) becomes ready.
-const STATIC_AUTH_SPLASH_MIN_MS = 1500;
+const STATIC_AUTH_SPLASH_MIN_MS = 4000;
 
 function scheduleHideStaticAuthSplash(minMs: number = STATIC_AUTH_SPLASH_MIN_MS) {
   try {
