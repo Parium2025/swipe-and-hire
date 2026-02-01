@@ -251,8 +251,17 @@ export const useEmployerBackgroundSync = () => {
   useEffect(() => {
     if (!user || !isEmployer) return;
 
-    // Kör preload DIREKT vid mount
-    preloadAllData();
+    // 🚀 PERFORMANCE: Defer initial preload to after first paint
+    // This prevents main-thread blocking on touch devices during mount
+    const scheduleInitialPreload = () => {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => preloadAllData(), { timeout: 1000 });
+      } else {
+        setTimeout(() => preloadAllData(), 100);
+      }
+    };
+    
+    scheduleInitialPreload();
 
     // Lyssna på tab-focus
     const handleVisibilityChange = () => {

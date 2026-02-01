@@ -716,8 +716,17 @@ export const useEagerRatingsPreload = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Kör preload DIREKT vid mount (användaren är redan aktiv om de är här)
-    preloadAllData();
+    // 🚀 PERFORMANCE: Defer initial preload to after first paint
+    // This prevents main-thread blocking on touch devices during mount
+    const scheduleInitialPreload = () => {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => preloadAllData(), { timeout: 1000 });
+      } else {
+        setTimeout(() => preloadAllData(), 100);
+      }
+    };
+    
+    scheduleInitialPreload();
 
     // Lyssna på tab-focus (användare kommer tillbaka efter inaktivitet)
     const handleVisibilityChange = () => {
