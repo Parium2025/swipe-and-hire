@@ -165,11 +165,11 @@
       />
     </div>
     <style>
-      /* Show auth splash only on /auth route (desktop) until React populates #root */
+      /* Show auth splash only on /auth route (desktop) until React signals ready */
       @media (min-width: 768px) {
         body.route-auth #auth-splash { display: flex; }
-        body.route-auth #root:not(:empty) ~ #auth-splash,
-        body.route-auth #auth-splash.hidden { display: none !important; }
+        /* Hide splash ONLY when React explicitly signals the logo is painted */
+        body.route-auth #auth-splash.logo-ready { display: none !important; }
       }
     </style>
     <script>

@@ -7,6 +7,7 @@
  *   on both mobile AND desktop. Background-image can have decode delays
  *   on desktop browsers that cause the logo to "flash in" after mount.
  * - The <img> with decode="sync" ensures the bitmap is ready before paint.
+ * - onLoad callback signals when the bitmap is painted so we can hide splash.
  */
 
 import { cn } from "@/lib/utils";
@@ -14,9 +15,11 @@ import authLogoDataUri from "./parium-auth-logo.png?inline";
 
 interface AuthLogoProps {
   className?: string;
+  /** Called when the image has loaded and is painted */
+  onPainted?: () => void;
 }
 
-export function AuthLogoInline({ className }: AuthLogoProps) {
+export function AuthLogoInline({ className, onPainted }: AuthLogoProps) {
   return (
     <img
       src={authLogoDataUri}
@@ -27,6 +30,10 @@ export function AuthLogoInline({ className }: AuthLogoProps) {
       loading="eager"
       // High priority for LCP
       fetchPriority="high"
+      onLoad={() => {
+        // Signal that the React logo is now painted
+        onPainted?.();
+      }}
       className={cn(
         "block object-contain pointer-events-none transform-gpu select-none",
         className
