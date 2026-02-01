@@ -287,6 +287,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const prefetchedEmployerCandidateMediaForUserRef = useRef<string | null>(null);
   // 🔄 Track current user ID for cross-tab session change detection
   const currentUserIdRef = useRef<string | null>(null);
+  // Avoid doing heavy localStorage sweeps during the very first paint on /auth.
+  const didInitialLoggedOutCleanupRef = useRef(false);
  
   // Håll en ref i synk med state så att async login kan läsa korrekt värde
   useEffect(() => {
@@ -296,6 +298,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
     let sessionInitialized = false;
+
+    const scheduleLoggedOutCacheClear = (event: string) => {
+      try {
+        const isInitial = event === 'INITIAL_SESSION';
+        if (isInitial) {
+          // On cold start while logged out: don't block first paint.
+          if (didInitialLoggedOutCleanupRef.current) return;
+          didInitialLoggedOutCleanupRef.current = true;
+        }
+
+        const isAuthRoute =
+          typeof window !== 'undefined' && window.location?.pathname === '/auth';
+
+        const run = () => {
+          try {
+            clearAllAppCaches();
+          } catch {
+            // ignore
+          }
+        };
+
+        // On /auth we defer aggressively; on other routes we can clear next tick.
+        if (isAuthRoute) {
+          const ric = (window as any).requestIdleCallback as
+            | ((cb: () => void, opts?: any) => void)
+            | undefined;
+          if (typeof ric === 'function') {
+            ric(run, { timeout: 2000 } as any);
+          } else {
+            setTimeout(run, 1500);
+          }
+        } else {
+          setTimeout(run, 0);
+        }
+      } catch {
+        // Last-resort fallback
+        setTimeout(() => {
+          try { clearAllAppCaches(); } catch {}
+        }, 0);
+      }
+    };
 
     // Set up auth state listener FIRST to avoid missing events and deadlocks
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -406,7 +449,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } catch {}
           try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch {}
           // 🗑️ Rensa ALLA app-cacher så inget gammalt visas vid nästa login
-          clearAllAppCaches();
+          // Defer on /auth to avoid blocking first paint / causing visible jank.
+          scheduleLoggedOutCacheClear(event);
           if (event !== 'INITIAL_SESSION') {
             setLoading(false);
           }
