@@ -345,54 +345,90 @@ export const useJobSeekerBackgroundSync = () => {
 
   // 📡 Realtime ersätter periodisk refresh - ingen polling behövs
 
-  // 🖱️ AKTIVITETS-TRIGGERS
+  // 🖱️ AKTIVITETS-TRIGGERS (OPTIMERAD FÖR TOUCH/SVAGT INTERNET)
   useEffect(() => {
     if (!user || !isJobSeeker) return;
 
-    // 🚀 PERFORMANCE: Defer initial preload to after first paint
-    // This prevents main-thread blocking on touch devices during mount
+    // 🚀 TOUCH OPTIMIZATION: Detect if we're on a touch device
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    // 🌐 NETWORK OPTIMIZATION: Detect slow connection
+    const isSlowConnection = () => {
+      if ('connection' in navigator) {
+        const conn = (navigator as any).connection;
+        if (conn?.effectiveType === '2g' || conn?.effectiveType === 'slow-2g') return true;
+        if (conn?.saveData) return true;
+      }
+      return false;
+    };
+
+    // 🚀 PERFORMANCE: Defer initial preload significantly on touch/slow
     const scheduleInitialPreload = () => {
+      const delay = isTouchDevice || isSlowConnection() ? 3000 : 1000;
+      
       if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(() => preloadAllData(), { timeout: 1000 });
+        (window as any).requestIdleCallback(() => preloadAllData(), { timeout: delay });
       } else {
-        setTimeout(() => preloadAllData(), 100);
+        setTimeout(() => preloadAllData(), delay);
       }
     };
     
     scheduleInitialPreload();
 
-    // Lyssna på tab-focus
+    // Lyssna på tab-focus - MED DEBOUNCE på touch
+    let visibilityTimeout: NodeJS.Timeout | null = null;
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        hasPreloadedRef.current = false;
-        preloadAllData(true);
+        // På touch/svagt internet: vänta 2 sekunder innan sync
+        const delay = isTouchDevice || isSlowConnection() ? 2000 : 0;
+        
+        if (visibilityTimeout) clearTimeout(visibilityTimeout);
+        visibilityTimeout = setTimeout(() => {
+          hasPreloadedRef.current = false;
+          // Använd requestIdleCallback för att inte blocka UI
+          if ('requestIdleCallback' in window) {
+            (window as any).requestIdleCallback(() => preloadAllData(true), { timeout: 5000 });
+          } else {
+            preloadAllData(true);
+          }
+        }, delay);
       }
     };
 
-    // Lyssna på första musrörelse/klick
+    // På touch: INGEN omedelbar preload vid första interaktion (blockar touch response)
+    // Desktop: behåll beteendet
     let firstInteractionHandled = false;
     const handleFirstInteraction = () => {
-      if (firstInteractionHandled) return;
+      if (firstInteractionHandled || isTouchDevice) return; // Skip på touch
       firstInteractionHandled = true;
-      preloadAllData();
+      
+      // Defer till idle
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => preloadAllData(), { timeout: 2000 });
+      } else {
+        setTimeout(() => preloadAllData(), 500);
+      }
+      
       document.removeEventListener('mousemove', handleFirstInteraction);
       document.removeEventListener('click', handleFirstInteraction);
       document.removeEventListener('keydown', handleFirstInteraction);
-      document.removeEventListener('touchstart', handleFirstInteraction);
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    document.addEventListener('mousemove', handleFirstInteraction, { once: true });
-    document.addEventListener('click', handleFirstInteraction, { once: true });
-    document.addEventListener('keydown', handleFirstInteraction, { once: true });
-    document.addEventListener('touchstart', handleFirstInteraction, { once: true });
+    
+    // Endast desktop-interaktioner
+    if (!isTouchDevice) {
+      document.addEventListener('mousemove', handleFirstInteraction, { once: true });
+      document.addEventListener('click', handleFirstInteraction, { once: true });
+      document.addEventListener('keydown', handleFirstInteraction, { once: true });
+    }
 
     return () => {
+      if (visibilityTimeout) clearTimeout(visibilityTimeout);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('mousemove', handleFirstInteraction);
       document.removeEventListener('click', handleFirstInteraction);
       document.removeEventListener('keydown', handleFirstInteraction);
-      document.removeEventListener('touchstart', handleFirstInteraction);
     };
   }, [user, isJobSeeker, preloadAllData]);
 
