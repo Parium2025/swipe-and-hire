@@ -7,18 +7,21 @@ import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 
+// Auth page logo (from public folder)
+const authLogoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
+
 // Preload + decode critical UI assets ASAP (before React mounts)
-const preloadAndDecodeImage = async (src: string) => {
+const preloadAndDecodeImage = async (src: string, id: string) => {
   try {
     // Add a preload hint (helps the browser start fetching earlier)
     if (typeof document !== 'undefined' && document.head) {
-      const existing = document.querySelector(`link[data-preload-parium-logo="true"]`) as HTMLLinkElement | null;
+      const existing = document.querySelector(`link[data-preload-logo="${id}"]`) as HTMLLinkElement | null;
       if (!existing) {
         const link = document.createElement('link');
         link.rel = 'preload';
         link.as = 'image';
         link.href = src;
-        link.setAttribute('data-preload-parium-logo', 'true');
+        link.setAttribute('data-preload-logo', id);
         document.head.appendChild(link);
       }
     }
@@ -35,8 +38,9 @@ const preloadAndDecodeImage = async (src: string) => {
   }
 };
 
-// Fire-and-forget: ensures top nav logo is instantly ready on back navigation
-void preloadAndDecodeImage(pariumLogoRings);
+// Fire-and-forget: ensures logos are instantly ready on page load/navigation
+void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
+void preloadAndDecodeImage(authLogoUrl, 'auth-logo');
 
 // Initialize Sentry for error tracking in production
 if (import.meta.env.PROD) {
