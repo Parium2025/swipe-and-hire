@@ -87,7 +87,7 @@ export function AuthTransitionSplash() {
       />
       
       {/* Tagline */}
-      <p className="mt-6 text-white/90 text-lg sm:text-xl font-medium tracking-wide text-center px-4">
+      <p className="mt-2 -translate-y-6 text-white/90 text-lg sm:text-xl font-medium tracking-wide text-center px-4">
         Din karriärresa börjar här
       </p>
       
