@@ -25,7 +25,7 @@ export function AuthTransitionSplash() {
   const [open, setOpen] = useState(false);
   const [present, setPresent] = useState(false);
   const showTimeRef = useRef<number>(0);
-  const minDisplayMs = 1500; // Minimum display time for smooth loading
+  const minDisplayMs = 4000; // Minimum display time for premium, consistent shell
 
   useEffect(() => {
     const onShow = () => {
@@ -82,29 +82,33 @@ export function AuthTransitionSplash() {
         fetchPriority="high"
         width={240}
         height={96}
-        className="block w-[min(240px,60vw)] h-auto object-contain"
+        // The PNG has built-in whitespace under the text; pull the next line up.
+        className="block w-[min(240px,60vw)] h-auto object-contain mb-[-64px]"
         draggable={false}
       />
       
       {/* Tagline */}
-      <p className="mt-2 -translate-y-6 text-white/90 text-lg sm:text-xl font-medium tracking-wide text-center px-4">
+      <p className="mt-0 text-white/90 text-lg sm:text-xl font-medium tracking-wide text-center px-4">
         Din karriärresa börjar här
       </p>
       
       {/* Animated dots */}
       <div className="mt-6 flex items-center gap-2">
-        <span 
-          className="w-3 h-3 rounded-full bg-secondary animate-pulse"
-          style={{ animationDelay: '0ms', animationDuration: '1s' }}
-        />
-        <span 
-          className="w-3 h-3 rounded-full bg-secondary animate-pulse"
-          style={{ animationDelay: '200ms', animationDuration: '1s' }}
-        />
-        <span 
-          className="w-3 h-3 rounded-full bg-secondary animate-pulse"
-          style={{ animationDelay: '400ms', animationDuration: '1s' }}
-        />
+        {([0, 400, 800] as const).map((delay) => (
+          <span
+            key={delay}
+            className="w-3 h-3 rounded-full"
+            style={{
+              background: 'hsl(var(--primary-glow))',
+              opacity: 0.35,
+              transform: 'scale(0.85) translateZ(0)',
+              willChange: 'transform, opacity',
+              backfaceVisibility: 'hidden',
+              animation: `splash-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite ${delay}ms`,
+              animationFillMode: 'both',
+            }}
+          />
+        ))}
       </div>
     </div>
   );
