@@ -95,11 +95,14 @@ const Auth = () => {
 
   // Smart scroll-locking: Lock only for login on MOBILE devices, allow scroll on desktop
   useEffect(() => {
+    // SAFETY NET: If an older build ever added auth-lock classes, they can get “stuck”
+    // and completely disable scrolling (position:fixed + touch-action: pan-x).
+    // We do not rely on these classes anymore, so always remove them on /auth.
+    document.documentElement.classList.remove('auth-locked', 'auth-lock');
+    document.body.classList.remove('auth-locked', 'auth-lock');
+
     // CRITICAL: Desktop must ALWAYS scroll freely - no scroll-lock at all
     if (device === 'desktop') {
-      // Ensure no scroll-lock classes are present
-      document.documentElement.classList.remove('auth-locked', 'auth-lock');
-      document.body.classList.remove('auth-locked', 'auth-lock');
       return; // Skip scroll-lock entirely on desktop
     }
 
@@ -113,6 +116,9 @@ const Auth = () => {
 
     // Register mode: Allow scroll freely (no event listeners needed)
     if (!isLoginMode) {
+      // Make sure UI state doesn’t “stick” from login mode.
+      setPullProgress(0);
+      if (isRefreshing) setIsRefreshing(false);
       return;
     }
 
