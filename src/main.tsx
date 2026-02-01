@@ -8,6 +8,9 @@ import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
+// PNG used by the pre-React + in-app transition splash (preloaded in index.html)
+const AUTH_SPLASH_PNG = '/lovable-uploads/parium-auth-logo.png';
+
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
   try {
@@ -104,9 +107,13 @@ async function bootstrap() {
   // so the first paint can include it without any flash.
   const isAuthRoute = typeof window !== 'undefined' && window.location.pathname === '/auth';
   if (isAuthRoute) {
-    await preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
+    await Promise.all([
+      preloadAndDecodeImage(authLogoDataUri, 'auth-logo'),
+      preloadAndDecodeImage(AUTH_SPLASH_PNG, 'auth-splash-logo'),
+    ]);
   } else {
     void preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
+    void preloadAndDecodeImage(AUTH_SPLASH_PNG, 'auth-splash-logo');
   }
 
   // Nav logo can remain fire-and-forget.

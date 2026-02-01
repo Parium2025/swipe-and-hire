@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { hideAuthSplash } from '@/lib/authSplashEvents';
 
 // Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
@@ -77,6 +78,11 @@ const Auth = () => {
   const navigate = useNavigate();
   const device = useDevice();
   const { toast } = useToast();
+
+  // Hide in-app transition splash (shown during navigation/logout) once /auth has mounted.
+  useEffect(() => {
+    requestAnimationFrame(() => requestAnimationFrame(() => hideAuthSplash()));
+  }, []);
 
   // Read initial state from navigation (from Landing page)
   const initialMode = (location.state as any)?.mode;
