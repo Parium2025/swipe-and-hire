@@ -19,7 +19,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" imagesrcset="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
     <!-- Preload Parium logo for instant nav rendering -->
     <link rel="preload" as="image" href="/src/assets/parium-logo-rings.png" fetchpriority="high" />
     <!-- Preload hero image used on Landing -->
@@ -186,15 +185,14 @@
   <body>
     <!-- AUTH SPLASH SCREEN - Only shown on /auth hard refresh -->
     <div id="auth-splash" aria-label="Laddar Parium">
-      <!-- Inline SVG logo to avoid any network request -->
-      <img 
-        id="auth-splash-logo"
-        src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
-        alt="Parium"
-        decoding="sync"
-        loading="eager"
-        fetchpriority="high"
-      />
+      <!-- 🔥 INLINE SVG LOGO - Zero network requests, always available -->
+      <svg id="auth-splash-logo" viewBox="0 0 540 216" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Parium">
+        <!-- Two interlocking rings -->
+        <circle cx="95" cy="108" r="50" stroke="#4BA3E3" stroke-width="12" fill="none"/>
+        <circle cx="145" cy="108" r="50" stroke="#4BA3E3" stroke-width="12" fill="none"/>
+        <!-- PARIUM text -->
+        <text x="215" y="128" fill="white" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="72" font-weight="600" letter-spacing="-0.02em">Parium</text>
+      </svg>
       <p id="auth-splash-tagline">Din karriärresa börjar här</p>
       <div id="auth-splash-dots">
         <span></span>
