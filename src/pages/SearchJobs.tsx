@@ -36,7 +36,7 @@ import { useOptimizedJobSearch } from '@/hooks/useOptimizedJobSearch';
 import { useSavedSearches, SearchCriteria } from '@/hooks/useSavedSearches';
 import { SaveSearchDialog } from '@/components/SaveSearchDialog';
 import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
-import { useBatchPrefetchReviews } from '@/hooks/useCompanyReviewsCache';
+import { useBatchPrefetchReviews, useBatchPrefetchCompanyProfiles } from '@/hooks/useCompanyReviewsCache';
 
 interface Job {
   id: string;
@@ -158,18 +158,20 @@ const SearchJobs = () => {
     enabled: true,
   });
 
-  // Prefetch reviews for all companies in results for instant dialog load
+  // Prefetch reviews and company profiles for all companies in results for instant dialog load
   const prefetchReviews = useBatchPrefetchReviews();
+  const prefetchProfiles = useBatchPrefetchCompanyProfiles();
   const companyIds = useMemo(() => {
     return [...new Set(jobs.map(job => job.employer_id).filter(Boolean))] as string[];
   }, [jobs]);
 
-  // Prefetch reviews when jobs load
+  // Prefetch reviews AND profiles when jobs load
   useEffect(() => {
     if (companyIds.length > 0) {
       prefetchReviews(companyIds);
+      prefetchProfiles(companyIds);
     }
-  }, [companyIds, prefetchReviews]);
+  }, [companyIds, prefetchReviews, prefetchProfiles]);
 
   // Förladdda alla jobbbilder via Service Worker för persistent cache
   const jobImageUrls = useMemo(() => {

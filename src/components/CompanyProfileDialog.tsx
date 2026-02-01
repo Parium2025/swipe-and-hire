@@ -20,6 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyReviewsCache } from "@/hooks/useCompanyReviewsCache";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 
 interface CompanyProfileDialogProps {
   open: boolean;
@@ -52,8 +53,7 @@ interface CompanyReview {
 
 export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyProfileDialogProps) {
   const { toast } = useToast();
-  const [company, setCompany] = React.useState<CompanyProfile | null>(null);
-  const [loading, setLoading] = React.useState(true);
+  const queryClient = useQueryClient();
   const [newComment, setNewComment] = React.useState("");
   const [newRating, setNewRating] = React.useState(0);
   const [submitting, setSubmitting] = React.useState(false);
@@ -64,14 +64,31 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   // Use cached reviews for instant load
   const { reviews: cachedReviews, avgRating, reviewCount, refetch: refetchReviews } = useCompanyReviewsCache(open ? companyId : null);
 
+  // Use React Query for company profile with prefetched data
+  const { data: company, isLoading: loading } = useQuery<CompanyProfile | null>({
+    queryKey: ['company-profile', companyId],
+    queryFn: async () => {
+      if (!companyId) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("company_name, company_logo_url, company_description, website, industry, employee_count, address")
+        .eq("user_id", companyId)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: open && !!companyId,
+    staleTime: 60 * 1000, // 1 minute
+  });
+
   React.useEffect(() => {
     if (open && companyId) {
-      fetchCompanyData();
       getCurrentUser();
     }
   }, [open, companyId]);
 
-  // Real-time lyssning för företagsprofil
+  // Real-time lyssning för företagsprofil - invalidate query cache
   React.useEffect(() => {
     if (!open || !companyId) return;
 
@@ -87,7 +104,8 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
         },
         (payload) => {
           console.log('Profile updated in dialog:', payload);
-          setCompany(payload.new as CompanyProfile);
+          // Update the query cache directly with new data
+          queryClient.setQueryData(['company-profile', companyId], payload.new as CompanyProfile);
         }
       )
       .subscribe();
@@ -95,7 +113,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     return () => {
       supabase.removeChannel(profileChannel);
     };
-  }, [open, companyId]);
+  }, [open, companyId, queryClient]);
 
   // Real-time lyssning för recensioner - triggers refetch from cache hook
   React.useEffect(() => {
@@ -126,34 +144,6 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   const getCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setCurrentUserId(user?.id || null);
-  };
-
-  const fetchCompanyData = async () => {
-    try {
-      console.log("Fetching company data for companyId:", companyId);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("company_name, company_logo_url, company_description, website, industry, employee_count, address")
-        .eq("user_id", companyId)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching company data:", error);
-        throw error;
-      }
-      
-      console.log("Fetched company data:", data);
-      setCompany(data);
-    } catch (error) {
-      console.error("Error fetching company:", error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte hämta företagsinformation",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
   };
 
   // Reviews are now fetched via useCompanyReviewsCache hook
