@@ -73,8 +73,8 @@ export function ConversationAvatar({
   }
 
   return (
-    <Avatar className={cn(sizeClasses[size], 'border border-white/10', className)} style={{ contain: 'layout style paint' }}>
-      <AvatarImage src={resolvedUrl || ''} loading="lazy" />
+    <Avatar className={cn(sizeClasses[size], 'border border-white/10', className)}>
+      <AvatarImage src={resolvedUrl || ''} />
       <AvatarFallback 
         className={cn("bg-white/10 text-white", fallbackClassName)} 
         delayMs={150}

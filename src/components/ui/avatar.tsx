@@ -1,14 +1,13 @@
 import * as React from "react"
+
 import { cn } from "@/lib/utils"
 
 /**
- * 🚀 OPTIMIZED AVATAR COMPONENT
+ * Custom Avatar implementation that avoids Radix UI's internal loading state
+ * which causes a flash/flicker when images are already cached.
  * 
- * Performance optimizations for touch/slow internet:
- * - Synchronous cache check to prevent fallback flash
- * - CSS containment for isolated repaints
- * - loading="lazy" for images below the fold
- * - Minimal re-renders with memoization
+ * This implementation checks if the image is in browser cache synchronously
+ * and renders accordingly to prevent any visible fallback flash.
  */
 
 interface AvatarContextValue {
@@ -32,7 +31,6 @@ const Avatar = React.forwardRef<
           "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
           className
         )}
-        style={{ contain: 'layout style paint' }}
         {...props}
       >
         {children}
@@ -113,12 +111,9 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
         ref={ref}
         src={src}
         alt={alt || ''}
-        loading="lazy"
-        decoding="async"
         onLoad={handleLoad}
         onError={handleError}
         className={cn("aspect-square h-full w-full object-cover", className)}
-        style={{ contentVisibility: 'auto' }}
         data-state={status}
         {...props}
       />
