@@ -24,6 +24,8 @@
     <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/src/assets/parium-logo-rings.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/assets/hero-woman-left-hand-verified.jpg" type="image/jpeg" fetchpriority="high" />
+    <!-- Auth page logo - preload for instant splash -->
+    <link rel="preload" as="image" href="/parium-auth-logo.png" fetchpriority="high" />
  
       
     
@@ -139,6 +141,7 @@
     <!--
       🔥 AUTH SPLASH: Instant logo visible BEFORE React hydrates (desktop only).
       Hidden on mobile (handled by AuthMobile). Auto-hidden when React mounts via #root:not(:empty).
+      CRITICAL: Must match EXACT same image and sizing as AuthDesktop.tsx AuthLogoInline!
     -->
     <div id="auth-splash" aria-hidden="true" style="
       display: none;
@@ -149,16 +152,48 @@
       align-items: center;
       justify-content: center;
       pointer-events: none;
+      padding-top: 2rem;
     ">
-      <img
-        src="/lovable-uploads/parium-logo-transparent.png"
-        alt="Parium"
-        decoding="sync"
-        fetchpriority="high"
-        width="560"
-        height="224"
-        style="max-width: 90vw; height: auto; object-fit: contain;"
-      />
+      <!-- Container matching AuthDesktop layout: max-w-2xl mx-auto, text-center mb-4, height 260px -->
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 42rem;
+        text-align: center;
+      ">
+        <div style="height: 260px; display: flex; align-items: center; justify-content: center; position: relative;">
+          <!-- Glow effects behind logo (same as AuthDesktop) -->
+          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transform: translateY(-0.5rem);">
+            <div style="width: 18rem; height: 13rem; background: hsla(200, 100%, 60%, 0.25); border-radius: 9999px; filter: blur(40px);"></div>
+          </div>
+          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transform: translateY(-0.5rem);">
+            <div style="width: 13rem; height: 9rem; background: hsla(200, 100%, 60%, 0.22); border-radius: 9999px; filter: blur(35px);"></div>
+          </div>
+          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transform: translateY(-0.5rem);">
+            <div style="width: 11rem; height: 7rem; background: hsla(200, 100%, 60%, 0.20); border-radius: 9999px; filter: blur(30px);"></div>
+          </div>
+          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transform: translateY(-0.5rem);">
+            <div style="width: 9rem; height: 5rem; background: hsla(200, 100%, 60%, 0.18); border-radius: 9999px; filter: blur(25px);"></div>
+          </div>
+          <!-- Logo: h-56 = 224px, w-[min(35rem,90vw)] = min(560px, 90vw) -->
+          <img
+            src="/parium-auth-logo.png"
+            alt="Parium"
+            decoding="sync"
+            fetchpriority="high"
+            style="
+              position: relative;
+              z-index: 10;
+              height: 224px;
+              width: min(560px, 90vw);
+              object-fit: contain;
+              pointer-events: none;
+            "
+          />
+        </div>
+      </div>
     </div>
     <style>
       /* Show auth splash only on /auth route (desktop) until React populates #root */
