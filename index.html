@@ -122,7 +122,7 @@
     (function() {
       try {
         var path = location.pathname || '';
-        var isOutsidan = path === '/' || path === '/auth' || path.startsWith('/auth/');
+        var isOutsidan = path === '/auth' || path.startsWith('/auth');
         if (!isOutsidan) return;
 
         var hasSession = false;
@@ -200,7 +200,7 @@
         width="240"
         style="max-width: min(240px, 60vw); height: auto; object-fit: contain;"
       />
-      <p style="margin-top: -0.5rem; color: rgba(255,255,255,0.9); font-size: 1.25rem; font-weight: 500; letter-spacing: 0.025em; text-align: center; padding: 0 1rem; font-family: Inter, sans-serif;">
+      <p style="margin-top: -2rem; color: rgba(255,255,255,0.9); font-size: 1.25rem; font-weight: 500; letter-spacing: 0.025em; text-align: center; padding: 0 1rem; font-family: Inter, sans-serif;">
         Din karriärresa börjar här
       </p>
       <div style="margin-top: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -222,40 +222,7 @@
       html.route-outsidan #auth-splash.hidden,
       body.route-outsidan #auth-splash.hidden { display: none !important; }
     </style>
-    <script>
-      // Detect outsidan routes (/auth or /) and check if user is logged in
-      (function() {
-        var path = location.pathname;
-        var isOutsidan = path === '/' || path === '/auth' || path.startsWith('/auth?') || path.startsWith('/auth#');
-        
-        if (!isOutsidan) return;
-        
-        // Check if user has an active session (logged in)
-        // Supabase stores session in localStorage with key pattern: sb-{projectId}-auth-token
-        var hasSession = false;
-        try {
-          var sessionKey = 'sb-jrjaegapuujushsiofoi-auth-token';
-          var sessionData = localStorage.getItem(sessionKey);
-          if (sessionData) {
-            var parsed = JSON.parse(sessionData);
-            // Check if session has valid access_token and is not expired
-            if (parsed && parsed.access_token) {
-              var expiresAt = parsed.expires_at;
-              if (expiresAt && (expiresAt * 1000) > Date.now()) {
-                hasSession = true;
-              }
-            }
-          }
-        } catch (e) {
-          // Ignore parse errors
-        }
-        
-        // Only show splash if NOT logged in
-        if (!hasSession) {
-          document.body.classList.add('route-outsidan');
-        }
-      })();
-    </script>
+    
 
     <div id="root"></div>
     <script>
