@@ -138,8 +138,10 @@
     <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
 
     <!--
-      🔥 AUTH SPLASH: Instant logo visible BEFORE React hydrates (desktop only).
-      Hidden on mobile (handled by AuthMobile). Auto-hidden when React mounts via #root:not(:empty).
+      🔥 PARIUM LOADING SPLASH: Branded shell shown on refresh/navigation to outsidan.
+      Shows: Logo + "Din karriärresa börjar här" + animated dots.
+      Visible when: /auth or / (landing) AND user is NOT logged in.
+      Auto-hidden when React mounts and takes over.
     -->
     <div id="auth-splash" aria-hidden="true" style="
       display: none;
@@ -147,6 +149,7 @@
       inset: 0;
       z-index: 9998;
       background: linear-gradient(135deg, hsl(215 100% 10%) 0%, hsl(215 100% 6%) 100%);
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       pointer-events: none;
@@ -156,24 +159,59 @@
         alt="Parium"
         decoding="sync"
         fetchpriority="high"
-        width="560"
-        height="224"
-        style="max-width: 90vw; height: auto; object-fit: contain;"
+        width="400"
+        style="max-width: 70vw; height: auto; object-fit: contain;"
       />
+      <p style="margin-top: 1.5rem; color: rgba(255,255,255,0.9); font-size: 1.25rem; font-weight: 500; letter-spacing: 0.025em; text-align: center; padding: 0 1rem; font-family: Inter, sans-serif;">
+        Din karriärresa börjar här
+      </p>
+      <div style="margin-top: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <span class="splash-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #3B82F6; animation: splash-pulse 1s ease-in-out infinite;"></span>
+        <span class="splash-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #3B82F6; animation: splash-pulse 1s ease-in-out infinite; animation-delay: 0.2s;"></span>
+        <span class="splash-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #3B82F6; animation: splash-pulse 1s ease-in-out infinite; animation-delay: 0.4s;"></span>
+      </div>
     </div>
     <style>
-      /* Show auth splash only on /auth route (desktop) until React populates #root */
-      @media (min-width: 768px) {
-        body.route-auth #auth-splash { display: flex; }
-        body.route-auth #root:not(:empty) ~ #auth-splash,
-        body.route-auth #auth-splash.hidden { display: none !important; }
+      @keyframes splash-pulse {
+        0%, 100% { opacity: 0.4; transform: scale(0.9); }
+        50% { opacity: 1; transform: scale(1.1); }
       }
+      /* Show splash on outsidan routes (/ or /auth) when NOT logged in */
+      body.route-outsidan #auth-splash { display: flex; }
+      body.route-outsidan #root:not(:empty) ~ #auth-splash,
+      body.route-outsidan #auth-splash.hidden { display: none !important; }
     </style>
     <script>
-      // Detect /auth route and add body class BEFORE paint
+      // Detect outsidan routes (/auth or /) and check if user is logged in
       (function() {
-        if (location.pathname === '/auth' || location.pathname.startsWith('/auth?') || location.pathname.startsWith('/auth#')) {
-          document.body.classList.add('route-auth');
+        var path = location.pathname;
+        var isOutsidan = path === '/' || path === '/auth' || path.startsWith('/auth?') || path.startsWith('/auth#');
+        
+        if (!isOutsidan) return;
+        
+        // Check if user has an active session (logged in)
+        // Supabase stores session in localStorage with key pattern: sb-{projectId}-auth-token
+        var hasSession = false;
+        try {
+          var sessionKey = 'sb-jrjaegapuujushsiofoi-auth-token';
+          var sessionData = localStorage.getItem(sessionKey);
+          if (sessionData) {
+            var parsed = JSON.parse(sessionData);
+            // Check if session has valid access_token and is not expired
+            if (parsed && parsed.access_token) {
+              var expiresAt = parsed.expires_at;
+              if (expiresAt && (expiresAt * 1000) > Date.now()) {
+                hasSession = true;
+              }
+            }
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+        
+        // Only show splash if NOT logged in
+        if (!hasSession) {
+          document.body.classList.add('route-outsidan');
         }
       })();
     </script>
