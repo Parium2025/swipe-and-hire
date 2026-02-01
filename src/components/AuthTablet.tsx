@@ -584,7 +584,11 @@ const AuthTablet = ({
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
-                <AuthLogoInline className="relative h-[224px] w-auto md:h-[240px]" />
+                {/*
+                  IMPORTANT: Explicit width prevents `w-fit` wrappers from collapsing
+                  (background images have no intrinsic width).
+                */}
+                <AuthLogoInline className="relative h-[224px] w-[min(560px,90vw)] md:h-[240px] md:w-[min(600px,90vw)]" />
               </div>
             </div>
             
