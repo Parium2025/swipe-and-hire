@@ -685,11 +685,7 @@ const AuthMobile = ({
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <CardContent className={cn("p-4 md:p-6 flex flex-col min-h-0", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
-                 <Tabs
-                   value={isLogin ? 'login' : 'signup'}
-                   onValueChange={handleTabChange}
-                   className="flex flex-col min-h-0"
-                 >
+                 <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <SlidingTabs isLogin={isLogin} onTabChange={handleTabChange} />
 
                   {/* Forms wrapper for instant swap */}
