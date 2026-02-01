@@ -3,15 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <!-- 🔥 CRITICAL: Detect /auth route BEFORE any paint happens -->
-    <script>
-      (function(){
-        var p = location.pathname;
-        if (p === '/auth' || p.indexOf('/auth?') === 0 || p.indexOf('/auth#') === 0) {
-          document.documentElement.classList.add('route-auth');
-        }
-      })();
-    </script>
     <!-- PWA / iOS status bar full-bleed -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -29,9 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
-    <!-- 🔥 Preload auth logo FIRST for instant splash -->
-    <link rel="preload" as="image" href="/lovable-uploads/parium-logo-transparent.png" fetchpriority="high" />
-    <!-- Preload other critical images -->
+    <!-- Preload critical images -->
     <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/src/assets/parium-logo-rings.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/assets/hero-woman-left-hand-verified.jpg" type="image/jpeg" fetchpriority="high" />
@@ -149,40 +138,44 @@
 
     <!--
       🔥 AUTH SPLASH: Instant logo visible BEFORE React hydrates (desktop only).
-      Uses html.route-auth (set in <head>) so it's visible from FIRST PAINT.
       Hidden on mobile (handled by AuthMobile). Auto-hidden when React mounts via #root:not(:empty).
     -->
-    <style>
-      /* Auth splash - visible immediately on /auth desktop, no transitions */
-      #auth-splash {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 9998;
-        background: linear-gradient(135deg, hsl(215 100% 10%) 0%, hsl(215 100% 6%) 100%);
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-      }
-      /* Show IMMEDIATELY on /auth desktop (class added in <head> before paint) */
-      @media (min-width: 768px) {
-        html.route-auth #auth-splash { display: flex !important; }
-        /* Hide once React has content */
-        html.route-auth #auth-splash.hidden { display: none !important; }
-      }
-    </style>
-    <div id="auth-splash" aria-hidden="true">
+    <div id="auth-splash" aria-hidden="true" style="
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      background: linear-gradient(135deg, hsl(215 100% 10%) 0%, hsl(215 100% 6%) 100%);
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    ">
       <img
         src="/lovable-uploads/parium-logo-transparent.png"
         alt="Parium"
         decoding="sync"
-        loading="eager"
         fetchpriority="high"
         width="560"
         height="224"
         style="max-width: 90vw; height: auto; object-fit: contain;"
       />
     </div>
+    <style>
+      /* Show auth splash only on /auth route (desktop) until React populates #root */
+      @media (min-width: 768px) {
+        body.route-auth #auth-splash { display: flex; }
+        body.route-auth #root:not(:empty) ~ #auth-splash,
+        body.route-auth #auth-splash.hidden { display: none !important; }
+      }
+    </style>
+    <script>
+      // Detect /auth route and add body class BEFORE paint
+      (function() {
+        if (location.pathname === '/auth' || location.pathname.startsWith('/auth?') || location.pathname.startsWith('/auth#')) {
+          document.body.classList.add('route-auth');
+        }
+      })();
+    </script>
 
     <div id="root"></div>
     <script>
