@@ -291,3 +291,36 @@ export function useBatchPrefetchReviews() {
     });
   }, [queryClient]);
 }
+
+/**
+ * Batch prefetch company profiles for instant dialog load.
+ * Call this when loading job search results.
+ */
+export function useBatchPrefetchCompanyProfiles() {
+  const queryClient = useQueryClient();
+
+  return useCallback(async (companyIds: string[]) => {
+    if (companyIds.length === 0) return;
+
+    // Only prefetch for companies not already cached
+    const uncachedIds = companyIds.filter(id => {
+      const cached = queryClient.getQueryData(['company-profile', id]);
+      return !cached;
+    });
+
+    if (uncachedIds.length === 0) return;
+
+    // Batch fetch all company profiles at once
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, company_name, company_logo_url, company_description, website, industry, employee_count, address')
+      .in('user_id', uncachedIds);
+
+    if (!profiles) return;
+
+    // Update query cache for each company
+    profiles.forEach(profile => {
+      queryClient.setQueryData(['company-profile', profile.user_id], profile);
+    });
+  }, [queryClient]);
+}
