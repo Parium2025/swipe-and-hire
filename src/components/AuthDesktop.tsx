@@ -95,6 +95,9 @@ const AuthDesktop = ({
   const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [employeeMenuOpen, setEmployeeMenuOpen] = useState(false);
+  const formScrollRef = useRef<HTMLDivElement>(null);
+  const loginScrollTopRef = useRef(0);
+  const signupScrollTopRef = useRef(0);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -111,12 +114,25 @@ const AuthDesktop = ({
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return;
 
+    // Save scroll position INSIDE the card (important on touch tablets).
+    const scroller = formScrollRef.current;
+    if (scroller) {
+      (isLogin ? loginScrollTopRef : signupScrollTopRef).current = scroller.scrollTop;
+    }
+
     // No global class toggling to avoid iOS reflow jank
 
     onAuthModeChange?.(newIsLogin);
     setIsLogin(newIsLogin);
     setHasRegistered(false);
     setShowResend(false);
+
+    // Restore scroll position for the newly active tab.
+    requestAnimationFrame(() => {
+      const nextScroller = formScrollRef.current;
+      if (!nextScroller) return;
+      nextScroller.scrollTop = newIsLogin ? loginScrollTopRef.current : signupScrollTopRef.current;
+    });
 
     const deferClear = () => startTransition(() => clearFormData());
     if (typeof (window as any).requestIdleCallback === 'function') {
@@ -608,13 +624,17 @@ const AuthDesktop = ({
 
           {/* Auth form */}
           <div className="w-full max-w-md">
-            <Card className="bg-white/[0.01] backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
-              <CardContent className="p-6">
+            <Card className="bg-white/[0.01] backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden flex flex-col max-h-[78svh]">
+              <CardContent className="p-6 flex flex-col min-h-0">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <SlidingTabs isLogin={isLogin} onTabChange={handleTabChange} />
 
                   {/* Forms wrapper for instant swap */}
-                  <div className="relative">
+                   <div
+                     ref={formScrollRef}
+                     className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain"
+                     style={{ WebkitOverflowScrolling: 'touch' }}
+                   >
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
                     <form key="login-form" onSubmit={handleSubmit} className="space-y-4">
