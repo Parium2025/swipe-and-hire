@@ -17,6 +17,12 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
 const AUTH_DEBUG = false;
 
+// Hide the pre-React splash logo once React mounts (to avoid logo doubling)
+if (typeof document !== 'undefined') {
+  const splash = document.getElementById('auth-splash');
+  if (splash) splash.classList.add('hidden');
+}
+
 const Auth = () => {
   const [showIntro, setShowIntro] = useState(() => {
     try {
