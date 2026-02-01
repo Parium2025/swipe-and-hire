@@ -9,14 +9,14 @@ const MINIMUM_DISPLAY_MS = 4000;
 /**
  * AuthSplashScreen - Premium "loading shell" för auth-sidan.
  * 
- * Visas i 4 sekunder vid navigering till /auth för att:
- * 1. Ge tid för Parium-loggan att laddas och avkodas helt
- * 2. Skapa en premium "Spotify-känsla" vid övergång
- * 3. Dölja eventuell laddningsfördröjning på svagt internet
+ * Exakt match av referensbilden:
+ * - Parium-logga centrerad (240px bred)
+ * - "Din karriärresa börjar här" tätt under loggan
+ * - Tre långsamma pulserande prickar (2.5s cykel)
+ * - Blå gradient-bakgrund
  */
 export function AuthSplashScreen() {
   const location = useLocation();
-  const isAuthRoute = location.pathname === '/auth';
   
   // Prenumerera på splash-events
   const isTriggered = useSyncExternalStore(
@@ -62,60 +62,56 @@ export function AuthSplashScreen() {
     }, MINIMUM_DISPLAY_MS);
     
     return () => clearTimeout(showTimer);
-  }, [isTriggered]);
+  }, [isTriggered, isVisible]);
   
-  // Visa inte om vi inte är på /auth och splash inte är triggad
+  // Visa inte om splash inte är triggad
   if (!isVisible) return null;
   
   return (
     <div
       className={`
         fixed inset-0 z-[9999] flex flex-col items-center justify-center
-        bg-parium-gradient
         transition-opacity duration-500 ease-out
         ${isFadingOut ? 'opacity-0' : 'opacity-100'}
       `}
       style={{
-        // Samma gradient som auth-sidan för sömlös övergång
-        background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-dark)) 100%)',
+        // Exakt samma gradient som auth-sidan
+        background: 'linear-gradient(135deg, hsl(210, 100%, 25%) 0%, hsl(210, 100%, 15%) 100%)',
       }}
     >
-      {/* Parium Logo - inbäddad data-URI för 0 nätverksanrop */}
+      {/* Parium Logo - STOR som i referensbilden (240px bred) */}
       <img
         src={authLogoDataUri}
         alt="Parium"
-        className="h-[60px] w-auto mb-6 select-none pointer-events-none"
-        style={{
-          // Tvinga synkron avkodning för omedelbar rendering
-        }}
+        className="w-[240px] h-auto mb-4 select-none pointer-events-none"
         decoding="sync"
         loading="eager"
         fetchPriority="high"
       />
       
-      {/* Tagline */}
-      <p className="text-white/90 text-lg font-medium tracking-wide mb-8">
+      {/* Tagline - tätt under loggan som i referensbilden */}
+      <p className="text-white text-xl font-medium tracking-wide mb-12">
         Din karriärresa börjar här
       </p>
       
-      {/* Pulserande prickar - långsam, premium animation */}
-      <div className="flex items-center gap-2">
+      {/* Pulserande prickar - exakt som i referensbilden */}
+      <div className="flex items-center gap-3">
         <span 
-          className="w-2.5 h-2.5 rounded-full bg-white/60"
+          className="w-3 h-3 rounded-full bg-white/70"
           style={{
             animation: 'authSplashPulse 2.5s ease-in-out infinite',
             animationDelay: '0s',
           }}
         />
         <span 
-          className="w-2.5 h-2.5 rounded-full bg-white/60"
+          className="w-3 h-3 rounded-full bg-white/70"
           style={{
             animation: 'authSplashPulse 2.5s ease-in-out infinite',
             animationDelay: '0.4s',
           }}
         />
         <span 
-          className="w-2.5 h-2.5 rounded-full bg-white/60"
+          className="w-3 h-3 rounded-full bg-white/70"
           style={{
             animation: 'authSplashPulse 2.5s ease-in-out infinite',
             animationDelay: '0.8s',
@@ -123,16 +119,16 @@ export function AuthSplashScreen() {
         />
       </div>
       
-      {/* CSS för pulsanimation */}
+      {/* CSS för pulsanimation - långsam och premium */}
       <style>{`
         @keyframes authSplashPulse {
           0%, 100% {
-            opacity: 0.4;
+            opacity: 0.5;
             transform: scale(1);
           }
           50% {
             opacity: 1;
-            transform: scale(1.15);
+            transform: scale(1.2);
           }
         }
       `}</style>
