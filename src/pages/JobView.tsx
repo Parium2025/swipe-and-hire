@@ -581,10 +581,11 @@ const JobView = () => {
             onClick={() => setShowCompanyProfile(true)}
             className="flex items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
           >
-            <Avatar className="h-10 w-10">
+            <Avatar className="h-10 w-10" style={{ contain: 'layout style paint' }}>
               <AvatarImage 
                 src={job.profiles?.company_logo_url || ''} 
                 alt={job.profiles?.company_name || 'Företagslogga'}
+                loading="lazy"
               />
               <AvatarFallback className="bg-white/20 text-white font-semibold text-sm" delayMs={150}>
                 {job.profiles?.company_name
@@ -615,14 +616,14 @@ const JobView = () => {
           <div className="lg:col-span-3 space-y-3">
             
             {imageUrl && (
-              <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
+              <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg" style={{ contain: 'paint' }}>
                 <img
                   src={imageUrl}
                   alt={`${job.title} hos ${job.profiles?.company_name || 'företaget'}`}
                   className="w-full h-full object-cover"
-                  loading="eager"
-                  fetchPriority="high"
-                  onLoad={() => console.log('Job image loaded', imageUrl)}
+                  loading="lazy"
+                  decoding="async"
+                  style={{ contentVisibility: 'auto' }}
                   onError={(e) => {
                     console.error('Job image failed to load', imageUrl);
                     setImageUrl(null);
