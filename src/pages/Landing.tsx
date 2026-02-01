@@ -9,11 +9,8 @@ import { motion } from 'framer-motion';
 import { showAuthSplash } from '@/lib/authSplashEvents';
 const HERO_URL = '/assets/hero-woman-left-hand-verified.jpg';
 
-// Hide the pre-React splash once Landing page mounts
-if (typeof document !== 'undefined') {
-  const splash = document.getElementById('auth-splash');
-  if (splash) splash.classList.add('hidden');
-}
+// NOTE: The pre-React splash (#auth-splash) is now managed entirely by main.tsx
+// which enforces a minimum display time. Do NOT hide it here.
 
 const Landing = () => {
   const navigate = useNavigate();

@@ -18,11 +18,8 @@ import { hideAuthSplash } from '@/lib/authSplashEvents';
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
 const AUTH_DEBUG = false;
 
-// Hide the pre-React splash logo once React mounts (to avoid logo doubling)
-if (typeof document !== 'undefined') {
-  const splash = document.getElementById('auth-splash');
-  if (splash) splash.classList.add('hidden');
-}
+// NOTE: The pre-React splash (#auth-splash) is now managed entirely by main.tsx
+// which enforces a minimum display time. Do NOT hide it here.
 
 const Auth = () => {
   const [showIntro, setShowIntro] = useState(() => {
