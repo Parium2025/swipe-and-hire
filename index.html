@@ -215,8 +215,9 @@
         50% { opacity: 1; transform: scale(1.1); }
       }
       /* Show splash on outsidan routes (/ or /auth) when NOT logged in */
+      /* Must use !important to override inline style="display:none" on #auth-splash */
       html.route-outsidan #auth-splash,
-      body.route-outsidan #auth-splash { display: flex; }
+      body.route-outsidan #auth-splash { display: flex !important; }
 
       html.route-outsidan #auth-splash.hidden,
       body.route-outsidan #auth-splash.hidden { display: none !important; }
