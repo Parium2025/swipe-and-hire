@@ -95,9 +95,9 @@ export function SavedSearchesDropdown({
       }}>
         <PopoverTrigger asChild>
           <button
-            className="relative flex items-center gap-2 text-xs text-white rounded-md px-2 py-1.5 transition-all duration-200 md:hover:bg-white/10 active:scale-95"
+            className="relative flex items-center gap-2 text-xs text-white rounded-lg px-3 min-h-[44px] transition-all duration-200 md:hover:bg-white/10 active:scale-95 active:bg-white/10"
           >
-            <Bell className="h-3 w-3 text-white" />
+            <Bell className="h-4 w-4 text-white" />
             <span>{savedSearches.length} sparad{savedSearches.length !== 1 ? 'e' : ''} sökning{savedSearches.length !== 1 ? 'ar' : ''}</span>
             {totalNewMatches > 0 && (
               <Badge 
@@ -152,10 +152,10 @@ export function SavedSearchesDropdown({
                 
                 <button
                   onClick={(e) => handleDeleteClick(e, search)}
-                  className="p-1.5 rounded-full text-white md:hover:text-red-400 md:hover:bg-red-500/10 transition-colors shrink-0"
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full text-white md:hover:text-red-400 md:hover:bg-red-500/10 transition-colors shrink-0 active:scale-95 active:bg-red-500/20"
                   aria-label="Ta bort sparad sökning"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             ))}
@@ -168,7 +168,7 @@ export function SavedSearchesDropdown({
                   await onClearNewMatches();
                   setOpen(false);
                 }}
-                className="w-full text-xs text-white/60 hover:text-white py-1.5 rounded-md hover:bg-white/5 transition-colors"
+                className="w-full text-xs text-white/60 md:hover:text-white min-h-[44px] rounded-lg md:hover:bg-white/5 transition-colors active:scale-[0.98] active:bg-white/10"
               >
                 Rensa alla notifikationer
               </button>
