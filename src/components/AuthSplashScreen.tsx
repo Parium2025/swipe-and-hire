@@ -82,29 +82,29 @@ export function AuthSplashScreen() {
         willChange: 'opacity',
       }}
     >
-      {/* Parium Logo - 240px bred, nära tagline */}
+      {/* Parium Logo - 240px bred, negativt avstånd till tagline */}
       <img
         src={authLogoDataUri}
         alt="Parium"
-        className="w-[240px] h-auto mb-2 select-none pointer-events-none"
-        style={{ transform: 'translateZ(0)' }}
+        className="w-[240px] h-auto select-none pointer-events-none"
+        style={{ transform: 'translateZ(0)', marginBottom: '-8px' }}
         decoding="sync"
         loading="eager"
         fetchPriority="high"
       />
       
-      {/* Tagline - tätt under loggan */}
-      <p className="text-white text-xl font-medium tracking-wide mb-10">
+      {/* Tagline - tätt under loggan, font-light för att matcha appen */}
+      <p className="text-white text-xl font-light tracking-wide mb-10">
         Din karriärresa börjar här
       </p>
       
-      {/* Pulserande prickar - GPU-accelererade */}
+      {/* Pulserande prickar - GPU-accelererade med negativ delay */}
       <div className="flex items-center gap-2.5">
         <span 
           className="w-2.5 h-2.5 rounded-full bg-white/60"
           style={{
             animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            animationDelay: '0s',
+            animationDelay: '-1.7s',
             transform: 'translateZ(0)',
             willChange: 'opacity, transform',
           }}
@@ -113,7 +113,7 @@ export function AuthSplashScreen() {
           className="w-2.5 h-2.5 rounded-full bg-white/60"
           style={{
             animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            animationDelay: '0.4s',
+            animationDelay: '-1.3s',
             transform: 'translateZ(0)',
             willChange: 'opacity, transform',
           }}
@@ -122,7 +122,7 @@ export function AuthSplashScreen() {
           className="w-2.5 h-2.5 rounded-full bg-white/60"
           style={{
             animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            animationDelay: '0.8s',
+            animationDelay: '-0.9s',
             transform: 'translateZ(0)',
             willChange: 'opacity, transform',
           }}
