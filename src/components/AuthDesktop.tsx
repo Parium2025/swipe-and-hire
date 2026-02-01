@@ -565,9 +565,7 @@ const AuthDesktop = ({
                    Using z-index to layer glows behind, but DOM order ensures
                    the logo bitmap is painted first by the browser.
                  */}
-                 <AuthLogoInline
-                   className="relative z-10 h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)]"
-                 />
+                 <AuthLogoInline className="relative z-10 h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)]" />
 
                 {/* Glow effects - AFTER logo in DOM, behind via z-index, delayed fade-in */}
                 <div

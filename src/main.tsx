@@ -5,10 +5,8 @@ import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
-import pariumLogoRingsDataUri from './assets/parium-logo-rings.png?inline'
+import pariumLogoRings from './assets/parium-logo-rings.png'
 import authLogoDataUri from './assets/parium-auth-logo.png?inline'
-
-// Splash system removed - React handles logo rendering directly
 
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
@@ -99,7 +97,6 @@ function redirectAuthTokensIfNeeded() {
 }
 
 async function bootstrap() {
-
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
@@ -113,7 +110,7 @@ async function bootstrap() {
   }
 
   // Nav logo can remain fire-and-forget.
-  void preloadAndDecodeImage(pariumLogoRingsDataUri, 'nav-logo');
+  void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
 
   // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
   if (import.meta.env.PROD) {

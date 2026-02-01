@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { preloadImages, waitForServiceWorker } from '@/lib/serviceWorkerManager';
 import { getMediaUrl } from '@/lib/mediaManager';
-// Inline logo to eliminate any network dependency for the most visible brand element
-import pariumLogoRingsDataUri from '@/assets/parium-logo-rings.png?inline';
+// Import logo directly so it's bundled and we get the hashed URL
+import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
 /**
  * Preload an image using native Image() - most reliable method
@@ -36,7 +36,7 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
         // 🔥 PRIORITET 0: Ladda Parium-logotypen OMEDELBART med native Image()
         // Detta körs INNAN service worker-väntan för att garantera att loggan alltid finns i cache
         console.log('🚀 HIGHEST PRIORITY: Preloading Parium logo (native)...');
-         await preloadImageNative(pariumLogoRingsDataUri);
+        await preloadImageNative(pariumLogoRings);
         console.log('✅ Parium logo preloaded and ready!');
         
         // Vänta på service worker endast i produktion (för övriga assets)
@@ -157,4 +157,3 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
     preloadCriticalImages();
   }, [enabled]);
 };
-
