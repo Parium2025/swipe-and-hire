@@ -15,14 +15,14 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <!-- 🚀 FONT OPTIMIZATION: Preload critical font with swap for no FOUT -->
+    <!-- Google Fonts - Inter for premium typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
-    <!-- Preload critical images -->
-    <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" imagesrcset="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
+    <!-- Preload Parium logo for instant nav rendering -->
     <link rel="preload" as="image" href="/src/assets/parium-logo-rings.png" fetchpriority="high" />
+    <!-- Preload hero image used on Landing -->
     <link rel="preload" as="image" href="/assets/hero-woman-left-hand-verified.jpg" type="image/jpeg" fetchpriority="high" />
  
       
@@ -47,33 +47,11 @@
   <meta property="og:description" content="Parium">
   <meta name="twitter:description" content="Parium">
   <link rel="icon" type="image/png" href="/favicon-v3.png?v=3">
-<style>
-    /* 🚀 CSS CONTAINMENT: Isolate repaints for better performance */
-    #root { 
-      position: relative; 
-      z-index: 1;
-      contain: layout style;
-    }
-    
+  <style>
     /* Dedicated full-screen background layer to eliminate iOS PWA banding/stripes */
     #app-bg { display: none !important; }
-
-    /* 🚀 TOUCH OPTIMIZATION: Ensure smooth scrolling and touch */
-    html {
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    /* Prevent text size adjust on orientation change */
-    body {
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
-    }
-    
-    /* 🚀 LAYOUT SHIFT PREVENTION: Pre-allocate space for images */
-    img {
-      content-visibility: auto;
-    }
+    /* Ensure app content sits above background layer */
+    #root { position: relative; z-index: 1; }
 
     /* Global CSS var to offset decorations in PWA */
     :root { --pwa-top-offset: 0px; }
