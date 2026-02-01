@@ -97,8 +97,10 @@ const AnimatedRoutes = () => {
 const App = () => {
   const showHeader = false; // Header removed for cleaner UI
 
-  // Förladdda alla kritiska bilder globalt vid app-start
-  useGlobalImagePreloader();
+  // Förladdda alla kritiska bilder globalt vid app-start.
+  // Viktigt: på /auth vill vi INTE starta tunga preloads som kan konkurrera med loggans first paint.
+  const preloadEnabled = typeof window !== 'undefined' ? window.location.pathname !== '/auth' : true;
+  useGlobalImagePreloader(preloadEnabled);
 
   const [animReady, setAnimReady] = useState(false);
   useEffect(() => {
