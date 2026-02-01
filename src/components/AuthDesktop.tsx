@@ -18,7 +18,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { searchAddresses } from '@/lib/addressSearch';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
 import { AuthLogoInline } from '@/assets/authLogoInline';
 

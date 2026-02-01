@@ -1,12 +1,13 @@
 /**
- * Parium auth logo as INLINE SVG in the JS bundle.
+ * Parium auth logo with **0 network requests**.
  *
  * IMPORTANT:
- * - We embed the ORIGINAL PNG as a data URI inside an <svg><image/></svg>.
- *   This keeps it pixel-perfect (identical to the original logo), while still
- *   being an inline SVG component.
+ * - We import the ORIGINAL PNG as a data URI via `?inline`.
+ * - We render it as a background-image (same structure as the home logo)
+ *   because browsers tend to cache/compose decoded bitmaps more reliably for
+ *   <img>/CSS backgrounds than for <svg><image/>.
  * - Size is controlled by the SAME Tailwind classes already used in Auth*
- *   (h-*, w-auto, scale-*). The wrapper keeps <img>-like intrinsic sizing.
+ *   (h-*, w-auto, scale-*). The aspect-ratio wrapper keeps intrinsic sizing.
  */
 
 import { cn } from "@/lib/utils";
@@ -22,27 +23,18 @@ const AUTH_LOGO_ASPECT = 1080 / 432;
 export function AuthLogoInline({ className }: AuthLogoProps) {
   return (
     <div
-      className={cn("block", className)}
-      style={{ aspectRatio: String(AUTH_LOGO_ASPECT) }}
+      className={cn(
+        "block bg-contain bg-center bg-no-repeat pointer-events-none transform-gpu",
+        className
+      )}
+      style={{
+        aspectRatio: String(AUTH_LOGO_ASPECT),
+        backgroundImage: `url(${authLogoDataUri})`,
+        willChange: "transform",
+      }}
       aria-label="Parium"
       role="img"
-    >
-      <svg
-        className="h-full w-full"
-        viewBox="0 0 1080 432"
-        xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <image
-          href={authLogoDataUri}
-          // Safari compatibility
-          xlinkHref={authLogoDataUri as unknown as string}
-          width="1080"
-          height="432"
-          preserveAspectRatio="xMidYMid meet"
-        />
-      </svg>
-    </div>
+    />
   );
 }
 
