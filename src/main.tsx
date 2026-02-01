@@ -8,6 +8,30 @@ import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
+// Desktop /auth: if the pre-React splash image ever races the network,
+// swap it to the already-inline (0-request) data URI as soon as JS runs.
+// This does NOT affect mobile/tablet because the splash is CSS-hidden there.
+function hydrateAuthSplashLogo(): void {
+  try {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    if (window.location.pathname !== '/auth') return;
+    if (typeof window.matchMedia === 'function' && !window.matchMedia('(min-width: 768px)').matches) return;
+
+    const el = document.getElementById('auth-splash-img') as HTMLImageElement | null;
+    if (!el) return;
+
+    // Ensure highest paint priority and zero network dependency.
+    el.setAttribute('decoding', 'sync');
+    el.setAttribute('loading', 'eager');
+    el.setAttribute('fetchpriority', 'high');
+    if (el.src !== authLogoDataUri) {
+      el.src = authLogoDataUri;
+    }
+  } catch {
+    // never block bootstrap
+  }
+}
+
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
   try {
@@ -97,6 +121,8 @@ function redirectAuthTokensIfNeeded() {
 }
 
 async function bootstrap() {
+  hydrateAuthSplashLogo();
+
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
