@@ -97,17 +97,15 @@
       position: fixed;
       inset: 0;
       z-index: 99999;
-      display: none; /* Hidden by default, shown via JS only on /auth */
+      display: none;
       flex-direction: column;
       align-items: center;
-      /* Positionera loggan där auth-sidans logga sitter (~28% från toppen) */
+      /* Positionera loggan där auth-sidans logga sitter (nära toppen) */
       justify-content: flex-start;
-      padding-top: max(28vh, 140px);
-      /* EXAKT samma gradient som auth-sidan (hsl 215 100% 12%) */
+      padding-top: calc(env(safe-area-inset-top, 0px) + 100px);
       background: hsl(215, 100%, 12%);
       opacity: 1;
       transition: opacity 0.5s ease-out;
-      /* GPU acceleration för smooth fade */
       transform: translateZ(0);
       will-change: opacity;
     }
@@ -116,20 +114,17 @@
       pointer-events: none;
     }
     #auth-splash-logo {
-      width: 240px;
+      width: 280px;
       height: auto;
-      /* Negativt avstånd för att krypa tätt intill tagline */
-      margin-bottom: -12px;
-      /* GPU-accelererad rendering */
+      margin-bottom: -16px;
       transform: translateZ(0);
     }
     #auth-splash-tagline {
       color: white;
-      font-size: 1.25rem;
-      font-weight: 300;
-      letter-spacing: 0.025em;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
       margin-bottom: 40px;
-      /* Exakt samma font som resten av appen */
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
     #auth-splash-dots {
