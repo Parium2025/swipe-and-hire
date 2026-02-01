@@ -69,7 +69,7 @@ const localPostalCodes: Record<string, PostalCodeResponse> = {
 let swedishPostalDatabase: Record<string, string> | null = null;
 let databaseLoadingPromise: Promise<Record<string, string>> | null = null;
 
-// Ladda databasen direkt vid start för snabbare sökningar
+// Starta laddning av databasen vid behov (och i bakgrunden på icke-kritiska sidor)
 function initializePostalDatabase() {
   if (!databaseLoadingPromise) {
     databaseLoadingPromise = loadSwedishPostalDatabase();
@@ -115,14 +115,23 @@ async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
 }
 
 // Initiera databasen direkt när modulen laddas
-initializePostalDatabase();
+// Viktigt: undvik tunga uppstartsjobb på /auth (första paint måste vara 0-jank).
+// På andra sidor kan vi värma upp databasen i idle.
+if (typeof window !== 'undefined' && window.location.pathname !== '/auth') {
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(() => initializePostalDatabase(), { timeout: 1500 } as any);
+  } else {
+    setTimeout(() => initializePostalDatabase(), 0);
+  }
+}
 
 async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse | null> {
   const cleanedCode = postalCode.replace(/\s+/g, '');
   
   // Använd cachad databas (laddades vid sidstart)
   try {
-    const database = await databaseLoadingPromise;
+    // Lazy-start om databasen inte redan är igång.
+    const database = await initializePostalDatabase();
     if (database) {
       const city = database[cleanedCode];
       if (city) {
