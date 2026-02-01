@@ -219,21 +219,21 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots - with proper touch targets */}
-        <div className="flex items-center justify-between mt-auto">
-          {/* Dot navigation */}
+        {/* Footer with dots - tight layout with stable positioning */}
+        <div className="flex items-center justify-between mt-auto h-6">
+          {/* Dot navigation - tight gaps, stable vertical alignment */}
           {tipsItems.length > 1 ? (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {tipsItems.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrentIndex(i)}
                   onKeyDown={(e) => e.key === 'Enter' && setCurrentIndex(i)}
-                  className="p-2 -m-1 touch-target flex items-center justify-center"
+                  className="w-6 h-6 flex items-center justify-center touch-manipulation"
                   aria-label={`Gå till nyhet ${i + 1}`}
                 >
                   <span className={cn(
-                    "w-2.5 h-2.5 rounded-full transition-none",
+                    "w-2 h-2 rounded-full",
                     i === currentIndex 
                       ? "bg-white" 
                       : "bg-white/30"
@@ -533,17 +533,17 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation - with proper touch targets */}
-        <div className="flex items-center gap-1 mt-auto">
+        {/* Dot navigation - tight gaps, stable vertical alignment */}
+        <div className="flex items-center gap-2 mt-auto h-6">
           {statsArray.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
-              className="p-2 -m-1 touch-target flex items-center justify-center"
+              className="w-6 h-6 flex items-center justify-center touch-manipulation"
               aria-label={`Gå till statistik ${i + 1}`}
             >
               <span className={cn(
-                "w-2.5 h-2.5 rounded-full transition-none",
+                "w-2 h-2 rounded-full",
                 i === currentIndex 
                   ? "bg-white" 
                   : "bg-white/30"
