@@ -372,9 +372,9 @@ const SearchJobs = () => {
               }) && (
                 <button
                   onClick={() => setSaveSearchDialogOpen(true)}
-                  className="inline-flex items-center gap-1.5 h-7 px-2 text-xs text-white rounded-md transition-all duration-200 md:hover:bg-white/10 active:scale-95"
+                  className="inline-flex items-center gap-1.5 min-h-[44px] h-11 px-3 text-sm text-white rounded-lg transition-all duration-200 md:hover:bg-white/10 active:scale-95"
                 >
-                  <Bookmark className="h-3.5 w-3.5 text-white" />
+                  <Bookmark className="h-4 w-4 text-white" />
                   <span className="hidden sm:inline">Spara sökning</span>
                 </button>
               )}
@@ -389,10 +389,10 @@ const SearchJobs = () => {
               {searchInput && (
                 <button
                   onClick={() => setSearchInput('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/10 rounded p-1 transition-colors"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white md:hover:bg-white/10 rounded-full min-h-[44px] min-w-[44px] h-11 w-11 flex items-center justify-center transition-colors active:scale-95 active:bg-white/20"
                   aria-label="Rensa sökning"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-5 w-5" />
                 </button>
               )}
             </div>
@@ -410,7 +410,7 @@ const SearchJobs = () => {
           {/* Expand/Collapse Filters Button */}
           <button
             onClick={() => setFiltersExpanded(!filtersExpanded)}
-            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-white"
+            className="w-full flex items-center justify-center gap-2 min-h-[44px] h-11 text-sm text-white rounded-lg md:hover:bg-white/5 transition-all duration-200 active:scale-[0.98] active:bg-white/10"
           >
             <span>{filtersExpanded ? 'Dölj filter' : 'Visa filter'}</span>
             <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${filtersExpanded ? 'rotate-180' : ''}`} />
