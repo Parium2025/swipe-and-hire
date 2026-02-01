@@ -15,15 +15,14 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <!-- 🚀 FONT OPTIMIZATION: Preload critical font with swap for no FOUT -->
+    <!-- Google Fonts - Inter for premium typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
-    <!-- Preload critical images - auth logo preloaded on ALL pages for instant /auth navigation -->
-    <link rel="preload" as="image" href="/lovable-uploads/parium-auth-logo.png" fetchpriority="high" />
-    <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" imagesrcset="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
+    <!-- Preload Parium logo for instant nav rendering -->
     <link rel="preload" as="image" href="/src/assets/parium-logo-rings.png" fetchpriority="high" />
+    <!-- Preload hero image used on Landing -->
     <link rel="preload" as="image" href="/assets/hero-woman-left-hand-verified.jpg" type="image/jpeg" fetchpriority="high" />
  
       
@@ -48,39 +47,11 @@
   <meta property="og:description" content="Parium">
   <meta name="twitter:description" content="Parium">
   <link rel="icon" type="image/png" href="/favicon-v3.png?v=3">
-<style>
-    /* 🚀 CSS CONTAINMENT: Isolate repaints for better performance */
-    #root { 
-      position: relative; 
-      z-index: 1;
-      contain: layout style;
-    }
-    
+  <style>
     /* Dedicated full-screen background layer to eliminate iOS PWA banding/stripes */
     #app-bg { display: none !important; }
-
-    /* 🚀 TOUCH OPTIMIZATION: Ensure smooth scrolling and touch */
-    html {
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      /* Prevent white flash on page load/refresh */
-      background: hsl(215 100% 12%);
-    }
-    
-    body {
-      background: hsl(215 100% 12%);
-    }
-    
-    /* Prevent text size adjust on orientation change */
-    body {
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
-    }
-    
-    /* 🚀 LAYOUT SHIFT PREVENTION: Pre-allocate space for images */
-    img {
-      content-visibility: auto;
-    }
+    /* Ensure app content sits above background layer */
+    #root { position: relative; z-index: 1; }
 
     /* Global CSS var to offset decorations in PWA */
     :root { --pwa-top-offset: 0px; }
@@ -122,44 +93,6 @@
       }
     }
   </style>
-  <script>
-    // EARLY outsidan route detection (runs in <head>) so the splash is visible on refresh.
-    // Adds class on <html> (and body when available) to avoid a "late" splash.
-    (function() {
-      try {
-        var path = location.pathname || '';
-        var isOutsidan = path === '/auth' || path.startsWith('/auth');
-        if (!isOutsidan) return;
-
-        var hasSession = false;
-        try {
-          // Auth session lives in localStorage under sb-{projectId}-auth-token
-          var sessionKey = 'sb-jrjaegapuujushsiofoi-auth-token';
-          var sessionData = localStorage.getItem(sessionKey);
-          if (sessionData) {
-            var parsed = JSON.parse(sessionData);
-            if (parsed && parsed.access_token) {
-              var expiresAt = parsed.expires_at;
-              if (expiresAt && (expiresAt * 1000) > Date.now()) {
-                hasSession = true;
-              }
-            }
-          }
-        } catch (e) {
-          // ignore
-        }
-
-        if (!hasSession) {
-          // Timestamp for minimum-display timing in app bootstrap.
-          window.__pariumAuthSplashTs = Date.now();
-          document.documentElement.classList.add('route-outsidan');
-          if (document.body) document.body.classList.add('route-outsidan');
-        }
-      } catch (e) {
-        // ignore
-      }
-    })();
-  </script>
 </head>
 
   <body>
@@ -180,56 +113,6 @@
     <div id="app-bg" aria-hidden="true"></div>
     <!-- Hidden hero preloader for Safari/iOS -->
     <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
-
-    <!--
-      🔥 PARIUM LOADING SPLASH: Branded shell shown on refresh/navigation to outsidan.
-      Shows: Logo + "Din karriärresa börjar här" + animated dots.
-      Visible when: /auth or / (landing) AND user is NOT logged in.
-      Auto-hidden when React mounts and takes over.
-    -->
-    <div id="auth-splash" aria-hidden="true" style="
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 9998;
-      background: radial-gradient(circle at 50% 40%, hsla(200, 100%, 50%, 0.4) 0%, hsla(200, 100%, 50%, 0.15) 50%, hsla(200, 100%, 50%, 0) 80%), linear-gradient(180deg, hsl(215 100% 12%), hsl(215 100% 12%));
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    ">
-      <img
-        src="/lovable-uploads/parium-auth-logo.png"
-        alt="Parium"
-        decoding="sync"
-        fetchpriority="high"
-        width="240"
-        style="max-width: min(240px, 60vw); height: auto; object-fit: contain; margin-bottom: -64px;"
-      />
-      <p style="margin-top: 0; color: rgba(255,255,255,0.9); font-size: 1.25rem; font-weight: 500; letter-spacing: 0.025em; text-align: center; padding: 0 1rem; font-family: Inter, sans-serif;">
-        Din karriärresa börjar här
-      </p>
-      <div style="margin-top: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-        <span class="splash-dot" style="width: 12px; height: 12px; border-radius: 50%; background: hsl(var(--primary-glow)); opacity: 0.35; transform: scale(0.85) translateZ(0); will-change: transform, opacity; backface-visibility: hidden; animation: splash-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; animation-fill-mode: both;"></span>
-        <span class="splash-dot" style="width: 12px; height: 12px; border-radius: 50%; background: hsl(var(--primary-glow)); opacity: 0.35; transform: scale(0.85) translateZ(0); will-change: transform, opacity; backface-visibility: hidden; animation: splash-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.4s; animation-fill-mode: both;"></span>
-        <span class="splash-dot" style="width: 12px; height: 12px; border-radius: 50%; background: hsl(var(--primary-glow)); opacity: 0.35; transform: scale(0.85) translateZ(0); will-change: transform, opacity; backface-visibility: hidden; animation: splash-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.8s; animation-fill-mode: both;"></span>
-      </div>
-    </div>
-    <style>
-      @keyframes splash-pulse {
-        0%, 100% { opacity: 0.35; transform: scale(0.85); }
-        50% { opacity: 1; transform: scale(1.1); }
-      }
-      /* Show splash on outsidan routes (/ or /auth) when NOT logged in */
-      /* Must use !important to override inline style="display:none" on #auth-splash */
-      html.route-outsidan #auth-splash,
-      body.route-outsidan #auth-splash { display: flex !important; }
-
-      html.route-outsidan #auth-splash.hidden,
-      body.route-outsidan #auth-splash.hidden { display: none !important; }
-    </style>
-    
-
     <div id="root"></div>
     <script>
       try {

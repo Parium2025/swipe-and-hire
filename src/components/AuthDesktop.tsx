@@ -95,30 +95,15 @@ const AuthDesktop = ({
   const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [employeeMenuOpen, setEmployeeMenuOpen] = useState(false);
-  const formScrollRef = useRef<HTMLDivElement>(null);
-  const loginScrollTopRef = useRef(0);
-  const signupScrollTopRef = useRef(0);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Keep parent (/auth) in sync with the actual active tab.
-  // This prevents global login-only scroll locking from sticking when user is on signup.
-  useEffect(() => {
-    onAuthModeChange?.(isLogin);
-  }, [isLogin, onAuthModeChange]);
-
   // Handle scroll-lock directly for instant response
   const handleTabChange = (value: string) => {
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return;
-
-    // Save scroll position INSIDE the card (important on touch tablets).
-    const scroller = formScrollRef.current;
-    if (scroller) {
-      (isLogin ? loginScrollTopRef : signupScrollTopRef).current = scroller.scrollTop;
-    }
 
     // No global class toggling to avoid iOS reflow jank
 
@@ -126,13 +111,6 @@ const AuthDesktop = ({
     setIsLogin(newIsLogin);
     setHasRegistered(false);
     setShowResend(false);
-
-    // Restore scroll position for the newly active tab.
-    requestAnimationFrame(() => {
-      const nextScroller = formScrollRef.current;
-      if (!nextScroller) return;
-      nextScroller.scrollTop = newIsLogin ? loginScrollTopRef.current : signupScrollTopRef.current;
-    });
 
     const deferClear = () => startTransition(() => clearFormData());
     if (typeof (window as any).requestIdleCallback === 'function') {
@@ -582,38 +560,25 @@ const AuthDesktop = ({
           <div className="text-center mb-4">
             <div className="mb-2">
               <div className="relative mx-auto w-fit flex items-center justify-center" style={{ height: '260px' }}>
-                 {/*
-                   🔥 LOGO FIRST: Render AuthLogoInline BEFORE glow divs.
-                   Using z-index to layer glows behind, but DOM order ensures
-                   the logo bitmap is painted first by the browser.
-                 */}
-                 <AuthLogoInline className="relative z-10 h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)]" />
-
-                {/* Glow effects - AFTER logo in DOM, behind via z-index, delayed fade-in */}
-                <div
-                  className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0 animate-fade-in"
-                  style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}
-                >
+                {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-72 h-52 bg-primary-glow/25 rounded-full blur-[40px]"></div>
                 </div>
-                <div
-                  className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0 animate-fade-in"
-                  style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}
-                >
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-52 h-36 bg-primary-glow/22 rounded-full blur-[35px]"></div>
                 </div>
-                <div
-                  className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0 animate-fade-in"
-                  style={{ animationDelay: '250ms', animationFillMode: 'backwards' }}
-                >
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-44 h-28 bg-primary-glow/20 rounded-full blur-[30px]"></div>
                 </div>
-                <div
-                  className="absolute inset-0 flex items-center justify-center -translate-y-2 z-0 animate-fade-in"
-                  style={{ animationDelay: '300ms', animationFillMode: 'backwards' }}
-                >
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
+                 {/*
+                   IMPORTANT: Give the logo an explicit width.
+                   Background images have no intrinsic width; without this, `w-fit`
+                   wrappers can collapse and the logo can disappear.
+                 */}
+                 <AuthLogoInline className="relative h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)]" />
               </div>
             </div>
             
@@ -624,17 +589,13 @@ const AuthDesktop = ({
 
           {/* Auth form */}
           <div className="w-full max-w-md">
-            <Card className="bg-white/[0.01] backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden flex flex-col max-h-[78svh]">
-              <CardContent className="p-6 flex flex-col min-h-0">
+            <Card className="bg-white/[0.01] backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
+              <CardContent className="p-6">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <SlidingTabs isLogin={isLogin} onTabChange={handleTabChange} />
 
                   {/* Forms wrapper for instant swap */}
-                   <div
-                     ref={formScrollRef}
-                     className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain"
-                     style={{ WebkitOverflowScrolling: 'touch' }}
-                   >
+                  <div className="relative">
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
                     <form key="login-form" onSubmit={handleSubmit} className="space-y-4">

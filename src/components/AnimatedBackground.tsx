@@ -19,9 +19,8 @@ const isTouchDevice =
 export const AnimatedBackground = memo(({ showBubbles = true, variant = 'viewport' }: AnimatedBackgroundProps) => {
   const positionClass = variant === 'card' ? 'absolute' : 'fixed';
 
-  // IMPORTANT: Always render bubbles for visual premium feel.
-  // Previously disabled on touch devices but users expect consistent visuals.
-  const renderBubbles = showBubbles;
+  // On touch devices skip animated bubbles entirely for max responsiveness
+  const renderBubbles = showBubbles && !isTouchDevice;
 
   return (
     <div className={`${positionClass} inset-0 pointer-events-none z-0`}>

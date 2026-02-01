@@ -2,17 +2,12 @@ import { useSyncExternalStore } from 'react';
 
 // Mobile breakpoint - below this we use mobile layout with sidebar
 const MOBILE_BREAKPOINT = 768;
-// Tablet breakpoint - between mobile and this we use tablet-optimized layout
-const TABLET_BREAKPOINT = 1024;
 
-export type DeviceType = 'mobile' | 'tablet' | 'desktop';
+export type DeviceType = 'mobile' | 'desktop';
 
 function getDeviceType(): DeviceType {
   if (typeof window === 'undefined') return 'desktop';
-  const width = window.innerWidth;
-  if (width < MOBILE_BREAKPOINT) return 'mobile';
-  if (width < TABLET_BREAKPOINT) return 'tablet';
-  return 'desktop';
+  return window.innerWidth < MOBILE_BREAKPOINT ? 'mobile' : 'desktop';
 }
 
 // Singleton subscription - shared across all hook instances (no duplicate listeners)

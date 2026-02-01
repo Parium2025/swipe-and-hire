@@ -100,9 +100,8 @@ const AuthMobile = ({
   const emailInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const resetSectionRef = useRef<HTMLDivElement>(null);
-  const formScrollRef = useRef<HTMLDivElement>(null);
-  const loginScrollTopRef = useRef(0);
-  const signupScrollTopRef = useRef(0);
+  // Independent scroll positions per tab
+  const signupScrollRef = useRef(0);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -115,13 +114,6 @@ const AuthMobile = ({
       }, 0);
     }
   }, [showResetPassword, resetPasswordSent]);
-
-  // CRITICAL: Keep parent (/auth) in sync with the actual visible tab.
-  // If parent stays in "login" it will keep global scroll-lock listeners active
-  // and make the Registrera view impossible to scroll.
-  useEffect(() => {
-    onAuthModeChange?.(isLogin);
-  }, [isLogin, onAuthModeChange]);
 
   // Utility: force top without smooth; works reliably on iOS Safari
   const hardScrollTo = (top: number) => {
@@ -148,18 +140,18 @@ const AuthMobile = ({
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return; // avoid redundant work
 
-    // Save current scroll position INSIDE the card (not window).
-    const scroller = formScrollRef.current;
-    if (scroller) {
-      (isLogin ? loginScrollTopRef : signupScrollTopRef).current = scroller.scrollTop;
+    // Save current scroll if leaving signup
+    if (!isLogin && typeof window !== 'undefined') {
+      signupScrollRef.current = window.scrollY || 0;
     }
 
-    // Blur first to avoid iOS keyboard/layout jank
+    // Scroll BEFORE state change to prevent layout jump
     try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch (blurError) {
       console.warn('Failed to blur active element:', blurError);
     }
+    const targetTop = newIsLogin ? 0 : (signupScrollRef.current || 0);
+    if (typeof window !== 'undefined') hardScrollTo(targetTop);
 
-    // Update parent immediately (no effect-delay) so scroll-lock detaches instantly on signup.
     onAuthModeChange?.(newIsLogin);
 
     // Now swap content
@@ -168,13 +160,6 @@ const AuthMobile = ({
     setShowResend(false);
     setShowResetPassword(false);
     setResetPasswordSent(false);
-
-    // Restore scroll position for the newly active tab (inside the card).
-    requestAnimationFrame(() => {
-      const nextScroller = formScrollRef.current;
-      if (!nextScroller) return;
-      nextScroller.scrollTop = newIsLogin ? loginScrollTopRef.current : signupScrollTopRef.current;
-    });
 
     // Defer heavy clearing until idle to avoid blocking frame
     const deferClear = () => startTransition(() => clearFormData());
@@ -681,19 +666,15 @@ const AuthMobile = ({
           {/* Auth form */}
           <div className="w-full max-w-sm overscroll-contain">
             <Card 
-              className="bg-white/[0.01] backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden flex flex-col max-h-[72svh]"
+              className="bg-white/[0.01] backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
-              <CardContent className={cn("p-4 md:p-6 flex flex-col min-h-0", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
+              <CardContent className={cn("p-4 md:p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <SlidingTabs isLogin={isLogin} onTabChange={handleTabChange} />
 
                   {/* Forms wrapper for instant swap */}
-                   <div
-                     ref={formScrollRef}
-                     className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain"
-                     style={{ WebkitOverflowScrolling: 'touch' }}
-                   >
+                  <div className="relative">
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
                     <form key="login-form" onSubmit={handleSubmit} className="space-y-3 md:space-y-4">

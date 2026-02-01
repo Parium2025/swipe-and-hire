@@ -12,14 +12,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
-import { hideAuthSplash } from '@/lib/authSplashEvents';
 
 // Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
 const AUTH_DEBUG = false;
-
-// NOTE: The pre-React splash (#auth-splash) is now managed entirely by main.tsx
-// which enforces a minimum display time. Do NOT hide it here.
 
 const Auth = () => {
   const [showIntro, setShowIntro] = useState(() => {
@@ -76,29 +72,121 @@ const Auth = () => {
   const device = useDevice();
   const { toast } = useToast();
 
-  // Hide in-app transition splash (shown during navigation/logout) once /auth has mounted.
-  useEffect(() => {
-    requestAnimationFrame(() => requestAnimationFrame(() => hideAuthSplash()));
-  }, []);
-
   // Read initial state from navigation (from Landing page)
   const initialMode = (location.state as any)?.mode;
   const initialRole = (location.state as any)?.role;
 
-  // Keep the top-level scroll-lock state in sync with the initial UI mode.
-  // Otherwise, if we land directly on “Registrera”, the child tab change handler
-  // may early-return and never notify the parent, leaving scroll locked.
+  // Smart scroll-locking: Lock only for login on MOBILE devices, allow scroll on desktop
   useEffect(() => {
-    if (initialMode === 'register') setIsLoginMode(false);
-    else if (initialMode === 'login') setIsLoginMode(true);
-  }, [initialMode]);
+    // CRITICAL: Desktop must ALWAYS scroll freely - no scroll-lock at all
+    if (device === 'desktop') {
+      // Ensure no scroll-lock classes are present
+      document.documentElement.classList.remove('auth-locked', 'auth-lock');
+      document.body.classList.remove('auth-locked', 'auth-lock');
+      return; // Skip scroll-lock entirely on desktop
+    }
 
-  // IMPORTANT: /auth must never get stuck in a global "scroll locked" state.
-  // We purposely keep scrolling local to the auth card instead of window-level listeners.
-  useEffect(() => {
-    document.documentElement.classList.remove('auth-locked', 'auth-lock');
-    document.body.classList.remove('auth-locked', 'auth-lock');
-  }, [isLoginMode]);
+    try {
+      const html = document.documentElement;
+      const body = document.body;
+      
+      if (isLoginMode) {
+        // Login mode: enable pull-to-refresh and block scroll via listeners (no global CSS class)
+        
+        let startY = 0;
+        let triggered = false;
+        let lastReload = 0;
+        let isInputFocused = false;
+
+        const onFocusIn = (e: FocusEvent) => {
+          if (e.target && (e.target as HTMLElement).tagName === 'INPUT') {
+            isInputFocused = true;
+          }
+        };
+
+        const onFocusOut = (e: FocusEvent) => {
+          if (e.target && (e.target as HTMLElement).tagName === 'INPUT') {
+            isInputFocused = false;
+          }
+        };
+
+        const onTouchStart = (e: TouchEvent) => {
+          startY = e.touches?.[0]?.clientY ?? 0;
+          triggered = false;
+          setPullProgress(0);
+        };
+
+        const onTouchMove = (e: TouchEvent) => {
+          // Allow scroll when input is focused (keyboard is open)
+          if (isInputFocused) return;
+          
+          const y = e.touches?.[0]?.clientY ?? 0;
+          const dy = y - startY;
+          
+          // Calculate progress (0-1) based on drag distance
+          const maxDrag = 100;
+          const progress = Math.min(Math.max(dy / maxDrag, 0), 1);
+          setPullProgress(progress);
+          
+          // Block all vertical scroll when no input focused
+          e.preventDefault();
+          
+          // Pull-to-refresh
+          if (dy > 70 && !triggered) {
+            triggered = true;
+            const now = Date.now();
+            if (now - lastReload > 1500) {
+              lastReload = now;
+              setIsRefreshing(true);
+              setTimeout(() => {
+                window.location.reload();
+              }, 300);
+            }
+          }
+        };
+
+        const onTouchEnd = () => {
+          if (!isRefreshing) {
+            setPullProgress(0);
+          }
+        };
+
+        const onWheel = (e: WheelEvent) => {
+          if (!isInputFocused) {
+            e.preventDefault();
+          }
+        };
+
+        const onScroll = () => {
+          if (!isInputFocused && window.scrollY !== 0) {
+            window.scrollTo(0, 0);
+          }
+        };
+
+        document.addEventListener('focusin', onFocusIn);
+        document.addEventListener('focusout', onFocusOut);
+        window.addEventListener('touchstart', onTouchStart, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', onTouchEnd, { passive: true });
+        window.addEventListener('wheel', onWheel, { passive: false });
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        return () => {
+          document.removeEventListener('focusin', onFocusIn);
+          document.removeEventListener('focusout', onFocusOut);
+          window.removeEventListener('touchstart', onTouchStart as any);
+          window.removeEventListener('touchmove', onTouchMove as any);
+          window.removeEventListener('touchend', onTouchEnd as any);
+          window.removeEventListener('wheel', onWheel as any);
+          window.removeEventListener('scroll', onScroll as any);
+        };
+      } else {
+        // Register mode: Allow scroll (no global class toggles)
+      }
+    } catch (scrollError) {
+      console.warn('Failed to handle scroll lock:', scrollError);
+    }
+  }, [isLoginMode, isRefreshing]);
 
   useEffect(() => {
     const handleAuthFlow = async () => {

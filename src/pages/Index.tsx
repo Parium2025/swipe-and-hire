@@ -49,7 +49,6 @@ import MyCandidates from '@/pages/MyCandidates';
 import Messages from '@/pages/Messages';
 import JobSeekerMessages from '@/pages/JobSeekerMessages';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
-import { showAuthSplash } from '@/lib/authSplashEvents';
 
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -335,15 +334,6 @@ const Index = () => {
     };
   }, []);
 
-  // If the user loses session while inside the app, show the branded shell BEFORE redirecting to /auth.
-  useEffect(() => {
-    if (loading) return;
-    if (!user) {
-      showAuthSplash();
-      requestAnimationFrame(() => navigate('/auth', { replace: true }));
-    }
-  }, [loading, user, navigate]);
-
   if ((loading && !user) || (authAction === 'logout' && loading)) {
     return (
       <div className="min-h-screen bg-gradient-parium flex items-center justify-center animate-fade-in">
@@ -359,8 +349,7 @@ const Index = () => {
 
   // Om ingen användare: redirecta omedelbart till /auth (säkerhetsnät för mobil)
   if (!user) {
-    // Keep a stable background while the splash + navigation takes over
-    return <div className="min-h-screen bg-gradient-parium" aria-hidden="true" />;
+    return <Navigate to="/auth" replace />;
   }
 
   // Vänta på profil men visa bakgrund

@@ -10,7 +10,6 @@ import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
-import { showAuthSplash } from '@/lib/authSplashEvents';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -1094,9 +1093,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       setAuthAction('logout');
-
-      // Show auth logo overlay immediately (covers the intentional sign-out delays)
-      showAuthSplash();
       
       // Markera att detta är en manuell utloggning
       isManualSignOutRef.current = true;
