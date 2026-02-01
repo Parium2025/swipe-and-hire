@@ -6,12 +6,16 @@ import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
+import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
   try {
+    const isDataUri = typeof src === 'string' && src.startsWith('data:');
+
     // Add a preload hint (helps the browser start fetching earlier)
-    if (typeof document !== 'undefined' && document.head) {
+    // Skip for data URIs to avoid bloating <head>.
+    if (!isDataUri && typeof document !== 'undefined' && document.head) {
       const existing = document.querySelector(`link[data-preload-logo="${id}"]`) as HTMLLinkElement | null;
       if (!existing) {
         const link = document.createElement('link');
@@ -34,10 +38,6 @@ const preloadAndDecodeImage = async (src: string, id: string) => {
     // Never block app start for a preload
   }
 };
-
-// Fire-and-forget: ensures nav logo is instantly ready on page load/navigation
-// Note: Auth logo is now inline SVG - no preload needed
-void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
 
 // Initialize Sentry for error tracking in production
 if (import.meta.env.PROD) {
@@ -96,8 +96,22 @@ function redirectAuthTokensIfNeeded() {
   return false;
 }
 
-const redirected = redirectAuthTokensIfNeeded();
-if (!redirected) {
+async function bootstrap() {
+  const redirected = redirectAuthTokensIfNeeded();
+  if (redirected) return;
+
+  // Critical: on /auth we block briefly until the logo is decoded,
+  // so the first paint can include it without any flash.
+  const isAuthRoute = typeof window !== 'undefined' && window.location.pathname === '/auth';
+  if (isAuthRoute) {
+    await preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
+  } else {
+    void preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
+  }
+
+  // Nav logo can remain fire-and-forget.
+  void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
+
   // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
   if (import.meta.env.PROD) {
     registerServiceWorker().catch(() => {
@@ -105,11 +119,13 @@ if (!redirected) {
     });
   }
 
-  const root = createRoot(document.getElementById("root")!);
+  const root = createRoot(document.getElementById('root')!);
   root.render(
     <GlobalErrorBoundary>
       <App />
     </GlobalErrorBoundary>
   );
 }
+
+void bootstrap();
 
