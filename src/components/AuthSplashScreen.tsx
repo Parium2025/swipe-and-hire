@@ -1,8 +1,8 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { useLocation } from 'react-router-dom';
 import { authSplashEvents } from '@/lib/authSplashEvents';
-import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
 import { useDevice } from '@/hooks/use-device';
+import { AuthLogoInline } from '@/assets/authLogoInline';
+import { cn } from '@/lib/utils';
 
 // Minsta visningstid för att garantera att loggan hinner laddas och avkodas
 const MINIMUM_DISPLAY_MS = 4000;
@@ -14,7 +14,6 @@ const MINIMUM_DISPLAY_MS = 4000;
  * fade-out landar pixel-perfekt på den riktiga loggan.
  */
 export function AuthSplashScreen() {
-  const location = useLocation();
   const device = useDevice();
   
   // Prenumerera på splash-events
@@ -60,13 +59,16 @@ export function AuthSplashScreen() {
   
   if (!isVisible) return null;
   
-  // Beräkna storlek baserat på device för att matcha auth-sidans logo
-  // Desktop: h-56 (224px), lg: h-64 (256px)
-  // Mobile: h-40 (160px) * scale-125 = 200px
+  // Matcha EXAKT samma constraints som AuthDesktop/AuthMobile för att undvika
+  // att loggan blir större än 90vw (det som orsakar "gigantisk" logo-flash).
   const isMobile = device === 'mobile';
   const isLargeDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
-  
-  const logoHeight = isMobile ? 200 : (isLargeDesktop ? 256 : 224);
+  const logoClassName = cn(
+    'pointer-events-none select-none transform-gpu',
+    isMobile
+      ? 'relative h-40 w-[min(400px,90vw)] scale-125'
+      : 'relative h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)]'
+  );
   
   // Padding-top matchar auth-sidans layout
   // Desktop: py-8 (32px) + lite centrering i 260px container ≈ 50px
@@ -95,20 +97,8 @@ export function AuthSplashScreen() {
         willChange: 'opacity',
       }}
     >
-      {/* Parium Logo - exakt samma höjd som AuthLogoInline */}
-      <img
-        src={authLogoDataUri}
-        alt="Parium"
-        className="select-none pointer-events-none"
-        style={{ 
-          height: `${logoHeight}px`,
-          width: 'auto',
-          transform: 'translateZ(0)',
-        }}
-        decoding="sync"
-        loading="eager"
-        fetchPriority="high"
-      />
+      {/* Parium Logo - renderas med EXAKT samma layout som auth-sidan */}
+      <AuthLogoInline className={logoClassName} />
       
       {/* Tagline - matchar auth-sidans h1 */}
       <p 
