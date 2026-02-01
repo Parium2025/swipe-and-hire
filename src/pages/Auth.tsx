@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { authSplashEvents } from '@/lib/authSplashEvents';
 
 // Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
 // Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
@@ -75,6 +76,17 @@ const Auth = () => {
   // Read initial state from navigation (from Landing page)
   const initialMode = (location.state as any)?.mode;
   const initialRole = (location.state as any)?.role;
+
+  // Signal splash to hide once Auth is ready to paint
+  useEffect(() => {
+    // Small delay to ensure first paint is complete
+    const timer = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        authSplashEvents.ready();
+      });
+    });
+    return () => cancelAnimationFrame(timer);
+  }, []);
 
   // Smart scroll-locking: Lock only for login on MOBILE devices, allow scroll on desktop
   useEffect(() => {
