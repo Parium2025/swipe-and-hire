@@ -1,10 +1,10 @@
 /**
  * Parium auth logo component.
- * Uses an ES6 import which Vite bundles directly into the JS.
- * This eliminates the network waterfall issue by having the image
- * available immediately when the component mounts.
+ * Uses Vite's `?inline` to force the PNG to be inlined as a data URI.
+ * This keeps the logo pixel-perfect (identical to the original PNG)
+ * while eliminating any network request/flicker on first paint.
  */
-import authLogo from './parium-auth-logo.png';
+import authLogoDataUri from './parium-auth-logo.png?inline';
 
 interface AuthLogoProps {
   className?: string;
@@ -13,7 +13,7 @@ interface AuthLogoProps {
 export function AuthLogoInline({ className }: AuthLogoProps) {
   return (
     <img
-      src={authLogo}
+      src={authLogoDataUri}
       alt="Parium"
       className={className}
       loading="eager"
