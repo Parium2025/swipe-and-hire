@@ -573,7 +573,12 @@ const AuthDesktop = ({
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
-                <AuthLogoInline className="relative h-56 w-auto lg:h-64" />
+                 {/*
+                   IMPORTANT: Give the logo an explicit width.
+                   Background images have no intrinsic width; without this, `w-fit`
+                   wrappers can collapse and the logo can disappear.
+                 */}
+                 <AuthLogoInline className="relative h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)]" />
               </div>
             </div>
             

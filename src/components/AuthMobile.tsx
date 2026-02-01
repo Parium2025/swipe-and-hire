@@ -648,7 +648,13 @@ const AuthMobile = ({
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
-                <AuthLogoInline className="relative h-40 w-auto scale-125" />
+                {/*
+                  IMPORTANT: The logo MUST have an explicit width.
+                  Background images have no intrinsic width, and the surrounding
+                  `w-fit` container can collapse to 0 on mobile otherwise.
+                  This mirrors the Home logo structure (fixed box + backgroundImage).
+                */}
+                <AuthLogoInline className="relative h-40 w-[min(400px,90vw)] scale-125" />
               </div>
             </div>
             
