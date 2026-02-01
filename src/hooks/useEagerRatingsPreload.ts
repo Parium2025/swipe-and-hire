@@ -67,9 +67,10 @@ export const triggerBackgroundSync = async () => {
  * - Intervju-snapshots
  * - Jobbmallar-snapshots
  */
-export const clearAllAppCaches = () => {
-  console.log('🗑️ Clearing all app caches on logout...');
-  
+/**
+ * Internal sync implementation of cache clearing
+ */
+const clearAllAppCachesSync = () => {
   const prefixesToClear = [
     RATINGS_CACHE_PREFIX,
     STAGE_SETTINGS_CACHE_KEY,
@@ -102,6 +103,34 @@ export const clearAllAppCaches = () => {
     console.log('✅ All app caches cleared');
   } catch (error) {
     console.warn('⚠️ Failed to clear some app caches:', error);
+  }
+};
+
+/**
+ * 🗑️ RENSA ALL APP-CACHE
+ * 
+ * Anropas vid logout för att garantera att ingen gammal data
+ * visas vid nästa inloggning.
+ * 
+ * PERFORMANCE: På /auth-rutten körs detta asynkront via requestIdleCallback
+ * för att inte blockera main thread och orsaka 6-7s lag på mobil.
+ */
+export const clearAllAppCaches = () => {
+  console.log('🗑️ Clearing all app caches on logout...');
+  
+  // On /auth route, defer entirely to avoid blocking touch responsiveness
+  const isAuthRoute = typeof window !== 'undefined' && window.location.pathname === '/auth';
+  
+  if (isAuthRoute) {
+    // Use idle callback for maximum deferral on mobile
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(() => clearAllAppCachesSync(), { timeout: 3000 });
+    } else {
+      setTimeout(clearAllAppCachesSync, 100);
+    }
+  } else {
+    // On other pages, run immediately (they're already responsive)
+    clearAllAppCachesSync();
   }
 };
 
