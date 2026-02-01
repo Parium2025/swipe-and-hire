@@ -135,6 +135,48 @@
     <div id="app-bg" aria-hidden="true"></div>
     <!-- Hidden hero preloader for Safari/iOS -->
     <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
+
+    <!--
+      🔥 AUTH SPLASH: Instant logo visible BEFORE React hydrates (desktop only).
+      Hidden on mobile (handled by AuthMobile). Auto-hidden when React mounts via #root:not(:empty).
+    -->
+    <div id="auth-splash" aria-hidden="true" style="
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      background: linear-gradient(135deg, hsl(215 100% 10%) 0%, hsl(215 100% 6%) 100%);
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    ">
+      <img
+        src="/lovable-uploads/parium-logo-transparent.png"
+        alt="Parium"
+        decoding="sync"
+        fetchpriority="high"
+        width="560"
+        height="224"
+        style="max-width: 90vw; height: auto; object-fit: contain;"
+      />
+    </div>
+    <style>
+      /* Show auth splash only on /auth route (desktop) until React populates #root */
+      @media (min-width: 768px) {
+        body.route-auth #auth-splash { display: flex; }
+        body.route-auth #root:not(:empty) ~ #auth-splash,
+        body.route-auth #auth-splash.hidden { display: none !important; }
+      }
+    </style>
+    <script>
+      // Detect /auth route and add body class BEFORE paint
+      (function() {
+        if (location.pathname === '/auth' || location.pathname.startsWith('/auth?') || location.pathname.startsWith('/auth#')) {
+          document.body.classList.add('route-auth');
+        }
+      })();
+    </script>
+
     <div id="root"></div>
     <script>
       try {
