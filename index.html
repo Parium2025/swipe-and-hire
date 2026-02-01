@@ -49,6 +49,14 @@
   <meta property="og:description" content="Parium">
   <meta name="twitter:description" content="Parium">
   <link rel="icon" type="image/png" href="/favicon-v3.png?v=3">
+  <script>
+    // Detect /auth route and add class to <html> BEFORE first paint (runs in <head>)
+    (function() {
+      if (location.pathname === '/auth' || location.pathname.startsWith('/auth?') || location.pathname.startsWith('/auth#')) {
+        document.documentElement.classList.add('route-auth');
+      }
+    })();
+  </script>
 <style>
     /* 🚀 CSS CONTAINMENT: Isolate repaints for better performance */
     #root { 
@@ -138,81 +146,99 @@
     <!-- Hidden hero preloader for Safari/iOS -->
     <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
 
+    <div id="root"></div>
+
     <!--
       🔥 AUTH SPLASH: Instant logo visible BEFORE React hydrates (desktop only).
-      Hidden on mobile (handled by AuthMobile). Auto-hidden when React mounts via #root:not(:empty).
+      MUST be AFTER #root so the CSS sibling selector (#root:not(:empty) + #auth-splash) works.
+      Hidden on mobile (handled by AuthMobile). Auto-hidden when React populates #root.
       CRITICAL: Must match EXACT same image and sizing as AuthDesktop.tsx AuthLogoInline!
     -->
-    <div id="auth-splash" aria-hidden="true" style="
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 9998;
-      background: linear-gradient(135deg, hsl(215 100% 10%) 0%, hsl(215 100% 6%) 100%);
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      padding-top: 2rem;
-    ">
-      <!-- Container matching AuthDesktop layout: max-w-2xl mx-auto, text-center mb-4, height 260px -->
-      <div style="
+    <div id="auth-splash" aria-hidden="true">
+      <div class="auth-splash-inner">
+        <div class="auth-splash-logo-container">
+          <!-- Glow effects behind logo (same as AuthDesktop) -->
+          <div class="auth-splash-glow auth-splash-glow-1"></div>
+          <div class="auth-splash-glow auth-splash-glow-2"></div>
+          <div class="auth-splash-glow auth-splash-glow-3"></div>
+          <div class="auth-splash-glow auth-splash-glow-4"></div>
+          <!-- Logo: matches AuthDesktop h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)] -->
+          <img
+            src="/parium-auth-logo.png"
+            alt="Parium"
+            decoding="sync"
+            fetchpriority="high"
+            class="auth-splash-logo"
+          />
+        </div>
+      </div>
+    </div>
+    <style>
+      /* Auth splash - hidden by default, shown only on /auth desktop route */
+      #auth-splash {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9998;
+        background: linear-gradient(135deg, hsl(215 100% 10%) 0%, hsl(215 100% 6%) 100%);
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        padding-top: 2rem;
+      }
+      .auth-splash-inner {
         display: flex;
         flex-direction: column;
         align-items: center;
         width: 100%;
         max-width: 42rem;
         text-align: center;
-      ">
-        <div style="height: 260px; display: flex; align-items: center; justify-content: center; position: relative;">
-          <!-- Glow effects behind logo (same as AuthDesktop) -->
-          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transform: translateY(-0.5rem);">
-            <div style="width: 18rem; height: 13rem; background: hsla(200, 100%, 60%, 0.25); border-radius: 9999px; filter: blur(40px);"></div>
-          </div>
-          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transform: translateY(-0.5rem);">
-            <div style="width: 13rem; height: 9rem; background: hsla(200, 100%, 60%, 0.22); border-radius: 9999px; filter: blur(35px);"></div>
-          </div>
-          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transform: translateY(-0.5rem);">
-            <div style="width: 11rem; height: 7rem; background: hsla(200, 100%, 60%, 0.20); border-radius: 9999px; filter: blur(30px);"></div>
-          </div>
-          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transform: translateY(-0.5rem);">
-            <div style="width: 9rem; height: 5rem; background: hsla(200, 100%, 60%, 0.18); border-radius: 9999px; filter: blur(25px);"></div>
-          </div>
-          <!-- Logo: h-56 = 224px, w-[min(35rem,90vw)] = min(560px, 90vw) -->
-          <img
-            src="/parium-auth-logo.png"
-            alt="Parium"
-            decoding="sync"
-            fetchpriority="high"
-            style="
-              position: relative;
-              z-index: 10;
-              height: 224px;
-              width: min(560px, 90vw);
-              object-fit: contain;
-              pointer-events: none;
-            "
-          />
-        </div>
-      </div>
-    </div>
-    <style>
-      /* Show auth splash only on /auth route (desktop) until React populates #root */
+      }
+      .auth-splash-logo-container {
+        height: 260px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .auth-splash-glow {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translateY(-0.5rem);
+      }
+      .auth-splash-glow::before {
+        content: '';
+        border-radius: 9999px;
+      }
+      .auth-splash-glow-1::before { width: 18rem; height: 13rem; background: hsla(200, 100%, 60%, 0.25); filter: blur(40px); }
+      .auth-splash-glow-2::before { width: 13rem; height: 9rem; background: hsla(200, 100%, 60%, 0.22); filter: blur(35px); }
+      .auth-splash-glow-3::before { width: 11rem; height: 7rem; background: hsla(200, 100%, 60%, 0.20); filter: blur(30px); }
+      .auth-splash-glow-4::before { width: 9rem; height: 5rem; background: hsla(200, 100%, 60%, 0.18); filter: blur(25px); }
+      .auth-splash-logo {
+        position: relative;
+        z-index: 10;
+        height: 224px;
+        width: min(560px, 90vw);
+        object-fit: contain;
+        pointer-events: none;
+      }
+      /* lg breakpoint (1024px+): match AuthDesktop lg:h-64 lg:w-[min(40rem,90vw)] */
+      @media (min-width: 1024px) {
+        .auth-splash-logo {
+          height: 256px;
+          width: min(640px, 90vw);
+        }
+      }
+      /* Show auth splash ONLY on /auth route, desktop (768px+), until React populates #root */
       @media (min-width: 768px) {
-        body.route-auth #auth-splash { display: flex; }
-        body.route-auth #root:not(:empty) ~ #auth-splash,
-        body.route-auth #auth-splash.hidden { display: none !important; }
+        html.route-auth #auth-splash { display: flex; }
+        /* Hide splash when #root has content (React mounted) - sibling selector works because splash is after root */
+        html.route-auth #root:not(:empty) + #auth-splash { display: none !important; }
       }
     </style>
-    <script>
-      // Detect /auth route and add body class BEFORE paint
-      (function() {
-        if (location.pathname === '/auth' || location.pathname.startsWith('/auth?') || location.pathname.startsWith('/auth#')) {
-          document.body.classList.add('route-auth');
-        }
-      })();
-    </script>
-
-    <div id="root"></div>
     <script>
       try {
         const meta = document.querySelector('meta[name="build-version"]');
