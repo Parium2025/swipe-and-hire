@@ -5,7 +5,7 @@ import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
-import pariumLogoRings from './assets/parium-logo-rings.png'
+import pariumLogoRingsDataUri from './assets/parium-logo-rings.png?inline'
 import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
 // Desktop /auth: if the pre-React splash image ever races the network,
@@ -136,7 +136,7 @@ async function bootstrap() {
   }
 
   // Nav logo can remain fire-and-forget.
-  void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
+  void preloadAndDecodeImage(pariumLogoRingsDataUri, 'nav-logo');
 
   // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
   if (import.meta.env.PROD) {

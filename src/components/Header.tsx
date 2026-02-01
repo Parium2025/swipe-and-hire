@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import pariumLogoRings from "@/assets/parium-logo-rings.png";
+import { PariumLogoRingsInline } from "@/assets/pariumLogoRingsInline";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -13,14 +13,11 @@ export const Header = () => {
           variant="ghost"
           className="flex items-center gap-3 p-2 hover:bg-accent/50 rounded-lg transition-colors"
         >
-          <img 
-            src={pariumLogoRings}
-            alt="Parium" 
+          <PariumLogoRingsInline
+            alt="Parium"
+            width={128}
+            height={32}
             className="h-8 w-auto"
-            width="128"
-            height="32"
-            loading="eager"
-            decoding="sync"
           />
         </Button>
         
