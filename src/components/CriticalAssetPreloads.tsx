@@ -1,14 +1,13 @@
 import pariumLogoRings from "@/assets/parium-logo-rings.png";
 import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
-// Same asset used by the hard-refresh auth splash in index.html + LandingNav
-import pariumWordmarkPng from "/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png";
 
 /**
  * Keeps critical UI assets warm in the browser cache/decoder so route changes
  * and auth transitions (logout -> /auth splash) don't cause visible logo pop-in.
  *
- * Uses BOTH an <img> element (forces download + decode) AND a div with
- * backgroundImage (keeps texture warm in GPU/compositor).
+ * Note: The auth-splash in index.html now uses an INLINE SVG, so no network
+ * preload is needed for that. We still keep the React-side auth logo (data-URI)
+ * warm for AuthSplashScreen.tsx which takes over after React mounts.
  */
 export function CriticalAssetPreloads() {
   return (
@@ -33,29 +32,9 @@ export function CriticalAssetPreloads() {
         }}
       />
 
-      {/* Hidden img to keep auth logo decoded in memory (prevents logout splash delay) */}
+      {/* Hidden img to keep auth logo (data-URI) decoded for AuthSplashScreen */}
       <img
         src={authLogoDataUri}
-        alt=""
-        aria-hidden="true"
-        loading="eager"
-        decoding="sync"
-        fetchPriority="high"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: 1,
-          height: 1,
-          opacity: 0,
-          pointerEvents: "none",
-          zIndex: -1,
-        }}
-      />
-
-      {/* Hidden img to warm the wordmark used by index.html auth-splash (hard reload) */}
-      <img
-        src={pariumWordmarkPng}
         alt=""
         aria-hidden="true"
         loading="eager"
