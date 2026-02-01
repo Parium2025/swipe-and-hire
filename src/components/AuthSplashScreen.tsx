@@ -75,60 +75,70 @@ export function AuthSplashScreen() {
         ${isFadingOut ? 'opacity-0' : 'opacity-100'}
       `}
       style={{
-        // Exakt samma gradient som auth-sidan
-        background: 'linear-gradient(135deg, hsl(210, 100%, 25%) 0%, hsl(210, 100%, 15%) 100%)',
+        // EXAKT samma bakgrund som auth-sidan
+        background: 'hsl(215, 100%, 12%)',
+        // GPU acceleration
+        transform: 'translateZ(0)',
+        willChange: 'opacity',
       }}
     >
-      {/* Parium Logo - STOR som i referensbilden (240px bred) */}
+      {/* Parium Logo - 240px bred, nära tagline */}
       <img
         src={authLogoDataUri}
         alt="Parium"
-        className="w-[240px] h-auto mb-4 select-none pointer-events-none"
+        className="w-[240px] h-auto mb-2 select-none pointer-events-none"
+        style={{ transform: 'translateZ(0)' }}
         decoding="sync"
         loading="eager"
         fetchPriority="high"
       />
       
-      {/* Tagline - tätt under loggan som i referensbilden */}
-      <p className="text-white text-xl font-medium tracking-wide mb-12">
+      {/* Tagline - tätt under loggan */}
+      <p className="text-white text-xl font-medium tracking-wide mb-10">
         Din karriärresa börjar här
       </p>
       
-      {/* Pulserande prickar - exakt som i referensbilden */}
-      <div className="flex items-center gap-3">
+      {/* Pulserande prickar - GPU-accelererade */}
+      <div className="flex items-center gap-2.5">
         <span 
-          className="w-3 h-3 rounded-full bg-white/70"
+          className="w-2.5 h-2.5 rounded-full bg-white/60"
           style={{
-            animation: 'authSplashPulse 2.5s ease-in-out infinite',
+            animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             animationDelay: '0s',
+            transform: 'translateZ(0)',
+            willChange: 'opacity, transform',
           }}
         />
         <span 
-          className="w-3 h-3 rounded-full bg-white/70"
+          className="w-2.5 h-2.5 rounded-full bg-white/60"
           style={{
-            animation: 'authSplashPulse 2.5s ease-in-out infinite',
+            animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             animationDelay: '0.4s',
+            transform: 'translateZ(0)',
+            willChange: 'opacity, transform',
           }}
         />
         <span 
-          className="w-3 h-3 rounded-full bg-white/70"
+          className="w-2.5 h-2.5 rounded-full bg-white/60"
           style={{
-            animation: 'authSplashPulse 2.5s ease-in-out infinite',
+            animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             animationDelay: '0.8s',
+            transform: 'translateZ(0)',
+            willChange: 'opacity, transform',
           }}
         />
       </div>
       
-      {/* CSS för pulsanimation - långsam och premium */}
+      {/* CSS för mjuk pulsanimation */}
       <style>{`
         @keyframes authSplashPulse {
           0%, 100% {
-            opacity: 0.5;
-            transform: scale(1);
+            opacity: 0.4;
+            transform: translateZ(0) scale(1);
           }
           50% {
             opacity: 1;
-            transform: scale(1.2);
+            transform: translateZ(0) scale(1.15);
           }
         }
       `}</style>
