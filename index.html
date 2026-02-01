@@ -186,12 +186,13 @@
     <!-- AUTH SPLASH SCREEN - Only shown on /auth hard refresh -->
     <div id="auth-splash" aria-label="Laddar Parium">
       <!-- 🔥 INLINE SVG LOGO - Zero network requests, always available -->
-      <svg id="auth-splash-logo" viewBox="0 0 540 216" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Parium">
-        <!-- Two interlocking rings -->
-        <circle cx="95" cy="108" r="50" stroke="#4BA3E3" stroke-width="12" fill="none"/>
-        <circle cx="145" cy="108" r="50" stroke="#4BA3E3" stroke-width="12" fill="none"/>
-        <!-- PARIUM text -->
-        <text x="215" y="128" fill="white" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="72" font-weight="600" letter-spacing="-0.02em">Parium</text>
+      <!-- Matches AuthLogoInline exactly: aspect ratio 2.5 (1080x432), interlocking rings + "Parium" text -->
+      <svg id="auth-splash-logo" viewBox="0 0 270 108" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Parium">
+        <!-- Two interlocking rings (overlapping more like the real logo) -->
+        <circle cx="32" cy="54" r="24" stroke="#4BA3E3" stroke-width="5" fill="none"/>
+        <circle cx="52" cy="54" r="24" stroke="#4BA3E3" stroke-width="5" fill="none"/>
+        <!-- PARIUM text - positioned to match the PNG -->
+        <text x="88" y="66" fill="white" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="38" font-weight="600" letter-spacing="-0.02em">Parium</text>
       </svg>
       <p id="auth-splash-tagline">Din karriärresa börjar här</p>
       <div id="auth-splash-dots">
