@@ -95,30 +95,15 @@ const AuthTablet = ({
   const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [employeeMenuOpen, setEmployeeMenuOpen] = useState(false);
-  const formScrollRef = useRef<HTMLDivElement>(null);
-  const loginScrollTopRef = useRef(0);
-  const signupScrollTopRef = useRef(0);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Keep parent (/auth) in sync with the actual active tab.
-  // This prevents global login-only scroll locking from sticking when user is on signup.
-  useEffect(() => {
-    onAuthModeChange?.(isLogin);
-  }, [isLogin, onAuthModeChange]);
-
   // Handle scroll-lock directly for instant response
   const handleTabChange = (value: string) => {
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return;
-
-    // Save scroll position INSIDE the card.
-    const scroller = formScrollRef.current;
-    if (scroller) {
-      (isLogin ? loginScrollTopRef : signupScrollTopRef).current = scroller.scrollTop;
-    }
 
     // No global class toggling to avoid iOS reflow jank
 
@@ -126,13 +111,6 @@ const AuthTablet = ({
     setIsLogin(newIsLogin);
     setHasRegistered(false);
     setShowResend(false);
-
-    // Restore scroll position for the newly active tab.
-    requestAnimationFrame(() => {
-      const nextScroller = formScrollRef.current;
-      if (!nextScroller) return;
-      nextScroller.scrollTop = newIsLogin ? loginScrollTopRef.current : signupScrollTopRef.current;
-    });
 
     const deferClear = () => startTransition(() => clearFormData());
     if (typeof (window as any).requestIdleCallback === 'function') {
