@@ -100,9 +100,10 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      /* Positionera loggan där auth-sidans logga sitter (nära toppen) */
+      /* Positionera loggan EXAKT där auth-sidans logga sitter */
       justify-content: flex-start;
-      padding-top: calc(env(safe-area-inset-top, 0px) + 100px);
+      /* Auth-sidan: safe-area + pt-6(24px) + min-h-200px container center = ~124px + halva loggan */
+      padding-top: calc(env(safe-area-inset-top, 0px) + 24px + 76px);
       background: hsl(215, 100%, 12%);
       opacity: 1;
       transition: opacity 0.5s ease-out;
@@ -114,17 +115,19 @@
       pointer-events: none;
     }
     #auth-splash-logo {
-      width: 280px;
+      /* Matchar AuthLogoInline: h-40 (160px) * scale-125 = 200px */
+      width: 350px;
       height: auto;
-      margin-bottom: -16px;
+      margin-bottom: -24px;
       transform: translateZ(0);
     }
     #auth-splash-tagline {
       color: white;
       font-size: 1.5rem;
       font-weight: 600;
-      letter-spacing: -0.01em;
-      margin-bottom: 40px;
+      letter-spacing: -0.025em;
+      margin-bottom: 48px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
     #auth-splash-dots {

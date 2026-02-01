@@ -77,24 +77,25 @@ export function AuthSplashScreen() {
       style={{
         background: 'hsl(215, 100%, 12%)',
         justifyContent: 'flex-start',
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 100px)',
+        // Matchar auth-sidans layout: safe-area + pt-6(24px) + center av 200px container
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 24px + 76px)',
         transform: 'translateZ(0)',
         willChange: 'opacity',
       }}
     >
-      {/* Parium Logo - matchar auth-sidans storlek */}
+      {/* Parium Logo - matchar AuthLogoInline storlek: h-40 * scale-125 */}
       <img
         src={authLogoDataUri}
         alt="Parium"
-        className="w-[280px] h-auto select-none pointer-events-none"
-        style={{ transform: 'translateZ(0)', marginBottom: '-16px' }}
+        className="w-[350px] h-auto select-none pointer-events-none"
+        style={{ transform: 'translateZ(0)', marginBottom: '-24px' }}
         decoding="sync"
         loading="eager"
         fetchPriority="high"
       />
       
-      {/* Tagline - text-2xl font-semibold för att matcha auth-sidan */}
-      <p className="text-white text-2xl font-semibold tracking-tight mb-10">
+      {/* Tagline - matchar auth-sidans h1: text-2xl font-semibold + drop-shadow */}
+      <p className="text-white text-2xl font-semibold tracking-tight mb-12 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
         Din karriärresa börjar här
       </p>
       
