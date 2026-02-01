@@ -100,7 +100,9 @@
       display: none; /* Hidden by default, shown via JS only on /auth */
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      /* Positionera loggan där auth-sidans logga sitter (~28% från toppen) */
+      justify-content: flex-start;
+      padding-top: max(28vh, 140px);
       /* EXAKT samma gradient som auth-sidan (hsl 215 100% 12%) */
       background: hsl(215, 100%, 12%);
       opacity: 1;
@@ -116,8 +118,8 @@
     #auth-splash-logo {
       width: 240px;
       height: auto;
-      /* Negativt avstånd för att krypa närmare tagline */
-      margin-bottom: -8px;
+      /* Negativt avstånd för att krypa tätt intill tagline */
+      margin-bottom: -12px;
       /* GPU-accelererad rendering */
       transform: translateZ(0);
     }
