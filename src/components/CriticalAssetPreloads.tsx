@@ -1,5 +1,8 @@
+import { useEffect } from "react";
 import pariumLogoRings from "@/assets/parium-logo-rings.png";
 import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
+
+const AUTH_LOGO_DATA_URI_KEY = "parium_auth_logo_data_uri_v1";
 
 /**
  * Keeps critical UI assets warm in the browser cache/decoder so route changes
@@ -10,6 +13,18 @@ import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
  * warm for AuthSplashScreen.tsx which takes over after React mounts.
  */
 export function CriticalAssetPreloads() {
+  // Persist a network-free version for the HTML auth splash shell on refresh.
+  // This makes the shell logo instantaneous even before React mounts.
+  useEffect(() => {
+    try {
+      if (typeof authLogoDataUri === "string" && authLogoDataUri.startsWith("data:image")) {
+        localStorage.setItem(AUTH_LOGO_DATA_URI_KEY, authLogoDataUri);
+      }
+    } catch {
+      // Ignore storage errors (private mode/quota/etc.)
+    }
+  }, []);
+
   return (
     <>
       {/* Hidden img element to keep navigation logo decoded in memory */}
