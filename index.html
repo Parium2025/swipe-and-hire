@@ -286,6 +286,18 @@
             }
             var splash = document.getElementById('auth-splash-shell');
             if (splash) {
+               // If we've already cached a data-URI version of the logo from a previous session,
+               // use it to make the shell logo 100% network-free on refresh.
+               try {
+                 var cachedLogo = localStorage.getItem('parium_auth_logo_data_uri_v1');
+                 if (cachedLogo && cachedLogo.indexOf('data:image') === 0) {
+                   var logoEl = document.getElementById('auth-splash-logo');
+                   if (logoEl) {
+                     logoEl.style.backgroundImage = 'url(' + cachedLogo + ')';
+                   }
+                 }
+               } catch (e) {}
+
               splash.style.display = 'flex';
               // Signal to React that HTML splash is showing
               window.__parium_html_auth_splash__ = true;
