@@ -212,14 +212,28 @@
           var path = window.location.pathname;
           if (path === '/auth' || path === '/auth/') {
             var splash = document.getElementById('auth-splash');
-            if (splash) {
-              // Display first, then trigger fade-in on next frame
+            var logo = document.getElementById('auth-splash-logo');
+            if (splash && logo) {
+              // Display container (invisible due to opacity: 0)
               splash.style.display = 'flex';
-              requestAnimationFrame(function() {
+              
+              // Function to trigger fade-in
+              function startFadeIn() {
                 requestAnimationFrame(function() {
                   splash.classList.add('fade-in');
                 });
-              });
+              }
+              
+              // Wait for logo to load, then fade in
+              if (logo.complete && logo.naturalHeight !== 0) {
+                // Already loaded (cached)
+                startFadeIn();
+              } else {
+                logo.onload = startFadeIn;
+                // Fallback if image fails
+                logo.onerror = startFadeIn;
+              }
+              
               // Fade out after 4 seconds
               setTimeout(function() {
                 splash.classList.remove('fade-in');
