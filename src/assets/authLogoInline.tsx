@@ -10,6 +10,7 @@
  *   (h-*, w-auto, scale-*). The aspect-ratio wrapper keeps intrinsic sizing.
  */
 
+import authLogoPng from "@/assets/parium-auth-logo.png";
 import { cn } from "@/lib/utils";
 
 interface AuthLogoProps {
@@ -18,10 +19,6 @@ interface AuthLogoProps {
 
 // Original PNG is 1080x432 (2.5 aspect ratio)
 const AUTH_LOGO_ASPECT = 1080 / 432;
-
-// Use the same URL everywhere (index.html shell + React) for perfectly identical caching.
-// This asset lives in /public so it is available immediately.
-const AUTH_LOGO_URL = "/lovable-uploads/parium-auth-logo.png";
 
 export function AuthLogoInline({ className }: AuthLogoProps) {
   return (
@@ -32,7 +29,9 @@ export function AuthLogoInline({ className }: AuthLogoProps) {
       )}
       style={{
         aspectRatio: String(AUTH_LOGO_ASPECT),
-        backgroundImage: `url(${AUTH_LOGO_URL})`,
+        // Same structure as the home-logo button: background-image + contain.
+        // Uses Vite-managed asset so it gets proper cache headers and fast decode.
+        backgroundImage: `url(${authLogoPng})`,
         willChange: "transform",
       }}
       data-auth-logo="true"
