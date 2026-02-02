@@ -15,6 +15,36 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+
+    <script>
+      // EARLY AUTH SHELL FLAG (runs in <head> so the shell can paint immediately)
+      (function () {
+        try {
+          var path = window.location.pathname;
+          if (path !== '/auth' && path !== '/auth/') return;
+
+          // Skip for recovery/reset flows
+          var search = window.location.search || '';
+          var hash = window.location.hash || '';
+          if (
+            search.indexOf('token') !== -1 ||
+            search.indexOf('token_hash') !== -1 ||
+            search.indexOf('reset=true') !== -1 ||
+            search.indexOf('type=recovery') !== -1 ||
+            hash.indexOf('token') !== -1 ||
+            hash.indexOf('token_hash') !== -1 ||
+            hash.indexOf('access_token') !== -1 ||
+            hash.indexOf('type=recovery') !== -1
+          ) {
+            return;
+          }
+
+          document.documentElement.setAttribute('data-parium-auth-splash', '1');
+          // Signal to React that HTML splash is showing
+          window.__parium_html_auth_splash__ = true;
+        } catch (e) {}
+      })();
+    </script>
     <!-- Google Fonts - Inter for premium typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -115,6 +145,11 @@
       opacity: 0;
       pointer-events: none;
     }
+
+     /* If we're on /auth, show instantly (no waiting for body scripts) */
+     html[data-parium-auth-splash="1"] #auth-splash-shell {
+       display: flex;
+     }
 
     /* Mirror AuthDesktop/AuthMobile layout */
     #auth-splash-shell .shell-inner {
@@ -298,21 +333,9 @@
             }
             var splash = document.getElementById('auth-splash-shell');
             if (splash) {
-               // If we've already cached a data-URI version of the logo from a previous session,
-               // use it to make the shell logo 100% network-free on refresh.
-               try {
-                 var cachedLogo = localStorage.getItem('parium_auth_logo_data_uri_v1');
-                 if (cachedLogo && cachedLogo.indexOf('data:image') === 0) {
-                   var logoEl = document.getElementById('auth-splash-logo');
-                   if (logoEl) {
-                     logoEl.style.backgroundImage = 'url(' + cachedLogo + ')';
-                   }
-                 }
-               } catch (e) {}
-
               splash.style.display = 'flex';
-              // Signal to React that HTML splash is showing
-              window.__parium_html_auth_splash__ = true;
+               // Signal to React that HTML splash is showing (redundant if head script ran)
+               window.__parium_html_auth_splash__ = true;
             }
           }
         } catch(e) {}
