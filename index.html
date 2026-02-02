@@ -125,7 +125,9 @@
       height: 224px;
       width: min(35rem, 90vw);
       aspect-ratio: 2.5;
-      background-size: contain;
+      /* IMPORTANT: SVG saknar samma transparenta padding som PNG-loggan.
+         Skala ner bakgrunden så den visuellt matchar AuthLogoInline (bild 2). */
+      background-size: 56% 56%;
       background-position: center;
       background-repeat: no-repeat;
       pointer-events: none;
@@ -222,6 +224,9 @@
             var splash = document.getElementById('auth-splash');
             if (splash) {
               splash.style.display = 'flex';
+              // Signal to React that this was a hard refresh on /auth so it can
+              // take over with the exact same AuthSplashScreen as the Login flow.
+              window.__parium_auth_hard_splash__ = true;
               // Fade out after 4 seconds
               setTimeout(function() {
                 splash.classList.add('fade-out');
