@@ -8,7 +8,7 @@ import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
 
 // Use the same URL everywhere (index.html shell + React) for identical caching.
-const AUTH_LOGO_URL = '/lovable-uploads/parium-auth-logo-transparent.png';
+const AUTH_LOGO_URL = '/lovable-uploads/parium-auth-logo.png';
 
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
