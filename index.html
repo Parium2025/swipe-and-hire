@@ -204,7 +204,7 @@
     #auth-splash-shell .glow-3 { width: 176px; height: 112px; border-radius: 9999px; filter: blur(30px); background: hsl(var(--primary-glow, 205 86% 64%) / 0.20); }
     #auth-splash-shell .glow-4 { width: 144px; height: 80px; border-radius: 9999px; filter: blur(25px); background: hsl(var(--primary-glow, 205 86% 64%) / 0.18); }
 
-    /* AuthLogoInline-equivalent sizing - INLINE SVG */
+    /* AuthLogoInline-equivalent sizing */
     #auth-splash-logo {
       pointer-events: none;
       user-select: none;
@@ -213,25 +213,25 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 80px;
-      width: min(32rem, 90vw);
+      height: 224px;
+      width: min(35rem, 90vw);
     }
-    #auth-splash-logo svg {
+    #auth-splash-logo img {
       height: 100%;
       width: auto;
       display: block;
     }
     @media (min-width: 1024px) {
       #auth-splash-logo {
-        height: 100px;
+        height: 256px;
         width: min(40rem, 90vw);
       }
     }
     @media (max-width: 640px) {
       #auth-splash-logo {
-        height: 56px;
-        width: min(320px, 90vw);
-        transform: translateZ(0) scale(1.4);
+        height: 160px;
+        width: min(400px, 90vw);
+        transform: translateZ(0) scale(1.25);
       }
     }
 
@@ -294,18 +294,13 @@
                 <div class="glow"><div class="glow-3"></div></div>
                 <div class="glow"><div class="glow-4"></div></div>
                 <div id="auth-splash-logo" role="img" aria-label="Parium">
-                  <!-- Inline SVG: 0 network requests, instant first-paint, transparent bg -->
-                  <!-- viewBox 840x140 = cropped to actual content bounds, ~6:1 aspect ratio -->
-                  <svg viewBox="0 0 840 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <!-- Left ring (behind) -->
-                    <circle cx="54" cy="70" r="46" stroke="#389AF6" stroke-width="16" fill="none"/>
-                    <!-- Right ring (full) -->
-                    <circle cx="108" cy="70" r="46" stroke="#389AF6" stroke-width="16" fill="none"/>
-                    <!-- Left ring front arc (overlap fix) -->
-                    <path d="M54 24 A46 46 0 0 1 100 70 A46 46 0 0 1 54 116" stroke="#389AF6" stroke-width="16" fill="none" stroke-linecap="round"/>
-                    <!-- "Parium" text as path - matches Inter Medium -->
-                    <text x="180" y="95" font-family="Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="72" font-weight="500" fill="white" letter-spacing="-1">Parium</text>
-                  </svg>
+                  <img
+                    src="/lovable-uploads/parium-auth-logo.png"
+                    alt="Parium"
+                    decoding="sync"
+                    fetchpriority="high"
+                    loading="eager"
+                  />
                 </div>
               </div>
             </div>
