@@ -27,7 +27,6 @@ export const authSplashEvents = {
   show() {
     if (currentlyVisible) return;
     currentlyVisible = true;
-
     listeners.forEach(l => l(true));
   },
 

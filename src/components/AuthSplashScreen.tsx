@@ -13,13 +13,6 @@ const MINIMUM_DISPLAY_MS = 2000;
  */
 export function AuthSplashScreen() {
   const device = useDevice();
-
-  const getIsLogoCached = () => {
-    if (typeof window === 'undefined') return false;
-    const img = new Image();
-    img.src = '/parium-auth-logo.png';
-    return img.complete && img.naturalHeight > 0;
-  };
   
   // Prenumerera på splash-events
   const isTriggered = useSyncExternalStore(
@@ -31,10 +24,7 @@ export function AuthSplashScreen() {
   const [isVisible, setIsVisible] = useState(false);
   const [isFadingIn, setIsFadingIn] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
-  const [dotsFading, setDotsFading] = useState(false);
-  
-  // If the logo is already cached, we can fade-in immediately (no onLoad wait)
-  const [imageLoaded, setImageLoaded] = useState(getIsLogoCached);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   useEffect(() => {
     if (!isTriggered) {
@@ -53,10 +43,7 @@ export function AuthSplashScreen() {
     setIsVisible(true);
     setIsFadingOut(false);
     setIsFadingIn(false);
-    setDotsFading(false);
-    // IMPORTANT: don't force this to false; it causes a visible delay on Landing -> /auth.
-    // If cached, this becomes true instantly and splash fades in right away.
-    setImageLoaded(getIsLogoCached());
+    setImageLoaded(false);
   }, [isTriggered, isVisible]);
   
   // Trigger fade-in when image is loaded
@@ -73,11 +60,6 @@ export function AuthSplashScreen() {
   useEffect(() => {
     if (!isTriggered || !isVisible) return;
     
-    // Fade dots 0.5s before splash fades
-    const dotsTimer = setTimeout(() => {
-      setDotsFading(true);
-    }, MINIMUM_DISPLAY_MS - 500);
-    
     const timer = setTimeout(() => {
       setIsFadingIn(false);
       setIsFadingOut(true);
@@ -85,15 +67,11 @@ export function AuthSplashScreen() {
       setTimeout(() => {
         setIsVisible(false);
         setIsFadingOut(false);
-        setDotsFading(false);
         authSplashEvents.hide();
       }, 500);
     }, MINIMUM_DISPLAY_MS);
     
-    return () => {
-      clearTimeout(dotsTimer);
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [isTriggered, isVisible]);
   
   if (!isVisible) return null;
@@ -169,15 +147,7 @@ export function AuthSplashScreen() {
       </p>
       
       {/* Pulserande prickar - exakt samma som index.html */}
-      <div 
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '10px',
-          opacity: dotsFading ? 0 : 1,
-          transition: 'opacity 0.4s ease-out',
-        }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <span 
           style={{
             width: '10px',
