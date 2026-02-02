@@ -107,10 +107,14 @@
       /* Desktop: py-8 (32px) + center av 260px container */
       padding-top: 50px;
       background: hsl(215, 100%, 12%);
-      opacity: 1;
-      transition: opacity 0.5s ease-out;
+      opacity: 0;
+      transition: opacity 0.4s ease-out;
       transform: translateZ(0);
       will-change: opacity;
+    }
+    /* Fade-in state */
+    #auth-splash.fade-in {
+      opacity: 1;
     }
     /* Mobile: safe-area + pt-6 (24px) */
     @media (max-width: 640px) {
@@ -209,9 +213,16 @@
           if (path === '/auth' || path === '/auth/') {
             var splash = document.getElementById('auth-splash');
             if (splash) {
+              // Display first, then trigger fade-in on next frame
               splash.style.display = 'flex';
+              requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                  splash.classList.add('fade-in');
+                });
+              });
               // Fade out after 4 seconds
               setTimeout(function() {
+                splash.classList.remove('fade-in');
                 splash.classList.add('fade-out');
                 // Remove from DOM after fade
                 setTimeout(function() {
