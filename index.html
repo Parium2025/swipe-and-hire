@@ -169,14 +169,17 @@
     #auth-splash-shell .glow-3 { width: 176px; height: 112px; border-radius: 9999px; filter: blur(30px); background: hsl(var(--primary-glow, 205 86% 64%) / 0.20); }
     #auth-splash-shell .glow-4 { width: 144px; height: 80px; border-radius: 9999px; filter: blur(25px); background: hsl(var(--primary-glow, 205 86% 64%) / 0.18); }
 
-    /* AuthLogoInline-equivalent sizing - use <img> for reliable preload */
+    /* AuthLogoInline-equivalent sizing - background-image for instant shell */
     #auth-splash-logo {
       pointer-events: none;
       user-select: none;
       transform: translateZ(0);
       will-change: transform;
       display: block;
-      object-fit: contain;
+      background-image: url('/lovable-uploads/parium-auth-logo.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
       height: 224px;
       width: min(35rem, 90vw);
     }
@@ -252,7 +255,7 @@
                 <div class="glow"><div class="glow-2"></div></div>
                 <div class="glow"><div class="glow-3"></div></div>
                 <div class="glow"><div class="glow-4"></div></div>
-                <img id="auth-splash-logo" src="/lovable-uploads/parium-auth-logo.png" alt="Parium" decoding="sync" fetchpriority="high" />
+                <div id="auth-splash-logo" role="img" aria-label="Parium"></div>
               </div>
             </div>
             <h1 id="auth-splash-tagline">Din karriärresa börjar här</h1>
