@@ -714,14 +714,13 @@ const Auth = () => {
   }
 
   // 🎯 Visa "Loggar in..."-sida när användaren är inloggad men media fortfarande laddas
-  if (user && loading) {
+  // OBS: Vid logout hanteras detta av AuthSplashScreen istället
+  if (user && loading && authAction !== 'logout') {
     return (
       <div className="min-h-screen bg-gradient-parium flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-white" />
-          <p className="text-white text-sm">
-            {authAction === 'logout' ? 'Loggar ut...' : 'Loggar in...'}
-          </p>
+          <p className="text-white text-sm">Loggar in...</p>
         </div>
       </div>
     );
