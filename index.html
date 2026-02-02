@@ -204,19 +204,22 @@
     #auth-splash-shell .glow-3 { width: 176px; height: 112px; border-radius: 9999px; filter: blur(30px); background: hsl(var(--primary-glow, 205 86% 64%) / 0.20); }
     #auth-splash-shell .glow-4 { width: 144px; height: 80px; border-radius: 9999px; filter: blur(25px); background: hsl(var(--primary-glow, 205 86% 64%) / 0.18); }
 
-    /* AuthLogoInline-equivalent sizing */
+    /* AuthLogoInline-equivalent sizing - INLINE SVG */
     #auth-splash-logo {
       pointer-events: none;
       user-select: none;
       transform: translateZ(0);
       will-change: transform;
-      display: block;
-      background-image: url('/lovable-uploads/parium-auth-logo.png');
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       height: 224px;
       width: min(35rem, 90vw);
+    }
+    #auth-splash-logo svg {
+      height: 100%;
+      width: auto;
+      display: block;
     }
     @media (min-width: 1024px) {
       #auth-splash-logo {
@@ -290,7 +293,29 @@
                 <div class="glow"><div class="glow-2"></div></div>
                 <div class="glow"><div class="glow-3"></div></div>
                 <div class="glow"><div class="glow-4"></div></div>
-                <div id="auth-splash-logo" role="img" aria-label="Parium"></div>
+                <div id="auth-splash-logo" role="img" aria-label="Parium">
+                  <!-- Inline SVG: 0 network requests, instant first-paint -->
+                  <!-- viewBox 1080x432 matches original PNG aspect ratio (2.5:1) -->
+                  <svg viewBox="0 0 1080 432" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <defs>
+                      <!-- Clip path to create the interlocking effect -->
+                      <clipPath id="leftRingClip">
+                        <rect x="0" y="0" width="234" height="432"/>
+                      </clipPath>
+                      <clipPath id="rightRingFront">
+                        <rect x="234" y="0" width="846" height="432"/>
+                      </clipPath>
+                    </defs>
+                    <!-- Left ring (full circle, behind) -->
+                    <circle cx="162" cy="216" r="90" stroke="#4BA3E3" stroke-width="18" fill="none"/>
+                    <!-- Right ring (full circle) -->
+                    <circle cx="270" cy="216" r="90" stroke="#4BA3E3" stroke-width="18" fill="none"/>
+                    <!-- Redraw front arc of left ring to create interlock -->
+                    <path d="M216 135 A90 90 0 0 1 216 297" stroke="#4BA3E3" stroke-width="18" fill="none" stroke-linecap="round"/>
+                    <!-- "Parium" text -->
+                    <text x="400" y="248" font-family="Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="120" font-weight="500" fill="white" letter-spacing="-1.5">Parium</text>
+                  </svg>
+                </div>
               </div>
             </div>
             <h1 id="auth-splash-tagline">Din karriärresa börjar här</h1>
