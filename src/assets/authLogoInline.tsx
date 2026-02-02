@@ -11,7 +11,6 @@
  */
 
 import { cn } from "@/lib/utils";
-import authLogoDataUri from "./parium-auth-logo.png?inline";
 
 interface AuthLogoProps {
   className?: string;
@@ -19,6 +18,10 @@ interface AuthLogoProps {
 
 // Original PNG is 1080x432 (2.5 aspect ratio)
 const AUTH_LOGO_ASPECT = 1080 / 432;
+
+// Use the same URL everywhere (index.html shell + React) for perfectly identical caching.
+// This asset lives in /public so it is available immediately at /lovable-uploads/...
+const AUTH_LOGO_URL = "/lovable-uploads/parium-auth-logo-transparent.png";
 
 export function AuthLogoInline({ className }: AuthLogoProps) {
   return (
@@ -29,7 +32,7 @@ export function AuthLogoInline({ className }: AuthLogoProps) {
       )}
       style={{
         aspectRatio: String(AUTH_LOGO_ASPECT),
-        backgroundImage: `url(${authLogoDataUri})`,
+        backgroundImage: `url(${AUTH_LOGO_URL})`,
         willChange: "transform",
       }}
       data-auth-logo="true"

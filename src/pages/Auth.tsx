@@ -73,27 +73,11 @@ const Auth = () => {
   const device = useDevice();
   const { toast } = useToast();
 
-  // ALWAYS show splash on /auth mount UNLESS it's a recovery/reset flow or splash is already visible.
+  // ALWAYS show splash on /auth mount UNLESS it's a recovery/reset flow.
   // This covers: refresh, direct navigation, "Logga in" click, logout redirect.
   useEffect(() => {
     try {
-      // Fade out minimal HTML splash immediately when React mounts
-      const w = window as any;
-      if (w.__parium_minimal_splash__) {
-        const minimalSplash = document.getElementById('auth-splash-minimal');
-        if (minimalSplash) {
-          minimalSplash.classList.add('fade-out');
-          setTimeout(() => {
-            minimalSplash.style.display = 'none';
-          }, 300);
-        }
-        w.__parium_minimal_splash__ = false;
-      }
-
-      // Skip if splash is already showing (e.g., triggered by useAuthNavigation)
-      if (authSplashEvents.isVisible()) return;
-
-      // Skip for recovery/reset flows (those show the password reset form immediately)
+      // Detect recovery/reset flows first (we must NOT block these)
       const loc = window.location;
       const sp = new URLSearchParams(loc.search);
       const hashStr = loc.hash && loc.hash.startsWith('#') ? loc.hash.slice(1) : '';
@@ -103,10 +87,32 @@ const Auth = () => {
         type === 'recovery' ||
         !!(hp.get('token') || sp.get('token') || hp.get('token_hash') || sp.get('token_hash') || hp.get('access_token') || sp.get('access_token')) ||
         !!(sp.get('reset') === 'true' && sp.get('issued'));
-      if (hasAnyRecovery) return;
 
-      // Show the splash (same one as "Logga in" button triggers)
-      authSplashEvents.show();
+      // Show the React splash (same as "Logga in") unless we're in recovery
+      if (!hasAnyRecovery && !authSplashEvents.isVisible()) {
+        authSplashEvents.show();
+      }
+
+      // Fade out HTML splash-shell after React splash has had a moment to paint
+      const w = window as any;
+      if (w.__parium_html_auth_splash__) {
+        const htmlSplash = document.getElementById('auth-splash-shell');
+        if (htmlSplash) {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              htmlSplash.classList.add('fade-out');
+              window.setTimeout(() => {
+                try {
+                  (htmlSplash as HTMLElement).style.display = 'none';
+                } catch {
+                  // noop
+                }
+              }, 550);
+            });
+          });
+        }
+        w.__parium_html_auth_splash__ = false;
+      }
     } catch {
       // noop
     }
