@@ -73,29 +73,28 @@ const Auth = () => {
   const device = useDevice();
   const { toast } = useToast();
 
-  // If this page was hard-refreshed, index.html shows a minimal splash immediately.
-  // As soon as React mounts, we fade out the HTML splash and show the React splash
-  // (exactly the same one as when clicking “Logga in” from startsidan).
+  // Hard refresh on /auth should use the SAME React splash as when navigating
+  // from startsidan ("Logga in"). No HTML/SVG splash should ever be shown.
   useEffect(() => {
     try {
-      const w = window as any;
-      if (!w.__parium_auth_hard_splash__) return;
+      // Detect navigation type
+      const navEntry = (performance.getEntriesByType?.('navigation')?.[0] as PerformanceNavigationTiming | undefined);
+      const isReload = navEntry ? navEntry.type === 'reload' : (performance as any).navigation?.type === 1;
+      if (!isReload) return;
 
-      const htmlSplash = document.getElementById('auth-splash');
-      if (htmlSplash) {
-        htmlSplash.classList.add('fade-out');
-        // Remove quickly so AuthSplashScreen (React) can sit on top.
-        window.setTimeout(() => {
-          try {
-            (htmlSplash as HTMLElement).style.display = 'none';
-          } catch {
-            // noop
-          }
-        }, 550);
-      }
+      // Avoid showing splash for recovery/reset flows
+      const loc = window.location;
+      const sp = new URLSearchParams(loc.search);
+      const hashStr = loc.hash && loc.hash.startsWith('#') ? loc.hash.slice(1) : '';
+      const hp = new URLSearchParams(hashStr);
+      const type = hp.get('type') || sp.get('type');
+      const hasAnyRecovery =
+        type === 'recovery' ||
+        !!(hp.get('token') || sp.get('token') || hp.get('token_hash') || sp.get('token_hash') || hp.get('access_token') || sp.get('access_token')) ||
+        !!(sp.get('reset') === 'true' && sp.get('issued'));
+      if (hasAnyRecovery) return;
 
       authSplashEvents.show();
-      w.__parium_auth_hard_splash__ = false;
     } catch {
       // noop
     }
