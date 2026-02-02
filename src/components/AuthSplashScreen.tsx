@@ -1,8 +1,8 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useLocation } from 'react-router-dom';
 import { authSplashEvents } from '@/lib/authSplashEvents';
+import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
 import { useDevice } from '@/hooks/use-device';
-import { AuthLogoInline } from '@/assets/authLogoInline';
-import { cn } from '@/lib/utils';
 
 // Minsta visningstid för att garantera att loggan hinner laddas och avkodas
 const MINIMUM_DISPLAY_MS = 4000;
@@ -10,10 +10,11 @@ const MINIMUM_DISPLAY_MS = 4000;
 /**
  * AuthSplashScreen - Premium "loading shell" för auth-sidan.
  * 
- * PIXEL-PERFECT: Matchar exakt auth-sidans logo-container (260px höjd på desktop)
- * så att fade-out landar sömlöst på den riktiga loggan utan hopp.
+ * Matchar exakt auth-sidans logo-storlek och position så att
+ * fade-out landar pixel-perfekt på den riktiga loggan.
  */
 export function AuthSplashScreen() {
+  const location = useLocation();
   const device = useDevice();
   
   // Prenumerera på splash-events
@@ -59,98 +60,98 @@ export function AuthSplashScreen() {
   
   if (!isVisible) return null;
   
-  // EXAKT samma layout som AuthDesktop/AuthMobile för pixel-perfekt match
+  // Beräkna storlek baserat på device för att matcha auth-sidans logo
+  // Desktop: h-56 (224px), lg: h-64 (256px)
+  // Mobile: h-40 (160px) * scale-125 = 200px
   const isMobile = device === 'mobile';
+  const isLargeDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
   
-  // Logo-storlek matchar exakt AuthDesktop/AuthMobile
-  const logoClassName = cn(
-    'pointer-events-none select-none transform-gpu',
-    isMobile
-      ? 'relative h-40 w-[min(400px,90vw)] scale-125'
-      : 'relative h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)]'
-  );
+  const logoHeight = isMobile ? 200 : (isLargeDesktop ? 256 : 224);
+  
+  // Padding-top matchar auth-sidans layout
+  // Desktop: py-8 (32px) + lite centrering i 260px container ≈ 50px
+  // Mobile: safe-area + pt-6 (24px)
+  const paddingTop = isMobile 
+    ? 'calc(env(safe-area-inset-top, 0px) + 24px)' 
+    : '50px';
+  
+  // Text-storlek matchar auth-sidans h1
+  // Desktop: text-xl (1.25rem), lg: text-2xl (1.5rem)
+  // Mobile: text-2xl (1.5rem)
+  const fontSize = isMobile ? '1.5rem' : (isLargeDesktop ? '1.5rem' : '1.25rem');
   
   return (
     <div
-      className={cn(
-        'fixed inset-0 z-[9999] flex flex-col transition-opacity duration-500 ease-out',
-        isFadingOut ? 'opacity-0' : 'opacity-100'
-      )}
+      className={`
+        fixed inset-0 z-[9999] flex flex-col items-center
+        transition-opacity duration-500 ease-out
+        ${isFadingOut ? 'opacity-0' : 'opacity-100'}
+      `}
       style={{
         background: 'hsl(215, 100%, 12%)',
+        justifyContent: 'flex-start',
+        paddingTop,
         transform: 'translateZ(0)',
         willChange: 'opacity',
       }}
     >
-      {/* Exakt samma struktur som AuthDesktop: py-8 + centered content */}
-      <div className="relative z-10 flex flex-col min-h-screen py-8 px-6">
-        {/* Header med logo - samma struktur som auth-sidan */}
-        <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
-          <div className="text-center mb-4">
-            <div className="mb-2">
-              {/* 260px container matchar AuthDesktop exakt */}
-              <div 
-                className="relative mx-auto w-fit flex items-center justify-center" 
-                style={{ height: isMobile ? '200px' : '260px' }}
-              >
-                {/* Glow effect bakom loggan - exakt som auth-sidan */}
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-72 h-52 bg-primary-glow/25 rounded-full blur-[40px]"></div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-52 h-36 bg-primary-glow/22 rounded-full blur-[35px]"></div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-44 h-28 bg-primary-glow/20 rounded-full blur-[30px]"></div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
-                </div>
-                
-                {/* Logo - exakt samma som auth-sidan */}
-                <AuthLogoInline className={logoClassName} />
-              </div>
-            </div>
-            
-            {/* Tagline - matchar auth-sidans h1 exakt */}
-            <h1 className="text-xl lg:text-2xl font-semibold text-white mb-3 relative z-10 [color:rgb(255,255,255)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
-              Din karriärresa börjar här
-            </h1>
-          </div>
-          
-          {/* Pulserande prickar under där formuläret skulle vara */}
-          <div className="w-full max-w-md flex justify-center pt-8">
-            <div className="flex items-center gap-2.5">
-              <span 
-                className="w-2.5 h-2.5 rounded-full bg-white/60"
-                style={{
-                  animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                  animationDelay: '-1.7s',
-                  transform: 'translateZ(0)',
-                  willChange: 'opacity, transform',
-                }}
-              />
-              <span 
-                className="w-2.5 h-2.5 rounded-full bg-white/60"
-                style={{
-                  animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                  animationDelay: '-1.3s',
-                  transform: 'translateZ(0)',
-                  willChange: 'opacity, transform',
-                }}
-              />
-              <span 
-                className="w-2.5 h-2.5 rounded-full bg-white/60"
-                style={{
-                  animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                  animationDelay: '-0.9s',
-                  transform: 'translateZ(0)',
-                  willChange: 'opacity, transform',
-                }}
-              />
-            </div>
-          </div>
-        </div>
+      {/* Parium Logo - exakt samma höjd som AuthLogoInline */}
+      <img
+        src={authLogoDataUri}
+        alt="Parium"
+        className="select-none pointer-events-none"
+        style={{ 
+          height: `${logoHeight}px`,
+          width: 'auto',
+          transform: 'translateZ(0)',
+        }}
+        decoding="sync"
+        loading="eager"
+        fetchPriority="high"
+      />
+      
+      {/* Tagline - matchar auth-sidans h1 */}
+      <p 
+        className="text-white font-semibold drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
+        style={{
+          fontSize,
+          letterSpacing: '-0.01em',
+          marginTop: isMobile ? '4px' : '8px',
+          marginBottom: '40px',
+        }}
+      >
+        Din karriärresa börjar här
+      </p>
+      
+      {/* Pulserande prickar */}
+      <div className="flex items-center gap-2.5">
+        <span 
+          className="w-2.5 h-2.5 rounded-full bg-white/60"
+          style={{
+            animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            animationDelay: '-1.7s',
+            transform: 'translateZ(0)',
+            willChange: 'opacity, transform',
+          }}
+        />
+        <span 
+          className="w-2.5 h-2.5 rounded-full bg-white/60"
+          style={{
+            animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            animationDelay: '-1.3s',
+            transform: 'translateZ(0)',
+            willChange: 'opacity, transform',
+          }}
+        />
+        <span 
+          className="w-2.5 h-2.5 rounded-full bg-white/60"
+          style={{
+            animation: 'authSplashPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            animationDelay: '-0.9s',
+            transform: 'translateZ(0)',
+            willChange: 'opacity, transform',
+          }}
+        />
       </div>
       
       <style>{`

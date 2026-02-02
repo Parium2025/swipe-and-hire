@@ -1,12 +1,17 @@
 /**
- * Parium auth logo rendered as a **data URI** (base64) via Vite's `?inline`.
+ * Parium auth logo with **0 network requests**.
  *
- * Why: when navigating to /auth (logout → auth), the JS bundle is already in
- * memory, so the logo can paint with **zero network requests** and no pop-in.
+ * IMPORTANT:
+ * - We import the ORIGINAL PNG as a data URI via `?inline`.
+ * - We render it as a background-image (same structure as the home logo)
+ *   because browsers tend to cache/compose decoded bitmaps more reliably for
+ *   <img>/CSS backgrounds than for <svg><image/>.
+ * - Size is controlled by the SAME Tailwind classes already used in Auth*
+ *   (h-*, w-auto, scale-*). The aspect-ratio wrapper keeps intrinsic sizing.
  */
 
-import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
 import { cn } from "@/lib/utils";
+import authLogoDataUri from "./parium-auth-logo.png?inline";
 
 interface AuthLogoProps {
   className?: string;
@@ -24,8 +29,6 @@ export function AuthLogoInline({ className }: AuthLogoProps) {
       )}
       style={{
         aspectRatio: String(AUTH_LOGO_ASPECT),
-        // Same structure as the home-logo button: background-image + contain.
-        // Data URI (base64) => no request when switching routes.
         backgroundImage: `url(${authLogoDataUri})`,
         willChange: "transform",
       }}

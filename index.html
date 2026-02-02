@@ -15,44 +15,12 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-
-    <script>
-      // EARLY AUTH SHELL FLAG (runs in <head> so the shell can paint immediately)
-      (function () {
-        try {
-          var path = window.location.pathname;
-          if (path !== '/auth' && path !== '/auth/') return;
-
-          // Skip for recovery/reset flows
-          var search = window.location.search || '';
-          var hash = window.location.hash || '';
-          if (
-            search.indexOf('token') !== -1 ||
-            search.indexOf('token_hash') !== -1 ||
-            search.indexOf('reset=true') !== -1 ||
-            search.indexOf('type=recovery') !== -1 ||
-            hash.indexOf('token') !== -1 ||
-            hash.indexOf('token_hash') !== -1 ||
-            hash.indexOf('access_token') !== -1 ||
-            hash.indexOf('type=recovery') !== -1
-          ) {
-            return;
-          }
-
-          document.documentElement.setAttribute('data-parium-auth-splash', '1');
-          // Signal to React that HTML splash is showing
-          window.__parium_html_auth_splash__ = true;
-        } catch (e) {}
-      })();
-    </script>
     <!-- Google Fonts - Inter for premium typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Preload Parium logo for instant nav rendering -->
     <link rel="preload" as="image" href="/src/assets/parium-logo-rings.png" fetchpriority="high" />
-    <!-- Preload auth logo for instant /auth refresh splash -->
-    <link rel="preload" as="image" href="/lovable-uploads/parium-auth-logo.png" fetchpriority="high" />
     <!-- Preload hero image used on Landing -->
     <link rel="preload" as="image" href="/assets/hero-woman-left-hand-verified.jpg" type="image/jpeg" fetchpriority="high" />
  
@@ -126,249 +94,129 @@
         visibility: hidden;
       }
     }
-    /* ===== AUTH SPLASH (HTML shell for /auth refresh) ===== */
-    /* Shows instantly on /auth refresh; React takes over with the identical splash */
-    #auth-splash-shell {
+    /* ===== AUTH SPLASH SCREEN (hard refresh only on /auth) ===== */
+    #auth-splash {
       position: fixed;
       inset: 0;
-      z-index: 9998; /* Below React splash (9999) */
+      z-index: 99999;
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
+      /* Desktop: py-8 (32px) + center av 260px container */
+      padding-top: 50px;
       background: hsl(215, 100%, 12%);
       opacity: 1;
-      transition: opacity 0.3s ease-out;
+      transition: opacity 0.5s ease-out;
       transform: translateZ(0);
+      will-change: opacity;
     }
-    #auth-splash-shell.fade-out {
+    /* Mobile: safe-area + pt-6 (24px) */
+    @media (max-width: 640px) {
+      #auth-splash { padding-top: calc(env(safe-area-inset-top, 0px) + 24px); }
+    }
+    #auth-splash.fade-out {
       opacity: 0;
       pointer-events: none;
     }
-
-     /* If we're on /auth, show instantly (no waiting for body scripts) */
-     html[data-parium-auth-splash="1"] #auth-splash-shell {
-       display: flex;
-     }
-
-    /* Mirror AuthDesktop/AuthMobile layout */
-    #auth-splash-shell .shell-inner {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      padding: 32px 24px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    #auth-splash-shell .shell-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      max-width: 42rem; /* ~max-w-2xl */
-      margin: 0 auto;
-    }
-    #auth-splash-shell .text-center {
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    #auth-splash-shell .logo-block {
-      margin-bottom: 8px;
-    }
-    #auth-splash-shell .logo-container {
-      position: relative;
-      margin: 0 auto;
-      width: fit-content;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 260px;
-    }
-    @media (max-width: 640px) {
-      #auth-splash-shell .logo-container {
-        height: 200px;
-      }
-    }
-    #auth-splash-shell .glow {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transform: translateY(-8px);
-    }
-    #auth-splash-shell .glow-1 { width: 288px; height: 208px; border-radius: 9999px; filter: blur(40px); background: hsl(var(--primary-glow, 205 86% 64%) / 0.25); }
-    #auth-splash-shell .glow-2 { width: 208px; height: 144px; border-radius: 9999px; filter: blur(35px); background: hsl(var(--primary-glow, 205 86% 64%) / 0.22); }
-    #auth-splash-shell .glow-3 { width: 176px; height: 112px; border-radius: 9999px; filter: blur(30px); background: hsl(var(--primary-glow, 205 86% 64%) / 0.20); }
-    #auth-splash-shell .glow-4 { width: 144px; height: 80px; border-radius: 9999px; filter: blur(25px); background: hsl(var(--primary-glow, 205 86% 64%) / 0.18); }
-
-    /* AuthLogoInline-equivalent sizing */
     #auth-splash-logo {
-      pointer-events: none;
-      user-select: none;
-      transform: translateZ(0);
-      will-change: transform;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      /* Desktop: matchar AuthDesktop h-56 (224px), aspekt 2.5 => bredd ~560px */
       height: 224px;
-      width: min(35rem, 90vw);
-      position: relative; /* For absolute positioning of real img */
-    }
-    #auth-splash-logo svg,
-    #auth-splash-logo img {
-      height: 100%;
       width: auto;
-      display: block;
+      margin-bottom: 0;
+      transform: translateZ(0);
     }
+    /* lg breakpoint: h-64 (256px) */
     @media (min-width: 1024px) {
-      #auth-splash-logo {
-        height: 256px;
-        width: min(40rem, 90vw);
-      }
+      #auth-splash-logo { height: 256px; }
     }
+    /* Mobile: matchar AuthMobile h-40*scale-125 = 200px */
     @media (max-width: 640px) {
-      #auth-splash-logo {
-        height: 160px;
-        width: min(400px, 90vw);
-        transform: translateZ(0) scale(1.25);
-      }
+      #auth-splash-logo { height: 200px; }
     }
-
     #auth-splash-tagline {
-      color: rgb(255,255,255);
-      font-family: Inter, system-ui, -apple-system, sans-serif;
+      color: white;
+      /* Desktop: text-xl (1.25rem), lg: text-2xl (1.5rem) */
+      font-size: 1.25rem;
       font-weight: 600;
       letter-spacing: -0.01em;
-      font-size: 1.25rem;
-      margin: 0 0 12px;
+      margin-top: 8px;
+      margin-bottom: 40px;
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
     @media (min-width: 1024px) {
       #auth-splash-tagline { font-size: 1.5rem; }
     }
+    /* Mobile: text-2xl */
     @media (max-width: 640px) {
-      #auth-splash-tagline { font-size: 1.5rem; margin-bottom: 8px; }
+      #auth-splash-tagline { font-size: 1.5rem; margin-top: 4px; }
     }
-
-    #auth-splash-shell .dots-wrap {
-      width: 100%;
-      max-width: 28rem; /* ~max-w-md */
-      display: flex;
-      justify-content: center;
-      padding-top: 32px;
-    }
-    #auth-splash-shell .dots {
+    #auth-splash-dots {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    #auth-splash-shell .dots span {
+    #auth-splash-dots span {
       width: 10px;
       height: 10px;
       border-radius: 50%;
       background: rgba(255,255,255,0.6);
       transform: translateZ(0);
-      animation: minimalDotPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      will-change: opacity, transform;
+      animation: authSplashDotPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
-    #auth-splash-shell .dots span:nth-child(1) { animation-delay: -1.7s; }
-    #auth-splash-shell .dots span:nth-child(2) { animation-delay: -1.3s; }
-    #auth-splash-shell .dots span:nth-child(3) { animation-delay: -0.9s; }
-    @keyframes minimalDotPulse {
-      0%, 100% { opacity: 0.4; transform: translateZ(0) scale(1); }
-      50% { opacity: 1; transform: translateZ(0) scale(1.15); }
+    #auth-splash-dots span:nth-child(1) { animation-delay: -1.7s; }
+    #auth-splash-dots span:nth-child(2) { animation-delay: -1.3s; }
+    #auth-splash-dots span:nth-child(3) { animation-delay: -0.9s; }
+    @keyframes authSplashDotPulse {
+      0%, 100% { 
+        opacity: 0.4; 
+        transform: translateZ(0) scale(1); 
+      }
+      50% { 
+        opacity: 1; 
+        transform: translateZ(0) scale(1.15); 
+      }
     }
   </style>
 </head>
 
   <body>
-    <!-- Auth splash (HTML shell) - shows instantly on /auth refresh; React takes over identically -->
-    <div id="auth-splash-shell" aria-label="Laddar Parium">
-      <div class="shell-inner">
-        <div class="shell-center">
-          <div class="text-center">
-            <div class="logo-block">
-              <div class="logo-container">
-                <div class="glow"><div class="glow-1"></div></div>
-                <div class="glow"><div class="glow-2"></div></div>
-                <div class="glow"><div class="glow-3"></div></div>
-                <div class="glow"><div class="glow-4"></div></div>
-                <div id="auth-splash-logo" role="img" aria-label="Parium">
-                  <!-- 
-                    INSTANT LOGO STRATEGY:
-                    1. SVG skeleton shows immediately (embedded, no network)
-                    2. Real PNG loads in background
-                    3. Swap when ready - no pop-in
-                  -->
-                  <svg 
-                    id="auth-logo-skeleton"
-                    viewBox="0 0 1080 432"
-                    preserveAspectRatio="xMidYMid meet"
-                    style="width:100%;height:100%;opacity:1;transition:opacity 0.15s"
-                    aria-hidden="true"
-                  >
-                    <!-- Parium blue rings approximation -->
-                    <defs>
-                      <linearGradient id="parium-glow" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:hsl(205,86%,64%);stop-opacity:0.9"/>
-                        <stop offset="100%" style="stop-color:hsl(205,86%,50%);stop-opacity:0.7"/>
-                      </linearGradient>
-                    </defs>
-                    <!-- Outer ring -->
-                    <circle cx="216" cy="216" r="160" fill="none" stroke="url(#parium-glow)" stroke-width="18" opacity="0.85"/>
-                    <!-- Inner ring -->
-                    <circle cx="216" cy="216" r="100" fill="none" stroke="url(#parium-glow)" stroke-width="14" opacity="0.75"/>
-                    <!-- Core glow -->
-                    <circle cx="216" cy="216" r="45" fill="url(#parium-glow)" opacity="0.6"/>
-                    <!-- "PARIUM" text placeholder -->
-                    <text x="540" y="240" fill="white" font-family="Inter,system-ui,sans-serif" font-size="110" font-weight="700" letter-spacing="8" opacity="0.95">PARIUM</text>
-                  </svg>
-                  <img
-                    id="auth-logo-real"
-                    src="/lovable-uploads/parium-auth-logo.png"
-                    alt="Parium"
-                    decoding="async"
-                    fetchpriority="high"
-                    loading="eager"
-                    style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity 0.15s"
-                    onload="this.style.opacity='1';document.getElementById('auth-logo-skeleton').style.opacity='0'"
-                  />
-                </div>
-              </div>
-            </div>
-            <h1 id="auth-splash-tagline">Din karriärresa börjar här</h1>
-          </div>
-          <div class="dots-wrap">
-            <div class="dots" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          </div>
-        </div>
+    <!-- AUTH SPLASH SCREEN - Only shown on /auth hard refresh -->
+    <div id="auth-splash" aria-label="Laddar Parium">
+      <!-- 🔥 INLINE SVG LOGO - Zero network requests, always available -->
+      <svg id="auth-splash-logo" viewBox="0 0 540 216" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Parium">
+        <!-- Two interlocking rings -->
+        <circle cx="95" cy="108" r="50" stroke="#4BA3E3" stroke-width="12" fill="none"/>
+        <circle cx="145" cy="108" r="50" stroke="#4BA3E3" stroke-width="12" fill="none"/>
+        <!-- PARIUM text -->
+        <text x="215" y="128" fill="white" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="72" font-weight="600" letter-spacing="-0.02em">Parium</text>
+      </svg>
+      <p id="auth-splash-tagline">Din karriärresa börjar här</p>
+      <div id="auth-splash-dots">
+        <span></span>
+        <span></span>
+        <span></span>
       </div>
     </div>
     <script>
-      // Show auth splash ONLY on /auth route during initial load
+      // Show auth splash ONLY on /auth route during hard refresh
       (function() {
         try {
           var path = window.location.pathname;
           if (path === '/auth' || path === '/auth/') {
-            // Skip for recovery/reset flows
-            var search = window.location.search;
-            var hash = window.location.hash;
-            if (search.indexOf('token') !== -1 || search.indexOf('token_hash') !== -1 || search.indexOf('reset=true') !== -1 ||
-                search.indexOf('type=recovery') !== -1 ||
-                hash.indexOf('token') !== -1 || hash.indexOf('token_hash') !== -1 || hash.indexOf('access_token') !== -1 || hash.indexOf('type=recovery') !== -1) {
-              return;
-            }
-            var splash = document.getElementById('auth-splash-shell');
+            var splash = document.getElementById('auth-splash');
             if (splash) {
               splash.style.display = 'flex';
-               // Signal to React that HTML splash is showing (redundant if head script ran)
-               window.__parium_html_auth_splash__ = true;
+              // Fade out after 4 seconds
+              setTimeout(function() {
+                splash.classList.add('fade-out');
+                // Remove from DOM after fade
+                setTimeout(function() {
+                  splash.style.display = 'none';
+                }, 500);
+              }, 4000);
             }
           }
         } catch(e) {}
@@ -392,8 +240,6 @@
     <div id="app-bg" aria-hidden="true"></div>
     <!-- Hidden hero preloader for Safari/iOS -->
     <img src="/assets/hero-woman-left-hand-verified.jpg" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
-    <!-- Hidden auth-logo decode preloader for Safari/iOS -->
-    <img src="/lovable-uploads/parium-auth-logo.png" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
     <div id="root"></div>
     <script>
       try {

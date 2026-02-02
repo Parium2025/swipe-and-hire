@@ -6,8 +6,7 @@ import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { registerServiceWorker } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
-
-import { AUTH_LOGO_URL } from './lib/criticalAssets'
+import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
@@ -107,7 +106,7 @@ async function bootstrap() {
   const isAuthRoute = typeof window !== 'undefined' && window.location.pathname === '/auth';
   
   // Start both preloads immediately (parallel)
-  const authLogoPromise = preloadAndDecodeImage(AUTH_LOGO_URL, 'auth-logo');
+  const authLogoPromise = preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
   void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
 
   // On /auth, wait for logo to be fully decoded before rendering

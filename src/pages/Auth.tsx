@@ -4,7 +4,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import { useToast } from '@/hooks/use-toast';
-import { authSplashEvents } from '@/lib/authSplashEvents';
 import AnimatedIntro from '@/components/AnimatedIntro';
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
@@ -72,51 +71,6 @@ const Auth = () => {
   const navigate = useNavigate();
   const device = useDevice();
   const { toast } = useToast();
-
-  // ALWAYS show splash on /auth mount UNLESS it's a recovery/reset flow.
-  // This covers: refresh, direct navigation, "Logga in" click, logout redirect.
-  useEffect(() => {
-    try {
-      // Detect recovery/reset flows first (we must NOT block these)
-      const loc = window.location;
-      const sp = new URLSearchParams(loc.search);
-      const hashStr = loc.hash && loc.hash.startsWith('#') ? loc.hash.slice(1) : '';
-      const hp = new URLSearchParams(hashStr);
-      const type = hp.get('type') || sp.get('type');
-      const hasAnyRecovery =
-        type === 'recovery' ||
-        !!(hp.get('token') || sp.get('token') || hp.get('token_hash') || sp.get('token_hash') || hp.get('access_token') || sp.get('access_token')) ||
-        !!(sp.get('reset') === 'true' && sp.get('issued'));
-
-      // Show the React splash (same as "Logga in") unless we're in recovery
-      if (!hasAnyRecovery && !authSplashEvents.isVisible()) {
-        authSplashEvents.show();
-      }
-
-      // Fade out HTML splash-shell after React splash has had a moment to paint
-      const w = window as any;
-      if (w.__parium_html_auth_splash__) {
-        const htmlSplash = document.getElementById('auth-splash-shell');
-        if (htmlSplash) {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              htmlSplash.classList.add('fade-out');
-              window.setTimeout(() => {
-                try {
-                  (htmlSplash as HTMLElement).style.display = 'none';
-                } catch {
-                  // noop
-                }
-              }, 550);
-            });
-          });
-        }
-        w.__parium_html_auth_splash__ = false;
-      }
-    } catch {
-      // noop
-    }
-  }, []);
 
   // Read initial state from navigation (from Landing page)
   const initialMode = (location.state as any)?.mode;

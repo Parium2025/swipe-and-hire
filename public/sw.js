@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v2';
 
 const IMAGE_CACHE = `parium-images-${CACHE_VERSION}`;
 const STATIC_CACHE = `parium-static-${CACHE_VERSION}`;
@@ -9,8 +9,6 @@ const CRITICAL_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  // Auth splash logo (used on /auth refresh shell)
-  '/lovable-uploads/parium-auth-logo.png',
 ];
 
 // Mönster för bilder och filer som ska cachas permanent
