@@ -1,16 +1,11 @@
 /**
- * Parium auth logo with **0 network requests**.
+ * Parium auth logo.
  *
- * IMPORTANT:
- * - We import the ORIGINAL PNG as a data URI via `?inline`.
- * - We render it as a background-image (same structure as the home logo)
- *   because browsers tend to cache/compose decoded bitmaps more reliably for
- *   <img>/CSS backgrounds than for <svg><image/>.
- * - Size is controlled by the SAME Tailwind classes already used in Auth*
- *   (h-*, w-auto, scale-*). The aspect-ratio wrapper keeps intrinsic sizing.
+ * CRITICAL: Must use the SAME URL as index.html + bootstrap pre-decode,
+ * otherwise the logo can still "load" even though we preloaded/decoded.
  */
 
-import authLogoPng from "@/assets/parium-auth-logo.png";
+import { AUTH_LOGO_URL } from "@/lib/criticalAssets";
 import { cn } from "@/lib/utils";
 
 interface AuthLogoProps {
@@ -30,8 +25,8 @@ export function AuthLogoInline({ className }: AuthLogoProps) {
       style={{
         aspectRatio: String(AUTH_LOGO_ASPECT),
         // Same structure as the home-logo button: background-image + contain.
-        // Uses Vite-managed asset so it gets proper cache headers and fast decode.
-        backgroundImage: `url(${authLogoPng})`,
+        // Uses the preloaded/decoded URL so it can paint instantly.
+        backgroundImage: `url(${AUTH_LOGO_URL})`,
         willChange: "transform",
       }}
       data-auth-logo="true"
