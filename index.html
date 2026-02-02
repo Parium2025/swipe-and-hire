@@ -121,19 +121,19 @@
       pointer-events: none;
     }
     #auth-splash-logo {
-      /* Matchar AuthSplashScreen storlek - mer kompakt */
-      height: 80px;
+      /* Matchar AuthSplashScreen EXAKT: desktop h-56 (224px) */
+      height: 224px;
       width: auto;
       margin-bottom: 0;
       transform: translateZ(0);
     }
-    /* lg breakpoint */
+    /* lg breakpoint: h-64 (256px) */
     @media (min-width: 1024px) {
-      #auth-splash-logo { height: 96px; }
+      #auth-splash-logo { height: 256px; }
     }
-    /* Mobile */
+    /* Mobile: h-40 * scale-125 = 200px */
     @media (max-width: 640px) {
-      #auth-splash-logo { height: 72px; }
+      #auth-splash-logo { height: 200px; }
     }
     #auth-splash-tagline {
       color: white;
