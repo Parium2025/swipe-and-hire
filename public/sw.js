@@ -9,6 +9,8 @@ const CRITICAL_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  // Auth splash logo (used on /auth refresh shell)
+  '/lovable-uploads/parium-auth-logo-transparent.png',
 ];
 
 // Mönster för bilder och filer som ska cachas permanent
