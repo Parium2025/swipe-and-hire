@@ -25,7 +25,16 @@ export function AuthSplashScreen() {
   const [isFadingIn, setIsFadingIn] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [dotsFading, setDotsFading] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  
+  // Check if image is already cached - if so, skip onLoad wait for instant display
+  const [imageLoaded, setImageLoaded] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const img = new Image();
+      img.src = '/parium-auth-logo.png';
+      return img.complete && img.naturalHeight > 0;
+    }
+    return false;
+  });
   
   useEffect(() => {
     if (!isTriggered) {
