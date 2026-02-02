@@ -20,8 +20,8 @@ interface AuthLogoProps {
 const AUTH_LOGO_ASPECT = 1080 / 432;
 
 // Use the same URL everywhere (index.html shell + React) for perfectly identical caching.
-// This asset lives in /public so it is available immediately at /lovable-uploads/...
-const AUTH_LOGO_URL = "/lovable-uploads/parium-auth-logo-transparent.png";
+// This asset lives in /public so it is available immediately.
+const AUTH_LOGO_URL = "/lovable-uploads/parium-auth-logo.png";
 
 export function AuthLogoInline({ className }: AuthLogoProps) {
   return (
