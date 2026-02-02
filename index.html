@@ -94,12 +94,80 @@
         visibility: hidden;
       }
     }
-    /* Auth-splash removed intentionally: we only use the React splash ("bild 2"). */
+    /* ===== MINIMAL AUTH SPLASH (only dots, no logo) ===== */
+    /* Shows instantly on /auth refresh; React takes over with full splash */
+    #auth-splash-minimal {
+      position: fixed;
+      inset: 0;
+      z-index: 99998; /* Below React splash (99999) */
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: hsl(215, 100%, 12%);
+      opacity: 1;
+      transition: opacity 0.3s ease-out;
+      transform: translateZ(0);
+    }
+    #auth-splash-minimal.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #auth-splash-minimal .dots {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #auth-splash-minimal .dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      transform: translateZ(0);
+      animation: minimalDotPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    #auth-splash-minimal .dots span:nth-child(1) { animation-delay: -1.7s; }
+    #auth-splash-minimal .dots span:nth-child(2) { animation-delay: -1.3s; }
+    #auth-splash-minimal .dots span:nth-child(3) { animation-delay: -0.9s; }
+    @keyframes minimalDotPulse {
+      0%, 100% { opacity: 0.4; transform: translateZ(0) scale(1); }
+      50% { opacity: 1; transform: translateZ(0) scale(1.15); }
+    }
   </style>
 </head>
 
   <body>
-    <!-- Auth-splash removed intentionally: we only use the React splash ("bild 2"). -->
+    <!-- Minimal auth splash - shows dots immediately on /auth, React takes over with full logo -->
+    <div id="auth-splash-minimal" aria-label="Laddar Parium">
+      <div class="dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <script>
+      // Show minimal splash ONLY on /auth route during initial load
+      (function() {
+        try {
+          var path = window.location.pathname;
+          if (path === '/auth' || path === '/auth/') {
+            // Skip for recovery/reset flows
+            var search = window.location.search;
+            var hash = window.location.hash;
+            if (search.indexOf('token') !== -1 || search.indexOf('reset=true') !== -1 ||
+                hash.indexOf('token') !== -1 || hash.indexOf('access_token') !== -1) {
+              return;
+            }
+            var splash = document.getElementById('auth-splash-minimal');
+            if (splash) {
+              splash.style.display = 'flex';
+              // Signal to React that minimal splash is showing
+              window.__parium_minimal_splash__ = true;
+            }
+          }
+        } catch(e) {}
+      })();
+    </script>
 
     <!-- Portrait-only warning -->
     <div id="portrait-warning" role="alert" aria-live="polite">

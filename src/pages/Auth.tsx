@@ -73,16 +73,27 @@ const Auth = () => {
   const device = useDevice();
   const { toast } = useToast();
 
-  // Hard refresh on /auth should use the SAME React splash as when navigating
-  // from startsidan ("Logga in"). No HTML/SVG splash should ever be shown.
+  // ALWAYS show splash on /auth mount UNLESS it's a recovery/reset flow or splash is already visible.
+  // This covers: refresh, direct navigation, "Logga in" click, logout redirect.
   useEffect(() => {
     try {
-      // Detect navigation type
-      const navEntry = (performance.getEntriesByType?.('navigation')?.[0] as PerformanceNavigationTiming | undefined);
-      const isReload = navEntry ? navEntry.type === 'reload' : (performance as any).navigation?.type === 1;
-      if (!isReload) return;
+      // Fade out minimal HTML splash immediately when React mounts
+      const w = window as any;
+      if (w.__parium_minimal_splash__) {
+        const minimalSplash = document.getElementById('auth-splash-minimal');
+        if (minimalSplash) {
+          minimalSplash.classList.add('fade-out');
+          setTimeout(() => {
+            minimalSplash.style.display = 'none';
+          }, 300);
+        }
+        w.__parium_minimal_splash__ = false;
+      }
 
-      // Avoid showing splash for recovery/reset flows
+      // Skip if splash is already showing (e.g., triggered by useAuthNavigation)
+      if (authSplashEvents.isVisible()) return;
+
+      // Skip for recovery/reset flows (those show the password reset form immediately)
       const loc = window.location;
       const sp = new URLSearchParams(loc.search);
       const hashStr = loc.hash && loc.hash.startsWith('#') ? loc.hash.slice(1) : '';
@@ -94,6 +105,7 @@ const Auth = () => {
         !!(sp.get('reset') === 'true' && sp.get('issued'));
       if (hasAnyRecovery) return;
 
+      // Show the splash (same one as "Logga in" button triggers)
       authSplashEvents.show();
     } catch {
       // noop
