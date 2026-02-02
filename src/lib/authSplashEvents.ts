@@ -27,14 +27,7 @@ export const authSplashEvents = {
   show() {
     if (currentlyVisible) return;
     currentlyVisible = true;
-    
-    // Instantly show the static HTML splash (no React render needed)
-    const splash = document.getElementById('auth-splash');
-    if (splash) {
-      splash.classList.remove('fade-out');
-      splash.classList.add('fade-in');
-    }
-    
+
     listeners.forEach(l => l(true));
   },
 

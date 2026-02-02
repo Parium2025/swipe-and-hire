@@ -13,6 +13,13 @@ const MINIMUM_DISPLAY_MS = 2000;
  */
 export function AuthSplashScreen() {
   const device = useDevice();
+
+  const getIsLogoCached = () => {
+    if (typeof window === 'undefined') return false;
+    const img = new Image();
+    img.src = '/parium-auth-logo.png';
+    return img.complete && img.naturalHeight > 0;
+  };
   
   // Prenumerera på splash-events
   const isTriggered = useSyncExternalStore(
@@ -26,15 +33,8 @@ export function AuthSplashScreen() {
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [dotsFading, setDotsFading] = useState(false);
   
-  // Check if image is already cached - if so, skip onLoad wait for instant display
-  const [imageLoaded, setImageLoaded] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const img = new Image();
-      img.src = '/parium-auth-logo.png';
-      return img.complete && img.naturalHeight > 0;
-    }
-    return false;
-  });
+  // If the logo is already cached, we can fade-in immediately (no onLoad wait)
+  const [imageLoaded, setImageLoaded] = useState(getIsLogoCached);
   
   useEffect(() => {
     if (!isTriggered) {
@@ -54,7 +54,9 @@ export function AuthSplashScreen() {
     setIsFadingOut(false);
     setIsFadingIn(false);
     setDotsFading(false);
-    setImageLoaded(false);
+    // IMPORTANT: don't force this to false; it causes a visible delay on Landing -> /auth.
+    // If cached, this becomes true instantly and splash fades in right away.
+    setImageLoaded(getIsLogoCached());
   }, [isTriggered, isVisible]);
   
   // Trigger fade-in when image is loaded
