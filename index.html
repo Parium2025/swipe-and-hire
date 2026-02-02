@@ -234,7 +234,7 @@
                 logo.onerror = startFadeIn;
               }
               
-              // Fade out after 4 seconds
+              // Fade out after 2 seconds
               setTimeout(function() {
                 splash.classList.remove('fade-in');
                 splash.classList.add('fade-out');
@@ -242,7 +242,7 @@
                 setTimeout(function() {
                   splash.style.display = 'none';
                 }, 500);
-              }, 4000);
+              }, 2000);
             }
           }
         } catch(e) {}

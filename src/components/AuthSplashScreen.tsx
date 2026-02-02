@@ -3,7 +3,7 @@ import { authSplashEvents } from '@/lib/authSplashEvents';
 import { useDevice } from '@/hooks/use-device';
 
 // Minsta visningstid för att garantera att loggan hinner laddas och avkodas
-const MINIMUM_DISPLAY_MS = 4000;
+const MINIMUM_DISPLAY_MS = 2000;
 
 /**
  * AuthSplashScreen - Premium "loading shell" för auth-sidan.
