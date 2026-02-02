@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import { useToast } from '@/hooks/use-toast';
+import { authSplashEvents } from '@/lib/authSplashEvents';
 import AnimatedIntro from '@/components/AnimatedIntro';
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
@@ -71,6 +72,34 @@ const Auth = () => {
   const navigate = useNavigate();
   const device = useDevice();
   const { toast } = useToast();
+
+  // If this page was hard-refreshed, index.html shows a minimal splash immediately.
+  // As soon as React mounts, we fade out the HTML splash and show the React splash
+  // (exactly the same one as when clicking “Logga in” from startsidan).
+  useEffect(() => {
+    try {
+      const w = window as any;
+      if (!w.__parium_auth_hard_splash__) return;
+
+      const htmlSplash = document.getElementById('auth-splash');
+      if (htmlSplash) {
+        htmlSplash.classList.add('fade-out');
+        // Remove quickly so AuthSplashScreen (React) can sit on top.
+        window.setTimeout(() => {
+          try {
+            (htmlSplash as HTMLElement).style.display = 'none';
+          } catch {
+            // noop
+          }
+        }, 550);
+      }
+
+      authSplashEvents.show();
+      w.__parium_auth_hard_splash__ = false;
+    } catch {
+      // noop
+    }
+  }, []);
 
   // Read initial state from navigation (from Landing page)
   const initialMode = (location.state as any)?.mode;
