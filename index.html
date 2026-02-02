@@ -161,6 +161,10 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      transition: opacity 0.4s ease-out;
+    }
+    #auth-splash-dots.fading {
+      opacity: 0;
     }
     #auth-splash-dots span {
       width: 10px;
@@ -234,7 +238,13 @@
                 logo.onerror = startFadeIn;
               }
               
-              // Fade out after 2 seconds
+              // Fade dots first (0.5s before splash fades)
+              setTimeout(function() {
+                var dots = document.getElementById('auth-splash-dots');
+                if (dots) dots.classList.add('fading');
+              }, 1500);
+              
+              // Fade out splash after 2 seconds
               setTimeout(function() {
                 splash.classList.remove('fade-in');
                 splash.classList.add('fade-out');
