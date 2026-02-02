@@ -1,11 +1,11 @@
 /**
- * Parium auth logo.
+ * Parium auth logo rendered as a **data URI** (base64) via Vite's `?inline`.
  *
- * CRITICAL: Must use the SAME URL as index.html + bootstrap pre-decode,
- * otherwise the logo can still "load" even though we preloaded/decoded.
+ * Why: when navigating to /auth (logout → auth), the JS bundle is already in
+ * memory, so the logo can paint with **zero network requests** and no pop-in.
  */
 
-import { AUTH_LOGO_URL } from "@/lib/criticalAssets";
+import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
 import { cn } from "@/lib/utils";
 
 interface AuthLogoProps {
@@ -25,8 +25,8 @@ export function AuthLogoInline({ className }: AuthLogoProps) {
       style={{
         aspectRatio: String(AUTH_LOGO_ASPECT),
         // Same structure as the home-logo button: background-image + contain.
-        // Uses the preloaded/decoded URL so it can paint instantly.
-        backgroundImage: `url(${AUTH_LOGO_URL})`,
+        // Data URI (base64) => no request when switching routes.
+        backgroundImage: `url(${authLogoDataUri})`,
         willChange: "transform",
       }}
       data-auth-logo="true"
