@@ -219,19 +219,27 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots - matching employer style */}
-        <div className="flex items-center justify-center gap-2 mt-auto shrink-0">
-          {tipsItems.length > 1 && tipsItems.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              className={cn(
-                "w-2 h-2 rounded-full transition-none touch-manipulation",
-                i === currentIndex ? "bg-white" : "bg-white/30 hover:bg-white/50"
-              )}
-              aria-label={`Gå till nyhet ${i + 1}`}
-            />
-          ))}
+        {/* Footer with dots - fixed height, ultra-tight, no layout jitter - matching employer style exactly */}
+        <div className="h-4 flex items-center mt-auto shrink-0">
+          {tipsItems.length > 1 && (
+            <div className="flex items-center gap-px">
+              {tipsItems.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentIndex(i)}
+                  className="w-3 h-3 p-0 flex items-center justify-center leading-none touch-manipulation"
+                  aria-label={`Gå till nyhet ${i + 1}`}
+                >
+                  <span
+                    className={cn(
+                      "block w-1.5 h-1.5 rounded-full",
+                      i === currentIndex ? "bg-white" : "bg-white/30"
+                    )}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -523,19 +531,25 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation - matching employer style */}
-        <div className="flex items-center justify-center gap-2 mt-auto shrink-0">
-          {statsArray.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              className={cn(
-                "w-2 h-2 rounded-full transition-none touch-manipulation",
-                i === currentIndex ? "bg-white" : "bg-white/30 hover:bg-white/50"
-              )}
-              aria-label={`Gå till statistik ${i + 1}`}
-            />
-          ))}
+        {/* Dot navigation - fixed height, ultra-tight, no layout jitter - matching employer style exactly */}
+        <div className="h-4 flex items-center mt-auto shrink-0">
+          <div className="flex items-center gap-px">
+            {statsArray.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className="w-3 h-3 p-0 flex items-center justify-center leading-none touch-manipulation"
+                aria-label={`Gå till statistik ${i + 1}`}
+              >
+                <span
+                  className={cn(
+                    "block w-1.5 h-1.5 rounded-full",
+                    i === currentIndex ? "bg-white" : "bg-white/30"
+                  )}
+                />
+              </button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
