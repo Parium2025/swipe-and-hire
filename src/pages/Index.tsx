@@ -334,16 +334,9 @@ const Index = () => {
     };
   }, []);
 
-  // Vid logout hanteras övergången av AuthSplashScreen - visa inte gammal spinner
+  // Vid logout/inloggning hanteras övergången av AuthSplashScreen - visa bara bakgrund
   if (loading && !user && authAction !== 'logout') {
-    return (
-      <div className="min-h-screen bg-gradient-parium flex items-center justify-center animate-fade-in">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-white" />
-          <p className="text-white text-sm">Loggar in...</p>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen bg-gradient-parium" />;
   }
 
   // Om ingen användare: redirecta omedelbart till /auth (säkerhetsnät för mobil)
