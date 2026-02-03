@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +8,6 @@ import { motion } from 'framer-motion';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 // AnimatedIntro removed - using index.html splash instead
 import AuthMobile from '@/components/AuthMobile';
-import AuthTablet from '@/components/AuthTablet';
 import AuthDesktop from '@/components/AuthDesktop';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,9 +75,6 @@ const Auth = () => {
     }
 
     try {
-      const html = document.documentElement;
-      const body = document.body;
-      
       if (isLoginMode) {
         // Login mode: enable pull-to-refresh and block scroll via listeners (no global CSS class)
         
@@ -401,7 +397,7 @@ const Auth = () => {
     navigate(newUrl, { replace: true });
   };
 
-  const handleResendReset = async (e: React.FormEvent) => {
+  const handleResendReset = async (e: FormEvent) => {
     e.preventDefault();
     setResendMessage('');
     setResending(true);
@@ -429,7 +425,7 @@ const Auth = () => {
     navigate('/auth', { replace: true });
   };
 
-  const handlePasswordReset = async (e: React.FormEvent) => {
+  const handlePasswordReset = async (e: FormEvent) => {
     e.preventDefault();
     
     console.log('🔄 Starting handlePasswordReset');

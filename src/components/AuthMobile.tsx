@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, startTransition } from 'react';
+import { useState, useRef, useEffect, startTransition, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,7 +28,7 @@ interface AuthMobileProps {
   setNewPassword: (value: string) => void;
   confirmPassword: string;
   setConfirmPassword: (value: string) => void;
-  handlePasswordReset: (e: React.FormEvent) => void;
+  handlePasswordReset: (e: FormEvent) => void;
   onBackToLogin?: () => void;
   onAuthModeChange?: (isLogin: boolean) => void;
   initialMode?: string;
@@ -283,7 +283,7 @@ const AuthMobile = ({
     setPasswordStrength(0);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
     // Check if online before attempting auth
