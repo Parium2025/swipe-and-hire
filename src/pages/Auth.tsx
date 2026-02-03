@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import { useToast } from '@/hooks/use-toast';
-import AnimatedIntro from '@/components/AnimatedIntro';
+// AnimatedIntro removed - using index.html splash instead
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
 import AuthDesktop from '@/components/AuthDesktop';
@@ -23,29 +23,7 @@ const Auth = () => {
     sessionStorage.removeItem('parium-skip-splash');
   }, []);
 
-  const [showIntro, setShowIntro] = useState(() => {
-    try {
-      // If coming from landing page, skip intro entirely
-      if (sessionStorage.getItem('parium-skip-splash') === '1') {
-        return false;
-      }
-      const loc = typeof window !== 'undefined' ? window.location : null;
-      if (loc) {
-        const sp = new URLSearchParams(loc.search);
-        const hashStr = loc.hash && loc.hash.startsWith('#') ? loc.hash.slice(1) : '';
-        const hp = new URLSearchParams(hashStr);
-        const type = hp.get('type') || sp.get('type');
-        const hasAnyRecovery =
-          type === 'recovery' ||
-          !!(hp.get('token') || sp.get('token') || hp.get('token_hash') || sp.get('token_hash') || hp.get('access_token') || sp.get('access_token')) ||
-          !!(sp.get('reset') === 'true' && sp.get('issued')); // Lägg till stöd för issued parameter
-        if (hasAnyRecovery) return false;
-      }
-    } catch (urlParseError) {
-      console.warn('Failed to parse URL for intro detection:', urlParseError);
-    }
-    return !sessionStorage.getItem('parium-intro-seen');
-  });
+  // AnimatedIntro removed - index.html splash handles the loading screen now
   const [isPasswordReset, setIsPasswordReset] = useState(() => {
     try {
       const loc = typeof window !== 'undefined' ? window.location : null;
@@ -328,7 +306,7 @@ const Auth = () => {
           if (AUTH_DEBUG) console.log('❌ Setting recovery status to invalid due to unknown error');
           setRecoveryStatus('invalid');
         }
-        setShowIntro(false);
+        // showIntro removed - index.html handles splash
         return;
       }
       
@@ -349,7 +327,7 @@ const Auth = () => {
         });
         
         if (AUTH_DEBUG) console.log('✅ Token är giltig - visar reset-formulär');
-        setShowIntro(false);
+        // showIntro removed - index.html handles splash
         setIsPasswordReset(true);
         return;
       }
@@ -636,14 +614,7 @@ const Auth = () => {
     );
   }
 
-  if (showIntro) {
-    return (
-      <AnimatedIntro onComplete={() => {
-        setShowIntro(false);
-        sessionStorage.setItem('parium-intro-seen', 'true');
-      }} />
-    );
-  }
+  // AnimatedIntro removed - index.html splash handles this now
 
   // Visa bekräftelsestatus om det finns en
   if (confirmationStatus !== 'none') {
