@@ -269,16 +269,17 @@ const AuthTablet = ({
          
          const result = await signIn(currentEmail, currentPassword);
 
-         // Hide splash immediately - let dashboard show its own loading states
-         authSplashEvents.hide();
-
          if (result?.error) {
+           // Hide splash on error
+           authSplashEvents.hide();
+           
            if (result.error.code === 'email_not_confirmed') {
              setShowResend(true);
            } else if (result.error.showResetPassword) {
              setShowResetPassword(true);
            }
          }
+         // Vid lyckad inloggning: splash förblir synlig tills redirect sker i Auth.tsx
        } else {
         // Validate all required fields
         if (role === 'job_seeker') {
