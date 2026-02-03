@@ -215,31 +215,27 @@ const NewsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaus
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots and update time */}
-        <div className="flex items-center justify-between mt-auto">
-          {/* Dot navigation */}
-          {newsItems.length > 1 ? (
-            <div className="flex items-center gap-2">
+        {/* Footer with dots - fixed height, ultra-tight, no layout jitter */}
+        <div className="h-4 flex items-center mt-auto shrink-0">
+          {newsItems.length > 1 && (
+            <div className="flex items-center gap-px">
               {newsItems.map((_, i) => (
-                <div
+                <button
                   key={i}
                   onClick={() => setCurrentIndex(i)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && setCurrentIndex(i)}
-                  className={cn(
-                    "w-2.5 h-2.5 rounded-full cursor-pointer",
-                    // Important: no transitions here (prevents visible "trails" on some browsers)
-                    "transition-none",
-                    i === currentIndex 
-                      ? "bg-white" 
-                      : "bg-white/30 hover:bg-white/50"
-                  )}
+                  className="w-3 h-3 p-0 flex items-center justify-center leading-none touch-manipulation"
                   aria-label={`Gå till nyhet ${i + 1}`}
-                />
+                >
+                  <span
+                    className={cn(
+                      "block w-1.5 h-1.5 rounded-full",
+                      i === currentIndex ? "bg-white" : "bg-white/30"
+                    )}
+                  />
+                </button>
               ))}
             </div>
-          ) : <div />}
+          )}
         </div>
       </CardContent>
     </Card>
@@ -513,22 +509,25 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation */}
-        <div className="flex items-center gap-2 mt-auto">
-          {statsArray.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              className={cn(
-                // Important: no transitions here (prevents visible "trails" on some browsers)
-                "w-2.5 h-2.5 rounded-full transition-none",
-                i === currentIndex 
-                  ? "bg-white" 
-                  : "bg-white/30 hover:bg-white/50"
-              )}
-              aria-label={`Gå till statistik ${i + 1}`}
-            />
-          ))}
+        {/* Dot navigation - fixed height, ultra-tight, no layout jitter */}
+        <div className="h-4 flex items-center mt-auto shrink-0">
+          <div className="flex items-center gap-px">
+            {statsArray.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className="w-3 h-3 p-0 flex items-center justify-center leading-none touch-manipulation"
+                aria-label={`Gå till statistik ${i + 1}`}
+              >
+                <span
+                  className={cn(
+                    "block w-1.5 h-1.5 rounded-full",
+                    i === currentIndex ? "bg-white" : "bg-white/30"
+                  )}
+                />
+              </button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
