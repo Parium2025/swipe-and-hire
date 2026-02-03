@@ -18,8 +18,17 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 const AUTH_DEBUG = false;
 
 const Auth = () => {
+  // Clear skip-splash flag on mount (used when navigating from landing)
+  useEffect(() => {
+    sessionStorage.removeItem('parium-skip-splash');
+  }, []);
+
   const [showIntro, setShowIntro] = useState(() => {
     try {
+      // If coming from landing page, skip intro entirely
+      if (sessionStorage.getItem('parium-skip-splash') === '1') {
+        return false;
+      }
       const loc = typeof window !== 'undefined' ? window.location : null;
       if (loc) {
         const sp = new URLSearchParams(loc.search);

@@ -37,6 +37,8 @@ const Landing = () => {
   }, []);
 
   const handleLogin = () => {
+    // Mark that we're coming from landing - skip splash on auth page
+    sessionStorage.setItem('parium-skip-splash', '1');
     navigate('/auth');
   };
 
@@ -106,7 +108,10 @@ const Landing = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                onClick={() => navigate('/auth', { state: { mode: 'register', role: 'job_seeker' } })}
+                onClick={() => {
+                  sessionStorage.setItem('parium-skip-splash', '1');
+                  navigate('/auth', { state: { mode: 'register', role: 'job_seeker' } });
+                }}
                 className="bg-white/5 backdrop-blur-[2px] border border-white/20 text-white p-4 sm:p-5 rounded-lg cursor-pointer hover:bg-white/15 hover:shadow-2xl transition-all duration-300 hover:scale-105 group min-h-[80px] sm:min-h-[90px]"
               >
                 <div className="flex items-center justify-between mb-2">
@@ -124,7 +129,10 @@ const Landing = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                onClick={() => navigate('/auth', { state: { mode: 'register', role: 'employer' } })}
+                onClick={() => {
+                  sessionStorage.setItem('parium-skip-splash', '1');
+                  navigate('/auth', { state: { mode: 'register', role: 'employer' } });
+                }}
                 className="bg-white/5 backdrop-blur-[2px] border border-white/20 text-white p-4 sm:p-5 rounded-lg cursor-pointer hover:bg-white/15 hover:shadow-2xl transition-all duration-300 hover:scale-105 group min-h-[80px] sm:min-h-[90px]"
               >
                 <div className="flex items-center justify-between mb-2">
