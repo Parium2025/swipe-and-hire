@@ -18,32 +18,20 @@ export interface HrNewsItem {
   is_translated?: boolean;
 }
 
-// LocalStorage cache for instant load - WITH daily invalidation
+// LocalStorage cache for instant load - no expiry, always syncs in background
 const CACHE_KEY = 'parium_hr_news_cache';
 
 interface CachedData {
   items: HrNewsItem[];
   timestamp: number;
-  dateKey: string; // YYYY-MM-DD to invalidate on day change
 }
 
-function getTodayKey(): string {
-  return new Date().toISOString().split('T')[0];
-}
-
-function readCache(): { items: HrNewsItem[]; timestamp: number } | null {
+function readCache(): HrNewsItem[] | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const cached: CachedData = JSON.parse(raw);
-    
-    // Invalidate cache if it's from a different day
-    if (cached.dateKey !== getTodayKey()) {
-      localStorage.removeItem(CACHE_KEY);
-      return null;
-    }
-    
-    return { items: cached.items, timestamp: cached.timestamp };
+    return cached.items;
   } catch {
     return null;
   }
@@ -51,11 +39,7 @@ function readCache(): { items: HrNewsItem[]; timestamp: number } | null {
 
 function writeCache(items: HrNewsItem[]): void {
   try {
-    const cached: CachedData = { 
-      items, 
-      timestamp: Date.now(),
-      dateKey: getTodayKey()
-    };
+    const cached: CachedData = { items, timestamp: Date.now() };
     localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
   } catch {
     // Storage full
@@ -155,14 +139,10 @@ export const useHrNews = () => {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     // Instant load from localStorage cache
-    initialData: () => {
-      const cached = readCache();
-      return cached?.items ?? undefined;
-    },
+    initialData: () => readCache() ?? undefined,
     initialDataUpdatedAt: () => {
       const cached = readCache();
-      // Use actual cache timestamp for proper staleness calculation
-      return cached?.timestamp ?? undefined;
+      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
     },
   });
 };
