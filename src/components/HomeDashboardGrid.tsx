@@ -215,24 +215,20 @@ const NewsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaus
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots - fixed height, ultra-tight, no layout jitter */}
-        <div className="h-4 flex items-center mt-auto shrink-0">
+        {/* Footer with dots - larger, more visible dots */}
+        <div className="h-6 flex items-center mt-auto shrink-0">
           {newsItems.length > 1 && (
-            <div className="flex items-center gap-px">
+            <div className="flex items-center gap-1.5">
               {newsItems.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrentIndex(i)}
-                  className="w-3 h-3 p-0 flex items-center justify-center leading-none touch-manipulation"
+                  className={cn(
+                    "w-2.5 h-2.5 rounded-full touch-manipulation transition-none",
+                    i === currentIndex ? "bg-white" : "bg-white/30"
+                  )}
                   aria-label={`Gå till nyhet ${i + 1}`}
-                >
-                  <span
-                    className={cn(
-                      "block w-1.5 h-1.5 rounded-full",
-                      i === currentIndex ? "bg-white" : "bg-white/30"
-                    )}
-                  />
-                </button>
+                />
               ))}
             </div>
           )}
@@ -509,23 +505,19 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation - fixed height, ultra-tight, no layout jitter */}
-        <div className="h-4 flex items-center mt-auto shrink-0">
-          <div className="flex items-center gap-px">
+        {/* Dot navigation - larger, more visible dots */}
+        <div className="h-6 flex items-center mt-auto shrink-0">
+          <div className="flex items-center gap-1.5">
             {statsArray.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentIndex(i)}
-                className="w-3 h-3 p-0 flex items-center justify-center leading-none touch-manipulation"
+                className={cn(
+                  "w-2.5 h-2.5 rounded-full touch-manipulation transition-none",
+                  i === currentIndex ? "bg-white" : "bg-white/30"
+                )}
                 aria-label={`Gå till statistik ${i + 1}`}
-              >
-                <span
-                  className={cn(
-                    "block w-1.5 h-1.5 rounded-full",
-                    i === currentIndex ? "bg-white" : "bg-white/30"
-                  )}
-                />
-              </button>
+              />
             ))}
           </div>
         </div>
