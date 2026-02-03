@@ -107,18 +107,24 @@
       /* Desktop: py-8 (32px) + center av 260px container */
       padding-top: 50px;
       background: hsl(215, 100%, 12%);
-      /* CRITICAL: Start invisible (not just transparent) to prevent mobile flash */
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.4s ease-out, visibility 0s linear 0.4s;
-      transform: translateZ(0);
-      will-change: opacity, visibility;
-    }
-    /* Fade-in state - visibility must be immediate, opacity transitions */
-    #auth-splash.fade-in {
+      /* Start fully visible to block content immediately */
       opacity: 1;
-      visibility: visible;
-      transition: opacity 0.4s ease-out, visibility 0s linear 0s;
+      transition: opacity 0.4s ease-out;
+      transform: translateZ(0);
+      will-change: opacity;
+    }
+    /* Content elements fade in separately */
+    #auth-splash-logo,
+    #auth-splash-tagline,
+    #auth-splash-dots {
+      opacity: 0;
+      transition: opacity 0.4s ease-out;
+    }
+    /* When splash is ready, fade in content */
+    #auth-splash.content-ready #auth-splash-logo,
+    #auth-splash.content-ready #auth-splash-tagline,
+    #auth-splash.content-ready #auth-splash-dots {
+      opacity: 1;
     }
     /* Mobile: safe-area + pt-6 (24px) */
     @media (max-width: 640px) {
@@ -126,9 +132,7 @@
     }
     #auth-splash.fade-out {
       opacity: 0;
-      visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.4s ease-out, visibility 0s linear 0.4s;
     }
     #auth-splash-logo {
       /* Matchar AuthSplashScreen EXAKT: desktop h-56 (224px) */
@@ -230,24 +234,24 @@
             var splash = document.getElementById('auth-splash');
             var logo = document.getElementById('auth-splash-logo');
             if (splash && logo) {
-              // Display container (invisible due to opacity: 0)
+              // Display container IMMEDIATELY with dark background to block auth content
               splash.style.display = 'flex';
               
-              // Function to trigger fade-in
-              function startFadeIn() {
+              // Function to fade in content (not the container)
+              function showContent() {
                 requestAnimationFrame(function() {
-                  splash.classList.add('fade-in');
+                  splash.classList.add('content-ready');
                 });
               }
               
-              // Wait for logo to load, then fade in
+              // Wait for logo to load, then fade in content
               if (logo.complete && logo.naturalHeight !== 0) {
                 // Already loaded (cached)
-                startFadeIn();
+                showContent();
               } else {
-                logo.onload = startFadeIn;
+                logo.onload = showContent;
                 // Fallback if image fails
-                logo.onerror = startFadeIn;
+                logo.onerror = showContent;
               }
               
               // Fade dots first (0.5s before splash fades)
@@ -256,9 +260,8 @@
                 if (dots) dots.classList.add('fading');
               }, 1500);
               
-              // Fade out splash after 2 seconds
+              // Fade out entire splash after 2 seconds
               setTimeout(function() {
-                splash.classList.remove('fade-in');
                 splash.classList.add('fade-out');
                 // Remove from DOM after fade
                 setTimeout(function() {
