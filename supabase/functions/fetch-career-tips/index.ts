@@ -118,6 +118,22 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Decode HTML entities like &#8211; → – and &amp; → &
+function decodeHtmlEntities(text: string): string {
+  if (!text) return text;
+  return text
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&ndash;/g, '–')
+    .replace(/&mdash;/g, '—')
+    .replace(/&nbsp;/g, ' ');
+}
+
 function isWithin5Days(dateStr: string): boolean {
   try {
     const d = new Date(dateStr);
@@ -142,11 +158,11 @@ function parseRSSItems(xml: string): { title: string; description: string; link:
     
     let tm = c.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i);
     if (!tm) tm = c.match(/<title>([^<]*)<\/title>/i);
-    const title = tm ? tm[1].trim() : '';
+    const title = decodeHtmlEntities(tm ? tm[1].trim() : '');
     
     let dm = c.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/is);
     if (!dm) dm = c.match(/<description>([^<]*)<\/description>/i);
-    let desc = dm ? dm[1].trim().replace(/<[^>]+>/g, '') : '';
+    let desc = decodeHtmlEntities(dm ? dm[1].trim().replace(/<[^>]+>/g, '') : '');
     
     const lm = c.match(/<link>([^<]*)<\/link>/i) || c.match(/<guid[^>]*>([^<]*)<\/guid>/i);
     const link = lm ? lm[1].trim() : '';
