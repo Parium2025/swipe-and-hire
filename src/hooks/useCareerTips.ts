@@ -18,20 +18,32 @@ export interface CareerTipItem {
   is_translated?: boolean;
 }
 
-// LocalStorage cache for instant load - no expiry, always syncs in background
+// LocalStorage cache for instant load - WITH daily invalidation
 const CACHE_KEY = 'parium_career_tips_cache';
 
 interface CachedData {
   items: CareerTipItem[];
   timestamp: number;
+  dateKey: string; // YYYY-MM-DD to invalidate on day change
 }
 
-function readCache(): CareerTipItem[] | null {
+function getTodayKey(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function readCache(): { items: CareerTipItem[]; timestamp: number } | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const cached: CachedData = JSON.parse(raw);
-    return cached.items;
+    
+    // Invalidate cache if it's from a different day
+    if (cached.dateKey !== getTodayKey()) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    
+    return { items: cached.items, timestamp: cached.timestamp };
   } catch {
     return null;
   }
@@ -39,7 +51,11 @@ function readCache(): CareerTipItem[] | null {
 
 function writeCache(items: CareerTipItem[]): void {
   try {
-    const cached: CachedData = { items, timestamp: Date.now() };
+    const cached: CachedData = { 
+      items, 
+      timestamp: Date.now(),
+      dateKey: getTodayKey()
+    };
     localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
   } catch {
     // Storage full
@@ -139,10 +155,14 @@ export const useCareerTips = () => {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     // Instant load from localStorage cache
-    initialData: () => readCache() ?? undefined,
+    initialData: () => {
+      const cached = readCache();
+      return cached?.items ?? undefined;
+    },
     initialDataUpdatedAt: () => {
       const cached = readCache();
-      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+      // Use actual cache timestamp for proper staleness calculation
+      return cached?.timestamp ?? undefined;
     },
   });
 };
