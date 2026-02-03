@@ -11,20 +11,12 @@ interface AnimatedBackgroundProps {
   variant?: 'viewport' | 'card';
 }
 
-// Detect touch device once (cheap, avoids re-eval on each render)
-const isTouchDevice =
-  typeof window !== 'undefined' &&
-  ('ontouchstart' in window || navigator.maxTouchPoints > 0);
-
 export const AnimatedBackground = memo(({ showBubbles = true, variant = 'viewport' }: AnimatedBackgroundProps) => {
   const positionClass = variant === 'card' ? 'absolute' : 'fixed';
 
-  // On touch devices skip animated bubbles entirely for max responsiveness
-  const renderBubbles = showBubbles && !isTouchDevice;
-
   return (
     <div className={`${positionClass} inset-0 pointer-events-none z-0`}>
-      {renderBubbles && (
+      {showBubbles && (
         <>
           {/* Left-side bubbles (top corner) */}
           <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full"></div>
