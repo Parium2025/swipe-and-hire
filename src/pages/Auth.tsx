@@ -1,13 +1,12 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import { useToast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
-import { AnimatedBackground } from '@/components/AnimatedBackground';
 // AnimatedIntro removed - using index.html splash instead
 import AuthMobile from '@/components/AuthMobile';
+import AuthTablet from '@/components/AuthTablet';
 import AuthDesktop from '@/components/AuthDesktop';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -75,6 +74,9 @@ const Auth = () => {
     }
 
     try {
+      const html = document.documentElement;
+      const body = document.body;
+      
       if (isLoginMode) {
         // Login mode: enable pull-to-refresh and block scroll via listeners (no global CSS class)
         
@@ -397,7 +399,7 @@ const Auth = () => {
     navigate(newUrl, { replace: true });
   };
 
-  const handleResendReset = async (e: FormEvent) => {
+  const handleResendReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setResendMessage('');
     setResending(true);
@@ -425,7 +427,7 @@ const Auth = () => {
     navigate('/auth', { replace: true });
   };
 
-  const handlePasswordReset = async (e: FormEvent) => {
+  const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
     console.log('🔄 Starting handlePasswordReset');
@@ -716,15 +718,7 @@ const Auth = () => {
   // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
     return (
-      <>
-        {/* AnimatedBackground outside motion.div - always visible, no fade delay */}
-        <AnimatedBackground />
-        <motion.div 
-          className="min-h-screen w-full overflow-x-hidden relative z-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-        >
+      <div className="min-h-screen w-full overflow-x-hidden relative">
         {/* Pull-to-refresh spinner */}
         <div 
           className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -761,53 +755,43 @@ const Auth = () => {
           initialMode={initialMode}
           initialRole={initialRole}
         />
-      </motion.div>
-      </>
+      </div>
     );
   }
 
   // Desktop layout (includes former tablet layout)
 
   return (
-    <>
-      {/* AnimatedBackground outside motion.div - always visible, no fade delay */}
-      <AnimatedBackground />
-      <motion.div 
-        className="min-h-screen w-full overflow-x-hidden relative z-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+    <div className="min-h-screen w-full overflow-x-hidden relative">
+      {/* Pull-to-refresh spinner */}
+      <div 
+        className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
+        style={{ 
+          opacity: pullProgress,
+          pointerEvents: 'none'
+        }}
       >
-        {/* Pull-to-refresh spinner */}
-        <div 
-          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
-          style={{ 
-            opacity: pullProgress,
-            pointerEvents: 'none'
+        <Loader2 
+          className={`w-8 h-8 text-primary-foreground ${isRefreshing ? 'animate-spin' : ''}`}
+          style={{
+            transform: isRefreshing ? 'none' : `rotate(${pullProgress * 360}deg)`,
+            transition: isRefreshing ? 'none' : 'transform 0.1s linear'
           }}
-        >
-          <Loader2 
-            className={`w-8 h-8 text-primary-foreground ${isRefreshing ? 'animate-spin' : ''}`}
-            style={{
-              transform: isRefreshing ? 'none' : `rotate(${pullProgress * 360}deg)`,
-              transition: isRefreshing ? 'none' : 'transform 0.1s linear'
-            }}
-          />
-        </div>
-        <AuthDesktop
-          isPasswordReset={isPasswordReset}
-          newPassword={newPassword}
-          setNewPassword={setNewPassword}
-          confirmPassword={confirmPassword}
-          setConfirmPassword={setConfirmPassword}
-          handlePasswordReset={handlePasswordReset}
-          onBackToLogin={handleBackToLogin}
-          onAuthModeChange={setIsLoginMode}
-          initialMode={initialMode}
-          initialRole={initialRole}
         />
-      </motion.div>
-    </>
+      </div>
+      <AuthDesktop
+        isPasswordReset={isPasswordReset}
+        newPassword={newPassword}
+        setNewPassword={setNewPassword}
+        confirmPassword={confirmPassword}
+        setConfirmPassword={setConfirmPassword}
+        handlePasswordReset={handlePasswordReset}
+        onBackToLogin={handleBackToLogin}
+        onAuthModeChange={setIsLoginMode}
+        initialMode={initialMode}
+        initialRole={initialRole}
+      />
+    </div>
   );
 };
 

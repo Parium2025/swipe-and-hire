@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, startTransition, type FormEvent } from 'react';
+import { useState, useRef, useEffect, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-// AnimatedBackground moved to Auth.tsx for consistent layering
+import { AnimatedBackground } from './AnimatedBackground';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,7 +27,7 @@ interface AuthDesktopProps {
   setNewPassword: (value: string) => void;
   confirmPassword: string;
   setConfirmPassword: (value: string) => void;
-  handlePasswordReset: (e: FormEvent) => void;
+  handlePasswordReset: (e: React.FormEvent) => void;
   onBackToLogin?: () => void;
   onAuthModeChange?: (isLogin: boolean) => void;
   initialMode?: string;
@@ -234,7 +234,7 @@ const AuthDesktop = ({
     setPasswordStrength(0);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Check if online before attempting auth
@@ -551,7 +551,8 @@ const AuthDesktop = ({
     <div 
       className="flex flex-col relative auth-dark" 
     >
-      {/* AnimatedBackground now rendered in Auth.tsx */}
+      {/* Animated background with bubbles and glow */}
+      <AnimatedBackground />
 
       <div className="relative z-10 flex flex-col min-h-screen py-8 px-6 overflow-y-auto">
         {/* Header med logo och text */}

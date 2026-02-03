@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, startTransition, type FormEvent } from 'react';
+import { useState, useRef, useEffect, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,7 +27,7 @@ interface AuthTabletProps {
   setNewPassword: (value: string) => void;
   confirmPassword: string;
   setConfirmPassword: (value: string) => void;
-  handlePasswordReset: (e: FormEvent) => void;
+  handlePasswordReset: (e: React.FormEvent) => void;
   onBackToLogin?: () => void;
   onAuthModeChange?: (isLogin: boolean) => void;
   initialMode?: string;
@@ -234,7 +234,7 @@ const AuthTablet = ({
     setPasswordStrength(0);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Check if online before attempting auth
