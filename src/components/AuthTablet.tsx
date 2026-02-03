@@ -685,7 +685,7 @@ const AuthTablet = ({
                       </label>
                       
                        <Button type="submit" variant="glass" className="w-full" disabled={loading}>
-                         {loading ? "Loggar in..." : "Logga in"}
+                         Logga in
                        </Button>
                        
                         <div className="text-center mt-3">
