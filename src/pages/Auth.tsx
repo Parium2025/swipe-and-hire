@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 // AnimatedIntro removed - using index.html splash instead
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
@@ -18,6 +19,12 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 const AUTH_DEBUG = false;
 
 const Auth = () => {
+  // Check if we came from landing page (should fade in)
+  const [shouldFadeIn] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem('parium-skip-splash') === '1';
+  });
+
   // Clear skip-splash flag on mount (used when navigating from landing)
   useEffect(() => {
     sessionStorage.removeItem('parium-skip-splash');
@@ -718,7 +725,12 @@ const Auth = () => {
   // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
     return (
-      <div className="min-h-screen w-full overflow-x-hidden relative">
+      <motion.div 
+        className="min-h-screen w-full overflow-x-hidden relative"
+        initial={shouldFadeIn ? { opacity: 0 } : false}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+      >
         {/* Pull-to-refresh spinner */}
         <div 
           className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -755,14 +767,19 @@ const Auth = () => {
           initialMode={initialMode}
           initialRole={initialRole}
         />
-      </div>
+      </motion.div>
     );
   }
 
   // Desktop layout (includes former tablet layout)
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden relative">
+    <motion.div 
+      className="min-h-screen w-full overflow-x-hidden relative"
+      initial={shouldFadeIn ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
       {/* Pull-to-refresh spinner */}
       <div 
         className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -791,7 +808,7 @@ const Auth = () => {
         initialMode={initialMode}
         initialRole={initialRole}
       />
-    </div>
+    </motion.div>
   );
 };
 
