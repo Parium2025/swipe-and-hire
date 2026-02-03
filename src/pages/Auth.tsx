@@ -125,6 +125,10 @@ const Auth = () => {
             if (now - lastReload > 1500) {
               lastReload = now;
               setIsRefreshing(true);
+              // Ensure index.html splash shows on pull-to-refresh (same as browser refresh)
+              try {
+                sessionStorage.removeItem('parium-skip-splash');
+              } catch {}
               setTimeout(() => {
                 window.location.reload();
               }, 300);
