@@ -5,8 +5,7 @@ import { useDevice } from '@/hooks/use-device';
 // Minsta visningstid för att garantera att loggan hinner laddas och avkodas
 const MINIMUM_DISPLAY_MS = 2000;
 
-// Logo aspect ratio (original: 1080x432)
-const AUTH_LOGO_ASPECT = 1080 / 432;
+// Minsta visningstid
 
 /**
  * AuthSplashScreen - Premium "loading shell" för auth-sidan.
@@ -100,7 +99,7 @@ export function AuthSplashScreen() {
   // Tablet: AuthTablet.tsx line 592: h-[224px]
   // Desktop: AuthDesktop.tsx line 583: h-56 (224px), lg:h-64 (256px)
   const logoHeight = isMobile ? 200 : (isLargeDesktop ? 256 : 224);
-  const logoWidth = Math.round(logoHeight * AUTH_LOGO_ASPECT);
+  
   
   // Auth page padding structure:
   // Mobile: pt-6 (24px) + safe-area-inset-top via env()
@@ -143,103 +142,22 @@ export function AuthSplashScreen() {
         pointerEvents: isFadingOut ? 'none' : 'auto',
       }}
     >
-      {/* Logo container - matches auth page's min-height wrapper */}
-      <div
-        style={{
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: `${logoHeight + 40}px`, // Extra space for glow
-          width: '100%',
-          maxWidth: isMobile ? '400px' : '560px',
+      {/* Parium Logo - enkel utan glow */}
+      <img
+        src="/parium-auth-logo.png"
+        alt="Parium"
+        onLoad={() => setImageLoaded(true)}
+        onError={() => setImageLoaded(true)}
+        style={{ 
+          height: `${logoHeight}px`,
+          width: 'auto',
+          marginBottom: 0,
+          transform: 'translateZ(0)',
         }}
-      >
-        {/* Glow layers - matching auth page glow structure */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transform: 'translateY(-8px)',
-        }}>
-          <div style={{
-            width: '288px',
-            height: '208px',
-            background: 'rgba(59, 130, 246, 0.25)',
-            borderRadius: '50%',
-            filter: 'blur(40px)',
-          }} />
-        </div>
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transform: 'translateY(-8px)',
-        }}>
-          <div style={{
-            width: '208px',
-            height: '144px',
-            background: 'rgba(59, 130, 246, 0.22)',
-            borderRadius: '50%',
-            filter: 'blur(35px)',
-          }} />
-        </div>
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transform: 'translateY(-8px)',
-        }}>
-          <div style={{
-            width: '176px',
-            height: '112px',
-            background: 'rgba(59, 130, 246, 0.20)',
-            borderRadius: '50%',
-            filter: 'blur(30px)',
-          }} />
-        </div>
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transform: 'translateY(-8px)',
-        }}>
-          <div style={{
-            width: '144px',
-            height: '80px',
-            background: 'rgba(59, 130, 246, 0.18)',
-            borderRadius: '50%',
-            filter: 'blur(25px)',
-          }} />
-        </div>
-        
-        {/* Parium Logo */}
-        <img
-          src="/parium-auth-logo.png"
-          alt="Parium"
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageLoaded(true)}
-          style={{ 
-            position: 'relative',
-            height: `${logoHeight}px`,
-            width: `${logoWidth}px`,
-            maxWidth: '90vw',
-            objectFit: 'contain',
-            transform: 'translateZ(0)',
-          }}
-          decoding="sync"
-          loading="eager"
-          fetchPriority="high"
-        />
-      </div>
+        decoding="sync"
+        loading="eager"
+        fetchPriority="high"
+      />
       
       {/* Tagline - synced typography with auth page h1 */}
       <p 
