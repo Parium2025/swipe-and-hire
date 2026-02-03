@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
@@ -6,15 +6,12 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Button } from '@/components/ui/button';
 import { Zap, Video, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const HERO_URL = '/assets/hero-woman-left-hand-verified.jpg';
 
-// Synkron touch-detektering (samma som AnimatedBackground) — ingen hook-fördröjning
-const isTouchDevice =
-  typeof window !== 'undefined' &&
-  ('ontouchstart' in window || navigator.maxTouchPoints > 0);
-
 const Landing = () => {
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
 
@@ -69,7 +66,7 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="relative pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-24 min-h-screen flex items-center">
         {/* Background: Video on desktop, Image on mobile/touch */}
-        {isTouchDevice ? (
+        {isMobile ? (
           <img
             src={HERO_URL}
             alt="Parium hero"
