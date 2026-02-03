@@ -137,7 +137,7 @@ export const useHrNews = () => {
     retry: 2,
     retryDelay: 1000,
     refetchOnWindowFocus: true,
-    refetchOnMount: true,
+    refetchOnMount: 'always',
     // Instant load from localStorage cache
     initialData: () => readCache() ?? undefined,
     initialDataUpdatedAt: () => {
