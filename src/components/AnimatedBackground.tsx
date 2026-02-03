@@ -13,9 +13,11 @@ interface AnimatedBackgroundProps {
 
 export const AnimatedBackground = memo(({ showBubbles = true, variant = 'viewport' }: AnimatedBackgroundProps) => {
   const positionClass = variant === 'card' ? 'absolute' : 'fixed';
+  // Keep bubbles behind interactive UI in viewport mode (e.g., Auth forms)
+  const zClass = variant === 'card' ? 'z-0' : 'z-[-1]';
 
   return (
-    <div className={`${positionClass} inset-0 pointer-events-none z-0`}>
+    <div className={`${positionClass} inset-0 pointer-events-none ${zClass}`}>
       {showBubbles && (
         <>
           {/* Left-side bubbles (top corner) */}
