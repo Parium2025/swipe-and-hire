@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 // AnimatedIntro removed - using index.html splash instead
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
@@ -719,12 +720,15 @@ const Auth = () => {
   // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
     return (
-      <motion.div 
-        className="min-h-screen w-full overflow-x-hidden relative"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-      >
+      <>
+        {/* AnimatedBackground outside motion.div - always visible, no fade delay */}
+        <AnimatedBackground />
+        <motion.div 
+          className="min-h-screen w-full overflow-x-hidden relative z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
         {/* Pull-to-refresh spinner */}
         <div 
           className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -762,47 +766,52 @@ const Auth = () => {
           initialRole={initialRole}
         />
       </motion.div>
+      </>
     );
   }
 
   // Desktop layout (includes former tablet layout)
 
   return (
-    <motion.div 
-      className="min-h-screen w-full overflow-x-hidden relative"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-    >
-      {/* Pull-to-refresh spinner */}
-      <div 
-        className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
-        style={{ 
-          opacity: pullProgress,
-          pointerEvents: 'none'
-        }}
+    <>
+      {/* AnimatedBackground outside motion.div - always visible, no fade delay */}
+      <AnimatedBackground />
+      <motion.div 
+        className="min-h-screen w-full overflow-x-hidden relative z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
       >
-        <Loader2 
-          className={`w-8 h-8 text-primary-foreground ${isRefreshing ? 'animate-spin' : ''}`}
-          style={{
-            transform: isRefreshing ? 'none' : `rotate(${pullProgress * 360}deg)`,
-            transition: isRefreshing ? 'none' : 'transform 0.1s linear'
+        {/* Pull-to-refresh spinner */}
+        <div 
+          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
+          style={{ 
+            opacity: pullProgress,
+            pointerEvents: 'none'
           }}
+        >
+          <Loader2 
+            className={`w-8 h-8 text-primary-foreground ${isRefreshing ? 'animate-spin' : ''}`}
+            style={{
+              transform: isRefreshing ? 'none' : `rotate(${pullProgress * 360}deg)`,
+              transition: isRefreshing ? 'none' : 'transform 0.1s linear'
+            }}
+          />
+        </div>
+        <AuthDesktop
+          isPasswordReset={isPasswordReset}
+          newPassword={newPassword}
+          setNewPassword={setNewPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          handlePasswordReset={handlePasswordReset}
+          onBackToLogin={handleBackToLogin}
+          onAuthModeChange={setIsLoginMode}
+          initialMode={initialMode}
+          initialRole={initialRole}
         />
-      </div>
-      <AuthDesktop
-        isPasswordReset={isPasswordReset}
-        newPassword={newPassword}
-        setNewPassword={setNewPassword}
-        confirmPassword={confirmPassword}
-        setConfirmPassword={setConfirmPassword}
-        handlePasswordReset={handlePasswordReset}
-        onBackToLogin={handleBackToLogin}
-        onAuthModeChange={setIsLoginMode}
-        initialMode={initialMode}
-        initialRole={initialRole}
-      />
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 
