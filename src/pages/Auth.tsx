@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 // AnimatedIntro removed - using index.html splash instead
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
@@ -718,7 +719,12 @@ const Auth = () => {
   // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
     return (
-      <div className="min-h-screen w-full overflow-x-hidden relative">
+      <motion.div 
+        className="min-h-screen w-full overflow-x-hidden relative"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+      >
         {/* Pull-to-refresh spinner */}
         <div 
           className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -755,14 +761,19 @@ const Auth = () => {
           initialMode={initialMode}
           initialRole={initialRole}
         />
-      </div>
+      </motion.div>
     );
   }
 
   // Desktop layout (includes former tablet layout)
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden relative">
+    <motion.div 
+      className="min-h-screen w-full overflow-x-hidden relative"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
       {/* Pull-to-refresh spinner */}
       <div 
         className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -791,7 +802,7 @@ const Auth = () => {
         initialMode={initialMode}
         initialRole={initialRole}
       />
-    </div>
+    </motion.div>
   );
 };
 
