@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
@@ -6,9 +6,12 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Button } from '@/components/ui/button';
 import { Zap, Video, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 const HERO_URL = '/assets/hero-woman-left-hand-verified.jpg';
 
 const Landing = () => {
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
 
@@ -62,23 +65,25 @@ const Landing = () => {
       
       {/* Hero Section */}
       <section className="relative pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-24 min-h-screen flex items-center">
-        {/* Background Video */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover will-change-transform select-none"
-          style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
-        >
-          <source src="/assets/hero-video.mp4" type="video/mp4" />
-          {/* Fallback image om video inte laddar */}
+        {/* Background: Video on desktop, Image on mobile/touch */}
+        {isMobile ? (
           <img
             src={HERO_URL}
             alt="Parium hero"
             className="absolute inset-0 w-full h-full object-cover"
           />
-        </video>
+        ) : (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover will-change-transform select-none"
+            style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
+          >
+            <source src="/assets/hero-video.mp4" type="video/mp4" />
+          </video>
+        )}
         {/* Overlay för bättre textläsbarhet */}
         <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/40 to-transparent md:from-primary/70 md:via-primary/20" />
         
