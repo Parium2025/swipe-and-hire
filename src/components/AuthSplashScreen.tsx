@@ -5,11 +5,14 @@ import { useDevice } from '@/hooks/use-device';
 // Minsta visningstid för att garantera att loggan hinner laddas och avkodas
 const MINIMUM_DISPLAY_MS = 2000;
 
+// Logo aspect ratio (original: 1080x432)
+const AUTH_LOGO_ASPECT = 1080 / 432;
+
 /**
  * AuthSplashScreen - Premium "loading shell" för auth-sidan.
  * 
- * Matchar EXAKT samma struktur som index.html #auth-splash
- * så att fade-in/out blir pixel-perfekt oavsett entry-point.
+ * Synkad med auth-sidans layout så att logo + tagline
+ * ligger EXAKT på samma position → sömlös fade-övergång.
  */
 export function AuthSplashScreen() {
   const device = useDevice();
@@ -51,7 +54,6 @@ export function AuthSplashScreen() {
   // Trigger fade-in when image is loaded
   useEffect(() => {
     if (isVisible && imageLoaded && !isFadingOut) {
-      // Use requestAnimationFrame for smooth fade-in like index.html
       requestAnimationFrame(() => {
         setIsFadingIn(true);
       });
@@ -87,23 +89,38 @@ export function AuthSplashScreen() {
   
   if (!isVisible) return null;
   
-  // Beräkna storlekar som matchar index.html EXAKT
   const isMobile = device === 'mobile';
   const isLargeDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
   
-  // Logo: desktop 224px, lg 256px, mobile 200px
+  // ─────────────────────────────────────────────────────────────────────────────
+  // SYNKA MED AUTH-SIDANS LAYOUT (AuthMobile/AuthTablet/AuthDesktop)
+  // ─────────────────────────────────────────────────────────────────────────────
+  
+  // Mobile: AuthMobile.tsx line 659: h-40 (160px) scale-125 = ~200px visual height
+  // Tablet: AuthTablet.tsx line 592: h-[224px]
+  // Desktop: AuthDesktop.tsx line 583: h-56 (224px), lg:h-64 (256px)
   const logoHeight = isMobile ? 200 : (isLargeDesktop ? 256 : 224);
+  const logoWidth = Math.round(logoHeight * AUTH_LOGO_ASPECT);
   
-  // Padding-top: desktop 50px, mobile safe-area + 24px
-  const paddingTop = isMobile 
+  // Auth page padding structure:
+  // Mobile: pt-6 (24px) + safe-area-inset-top via env()
+  // Tablet: py-safe (auto) + pt-6 (24px) inside nested div
+  // Desktop: py-8 (32px) + container padding
+  const safePaddingTop = isMobile 
     ? 'calc(env(safe-area-inset-top, 0px) + 24px)' 
-    : '50px';
+    : isLargeDesktop 
+      ? '32px' 
+      : '24px';
   
-  // Tagline font-size: desktop 1.25rem, lg/mobile 1.5rem
+  // Tagline: Auth uses "Framtiden börjar med ett swipe"
+  // Splash matches visual weight with "Din karriärresa börjar här"
+  // Typography synced with auth: text-2xl font-semibold on mobile/tablet, xl-2xl on desktop
   const fontSize = isMobile ? '1.5rem' : (isLargeDesktop ? '1.5rem' : '1.25rem');
   
-  // Tagline margin-top: desktop 8px, mobile 4px
-  const taglineMarginTop = isMobile ? '4px' : '8px';
+  // Gap between logo and tagline - match auth layout margins
+  // AuthMobile: -mb-6 on logo container, mb-2 on h1
+  // AuthDesktop: mb-2 on logo container, mb-3 on h1  
+  const taglineMarginTop = isMobile ? '4px' : '12px';
   
   return (
     <div
@@ -115,7 +132,9 @@ export function AuthSplashScreen() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        paddingTop,
+        paddingTop: safePaddingTop,
+        paddingLeft: '24px',
+        paddingRight: '24px',
         background: 'hsl(215, 100%, 12%)',
         opacity: isFadingIn && !isFadingOut ? 1 : 0,
         transition: 'opacity 0.4s ease-out',
@@ -124,24 +143,105 @@ export function AuthSplashScreen() {
         pointerEvents: isFadingOut ? 'none' : 'auto',
       }}
     >
-      {/* Parium Logo - exakt samma som index.html */}
-      <img
-        src="/parium-auth-logo.png"
-        alt="Parium"
-        onLoad={() => setImageLoaded(true)}
-        onError={() => setImageLoaded(true)}
-        style={{ 
-          height: `${logoHeight}px`,
-          width: 'auto',
-          marginBottom: 0,
-          transform: 'translateZ(0)',
+      {/* Logo container - matches auth page's min-height wrapper */}
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: `${logoHeight + 40}px`, // Extra space for glow
+          width: '100%',
+          maxWidth: isMobile ? '400px' : '560px',
         }}
-        decoding="sync"
-        loading="eager"
-        fetchPriority="high"
-      />
+      >
+        {/* Glow layers - matching auth page glow structure */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transform: 'translateY(-8px)',
+        }}>
+          <div style={{
+            width: '288px',
+            height: '208px',
+            background: 'rgba(59, 130, 246, 0.25)',
+            borderRadius: '50%',
+            filter: 'blur(40px)',
+          }} />
+        </div>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transform: 'translateY(-8px)',
+        }}>
+          <div style={{
+            width: '208px',
+            height: '144px',
+            background: 'rgba(59, 130, 246, 0.22)',
+            borderRadius: '50%',
+            filter: 'blur(35px)',
+          }} />
+        </div>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transform: 'translateY(-8px)',
+        }}>
+          <div style={{
+            width: '176px',
+            height: '112px',
+            background: 'rgba(59, 130, 246, 0.20)',
+            borderRadius: '50%',
+            filter: 'blur(30px)',
+          }} />
+        </div>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transform: 'translateY(-8px)',
+        }}>
+          <div style={{
+            width: '144px',
+            height: '80px',
+            background: 'rgba(59, 130, 246, 0.18)',
+            borderRadius: '50%',
+            filter: 'blur(25px)',
+          }} />
+        </div>
+        
+        {/* Parium Logo */}
+        <img
+          src="/parium-auth-logo.png"
+          alt="Parium"
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageLoaded(true)}
+          style={{ 
+            position: 'relative',
+            height: `${logoHeight}px`,
+            width: `${logoWidth}px`,
+            maxWidth: '90vw',
+            objectFit: 'contain',
+            transform: 'translateZ(0)',
+          }}
+          decoding="sync"
+          loading="eager"
+          fetchPriority="high"
+        />
+      </div>
       
-      {/* Tagline - exakt samma som index.html */}
+      {/* Tagline - synced typography with auth page h1 */}
       <p 
         style={{
           color: 'white',
@@ -152,12 +252,13 @@ export function AuthSplashScreen() {
           marginBottom: '40px',
           textShadow: '0 2px 4px rgba(0,0,0,0.3)',
           fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+          textAlign: 'center',
         }}
       >
         Din karriärresa börjar här
       </p>
       
-      {/* Pulserande prickar - exakt samma som index.html */}
+      {/* Pulserande prickar */}
       <div 
         style={{ 
           display: 'flex', 
