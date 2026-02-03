@@ -755,7 +755,7 @@ const AuthMobile = ({
                       </label>
                       
                        <Button type="submit" variant="glass" className="w-full min-h-[44px]" disabled={loading}>
-                         {loading ? "Loggar in..." : "Logga in"}
+                         Logga in
                        </Button>
                        
                         <div className="text-center mt-3">
