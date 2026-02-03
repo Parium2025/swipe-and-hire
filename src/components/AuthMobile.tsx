@@ -21,6 +21,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
 import { AuthLogoInline } from '@/assets/authLogoInline';
+import { authSplashEvents } from '@/lib/authSplashEvents';
 
 interface AuthMobileProps {
   isPasswordReset: boolean;
@@ -312,16 +313,22 @@ const AuthMobile = ({
       const currentPassword = currentData.password;
       
       if (isLogin) {
+        // Show premium splash screen while authenticating
+        authSplashEvents.show();
+        
         const result = await signIn(currentEmail, currentPassword);
 
         if (result?.error) {
+          // Hide splash on error
+          authSplashEvents.hide();
+          
           if (result.error.code === 'email_not_confirmed') {
             setShowResend(true);
           } else if (result.error.showResetPassword) {
             setShowResetPassword(true);
           }
         }
-        // Vid lyckad inloggning navigerar Auth.tsx automatiskt baserat på onAuthStateChange
+        // Vid lyckad inloggning: splash förblir synlig tills redirect sker i Auth.tsx
       } else {
         // Validate all required fields
         if (role === 'job_seeker') {
@@ -503,6 +510,8 @@ const AuthMobile = ({
       }
     } catch (error) {
       console.error('Auth error:', error);
+      // Hide splash on unexpected error
+      authSplashEvents.hide();
     } finally {
       setLoading(false);
     }
