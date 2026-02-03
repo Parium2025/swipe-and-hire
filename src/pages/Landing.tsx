@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
@@ -14,6 +14,8 @@ const Landing = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<{ path: string; state?: any } | null>(null);
 
   // Redirect authenticated users
   useEffect(() => {
@@ -36,10 +38,24 @@ const Landing = () => {
     }
   }, []);
 
+  // Handle fade-out then navigate
+  useEffect(() => {
+    if (isFadingOut && pendingNavigation) {
+      const timer = setTimeout(() => {
+        sessionStorage.setItem('parium-skip-splash', '1');
+        navigate(pendingNavigation.path, { state: pendingNavigation.state });
+      }, 300); // Match fade duration
+      return () => clearTimeout(timer);
+    }
+  }, [isFadingOut, pendingNavigation, navigate]);
+
+  const navigateWithFade = useCallback((path: string, state?: any) => {
+    setPendingNavigation({ path, state });
+    setIsFadingOut(true);
+  }, []);
+
   const handleLogin = () => {
-    // Mark that we're coming from landing - skip splash on auth page
-    sessionStorage.setItem('parium-skip-splash', '1');
-    navigate('/auth');
+    navigateWithFade('/auth');
   };
 
   const features = [
@@ -61,7 +77,11 @@ const Landing = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gradient-parium text-white overflow-x-hidden relative">
+    <motion.div 
+      className="min-h-screen w-full bg-gradient-parium text-white overflow-x-hidden relative"
+      animate={{ opacity: isFadingOut ? 0 : 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
       <AnimatedBackground />
       <LandingNav onLoginClick={handleLogin} />
       
@@ -108,10 +128,7 @@ const Landing = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                onClick={() => {
-                  sessionStorage.setItem('parium-skip-splash', '1');
-                  navigate('/auth', { state: { mode: 'register', role: 'job_seeker' } });
-                }}
+                onClick={() => navigateWithFade('/auth', { mode: 'register', role: 'job_seeker' })}
                 className="bg-white/5 backdrop-blur-[2px] border border-white/20 text-white p-4 sm:p-5 rounded-lg cursor-pointer hover:bg-white/15 hover:shadow-2xl transition-all duration-300 hover:scale-105 group min-h-[80px] sm:min-h-[90px]"
               >
                 <div className="flex items-center justify-between mb-2">
@@ -129,10 +146,7 @@ const Landing = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                onClick={() => {
-                  sessionStorage.setItem('parium-skip-splash', '1');
-                  navigate('/auth', { state: { mode: 'register', role: 'employer' } });
-                }}
+                onClick={() => navigateWithFade('/auth', { mode: 'register', role: 'employer' })}
                 className="bg-white/5 backdrop-blur-[2px] border border-white/20 text-white p-4 sm:p-5 rounded-lg cursor-pointer hover:bg-white/15 hover:shadow-2xl transition-all duration-300 hover:scale-105 group min-h-[80px] sm:min-h-[90px]"
               >
                 <div className="flex items-center justify-between mb-2">
@@ -231,7 +245,7 @@ const Landing = () => {
           </div>
         </div>
       </footer>
-    </div>
+    </motion.div>
   );
 };
 
