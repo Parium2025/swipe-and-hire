@@ -20,7 +20,6 @@ import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
 import { AuthLogoInline } from '@/assets/authLogoInline';
-import { authSplashEvents } from '@/lib/authSplashEvents';
 
 interface AuthTabletProps {
   isPasswordReset: boolean;
@@ -264,15 +263,10 @@ const AuthTablet = ({
       const currentPassword = currentData.password;
       
        if (isLogin) {
-         // Show premium splash screen while authenticating
-         authSplashEvents.show();
-         
+         // 🎬 Splash triggas nu CENTRALT i signIn (useAuth.tsx) - ingen dubblering här
          const result = await signIn(currentEmail, currentPassword);
 
          if (result?.error) {
-           // Hide splash on error
-           authSplashEvents.hide();
-           
            if (result.error.code === 'email_not_confirmed') {
              setShowResend(true);
            } else if (result.error.showResetPassword) {
@@ -461,8 +455,7 @@ const AuthTablet = ({
       }
     } catch (error) {
       console.error('Auth error:', error);
-      // Hide splash on unexpected error
-      authSplashEvents.hide();
+      // Splash döljs nu centralt av useAuth vid fel
     } finally {
       setLoading(false);
     }

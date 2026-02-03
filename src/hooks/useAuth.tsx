@@ -921,13 +921,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       isSigningInRef.current = true;
       
+      // 🎬 Trigga auth splash CENTRALT för premium känsla (exakt som logout)
+      // OBS: Auth-komponenterna ska INTE trigga splash separat
+      authSplashEvents.show();
+      
       // 🗑️ KRITISKT: Rensa ALL app-cache DIREKT vid login
       // Detta förhindrar att gammal data (t.ex. snö-vädereffekt från tidigare session)
       // visas innan ny data hämtas
       clearAllAppCaches();
       profileLoadedRef.current = false; // 🔧 Reset before new login attempt
  
-      // Minsta visningstid för "Loggar in..." (ca 1–1.1 sekund)
+      // Minsta visningstid för splash (matchar logout: ~1.1 sekund)
       const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1100));
  
       // Starta auth-anropet
@@ -937,6 +941,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
  
       if (error) {
+        // 🎬 Dölj splash vid fel (samma mönster som logout)
+        authSplashEvents.hide();
+        
         if (error.message === 'Invalid login credentials') {
           toast({
             title: "Inloggning misslyckades",
@@ -965,6 +972,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
  
       // CRITICAL: Block login if email is not confirmed
       if (signInData?.user && !signInData.user.email_confirmed_at) {
+        // 🎬 Dölj splash vid obekräftad email
+        authSplashEvents.hide();
         
         // Sign out i bakgrunden utan att vänta
         supabase.auth.signOut();
@@ -1016,6 +1025,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
  
       return {};
     } catch (error: any) {
+      // 🎬 Dölj splash vid oväntat fel
+      authSplashEvents.hide();
       setLoading(false);
       setAuthAction(null);
       toast({ title: "Inloggningsfel", description: "Ett oväntat fel inträffade. Försök igen.", variant: "destructive" });
