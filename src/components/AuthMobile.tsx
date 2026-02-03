@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { AnimatedBackground } from './AnimatedBackground';
+// AnimatedBackground moved to Auth.tsx for consistent layering
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -619,8 +619,7 @@ const AuthMobile = ({
         minHeight: '100svh'
       }}
     >
-      {/* Animated background with bubbles and glow */}
-      <AnimatedBackground />
+      {/* AnimatedBackground now rendered in Auth.tsx */}
 
       <div 
         ref={containerRef} 

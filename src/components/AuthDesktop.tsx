@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { AnimatedBackground } from './AnimatedBackground';
+// AnimatedBackground moved to Auth.tsx for consistent layering
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -551,8 +551,7 @@ const AuthDesktop = ({
     <div 
       className="flex flex-col relative auth-dark" 
     >
-      {/* Animated background with bubbles and glow */}
-      <AnimatedBackground />
+      {/* AnimatedBackground now rendered in Auth.tsx */}
 
       <div className="relative z-10 flex flex-col min-h-screen py-8 px-6 overflow-y-auto">
         {/* Header med logo och text */}
