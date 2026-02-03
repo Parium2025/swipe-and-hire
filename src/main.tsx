@@ -100,6 +100,37 @@ async function bootstrap() {
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
+  // ✅ Preview hygiene: ensure we are never stuck on an old cached bundle/UI.
+  // The preview environment should always reflect the latest code immediately.
+  const isPreviewHost = (() => {
+    try {
+      return typeof window !== 'undefined' && window.location.hostname.includes('id-preview--');
+    } catch {
+      return false;
+    }
+  })();
+
+  if (isPreviewHost) {
+    // Best-effort cleanup without blocking first paint.
+    setTimeout(() => {
+      try {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+          navigator.serviceWorker.getRegistrations()
+            .then((regs) => Promise.all(regs.map((r) => r.unregister())))
+            .catch(() => {});
+        }
+
+        if (typeof caches !== 'undefined' && caches.keys) {
+          caches.keys()
+            .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+            .catch(() => {});
+        }
+      } catch {
+        // ignore
+      }
+    }, 0);
+  }
+
   // 🔥 CRITICAL: ALWAYS preload AND DECODE the auth logo immediately, regardless of current route.
   // This ensures the logo is already in browser memory when user logs out and navigates to /auth.
   // On /auth route we block until decoded; on other routes we still decode but don't block.
@@ -115,7 +146,8 @@ async function bootstrap() {
   }
 
   // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
-  if (import.meta.env.PROD) {
+  // NOTE: In preview we disable SW entirely to avoid sticky caching that can show outdated UI.
+  if (import.meta.env.PROD && !isPreviewHost) {
     registerServiceWorker().catch(() => {
       // Silent fail - SW is optional enhancement
     });
