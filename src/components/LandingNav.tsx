@@ -91,6 +91,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
                 <Button
                   onClick={() => {
                     setMobileMenuOpen(false);
+                    sessionStorage.setItem('parium-skip-splash', '1');
                     onLoginClick();
                   }}
                   className="w-full bg-white text-primary hover:bg-white/90"

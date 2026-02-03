@@ -210,11 +210,17 @@
       </div>
     </div>
     <script>
-      // Show auth splash ONLY on /auth route during hard refresh
+      // Show auth splash ONLY on /auth route during hard refresh (NOT SPA navigation)
       (function() {
         try {
           var path = window.location.pathname;
-          if (path === '/auth' || path === '/auth/') {
+          // Skip splash if coming from landing page (SPA navigation)
+          var skipSplash = false;
+          try {
+            skipSplash = sessionStorage.getItem('parium-skip-splash') === '1';
+          } catch(e) {}
+          
+          if ((path === '/auth' || path === '/auth/') && !skipSplash) {
             var splash = document.getElementById('auth-splash');
             var logo = document.getElementById('auth-splash-logo');
             if (splash && logo) {
