@@ -362,12 +362,12 @@ const EmployerDashboard = memo(() => {
                           </div>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
-                          <Badge variant="glass" className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-purple-500/30 hover:border-purple-500/50 hover:backdrop-brightness-110 hover:scale-[1.03]">
+                          <Badge variant="glass" className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-purple-500/30 hover:border-purple-500/50 hover:backdrop-brightness-110 hover:scale-[1.03]">
                             {job.views_count || 0}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center px-2 py-3">
-                          <Badge variant="glass" className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-blue-500/30 hover:border-blue-500/50 hover:backdrop-brightness-110 hover:scale-[1.03]">
+                          <Badge variant="glass" className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-blue-500/30 hover:border-blue-500/50 hover:backdrop-brightness-110 hover:scale-[1.03]">
                             {job.applications_count || 0}
                           </Badge>
                         </TableCell>
