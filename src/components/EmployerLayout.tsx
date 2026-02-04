@@ -287,20 +287,37 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
     queryClient.prefetchQuery({
       queryKey: ['company-reviews', user.id],
       queryFn: async () => {
-        const { data, error } = await supabase
+        // Fetch reviews first
+        const { data: reviews, error } = await supabase
           .from('company_reviews')
-          .select(`
-            *,
-            profiles:user_id (
-              first_name,
-              last_name
-            )
-          `)
+          .select('*')
           .eq('company_id', user.id)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return data || [];
+        if (!reviews || reviews.length === 0) return [];
+
+        // Fetch profiles for non-anonymous reviews
+        const userIds = reviews
+          .filter(r => !r.is_anonymous)
+          .map(r => r.user_id);
+
+        if (userIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, first_name, last_name')
+            .in('user_id', userIds);
+
+          if (profiles) {
+            const profileMap = new Map(profiles.map(p => [p.user_id, p]));
+            return reviews.map(r => ({
+              ...r,
+              profiles: profileMap.get(r.user_id) || undefined,
+            }));
+          }
+        }
+
+        return reviews;
       },
     });
   }, [user, queryClient]);
