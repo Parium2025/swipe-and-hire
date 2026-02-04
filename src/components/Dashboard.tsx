@@ -254,7 +254,7 @@ const Dashboard = memo(() => {
                         <div className="flex justify-center">
                           <Badge 
                             variant={activeTab === 'expired' ? 'glassDestructive' : undefined}
-                            className={`text-sm whitespace-nowrap transition-colors ${
+                            className={`text-xs whitespace-nowrap transition-colors ${
                               activeTab === 'expired' 
                                 ? ""
                                 : job.is_active 
