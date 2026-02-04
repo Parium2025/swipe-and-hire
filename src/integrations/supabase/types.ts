@@ -344,6 +344,7 @@ export type Database = {
       conversations: {
         Row: {
           application_id: string | null
+          candidate_id: string | null
           created_at: string
           created_by: string
           id: string
@@ -355,6 +356,7 @@ export type Database = {
         }
         Insert: {
           application_id?: string | null
+          candidate_id?: string | null
           created_at?: string
           created_by: string
           id?: string
@@ -366,6 +368,7 @@ export type Database = {
         }
         Update: {
           application_id?: string | null
+          candidate_id?: string | null
           created_at?: string
           created_by?: string
           id?: string
