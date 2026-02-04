@@ -643,7 +643,13 @@ function ChatView({
               {conversation.members.length} medlemmar
             </p>
           )}
-          {conversation.job && (
+          {/* Show current job context from application snapshot */}
+          {snapshot?.job_title ? (
+            <p className="text-blue-300/70 text-xs flex items-center gap-1">
+              <Briefcase className="h-3 w-3" />
+              <span className="truncate">{snapshot.job_title}</span>
+            </p>
+          ) : conversation.job && (
             <p className="text-white/50 text-xs flex items-center gap-1">
               <Briefcase className="h-3 w-3" />
               {conversation.job.title}
@@ -783,12 +789,26 @@ function MessageBubble({
 
   // Avatar URL resolution is now handled by ConversationAvatar component
 
+  // System message - job context switch marker
   if (message.is_system_message) {
+    const isJobContextMarker = message.content.startsWith('📋');
+    
     return (
-      <div className="flex justify-center">
-        <span className="text-white/40 text-xs italic px-3 py-1 bg-white/5 rounded-full">
-          {message.content}
-        </span>
+      <div className="flex justify-center my-4">
+        <div className={cn(
+          "flex items-center gap-2 px-4 py-2 rounded-full",
+          isJobContextMarker 
+            ? "bg-blue-500/10 border border-blue-500/20" 
+            : "bg-white/5"
+        )}>
+          {isJobContextMarker && <Briefcase className="h-3.5 w-3.5 text-blue-400" />}
+          <span className={cn(
+            "text-xs font-medium",
+            isJobContextMarker ? "text-blue-300" : "text-white/40 italic"
+          )}>
+            {message.content}
+          </span>
+        </div>
       </div>
     );
   }

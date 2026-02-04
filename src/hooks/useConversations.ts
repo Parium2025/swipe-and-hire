@@ -50,7 +50,8 @@ export interface Conversation {
   name: string | null;
   is_group: boolean;
   job_id: string | null;
-  application_id: string | null;
+  application_id: string | null; // Current job context - updates when switching jobs
+  candidate_id: string | null; // The job seeker user ID - one conversation per candidate
   created_by: string;
   created_at: string;
   last_message_at: string | null;
@@ -60,14 +61,14 @@ export interface Conversation {
   job?: {
     title: string;
   };
-  // Frozen profile snapshot from application (for employer-candidate chats)
+  // Frozen profile snapshot from current application context (for employer-candidate chats)
   applicationSnapshot?: ApplicationSnapshot;
 }
 
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 3;
+const CACHE_VERSION = 4; // v4: unified per-candidate conversations with candidate_id
 
 interface CachedConversations {
   userId: string;
@@ -511,7 +512,8 @@ export function useConversationMessages(conversationId: string | null) {
   };
 }
 
-// Create a new conversation
+// Create or find unified conversation per candidate
+// One thread per candidate - job context can change with system messages
 export function useCreateConversation() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -535,117 +537,187 @@ export function useCreateConversation() {
       if (!user) throw new Error('Not authenticated');
       if (!navigator.onLine) throw new Error('Du är offline');
 
-      // For 1-1 chats WITH an application_id, check if conversation for THAT application exists
-      // Each application gets its own conversation with frozen profile
-      if (!isGroup && memberIds.length === 1 && applicationId) {
-        const { data: existingConv } = await supabase
+      const candidateId = memberIds[0]; // The job seeker
+      let conversationId: string | null = null;
+      let isExisting = false;
+      let needsJobContextSwitch = false;
+      let previousApplicationId: string | null = null;
+
+      // For 1-1 chats, look for existing unified conversation with this candidate
+      if (!isGroup && memberIds.length === 1) {
+        // Find conversation by candidate_id (new unified approach)
+        const { data: existingByCandidate } = await supabase
           .from('conversations')
-          .select('id')
-          .eq('application_id', applicationId)
+          .select('id, application_id')
+          .eq('candidate_id', candidateId)
+          .not('candidate_id', 'is', null)
           .single();
 
-        if (existingConv) {
-          // Found existing conversation for this specific application
-          return { id: existingConv.id, isExisting: true };
-        }
-      }
-
-      // For 1-1 chats WITHOUT application_id (legacy behavior), check for existing
-      if (!isGroup && memberIds.length === 1 && !applicationId) {
-        const otherUserId = memberIds[0];
-        
-        // Find existing 1-1 conversation without application_id
-        const { data: existingMemberships } = await supabase
-          .from('conversation_members')
-          .select('conversation_id')
-          .eq('user_id', user.id);
-
-        if (existingMemberships) {
-          for (const membership of existingMemberships) {
-            // Check if this conversation has no application_id (legacy 1:1 chat)
-            const { data: conv } = await supabase
+        if (existingByCandidate) {
+          conversationId = existingByCandidate.id;
+          isExisting = true;
+          previousApplicationId = existingByCandidate.application_id;
+          
+          // Check if job context is changing
+          if (applicationId && applicationId !== previousApplicationId) {
+            needsJobContextSwitch = true;
+          }
+        } else {
+          // Fallback: look for legacy conversations (by application_id or membership)
+          if (applicationId) {
+            const { data: legacyByApp } = await supabase
               .from('conversations')
               .select('id, application_id')
-              .eq('id', membership.conversation_id)
-              .is('application_id', null)
+              .eq('application_id', applicationId)
               .single();
 
-            if (!conv) continue;
+            if (legacyByApp) {
+              // Migrate: set candidate_id on this conversation
+              await supabase
+                .from('conversations')
+                .update({ candidate_id: candidateId })
+                .eq('id', legacyByApp.id);
+              
+              conversationId = legacyByApp.id;
+              isExisting = true;
+            }
+          }
 
-            const { data: otherMember } = await supabase
+          // Still no conversation? Check by membership
+          if (!conversationId) {
+            const { data: myMemberships } = await supabase
               .from('conversation_members')
-              .select('user_id')
-              .eq('conversation_id', membership.conversation_id)
-              .eq('user_id', otherUserId)
-              .single();
+              .select('conversation_id')
+              .eq('user_id', user.id);
 
-            if (otherMember) {
-              // Check if it's a 1-1 (only 2 members)
-              const { count } = await supabase
-                .from('conversation_members')
-                .select('*', { count: 'exact', head: true })
-                .eq('conversation_id', membership.conversation_id);
+            if (myMemberships) {
+              for (const membership of myMemberships) {
+                const { data: otherMember } = await supabase
+                  .from('conversation_members')
+                  .select('user_id')
+                  .eq('conversation_id', membership.conversation_id)
+                  .eq('user_id', candidateId)
+                  .single();
 
-              if (count === 2) {
-                // Found existing 1-1 conversation without application
-                return { id: membership.conversation_id, isExisting: true };
+                if (otherMember) {
+                  const { count } = await supabase
+                    .from('conversation_members')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('conversation_id', membership.conversation_id);
+
+                  if (count === 2) {
+                    // Found existing 1-1 - migrate to unified model
+                    const { data: conv } = await supabase
+                      .from('conversations')
+                      .select('application_id')
+                      .eq('id', membership.conversation_id)
+                      .single();
+
+                    await supabase
+                      .from('conversations')
+                      .update({ candidate_id: candidateId })
+                      .eq('id', membership.conversation_id);
+
+                    conversationId = membership.conversation_id;
+                    isExisting = true;
+                    previousApplicationId = conv?.application_id || null;
+                    
+                    if (applicationId && applicationId !== previousApplicationId) {
+                      needsJobContextSwitch = true;
+                    }
+                    break;
+                  }
+                }
               }
             }
           }
         }
       }
 
-      // Create new conversation
-      const { data: conversation, error: convError } = await supabase
-        .from('conversations')
-        .insert({
-          name: isGroup ? name : null,
-          is_group: isGroup,
-          job_id: jobId,
-          application_id: applicationId, // Link to specific application for frozen profile
-          created_by: user.id,
-        })
-        .select()
-        .single();
+      // Create new conversation if none exists
+      if (!conversationId) {
+        const { data: conversation, error: convError } = await supabase
+          .from('conversations')
+          .insert({
+            name: isGroup ? name : null,
+            is_group: isGroup,
+            job_id: jobId,
+            application_id: applicationId,
+            candidate_id: isGroup ? null : candidateId, // Set candidate_id for 1-1 chats
+            created_by: user.id,
+          })
+          .select()
+          .single();
 
-      if (convError) throw convError;
+        if (convError) throw convError;
+        conversationId = conversation.id;
 
-      // Add creator as admin member
-      const { error: creatorError } = await supabase
-        .from('conversation_members')
-        .insert({
-          conversation_id: conversation.id,
-          user_id: user.id,
-          is_admin: true,
-        });
+        // Add creator as admin member
+        await supabase
+          .from('conversation_members')
+          .insert({
+            conversation_id: conversationId,
+            user_id: user.id,
+            is_admin: true,
+          });
 
-      if (creatorError) throw creatorError;
-
-      // Add other members
-      for (const memberId of memberIds) {
-        if (memberId !== user.id) {
-          await supabase
-            .from('conversation_members')
-            .insert({
-              conversation_id: conversation.id,
-              user_id: memberId,
-              is_admin: false,
-            });
+        // Add other members
+        for (const memberId of memberIds) {
+          if (memberId !== user.id) {
+            await supabase
+              .from('conversation_members')
+              .insert({
+                conversation_id: conversationId,
+                user_id: memberId,
+                is_admin: false,
+              });
+          }
         }
       }
 
-      // Send initial message if provided
-      if (initialMessage) {
+      // Handle job context switch - update application_id and add system message
+      if (needsJobContextSwitch && applicationId && conversationId) {
+        // Get job title for the system message
+        const { data: application } = await supabase
+          .from('job_applications')
+          .select('job:job_id (title)')
+          .eq('id', applicationId)
+          .single();
+
+        const jobTitle = (application?.job as any)?.title || 'Okänd tjänst';
+
+        // Update conversation's current application context
+        await supabase
+          .from('conversations')
+          .update({ 
+            application_id: applicationId,
+            job_id: jobId,
+          })
+          .eq('id', conversationId);
+
+        // Insert system message marking the job context switch
         await supabase
           .from('conversation_messages')
           .insert({
-            conversation_id: conversation.id,
+            conversation_id: conversationId,
+            sender_id: user.id,
+            content: `📋 Skriver från: ${jobTitle}`,
+            is_system_message: true,
+          });
+      }
+
+      // Send initial message if provided
+      if (initialMessage && conversationId) {
+        await supabase
+          .from('conversation_messages')
+          .insert({
+            conversation_id: conversationId,
             sender_id: user.id,
             content: initialMessage,
           });
       }
 
-      return { id: conversation.id, isExisting: false };
+      return { id: conversationId, isExisting, jobContextSwitched: needsJobContextSwitch };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
