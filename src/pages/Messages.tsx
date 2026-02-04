@@ -231,7 +231,7 @@ export default function Messages() {
           <div>
             <h1 className="text-2xl font-bold text-white">Meddelanden</h1>
             {totalUnreadCount > 0 && (
-              <p className="text-white/60 text-sm">{totalUnreadCount} olästa meddelanden</p>
+              <p className="text-white text-sm">{totalUnreadCount} olästa meddelanden</p>
             )}
           </div>
         </div>
