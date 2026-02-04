@@ -267,12 +267,12 @@ const Dashboard = memo(() => {
                         </div>
                       </TableCell>
                       <TableCell className="text-center px-2 py-3">
-                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm hover:bg-purple-500/30 transition-colors">
+                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs hover:bg-purple-500/30 transition-colors">
                           {job.views_count || 0}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center px-2 py-3">
-                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm hover:bg-blue-500/30 transition-colors">
+                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs hover:bg-blue-500/30 transition-colors">
                           {job.applications_count || 0}
                         </Badge>
                       </TableCell>
