@@ -49,6 +49,8 @@ interface Contact {
   companyName?: string | null;
   profileImageUrl: string | null;
   jobTitle?: string; // For candidates - which job they applied to
+  applicationId?: string; // For candidates - link to frozen profile
+  jobId?: string; // For candidates - the job they applied to
 }
 
 export function NewConversationDialog({
@@ -86,20 +88,19 @@ export function NewConversationDialog({
       });
     });
 
-    // Add candidates (unique by applicant_id)
-    const seenCandidates = new Set<string>();
+    // Add candidates - one entry per application for frozen profile support
+    // This allows selecting the specific application context for the chat
     candidates.forEach(candidate => {
-      if (!seenCandidates.has(candidate.applicant_id)) {
-        seenCandidates.add(candidate.applicant_id);
-        list.push({
-          id: candidate.applicant_id,
-          type: 'candidate',
-          firstName: candidate.first_name,
-          lastName: candidate.last_name,
-          profileImageUrl: candidate.profile_image_url,
-          jobTitle: candidate.job_title,
-        });
-      }
+      list.push({
+        id: candidate.applicant_id,
+        type: 'candidate',
+        firstName: candidate.first_name,
+        lastName: candidate.last_name,
+        profileImageUrl: candidate.profile_image_url,
+        jobTitle: candidate.job_title,
+        applicationId: candidate.application_id,
+        jobId: candidate.job_id,
+      });
     });
 
     return list;
@@ -149,11 +150,22 @@ export function NewConversationDialog({
     if (selectedContacts.length === 0) return;
 
     try {
+      // For single candidate selection, include applicationId for frozen profile
+      const selectedContact = selectedContactObjects[0];
+      const applicationId = !isGroup && selectedContact?.type === 'candidate' 
+        ? selectedContact.applicationId 
+        : undefined;
+      const jobId = !isGroup && selectedContact?.type === 'candidate'
+        ? selectedContact.jobId
+        : undefined;
+      
       const result = await createConversation.mutateAsync({
         memberIds: selectedContacts,
         name: isGroup ? groupName.trim() || undefined : undefined,
         isGroup,
         initialMessage: initialMessage.trim() || undefined,
+        applicationId: applicationId || null,
+        jobId: jobId || null,
       });
 
       toast.success(result.isExisting ? 'Konversation öppnad' : 'Konversation skapad!');

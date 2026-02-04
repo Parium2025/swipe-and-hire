@@ -3,14 +3,14 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import type { MouseEvent, TouchEvent } from 'react';
 import { Loader2, Send, MessageSquare, WifiOff, X } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useFieldDraft } from '@/hooks/useFormDraft';
+import { useCreateConversation } from '@/hooks/useConversations';
+import { useNavigate } from 'react-router-dom';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +27,10 @@ interface SendMessageDialogProps {
   recipientId: string;
   recipientName: string;
   jobId?: string | null;
+  /** Application ID for frozen profile snapshot - required for candidate chats */
+  applicationId?: string | null;
+  /** If true, navigate to messages page after sending */
+  navigateToMessages?: boolean;
 }
 
 export function SendMessageDialog({
@@ -35,11 +39,17 @@ export function SendMessageDialog({
   recipientId,
   recipientName,
   jobId,
+  applicationId,
+  navigateToMessages = false,
 }: SendMessageDialogProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { isOnline, showOfflineToast } = useOnline();
-  // Auto-save message draft to localStorage (unique per recipient)
-  const [message, setMessage, clearMessageDraft] = useFieldDraft(`message-${recipientId}`);
+  const createConversation = useCreateConversation();
+  
+  // Auto-save message draft to localStorage (unique per recipient + application)
+  const draftKey = applicationId ? `message-${recipientId}-${applicationId}` : `message-${recipientId}`;
+  const [message, setMessage, clearMessageDraft] = useFieldDraft(draftKey);
   const [sending, setSending] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
@@ -53,21 +63,23 @@ export function SendMessageDialog({
 
     setSending(true);
     try {
-      const { error } = await supabase
-        .from('messages')
-        .insert({
-          sender_id: user.id,
-          recipient_id: recipientId,
-          content: message.trim(),
-          job_id: jobId || null,
-        });
-
-      if (error) throw error;
+      // Use the new conversation system with frozen profile support
+      const result = await createConversation.mutateAsync({
+        memberIds: [recipientId],
+        jobId: jobId || null,
+        applicationId: applicationId || null,
+        initialMessage: message.trim(),
+      });
 
       toast.success(`Meddelande skickat till ${recipientName}`);
       setMessage('');
       clearMessageDraft();
       onOpenChange(false);
+      
+      // Navigate to the conversation if requested
+      if (navigateToMessages && result.id) {
+        navigate(`/messages?conversation=${result.id}`);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Kunde inte skicka meddelande');
