@@ -58,9 +58,13 @@ export default function Messages() {
   // Categorize conversations
   const categorizeConversation = (conv: Conversation): 'candidates' | 'colleagues' => {
     const otherMembers = conv.members.filter(m => m.user_id !== user?.id);
-    // If any other member is a job_seeker, it's a candidate conversation
-    const hasCandidate = otherMembers.some(m => m.profile?.role === 'job_seeker');
-    return hasCandidate ? 'candidates' : 'colleagues';
+    // If any other member is a job_seeker, it's a candidate conversation.
+    // IMPORTANT: if profiles are not readable (RLS) we may not have role info;
+    // in that case default to 'candidates' so we never hide real conversations.
+    const roles = otherMembers.map(m => m.profile?.role).filter(Boolean);
+    if (roles.includes('job_seeker')) return 'candidates';
+    if (roles.includes('employer')) return 'colleagues';
+    return 'candidates';
   };
 
   const candidateConversations = conversations.filter(c => categorizeConversation(c) === 'candidates');
