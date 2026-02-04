@@ -1376,6 +1376,7 @@ export const CandidateProfileDialog = ({
         recipientId={displayApp.applicant_id}
         recipientName={`${displayApp.first_name || ''} ${displayApp.last_name || ''}`.trim() || 'Kandidat'}
         jobId={displayApp.job_id}
+        applicationId={displayApp.id}
       />
     )}
 
