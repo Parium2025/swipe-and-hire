@@ -61,10 +61,10 @@ const profileItems = [
   { title: "Hjälp & Support", url: "/support", icon: HelpCircle },
 ];
 
-// Dropdown styling - tight background around text
-const dropdownContentClass = "min-w-[140px] bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-xl z-[10000] rounded-lg p-1";
-const dropdownItemClass = "flex items-center gap-1.5 cursor-pointer text-white/70 hover:text-white hover:bg-white/5 focus:bg-white/5 rounded px-1.5 py-0.5 text-sm font-normal transition-colors";
-const dropdownItemActiveClass = "text-white bg-white/10";
+// Dropdown styling matching the sort dropdown - compact and centered
+const dropdownContentClass = "min-w-[160px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-1";
+const dropdownItemClass = "flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors";
+const dropdownItemActiveClass = "bg-white/15 text-white";
 
 function EmployerTopNav() {
   const { profile, signOut, user, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedMyCandidates, preloadedCompanyLogoUrl } = useAuth();
