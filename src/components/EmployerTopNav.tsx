@@ -62,8 +62,8 @@ const profileItems = [
 ];
 
 // Dropdown styling matching the sort dropdown - compact and centered
-const dropdownContentClass = "min-w-[160px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-1";
-const dropdownItemClass = "flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors";
+const dropdownContentClass = "min-w-[140px] bg-slate-900/90 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-0.5";
+const dropdownItemClass = "flex items-center gap-1.5 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2 py-1.5 text-sm font-medium transition-colors";
 const dropdownItemActiveClass = "bg-white/15 text-white";
 
 function EmployerTopNav() {
@@ -262,7 +262,7 @@ function EmployerTopNav() {
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className={dropdownContentClass}>
+            <DropdownMenuContent align="center" sideOffset={4} className={dropdownContentClass}>
               {dashboardItems.map((item) => {
                 const count = getCount(item.url);
                 const isActive = isActiveUrl(item.url);
@@ -301,7 +301,7 @@ function EmployerTopNav() {
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className={dropdownContentClass}>
+            <DropdownMenuContent align="center" sideOffset={4} className={dropdownContentClass}>
               {candidateItems.map((item) => {
                 const count = getCount(item.url);
                 const isActive = isActiveUrl(item.url);
@@ -373,7 +373,7 @@ function EmployerTopNav() {
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className={dropdownContentClass}>
+            <DropdownMenuContent align="center" sideOffset={4} className={dropdownContentClass}>
               {businessItems.map((item) => {
                 const isActive = isActiveUrl(item.url);
                 return (
@@ -410,7 +410,7 @@ function EmployerTopNav() {
                 <ChevronDown className="h-3.5 w-3.5 text-white" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className={dropdownContentClass + " min-w-[180px]"}>
+            <DropdownMenuContent align="center" sideOffset={4} className={dropdownContentClass + " min-w-[180px]"}>
               {/* Profilhuvud med namn */}
               <div className="px-2.5 py-2 border-b border-white/10 mb-1">
                 <div className="flex items-center gap-2.5">
