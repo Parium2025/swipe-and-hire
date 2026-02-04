@@ -62,9 +62,9 @@ const profileItems = [
 ];
 
 // Dropdown styling - minimalist and clean (matches nav button sizing)
-const dropdownContentClass = "min-w-[140px] bg-slate-900/80 backdrop-blur-xl border border-white/15 shadow-xl z-[10000] rounded-lg p-1";
-const dropdownItemClass = "flex items-center gap-1.5 cursor-pointer text-white/80 hover:text-white hover:bg-white/10 focus:bg-white/10 rounded-lg px-3 py-2 text-sm font-medium transition-colors";
-const dropdownItemActiveClass = "text-white bg-white/10";
+const dropdownContentClass = "min-w-[140px] bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-xl z-[10000] rounded-lg p-0.5";
+const dropdownItemClass = "flex items-center gap-1.5 cursor-pointer text-white/70 hover:text-white hover:bg-white/5 focus:bg-white/5 rounded-md px-2.5 py-1.5 text-sm font-normal transition-colors";
+const dropdownItemActiveClass = "text-white";
 
 function EmployerTopNav() {
   const { profile, signOut, user, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedMyCandidates, preloadedCompanyLogoUrl } = useAuth();
