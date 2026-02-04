@@ -66,6 +66,8 @@ function readConversationsCache(userId: string): Conversation[] | null {
     const cached: CachedConversations = JSON.parse(raw);
     // Only use if same user
     if (cached.userId !== userId) return null;
+    // Don't use empty cache as valid data - force refetch
+    if (cached.conversations.length === 0) return null;
     return cached.conversations;
   } catch {
     return null;
