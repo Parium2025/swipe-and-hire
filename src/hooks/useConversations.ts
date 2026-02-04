@@ -52,11 +52,14 @@ export interface Conversation {
 
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
+// Bump this version when cache structure changes or when we need to invalidate old data
+const CACHE_VERSION = 2;
 
 interface CachedConversations {
   userId: string;
   conversations: Conversation[];
   timestamp: number;
+  version?: number;
 }
 
 function readConversationsCache(userId: string): Conversation[] | null {
@@ -66,8 +69,22 @@ function readConversationsCache(userId: string): Conversation[] | null {
     const cached: CachedConversations = JSON.parse(raw);
     // Only use if same user
     if (cached.userId !== userId) return null;
+    // Invalidate old cache versions (missing profiles, etc.)
+    if (!cached.version || cached.version < CACHE_VERSION) {
+      localStorage.removeItem(CONVERSATIONS_CACHE_KEY);
+      return null;
+    }
     // Don't use empty cache as valid data - force refetch
     if (cached.conversations.length === 0) return null;
+    // Validate that cached conversations have profile data
+    // If any member is missing profile info, invalidate cache
+    const hasMissingProfiles = cached.conversations.some(conv => 
+      conv.members.some(m => !m.profile?.first_name && !m.profile?.company_name)
+    );
+    if (hasMissingProfiles) {
+      localStorage.removeItem(CONVERSATIONS_CACHE_KEY);
+      return null;
+    }
     return cached.conversations;
   } catch {
     return null;
@@ -80,6 +97,7 @@ function writeConversationsCache(userId: string, conversations: Conversation[]):
       userId,
       conversations: conversations.slice(0, 50), // Max 50 to save space
       timestamp: Date.now(),
+      version: CACHE_VERSION,
     };
     localStorage.setItem(CONVERSATIONS_CACHE_KEY, JSON.stringify(cached));
   } catch {
