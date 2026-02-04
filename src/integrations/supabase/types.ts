@@ -343,6 +343,7 @@ export type Database = {
       }
       conversations: {
         Row: {
+          application_id: string | null
           created_at: string
           created_by: string
           id: string
@@ -353,6 +354,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          application_id?: string | null
           created_at?: string
           created_by: string
           id?: string
@@ -363,6 +365,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          application_id?: string | null
           created_at?: string
           created_by?: string
           id?: string
@@ -373,6 +376,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "conversations_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "conversations_job_id_fkey"
             columns: ["job_id"]
@@ -773,9 +783,11 @@ export type Database = {
           last_name: string | null
           location: string | null
           phone: string | null
+          profile_image_snapshot_url: string | null
           search_vector: unknown
           status: string
           updated_at: string
+          video_snapshot_url: string | null
           viewed_at: string | null
           work_schedule: string | null
         }
@@ -797,9 +809,11 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           phone?: string | null
+          profile_image_snapshot_url?: string | null
           search_vector?: unknown
           status?: string
           updated_at?: string
+          video_snapshot_url?: string | null
           viewed_at?: string | null
           work_schedule?: string | null
         }
@@ -821,9 +835,11 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           phone?: string | null
+          profile_image_snapshot_url?: string | null
           search_vector?: unknown
           status?: string
           updated_at?: string
+          video_snapshot_url?: string | null
           viewed_at?: string | null
           work_schedule?: string | null
         }
