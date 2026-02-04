@@ -53,7 +53,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 
 interface CachedConversations {
   userId: string;
@@ -76,6 +76,19 @@ function readConversationsCache(userId: string): Conversation[] | null {
     }
     // Don't use empty cache as valid data - force refetch
     if (cached.conversations.length === 0) return null;
+
+    // If we somehow cached a 1:1 conversation with only our own membership row,
+    // the UI will show “Okänd användare”. Invalidate that cache.
+    const hasMissingOtherMember = cached.conversations.some((conv) => {
+      if (conv.is_group) return false;
+      const otherMembers = (conv.members || []).filter((m) => m.user_id !== userId);
+      return otherMembers.length === 0;
+    });
+    if (hasMissingOtherMember) {
+      localStorage.removeItem(CONVERSATIONS_CACHE_KEY);
+      return null;
+    }
+
     // Validate that cached conversations have profile data
     // If any member is missing profile info, invalidate cache
     const hasMissingProfiles = cached.conversations.some(conv => 
