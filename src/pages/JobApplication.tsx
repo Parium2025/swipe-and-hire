@@ -266,6 +266,13 @@ const JobApplication = () => {
 
     setSubmitting(true);
     try {
+      // Fetch current profile to snapshot profile image and video at time of application
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('profile_image_url, video_url')
+        .eq('user_id', user.id)
+        .single();
+
       const { error } = await supabase
         .from('job_applications')
         .insert({
@@ -279,6 +286,9 @@ const JobApplication = () => {
           location: formData.location,
           bio: formData.personalLetter,
           cv_url: formData.cvUrl,
+          // Snapshot profile image and video at time of application
+          profile_image_snapshot_url: currentProfile?.profile_image_url || null,
+          video_snapshot_url: currentProfile?.video_url || null,
           custom_answers: {
             driversLicense: formData.driversLicense,
             hasOwnCar: formData.hasOwnCar,

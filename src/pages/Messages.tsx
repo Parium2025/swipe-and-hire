@@ -367,9 +367,16 @@ function ConversationItem({
   const otherMembers = conversation.members.filter(m => m.user_id !== currentUserId);
   const displayMember = otherMembers[0];
   
+  // Use frozen application snapshot if available, otherwise fall back to live profile
+  const snapshot = conversation.applicationSnapshot;
+  
   const getDisplayName = () => {
     if (conversation.is_group && conversation.name) {
       return conversation.name;
+    }
+    // Use frozen name from application if available
+    if (snapshot && (snapshot.first_name || snapshot.last_name)) {
+      return `${snapshot.first_name || ''} ${snapshot.last_name || ''}`.trim();
     }
     if (!displayMember?.profile) return 'Okänd användare';
     const p = displayMember.profile;
@@ -377,7 +384,23 @@ function ConversationItem({
     return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd användare';
   };
 
-  // Avatar URL resolution is now handled by ConversationAvatar component
+  // Build a profile object for avatar, preferring snapshot data for candidates
+  const getAvatarProfile = () => {
+    if (snapshot && snapshot.profile_image_snapshot_url) {
+      // Return a synthetic profile with frozen snapshot data
+      return {
+        role: 'job_seeker' as const,
+        first_name: snapshot.first_name,
+        last_name: snapshot.last_name,
+        company_name: null,
+        profile_image_url: snapshot.profile_image_snapshot_url,
+        company_logo_url: null,
+      };
+    }
+    return displayMember?.profile;
+  };
+
+  const avatarProfile = getAvatarProfile();
 
   const formatTime = (dateStr: string | null) => {
     if (!dateStr) return '';
@@ -403,7 +426,7 @@ function ConversationItem({
       {/* Avatar with category indicator */}
       <div className="relative flex-shrink-0">
         <ConversationAvatar
-          profile={displayMember?.profile}
+          profile={avatarProfile}
           isGroup={conversation.is_group}
           groupName={conversation.name}
           size="lg"
@@ -487,6 +510,9 @@ function ChatView({
 
   const otherMembers = conversation.members.filter(m => m.user_id !== currentUserId);
   const displayMember = otherMembers[0];
+  
+  // Use frozen application snapshot if available
+  const snapshot = conversation.applicationSnapshot;
 
   // Get current user's display name for typing indicator
   const getCurrentUserName = () => {
@@ -496,6 +522,23 @@ function ChatView({
     if (p.role === 'employer' && p.company_name) return p.company_name;
     return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Någon';
   };
+  
+  // Build avatar profile preferring snapshot for candidates
+  const getAvatarProfile = () => {
+    if (snapshot && snapshot.profile_image_snapshot_url) {
+      return {
+        role: 'job_seeker' as const,
+        first_name: snapshot.first_name,
+        last_name: snapshot.last_name,
+        company_name: null,
+        profile_image_url: snapshot.profile_image_snapshot_url,
+        company_logo_url: null,
+      };
+    }
+    return displayMember?.profile;
+  };
+  
+  const avatarProfile = getAvatarProfile();
 
   // Mark as read when opening
   useEffect(() => {
@@ -547,13 +590,15 @@ function ChatView({
     if (conversation.is_group && conversation.name) {
       return conversation.name;
     }
+    // Use frozen name from application if available
+    if (snapshot && (snapshot.first_name || snapshot.last_name)) {
+      return `${snapshot.first_name || ''} ${snapshot.last_name || ''}`.trim();
+    }
     if (!displayMember?.profile) return 'Okänd användare';
     const p = displayMember.profile;
     if (p.role === 'employer' && p.company_name) return p.company_name;
     return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Okänd användare';
   };
-
-  // Avatar URL resolution is now handled by ConversationAvatar component
 
   // Group messages by date
   const groupedMessages = messages.reduce((groups, msg) => {
@@ -585,7 +630,7 @@ function ChatView({
         </Button>
 
         <ConversationAvatar
-          profile={displayMember?.profile}
+          profile={avatarProfile}
           isGroup={conversation.is_group}
           groupName={conversation.name}
           size="md"

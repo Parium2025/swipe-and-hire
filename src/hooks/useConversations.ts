@@ -17,6 +17,17 @@ export interface ConversationMember {
   };
 }
 
+// Frozen profile from job application - used for employer-candidate conversations
+export interface ApplicationSnapshot {
+  application_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  profile_image_snapshot_url: string | null;
+  video_snapshot_url: string | null;
+  cv_url: string | null;
+  job_title: string | null;
+}
+
 export interface ConversationMessage {
   id: string;
   conversation_id: string;
@@ -39,6 +50,7 @@ export interface Conversation {
   name: string | null;
   is_group: boolean;
   job_id: string | null;
+  application_id: string | null;
   created_by: string;
   created_at: string;
   last_message_at: string | null;
@@ -48,6 +60,8 @@ export interface Conversation {
   job?: {
     title: string;
   };
+  // Frozen profile snapshot from application (for employer-candidate chats)
+  applicationSnapshot?: ApplicationSnapshot;
 }
 
 // 🔥 localStorage cache for instant-load
@@ -159,6 +173,42 @@ export function useConversations() {
       if (convError) throw convError;
       if (!conversations) return [];
 
+      // Get application_ids for conversations that have them
+      const applicationIds = conversations
+        .map(c => c.application_id)
+        .filter((id): id is string => id !== null);
+
+      // Fetch application snapshots for frozen profile data
+      let applicationSnapshotMap = new Map<string, ApplicationSnapshot>();
+      if (applicationIds.length > 0) {
+        const { data: applications } = await supabase
+          .from('job_applications')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            profile_image_snapshot_url,
+            video_snapshot_url,
+            cv_url,
+            job:job_id (title)
+          `)
+          .in('id', applicationIds);
+
+        if (applications) {
+          applications.forEach(app => {
+            applicationSnapshotMap.set(app.id, {
+              application_id: app.id,
+              first_name: app.first_name,
+              last_name: app.last_name,
+              profile_image_snapshot_url: app.profile_image_snapshot_url,
+              video_snapshot_url: app.video_snapshot_url,
+              cv_url: app.cv_url,
+              job_title: (app.job as any)?.title || null,
+            });
+          });
+        }
+      }
+
       // Fetch all members for these conversations
       const { data: allMembers, error: membersError } = await supabase
         .from('conversation_members')
@@ -228,6 +278,10 @@ export function useConversations() {
           members,
           last_message: lastMessageMap.get(conv.id),
           unread_count: unreadCounts.get(conv.id) || 0,
+          // Include frozen profile snapshot from application if available
+          applicationSnapshot: conv.application_id 
+            ? applicationSnapshotMap.get(conv.application_id) 
+            : undefined,
         } as Conversation;
       });
 
@@ -468,22 +522,39 @@ export function useCreateConversation() {
       name, 
       isGroup = false,
       jobId = null,
+      applicationId = null,
       initialMessage,
     }: {
       memberIds: string[];
       name?: string;
       isGroup?: boolean;
       jobId?: string | null;
+      applicationId?: string | null;
       initialMessage?: string;
     }) => {
       if (!user) throw new Error('Not authenticated');
       if (!navigator.onLine) throw new Error('Du är offline');
 
-      // For 1-1 chats, check if conversation already exists
-      if (!isGroup && memberIds.length === 1) {
+      // For 1-1 chats WITH an application_id, check if conversation for THAT application exists
+      // Each application gets its own conversation with frozen profile
+      if (!isGroup && memberIds.length === 1 && applicationId) {
+        const { data: existingConv } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('application_id', applicationId)
+          .single();
+
+        if (existingConv) {
+          // Found existing conversation for this specific application
+          return { id: existingConv.id, isExisting: true };
+        }
+      }
+
+      // For 1-1 chats WITHOUT application_id (legacy behavior), check for existing
+      if (!isGroup && memberIds.length === 1 && !applicationId) {
         const otherUserId = memberIds[0];
         
-        // Find existing 1-1 conversation
+        // Find existing 1-1 conversation without application_id
         const { data: existingMemberships } = await supabase
           .from('conversation_members')
           .select('conversation_id')
@@ -491,6 +562,16 @@ export function useCreateConversation() {
 
         if (existingMemberships) {
           for (const membership of existingMemberships) {
+            // Check if this conversation has no application_id (legacy 1:1 chat)
+            const { data: conv } = await supabase
+              .from('conversations')
+              .select('id, application_id')
+              .eq('id', membership.conversation_id)
+              .is('application_id', null)
+              .single();
+
+            if (!conv) continue;
+
             const { data: otherMember } = await supabase
               .from('conversation_members')
               .select('user_id')
@@ -506,7 +587,7 @@ export function useCreateConversation() {
                 .eq('conversation_id', membership.conversation_id);
 
               if (count === 2) {
-                // Found existing 1-1 conversation
+                // Found existing 1-1 conversation without application
                 return { id: membership.conversation_id, isExisting: true };
               }
             }
@@ -521,6 +602,7 @@ export function useCreateConversation() {
           name: isGroup ? name : null,
           is_group: isGroup,
           job_id: jobId,
+          application_id: applicationId, // Link to specific application for frozen profile
           created_by: user.id,
         })
         .select()
