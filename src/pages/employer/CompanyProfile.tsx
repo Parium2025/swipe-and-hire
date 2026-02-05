@@ -131,8 +131,10 @@ const CompanyProfile = () => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [originalLogoFile, setOriginalLogoFile] = useState<File | null>(null);
-  const [originalLogoUrl, setOriginalLogoUrl] = useState<string>('');
-  const [logoIsEdited, setLogoIsEdited] = useState(false);
+  // Match Job Wizard pattern: store original URL and storage path separately
+  const [originalLogoUrl, setOriginalLogoUrl] = useState<string>(''); // URL/blob for editor source
+  const [originalLogoStoragePath, setOriginalLogoStoragePath] = useState<string>(''); // Storage path for restore
+  const [logoIsEdited, setLogoIsEdited] = useState(false); // Track if logo has been cropped/edited
   
   // Industry dropdown states
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
@@ -329,10 +331,12 @@ const CompanyProfile = () => {
     setOriginalLogoFile(file);
     
     const imageUrl = URL.createObjectURL(file);
-    // Store the original blob URL - this will be our original for this new image
+    // Store the original blob URL - this will be our original for editing (Job Wizard pattern)
     setOriginalLogoUrl(imageUrl);
+    setOriginalLogoStoragePath(''); // New file, no storage path yet
     setPendingImageSrc(imageUrl);
     setImageEditorOpen(true);
+    setLogoIsEdited(false); // Fresh image, not edited yet
     // Reset the file input so the same file can be selected again
     e.target.value = '';
   };
@@ -355,10 +359,14 @@ const CompanyProfile = () => {
 
       if (uploadError) throw uploadError;
 
-      // Upload original version if we have it
+      // Upload original version if we have a new file (not already saved)
       let originalUrl = formData.company_logo_original_url;
-      if (originalLogoFile) {
-        const originalFileName = `${user.data.user.id}/${timestamp}-company-logo-original.${fileExt}`;
+      let newOriginalStoragePath = originalLogoStoragePath;
+      
+      if (originalLogoFile && !originalLogoStoragePath) {
+        // Save original file to storage for future edits (Job Wizard pattern)
+        const origExt = originalLogoFile.name.split('.').pop() || 'jpg';
+        const originalFileName = `${user.data.user.id}/${timestamp}-company-logo-original.${origExt}`;
         const { error: originalUploadError } = await supabase.storage
           .from('company-logos')
           .upload(originalFileName, originalLogoFile);
@@ -368,6 +376,8 @@ const CompanyProfile = () => {
             .from('company-logos')
             .getPublicUrl(originalFileName);
           originalUrl = `${originalPublicUrl}?t=${timestamp}`;
+          newOriginalStoragePath = originalFileName;
+          setOriginalLogoStoragePath(originalFileName);
         }
       }
 
@@ -390,7 +400,7 @@ const CompanyProfile = () => {
       }));
       setImageEditorOpen(false);
       setPendingImageSrc('');
-      setLogoIsEdited(true);
+      setLogoIsEdited(true); // Mark as edited/cropped
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
@@ -412,21 +422,29 @@ const CompanyProfile = () => {
   };
 
   const handleEditExistingLogo = async () => {
-    // Priority 1: Use stored original URL (same session - always edit from original, like job wizard)
+    // Job Wizard pattern: ALWAYS prioritize originalLogoUrl for editing from the original source
+    // This prevents quality loss from double-cropping
+    
+    // Priority 1: Use stored original URL from current session
     if (originalLogoUrl) {
       setPendingImageSrc(originalLogoUrl);
       setImageEditorOpen(true);
       return;
     }
     
-    // Priority 2: Use stored original URL from database (company_logo_original_url)
+    // Priority 2: Fetch from stored original in database (company_logo_original_url)
     if (formData.company_logo_original_url) {
       try {
         const response = await fetch(formData.company_logo_original_url);
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
-        // Cache this for future edits in the same session
+        // Cache for future edits in the same session (Job Wizard pattern)
         setOriginalLogoUrl(blobUrl);
+        // Extract storage path from URL if possible
+        const match = formData.company_logo_original_url.match(/company-logos\/(.+?)(?:\?|$)/);
+        if (match) {
+          setOriginalLogoStoragePath(match[1]);
+        }
         setPendingImageSrc(blobUrl);
         setImageEditorOpen(true);
         return;
@@ -435,15 +453,20 @@ const CompanyProfile = () => {
       }
     }
     
-    // Fallback: fetch current cropped logo
+    // Fallback: fetch current cropped logo (least preferred - may cause quality loss)
     if (!formData.company_logo_url) return;
     
     try {
       const response = await fetch(formData.company_logo_url);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-      // This becomes our "original" if we don't have a better one
+      // This becomes our "original" if we don't have a better one (Job Wizard pattern)
       setOriginalLogoUrl(blobUrl);
+      // Extract storage path from URL
+      const match = formData.company_logo_url.match(/company-logos\/(.+?)(?:\?|$)/);
+      if (match) {
+        setOriginalLogoStoragePath(match[1]);
+      }
       setPendingImageSrc(blobUrl);
       setImageEditorOpen(true);
     } catch (error) {
@@ -456,13 +479,18 @@ const CompanyProfile = () => {
     }
   };
 
-  // Restore original logo (used when user clicks save without making changes - passes through to original)
+  // Restore original logo - Job Wizard pattern: restore to originalStoragePath
   const handleRestoreOriginal = () => {
-    // If we have original URL stored, restore it
-    if (originalLogoUrl && formData.company_logo_original_url) {
+    // If we have original URL stored, restore it (like Job Wizard)
+    if (originalLogoUrl && (formData.company_logo_original_url || originalLogoStoragePath)) {
+      const originalPublicUrl = formData.company_logo_original_url || 
+        (originalLogoStoragePath ? 
+          supabase.storage.from('company-logos').getPublicUrl(originalLogoStoragePath).data.publicUrl 
+          : '');
+      
       setFormData(prev => ({
         ...prev,
-        company_logo_url: formData.company_logo_original_url,
+        company_logo_url: originalPublicUrl,
       }));
       setLogoIsEdited(false);
       toast({

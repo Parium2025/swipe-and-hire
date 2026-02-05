@@ -59,7 +59,10 @@ const EmployerProfile = () => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
-  const [originalProfileImageUrl, setOriginalProfileImageUrl] = useState<string>(''); // Storage path för original
+  // Job Wizard pattern: store original URL and storage path separately
+  const [originalProfileImageUrl, setOriginalProfileImageUrl] = useState<string>(''); // URL/blob for editor source
+  const [originalProfileImageStoragePath, setOriginalProfileImageStoragePath] = useState<string>(''); // Storage path for restore
+  const [profileImageIsEdited, setProfileImageIsEdited] = useState(false); // Track if image has been cropped/edited
   const fileInputRef = useRef<HTMLInputElement>(null);
   const didInitRef = useRef(false);
   
@@ -195,11 +198,15 @@ const EmployerProfile = () => {
     if (!file) return;
 
     if (file.type.startsWith('image/')) {
-      // Spara originalfilen för framtida redigeringar
+      // Store original file for future edits (Job Wizard pattern)
       setOriginalProfileImageFile(file);
       const imageUrl = URL.createObjectURL(file);
+      // Store the original blob URL - this will be our original for editing
+      setOriginalProfileImageUrl(imageUrl);
+      setOriginalProfileImageStoragePath(''); // New file, no storage path yet
       setPendingImageSrc(imageUrl);
       setImageEditorOpen(true);
+      setProfileImageIsEdited(false); // Fresh image, not edited yet
     } else {
       toast({
         title: "Fel filtyp",
@@ -216,34 +223,40 @@ const EmployerProfile = () => {
 
   // Redigera befintlig bild - ALLTID använd originalet om det finns
   const handleEditExistingImage = async () => {
-    // 1. Om vi har originalfilen i minnet (just uppladdad), använd den
-    if (originalProfileImageFile) {
-      const blobUrl = URL.createObjectURL(originalProfileImageFile);
-      setPendingImageSrc(blobUrl);
+    // Job Wizard pattern: ALWAYS prioritize originalProfileImageUrl for editing from the original source
+    // This prevents quality loss from double-cropping
+    
+    // Priority 1: Use stored original URL from current session
+    if (originalProfileImageUrl) {
+      setPendingImageSrc(originalProfileImageUrl);
       setImageEditorOpen(true);
       return;
     }
 
-    // 2. Om vi har sparad original i storage, använd den
-    if (originalProfileImageUrl) {
+    // Priority 2: Fetch from stored original storage path
+    if (originalProfileImageStoragePath) {
       try {
-        const signedUrl = await getMediaUrl(originalProfileImageUrl, 'profile-image', 3600);
+        const signedUrl = await getMediaUrl(originalProfileImageStoragePath, 'profile-image', 3600);
         if (signedUrl) {
+          // Cache for future edits in the same session (Job Wizard pattern)
+          setOriginalProfileImageUrl(signedUrl);
           setPendingImageSrc(signedUrl);
           setImageEditorOpen(true);
           return;
         }
       } catch (error) {
         console.error('Error loading original image:', error);
-        // Fallback till beskuren bild
       }
     }
 
-    // 3. Fallback: Hämta den beskurna bilden (om ingen original finns)
+    // Priority 3: Fallback - fetch current cropped image (least preferred)
     if (formData.profile_image_url) {
       try {
         const signedUrl = await getMediaUrl(formData.profile_image_url, 'profile-image', 3600);
         if (signedUrl) {
+          // This becomes our "original" if we don't have a better one (Job Wizard pattern)
+          setOriginalProfileImageUrl(signedUrl);
+          setOriginalProfileImageStoragePath(formData.profile_image_url);
           setPendingImageSrc(signedUrl);
           setImageEditorOpen(true);
         }
@@ -275,10 +288,9 @@ const EmployerProfile = () => {
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
 
-      // Om vi har originalfilen, spara den också i storage för framtida redigeringar
-      if (originalProfileImageFile && !originalProfileImageUrl) {
+      // Upload original file if we have a new file (not already saved) - Job Wizard pattern
+      if (originalProfileImageFile && !originalProfileImageStoragePath) {
         try {
-          // Skapa en unik fil med "original" prefix för att skilja från den beskurna versionen
           const fileExt = originalProfileImageFile.name.split('.').pop() || 'jpg';
           const timestamp = Date.now();
           const originalFileName = `${user.id}/original-${timestamp}.${fileExt}`;
@@ -288,11 +300,11 @@ const EmployerProfile = () => {
             .upload(originalFileName, originalProfileImageFile);
           
           if (!origError) {
-            setOriginalProfileImageUrl(originalFileName);
+            setOriginalProfileImageStoragePath(originalFileName);
+            // Keep originalProfileImageUrl (blob) for session-based edits
           }
         } catch (origErr) {
           console.error('Failed to save original image:', origErr);
-          // Non-critical, continue
         }
       }
 
@@ -300,6 +312,7 @@ const EmployerProfile = () => {
       setFormData(prev => ({ ...prev, profile_image_url: storagePath }));
       setDeletedProfileImage(null); // Rensa undo-state
       setHasUnsavedChanges(true);
+      setProfileImageIsEdited(true); // Mark as edited/cropped
       
       setImageEditorOpen(false);
       if (pendingImageSrc) {
@@ -321,6 +334,24 @@ const EmployerProfile = () => {
     }
   };
 
+  // Restore original profile image - Job Wizard pattern
+  const handleRestoreOriginal = async () => {
+    if (!originalProfileImageStoragePath && !originalProfileImageUrl) {
+      console.log('No original image to restore');
+      return;
+    }
+    
+    // If we have original storage path, restore to that
+    if (originalProfileImageStoragePath) {
+      setFormData(prev => ({ ...prev, profile_image_url: originalProfileImageStoragePath }));
+      setProfileImageIsEdited(false);
+      toast({
+        title: "Bild återställd",
+        description: "Originalbilden har återställts",
+      });
+    }
+  };
+
   // Ta bort profilbild
   const handleRemoveProfileImage = () => {
     // Spara nuvarande bild för undo
@@ -331,6 +362,9 @@ const EmployerProfile = () => {
     
     setFormData(prev => ({ ...prev, profile_image_url: '' }));
     setOriginalProfileImageFile(null);
+    setOriginalProfileImageUrl('');
+    setOriginalProfileImageStoragePath('');
+    setProfileImageIsEdited(false);
     setHasUnsavedChanges(true);
     toast({
       title: "Profilbild borttagen",
@@ -929,6 +963,8 @@ const EmployerProfile = () => {
         }}
         imageSrc={pendingImageSrc}
         onSave={handleProfileImageSave}
+       onRestoreOriginal={originalProfileImageStoragePath ? handleRestoreOriginal : undefined}
+       aspectRatio={1}
         isCircular={true}
       />
     </div>
