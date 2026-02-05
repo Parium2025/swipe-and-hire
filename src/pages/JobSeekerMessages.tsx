@@ -81,7 +81,7 @@ export default function JobSeekerMessages() {
   
   if (isLoading && !hasData) {
     return (
-      <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col opacity-0">
+       <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col opacity-0 max-w-4xl mx-auto px-3 md:px-8">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
@@ -90,7 +90,7 @@ export default function JobSeekerMessages() {
   // Show chat view if thread is selected
   if (selectedThread) {
     return (
-      <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-4xl mx-auto px-3 md:px-6">
+       <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-4xl mx-auto px-3 md:px-8">
         <ChatView 
           thread={selectedThread}
           currentUserId={user?.id || ''}
