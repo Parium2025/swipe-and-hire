@@ -79,20 +79,19 @@ const SearchJobs = () => {
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const [swipeModeActive, setSwipeModeActive] = useState(false);
-  
-  // 🔥 Flagga för att dölja företagsförslag under sparad sökning-övergång
-  const [isApplyingSavedSearch, setIsApplyingSavedSearch] = useState(false);
 
   // Handler to apply a saved search - sets all the filter states
+  // 🔥 PREMIUM: Sätter BÅDE searchInput OCH debouncedSearch direkt för omedelbar respons
   const handleApplySavedSearch = useCallback((criteria: SearchCriteria) => {
-    // 🔥 CRITICAL: Sätt flagga FÖRST för att dölja företagsförslag omedelbart
-    setIsApplyingSavedSearch(true);
-    
-    // Invalidera cache för att förhindra flimmer
+    // Invalidera cache
     queryClient.removeQueries({ queryKey: ['optimized-job-search'] });
     
-    // Clear existing filters first
-    setSearchInput(criteria.search_query || '');
+    const newSearchQuery = criteria.search_query || '';
+    
+    // 🔥 CRITICAL: Sätt BÅDA för att skippa debounce-fördröjning
+    setSearchInput(newSearchQuery);
+    setDebouncedSearch(newSearchQuery); // Omedelbar sökning utan 300ms väntan
+    
     setSelectedCity(criteria.city || '');
     setSelectedPostalCode('');
     setSelectedCategory(criteria.category || 'all-categories');
@@ -109,9 +108,6 @@ const SearchJobs = () => {
     
     // Scroll to top of results
     listTopRef.current?.scrollIntoView({ behavior: 'smooth' });
-    
-    // 🔥 Återställ flagga efter kort delay så query hinner starta
-    setTimeout(() => setIsApplyingSavedSearch(false), 100);
   }, [queryClient]);
   
   // Hämta användarens ansökningar för att visa "Redan sökt"-badge
@@ -758,8 +754,8 @@ const SearchJobs = () => {
         </CardContent>
       </Card>
 
-      {/* Company Suggestion Card - LinkedIn style - hide during loading and saved search transition */}
-      {matchingCompany && searchInput.trim() && !isLoading && !isApplyingSavedSearch && (
+      {/* Company Suggestion Card - LinkedIn style */}
+      {matchingCompany && searchInput.trim() && (
         <button
           onClick={() => {
             setSelectedCompanyId(matchingCompany.id);
