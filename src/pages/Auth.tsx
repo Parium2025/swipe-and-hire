@@ -610,7 +610,7 @@ const Auth = () => {
   // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
     return (
-      <div className="min-h-screen w-full overflow-x-hidden relative">
+      <div className="h-screen w-full overflow-hidden relative">
         {/* Bottom safe-area blend to eliminate iOS seam */}
         <div
           className="fixed inset-x-0 bottom-0 pointer-events-none z-40"
@@ -619,7 +619,39 @@ const Auth = () => {
             background: 'transparent'
           }}
         />
-        <AuthMobile
+
+        {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
+        <main
+          className="h-full w-full min-h-0 overflow-y-auto overflow-x-hidden relative z-10"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          <AuthMobile
+            isPasswordReset={isPasswordReset}
+            newPassword={newPassword}
+            setNewPassword={setNewPassword}
+            confirmPassword={confirmPassword}
+            setConfirmPassword={setConfirmPassword}
+            handlePasswordReset={handlePasswordReset}
+            onBackToLogin={handleBackToLogin}
+            onAuthModeChange={setIsLoginMode}
+            initialMode={initialMode}
+            initialRole={initialRole}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // Desktop layout (includes former tablet layout)
+
+  return (
+    <div className="h-screen w-full overflow-hidden relative">
+      {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
+      <main
+        className="h-full w-full min-h-0 overflow-y-auto overflow-x-hidden relative z-10"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
+        <AuthDesktop
           isPasswordReset={isPasswordReset}
           newPassword={newPassword}
           setNewPassword={setNewPassword}
@@ -631,26 +663,7 @@ const Auth = () => {
           initialMode={initialMode}
           initialRole={initialRole}
         />
-      </div>
-    );
-  }
-
-  // Desktop layout (includes former tablet layout)
-
-  return (
-    <div className="min-h-screen w-full overflow-x-hidden relative">
-      <AuthDesktop
-        isPasswordReset={isPasswordReset}
-        newPassword={newPassword}
-        setNewPassword={setNewPassword}
-        confirmPassword={confirmPassword}
-        setConfirmPassword={setConfirmPassword}
-        handlePasswordReset={handlePasswordReset}
-        onBackToLogin={handleBackToLogin}
-        onAuthModeChange={setIsLoginMode}
-        initialMode={initialMode}
-        initialRole={initialRole}
-      />
+      </main>
     </div>
   );
 };

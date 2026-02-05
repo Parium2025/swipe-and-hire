@@ -556,7 +556,7 @@ const AuthDesktop = ({
       {/* Animated background with bubbles and glow */}
       <AnimatedBackground />
 
-      <div className="relative z-10 flex flex-col min-h-screen py-8 px-6 overflow-y-auto">
+      <div className="relative z-10 flex flex-col min-h-full py-8 px-6">
         {/* Header med logo och text */}
         <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
           <div className="text-center mb-4">
