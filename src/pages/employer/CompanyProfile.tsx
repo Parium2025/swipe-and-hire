@@ -135,7 +135,22 @@ const CompanyProfile = () => {
   const [originalLogoUrl, setOriginalLogoUrl] = useState<string>(''); // URL/blob for editor source
   const [originalLogoStoragePath, setOriginalLogoStoragePath] = useState<string>(''); // Storage path for restore
   const [logoIsEdited, setLogoIsEdited] = useState(false); // Track if logo has been cropped/edited
-  
+
+  // Initialize originalLogoStoragePath from database when profile loads (Job Wizard pattern)
+  // This ensures that existing logos can be edited from the original source
+  useEffect(() => {
+    if (profile) {
+      const originalUrl = (profile as any)?.company_logo_original_url;
+      if (originalUrl) {
+        // Extract storage path from URL if possible
+        const match = originalUrl.match(/company-logos\/(.+?)(?:\?|$)/);
+        if (match && match[1]) {
+          setOriginalLogoStoragePath(match[1]);
+        }
+      }
+    }
+  }, [profile]);
+
   // Industry dropdown states
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -254,9 +269,12 @@ const CompanyProfile = () => {
         company_description: profile.company_description || '',
         employee_count: profile.employee_count || '',
         company_logo_url: (profile as any)?.company_logo_url || '',
+        company_logo_original_url: (profile as any)?.company_logo_original_url || '',
         social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
         // Interview settings
         interview_default_message: (profile as any)?.interview_default_message || '',
+        interview_video_default_message: (profile as any)?.interview_video_default_message || '',
+        interview_video_link: (profile as any)?.interview_video_link || '',
         interview_office_address: (profile as any)?.interview_office_address || '',
         interview_office_instructions: (profile as any)?.interview_office_instructions || '',
       };
