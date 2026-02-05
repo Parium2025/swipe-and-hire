@@ -28,7 +28,7 @@ export function ThreadList({
   };
 
   return (
-    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-4xl mx-auto px-3 md:px-6">
+     <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-4xl mx-auto px-3 md:px-8">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4 flex-shrink-0">
         <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
