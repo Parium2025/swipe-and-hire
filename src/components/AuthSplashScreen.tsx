@@ -57,6 +57,16 @@ export function AuthSplashScreen() {
       });
     }
   }, [isVisible, imageLoaded, isFadingOut]);
+
+  // SAFETY: If the logo load event never fires (rare caching/network edge cases),
+  // we must not leave an invisible full-screen layer that blocks all interaction.
+  useEffect(() => {
+    if (!isVisible || imageLoaded) return;
+    const t = setTimeout(() => {
+      setImageLoaded(true);
+    }, 800);
+    return () => clearTimeout(t);
+  }, [isVisible, imageLoaded]);
   
   // Auto-hide after minimum display time
   useEffect(() => {
@@ -121,7 +131,8 @@ export function AuthSplashScreen() {
         transition: 'opacity 0.4s ease-out',
         transform: 'translateZ(0)',
         willChange: 'opacity',
-        pointerEvents: isFadingOut ? 'none' : 'auto',
+        // Never block scroll/click when the splash is transparent.
+        pointerEvents: isFadingIn && !isFadingOut ? 'auto' : 'none',
       }}
     >
       {/* Parium Logo - exakt samma som index.html */}
