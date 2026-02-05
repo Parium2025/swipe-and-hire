@@ -48,8 +48,6 @@ const Auth = () => {
   const [emailForReset, setEmailForReset] = useState('');
   const [resending, setResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
-  const [pullProgress, setPullProgress] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true); // Track if user is on login or register
 
   const { user, profile, loading, authAction, updatePassword, confirmEmail } = useAuth();
@@ -63,10 +61,9 @@ const Auth = () => {
   const initialMode = (location.state as any)?.mode;
   const initialRole = (location.state as any)?.role;
 
-  // Smart scroll-locking: Lock only for login on MOBILE devices, allow scroll on desktop
+  // Failsafe: rensa ev. fastnade scroll-lås från äldre versioner.
+  // (Vi använder inte scroll-låsning på /auth längre.)
   useEffect(() => {
-    // Always clear legacy scroll-lock classes/styles first.
-    // These can otherwise get "stuck" across navigations and completely freeze the auth page.
     try {
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
@@ -75,111 +72,7 @@ const Auth = () => {
     } catch {
       // ignore
     }
-
-    // CRITICAL: Only apply scroll-lock on touch-first devices *without* any mouse/trackpad.
-    // On hybrid devices (touch laptop / iPad + trackpad), `(pointer: coarse)` may be true
-    // while users still scroll with mouse/trackpad. In those cases, DO NOT lock.
-    const isPrimaryCoarse = window.matchMedia('(pointer: coarse)').matches;
-    const hasAnyFinePointer =
-      window.matchMedia('(any-pointer: fine)').matches ||
-      window.matchMedia('(any-hover: hover)').matches;
-
-    const shouldLockScroll = isPrimaryCoarse && !hasAnyFinePointer;
-    if (!shouldLockScroll) {
-      return; // Never lock on devices where mouse/trackpad is available
-    }
-
-    try {
-      const html = document.documentElement;
-      const body = document.body;
-      
-      if (isLoginMode) {
-        // Login mode: enable pull-to-refresh and block scroll via listeners (no global CSS class)
-        
-        let startY = 0;
-        let triggered = false;
-        let lastReload = 0;
-        let isInputFocused = false;
-
-        const onFocusIn = (e: FocusEvent) => {
-          if (e.target && (e.target as HTMLElement).tagName === 'INPUT') {
-            isInputFocused = true;
-          }
-        };
-
-        const onFocusOut = (e: FocusEvent) => {
-          if (e.target && (e.target as HTMLElement).tagName === 'INPUT') {
-            isInputFocused = false;
-          }
-        };
-
-        const onTouchStart = (e: TouchEvent) => {
-          startY = e.touches?.[0]?.clientY ?? 0;
-          triggered = false;
-          setPullProgress(0);
-        };
-
-        const onTouchMove = (e: TouchEvent) => {
-          // Allow scroll when input is focused (keyboard is open)
-          if (isInputFocused) return;
-          
-          const y = e.touches?.[0]?.clientY ?? 0;
-          const dy = y - startY;
-          
-          // Calculate progress (0-1) based on drag distance
-          const maxDrag = 100;
-          const progress = Math.min(Math.max(dy / maxDrag, 0), 1);
-          setPullProgress(progress);
-          
-          // Block all vertical scroll when no input focused
-          e.preventDefault();
-          
-          // Pull-to-refresh
-          if (dy > 70 && !triggered) {
-            triggered = true;
-            const now = Date.now();
-            if (now - lastReload > 1500) {
-              lastReload = now;
-              setIsRefreshing(true);
-              // Ensure index.html splash shows on pull-to-refresh (same as browser refresh)
-              try {
-                sessionStorage.removeItem('parium-skip-splash');
-              } catch {}
-              setTimeout(() => {
-                window.location.reload();
-              }, 300);
-            }
-          }
-        };
-
-        const onTouchEnd = () => {
-          if (!isRefreshing) {
-            setPullProgress(0);
-          }
-        };
-
-        document.addEventListener('focusin', onFocusIn);
-        document.addEventListener('focusout', onFocusOut);
-        window.addEventListener('touchstart', onTouchStart, { passive: true });
-        window.addEventListener('touchmove', onTouchMove, { passive: false });
-        window.addEventListener('touchend', onTouchEnd, { passive: true });
-        // IMPORTANT: Never block mouse/trackpad scrolling on /auth.
-        // We only handle pull-to-refresh/scroll locking via touch events.
-
-        return () => {
-          document.removeEventListener('focusin', onFocusIn);
-          document.removeEventListener('focusout', onFocusOut);
-          window.removeEventListener('touchstart', onTouchStart as any);
-          window.removeEventListener('touchmove', onTouchMove as any);
-          window.removeEventListener('touchend', onTouchEnd as any);
-        };
-      } else {
-        // Register mode: Allow scroll (no global class toggles)
-      }
-    } catch (scrollError) {
-      console.warn('Failed to handle scroll lock:', scrollError);
-    }
-  }, [isLoginMode, isRefreshing]); // Note: device removed from deps - we use pointer media query instead
+  }, []);
 
   useEffect(() => {
     const handleAuthFlow = async () => {
@@ -718,22 +611,6 @@ const Auth = () => {
   if (device === 'mobile') {
     return (
       <div className="min-h-screen w-full overflow-x-hidden relative">
-        {/* Pull-to-refresh spinner */}
-        <div 
-          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
-          style={{ 
-            opacity: pullProgress,
-            pointerEvents: 'none'
-          }}
-        >
-          <Loader2 
-            className={`w-8 h-8 text-primary-foreground ${isRefreshing ? 'animate-spin' : ''}`}
-            style={{
-              transform: isRefreshing ? 'none' : `rotate(${pullProgress * 360}deg)`,
-              transition: isRefreshing ? 'none' : 'transform 0.1s linear'
-            }}
-          />
-        </div>
         {/* Bottom safe-area blend to eliminate iOS seam */}
         <div
           className="fixed inset-x-0 bottom-0 pointer-events-none z-40"
@@ -762,22 +639,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden relative">
-      {/* Pull-to-refresh spinner */}
-      <div 
-        className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
-        style={{ 
-          opacity: pullProgress,
-          pointerEvents: 'none'
-        }}
-      >
-        <Loader2 
-          className={`w-8 h-8 text-primary-foreground ${isRefreshing ? 'animate-spin' : ''}`}
-          style={{
-            transform: isRefreshing ? 'none' : `rotate(${pullProgress * 360}deg)`,
-            transition: isRefreshing ? 'none' : 'transform 0.1s linear'
-          }}
-        />
-      </div>
       <AuthDesktop
         isPasswordReset={isPasswordReset}
         newPassword={newPassword}
