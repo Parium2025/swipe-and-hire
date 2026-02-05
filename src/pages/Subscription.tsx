@@ -55,7 +55,7 @@ const Subscription = () => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+     <div className="max-w-4xl mx-auto px-3 md:px-8 space-y-6 animate-fade-in">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Abonnemang</h1>
         <p className="text-sm text-white mt-1">
@@ -63,7 +63,7 @@ const Subscription = () => {
         </p>
       </div>
 
-      <div className="px-4 pb-6">
+       <div className="pb-6">
         {/* Current Plan Status */}
         <div className="pt-4 mb-6">
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">

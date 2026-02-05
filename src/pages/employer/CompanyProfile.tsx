@@ -642,7 +642,7 @@ const CompanyProfile = () => {
 
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto animate-fade-in">
+     <div className="space-y-8 max-w-4xl mx-auto px-3 md:px-8 animate-fade-in">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Företagslogga</h1>
         <p className="text-sm text-white mt-1">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
