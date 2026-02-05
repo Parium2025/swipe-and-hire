@@ -283,7 +283,7 @@ const JobView = () => {
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white min-h-[80px] resize-none text-sm focus:outline-none focus:border-white/40"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[60px] max-h-[120px] resize-none text-sm focus:outline-none focus:border-white/40"
           />
         );
 
@@ -321,7 +321,7 @@ const JobView = () => {
 
       case 'multiple_choice':
         return (
-          <div className="space-y-2">
+          <div className="flex flex-wrap justify-center gap-2">
             {question.options?.filter(opt => opt.trim() !== '').map((option, index) => {
               const selectedAnswers = typeof currentAnswer === 'string' 
                 ? currentAnswer.split('|||').filter(a => a)
@@ -348,15 +348,15 @@ const JobView = () => {
                     (selected
                       ? 'bg-secondary/40 border-secondary '
                       : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
-                    'w-full flex items-center gap-3 rounded-lg px-4 py-2.5 border transition-colors'
+                    'inline-flex items-center gap-2 rounded-full px-4 py-2 border transition-colors'
                   }
                 >
                   <div className={
                     selected
-                      ? 'w-2 h-2 rounded-full border border-secondary bg-secondary flex-shrink-0'
+                      ? 'w-2 h-2 rounded-full bg-white flex-shrink-0'
                       : 'w-2 h-2 rounded-full border border-white/40 flex-shrink-0'
                   } />
-                  <span className="text-sm text-white text-left flex-1">{option}</span>
+                  <span className="text-sm text-white whitespace-nowrap">{option}</span>
                 </button>
               );
             })}
@@ -784,15 +784,15 @@ const JobView = () => {
                 <h2 className="text-section-title">Ansökningsfrågor</h2>
                 
                 {jobQuestions.map((question, index) => (
-                  <div key={question.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                    <div className="mb-3">
-                      <div className="text-caption mb-1">
-                        Fråga {index + 1} av {jobQuestions.length}
+                  <div key={question.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                    <div className="mb-4 text-center">
+                      <div className="text-[10px] uppercase tracking-widest text-white/40 mb-1.5">
+                        {index + 1} / {jobQuestions.length}
                       </div>
-                      <h3 className="text-subsection-title leading-tight">
+                      <h3 className="text-sm font-medium text-white leading-snug">
                         {question.question_text}
                         {question.is_required && (
-                          <span className="ml-1 text-white">*</span>
+                          <span className="ml-1 text-red-400">*</span>
                         )}
                       </h3>
                     </div>
@@ -807,20 +807,14 @@ const JobView = () => {
 
             {/* Contact info if exists - after questions */}
             {job.contact_email && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                <h3 className="text-subsection-title mb-2">Har du några frågor?</h3>
-                <p className="text-body-sm mb-3">Kontakt: {job.contact_email}</p>
-                <div className="flex justify-center">
-                  <Button 
-                    variant="glass"
-                    className="px-6"
-                    onClick={() => {
-                      window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
-                    }}
-                  >
-                    Skicka e-post
-                  </Button>
-                </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                <h3 className="text-sm font-medium text-white mb-1">Har du frågor?</h3>
+                <a 
+                  href={`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`}
+                  className="text-xs text-white/60 hover:text-white transition-colors underline underline-offset-2"
+                >
+                  {job.contact_email}
+                </a>
               </div>
             )}
 
