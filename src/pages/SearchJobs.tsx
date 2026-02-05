@@ -735,9 +735,9 @@ const SearchJobs = () => {
             </div>
 
             {/* Clear all filters button */}
-            <div className="pt-2">
+            <div className="pt-2 flex justify-center">
               <button 
-                className="w-full h-[44px] flex items-center justify-center bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-sm text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/20"
+                className="h-9 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 rounded-full px-5 text-xs text-white/70 hover:text-white transition-all duration-300 focus:outline-none"
                 onClick={() => {
                   setSelectedPostalCode('');
                   setSelectedCity('');
