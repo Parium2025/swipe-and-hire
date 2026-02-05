@@ -114,6 +114,7 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
         onLoad={handleLoad}
         onError={handleError}
         className={cn("aspect-square h-full w-full object-cover", className)}
+       style={{ imageRendering: '-webkit-optimize-contrast' } as React.CSSProperties}
         data-state={status}
         {...props}
       />
