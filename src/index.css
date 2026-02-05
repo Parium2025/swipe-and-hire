@@ -1347,3 +1347,18 @@ All colors MUST be HSL.
   opacity: 0.9;
 }
 
+/* ============================================
+   RESPONSIVE CONTAINER UTILITY
+   Bredare på laptops (lg), centrerad på stora skärmar (xl+)
+   Bevarar premium-känslan på stora skärmar,
+   men ger mer plats för tabeller på laptops
+   ============================================ */
+.responsive-container {
+  @apply max-w-full lg:max-w-6xl xl:max-w-4xl mx-auto px-3 md:px-8;
+}
+
+/* For table-heavy views that need more width */
+.responsive-container-wide {
+  @apply max-w-full lg:max-w-7xl xl:max-w-6xl 2xl:max-w-5xl mx-auto px-3 md:px-8;
+}
+

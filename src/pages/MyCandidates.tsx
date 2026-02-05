@@ -1197,7 +1197,7 @@ const MyCandidates = () => {
   }
 
   return (
-     <div className="max-w-4xl mx-auto px-3 md:px-8 animate-fade-in">
+     <div className="responsive-container-wide animate-fade-in">
       {/* Header with Search and Stage Filters */}
       <div className="mb-6 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4">
         {/* Title and description */}
