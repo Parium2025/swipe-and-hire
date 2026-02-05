@@ -65,19 +65,28 @@ const Auth = () => {
 
   // Smart scroll-locking: Lock only for login on MOBILE devices, allow scroll on desktop
   useEffect(() => {
-    // CRITICAL: Only apply scroll-lock on touch devices (coarse pointer = touch screen)
-    // This check is more reliable than device breakpoint since it detects actual input method
-    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-    const isFinePtrDevice = window.matchMedia('(pointer: fine)').matches;
-    
-    // If the device has a fine pointer (mouse), NEVER lock scroll
-    if (isFinePtrDevice || !isTouchDevice) {
-      // Clean up any possible leftover scroll-lock state
+    // Always clear legacy scroll-lock classes/styles first.
+    // These can otherwise get "stuck" across navigations and completely freeze the auth page.
+    try {
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
       document.documentElement.classList.remove('auth-locked', 'auth-lock');
       document.body.classList.remove('auth-locked', 'auth-lock');
-      return; // Skip scroll-lock entirely on non-touch devices
+    } catch {
+      // ignore
+    }
+
+    // CRITICAL: Only apply scroll-lock on touch-first devices *without* any mouse/trackpad.
+    // On hybrid devices (touch laptop / iPad + trackpad), `(pointer: coarse)` may be true
+    // while users still scroll with mouse/trackpad. In those cases, DO NOT lock.
+    const isPrimaryCoarse = window.matchMedia('(pointer: coarse)').matches;
+    const hasAnyFinePointer =
+      window.matchMedia('(any-pointer: fine)').matches ||
+      window.matchMedia('(any-hover: hover)').matches;
+
+    const shouldLockScroll = isPrimaryCoarse && !hasAnyFinePointer;
+    if (!shouldLockScroll) {
+      return; // Never lock on devices where mouse/trackpad is available
     }
 
     try {
