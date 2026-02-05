@@ -131,6 +131,8 @@ const CompanyProfile = () => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [originalLogoFile, setOriginalLogoFile] = useState<File | null>(null);
+  const [originalLogoUrl, setOriginalLogoUrl] = useState<string>('');
+  const [logoIsEdited, setLogoIsEdited] = useState(false);
   
   // Industry dropdown states
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
@@ -327,8 +329,12 @@ const CompanyProfile = () => {
     setOriginalLogoFile(file);
     
     const imageUrl = URL.createObjectURL(file);
+    // Store the original blob URL - this will be our original for this new image
+    setOriginalLogoUrl(imageUrl);
     setPendingImageSrc(imageUrl);
     setImageEditorOpen(true);
+    // Reset the file input so the same file can be selected again
+    e.target.value = '';
   };
 
   const handleLogoSave = async (editedBlob: Blob) => {
@@ -384,6 +390,7 @@ const CompanyProfile = () => {
       }));
       setImageEditorOpen(false);
       setPendingImageSrc('');
+      setLogoIsEdited(true);
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
@@ -405,20 +412,21 @@ const CompanyProfile = () => {
   };
 
   const handleEditExistingLogo = async () => {
-    // Priority 1: Use stored original file (same session)
-    if (originalLogoFile) {
-      const blobUrl = URL.createObjectURL(originalLogoFile);
-      setPendingImageSrc(blobUrl);
+    // Priority 1: Use stored original URL (same session - always edit from original, like job wizard)
+    if (originalLogoUrl) {
+      setPendingImageSrc(originalLogoUrl);
       setImageEditorOpen(true);
       return;
     }
     
-    // Priority 2: Use stored original URL from database
+    // Priority 2: Use stored original URL from database (company_logo_original_url)
     if (formData.company_logo_original_url) {
       try {
         const response = await fetch(formData.company_logo_original_url);
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
+        // Cache this for future edits in the same session
+        setOriginalLogoUrl(blobUrl);
         setPendingImageSrc(blobUrl);
         setImageEditorOpen(true);
         return;
@@ -434,6 +442,8 @@ const CompanyProfile = () => {
       const response = await fetch(formData.company_logo_url);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
+      // This becomes our "original" if we don't have a better one
+      setOriginalLogoUrl(blobUrl);
       setPendingImageSrc(blobUrl);
       setImageEditorOpen(true);
     } catch (error) {
@@ -442,6 +452,22 @@ const CompanyProfile = () => {
         title: "Fel",
         description: "Kunde inte ladda bilden för redigering.",
         variant: "destructive"
+      });
+    }
+  };
+
+  // Restore original logo (used when user clicks save without making changes - passes through to original)
+  const handleRestoreOriginal = () => {
+    // If we have original URL stored, restore it
+    if (originalLogoUrl && formData.company_logo_original_url) {
+      setFormData(prev => ({
+        ...prev,
+        company_logo_url: formData.company_logo_original_url,
+      }));
+      setLogoIsEdited(false);
+      toast({
+        title: "Bild återställd",
+        description: "Originalbilden har återställts",
       });
     }
   };
@@ -1274,8 +1300,9 @@ const CompanyProfile = () => {
         }}
         imageSrc={pendingImageSrc}
         onSave={handleLogoSave}
+        onRestoreOriginal={handleRestoreOriginal}
         aspectRatio={1}
-        isCircular={false}
+        isCircular={true}
       />
 
       {/* Delete Social Link Confirmation Dialog */}
