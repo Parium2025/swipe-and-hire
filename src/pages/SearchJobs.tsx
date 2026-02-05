@@ -82,6 +82,10 @@ const SearchJobs = () => {
 
   // Handler to apply a saved search - sets all the filter states
   const handleApplySavedSearch = useCallback((criteria: SearchCriteria) => {
+    // 🔥 CRITICAL: Invalidera cache FÖRST för att förhindra flimmer
+    // Detta gör att UI:n visar loading istället för gammal data som blinkar
+    queryClient.removeQueries({ queryKey: ['optimized-job-search'] });
+    
     // Clear existing filters first
     setSearchInput(criteria.search_query || '');
     setSelectedCity(criteria.city || '');
@@ -100,7 +104,7 @@ const SearchJobs = () => {
     
     // Scroll to top of results
     listTopRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
+  }, [queryClient]);
   
   // Hämta användarens ansökningar för att visa "Redan sökt"-badge
   const { data: appliedJobIds = new Set<string>() } = useQuery({
