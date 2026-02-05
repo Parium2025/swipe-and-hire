@@ -346,7 +346,7 @@ const EmployerDashboard = memo(() => {
                           <div className="flex flex-col items-center gap-0.5">
                             {job.is_active ? (
                               isJobExpiredCheck(job.created_at, job.expires_at) ? (
-                                <Badge variant="glass" className="px-1.5 whitespace-nowrap text-xs transition-all duration-300 bg-red-500/60 border-red-400/60 text-white group-hover:backdrop-brightness-90 hover:bg-red-500/70 hover:backdrop-brightness-110">
+                               <Badge variant="glass" className="whitespace-nowrap text-xs transition-all duration-300 bg-red-500/60 border-red-400/60 text-white group-hover:backdrop-brightness-90 hover:bg-red-500/70 hover:backdrop-brightness-110">
                                   Utgången
                                 </Badge>
                               ) : (
