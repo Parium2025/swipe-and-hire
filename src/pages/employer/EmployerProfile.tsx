@@ -65,7 +65,16 @@ const EmployerProfile = () => {
   const [profileImageIsEdited, setProfileImageIsEdited] = useState(false); // Track if image has been cropped/edited
   const fileInputRef = useRef<HTMLInputElement>(null);
   const didInitRef = useRef(false);
-  
+
+  // Initialize originalProfileImageStoragePath from database when profile loads (Job Wizard pattern)
+  // This ensures that existing profile images can be edited from the original source
+  useEffect(() => {
+    if (profile && profile.profile_image_url && !originalProfileImageStoragePath) {
+      // The profile_image_url IS the storage path - store it for restore functionality
+      setOriginalProfileImageStoragePath(profile.profile_image_url);
+    }
+  }, [profile, originalProfileImageStoragePath]);
+
   // Undo state - spara borttagen bild för återställning
   const [deletedProfileImage, setDeletedProfileImage] = useState<string | null>(null);
 
