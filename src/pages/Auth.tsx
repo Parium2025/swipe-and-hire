@@ -623,7 +623,12 @@ const Auth = () => {
         {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
         <main
           className="h-full w-full min-h-0 overflow-y-auto overflow-x-hidden relative z-10"
-          style={{ WebkitOverflowScrolling: 'touch' }}
+          style={{ 
+            WebkitOverflowScrolling: 'touch',
+            scrollBehavior: 'smooth',
+            willChange: 'scroll-position',
+            transform: 'translateZ(0)',
+          }}
         >
           <AuthMobile
             isPasswordReset={isPasswordReset}
@@ -649,7 +654,12 @@ const Auth = () => {
       {/* Internal scroll container (same pattern as Employer/JobSeeker layouts) */}
       <main
         className="h-full w-full min-h-0 overflow-y-auto overflow-x-hidden relative z-10"
-        style={{ WebkitOverflowScrolling: 'touch' }}
+        style={{ 
+          WebkitOverflowScrolling: 'touch',
+          scrollBehavior: 'smooth',
+          willChange: 'scroll-position',
+          transform: 'translateZ(0)',
+        }}
       >
         <AuthDesktop
           isPasswordReset={isPasswordReset}
