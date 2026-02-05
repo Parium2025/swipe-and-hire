@@ -1,6 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { authSplashEvents } from '@/lib/authSplashEvents';
 import { useDevice } from '@/hooks/use-device';
+import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
 
 // Minsta visningstid för att garantera att loggan hinner laddas och avkodas
 const MINIMUM_DISPLAY_MS = 2000;
@@ -135,9 +136,9 @@ export function AuthSplashScreen() {
         pointerEvents: isFadingIn && !isFadingOut ? 'auto' : 'none',
       }}
     >
-      {/* Parium Logo - exakt samma som index.html */}
+      {/* Parium Logo - inbäddad data-URI (offline-redo) */}
       <img
-        src="/parium-auth-logo.png"
+        src={authLogoDataUri}
         alt="Parium"
         onLoad={() => setImageLoaded(true)}
         onError={() => setImageLoaded(true)}
