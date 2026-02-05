@@ -1190,7 +1190,7 @@ const MyCandidates = () => {
 
   if (isLoading || !showContent) {
     return (
-       <div className="max-w-4xl mx-auto px-3 md:px-8 opacity-0">
+       <div className="responsive-container-wide opacity-0">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
