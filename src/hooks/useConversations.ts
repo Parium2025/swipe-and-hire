@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { prefetchMediaUrl } from './useMediaUrl';
 
 export interface ConversationMember {
   user_id: string;
@@ -289,6 +290,21 @@ export function useConversations() {
       // 🔥 Cache for instant-load on next visit
       writeConversationsCache(user.id, result);
 
+      // 🔥 Prefetch avatars for all conversation members (eliminates flicker)
+      result.forEach(conv => {
+        conv.members.forEach(member => {
+          if (member.user_id !== user.id && member.profile) {
+            const isEmployer = member.profile.role === 'employer';
+            const storagePath = isEmployer && member.profile.company_logo_url 
+              ? member.profile.company_logo_url 
+              : member.profile.profile_image_url;
+            if (storagePath) {
+              prefetchMediaUrl(storagePath, isEmployer ? 'company-logo' : 'profile-image');
+            }
+          }
+        });
+      });
+
       return result;
     },
     enabled: !!user,
@@ -305,6 +321,26 @@ export function useConversations() {
       return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
     },
   });
+
+  // 🔥 Prefetch avatars when conversations are loaded (from cache or fresh)
+  useEffect(() => {
+    const conversations = conversationsQuery.data;
+    if (!conversations || !user) return;
+
+    conversations.forEach(conv => {
+      conv.members.forEach(member => {
+        if (member.user_id !== user.id && member.profile) {
+          const isEmployer = member.profile.role === 'employer';
+          const storagePath = isEmployer && member.profile.company_logo_url 
+            ? member.profile.company_logo_url 
+            : member.profile.profile_image_url;
+          if (storagePath) {
+            prefetchMediaUrl(storagePath, isEmployer ? 'company-logo' : 'profile-image');
+          }
+        }
+      });
+    });
+  }, [conversationsQuery.data, user]);
 
   // Subscribe to realtime updates for new messages
   useEffect(() => {
