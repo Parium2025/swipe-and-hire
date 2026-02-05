@@ -519,42 +519,50 @@ const SearchJobs = () => {
               </div>
             </div>
 
-            {/* Subcategories Dropdown - shown only when category is selected */}
+            {/* Subcategories - Compact inline style when category selected */}
             {selectedCategory && selectedCategory !== 'all-categories' && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-white flex items-center gap-2">
-                  <Users className="h-3 w-3" />
-                  Specifik roll inom {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label}
-                </Label>
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="w-full h-[44px] flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
-                      aria-label="Välj specifik roll"
-                    >
-                      <Users className="h-4 w-4 text-white flex-shrink-0" />
-                      <span className="text-sm text-white flex-1 truncate">
-                        {selectedSubcategories.length === 0
-                          ? 'Alla roller'
-                          : selectedSubcategories.length === 1
-                          ? selectedSubcategories[0]
-                          : `${selectedSubcategories.length} roller valda`
-                        }
-                      </span>
-                      <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-900/85 backdrop-blur-xl border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto">
-                    <DropdownMenuItem
-                      onClick={() => setSelectedSubcategories([])}
-                      className="cursor-pointer hover:bg-white/10 text-white font-medium"
-                    >
-                      Alla roller
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-white/20" />
-                    {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.map((subcat, index, array) => (
-                      <React.Fragment key={subcat}>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-white/60">Roll:</span>
+                <button
+                  onClick={() => setSelectedSubcategories([])}
+                  className={`px-2.5 py-1 text-xs rounded-full transition-all duration-200 ${
+                    selectedSubcategories.length === 0 
+                      ? 'bg-white/20 text-white' 
+                      : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  Alla
+                </button>
+                {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.slice(0, 5).map((subcat) => (
+                  <button
+                    key={subcat}
+                    onClick={() => {
+                      setSelectedSubcategories(prev => 
+                        prev.includes(subcat) 
+                          ? prev.filter(s => s !== subcat)
+                          : [...prev, subcat]
+                      );
+                    }}
+                    className={`px-2.5 py-1 text-xs rounded-full transition-all duration-200 ${
+                      selectedSubcategories.includes(subcat)
+                        ? 'bg-white/20 text-white' 
+                        : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    {subcat}
+                  </button>
+                ))}
+                {(OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.length || 0) > 5 && (
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <button className="px-2.5 py-1 text-xs rounded-full bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all duration-200">
+                        +{(OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.length || 0) - 5} fler
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="bottom" className="w-64 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-lg shadow-xl text-white max-h-64 overflow-y-auto">
+                      {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.slice(5).map((subcat) => (
                         <DropdownMenuItem
+                          key={subcat}
                           onClick={() => {
                             setSelectedSubcategories(prev => 
                               prev.includes(subcat) 
@@ -564,39 +572,14 @@ const SearchJobs = () => {
                           }}
                           className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
                         >
-                          <span>{subcat}</span>
+                          <span className="text-sm">{subcat}</span>
                           {selectedSubcategories.includes(subcat) && (
-                            <Check className="h-4 w-4 text-white" />
+                            <Check className="h-3.5 w-3.5 text-white" />
                           )}
                         </DropdownMenuItem>
-                        {index < array.length - 1 && (
-                          <DropdownMenuSeparator className="bg-white/20" />
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Show selected roles as badges */}
-                {selectedSubcategories.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedSubcategories.map((subcat) => (
-                      <Badge 
-                        key={subcat}
-                        variant="secondary"
-                        className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
-                      >
-                        {subcat}
-                        <X 
-                          className="h-3 w-3" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedSubcategories(prev => prev.filter(s => s !== subcat));
-                          }}
-                        />
-                      </Badge>
-                    ))}
-                  </div>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </div>
             )}
@@ -734,10 +717,10 @@ const SearchJobs = () => {
               </div>
             </div>
 
-            {/* Clear all filters button */}
-            <div className="pt-2">
+            {/* Clear all filters - Subtle text link style */}
+            <div className="flex justify-center pt-1">
               <button 
-                className="w-full h-[44px] flex items-center justify-center bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-sm text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/20"
+                className="text-xs text-white/50 hover:text-white transition-colors duration-200 py-2 px-3"
                 onClick={() => {
                   setSelectedPostalCode('');
                   setSelectedCity('');
@@ -745,6 +728,7 @@ const SearchJobs = () => {
                   setSelectedCategory('all-categories');
                   setSelectedSubcategories([]);
                   setSearchInput('');
+                  setDebouncedSearch('');
                 }}
               >
                 Rensa alla filter
