@@ -160,7 +160,7 @@ const CompanyReviews = () => {
   }
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto animate-fade-in">
+     <div className="space-y-8 max-w-4xl mx-auto px-3 md:px-8 animate-fade-in">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Recensioner</h1>
         <p className="text-sm text-white">
