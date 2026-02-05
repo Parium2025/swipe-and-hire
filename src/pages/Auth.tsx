@@ -73,6 +73,13 @@ const Auth = () => {
       return; // Skip scroll-lock entirely on desktop
     }
 
+    // CRITICAL: Only apply scroll-lock on touch devices (coarse pointer)
+    // Check if this is a touch device - if not, skip scroll-lock entirely
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+    if (!isTouchDevice) {
+      return; // Skip scroll-lock on non-touch devices (e.g., desktop with mouse)
+    }
+
     try {
       const html = document.documentElement;
       const body = document.body;
