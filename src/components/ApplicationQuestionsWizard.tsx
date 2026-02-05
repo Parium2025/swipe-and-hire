@@ -272,21 +272,52 @@ export function ApplicationQuestionsWizard({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="flex-1 flex flex-col items-center justify-center text-center py-4"
+              className="flex-1 flex flex-col"
             >
-              <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center mb-3">
-                <CheckCircle className="w-6 h-6 text-secondary" />
+              {/* Header */}
+              <div className="text-center mb-3">
+                <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-2">
+                  <CheckCircle className="w-5 h-5 text-secondary" />
+                </div>
+                <h3 className="text-sm font-medium text-white">Granska dina svar</h3>
               </div>
-              <h3 className="text-sm font-medium text-white mb-1">
-                Allt klart!
-              </h3>
-              <p className="text-xs text-white/60 max-w-[200px]">
-                Klicka på knappen nedan för att skicka din ansökan.
-              </p>
+
+              {/* Answers summary - scrollable */}
+              <div className="flex-1 overflow-y-auto max-h-[200px] space-y-2 px-1">
+                {questions.map((q, idx) => {
+                  const answer = answers[q.id];
+                  let displayAnswer = answer || '—';
+                  
+                  // Format answer based on type
+                  if (q.question_type === 'yes_no') {
+                    displayAnswer = answer === 'yes' ? 'Ja' : answer === 'no' ? 'Nej' : '—';
+                  } else if (q.question_type === 'multiple_choice' && typeof answer === 'string') {
+                    displayAnswer = answer.split('|||').filter(a => a).join(', ') || '—';
+                  }
+                  
+                  return (
+                    <button
+                      key={q.id}
+                      type="button"
+                      onClick={() => setCurrentStep(idx)}
+                      className="w-full text-left p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] text-white/40 mb-0.5">Fråga {idx + 1}</p>
+                          <p className="text-xs text-white/70 truncate">{q.question_text}</p>
+                          <p className="text-xs text-white font-medium mt-0.5 truncate">{displayAnswer}</p>
+                        </div>
+                        <ArrowRight className="w-3 h-3 text-white/30 group-hover:text-white/60 transition-colors flex-shrink-0 mt-1" />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
 
               {/* Contact email */}
               {contactEmail && (
-                <div className="mt-3">
+                <div className="mt-3 text-center">
                   <a 
                     href={`mailto:${contactEmail}?subject=Fråga om tjänsten: ${jobTitle || ''}`}
                     className="text-xs text-white/50 hover:text-white transition-colors underline underline-offset-2"
