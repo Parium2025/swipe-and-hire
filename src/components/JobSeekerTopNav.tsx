@@ -172,10 +172,10 @@ function JobSeekerTopNav() {
                   <span className="text-white text-xs relative z-10">({getTotalJobsCount()})</span>
                 )}
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
-                {/* Red badge for new search matches */}
+                {/* Stilren badge för nya jobb-matchningar */}
                 {totalNewMatches > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 border-2 border-slate-900 z-20">
-                    {totalNewMatches > 99 ? '99+' : totalNewMatches}
+                  <span className="absolute -top-1 -right-1.5 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
+                    {totalNewMatches > 9 ? '9+' : totalNewMatches}
                   </span>
                 )}
               </button>
@@ -197,8 +197,8 @@ function JobSeekerTopNav() {
                     {showNewMatchBadge ? (
                       <span className="flex items-center gap-1.5">
                         {count !== null && <span className="text-white/60 text-xs">({count})</span>}
-                        <span className="min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
-                          {totalNewMatches > 99 ? '99+' : totalNewMatches}
+                        <span className="min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-sm">
+                          {totalNewMatches > 9 ? '9+' : totalNewMatches}
                         </span>
                       </span>
                     ) : (
@@ -223,8 +223,8 @@ function JobSeekerTopNav() {
             <MessageCircle className="h-4 w-4 relative z-10" />
             <span className="relative z-10">Meddelanden</span>
             {preloadedJobSeekerUnreadMessages > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 border-2 border-slate-900 z-20">
-                {preloadedJobSeekerUnreadMessages > 99 ? '99+' : preloadedJobSeekerUnreadMessages}
+              <span className="absolute -top-1 -right-1.5 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
+                {preloadedJobSeekerUnreadMessages > 9 ? '9+' : preloadedJobSeekerUnreadMessages}
               </span>
             )}
           </button>
