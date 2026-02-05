@@ -435,7 +435,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
         {/* Fixed gradient background */}
         <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
         
-        <div className="min-h-screen flex flex-col w-full overflow-x-hidden relative">
+         <div className="h-screen flex flex-col w-full overflow-hidden relative">
           <AnimatedBackground showBubbles={false} />
           
           {/* Top Navigation for Desktop */}
@@ -471,7 +471,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
             <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s', animationDelay: '-1.0s' }}></div>
           </div>
           
-           <main className="flex-1 overflow-y-auto p-3 relative z-10">
+           <main className="flex-1 min-h-0 overflow-y-auto p-3 relative z-10">
             {children}
           </main>
           
