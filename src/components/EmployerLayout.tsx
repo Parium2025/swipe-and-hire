@@ -471,7 +471,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
             <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s', animationDelay: '-1.0s' }}></div>
           </div>
           
-          <main className="flex-1 overflow-hidden p-3 relative z-10">
+           <main className="flex-1 overflow-y-auto p-3 relative z-10">
             {children}
           </main>
           
