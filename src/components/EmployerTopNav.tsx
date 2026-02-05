@@ -360,10 +360,11 @@ function EmployerTopNav() {
                   <img 
                     src={preloadedCompanyLogoUrl} 
                     alt="Företagslogo" 
-                    className="h-6 w-6 rounded-full object-cover ring-1 ring-white/30 relative z-10"
+                    className="h-8 w-8 rounded-full object-cover ring-2 ring-white/30 relative z-10 transform-gpu"
+                    style={{ imageRendering: '-webkit-optimize-contrast' } as React.CSSProperties}
                   />
                 ) : profile?.company_name ? (
-                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white relative z-10">
+                  <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white relative z-10">
                     {profile.company_name.substring(0, 2).toUpperCase()}
                   </div>
                 ) : (
@@ -400,10 +401,11 @@ function EmployerTopNav() {
                   <img 
                     src={resolvedProfileImageUrl} 
                     alt={getUserDisplayName()} 
-                    className="h-7 w-7 rounded-full object-cover"
+                    className="h-8 w-8 rounded-full object-cover ring-2 ring-white/30 transform-gpu"
+                    style={{ imageRendering: '-webkit-optimize-contrast' } as React.CSSProperties}
                   />
                 ) : (
-                  <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white">
+                  <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white">
                     {getUserInitials()}
                   </div>
                 )}
