@@ -734,8 +734,8 @@ const SearchJobs = () => {
               </div>
             </div>
 
-            {/* Clear all filters button */}
-            <div className="pt-2">
+            {/* Clear all filters button - full width spanning both columns */}
+            <div className="col-span-2 pt-2">
               <button 
                 className="w-full h-[44px] flex items-center justify-center bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-sm text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/20"
                 onClick={() => {
