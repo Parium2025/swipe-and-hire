@@ -289,31 +289,33 @@ const JobView = () => {
 
       case 'yes_no':
         return (
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => handleAnswerChange(question.id, currentAnswer === 'yes' ? '' : 'yes')}
-              className={
-                (currentAnswer === 'yes'
-                  ? 'bg-secondary/40 border-secondary text-white '
-                  : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
-                'border rounded-lg px-4 py-2 text-sm transition-colors font-medium flex-1'
-              }
-            >
-              Ja
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAnswerChange(question.id, currentAnswer === 'no' ? '' : 'no')}
-              className={
-                (currentAnswer === 'no'
-                  ? 'bg-secondary/40 border-secondary text-white '
-                  : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
-                'border rounded-lg px-4 py-2 text-sm transition-colors font-medium flex-1'
-              }
-            >
-              Nej
-            </button>
+          <div className="flex justify-center">
+            <div className="inline-flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleAnswerChange(question.id, currentAnswer === 'yes' ? '' : 'yes')}
+                className={
+                  (currentAnswer === 'yes'
+                    ? 'bg-secondary/40 border-secondary text-white '
+                    : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
+                  'border rounded-full px-6 py-2 text-sm transition-colors font-medium'
+                }
+              >
+                Ja
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAnswerChange(question.id, currentAnswer === 'no' ? '' : 'no')}
+                className={
+                  (currentAnswer === 'no'
+                    ? 'bg-secondary/40 border-secondary text-white '
+                    : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
+                  'border rounded-full px-6 py-2 text-sm transition-colors font-medium'
+                }
+              >
+                Nej
+              </button>
+            </div>
           </div>
         );
 
@@ -808,50 +810,54 @@ const JobView = () => {
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                 <h3 className="text-subsection-title mb-2">Har du några frågor?</h3>
                 <p className="text-body-sm mb-3">Kontakt: {job.contact_email}</p>
-                <Button 
-                  variant="glass"
-                  className="w-full"
-                  onClick={() => {
-                    window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
-                  }}
-                >
-                  Skicka e-post
-                </Button>
+                <div className="flex justify-center">
+                  <Button 
+                    variant="glass"
+                    className="px-6"
+                    onClick={() => {
+                      window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
+                    }}
+                  >
+                    Skicka e-post
+                  </Button>
+                </div>
               </div>
             )}
 
             {/* Submit application button - only show when job is not expired */}
             {!isJobExpired && (
-              hasAlreadyApplied ? (
-                <Button
-                  size="lg"
-                  variant="glass"
-                  className="w-full h-12 text-base font-semibold bg-green-500/20 text-green-300 border-green-500/30 cursor-default hover:bg-green-500/20"
-                  disabled
-                >
-                  <CheckCircle className="mr-1.5 h-4 w-4" />
-                  Redan sökt
-                </Button>
-              ) : (
-                <Button
-                  size="lg"
-                  variant={canSubmitApplication ? "glassGreen" : "glass"}
-                  className={`w-full h-12 text-base font-semibold ${
-                    !canSubmitApplication ? 'cursor-not-allowed opacity-50' : ''
-                  }`}
-                  onClick={handleApplicationSubmit}
-                  disabled={applying || !canSubmitApplication}
-                >
-                  {applying ? (
-                    'Skickar...'
-                  ) : (
-                    <>
-                      <Send className="mr-1.5 h-3.5 w-3.5" />
-                      Skicka ansökan
-                    </>
-                  )}
-                </Button>
-              )
+              <div className="flex justify-center">
+                {hasAlreadyApplied ? (
+                  <Button
+                    size="lg"
+                    variant="glass"
+                    className="h-11 px-8 text-sm font-semibold bg-green-500/20 text-green-300 border-green-500/30 cursor-default hover:bg-green-500/20"
+                    disabled
+                  >
+                    <CheckCircle className="mr-1.5 h-4 w-4" />
+                    Redan sökt
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    variant={canSubmitApplication ? "glassGreen" : "glass"}
+                    className={`h-11 px-8 text-sm font-semibold ${
+                      !canSubmitApplication ? 'cursor-not-allowed opacity-50' : ''
+                    }`}
+                    onClick={handleApplicationSubmit}
+                    disabled={applying || !canSubmitApplication}
+                  >
+                    {applying ? (
+                      'Skickar...'
+                    ) : (
+                      <>
+                        <Send className="mr-1.5 h-3.5 w-3.5" />
+                        Skicka ansökan
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             )}
 
             {/* Job posted date and countdown */}
