@@ -176,7 +176,7 @@ const MyApplications = () => {
 
   if (isLoading) {
     return (
-       <div className="max-w-4xl mx-auto px-3 md:px-8 animate-fade-in">
+       <div className="responsive-container animate-fade-in">
         <div className="text-center mb-8">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Mina Ansökningar</h1>
           <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
@@ -209,7 +209,7 @@ const MyApplications = () => {
 
   if (error) {
     return (
-       <div className="max-w-4xl mx-auto px-3 md:px-8 animate-fade-in">
+       <div className="responsive-container animate-fade-in">
         <div className="text-center py-12 text-red-400">
           Något gick fel vid hämtning av ansökningar
         </div>
@@ -218,7 +218,7 @@ const MyApplications = () => {
   }
 
   return (
-     <div className="max-w-4xl mx-auto px-3 md:px-8 animate-fade-in space-y-8">
+     <div className="responsive-container animate-fade-in space-y-8">
       {/* Interviews Section */}
       {interviews && interviews.length > 0 && (
         <section>

@@ -839,7 +839,7 @@ const JobDetails = () => {
   // Show skeleton while loading job data OR stage settings
   if (dataLoading || stagesLoading) {
     return (
-       <div className="space-y-4 max-w-4xl mx-auto px-3 md:px-8 py-4 pb-safe min-h-screen animate-fade-in">
+       <div className="space-y-4 responsive-container-wide py-4 pb-safe min-h-screen animate-fade-in">
         {/* Header skeleton */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-6">
           <div className="flex items-start justify-between mb-3">
@@ -906,7 +906,7 @@ const JobDetails = () => {
   }
 
   return (
-     <div className="space-y-4 max-w-4xl mx-auto px-3 md:px-8 py-4 pb-safe min-h-screen animate-fade-in">
+     <div className="space-y-4 responsive-container-wide py-4 pb-safe min-h-screen animate-fade-in">
         {/* Job Title and Stats - Compact */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4">
           <div className="flex items-start justify-between gap-2">
