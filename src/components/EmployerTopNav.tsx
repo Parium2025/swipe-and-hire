@@ -247,19 +247,19 @@ function EmployerTopNav() {
           <DropdownMenu open={dashboardOpen} onOpenChange={setDashboardOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+                className="relative flex items-baseline gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
                     isDropdownActive(dashboardItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
-                <LayoutDashboard className="h-4 w-4 relative z-10" />
+                <LayoutDashboard className="h-4 w-4 relative z-10 self-center" />
                 <span className="relative z-10">Annonser</span>
                 {getDashboardCount() && (
-                  <span className="text-white text-xs relative z-10 leading-none flex items-center">({getDashboardCount()})</span>
+                  <span className="text-white text-xs relative z-10">({getDashboardCount()})</span>
                 )}
-                <ChevronDown className="h-3 w-3 text-white relative z-10" />
+                <ChevronDown className="h-3 w-3 text-white relative z-10 self-center" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
@@ -286,19 +286,19 @@ function EmployerTopNav() {
             <DropdownMenuTrigger asChild>
               <button
                 onMouseEnter={prefetchApplications}
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+                className="relative flex items-baseline gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
                     isDropdownActive(candidateItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
-                <Users className="h-4 w-4 relative z-10" />
+                <Users className="h-4 w-4 relative z-10 self-center" />
                 <span className="relative z-10">Kandidater</span>
                 {getCandidatesCount() && (
-                  <span className="text-white text-xs relative z-10 leading-none flex items-center">({getCandidatesCount()})</span>
+                  <span className="text-white text-xs relative z-10">({getCandidatesCount()})</span>
                 )}
-                <ChevronDown className="h-3 w-3 text-white relative z-10" />
+                <ChevronDown className="h-3 w-3 text-white relative z-10 self-center" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
