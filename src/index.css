@@ -1349,24 +1349,23 @@ All colors MUST be HSL.
 
 /* ============================================
    RESPONSIVE CONTAINER UTILITY
-   Bredare på laptops (lg), centrerad på stora skärmar (xl+)
-   Bevarar premium-känslan på stora skärmar,
-   men ger mer plats för tabeller på laptops
+   Proportionellt skalningssystem - ser identiskt ut oavsett skärmstorlek
+   Mobil → Laptop → Desktop → Ultra-wide: samma proportioner, olika skalor
    ============================================ */
 .responsive-container {
-  @apply max-w-full lg:max-w-6xl xl:max-w-4xl mx-auto px-3 md:px-8;
+  @apply max-w-full md:max-w-[95%] lg:max-w-6xl xl:max-w-5xl 2xl:max-w-4xl mx-auto px-3 md:px-6 lg:px-8;
 }
 
-/* For table-heavy views that need more width */
+/* For table-heavy and Kanban views that need more width */
 .responsive-container-wide {
-  @apply max-w-full lg:max-w-7xl xl:max-w-6xl 2xl:max-w-5xl mx-auto px-3 md:px-8;
+  @apply max-w-full md:max-w-[98%] lg:max-w-[95%] xl:max-w-7xl 2xl:max-w-6xl mx-auto px-3 md:px-4 lg:px-6;
 }
 
 /* ============================================
    RESPONSIVE DASHBOARD CARD HEIGHT
-   Proportional scaling: shorter on laptops, taller on large screens
+   Proportional scaling: consistent feel across all screen sizes
    ============================================ */
 .dashboard-card-height {
-  @apply h-[200px] lg:h-[220px] xl:h-[240px];
+  @apply h-[180px] sm:h-[200px] lg:h-[220px] xl:h-[240px];
 }
 
