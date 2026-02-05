@@ -65,18 +65,13 @@ const Auth = () => {
 
   // Smart scroll-locking: Lock only for login on MOBILE devices, allow scroll on desktop
   useEffect(() => {
-    // CRITICAL: Desktop must ALWAYS scroll freely - no scroll-lock at all
-    if (device === 'desktop') {
-      // Ensure no scroll-lock classes are present
-      document.documentElement.classList.remove('auth-locked', 'auth-lock');
-      document.body.classList.remove('auth-locked', 'auth-lock');
-      return; // Skip scroll-lock entirely on desktop
-    }
-
-    // CRITICAL: Only apply scroll-lock on touch devices (coarse pointer)
-    // Check if this is a touch device - if not, skip scroll-lock entirely
+    // CRITICAL: Only apply scroll-lock on touch devices (coarse pointer = touch screen)
+    // This check is more reliable than device breakpoint since it detects actual input method
     const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
     if (!isTouchDevice) {
+      // Ensure no scroll-lock classes are present on non-touch devices
+      document.documentElement.classList.remove('auth-locked', 'auth-lock');
+      document.body.classList.remove('auth-locked', 'auth-lock');
       return; // Skip scroll-lock on non-touch devices (e.g., desktop with mouse)
     }
 
@@ -184,7 +179,7 @@ const Auth = () => {
     } catch (scrollError) {
       console.warn('Failed to handle scroll lock:', scrollError);
     }
-  }, [isLoginMode, isRefreshing]);
+  }, [isLoginMode, isRefreshing]); // Note: device removed from deps - we use pointer media query instead
 
   useEffect(() => {
     const handleAuthFlow = async () => {
