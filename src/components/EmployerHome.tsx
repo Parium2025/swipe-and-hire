@@ -266,7 +266,7 @@ const EmployerHome = memo(() => {
       <GpsPrompt />
       {/* Visa vädereffekter endast efter kort mount-delay (ger cache-rensning tid) */}
       {showWeatherEffects && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
-      <div className="space-y-6 responsive-container py-3 animate-fade-in relative z-10">
+      <div className="space-y-6 responsive-container-wide py-3 animate-fade-in relative z-10">
         {/* System Health badge removed - use nav bar icon instead */}
 
         {/* Personal greeting */}

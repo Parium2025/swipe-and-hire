@@ -140,7 +140,7 @@ const NewsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaus
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg h-[240px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-6 h-full">
           <div className="flex items-center gap-2 mb-4">
@@ -157,7 +157,7 @@ const NewsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaus
 
   return (
     <Card 
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg h-[240px] touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       {...swipeHandlers}
@@ -444,7 +444,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[240px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-6 h-full">
           <Skeleton className="h-10 w-10 rounded-xl bg-white/20 mb-4" />
@@ -459,7 +459,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
 
   return (
     <Card 
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[240px] touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       {...swipeHandlers}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -696,7 +696,7 @@ const NotesCard = memo(() => {
 
   return (
     <>
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder1} border-0 shadow-lg h-[240px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder1} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
         
@@ -861,7 +861,7 @@ const InterviewsCard = memo(() => {
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[240px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-4 h-full">
           <div className="flex items-center gap-2 mb-4">
@@ -875,7 +875,7 @@ const InterviewsCard = memo(() => {
   }
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg h-[240px]`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder2} border-0 shadow-lg dashboard-card-height`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       

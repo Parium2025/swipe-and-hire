@@ -1362,3 +1362,11 @@ All colors MUST be HSL.
   @apply max-w-full lg:max-w-7xl xl:max-w-6xl 2xl:max-w-5xl mx-auto px-3 md:px-8;
 }
 
+/* ============================================
+   RESPONSIVE DASHBOARD CARD HEIGHT
+   Proportional scaling: shorter on laptops, taller on large screens
+   ============================================ */
+.dashboard-card-height {
+  @apply h-[200px] lg:h-[220px] xl:h-[240px];
+}
+
