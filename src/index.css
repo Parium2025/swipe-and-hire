@@ -1066,17 +1066,20 @@ All colors MUST be HSL.
     background: hsl(var(--secondary) / 0.8) !important;
   }
 
-  /* Lås scroll på auth och fixa iOS viewport-gap */
+  /* Auth legacy scroll-lock classes (NO-OP)
+     We previously used these to hard-lock scrolling on /auth for pull-to-refresh.
+     That caused persistent “stuck scroll” issues across devices/browsers.
+     Keep selectors for backwards compatibility, but never block scrolling here. */
   html.auth-locked, body.auth-locked,
   html.auth-lock, body.auth-lock {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: calc(100dvh + env(safe-area-inset-bottom, 0px)); /* inkludera bottom safe area */
-    overflow: hidden;
-    overscroll-behavior: none;
-    touch-action: pan-x; /* blockera vertikal scroll men tillåt swipe i x */
-    -webkit-overflow-scrolling: auto;
+    position: static;
+    inset: auto;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    overscroll-behavior: auto;
+    touch-action: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   /* I standalone mode, säkerställ att background täcker hela vägen ner */
