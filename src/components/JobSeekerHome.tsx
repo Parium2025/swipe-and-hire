@@ -169,7 +169,7 @@ const JobSeekerHome = memo(() => {
 
   if (!showContent) {
     return (
-      <div className="space-y-6 max-w-6xl mx-auto px-3 md:px-12 py-8 opacity-0">
+      <div className="space-y-6 max-w-4xl mx-auto px-3 md:px-8 py-8 opacity-0">
         {/* Invisible placeholder */}
       </div>
     );
@@ -179,7 +179,7 @@ const JobSeekerHome = memo(() => {
     <>
       <GpsPrompt />
       {showWeatherEffects && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
-      <div className="space-y-6 max-w-6xl mx-auto px-3 md:px-12 py-3 animate-fade-in relative z-10">
+      <div className="space-y-6 max-w-4xl mx-auto px-3 md:px-8 py-3 animate-fade-in relative z-10">
         {/* Personal greeting */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
