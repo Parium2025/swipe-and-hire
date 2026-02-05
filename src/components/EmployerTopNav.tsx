@@ -257,7 +257,7 @@ function EmployerTopNav() {
                 <LayoutDashboard className="h-4 w-4 relative z-10" />
                 <span className="relative z-10">Annonser</span>
                 {getDashboardCount() && (
-                  <span className="text-white text-xs relative z-10">({getDashboardCount()})</span>
+                  <span className="text-white text-xs relative z-10 leading-none flex items-center">({getDashboardCount()})</span>
                 )}
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
@@ -296,7 +296,7 @@ function EmployerTopNav() {
                 <Users className="h-4 w-4 relative z-10" />
                 <span className="relative z-10">Kandidater</span>
                 {getCandidatesCount() && (
-                  <span className="text-white text-xs relative z-10">({getCandidatesCount()})</span>
+                  <span className="text-white text-xs relative z-10 leading-none flex items-center">({getCandidatesCount()})</span>
                 )}
                 <ChevronDown className="h-3 w-3 text-white relative z-10" />
               </button>
