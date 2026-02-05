@@ -686,24 +686,19 @@ export function useCreateConversation() {
 
         const jobTitle = (application?.job as any)?.title || 'Okänd tjänst';
 
-        // Update conversation's current application context
-        await supabase
-          .from('conversations')
-          .update({ 
-            application_id: applicationId,
-            job_id: jobId,
-          })
-          .eq('id', conversationId);
+        // Atomär transaktion: båda operationerna lyckas eller ingen
+        // Premium Spotify-känsla - inga inkonsistenta tillstånd möjliga
+        const { error: switchError } = await supabase.rpc('switch_conversation_job_context', {
+          p_conversation_id: conversationId,
+          p_new_application_id: applicationId,
+          p_new_job_id: jobId,
+          p_job_title: jobTitle,
+        });
 
-        // Insert system message marking the job context switch
-        await supabase
-          .from('conversation_messages')
-          .insert({
-            conversation_id: conversationId,
-            sender_id: user.id,
-            content: `📋 Skriver från: ${jobTitle}`,
-            is_system_message: true,
-          });
+        if (switchError) {
+          console.error('Failed to switch job context:', switchError);
+          // Non-critical: conversation still works, just without the marker
+        }
       }
 
       // Send initial message if provided

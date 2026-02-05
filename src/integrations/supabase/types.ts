@@ -2250,6 +2250,15 @@ export type Database = {
           updated_at: string
         }[]
       }
+      switch_conversation_job_context: {
+        Args: {
+          p_conversation_id: string
+          p_job_title: string
+          p_new_application_id: string
+          p_new_job_id: string
+        }
+        Returns: boolean
+      }
       trigger_career_tips_fetch: { Args: never; Returns: undefined }
       trigger_hr_news_fetch: { Args: never; Returns: undefined }
       try_uuid: { Args: { p_text: string }; Returns: string }
