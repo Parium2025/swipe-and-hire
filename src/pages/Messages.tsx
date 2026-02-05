@@ -329,6 +329,7 @@ export default function Messages() {
               conversation={selectedConversation} 
               currentUserId={user?.id || ''}
               onBack={handleBackToList}
+              currentUserRole={(user?.role as 'job_seeker' | 'employer') || null}
             />
           ) : (
             <EmptyChatState
@@ -496,10 +497,12 @@ function ChatView({
   conversation, 
   currentUserId,
   onBack,
+  currentUserRole,
 }: { 
   conversation: Conversation;
   currentUserId: string;
   onBack: () => void;
+  currentUserRole: 'job_seeker' | 'employer' | null;
 }) {
   const { messages, isLoading, sendMessage, markAsRead } = useConversationMessages(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
@@ -702,6 +705,7 @@ function ChatView({
                       isOwn={msg.sender_id === currentUserId}
                       showAvatar={idx === 0 || msgs[idx - 1]?.sender_id !== msg.sender_id}
                       isGroup={conversation.is_group}
+                      currentUserRole={currentUserRole}
                     />
                   ))}
                 </div>
@@ -774,11 +778,13 @@ function MessageBubble({
   isOwn, 
   showAvatar,
   isGroup,
+  currentUserRole,
 }: { 
   message: ConversationMessage;
   isOwn: boolean;
   showAvatar: boolean;
   isGroup: boolean;
+  currentUserRole: 'job_seeker' | 'employer' | null;
 }) {
   const getDisplayName = () => {
     const p = message.sender_profile;
@@ -792,6 +798,11 @@ function MessageBubble({
   // System message - job context switch marker
   if (message.is_system_message) {
     const isJobContextMarker = message.content.startsWith('📋');
+    
+    // Hide job context markers from job seekers - only employers should see these
+    if (isJobContextMarker && currentUserRole !== 'employer') {
+      return null;
+    }
     
     return (
       <div className="flex justify-center my-4">
