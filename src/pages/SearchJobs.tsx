@@ -744,8 +744,8 @@ const SearchJobs = () => {
         </CardContent>
       </Card>
 
-      {/* Company Suggestion Card - LinkedIn style */}
-      {matchingCompany && searchInput.trim() && (
+      {/* Company Suggestion Card - LinkedIn style - hide during loading to prevent flash */}
+      {matchingCompany && searchInput.trim() && !isLoading && (
         <button
           onClick={() => {
             setSelectedCompanyId(matchingCompany.id);
