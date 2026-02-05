@@ -68,11 +68,16 @@ const Auth = () => {
     // CRITICAL: Only apply scroll-lock on touch devices (coarse pointer = touch screen)
     // This check is more reliable than device breakpoint since it detects actual input method
     const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-    if (!isTouchDevice) {
-      // Ensure no scroll-lock classes are present on non-touch devices
+    const isFinePtrDevice = window.matchMedia('(pointer: fine)').matches;
+    
+    // If the device has a fine pointer (mouse), NEVER lock scroll
+    if (isFinePtrDevice || !isTouchDevice) {
+      // Clean up any possible leftover scroll-lock state
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
       document.documentElement.classList.remove('auth-locked', 'auth-lock');
       document.body.classList.remove('auth-locked', 'auth-lock');
-      return; // Skip scroll-lock on non-touch devices (e.g., desktop with mouse)
+      return; // Skip scroll-lock entirely on non-touch devices
     }
 
     try {
