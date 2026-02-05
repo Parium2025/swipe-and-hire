@@ -1349,40 +1349,35 @@ All colors MUST be HSL.
 
 /* ============================================
    FLUID RESPONSIVE CONTAINER SYSTEM
-   Spotify-level proportional scaling using CSS clamp()
+   Smooth scaling with clamp() - centered premium feel
    
-   Benefits:
-   ✓ No jarring breakpoint jumps - smooth fluid transitions
-   ✓ Mathematically consistent proportions at every size
-   ✓ Same visual feel whether on phone, laptop, or ultra-wide
-   ✓ Single source of truth - easier to maintain
-   
-   How clamp() works: clamp(MIN, PREFERRED, MAX)
-   - Value is PREFERRED, but never below MIN or above MAX
-   - Creates smooth scaling without media query steps
+   Tuned to match the original balanced proportions:
+   - Not too wide (stretched)
+   - Not too narrow (cramped)
+   - Smooth transitions without jarring breakpoint jumps
    ============================================ */
 
 /* Standard container: reading-focused views (profile, messages, settings) */
 .responsive-container {
   width: 100%;
-  max-width: clamp(20rem, 88vw, 56rem); /* 320px min → 88% of viewport → 896px max */
+  max-width: clamp(20rem, 75vw, 56rem); /* 320px → 75% viewport → 896px max */
   margin-inline: auto;
-  padding-inline: clamp(0.75rem, 3vw, 2rem); /* 12px → scales → 32px */
+  padding-inline: clamp(0.75rem, 3vw, 2rem);
 }
 
 /* Wide container: data-heavy views (kanban, tables, dashboards) */
 .responsive-container-wide {
   width: 100%;
-  max-width: clamp(20rem, 96vw, 90rem); /* 320px min → 96% of viewport → 1440px max */
+  max-width: clamp(20rem, 82vw, 76rem); /* 320px → 82% viewport → 1216px max */
   margin-inline: auto;
-  padding-inline: clamp(0.5rem, 2vw, 1.5rem); /* 8px → scales → 24px */
+  padding-inline: clamp(0.75rem, 2.5vw, 2rem);
 }
 
 /* ============================================
-   FLUID DASHBOARD CARD HEIGHT
-   Proportional to viewport width for consistent visual weight
+   DASHBOARD CARD HEIGHT
+   Fixed height with breakpoints for reliable proportions
    ============================================ */
 .dashboard-card-height {
-  height: clamp(10rem, 14vw, 15rem); /* 160px min → 14% of viewport → 240px max */
+  @apply h-[200px] md:h-[220px] lg:h-[240px];
 }
 
