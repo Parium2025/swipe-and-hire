@@ -227,6 +227,19 @@ export const useSavedSearches = () => {
   const clearNewMatches = useCallback(async (searchId?: string) => {
     if (!user) return false;
 
+    // 🔥 OPTIMISTIC UPDATE: Uppdatera state DIREKT för omedelbar UI-respons
+    const previousSearches = savedSearches;
+    const updatedSearches = savedSearches.map(s => 
+      (searchId ? s.id === searchId : true) 
+        ? { ...s, new_matches_count: 0 } 
+        : s
+    );
+    setSavedSearches(updatedSearches);
+    setTotalNewMatches(updatedSearches.reduce((sum, s) => sum + (s.new_matches_count || 0), 0));
+    
+    // Uppdatera cache direkt också
+    setCachedSearches(user.id, updatedSearches);
+
     try {
       if (searchId) {
         // Clear for specific search
@@ -247,13 +260,16 @@ export const useSavedSearches = () => {
         if (error) throw error;
       }
 
-      await fetchSavedSearches();
       return true;
     } catch (err) {
       console.error('Error clearing new matches:', err);
+      // Rollback on error
+      setSavedSearches(previousSearches);
+      setTotalNewMatches(previousSearches.reduce((sum, s) => sum + (s.new_matches_count || 0), 0));
+      setCachedSearches(user.id, previousSearches);
       return false;
     }
-  }, [user, fetchSavedSearches]);
+  }, [user, savedSearches]);
 
   const hasActiveFilters = useCallback((criteria: SearchCriteria) => {
     return !!(
