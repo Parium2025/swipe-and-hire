@@ -781,7 +781,7 @@ const JobView = () => {
 
             {/* Questions - Wizard Style */}
             {jobQuestions.length > 0 && !isJobExpired && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 md:p-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
                 <ApplicationQuestionsWizard
                   questions={jobQuestions}
                   answers={answers}
