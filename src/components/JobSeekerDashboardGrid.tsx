@@ -127,7 +127,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
   // Loading state - EXACT same as employer
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[240px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-6 h-full">
           <div className="flex items-center gap-2 mb-4">
@@ -143,7 +143,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
   // Error or no tips state
   if (error || !tips || tips.length === 0) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[240px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-4 h-full flex flex-col items-center justify-center">
           <Lightbulb className="h-8 w-8 text-white/60 mb-2" />
@@ -159,7 +159,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
 
   return (
     <Card 
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg h-[240px] touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
@@ -467,7 +467,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[240px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-6 h-full">
           <Skeleton className="h-10 w-10 rounded-xl bg-white/20 mb-4" />
@@ -482,7 +482,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
 
   return (
     <Card 
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg h-[240px] touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       {...swipeHandlers}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -718,7 +718,7 @@ const JobSeekerNotesCard = memo(() => {
 
   return (
     <>
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.notes} border-0 shadow-lg h-[240px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.notes} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
         
@@ -881,7 +881,7 @@ const JobSeekerInterviewsCard = memo(() => {
   };
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg h-[240px]`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
