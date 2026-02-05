@@ -22,6 +22,7 @@ import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { imageCache } from '@/lib/imageCache';
 import { TruncatedText } from '@/components/TruncatedText';
+import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
 interface JobQuestion {
   id: string;
   question_text: string;
@@ -778,79 +779,67 @@ const JobView = () => {
               </div>
             )}
 
-            {/* Questions */}
-            {jobQuestions.length > 0 && (
-              <div className="space-y-3">
-                <h2 className="text-section-title">Ansökningsfrågor</h2>
+            {/* Questions - Wizard Style */}
+            {jobQuestions.length > 0 && !isJobExpired && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 md:p-6">
+                <ApplicationQuestionsWizard
+                  questions={jobQuestions}
+                  answers={answers}
+                  onAnswerChange={handleAnswerChange}
+                  onSubmit={handleApplicationSubmit}
+                  isSubmitting={applying}
+                  canSubmit={canSubmitApplication}
+                  hasAlreadyApplied={hasAlreadyApplied}
+                  contactEmail={job.contact_email}
+                  jobTitle={job.title}
+                />
+              </div>
+            )}
+
+            {/* No questions - show direct submit */}
+            {jobQuestions.length === 0 && !isJobExpired && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-4">
+                <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
+                <p className="text-sm text-white/60">Detta jobb kräver inga extra frågor.</p>
                 
-                {jobQuestions.map((question, index) => (
-                  <div key={question.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                    <div className="mb-4 text-center">
-                      <div className="text-[10px] uppercase tracking-widest text-white/40 mb-1.5">
-                        {index + 1} / {jobQuestions.length}
-                      </div>
-                      <h3 className="text-sm font-medium text-white leading-snug">
-                        {question.question_text}
-                        {question.is_required && (
-                          <span className="ml-1 text-red-400">*</span>
-                        )}
-                      </h3>
-                    </div>
-
-                    <div className="space-y-2">
-                      {renderQuestionInput(question)}
-                    </div>
+                {job.contact_email && (
+                  <div className="pt-2">
+                    <p className="text-xs text-white/40 mb-1">Har du frågor?</p>
+                    <a 
+                      href={`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`}
+                      className="text-sm text-white/60 hover:text-white transition-colors underline underline-offset-2"
+                    >
+                      {job.contact_email}
+                    </a>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Contact info if exists - after questions */}
-            {job.contact_email && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
-                <h3 className="text-sm font-medium text-white mb-1">Har du frågor?</h3>
-                <a 
-                  href={`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`}
-                  className="text-xs text-white/60 hover:text-white transition-colors underline underline-offset-2"
-                >
-                  {job.contact_email}
-                </a>
-              </div>
-            )}
-
-            {/* Submit application button - only show when job is not expired */}
-            {!isJobExpired && (
-              <div className="flex justify-center">
-                {hasAlreadyApplied ? (
-                  <Button
-                    size="lg"
-                    variant="glass"
-                    className="h-11 px-8 text-sm font-semibold bg-green-500/20 text-green-300 border-green-500/30 cursor-default hover:bg-green-500/20"
-                    disabled
-                  >
-                    <CheckCircle className="mr-1.5 h-4 w-4" />
-                    Redan sökt
-                  </Button>
-                ) : (
-                  <Button
-                    size="lg"
-                    variant={canSubmitApplication ? "glassGreen" : "glass"}
-                    className={`h-11 px-8 text-sm font-semibold ${
-                      !canSubmitApplication ? 'cursor-not-allowed opacity-50' : ''
-                    }`}
-                    onClick={handleApplicationSubmit}
-                    disabled={applying || !canSubmitApplication}
-                  >
-                    {applying ? (
-                      'Skickar...'
-                    ) : (
-                      <>
-                        <Send className="mr-1.5 h-3.5 w-3.5" />
-                        Skicka ansökan
-                      </>
-                    )}
-                  </Button>
                 )}
+
+                <div className="flex justify-center pt-2">
+                  {hasAlreadyApplied ? (
+                    <Button
+                      variant="glass"
+                      className="px-8 bg-green-500/20 text-green-300 border-green-500/30"
+                      disabled
+                    >
+                      <CheckCircle className="mr-1.5 h-4 w-4" />
+                      Redan sökt
+                    </Button>
+                  ) : (
+                    <Button
+                      variant={canSubmitApplication ? "glassGreen" : "glass"}
+                      onClick={handleApplicationSubmit}
+                      disabled={applying || !canSubmitApplication}
+                      className={`px-8 ${!canSubmitApplication ? 'opacity-50' : ''}`}
+                    >
+                      {applying ? 'Skickar...' : (
+                        <>
+                          <Send className="mr-1.5 h-3.5 w-3.5" />
+                          Skicka ansökan
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
 
