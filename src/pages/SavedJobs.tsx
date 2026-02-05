@@ -215,7 +215,7 @@ const SavedJobs = () => {
 
   if (showLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-3 md:px-6">
+       <div className="max-w-4xl mx-auto px-3 md:px-8">
         <div className="text-center mb-8">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Sparade Jobb</h1>
           <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>
@@ -228,7 +228,7 @@ const SavedJobs = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-3 md:px-6 animate-fade-in">
+     <div className="max-w-4xl mx-auto px-3 md:px-8 animate-fade-in">
       <div className="text-center mb-8">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Sparade Jobb</h1>
         <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>

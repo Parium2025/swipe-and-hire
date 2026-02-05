@@ -218,14 +218,14 @@ export default function Messages() {
   
   if (isLoading && !hasData) {
     return (
-      <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col opacity-0">
+     <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col opacity-0 max-w-4xl mx-auto px-3 md:px-8">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
   }
 
   return (
-    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-6xl mx-auto px-3 md:px-12 overflow-x-hidden">
+     <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] flex flex-col animate-fade-in max-w-4xl mx-auto px-3 md:px-8 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">

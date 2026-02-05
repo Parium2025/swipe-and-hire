@@ -255,7 +255,7 @@ const SupportAdmin = () => {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6 p-6">
+       <div className="max-w-4xl mx-auto space-y-6 px-3 md:px-8 py-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white">Support Admin</h1>
           <p className="text-white mt-2">Laddar ärenden...</p>
@@ -265,7 +265,7 @@ const SupportAdmin = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 p-6">
+     <div className="max-w-4xl mx-auto space-y-6 px-3 md:px-8 py-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-white">Support Admin</h1>
         <p className="text-white mt-2">Hantera alla supportärenden</p>
