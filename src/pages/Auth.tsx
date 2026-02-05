@@ -158,25 +158,13 @@ const Auth = () => {
           }
         };
 
-        const onWheel = (e: WheelEvent) => {
-          if (!isInputFocused) {
-            e.preventDefault();
-          }
-        };
-
-        const onScroll = () => {
-          if (!isInputFocused && window.scrollY !== 0) {
-            window.scrollTo(0, 0);
-          }
-        };
-
         document.addEventListener('focusin', onFocusIn);
         document.addEventListener('focusout', onFocusOut);
         window.addEventListener('touchstart', onTouchStart, { passive: true });
         window.addEventListener('touchmove', onTouchMove, { passive: false });
         window.addEventListener('touchend', onTouchEnd, { passive: true });
-        window.addEventListener('wheel', onWheel, { passive: false });
-        window.addEventListener('scroll', onScroll, { passive: true });
+        // IMPORTANT: Never block mouse/trackpad scrolling on /auth.
+        // We only handle pull-to-refresh/scroll locking via touch events.
 
         return () => {
           document.removeEventListener('focusin', onFocusIn);
@@ -184,8 +172,6 @@ const Auth = () => {
           window.removeEventListener('touchstart', onTouchStart as any);
           window.removeEventListener('touchmove', onTouchMove as any);
           window.removeEventListener('touchend', onTouchEnd as any);
-          window.removeEventListener('wheel', onWheel as any);
-          window.removeEventListener('scroll', onScroll as any);
         };
       } else {
         // Register mode: Allow scroll (no global class toggles)
