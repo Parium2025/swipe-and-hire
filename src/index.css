@@ -1348,24 +1348,41 @@ All colors MUST be HSL.
 }
 
 /* ============================================
-   RESPONSIVE CONTAINER UTILITY
-   Proportionellt skalningssystem - ser identiskt ut oavsett skärmstorlek
-   Mobil → Laptop → Desktop → Ultra-wide: samma proportioner, olika skalor
+   FLUID RESPONSIVE CONTAINER SYSTEM
+   Spotify-level proportional scaling using CSS clamp()
+   
+   Benefits:
+   ✓ No jarring breakpoint jumps - smooth fluid transitions
+   ✓ Mathematically consistent proportions at every size
+   ✓ Same visual feel whether on phone, laptop, or ultra-wide
+   ✓ Single source of truth - easier to maintain
+   
+   How clamp() works: clamp(MIN, PREFERRED, MAX)
+   - Value is PREFERRED, but never below MIN or above MAX
+   - Creates smooth scaling without media query steps
    ============================================ */
+
+/* Standard container: reading-focused views (profile, messages, settings) */
 .responsive-container {
-  @apply max-w-full md:max-w-[95%] lg:max-w-6xl xl:max-w-5xl 2xl:max-w-4xl mx-auto px-3 md:px-6 lg:px-8;
+  width: 100%;
+  max-width: clamp(20rem, 88vw, 56rem); /* 320px min → 88% of viewport → 896px max */
+  margin-inline: auto;
+  padding-inline: clamp(0.75rem, 3vw, 2rem); /* 12px → scales → 32px */
 }
 
-/* For table-heavy and Kanban views that need more width */
+/* Wide container: data-heavy views (kanban, tables, dashboards) */
 .responsive-container-wide {
-  @apply max-w-full md:max-w-[98%] lg:max-w-[95%] xl:max-w-7xl 2xl:max-w-6xl mx-auto px-3 md:px-4 lg:px-6;
+  width: 100%;
+  max-width: clamp(20rem, 96vw, 90rem); /* 320px min → 96% of viewport → 1440px max */
+  margin-inline: auto;
+  padding-inline: clamp(0.5rem, 2vw, 1.5rem); /* 8px → scales → 24px */
 }
 
 /* ============================================
-   RESPONSIVE DASHBOARD CARD HEIGHT
-   Proportional scaling: consistent feel across all screen sizes
+   FLUID DASHBOARD CARD HEIGHT
+   Proportional to viewport width for consistent visual weight
    ============================================ */
 .dashboard-card-height {
-  @apply h-[180px] sm:h-[200px] lg:h-[220px] xl:h-[240px];
+  height: clamp(10rem, 14vw, 15rem); /* 160px min → 14% of viewport → 240px max */
 }
 
