@@ -245,10 +245,16 @@ const SearchJobs = () => {
   const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
 
   // Find matching companies for smart search suggestion
+  // 🔥 CRITICAL: Använd debouncedSearch OCH kontrollera att det matchar searchInput
+  // Detta förhindrar blinkande företagsförslag vid sparad sökning
   const matchingCompany = useMemo(() => {
-    if (!searchInput.trim() || searchInput.length < 2) return null;
+    // Visa bara om debounce är klar (debouncedSearch === searchInput)
+    // och vi inte är mitt i en sökning
+    if (!debouncedSearch.trim() || debouncedSearch.length < 2) return null;
+    if (debouncedSearch !== searchInput) return null; // Debounce pågår - visa inget
+    if (isLoading) return null; // Fortfarande laddar - visa inget
     
-    const searchLower = searchInput.toLowerCase().trim();
+    const searchLower = debouncedSearch.toLowerCase().trim();
     
     // Get unique companies from jobs with job count and rating
     const uniqueCompanies = new Map<string, { id: string; name: string; logo?: string; jobCount: number; avgRating?: number; reviewCount: number }>();
@@ -277,7 +283,7 @@ const SearchJobs = () => {
     // Return first matching company
     const matches = Array.from(uniqueCompanies.values());
     return matches.length > 0 ? matches[0] : null;
-  }, [jobs, searchInput]);
+  }, [jobs, debouncedSearch, searchInput, isLoading]);
 
   // Reset display count when filters change
   useEffect(() => {
