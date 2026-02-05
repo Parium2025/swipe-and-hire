@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 
 import {
@@ -724,7 +725,10 @@ const CompanyProfile = () => {
       <div className="flex flex-col items-center space-y-4 py-6">
         <div className="relative">
           {formData.company_logo_url ? (
-            <div className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
+            <div 
+              className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer"
+              onClick={() => document.getElementById('logo-upload')?.click()}
+            >
               <img 
                 src={formData.company_logo_url} 
                 alt="Företagslogga" 
@@ -732,7 +736,10 @@ const CompanyProfile = () => {
               />
             </div>
           ) : (
-            <div className="w-32 h-32 md:w-44 md:h-44 rounded-full bg-white/5 border border-dashed border-white flex items-center justify-center">
+            <div 
+              className="w-32 h-32 md:w-44 md:h-44 rounded-full bg-white/5 border border-dashed border-white flex items-center justify-center cursor-pointer"
+              onClick={() => document.getElementById('logo-upload')?.click()}
+            >
               <div className="text-2xl md:text-3xl font-semibold text-white">
                 {formData.company_name ? 
                   formData.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) : 
@@ -741,60 +748,54 @@ const CompanyProfile = () => {
               </div>
             </div>
           )}
-        </div>
 
-        <div className="flex items-center justify-center gap-2 -ml-1">
-          {/* Invisible spacer for visual balance when trash icon is shown */}
-          {formData.company_logo_url && (
-            <div className="w-7 h-9 invisible" aria-hidden="true" />
-          )}
-          
-          {isUploadingLogo ? (
-            <Button 
+          {/* Soptunna i hörnet - matchar EmployerProfile */}
+          {formData.company_logo_url && !isUploadingLogo && (
+            <button
               type="button"
-              variant="outline" 
-              size="sm"
-              disabled
-              className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50"
-            >
-              <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2"></div>
-              Laddar upp...
-            </Button>
-          ) : formData.company_logo_url ? (
-            <Button 
-              type="button"
-              variant="outline" 
-              size="sm"
-              onClick={handleEditExistingLogo}
-              className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
-            >
-              Justera bild
-            </Button>
-          ) : (
-            <Button 
-              type="button"
-              variant="outline" 
-              size="sm"
-              onClick={() => document.getElementById('logo-upload')?.click()}
-              className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
-            >
-              <Camera className="h-3 w-3 mr-2" />
-              Ladda upp
-            </Button>
-          )}
-
-          {formData.company_logo_url && (
-            <Button 
-              type="button"
-              variant="outline" 
-              size="sm"
-              onClick={handleLogoDelete}
-              disabled={isUploadingLogo}
-              className="bg-white/5 backdrop-blur-sm border-white/10 !text-white transition-all duration-300 md:hover:bg-destructive/20 md:hover:border-destructive/40 md:hover:!text-white p-2"
+              aria-label="Ta bort företagslogga"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleLogoDelete();
+              }}
+              className="absolute -top-3 -right-3 z-20 pointer-events-auto bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
             >
               <Trash2 className="h-4 w-4" />
-            </Button>
+            </button>
           )}
+        </div>
+
+        {/* Text och knappar under - matchar EmployerProfile */}
+        <div className="space-y-2 text-center">
+          <label 
+            htmlFor="logo-upload" 
+            className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
+          >
+            Klicka för att ladda upp • Max 5MB
+          </label>
+
+          {isUploadingLogo ? (
+            <div className="flex flex-col items-center space-y-2">
+              <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
+                <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                Laddar upp...
+              </Badge>
+            </div>
+          ) : formData.company_logo_url ? (
+            <div className="flex flex-col items-center space-y-2">
+              <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
+                Bild uppladdad!
+              </Badge>
+              <button 
+                type="button"
+                onClick={handleEditExistingLogo}
+                className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-3 py-1 text-sm font-medium rounded-md transition-colors"
+              >
+                Anpassa din bild
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <input
