@@ -20,6 +20,7 @@ import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
+import { imageCache } from '@/lib/imageCache';
 import { TruncatedText } from '@/components/TruncatedText';
 interface JobQuestion {
   id: string;
@@ -144,12 +145,19 @@ const JobView = () => {
 
           if (resolved) {
             setImageUrl(resolved);
+            // 🔥 Prefetch the job image to blob cache for instant display
+            imageCache.loadImage(resolved).catch(() => {});
           } else {
             console.warn('Kunde inte lösa jobbbildens URL', data.job_image_url);
           }
         } catch (err) {
           console.error('Error loading job image:', err);
         }
+      }
+
+      // 🔥 Prefetch company logo to eliminate flicker
+      if (data.profiles?.company_logo_url) {
+        imageCache.loadImage(data.profiles.company_logo_url).catch(() => {});
       }
 
       // Fetch job questions
