@@ -255,7 +255,7 @@ const EmployerHome = memo(() => {
 
   if (isLoading || !showContent) {
     return (
-      <div className="space-y-6 max-w-4xl mx-auto px-3 md:px-8 py-8 opacity-0">
+      <div className="space-y-6 responsive-container-wide py-8 opacity-0">
         {/* Invisible placeholder */}
       </div>
     );
