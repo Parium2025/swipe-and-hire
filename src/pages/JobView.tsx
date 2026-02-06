@@ -308,7 +308,22 @@ const JobView = () => {
       range: 'Löneintervall',
       hidden: 'Enligt överenskommelse',
     };
-    return value ? labels[value] || value : null;
+    if (!value) return null;
+    // Known label → return it
+    if (labels[value]) return labels[value];
+    // Detect salary range strings like "75000-80000" and format them nicely
+    const rangeMatch = value.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+    if (rangeMatch) {
+      const min = parseInt(rangeMatch[1]).toLocaleString('sv-SE');
+      const max = parseInt(rangeMatch[2]).toLocaleString('sv-SE');
+      return `${min} – ${max} kr/mån`;
+    }
+    // Single number
+    const singleMatch = value.match(/^(\d+)$/);
+    if (singleMatch) {
+      return `${parseInt(singleMatch[1]).toLocaleString('sv-SE')} kr/mån`;
+    }
+    return value;
   };
 
   const renderQuestionInput = (question: JobQuestion) => {
