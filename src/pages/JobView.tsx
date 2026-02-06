@@ -759,45 +759,45 @@ const JobView = () => {
                 {/* Anställningsform */}
                 {job.employment_type && (
                   <div className="flex items-center text-white text-sm">
-                    <Briefcase className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Anställning:</span>
-                    <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                    <Briefcase className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Anställning:</span>
+                    <span className="font-medium">{getEmploymentTypeLabel(job.employment_type)}</span>
                   </div>
                 )}
 
                 {/* Arbetsschema */}
                 {job.work_schedule && (
                   <div className="flex items-center text-white text-sm">
-                    <Clock className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Schema:</span>
-                    <span>{job.work_schedule}</span>
+                    <Clock className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Schema:</span>
+                    <span className="font-medium">{job.work_schedule}</span>
                   </div>
                 )}
 
                 {/* Plats */}
                 {job.location && (
                   <div className="flex items-center text-white text-sm">
-                    <MapPin className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Ort:</span>
-                    <span>{job.location}</span>
+                    <MapPin className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Ort:</span>
+                    <span className="font-medium">{job.location}</span>
                   </div>
                 )}
 
                 {/* Arbetsplats */}
                 {job.workplace_name && (
                   <div className="flex items-center text-white text-sm">
-                    <Building2 className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Arbetsplats:</span>
-                    <span>{job.workplace_name}</span>
+                    <Building2 className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Arbetsplats:</span>
+                    <span className="font-medium">{job.workplace_name}</span>
                   </div>
                 )}
 
                 {/* Arbetsplatsadress */}
                 {job.workplace_address && (
                   <div className="flex items-center text-white text-sm">
-                    <Home className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Adress:</span>
-                    <span>
+                    <Home className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Adress:</span>
+                    <span className="font-medium">
                       {job.workplace_address}
                       {job.workplace_postal_code && `, ${job.workplace_postal_code}`}
                       {job.workplace_city && ` ${job.workplace_city}`}
@@ -809,9 +809,9 @@ const JobView = () => {
                 {/* Arbetsort (om skild från location) */}
                 {job.workplace_city && job.workplace_city !== job.location && !job.workplace_address && (
                   <div className="flex items-center text-white text-sm">
-                    <MapPin className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Stad:</span>
-                    <span>
+                    <MapPin className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Stad:</span>
+                    <span className="font-medium">
                       {job.workplace_city}
                       {job.workplace_municipality && job.workplace_municipality !== job.workplace_city ? `, ${job.workplace_municipality}` : ''}
                       {job.workplace_county ? `, ${job.workplace_county}` : ''}
@@ -822,65 +822,65 @@ const JobView = () => {
                 {/* Kommun (visas separat om inte redan inkluderad ovan) */}
                 {job.workplace_municipality && !job.workplace_address && (!job.workplace_city || job.workplace_city === job.location) && (
                   <div className="flex items-center text-white text-sm">
-                    <MapPin className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Kommun:</span>
-                    <span>{job.workplace_municipality}</span>
+                    <MapPin className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Kommun:</span>
+                    <span className="font-medium">{job.workplace_municipality}</span>
                   </div>
                 )}
 
                 {/* Platstyp */}
                 {job.work_location_type && (
                   <div className="flex items-center text-white text-sm">
-                    <Monitor className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Platstyp:</span>
-                    <span>{getWorkLocationLabel(job.work_location_type)}</span>
+                    <Monitor className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Platstyp:</span>
+                    <span className="font-medium">{getWorkLocationLabel(job.work_location_type)}</span>
                   </div>
                 )}
 
                 {/* Distansarbete */}
                 {job.remote_work_possible && job.remote_work_possible !== 'no' && (
                   <div className="flex items-center text-white text-sm">
-                    <Wifi className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Distans:</span>
-                    <span>{getRemoteWorkLabel(job.remote_work_possible)}</span>
+                    <Wifi className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Distans:</span>
+                    <span className="font-medium">{getRemoteWorkLabel(job.remote_work_possible)}</span>
                   </div>
                 )}
 
                 {/* Arbetstider */}
                 {(job.work_start_time || job.work_end_time) && (
                   <div className="flex items-center text-white text-sm">
-                    <CalendarClock className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Arbetstid:</span>
-                    <span>{job.work_start_time} – {job.work_end_time}</span>
+                    <CalendarClock className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Arbetstid:</span>
+                    <span className="font-medium">{job.work_start_time} – {job.work_end_time}</span>
                   </div>
                 )}
 
                 {/* Antal tjänster */}
                 {job.positions_count && job.positions_count > 1 && (
                   <div className="flex items-center text-white text-sm">
-                    <Users className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Antal tjänster:</span>
-                    <span>{job.positions_count} st</span>
+                    <Users className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Antal tjänster:</span>
+                    <span className="font-medium">{job.positions_count} st</span>
                   </div>
                 )}
 
                 {/* Yrkeskategori */}
                 {job.occupation && (
                   <div className="flex items-center text-white text-sm">
-                    <Briefcase className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Yrke:</span>
-                    <span>{job.occupation}</span>
+                    <Briefcase className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Yrke:</span>
+                    <span className="font-medium">{job.occupation}</span>
                   </div>
                 )}
 
                 {/* Lön */}
                 {formatSalary(job.salary_min, job.salary_max, job.salary_type) && (
-                  <div className="flex items-center text-sm sm:col-span-2 pt-1">
-                    <Euro className="h-3.5 w-3.5 mr-2 text-green-400 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Lön:</span>
-                    <span className="text-green-300 font-semibold">{formatSalary(job.salary_min, job.salary_max, job.salary_type)}</span>
+                  <div className="flex items-center text-white text-sm sm:col-span-2 pt-1">
+                    <Euro className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Lön:</span>
+                    <span className="font-semibold">{formatSalary(job.salary_min, job.salary_max, job.salary_type)}</span>
                     {job.salary_type && (
-                      <span className="text-white/40 ml-1.5 text-xs">({getSalaryTypeLabel(job.salary_type)})</span>
+                      <span className="text-white/70 ml-1.5 text-xs">({getSalaryTypeLabel(job.salary_type)})</span>
                     )}
                   </div>
                 )}
@@ -888,9 +888,9 @@ const JobView = () => {
                 {/* Lönetransparens fallback */}
                 {!formatSalary(job.salary_min, job.salary_max, job.salary_type) && job.salary_transparency && (
                   <div className="flex items-center text-white text-sm">
-                    <Euro className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
-                    <span className="text-white/60 mr-1.5">Lön:</span>
-                    <span>{getSalaryTransparencyLabel(job.salary_transparency)}</span>
+                    <Euro className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                    <span className="mr-1.5">Lön:</span>
+                    <span className="font-medium">{getSalaryTransparencyLabel(job.salary_transparency)}</span>
                   </div>
                 )}
               </div>
