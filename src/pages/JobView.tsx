@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
-import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash, Timer, CheckCircle, Heart } from 'lucide-react';
+import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash, Timer, CheckCircle, Heart, Monitor, Home, Wifi, ClipboardList } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
@@ -48,14 +48,20 @@ interface JobPosting {
   work_schedule?: string;
   work_start_time?: string;
   work_end_time?: string;
+  work_location_type?: string;
+  remote_work_possible?: string;
   contact_email?: string;
   application_instructions?: string;
   pitch?: string;
   benefits?: string[];
   positions_count?: number;
+  requirements?: string;
+  occupation?: string;
+  workplace_name?: string;
   workplace_city?: string;
   workplace_county?: string;
   workplace_address?: string;
+  workplace_postal_code?: string;
   created_at: string;
   expires_at?: string;
   employer_id: string;
@@ -272,6 +278,33 @@ const JobView = () => {
     if (min) return `Från ${min.toLocaleString()} ${suffix}`;
     if (max) return `Upp till ${max.toLocaleString()} ${suffix}`;
     return null;
+  };
+
+  const getWorkLocationLabel = (type?: string) => {
+    const labels: Record<string, string> = {
+      onsite: 'På plats',
+      remote: 'Distans',
+      hybrid: 'Hybrid',
+    };
+    return type ? labels[type] || type : null;
+  };
+
+  const getRemoteWorkLabel = (value?: string) => {
+    const labels: Record<string, string> = {
+      yes: 'Ja, helt på distans möjligt',
+      partially: 'Delvis möjligt',
+      no: 'Nej',
+    };
+    return value ? labels[value] || value : null;
+  };
+
+  const getSalaryTransparencyLabel = (value?: string) => {
+    const labels: Record<string, string> = {
+      full: 'Lön visas öppet',
+      range: 'Löneintervall',
+      hidden: 'Enligt överenskommelse',
+    };
+    return value ? labels[value] || value : null;
   };
 
   const renderQuestionInput = (question: JobQuestion) => {
@@ -680,58 +713,171 @@ const JobView = () => {
               </div>
             )}
             
-            {/* Om det inte finns bild, visa info i vanligt kort */}
+            {/* Om det inte finns bild, visa titel i vanligt kort */}
             {!imageUrl && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
                 <TruncatedText
                   text={job.title}
-                  className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight line-clamp-3"
+                  className="text-white text-xl md:text-2xl font-bold leading-tight line-clamp-3"
                   tooltipSide="bottom"
                 />
-
-                <div className="space-y-2">
-                  <div className="flex items-center text-white text-xs">
-                    <MapPin className="h-3.5 w-3.5 mr-1.5 text-white" />
-                    <span className="text-white">{job.location}</span>
-                  </div>
-
+                <div className="flex flex-wrap items-center gap-2 mt-3 text-sm text-white">
                   {job.employment_type && (
-                    <div className="flex items-center text-white text-xs">
-                      <Briefcase className="h-3.5 w-3.5 mr-1.5 text-white" />
-                      <span className="text-white">{getEmploymentTypeLabel(job.employment_type)}</span>
-                    </div>
+                    <>
+                      <Briefcase className="h-3.5 w-3.5 text-white" />
+                      <span>{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
+                    </>
                   )}
-
-                  {job.work_schedule && (
-                    <div className="flex items-center text-white text-xs">
-                      <Clock className="h-3.5 w-3.5 mr-1.5 text-white" />
-                      <span className="text-white">{job.work_schedule}</span>
-                    </div>
-                    )}
-
-                  {formatSalary(job.salary_min, job.salary_max, job.salary_type) && (
-                    <div className="flex items-center text-green-300 text-sm font-semibold pt-0.5">
-                      <Euro className="h-4 w-4 mr-1.5" />
-                      <span>{formatSalary(job.salary_min, job.salary_max, job.salary_type)}</span>
-                    </div>
+                  {job.location && (
+                    <>
+                      <span className="text-white/60">·</span>
+                      <MapPin className="h-3.5 w-3.5 text-white" />
+                      <span>{job.location.toUpperCase()}</span>
+                    </>
                   )}
-
                   {job.positions_count && job.positions_count > 1 && (
-                    <div className="flex items-center text-white text-xs">
-                      <Hash className="h-3.5 w-3.5 mr-1.5 text-white" />
-                      <span className="text-white">{job.positions_count} lediga tjänster</span>
-                    </div>
-                  )}
-
-                  {(job.work_start_time || job.work_end_time) && (
-                    <div className="flex items-center text-white text-xs">
-                      <CalendarClock className="h-3.5 w-3.5 mr-1.5 text-white" />
-                      <span className="text-white">Arbetstider: {job.work_start_time} - {job.work_end_time}</span>
-                    </div>
+                    <>
+                      <span className="text-white/60">·</span>
+                      <Hash className="h-3.5 w-3.5 text-white" />
+                      <span>{job.positions_count} lediga tjänster</span>
+                    </>
                   )}
                 </div>
               </div>
             )}
+
+            {/* ━━━ Komplett detaljsektion — ALLTID synlig ━━━ */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+              <h2 className="text-section-title mb-3 flex items-center gap-2">
+                <ClipboardList className="h-4 w-4" />
+                Detaljer om tjänsten
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
+                {/* Anställningsform */}
+                {job.employment_type && (
+                  <div className="flex items-center text-white text-sm">
+                    <Briefcase className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Anställning:</span>
+                    <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                  </div>
+                )}
+
+                {/* Arbetsschema */}
+                {job.work_schedule && (
+                  <div className="flex items-center text-white text-sm">
+                    <Clock className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Schema:</span>
+                    <span>{job.work_schedule}</span>
+                  </div>
+                )}
+
+                {/* Plats */}
+                {job.location && (
+                  <div className="flex items-center text-white text-sm">
+                    <MapPin className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Ort:</span>
+                    <span>{job.location}</span>
+                  </div>
+                )}
+
+                {/* Arbetsplats */}
+                {job.workplace_name && (
+                  <div className="flex items-center text-white text-sm">
+                    <Building2 className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Arbetsplats:</span>
+                    <span>{job.workplace_name}</span>
+                  </div>
+                )}
+
+                {/* Arbetsplatsadress */}
+                {job.workplace_address && (
+                  <div className="flex items-center text-white text-sm">
+                    <Home className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Adress:</span>
+                    <span>
+                      {job.workplace_address}
+                      {job.workplace_postal_code && `, ${job.workplace_postal_code}`}
+                      {job.workplace_city && ` ${job.workplace_city}`}
+                    </span>
+                  </div>
+                )}
+
+                {/* Arbetsort (om skild från location) */}
+                {job.workplace_city && job.workplace_city !== job.location && !job.workplace_address && (
+                  <div className="flex items-center text-white text-sm">
+                    <MapPin className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Stad:</span>
+                    <span>{job.workplace_city}{job.workplace_county ? `, ${job.workplace_county}` : ''}</span>
+                  </div>
+                )}
+
+                {/* Platstyp */}
+                {job.work_location_type && (
+                  <div className="flex items-center text-white text-sm">
+                    <Monitor className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Platstyp:</span>
+                    <span>{getWorkLocationLabel(job.work_location_type)}</span>
+                  </div>
+                )}
+
+                {/* Distansarbete */}
+                {job.remote_work_possible && job.remote_work_possible !== 'no' && (
+                  <div className="flex items-center text-white text-sm">
+                    <Wifi className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Distans:</span>
+                    <span>{getRemoteWorkLabel(job.remote_work_possible)}</span>
+                  </div>
+                )}
+
+                {/* Arbetstider */}
+                {(job.work_start_time || job.work_end_time) && (
+                  <div className="flex items-center text-white text-sm">
+                    <CalendarClock className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Arbetstid:</span>
+                    <span>{job.work_start_time} – {job.work_end_time}</span>
+                  </div>
+                )}
+
+                {/* Antal tjänster */}
+                {job.positions_count && job.positions_count > 1 && (
+                  <div className="flex items-center text-white text-sm">
+                    <Users className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Antal tjänster:</span>
+                    <span>{job.positions_count} st</span>
+                  </div>
+                )}
+
+                {/* Yrkeskategori */}
+                {job.occupation && (
+                  <div className="flex items-center text-white text-sm">
+                    <Briefcase className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Yrke:</span>
+                    <span>{job.occupation}</span>
+                  </div>
+                )}
+
+                {/* Lön */}
+                {formatSalary(job.salary_min, job.salary_max, job.salary_type) && (
+                  <div className="flex items-center text-sm sm:col-span-2 pt-1">
+                    <Euro className="h-3.5 w-3.5 mr-2 text-green-400 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Lön:</span>
+                    <span className="text-green-300 font-semibold">{formatSalary(job.salary_min, job.salary_max, job.salary_type)}</span>
+                    {job.salary_type && (
+                      <span className="text-white/40 ml-1.5 text-xs">({getSalaryTypeLabel(job.salary_type)})</span>
+                    )}
+                  </div>
+                )}
+
+                {/* Lönetransparens fallback */}
+                {!formatSalary(job.salary_min, job.salary_max, job.salary_type) && job.salary_transparency && (
+                  <div className="flex items-center text-white text-sm">
+                    <Euro className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Lön:</span>
+                    <span>{getSalaryTransparencyLabel(job.salary_transparency)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Pitch - short highlight text */}
             {job.pitch && (
@@ -749,6 +895,19 @@ const JobView = () => {
                 {job.description}
               </p>
             </div>
+
+            {/* Requirements */}
+            {job.requirements && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <h2 className="text-section-title mb-3 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Krav
+                </h2>
+                <p className="text-body whitespace-pre-wrap">
+                  {job.requirements}
+                </p>
+              </div>
+            )}
 
             {job.benefits && job.benefits.length > 0 && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
