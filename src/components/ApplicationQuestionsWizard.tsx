@@ -41,8 +41,7 @@ export function ApplicationQuestionsWizard({
   jobTitle,
 }: ApplicationQuestionsWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
-  const totalSteps = questions.length + 1;
+  const totalSteps = questions.length + 1; // Questions + final submit step
   
   const isLastQuestion = currentStep === questions.length - 1;
   const isSubmitStep = currentStep === questions.length;
@@ -55,40 +54,15 @@ export function ApplicationQuestionsWizard({
 
   const handleNext = useCallback(() => {
     if (currentStep < totalSteps - 1) {
-      setDirection(1);
       setCurrentStep(prev => prev + 1);
     }
   }, [currentStep, totalSteps]);
 
   const handlePrev = useCallback(() => {
     if (currentStep > 0) {
-      setDirection(-1);
       setCurrentStep(prev => prev - 1);
     }
   }, [currentStep]);
-
-  const handleJumpToStep = useCallback((idx: number) => {
-    setDirection(idx > currentStep ? 1 : -1);
-    setCurrentStep(idx);
-  }, [currentStep]);
-
-  // Auto-advance for yes/no questions after selection
-  const handleYesNoAnswer = useCallback((questionId: string, value: string, currentAnswer: string) => {
-    const newValue = currentAnswer === value ? '' : value;
-    onAnswerChange(questionId, newValue);
-    // Auto-advance after a brief moment if answered
-    if (newValue && !isLastQuestion) {
-      setTimeout(() => {
-        setDirection(1);
-        setCurrentStep(prev => prev + 1);
-      }, 350);
-    } else if (newValue && isLastQuestion) {
-      setTimeout(() => {
-        setDirection(1);
-        setCurrentStep(questions.length); // Go to review
-      }, 350);
-    }
-  }, [onAnswerChange, isLastQuestion, questions.length]);
 
   const renderQuestionInput = (question: JobQuestion) => {
     const answer = answers[question.id];
@@ -96,49 +70,41 @@ export function ApplicationQuestionsWizard({
     switch (question.question_type) {
       case 'text':
         return (
-          <div className="w-full max-w-md mx-auto">
-            <Textarea
-              value={answer || ''}
-              onChange={(e) => onAnswerChange(question.id, e.target.value)}
-              placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-              className="bg-white/[0.07] border-white/10 text-white placeholder:text-white/30 min-h-[80px] max-h-[120px] resize-none text-sm rounded-2xl px-5 py-4 focus:outline-none focus:border-white/30 focus:bg-white/[0.09] transition-all duration-300"
-            />
-          </div>
+          <Textarea
+            value={answer || ''}
+            onChange={(e) => onAnswerChange(question.id, e.target.value)}
+            placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[60px] max-h-[100px] resize-none text-sm focus:outline-none focus:border-white/40"
+          />
         );
 
       case 'yes_no':
         return (
-          <div className="flex justify-center gap-4">
-            {[
-              { value: 'yes', label: 'Ja' },
-              { value: 'no', label: 'Nej' },
-            ].map(({ value, label }) => {
-              const isSelected = answer === value;
-              return (
-                <motion.button
-                  key={value}
-                  type="button"
-                  onClick={() => handleYesNoAnswer(question.id, value, answer || '')}
-                  whileTap={{ scale: 0.95 }}
-                  className={
-                    'relative min-w-[100px] min-h-[52px] rounded-2xl px-8 py-3.5 text-base font-semibold text-white transition-all duration-300 ' +
-                    (isSelected
-                      ? 'bg-white/20 border-2 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.08)]'
-                      : 'bg-white/[0.06] border border-white/10 hover:bg-white/[0.1] hover:border-white/20')
-                  }
-                >
-                  <span className="relative z-10">{label}</span>
-                  {isSelected && (
-                    <motion.div
-                      layoutId="yes-no-indicator"
-                      className="absolute inset-0 rounded-2xl bg-white/[0.05]"
-                      initial={false}
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                    />
-                  )}
-                </motion.button>
-              );
-            })}
+          <div className="flex justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => onAnswerChange(question.id, answer === 'yes' ? '' : 'yes')}
+              className={
+                (answer === 'yes'
+                  ? 'bg-secondary/40 border-secondary '
+                  : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
+                'border rounded-full px-6 py-2 text-sm transition-colors font-medium text-white'
+              }
+            >
+              Ja
+            </button>
+            <button
+              type="button"
+              onClick={() => onAnswerChange(question.id, answer === 'no' ? '' : 'no')}
+              className={
+                (answer === 'no'
+                  ? 'bg-secondary/40 border-secondary '
+                  : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
+                'border rounded-full px-6 py-2 text-sm transition-colors font-medium text-white'
+              }
+            >
+              Nej
+            </button>
           </div>
         );
 
@@ -148,14 +114,13 @@ export function ApplicationQuestionsWizard({
           : [];
           
         return (
-          <div className="flex flex-wrap justify-center gap-3 max-w-lg mx-auto">
+          <div className="flex flex-wrap justify-center gap-2">
             {question.options?.filter(opt => opt.trim() !== '').map((option, index) => {
               const selected = selectedAnswers.includes(option);
               return (
-                <motion.button
+                <button
                   key={index}
                   type="button"
-                  whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     if (selectedAnswers.includes(option)) {
                       const newAnswers = selectedAnswers.filter(a => a !== option);
@@ -165,14 +130,14 @@ export function ApplicationQuestionsWizard({
                     }
                   }}
                   className={
-                    'rounded-2xl px-6 py-3 text-sm font-medium text-white transition-all duration-300 ' +
                     (selected
-                      ? 'bg-white/20 border-2 border-white/40 shadow-[0_0_16px_rgba(255,255,255,0.06)]'
-                      : 'bg-white/[0.06] border border-white/10 hover:bg-white/[0.1] hover:border-white/20')
+                      ? 'bg-secondary/40 border-secondary '
+                      : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
+                    'border rounded-full px-4 py-2 text-sm transition-colors font-medium text-white'
                   }
                 >
                   {option}
-                </motion.button>
+                </button>
               );
             })}
           </div>
@@ -188,7 +153,7 @@ export function ApplicationQuestionsWizard({
               min={question.min_value}
               max={question.max_value}
               placeholder={question.placeholder_text || 'Ange ett nummer'}
-              className="bg-white/[0.07] border-white/10 text-white text-center text-lg font-light max-w-[180px] h-14 rounded-2xl placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-all duration-300"
+              className="bg-white/10 border-white/20 text-white text-center text-sm max-w-[160px] h-10 placeholder:text-white/50"
             />
           </div>
         );
@@ -200,7 +165,7 @@ export function ApplicationQuestionsWizard({
               type="date"
               value={answer || ''}
               onChange={(e) => onAnswerChange(question.id, e.target.value)}
-              className="bg-white/[0.07] border-white/10 text-white max-w-[200px] h-14 text-sm rounded-2xl focus:outline-none focus:border-white/30 transition-all duration-300"
+              className="bg-white/10 border-white/20 text-white max-w-[160px] h-10 text-sm"
             />
           </div>
         );
@@ -208,16 +173,9 @@ export function ApplicationQuestionsWizard({
       case 'range':
         const rangeValue = answer || question.min_value || 0;
         return (
-          <div className="space-y-4 max-w-xs mx-auto">
+          <div className="space-y-3 max-w-xs mx-auto">
             <div className="flex justify-center">
-              <motion.span 
-                key={rangeValue}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-4xl font-light text-white tabular-nums"
-              >
-                {rangeValue}
-              </motion.span>
+              <span className="text-2xl font-light text-white">{rangeValue}</span>
             </div>
             <input
               type="range"
@@ -225,9 +183,9 @@ export function ApplicationQuestionsWizard({
               max={question.max_value || 10}
               value={rangeValue}
               onChange={(e) => onAnswerChange(question.id, parseInt(e.target.value))}
-              className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-white/60"
+              className="w-full h-1.5 bg-white/20 rounded-full appearance-none cursor-pointer accent-secondary"
             />
-            <div className="flex justify-between text-xs text-white/30 font-light">
+            <div className="flex justify-between text-[10px] text-white/40">
               <span>{question.min_value || 0}</span>
               <span>{question.max_value || 10}</span>
             </div>
@@ -236,108 +194,72 @@ export function ApplicationQuestionsWizard({
 
       default:
         return (
-          <div className="w-full max-w-md mx-auto">
-            <Textarea
-              value={answer || ''}
-              onChange={(e) => onAnswerChange(question.id, e.target.value)}
-              placeholder="Skriv ditt svar här..."
-              className="bg-white/[0.07] border-white/10 text-white min-h-[80px] text-sm rounded-2xl px-5 py-4 placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-all duration-300"
-            />
-          </div>
+          <Textarea
+            value={answer || ''}
+            onChange={(e) => onAnswerChange(question.id, e.target.value)}
+            placeholder="Skriv ditt svar här..."
+            className="bg-white/10 border-white/20 text-white min-h-[60px] text-sm"
+          />
         );
     }
   };
 
-  // Slide animation variants based on direction
-  const slideVariants = {
-    enter: (dir: number) => ({
-      opacity: 0,
-      x: dir > 0 ? 60 : -60,
-    }),
-    center: {
-      opacity: 1,
-      x: 0,
-    },
-    exit: (dir: number) => ({
-      opacity: 0,
-      x: dir > 0 ? -60 : 60,
-    }),
-  };
+  // Progress bar percentage
+  const progress = ((currentStep + 1) / totalSteps) * 100;
+
+  // Shared button styles matching WizardFooter
+  const backButtonClasses = 
+    'rounded-full bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 text-sm transition-colors duration-150 hover:bg-white/10 disabled:opacity-30 focus:outline-none focus:ring-0';
+
+  const nextButtonClasses = 
+    'rounded-full bg-primary hover:bg-primary/90 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 disabled:opacity-50';
+
+  const submitButtonClasses = 
+    'rounded-full bg-green-600/80 hover:bg-green-600 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 disabled:opacity-50';
 
   return (
-    <div className="space-y-6">
-      {/* Progress dots — elegant step indicator */}
-      <div className="flex items-center justify-center gap-2">
-        {questions.map((_, idx) => {
-          const isActive = idx === currentStep;
-          const isCompleted = idx < currentStep || isSubmitStep;
-          const isAnswered = answers[questions[idx].id] !== undefined && answers[questions[idx].id] !== '' && answers[questions[idx].id] !== null;
-          
-          return (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => handleJumpToStep(idx)}
-              className="p-0.5 focus:outline-none"
-              aria-label={`Fråga ${idx + 1}`}
-            >
-              <motion.div
-                animate={{
-                  width: isActive ? 28 : 8,
-                  height: 8,
-                  opacity: isActive ? 1 : isCompleted || isAnswered ? 0.6 : 0.2,
-                }}
-                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                className="rounded-full bg-white"
-              />
-            </button>
-          );
-        })}
-        {/* Review step dot */}
-        <button
-          type="button"
-          onClick={() => handleJumpToStep(questions.length)}
-          className="p-0.5 focus:outline-none"
-          aria-label="Granska"
-        >
-          <motion.div
-            animate={{
-              width: isSubmitStep ? 28 : 8,
-              height: 8,
-              opacity: isSubmitStep ? 1 : 0.2,
-            }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            className="rounded-full bg-white"
-          />
-        </button>
+    <div className="space-y-4">
+      {/* Progress bar - subtle */}
+      <div className="relative h-0.5 bg-white/10 rounded-full overflow-hidden">
+        <motion.div 
+          className="absolute inset-y-0 left-0 bg-secondary rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+        />
       </div>
 
-      {/* Question container */}
-      <div className="relative min-h-[220px] flex flex-col">
-        <AnimatePresence mode="wait" custom={direction}>
+      {/* Question container - compact */}
+      <div className="relative min-h-[180px] flex flex-col">
+        <AnimatePresence mode="wait">
           {!isSubmitStep && currentQuestion ? (
             <motion.div
               key={currentQuestion.id}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
               className="flex-1 flex flex-col"
             >
-              {/* Question text — prominent, max 3 lines */}
-              <div className="text-center mb-8 px-4">
-                <h3 className="text-base md:text-lg font-medium text-white leading-relaxed line-clamp-3">
+              {/* Question number - minimal */}
+              <div className="text-center mb-2">
+                <span className="text-[10px] uppercase tracking-widest text-white/40">
+                  {currentStep + 1} / {questions.length}
+                </span>
+              </div>
+
+              {/* Question text - compact */}
+              <div className="text-center mb-4">
+                <h3 className="text-sm font-medium text-white leading-snug">
                   {currentQuestion.question_text}
                   {currentQuestion.is_required && (
-                    <span className="ml-1 text-white/40 text-sm">*</span>
+                    <span className="ml-1 text-destructive text-xs">*</span>
                   )}
                 </h3>
               </div>
 
-              {/* Answer input — centered with breathing room */}
-              <div className="flex-1 flex items-start justify-center pt-2">
+              {/* Answer input */}
+              <div className="flex-1 flex items-center justify-center">
                 <div className="w-full">
                   {renderQuestionInput(currentQuestion)}
                 </div>
@@ -346,74 +268,59 @@ export function ApplicationQuestionsWizard({
           ) : isSubmitStep ? (
             <motion.div
               key="submit-step"
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
               className="flex-1 flex flex-col"
             >
-              {/* Review header */}
-              <div className="text-center mb-5">
-                <motion.div 
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1, type: 'spring', stiffness: 400, damping: 25 }}
-                  className="w-12 h-12 rounded-full bg-white/[0.08] border border-white/10 flex items-center justify-center mx-auto mb-3"
-                >
-                  <CheckCircle className="w-5 h-5 text-white/70" />
-                </motion.div>
-                <h3 className="text-base font-medium text-white">Granska dina svar</h3>
-                <p className="text-xs text-white/40 mt-1">Tryck på ett svar för att ändra</p>
+              {/* Header */}
+              <div className="text-center mb-3">
+                <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-2">
+                  <CheckCircle className="w-5 h-5 text-secondary" />
+                </div>
+                <h3 className="text-sm font-medium text-white">Granska dina svar</h3>
               </div>
 
-              {/* Answers summary */}
-              <div className="flex-1 overflow-y-auto max-h-[220px] space-y-2 px-1">
+              {/* Answers summary - scrollable */}
+              <div className="flex-1 overflow-y-auto max-h-[200px] space-y-2 px-1">
                 {questions.map((q, idx) => {
                   const answer = answers[q.id];
                   let displayAnswer = answer || '—';
                   
+                  // Format answer based on type
                   if (q.question_type === 'yes_no') {
                     displayAnswer = answer === 'yes' ? 'Ja' : answer === 'no' ? 'Nej' : '—';
                   } else if (q.question_type === 'multiple_choice' && typeof answer === 'string') {
-                    displayAnswer = answer.split('|||').filter((a: string) => a).join(', ') || '—';
+                    displayAnswer = answer.split('|||').filter(a => a).join(', ') || '—';
                   }
                   
-                  const hasAnswer = displayAnswer !== '—';
-                  
                   return (
-                    <motion.button
+                    <button
                       key={q.id}
                       type="button"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      onClick={() => handleJumpToStep(idx)}
-                      className="w-full text-left p-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/10 transition-all duration-300 group"
+                      onClick={() => setCurrentStep(idx)}
+                      className="w-full text-left p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
                     >
-                      <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-white/40 truncate mb-0.5">{q.question_text}</p>
-                          <p className={`text-sm font-medium truncate ${hasAnswer ? 'text-white' : 'text-white/30'}`}>
-                            {displayAnswer}
-                          </p>
+                          <p className="text-[10px] text-white/40 mb-0.5">Fråga {idx + 1}</p>
+                          <p className="text-xs text-white/70 truncate">{q.question_text}</p>
+                          <p className="text-xs text-white font-medium mt-0.5 truncate">{displayAnswer}</p>
                         </div>
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/[0.06] group-hover:bg-white/10 flex items-center justify-center transition-all duration-300">
-                          <ArrowRight className="w-3 h-3 text-white/40 group-hover:text-white/70 transition-colors" />
-                        </div>
+                        <ArrowRight className="w-3 h-3 text-white/30 group-hover:text-white/60 transition-colors flex-shrink-0 mt-1" />
                       </div>
-                    </motion.button>
+                    </button>
                   );
                 })}
               </div>
 
               {/* Contact email */}
               {contactEmail && (
-                <div className="mt-4 text-center">
+                <div className="mt-3 text-center">
                   <a 
                     href={`mailto:${contactEmail}?subject=Fråga om tjänsten: ${jobTitle || ''}`}
-                    className="text-xs text-white/30 hover:text-white/60 transition-colors duration-300 underline underline-offset-4 decoration-white/10 hover:decoration-white/30"
+                    className="text-xs text-white/50 hover:text-white transition-colors underline underline-offset-2"
                   >
                     {contactEmail}
                   </a>
@@ -424,73 +331,56 @@ export function ApplicationQuestionsWizard({
         </AnimatePresence>
       </div>
 
-      {/* Navigation — clean and premium */}
-      <div className="flex items-center justify-between">
-        {/* Back button — ghost style */}
-        <motion.div whileTap={{ scale: 0.95 }}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handlePrev}
-            disabled={currentStep === 0}
-            className="rounded-full text-white/50 hover:text-white hover:bg-white/[0.06] px-5 py-2.5 h-auto text-sm font-medium disabled:opacity-0 transition-all duration-300"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Tillbaka
-          </Button>
-        </motion.div>
+      {/* Navigation - matching WizardFooter style */}
+      <div className="flex items-center justify-between pt-2 border-t border-white/10">
+        {/* Back button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handlePrev}
+          disabled={currentStep === 0}
+          className={backButtonClasses}
+        >
+          <ArrowLeft className="w-4 h-4 mr-1.5" />
+          Tillbaka
+        </Button>
 
         {/* Next / Submit button */}
         {!isSubmitStep ? (
-          <motion.div whileTap={{ scale: 0.97 }}>
-            <Button
-              size="sm"
-              onClick={handleNext}
-              disabled={currentQuestion?.is_required && !isCurrentAnswered}
-              className="rounded-full bg-white/[0.12] hover:bg-white/[0.18] text-white border border-white/10 hover:border-white/20 px-7 py-2.5 h-auto text-sm font-medium disabled:opacity-30 transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
-            >
-              {isLastQuestion ? 'Granska' : 'Nästa'}
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </motion.div>
+          <Button
+            size="sm"
+            onClick={handleNext}
+            disabled={currentQuestion?.is_required && !isCurrentAnswered}
+            className={nextButtonClasses}
+          >
+            {isLastQuestion ? 'Granska' : 'Nästa'}
+            <ArrowRight className="w-4 h-4 ml-1.5" />
+          </Button>
         ) : hasAlreadyApplied ? (
           <Button
             size="sm"
             disabled
-            className="rounded-full bg-white/[0.06] text-white/50 px-7 py-2.5 h-auto text-sm font-medium cursor-default border border-white/10"
+            className="rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default"
           >
-            <CheckCircle className="mr-2 h-4 w-4" />
+            <CheckCircle className="mr-1.5 h-4 w-4" />
             Redan sökt
           </Button>
         ) : (
-          <motion.div whileTap={{ scale: 0.97 }}>
-            <Button
-              size="sm"
-              onClick={onSubmit}
-              disabled={isSubmitting || !canSubmit}
-              className="rounded-full bg-white/[0.15] hover:bg-white/[0.22] text-white border border-white/20 hover:border-white/30 px-8 py-2.5 h-auto text-sm font-semibold disabled:opacity-30 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
-            >
-              {isSubmitting ? (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex items-center"
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-                    className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full mr-2"
-                  />
-                  Skickar...
-                </motion.span>
-              ) : (
-                <>
-                  <Send className="mr-2 h-3.5 w-3.5" />
-                  Skicka ansökan
-                </>
-              )}
-            </Button>
-          </motion.div>
+          <Button
+            size="sm"
+            onClick={onSubmit}
+            disabled={isSubmitting || !canSubmit}
+            className={submitButtonClasses}
+          >
+            {isSubmitting ? (
+              'Skickar...'
+            ) : (
+              <>
+                <Send className="mr-1.5 h-3.5 w-3.5" />
+                Skicka ansökan
+              </>
+            )}
+          </Button>
         )}
       </div>
     </div>
