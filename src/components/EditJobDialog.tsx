@@ -1967,7 +1967,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Arbetsplatsens namn *</Label>
+                        <Label className="text-white font-medium text-sm">Bolagsnamn *</Label>
                         <Input
                           value={formData.workplace_name}
                           onChange={(e) => handleInputChange('workplace_name', e.target.value)}
@@ -2637,7 +2637,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                          <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
                                            <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                              <MapPin className="h-2 w-2 mr-1 text-white" />
-                                             Arbetsplats
+                                              Bolagsnamn
                                            </h5>
                                            <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
                                             {formData.workplace_name && (
@@ -3131,11 +3131,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             </div>
                                           )}
 
-                                          {/* Arbetsplats */}
+                                           {/* Bolagsnamn */}
                                           <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                               <MapPin className="h-3 w-3 mr-1 text-white" />
-                                              Arbetsplats
+                                              Bolagsnamn
                                             </h5>
                                             <div className="text-xs text-white leading-relaxed space-y-0.5">
                                               {formData.workplace_name && <div className="font-medium">{formData.workplace_name}</div>}

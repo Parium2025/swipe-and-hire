@@ -1921,7 +1921,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Arbetsplatsens namn *</Label>
+                  <Label className="text-white font-medium text-sm">Bolagsnamn *</Label>
                   <Input
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
@@ -2269,7 +2269,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <div className="border-t border-white/30" />
                   
                   <div>
-                    <p className="text-white text-sm mb-1">Arbetsplats</p>
+                    <p className="text-white text-sm mb-1">Bolagsnamn</p>
                     <p className="text-white">{formData.workplace_name || '-'}</p>
                     {(formData.workplace_postal_code || formData.workplace_city) && (
                       <p className="text-white">

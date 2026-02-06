@@ -779,10 +779,10 @@ const JobView = () => {
                   </div>
                 )}
 
-                {/* Arbetsplats */}
+                {/* Bolagsnamn */}
                 {job.workplace_name && (
                   <div className="text-white text-sm">
-                    <span className="mr-1.5">Arbetsplats:</span>
+                    <span className="mr-1.5">Bolagsnamn:</span>
                     <span className="font-medium">{job.workplace_name}</span>
                   </div>
                 )}
