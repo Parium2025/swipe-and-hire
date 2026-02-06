@@ -768,18 +768,6 @@ const JobView = () => {
               </p>
             </div>
 
-            {/* 3. Krav (Requirements) */}
-            {job.requirements && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <h2 className="text-section-title mb-3 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Krav
-                </h2>
-                <p className="text-body whitespace-pre-wrap">
-                  {job.requirements}
-                </p>
-              </div>
-            )}
 
             {/* 4. Detaljer om tjänsten — kompakt faktaruta */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
