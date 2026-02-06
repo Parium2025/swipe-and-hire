@@ -1805,7 +1805,7 @@ const MobileJobWizard = ({
     if (currentStep === 1) {
       if (!formData.work_location_type) missing.push('Var utförs arbetet');
       if (!formData.remote_work_possible) missing.push('Distansarbete');
-      if (!formData.workplace_name.trim()) missing.push('Arbetsplatsens namn');
+      if (!formData.workplace_name.trim()) missing.push('Bolagsnamn');
       if (!formData.contact_email.trim()) missing.push('Kontakt e-post');
       if (!formData.workplace_postal_code.trim()) missing.push('Postnummer');
       if (!formData.workplace_city.trim()) missing.push('Ort');
@@ -2907,7 +2907,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium text-sm">Arbetsplatsens namn *</Label>
+                  <Label className="text-white font-medium text-sm">Bolagsnamn *</Label>
                   <Input
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
@@ -3640,11 +3640,11 @@ const MobileJobWizard = ({
                                )}
 
 
-                                 {/* Arbetsplats */}
+                                 {/* Bolagsnamn */}
                                  <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
                                    <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                      <MapPin className="h-2 w-2 mr-1 text-white" />
-                                     Arbetsplats
+                                     Bolagsnamn
                                    </h5>
                                     <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
                                      {formData.workplace_name && (
@@ -4179,11 +4179,11 @@ const MobileJobWizard = ({
                                       </div>
                                     )}
 
-                                    {/* Arbetsplats - samma som mobil */}
+                                     {/* Bolagsnamn - samma som mobil */}
                                     <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                       <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
                                         <MapPin className="h-3 w-3 mr-1 text-white" />
-                                        Arbetsplats
+                                        Bolagsnamn
                                       </h5>
                                       <div className="text-xs text-white space-y-0.5">
                                         {formData.workplace_name && (
