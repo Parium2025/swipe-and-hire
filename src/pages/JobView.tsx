@@ -749,7 +749,39 @@ const JobView = () => {
               </div>
             )}
 
-            {/* ━━━ Komplett detaljsektion — ALLTID synlig ━━━ */}
+            {/* ━━━ PREMIUM SECTION ORDER ━━━ */}
+
+            {/* 1. Pitch - short highlight text */}
+            {job.pitch && (
+              <div className="bg-primary/20 backdrop-blur-sm border border-primary/30 rounded-lg p-4">
+                <p className="text-white text-sm md:text-base italic leading-relaxed">
+                  "{job.pitch}"
+                </p>
+              </div>
+            )}
+
+            {/* 2. Om tjänsten (Description) */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+              <h2 className="text-section-title mb-3">Om tjänsten</h2>
+              <p className="text-body whitespace-pre-wrap">
+                {job.description}
+              </p>
+            </div>
+
+            {/* 3. Krav (Requirements) */}
+            {job.requirements && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <h2 className="text-section-title mb-3 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Krav
+                </h2>
+                <p className="text-body whitespace-pre-wrap">
+                  {job.requirements}
+                </p>
+              </div>
+            )}
+
+            {/* 4. Detaljer om tjänsten — kompakt faktaruta */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
               <h2 className="text-section-title mb-3">
                 Detaljer om tjänsten
@@ -881,36 +913,7 @@ const JobView = () => {
               </div>
             </div>
 
-            {/* Pitch - short highlight text */}
-            {job.pitch && (
-              <div className="bg-primary/20 backdrop-blur-sm border border-primary/30 rounded-lg p-4">
-                <p className="text-white text-sm md:text-base italic leading-relaxed">
-                  "{job.pitch}"
-                </p>
-              </div>
-            )}
-
-            {/* Description */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <h2 className="text-section-title mb-3">Om tjänsten</h2>
-              <p className="text-body whitespace-pre-wrap">
-                {job.description}
-              </p>
-            </div>
-
-            {/* Requirements */}
-            {job.requirements && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <h2 className="text-section-title mb-3 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Krav
-                </h2>
-                <p className="text-body whitespace-pre-wrap">
-                  {job.requirements}
-                </p>
-              </div>
-            )}
-
+            {/* 5. Förmåner */}
             {job.benefits && job.benefits.length > 0 && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
                 <h2 className="text-section-title mb-3 flex items-center gap-2">
@@ -927,7 +930,7 @@ const JobView = () => {
               </div>
             )}
 
-            {/* Application instructions if exists */}
+            {/* 6. Ansökningsinstruktioner */}
             {job.application_instructions && (
               <div className="bg-blue-400/20 backdrop-blur-sm border border-blue-300/30 rounded-lg p-4">
                 <h2 className="text-section-title mb-3 flex items-center gap-1.5">
