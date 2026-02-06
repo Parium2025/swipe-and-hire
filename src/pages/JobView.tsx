@@ -751,15 +751,13 @@ const JobView = () => {
 
             {/* ━━━ Komplett detaljsektion — ALLTID synlig ━━━ */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <h2 className="text-section-title mb-3 flex items-center gap-2">
-                <ClipboardList className="h-4 w-4" />
+              <h2 className="text-section-title mb-3">
                 Detaljer om tjänsten
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
                 {/* Anställningsform */}
                 {job.employment_type && (
-                  <div className="flex items-center text-white text-sm">
-                    <Briefcase className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Anställning:</span>
                     <span className="font-medium">{getEmploymentTypeLabel(job.employment_type)}</span>
                   </div>
@@ -767,8 +765,7 @@ const JobView = () => {
 
                 {/* Arbetsschema */}
                 {job.work_schedule && (
-                  <div className="flex items-center text-white text-sm">
-                    <Clock className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Schema:</span>
                     <span className="font-medium">{job.work_schedule}</span>
                   </div>
@@ -776,8 +773,7 @@ const JobView = () => {
 
                 {/* Plats */}
                 {job.location && (
-                  <div className="flex items-center text-white text-sm">
-                    <MapPin className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Ort:</span>
                     <span className="font-medium">{job.location}</span>
                   </div>
@@ -785,8 +781,7 @@ const JobView = () => {
 
                 {/* Arbetsplats */}
                 {job.workplace_name && (
-                  <div className="flex items-center text-white text-sm">
-                    <Building2 className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Arbetsplats:</span>
                     <span className="font-medium">{job.workplace_name}</span>
                   </div>
@@ -794,8 +789,7 @@ const JobView = () => {
 
                 {/* Arbetsplatsadress */}
                 {job.workplace_address && (
-                  <div className="flex items-center text-white text-sm">
-                    <Home className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Adress:</span>
                     <span className="font-medium">
                       {job.workplace_address}
@@ -808,8 +802,7 @@ const JobView = () => {
 
                 {/* Arbetsort (om skild från location) */}
                 {job.workplace_city && job.workplace_city !== job.location && !job.workplace_address && (
-                  <div className="flex items-center text-white text-sm">
-                    <MapPin className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Stad:</span>
                     <span className="font-medium">
                       {job.workplace_city}
@@ -821,8 +814,7 @@ const JobView = () => {
 
                 {/* Kommun (visas separat om inte redan inkluderad ovan) */}
                 {job.workplace_municipality && !job.workplace_address && (!job.workplace_city || job.workplace_city === job.location) && (
-                  <div className="flex items-center text-white text-sm">
-                    <MapPin className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Kommun:</span>
                     <span className="font-medium">{job.workplace_municipality}</span>
                   </div>
@@ -830,8 +822,7 @@ const JobView = () => {
 
                 {/* Platstyp */}
                 {job.work_location_type && (
-                  <div className="flex items-center text-white text-sm">
-                    <Monitor className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Platstyp:</span>
                     <span className="font-medium">{getWorkLocationLabel(job.work_location_type)}</span>
                   </div>
@@ -839,8 +830,7 @@ const JobView = () => {
 
                 {/* Distansarbete */}
                 {job.remote_work_possible && job.remote_work_possible !== 'no' && (
-                  <div className="flex items-center text-white text-sm">
-                    <Wifi className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Distans:</span>
                     <span className="font-medium">{getRemoteWorkLabel(job.remote_work_possible)}</span>
                   </div>
@@ -848,8 +838,7 @@ const JobView = () => {
 
                 {/* Arbetstider */}
                 {(job.work_start_time || job.work_end_time) && (
-                  <div className="flex items-center text-white text-sm">
-                    <CalendarClock className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Arbetstid:</span>
                     <span className="font-medium">{job.work_start_time} – {job.work_end_time}</span>
                   </div>
@@ -857,8 +846,7 @@ const JobView = () => {
 
                 {/* Antal tjänster */}
                 {job.positions_count && job.positions_count > 1 && (
-                  <div className="flex items-center text-white text-sm">
-                    <Users className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Antal tjänster:</span>
                     <span className="font-medium">{job.positions_count} st</span>
                   </div>
@@ -866,8 +854,7 @@ const JobView = () => {
 
                 {/* Yrkeskategori */}
                 {job.occupation && (
-                  <div className="flex items-center text-white text-sm">
-                    <Briefcase className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Yrke:</span>
                     <span className="font-medium">{job.occupation}</span>
                   </div>
@@ -875,8 +862,7 @@ const JobView = () => {
 
                 {/* Lön */}
                 {formatSalary(job.salary_min, job.salary_max, job.salary_type) && (
-                  <div className="flex items-center text-white text-sm sm:col-span-2 pt-1">
-                    <Euro className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm sm:col-span-2 pt-1">
                     <span className="mr-1.5">Lön:</span>
                     <span className="font-semibold">{formatSalary(job.salary_min, job.salary_max, job.salary_type)}</span>
                     {job.salary_type && (
@@ -887,8 +873,7 @@ const JobView = () => {
 
                 {/* Lönetransparens fallback */}
                 {!formatSalary(job.salary_min, job.salary_max, job.salary_type) && job.salary_transparency && (
-                  <div className="flex items-center text-white text-sm">
-                    <Euro className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                  <div className="text-white text-sm">
                     <span className="mr-1.5">Lön:</span>
                     <span className="font-medium">{getSalaryTransparencyLabel(job.salary_transparency)}</span>
                   </div>
