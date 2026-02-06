@@ -276,10 +276,11 @@ const JobView = () => {
 
   const formatSalary = (min?: number, max?: number, salaryType?: string) => {
     const suffix = salaryType === 'hourly' ? 'kr/tim' : 'kr/mån';
+    const fmt = (n: number) => n.toLocaleString('sv-SE');
     if (!min && !max) return null;
-    if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} ${suffix}`;
-    if (min) return `Från ${min.toLocaleString()} ${suffix}`;
-    if (max) return `Upp till ${max.toLocaleString()} ${suffix}`;
+    if (min && max) return `${fmt(min)} – ${fmt(max)} ${suffix}`;
+    if (min) return `Från ${fmt(min)} ${suffix}`;
+    if (max) return `Upp till ${fmt(max)} ${suffix}`;
     return null;
   };
 
