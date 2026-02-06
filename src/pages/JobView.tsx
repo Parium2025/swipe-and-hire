@@ -751,14 +751,7 @@ const JobView = () => {
 
             {/* ━━━ PREMIUM SECTION ORDER ━━━ */}
 
-            {/* 1. Pitch - short highlight text */}
-            {job.pitch && (
-              <div className="bg-primary/20 backdrop-blur-sm border border-primary/30 rounded-lg p-4">
-                <p className="text-white text-sm md:text-base italic leading-relaxed">
-                  "{job.pitch}"
-                </p>
-              </div>
-            )}
+            {/* 1. Om tjänsten (Description) */}
 
             {/* 2. Om tjänsten (Description) */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
@@ -918,18 +911,6 @@ const JobView = () => {
               </div>
             )}
 
-            {/* 6. Ansökningsinstruktioner */}
-            {job.application_instructions && (
-              <div className="bg-blue-400/20 backdrop-blur-sm border border-blue-300/30 rounded-lg p-4">
-                <h2 className="text-section-title mb-3 flex items-center gap-1.5">
-                  <FileText className="h-4 w-4" />
-                  Ansökningsinstruktioner
-                </h2>
-                <p className="text-body whitespace-pre-wrap">
-                  {job.application_instructions}
-                </p>
-              </div>
-            )}
 
             {/* Questions - Wizard Style */}
             {jobQuestions.length > 0 && !isJobExpired && (
