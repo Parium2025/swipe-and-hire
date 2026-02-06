@@ -690,24 +690,17 @@ const JobView = () => {
                   {/* Metadata på en rad under rubriken */}
                   <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm md:text-base text-white">
                     {job.employment_type && (
-                      <>
-                        <Briefcase className="h-3.5 w-3.5 text-white" />
-                        <span className="text-white">{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
-                      </>
+                      <span className="text-white">{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
                     )}
                     {job.employment_type && job.location && (
                       <span className="text-white/60">·</span>
                     )}
                     {job.location && (
-                      <>
-                        <MapPin className="h-3.5 w-3.5 text-white" />
-                        <span className="text-white">{job.location.toUpperCase()}</span>
-                      </>
+                      <span className="text-white">{job.location.toUpperCase()}</span>
                     )}
                     {job.positions_count && job.positions_count > 1 && (
                       <>
                         <span className="text-white/60">·</span>
-                        <Hash className="h-3.5 w-3.5 text-white" />
                         <span className="text-white">{job.positions_count} lediga tjänster</span>
                       </>
                     )}
@@ -726,22 +719,17 @@ const JobView = () => {
                 />
                 <div className="flex flex-wrap items-center gap-2 mt-3 text-sm text-white">
                   {job.employment_type && (
-                    <>
-                      <Briefcase className="h-3.5 w-3.5 text-white" />
-                      <span>{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
-                    </>
+                    <span>{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
                   )}
                   {job.location && (
                     <>
                       <span className="text-white/60">·</span>
-                      <MapPin className="h-3.5 w-3.5 text-white" />
                       <span>{job.location.toUpperCase()}</span>
                     </>
                   )}
                   {job.positions_count && job.positions_count > 1 && (
                     <>
                       <span className="text-white/60">·</span>
-                      <Hash className="h-3.5 w-3.5 text-white" />
                       <span>{job.positions_count} lediga tjänster</span>
                     </>
                   )}
