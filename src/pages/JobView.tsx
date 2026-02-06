@@ -60,12 +60,14 @@ interface JobPosting {
   workplace_name?: string;
   workplace_city?: string;
   workplace_county?: string;
+  workplace_municipality?: string;
   workplace_address?: string;
   workplace_postal_code?: string;
   created_at: string;
   expires_at?: string;
   employer_id: string;
   job_image_url?: string;
+  job_image_desktop_url?: string;
   profiles: {
     first_name?: string;
     last_name?: string;
@@ -128,24 +130,25 @@ const JobView = () => {
       if (error) throw error;
       setJob(data);
 
-      // Load job image if exists
-      if (data.job_image_url) {
+      // Load job image if exists — prefer desktop image on non-mobile
+      const rawImageUrl = data.job_image_desktop_url || data.job_image_url;
+      if (rawImageUrl) {
         try {
           let resolved: string | null = null;
 
           // If already a public URL, use as-is (stable for SW cache)
-          if (typeof data.job_image_url === 'string' && data.job_image_url.startsWith('http')) {
-            resolved = data.job_image_url;
+          if (typeof rawImageUrl === 'string' && rawImageUrl.startsWith('http')) {
+            resolved = rawImageUrl;
           } else {
             // Prefer public URL from job-images (bucket is public)
             const pub = supabase.storage
               .from('job-images')
-              .getPublicUrl(data.job_image_url).data.publicUrl;
+              .getPublicUrl(rawImageUrl).data.publicUrl;
             if (pub && pub.includes('/storage/')) {
               resolved = pub;
             } else {
               // Legacy fallback: private job-applications requires signed URL
-              const legacySigned = await convertToSignedUrl(data.job_image_url, 'job-applications', 3600);
+              const legacySigned = await convertToSignedUrl(rawImageUrl, 'job-applications', 3600);
               if (legacySigned) resolved = legacySigned;
             }
           }
@@ -155,7 +158,7 @@ const JobView = () => {
             // 🔥 Prefetch the job image to blob cache for instant display
             imageCache.loadImage(resolved).catch(() => {});
           } else {
-            console.warn('Kunde inte lösa jobbbildens URL', data.job_image_url);
+            console.warn('Kunde inte lösa jobbbildens URL', rawImageUrl);
           }
         } catch (err) {
           console.error('Error loading job image:', err);
@@ -798,6 +801,7 @@ const JobView = () => {
                       {job.workplace_address}
                       {job.workplace_postal_code && `, ${job.workplace_postal_code}`}
                       {job.workplace_city && ` ${job.workplace_city}`}
+                      {job.workplace_municipality && job.workplace_municipality !== job.workplace_city && ` (${job.workplace_municipality})`}
                     </span>
                   </div>
                 )}
@@ -807,7 +811,20 @@ const JobView = () => {
                   <div className="flex items-center text-white text-sm">
                     <MapPin className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
                     <span className="text-white/60 mr-1.5">Stad:</span>
-                    <span>{job.workplace_city}{job.workplace_county ? `, ${job.workplace_county}` : ''}</span>
+                    <span>
+                      {job.workplace_city}
+                      {job.workplace_municipality && job.workplace_municipality !== job.workplace_city ? `, ${job.workplace_municipality}` : ''}
+                      {job.workplace_county ? `, ${job.workplace_county}` : ''}
+                    </span>
+                  </div>
+                )}
+
+                {/* Kommun (visas separat om inte redan inkluderad ovan) */}
+                {job.workplace_municipality && !job.workplace_address && (!job.workplace_city || job.workplace_city === job.location) && (
+                  <div className="flex items-center text-white text-sm">
+                    <MapPin className="h-3.5 w-3.5 mr-2 text-white/60 flex-shrink-0" />
+                    <span className="text-white/60 mr-1.5">Kommun:</span>
+                    <span>{job.workplace_municipality}</span>
                   </div>
                 )}
 
