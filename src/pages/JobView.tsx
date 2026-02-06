@@ -897,8 +897,7 @@ const JobView = () => {
             {/* 5. Förmåner */}
             {job.benefits && job.benefits.length > 0 && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <h2 className="text-section-title mb-3 flex items-center gap-2">
-                  <Gift className="h-4 w-4" />
+                <h2 className="text-section-title mb-3">
                   Förmåner
                 </h2>
                 <div className="flex flex-wrap gap-2">
