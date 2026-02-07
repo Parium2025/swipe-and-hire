@@ -70,7 +70,7 @@ export function ApplicationQuestionsWizard({
     switch (question.question_type) {
       case 'text':
         return (
-          <div className="max-w-xs mx-auto">
+          <div className="max-w-md mx-auto">
             <Textarea
               value={answer || ''}
               onChange={(e) => onAnswerChange(question.id, e.target.value)}
