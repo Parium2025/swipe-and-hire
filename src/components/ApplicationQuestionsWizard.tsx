@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { TruncatedText } from '@/components/TruncatedText';
 
 interface JobQuestion {
   id: string;
@@ -356,7 +357,11 @@ export function ApplicationQuestionsWizard({
                           <p className="text-[10px] uppercase tracking-wider text-white mb-0.5">
                             Fråga {idx + 1}
                           </p>
-                          <p className="text-xs text-white truncate">{q.question_text}</p>
+                          <TruncatedText
+                            text={q.question_text}
+                            className="text-xs text-white truncate"
+                            alwaysShowTooltip={false}
+                          />
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <span className="text-xs font-medium truncate max-w-[120px] text-white">
