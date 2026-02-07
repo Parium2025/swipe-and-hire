@@ -79,11 +79,19 @@ export function ApplicationQuestionsWizard({
         );
 
       case 'yes_no':
+        const handleYesNo = (value: 'yes' | 'no') => {
+          const newValue = answer === value ? '' : value;
+          onAnswerChange(question.id, newValue);
+          // Auto-advance to next step after a brief moment for visual feedback
+          if (newValue) {
+            setTimeout(() => handleNext(), 250);
+          }
+        };
         return (
           <div className="flex justify-center gap-3">
             <button
               type="button"
-              onClick={() => onAnswerChange(question.id, answer === 'yes' ? '' : 'yes')}
+              onClick={() => handleYesNo('yes')}
               className={
                 (answer === 'yes'
                   ? 'bg-secondary/40 border-secondary '
@@ -95,7 +103,7 @@ export function ApplicationQuestionsWizard({
             </button>
             <button
               type="button"
-              onClick={() => onAnswerChange(question.id, answer === 'no' ? '' : 'no')}
+              onClick={() => handleYesNo('no')}
               className={
                 (answer === 'no'
                   ? 'bg-secondary/40 border-secondary '
