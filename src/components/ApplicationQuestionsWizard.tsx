@@ -271,7 +271,7 @@ export function ApplicationQuestionsWizard({
                 <h3 className="text-sm font-medium text-white leading-snug">
                   {currentQuestion.question_text}
                   {currentQuestion.is_required && (
-                    <span className="ml-1 text-destructive text-xs">*</span>
+                    <span className="ml-1 text-white/40 text-xs">*</span>
                   )}
                 </h3>
               </div>
