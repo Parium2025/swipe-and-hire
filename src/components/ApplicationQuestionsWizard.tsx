@@ -407,8 +407,8 @@ export function ApplicationQuestionsWizard({
           onClick={(e) => { e.currentTarget.blur(); handleNext(); }}
           disabled={currentQuestion?.is_required && !isCurrentAnswered}
           className={
-            nextButtonClasses + ' disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center' +
-            (isSubmitStep || hasAlreadyApplied || (currentQuestion?.question_type === 'yes_no') ? ' hidden' : '')
+            nextButtonClasses + ' disabled:opacity-50 disabled:pointer-events-none' +
+            (isSubmitStep || hasAlreadyApplied || (currentQuestion?.question_type === 'yes_no') ? ' hidden' : ' inline-flex items-center justify-center')
           }
         >
           {isLastQuestion ? 'Granska' : 'Nästa'}
@@ -420,8 +420,8 @@ export function ApplicationQuestionsWizard({
           type="button"
           disabled
           className={
-            'rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default inline-flex items-center justify-center focus:outline-none focus:ring-0 focus-visible:ring-0' +
-            (isSubmitStep && hasAlreadyApplied ? '' : ' hidden')
+            'rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default focus:outline-none focus:ring-0 focus-visible:ring-0' +
+            (isSubmitStep && hasAlreadyApplied ? ' inline-flex items-center justify-center' : ' hidden')
           }
         >
           <CheckCircle className="mr-1.5 h-4 w-4" />
@@ -436,8 +436,8 @@ export function ApplicationQuestionsWizard({
           onClick={(e) => { e.currentTarget.blur(); onSubmit(); }}
           disabled={isSubmitting || !canSubmit}
           className={
-            submitButtonClasses + ' disabled:pointer-events-none inline-flex items-center justify-center' +
-            (isSubmitStep && !hasAlreadyApplied ? '' : ' hidden')
+            submitButtonClasses + ' disabled:pointer-events-none' +
+            (isSubmitStep && !hasAlreadyApplied ? ' inline-flex items-center justify-center' : ' hidden')
           }
         >
           {isSubmitting ? (
