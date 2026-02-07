@@ -116,20 +116,8 @@ export const NotesToolbar = memo(({ editor, className, onExpand }: NotesToolbarP
   if (!editor) return null;
 
   return (
-    <div className={cn("flex items-center gap-0.5", className)}>
-      <ToolbarButton 
-        onClick={handleHeading1} 
-        icon={Heading1} 
-        title="Rubrik 1" 
-        isActive={editor.isActive('heading', { level: 1 })}
-      />
-      <ToolbarButton 
-        onClick={handleHeading2} 
-        icon={Heading2} 
-        title="Rubrik 2" 
-        isActive={editor.isActive('heading', { level: 2 })}
-      />
-      <div className="w-px h-3 bg-white/20 mx-0.5" />
+    <div className={cn("flex items-center gap-0.5 flex-shrink min-w-0 overflow-hidden", className)}>
+      {/* Core formatting - always visible */}
       <ToolbarButton 
         onClick={handleBold} 
         icon={Bold} 
@@ -148,7 +136,7 @@ export const NotesToolbar = memo(({ editor, className, onExpand }: NotesToolbarP
         title="Genomstruken" 
         isActive={editor.isActive('strike')}
       />
-      <div className="w-px h-3 bg-white/20 mx-0.5" />
+      <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
       <ToolbarButton 
         onClick={handleBulletList} 
         icon={List} 
@@ -161,22 +149,38 @@ export const NotesToolbar = memo(({ editor, className, onExpand }: NotesToolbarP
         title="Checkbox" 
         isActive={editor.isActive('taskList')}
       />
-      <div className="w-px h-3 bg-white/20 mx-0.5" />
-      <ToolbarButton 
-        onClick={handleUndo} 
-        icon={Undo} 
-        title="Ångra" 
-        disabled={!editor.can().undo()}
-      />
-      <ToolbarButton 
-        onClick={handleRedo} 
-        icon={Redo} 
-        title="Gör om" 
-        disabled={!editor.can().redo()}
-      />
+      {/* Headings + Undo/Redo - hidden on tight spaces */}
+      <div className="hidden md:contents">
+        <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
+        <ToolbarButton 
+          onClick={handleHeading1} 
+          icon={Heading1} 
+          title="Rubrik 1" 
+          isActive={editor.isActive('heading', { level: 1 })}
+        />
+        <ToolbarButton 
+          onClick={handleHeading2} 
+          icon={Heading2} 
+          title="Rubrik 2" 
+          isActive={editor.isActive('heading', { level: 2 })}
+        />
+        <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
+        <ToolbarButton 
+          onClick={handleUndo} 
+          icon={Undo} 
+          title="Ångra" 
+          disabled={!editor.can().undo()}
+        />
+        <ToolbarButton 
+          onClick={handleRedo} 
+          icon={Redo} 
+          title="Gör om" 
+          disabled={!editor.can().redo()}
+        />
+      </div>
       {onExpand && (
         <>
-          <div className="w-px h-3 bg-white/20 mx-0.5" />
+          <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
           <ToolbarButton 
             onClick={onExpand} 
             icon={Maximize2} 
