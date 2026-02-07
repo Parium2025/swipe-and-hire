@@ -66,6 +66,7 @@ export function ApplicationQuestionsWizard({
 
   const renderQuestionInput = (question: JobQuestion) => {
     const answer = answers[question.id];
+    const isLocked = hasAlreadyApplied;
 
     switch (question.question_type) {
       case 'text':
@@ -73,44 +74,47 @@ export function ApplicationQuestionsWizard({
           <div className="max-w-md mx-auto">
             <Textarea
               value={answer || ''}
-              onChange={(e) => onAnswerChange(question.id, e.target.value)}
+              onChange={(e) => !isLocked && onAnswerChange(question.id, e.target.value)}
+              readOnly={isLocked}
               placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px] max-h-[120px] resize-none text-sm focus:outline-none focus:border-white/40"
+              className={'bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px] max-h-[120px] resize-none text-sm focus:outline-none focus:border-white/40' + (isLocked ? ' opacity-70 cursor-default' : '')}
             />
           </div>
         );
 
       case 'yes_no':
-        const handleYesNo = (value: 'yes' | 'no') => {
-          const newValue = answer === value ? '' : value;
-          onAnswerChange(question.id, newValue);
-          // Auto-advance to next step after a brief moment for visual feedback
-          if (newValue) {
-            setTimeout(() => handleNext(), 250);
-          }
-        };
         return (
           <div className="flex justify-center gap-3">
             <button
               type="button"
-              onClick={() => handleYesNo('yes')}
+              onClick={() => !isLocked && (() => {
+                const newValue = answer === 'yes' ? '' : 'yes';
+                onAnswerChange(question.id, newValue);
+                if (newValue) setTimeout(() => handleNext(), 250);
+              })()}
+              disabled={isLocked}
               className={
                 (answer === 'yes'
                   ? 'bg-secondary/40 border-secondary '
-                  : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
-                'border rounded-full px-6 py-2.5 text-sm transition-all duration-150 font-medium text-white active:scale-[0.97]'
+                  : 'bg-white/10 border-white/20 ' + (isLocked ? '' : 'hover:bg-white/15 ')) +
+                'border rounded-full px-6 py-2.5 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
               }
             >
               Ja
             </button>
             <button
               type="button"
-              onClick={() => handleYesNo('no')}
+              onClick={() => !isLocked && (() => {
+                const newValue = answer === 'no' ? '' : 'no';
+                onAnswerChange(question.id, newValue);
+                if (newValue) setTimeout(() => handleNext(), 250);
+              })()}
+              disabled={isLocked}
               className={
                 (answer === 'no'
                   ? 'bg-secondary/40 border-secondary '
-                  : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
-                'border rounded-full px-6 py-2.5 text-sm transition-all duration-150 font-medium text-white active:scale-[0.97]'
+                  : 'bg-white/10 border-white/20 ' + (isLocked ? '' : 'hover:bg-white/15 ')) +
+                'border rounded-full px-6 py-2.5 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
               }
             >
               Nej
@@ -132,6 +136,7 @@ export function ApplicationQuestionsWizard({
                   key={index}
                   type="button"
                   onClick={() => {
+                    if (isLocked) return;
                     if (selectedAnswers.includes(option)) {
                       const newAnswers = selectedAnswers.filter(a => a !== option);
                       onAnswerChange(question.id, newAnswers.join('|||'));
@@ -139,11 +144,12 @@ export function ApplicationQuestionsWizard({
                       onAnswerChange(question.id, [...selectedAnswers, option].join('|||'));
                     }
                   }}
+                  disabled={isLocked}
                   className={
                     (selected
                       ? 'bg-secondary/40 border-secondary '
-                      : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
-                    'border rounded-full px-4 py-2.5 text-sm transition-all duration-150 font-medium text-white active:scale-[0.97]'
+                      : 'bg-white/10 border-white/20 ' + (isLocked ? '' : 'hover:bg-white/15 ')) +
+                    'border rounded-full px-4 py-2.5 text-sm transition-all duration-150 font-medium text-white' + (isLocked ? ' cursor-default opacity-70' : ' active:scale-[0.97]')
                   }
                 >
                   {option}
@@ -159,11 +165,12 @@ export function ApplicationQuestionsWizard({
             <Input
               type="number"
               value={answer || ''}
-              onChange={(e) => onAnswerChange(question.id, e.target.value)}
+              onChange={(e) => !isLocked && onAnswerChange(question.id, e.target.value)}
+              readOnly={isLocked}
               min={question.min_value}
               max={question.max_value}
               placeholder={question.placeholder_text || 'Ange ett nummer'}
-              className="bg-white/10 border-white/20 text-white text-center text-sm max-w-[160px] h-10 placeholder:text-white/50"
+              className={'bg-white/10 border-white/20 text-white text-center text-sm max-w-[160px] h-10 placeholder:text-white/50' + (isLocked ? ' opacity-70 cursor-default' : '')}
             />
           </div>
         );
@@ -174,8 +181,9 @@ export function ApplicationQuestionsWizard({
             <Input
               type="date"
               value={answer || ''}
-              onChange={(e) => onAnswerChange(question.id, e.target.value)}
-              className="bg-white/10 border-white/20 text-white max-w-[160px] h-10 text-sm"
+              onChange={(e) => !isLocked && onAnswerChange(question.id, e.target.value)}
+              readOnly={isLocked}
+              className={'bg-white/10 border-white/20 text-white max-w-[160px] h-10 text-sm' + (isLocked ? ' opacity-70 cursor-default' : '')}
             />
           </div>
         );
@@ -192,8 +200,9 @@ export function ApplicationQuestionsWizard({
               min={question.min_value || 0}
               max={question.max_value || 10}
               value={rangeValue}
-              onChange={(e) => onAnswerChange(question.id, parseInt(e.target.value))}
-              className="w-full h-1.5 bg-white/20 rounded-full appearance-none cursor-pointer accent-secondary"
+              onChange={(e) => !isLocked && onAnswerChange(question.id, parseInt(e.target.value))}
+              disabled={isLocked}
+              className={'w-full h-1.5 bg-white/20 rounded-full appearance-none accent-secondary' + (isLocked ? ' opacity-70 cursor-default' : ' cursor-pointer')}
             />
             <div className="flex justify-between text-[10px] text-white/40">
               <span>{question.min_value || 0}</span>
@@ -204,12 +213,15 @@ export function ApplicationQuestionsWizard({
 
       default:
         return (
-          <Textarea
-            value={answer || ''}
-            onChange={(e) => onAnswerChange(question.id, e.target.value)}
-            placeholder="Skriv ditt svar här..."
-            className="bg-white/10 border-white/20 text-white min-h-[60px] text-sm"
-          />
+          <div className="max-w-md mx-auto">
+            <Textarea
+              value={answer || ''}
+              onChange={(e) => !isLocked && onAnswerChange(question.id, e.target.value)}
+              readOnly={isLocked}
+              placeholder="Skriv ditt svar här..."
+              className={'bg-white/10 border-white/20 text-white min-h-[60px] text-sm' + (isLocked ? ' opacity-70 cursor-default' : '')}
+            />
+          </div>
         );
     }
   };
@@ -327,28 +339,7 @@ export function ApplicationQuestionsWizard({
 
                   const hasAnswer = answer && answer !== '';
                   
-                  return hasAlreadyApplied ? (
-                    <div
-                      key={q.id}
-                      className="w-full text-left p-2.5 rounded-lg bg-white/[0.04] border border-white/[0.06]"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] uppercase tracking-wider text-white mb-0.5">
-                            Fråga {idx + 1}
-                          </p>
-                          <p className="text-xs text-white truncate">{q.question_text}</p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-xs font-medium truncate max-w-[120px] text-white">
-                            {typeof displayAnswer === 'string' && displayAnswer.length > 20 
-                              ? displayAnswer.slice(0, 20) + '…' 
-                              : displayAnswer}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
+                  return (
                     <button
                       key={q.id}
                       type="button"
@@ -398,18 +389,17 @@ export function ApplicationQuestionsWizard({
           type="button"
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
-          onClick={(e) => { e.currentTarget.blur(); handlePrev(); }}
-          disabled={currentStep === 0}
+          onClick={(e) => { e.currentTarget.blur(); hasAlreadyApplied ? setCurrentStep(questions.length) : handlePrev(); }}
+          disabled={currentStep === 0 && !hasAlreadyApplied}
           className={
-            backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none inline-flex items-center justify-center' +
-            (hasAlreadyApplied ? ' hidden' : '')
+            backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none inline-flex items-center justify-center'
           }
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />
           Tillbaka
         </button>
 
-        {/* Nästa / Granska button - hidden for yes_no and on submit step */}
+        {/* Nästa / Granska button - hidden for yes_no, submit step, and locked mode */}
         <button
           type="button"
           onMouseDown={handleMouseDown}
@@ -418,7 +408,7 @@ export function ApplicationQuestionsWizard({
           disabled={currentQuestion?.is_required && !isCurrentAnswered}
           className={
             nextButtonClasses + ' disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center' +
-            (isSubmitStep || (currentQuestion?.question_type === 'yes_no') ? ' hidden' : '')
+            (isSubmitStep || hasAlreadyApplied || (currentQuestion?.question_type === 'yes_no') ? ' hidden' : '')
           }
         >
           {isLastQuestion ? 'Granska' : 'Nästa'}
