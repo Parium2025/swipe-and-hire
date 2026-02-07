@@ -4,21 +4,15 @@ import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TruncatedText } from '@/components/TruncatedText';
+import type { JobQuestion } from '@/types/jobWizard';
 
-interface JobQuestion {
+// Runtime interface where id is guaranteed (questions fetched from DB always have id)
+interface ResolvedJobQuestion extends JobQuestion {
   id: string;
-  question_text: string;
-  question_type: 'text' | 'yes_no' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range' | 'video';
-  options?: string[];
-  is_required: boolean;
-  order_index: number;
-  min_value?: number;
-  max_value?: number;
-  placeholder_text?: string;
 }
 
 interface ApplicationQuestionsWizardProps {
-  questions: JobQuestion[];
+  questions: ResolvedJobQuestion[];
   answers: Record<string, any>;
   onAnswerChange: (questionId: string, value: any) => void;
   onSubmit: () => void;
