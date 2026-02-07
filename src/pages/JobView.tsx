@@ -284,13 +284,16 @@ const JobView = () => {
     return null;
   };
 
+  // Capitalize first letter of any string for premium typography
+  const cap = (s?: string | null) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
   const getWorkLocationLabel = (type?: string) => {
     const labels: Record<string, string> = {
       onsite: 'På plats',
       remote: 'Distans',
-      hybrid: 'Hybrid',
+      hybrid: 'Hybridarbete',
     };
-    return type ? labels[type] || type : null;
+    return type ? labels[type] || cap(type) : null;
   };
 
   const getRemoteWorkLabel = (value?: string) => {
@@ -299,7 +302,7 @@ const JobView = () => {
       partially: 'Delvis möjligt',
       no: 'Nej',
     };
-    return value ? labels[value] || value : null;
+    return value ? labels[value] || cap(value) : null;
   };
 
   const getSalaryTransparencyLabel = (value?: string) => {
@@ -784,7 +787,7 @@ const JobView = () => {
                 {job.work_schedule && (
                   <div className="text-white text-sm">
                     <span className="mr-1.5">Schema:</span>
-                    <span className="font-medium">{job.work_schedule}</span>
+                    <span className="font-medium">{cap(job.work_schedule)}</span>
                   </div>
                 )}
 
@@ -792,7 +795,7 @@ const JobView = () => {
                 {job.location && (
                   <div className="text-white text-sm">
                     <span className="mr-1.5">Ort:</span>
-                    <span className="font-medium">{job.location}</span>
+                    <span className="font-medium">{cap(job.location)}</span>
                   </div>
                 )}
 
@@ -800,7 +803,7 @@ const JobView = () => {
                 {job.workplace_name && (
                   <div className="text-white text-sm">
                     <span className="mr-1.5">Bolagsnamn:</span>
-                    <span className="font-medium">{job.workplace_name}</span>
+                    <span className="font-medium">{cap(job.workplace_name)}</span>
                   </div>
                 )}
 
@@ -873,7 +876,7 @@ const JobView = () => {
                 {job.occupation && (
                   <div className="text-white text-sm">
                     <span className="mr-1.5">Yrke:</span>
-                    <span className="font-medium">{job.occupation}</span>
+                    <span className="font-medium">{cap(job.occupation)}</span>
                   </div>
                 )}
 
