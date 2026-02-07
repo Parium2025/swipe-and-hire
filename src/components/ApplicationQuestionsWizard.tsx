@@ -375,7 +375,6 @@ export function ApplicationQuestionsWizard({
       {/* Navigation */}
       <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/[0.06]">
         <Button
-          variant="outline"
           size="sm"
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
@@ -392,7 +391,6 @@ export function ApplicationQuestionsWizard({
             <div className="w-[72px]" /> 
           ) : (
           <Button
-            variant="outline"
             size="sm"
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
