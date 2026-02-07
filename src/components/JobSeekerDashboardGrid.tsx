@@ -729,7 +729,7 @@ const JobSeekerNotesCard = memo(() => {
               <div className="p-2 rounded-xl bg-white/10 flex-shrink-0">
                 <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
               </div>
-              <NotesToolbar editor={notesEditor} onExpand={handleExpand} />
+              <NotesToolbar editor={notesEditor} onExpand={handleExpand} compact />
             </div>
             <div className="flex items-center gap-2 flex-shrink-0 ml-2">
               {isSaving && (

@@ -74,9 +74,11 @@ interface NotesToolbarProps {
   editor: Editor | null;
   className?: string;
   onExpand?: () => void;
+  /** When true, hides less-used buttons on small screens. Default: false (show all) */
+  compact?: boolean;
 }
 
-export const NotesToolbar = memo(({ editor, className, onExpand }: NotesToolbarProps) => {
+export const NotesToolbar = memo(({ editor, className, onExpand, compact = false }: NotesToolbarProps) => {
   const handleBold = useCallback(() => {
     editor?.chain().focus().toggleBold().run();
   }, [editor]);
@@ -150,7 +152,7 @@ export const NotesToolbar = memo(({ editor, className, onExpand }: NotesToolbarP
         isActive={editor.isActive('taskList')}
       />
       {/* Headings + Undo/Redo - hidden on tight spaces */}
-      <div className="hidden md:contents">
+      <div className={compact ? "hidden md:contents" : "contents"}>
         <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
         <ToolbarButton 
           onClick={handleHeading1} 
