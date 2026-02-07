@@ -70,12 +70,12 @@ export function ApplicationQuestionsWizard({
     switch (question.question_type) {
       case 'text':
         return (
-          <div className="max-w-sm mx-auto">
+          <div className="max-w-xs mx-auto">
             <Textarea
               value={answer || ''}
               onChange={(e) => onAnswerChange(question.id, e.target.value)}
               placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[60px] max-h-[100px] resize-none text-sm focus:outline-none focus:border-white/40"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px] max-h-[120px] resize-none text-sm focus:outline-none focus:border-white/40"
             />
           </div>
         );
