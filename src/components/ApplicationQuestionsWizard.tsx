@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -337,21 +336,18 @@ export function ApplicationQuestionsWizard({
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] uppercase tracking-wider text-white/70 mb-0.5">
+                          <p className="text-[10px] uppercase tracking-wider text-white mb-0.5">
                             Fråga {idx + 1}
                           </p>
                           <p className="text-xs text-white truncate">{q.question_text}</p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className={
-                            'text-xs font-medium truncate max-w-[120px] ' +
-                            (hasAnswer ? 'text-white' : 'text-white/50')
-                          }>
+                          <span className="text-xs font-medium truncate max-w-[120px] text-white">
                             {typeof displayAnswer === 'string' && displayAnswer.length > 20 
                               ? displayAnswer.slice(0, 20) + '…' 
                               : displayAnswer}
                           </span>
-                          <ArrowRight className="w-3 h-3 text-white/60 group-hover:text-white transition-colors" />
+                          <ArrowRight className="w-3 h-3 text-white" />
                         </div>
                       </div>
                     </button>
@@ -377,51 +373,49 @@ export function ApplicationQuestionsWizard({
 
       {/* Navigation */}
       <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/[0.06]">
-        <Button
-          size="sm"
+        <button
+          type="button"
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onClick={(e) => { e.currentTarget.blur(); handlePrev(); }}
           disabled={currentStep === 0}
-          className={backButtonClasses}
+          className={backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none inline-flex items-center justify-center'}
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />
           Tillbaka
-        </Button>
+        </button>
 
         {!isSubmitStep ? (
           currentQuestion?.question_type === 'yes_no' ? null : (
-          <Button
-            size="sm"
+          <button
+            type="button"
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onClick={(e) => { e.currentTarget.blur(); handleNext(); }}
             disabled={currentQuestion?.is_required && !isCurrentAnswered}
-            className={isLastQuestion ? submitButtonClasses.replace('bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600', 'bg-primary hover:bg-primary/90 md:hover:bg-primary/90') + ' touch-border-white' : nextButtonClasses}
+            className={nextButtonClasses + ' disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center'}
           >
             {isLastQuestion ? 'Granska' : 'Nästa'}
             <ArrowRight className="w-4 h-4 ml-1.5" />
-          </Button>
+          </button>
           )
         ) : hasAlreadyApplied ? (
-          <Button
-            size="sm"
+          <button
+            type="button"
             disabled
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            className="rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default inline-flex items-center justify-center focus:outline-none focus:ring-0 focus-visible:ring-0"
           >
             <CheckCircle className="mr-1.5 h-4 w-4" />
             Redan sökt
-          </Button>
+          </button>
         ) : (
-          <Button
-            size="sm"
+          <button
+            type="button"
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onClick={(e) => { e.currentTarget.blur(); onSubmit(); }}
             disabled={isSubmitting || !canSubmit}
-            className={submitButtonClasses}
+            className={submitButtonClasses + ' disabled:pointer-events-none inline-flex items-center justify-center'}
           >
             {isSubmitting ? (
               'Skickar...'
@@ -431,7 +425,7 @@ export function ApplicationQuestionsWizard({
                 Skicka ansökan
               </>
             )}
-          </Button>
+          </button>
         )}
       </div>
     </div>
