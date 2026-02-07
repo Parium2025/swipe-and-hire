@@ -7,15 +7,20 @@ import { useJobViewTracker } from '@/hooks/useJobViewTracker';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import JobSwipe from '@/components/JobSwipe';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { getBenefitLabel } from '@/types/jobWizard';
 import type { JobQuestion } from '@/types/jobWizard';
-import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash, Timer, CheckCircle, Heart, Monitor, Home, Wifi, ClipboardList } from 'lucide-react';
+import {
+  capitalize as cap,
+  getSalaryTypeLabel,
+  formatSalary,
+  getWorkLocationLabel,
+  getRemoteWorkLabel,
+  getSalaryTransparencyLabel,
+} from '@/lib/jobViewHelpers';
+import { ArrowLeft, Send, Users, Timer, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
@@ -218,238 +223,7 @@ const JobView = () => {
   // Check if job is expired
   const isJobExpired = job ? getTimeRemaining(job.created_at, job.expires_at).isExpired : false;
 
-  // Map salary type to Swedish label
-  const getSalaryTypeLabel = (salaryType: string): string => {
-    const labels: Record<string, string> = {
-      monthly: 'Månadslön',
-      hourly: 'Timlön',
-      fixed: 'Fast lön',
-      commission: 'Provision',
-    };
-    return labels[salaryType] || salaryType;
-  };
-
-  const formatSalary = (min?: number, max?: number, salaryType?: string) => {
-    const suffix = salaryType === 'hourly' ? 'kr/tim' : 'kr/mån';
-    const fmt = (n: number) => n.toLocaleString('sv-SE');
-    if (!min && !max) return null;
-    if (min && max) return `${fmt(min)} – ${fmt(max)} ${suffix}`;
-    if (min) return `Från ${fmt(min)} ${suffix}`;
-    if (max) return `Upp till ${fmt(max)} ${suffix}`;
-    return null;
-  };
-
-  // Capitalize first letter of any string for premium typography
-  const cap = (s?: string | null) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-
-  const getWorkLocationLabel = (type?: string) => {
-    const labels: Record<string, string> = {
-      onsite: 'På plats',
-      remote: 'Distans',
-      hybrid: 'Hybridarbete',
-    };
-    return type ? labels[type] || cap(type) : null;
-  };
-
-  const getRemoteWorkLabel = (value?: string) => {
-    const labels: Record<string, string> = {
-      yes: 'Ja, helt på distans möjligt',
-      partially: 'Delvis möjligt',
-      no: 'Nej',
-    };
-    return value ? labels[value] || cap(value) : null;
-  };
-
-  const getSalaryTransparencyLabel = (value?: string) => {
-    const labels: Record<string, string> = {
-      full: 'Lön visas öppet',
-      range: 'Löneintervall',
-      hidden: 'Enligt överenskommelse',
-    };
-    if (!value) return null;
-    // Known label → return it
-    if (labels[value]) return labels[value];
-    // Detect salary range strings like "75000-80000" and format them nicely
-    const rangeMatch = value.match(/^(\d+)\s*[-–]\s*(\d+)$/);
-    if (rangeMatch) {
-      const min = parseInt(rangeMatch[1]).toLocaleString('sv-SE');
-      const max = parseInt(rangeMatch[2]).toLocaleString('sv-SE');
-      return `${min} – ${max} kr/mån`;
-    }
-    // Single number
-    const singleMatch = value.match(/^(\d+)$/);
-    if (singleMatch) {
-      return `${parseInt(singleMatch[1]).toLocaleString('sv-SE')} kr/mån`;
-    }
-    return value;
-  };
-
-  const renderQuestionInput = (question: JobQuestion) => {
-    const currentAnswer = answers[question.id];
-
-    switch (question.question_type) {
-      case 'text':
-        return (
-          <Textarea
-            value={currentAnswer || ''}
-            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-            placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[60px] max-h-[120px] resize-none text-sm focus:outline-none focus:border-white/40"
-          />
-        );
-
-      case 'yes_no':
-        return (
-          <div className="flex justify-center">
-            <div className="inline-flex gap-2">
-              <button
-                type="button"
-                onClick={() => handleAnswerChange(question.id, currentAnswer === 'yes' ? '' : 'yes')}
-                className={
-                  (currentAnswer === 'yes'
-                    ? 'bg-secondary/40 border-secondary text-white '
-                    : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
-                  'border rounded-full px-6 py-2 text-sm transition-colors font-medium'
-                }
-              >
-                Ja
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAnswerChange(question.id, currentAnswer === 'no' ? '' : 'no')}
-                className={
-                  (currentAnswer === 'no'
-                    ? 'bg-secondary/40 border-secondary text-white '
-                    : 'bg-white/10 border-white/20 text-white hover:bg-white/15 ') +
-                  'border rounded-full px-6 py-2 text-sm transition-colors font-medium'
-                }
-              >
-                Nej
-              </button>
-            </div>
-          </div>
-        );
-
-      case 'multiple_choice':
-        return (
-          <div className="flex flex-wrap justify-center gap-2">
-            {question.options?.filter(opt => opt.trim() !== '').map((option, index) => {
-              const selectedAnswers = typeof currentAnswer === 'string' 
-                ? currentAnswer.split('|||').filter(a => a)
-                : [];
-              const selected = selectedAnswers.includes(option);
-              
-              return (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => {
-                    const answersArray = typeof currentAnswer === 'string'
-                      ? currentAnswer.split('|||').filter(a => a)
-                      : [];
-                    
-                    if (answersArray.includes(option)) {
-                      const newAnswers = answersArray.filter(a => a !== option);
-                      handleAnswerChange(question.id, newAnswers.join('|||'));
-                    } else {
-                      handleAnswerChange(question.id, [...answersArray, option].join('|||'));
-                    }
-                  }}
-                  className={
-                    (selected
-                      ? 'bg-secondary/40 border-secondary '
-                      : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
-                    'inline-flex items-center gap-2 rounded-full px-4 py-2 border transition-colors'
-                  }
-                >
-                  <div className={
-                    selected
-                      ? 'w-2 h-2 rounded-full bg-white flex-shrink-0'
-                      : 'w-2 h-2 rounded-full border border-white/40 flex-shrink-0'
-                  } />
-                  <span className="text-sm text-white whitespace-nowrap">{option}</span>
-                </button>
-              );
-            })}
-          </div>
-        );
-
-      case 'number':
-        const minVal = question.min_value ?? 0;
-        const maxVal = question.max_value ?? 100;
-        const currentVal = Number(currentAnswer || minVal);
-        const percentage = ((currentVal - minVal) / (maxVal - minVal)) * 100;
-        
-        return (
-          <div className="space-y-3">
-            <div className="text-center text-lg font-semibold text-white">
-              {currentVal}
-            </div>
-            <input
-              type="range"
-              min={minVal}
-              max={maxVal}
-              value={currentVal}
-              className="w-full h-2 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full"
-              style={{
-                background: `linear-gradient(to right, white ${percentage}%, rgba(255,255,255,0.3) ${percentage}%)`
-              }}
-              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-            />
-            <div className="flex justify-between text-xs text-white">
-              <span>{minVal}</span>
-              <span>{maxVal}</span>
-            </div>
-          </div>
-        );
-
-      case 'date':
-        return (
-          <Input
-            type="date"
-            value={currentAnswer || ''}
-            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white h-10 text-sm focus:outline-none focus:border-white/40"
-          />
-        );
-
-      case 'file':
-        return (
-          <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center bg-white/5">
-            <FileText className="h-6 w-6 mx-auto mb-2 text-white" />
-            <p className="text-sm text-white">Välj fil</p>
-          </div>
-        );
-
-      case 'video':
-        return (
-          <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center bg-white/5">
-            <Video className="h-6 w-6 mx-auto mb-2 text-white" />
-            <p className="text-sm text-white">Spela in video</p>
-          </div>
-        );
-
-      default:
-        return (
-          <Input
-            value={currentAnswer || ''}
-            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-            placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white h-10 text-sm focus:outline-none focus:border-white/40"
-          />
-        );
-    }
-  };
-
-  const getQuestionIcon = (type: string) => {
-    switch (type) {
-      case 'text': return <FileText className="h-3.5 w-3.5 text-white" />;
-      case 'yes_no': return <CheckSquare className="h-3.5 w-3.5 text-white" />;
-      case 'multiple_choice': return <List className="h-3.5 w-3.5 text-white" />;
-      case 'video': return <Video className="h-3.5 w-3.5 text-white" />;
-      default: return <FileText className="h-3.5 w-3.5 text-white" />;
-    }
-  };
+  // Helper functions are now imported from '@/lib/jobViewHelpers'
 
   const { isOnline, showOfflineToast } = useOnline();
 
