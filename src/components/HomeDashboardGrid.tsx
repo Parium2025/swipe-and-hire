@@ -746,30 +746,35 @@ const NotesCard = memo(() => {
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="relative flex flex-col h-full p-6">
+          <div className="relative flex flex-col h-full p-4 sm:p-6">
             {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-white/10">
-                  <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
+            <div className="flex flex-col gap-2 mb-4">
+              {/* Top row: icon + title + save status + close */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-white/10">
+                    <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-semibold text-white">Anteckningar</h2>
                 </div>
-                <h2 className="text-xl font-semibold text-white">Anteckningar</h2>
-                {/* Toolbar */}
-                <NotesToolbar editor={expandedEditor} className="ml-4" />
+                <div className="flex items-center gap-3">
+                  {isSaving && (
+                    <span className="text-xs text-white/80 animate-pulse">Sparar...</span>
+                  )}
+                  {!isSaving && lastSaved && (
+                    <span className="text-xs text-white/80">Sparat</span>
+                  )}
+                  <button
+                    onClick={handleCloseExpanded}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
+                  >
+                    <X className="h-4 w-4 text-white" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                {isSaving && (
-                  <span className="text-xs text-white/80 animate-pulse">Sparar...</span>
-                )}
-                {!isSaving && lastSaved && (
-                  <span className="text-xs text-white/80">Sparat</span>
-                )}
-                <button
-                  onClick={handleCloseExpanded}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
-                >
-                  <X className="h-4 w-4 text-white" />
-                </button>
+              {/* Toolbar on its own row - always visible, wraps nicely */}
+              <div className="flex items-center">
+                <NotesToolbar editor={expandedEditor} />
               </div>
             </div>
             
