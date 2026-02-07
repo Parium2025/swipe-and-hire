@@ -214,13 +214,13 @@ export function ApplicationQuestionsWizard({
 
   // Shared button styles
   const backButtonClasses = 
-    'rounded-full bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 text-sm transition-all duration-150 hover:bg-white/10 disabled:opacity-30 focus:outline-none focus:ring-0 active:scale-[0.97]';
+    'rounded-full bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 text-sm transition-all duration-150 hover:bg-white/10 disabled:opacity-30 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:scale-[0.97]';
 
   const nextButtonClasses = 
-    'rounded-full bg-primary hover:bg-primary/90 text-white px-6 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-0 disabled:opacity-50 active:scale-[0.97]';
+    'rounded-full bg-primary hover:bg-primary/90 text-white px-6 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 disabled:opacity-50 active:scale-[0.97]';
 
   const submitButtonClasses = 
-    'rounded-full bg-green-600/80 hover:bg-green-600 text-white px-6 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-0 disabled:opacity-50 active:scale-[0.97]';
+    'rounded-full bg-green-600/80 hover:bg-green-600 text-white px-6 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 disabled:opacity-50 active:scale-[0.97]';
 
   return (
     <div className="space-y-4">
