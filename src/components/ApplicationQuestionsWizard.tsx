@@ -392,7 +392,8 @@ export function ApplicationQuestionsWizard({
           onClick={(e) => { e.currentTarget.blur(); hasAlreadyApplied ? setCurrentStep(questions.length) : handlePrev(); }}
           disabled={currentStep === 0 && !hasAlreadyApplied}
           className={
-            backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none inline-flex items-center justify-center'
+            backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none' +
+            (hasAlreadyApplied && isSubmitStep ? ' hidden' : ' inline-flex items-center justify-center')
           }
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />
