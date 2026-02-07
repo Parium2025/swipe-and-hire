@@ -135,7 +135,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           `)
           .in('employer_id', userIds)
           .is('deleted_at', null)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(500);
 
         if (error) throw error;
         result = data || [];
@@ -152,7 +153,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           `)
           .eq('employer_id', user.id)
           .is('deleted_at', null)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(500);
 
         if (error) throw error;
         result = data || [];
@@ -184,20 +186,25 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
   const isLoading = queryLoading && !hasCachedData;
 
   // Real-time subscription for job_postings changes
+  // 🔥 SCALED: Filter by employer_id to avoid broadcasting all changes to all clients
   useEffect(() => {
     if (!enableRealtime || !user) return;
 
+    // For personal scope, filter realtime to only this employer's jobs
+    // For org scope, we still need broader listening but use a unique channel name
+    const channelSuffix = `${user.id}-${scope}`;
+    
+    // Only filter for personal scope — org scope needs all org members' jobs
+    const jobFilter = scope !== 'organization' ? `employer_id=eq.${user.id}` : undefined;
+
     const channel = supabase
-      .channel('job-postings-realtime')
+      .channel(`job-postings-rt-${channelSuffix}`)
       .on(
         'postgres_changes',
-        {
-          event: '*', // Listen to INSERT, UPDATE, DELETE
-          schema: 'public',
-          table: 'job_postings'
-        },
+        jobFilter
+          ? { event: '*' as const, schema: 'public' as const, table: 'job_postings' as const, filter: jobFilter }
+          : { event: '*' as const, schema: 'public' as const, table: 'job_postings' as const },
         (payload) => {
-          // Update cache directly for updates to avoid full refetch
           if (payload.eventType === 'UPDATE') {
             queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
               if (!oldData) return oldData;
@@ -208,7 +215,6 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
               );
             });
           } else {
-            // For INSERT/DELETE, refetch to get complete data with joins
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
           }
         }
@@ -216,8 +222,10 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       .subscribe();
 
     // Also listen to job_applications for live count updates
+    // No server-side filter possible here (we don't know all job_ids upfront),
+    // but the client-side update only applies to matching jobs in cache
     const applicationsChannel = supabase
-      .channel('job-applications-realtime')
+      .channel(`job-apps-rt-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -226,7 +234,6 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           table: 'job_applications'
         },
         (payload) => {
-          // Update the applications_count for the relevant job
           queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
             if (!oldData) return oldData;
             return oldData.map(job => 
