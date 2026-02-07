@@ -918,9 +918,12 @@ const JobView = () => {
             )}
 
 
-            {/* Questions - Wizard Style */}
+            {/* 6. Ansökningsfrågor */}
             {jobQuestions.length > 0 && !isJobExpired && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+              <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06]">
+                <h2 className="text-section-title mb-3">
+                  Ansökningsfrågor
+                </h2>
                 <ApplicationQuestionsWizard
                   questions={jobQuestions}
                   answers={answers}

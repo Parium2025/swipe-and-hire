@@ -41,7 +41,7 @@ export function ApplicationQuestionsWizard({
   jobTitle,
 }: ApplicationQuestionsWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = questions.length + 1; // Questions + final submit step
+  const totalSteps = questions.length + 1;
   
   const isLastQuestion = currentStep === questions.length - 1;
   const isSubmitStep = currentStep === questions.length;
@@ -88,7 +88,7 @@ export function ApplicationQuestionsWizard({
                 (answer === 'yes'
                   ? 'bg-secondary/40 border-secondary '
                   : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
-                'border rounded-full px-6 py-2 text-sm transition-colors font-medium text-white'
+                'border rounded-full px-6 py-2.5 text-sm transition-all duration-150 font-medium text-white active:scale-[0.97]'
               }
             >
               Ja
@@ -100,7 +100,7 @@ export function ApplicationQuestionsWizard({
                 (answer === 'no'
                   ? 'bg-secondary/40 border-secondary '
                   : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
-                'border rounded-full px-6 py-2 text-sm transition-colors font-medium text-white'
+                'border rounded-full px-6 py-2.5 text-sm transition-all duration-150 font-medium text-white active:scale-[0.97]'
               }
             >
               Nej
@@ -133,7 +133,7 @@ export function ApplicationQuestionsWizard({
                     (selected
                       ? 'bg-secondary/40 border-secondary '
                       : 'bg-white/10 border-white/20 hover:bg-white/15 ') +
-                    'border rounded-full px-4 py-2 text-sm transition-colors font-medium text-white'
+                    'border rounded-full px-4 py-2.5 text-sm transition-all duration-150 font-medium text-white active:scale-[0.97]'
                   }
                 >
                   {option}
@@ -204,32 +204,42 @@ export function ApplicationQuestionsWizard({
     }
   };
 
-  // Progress bar percentage
-  const progress = ((currentStep + 1) / totalSteps) * 100;
-
-  // Shared button styles matching WizardFooter
+  // Shared button styles
   const backButtonClasses = 
-    'rounded-full bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 text-sm transition-colors duration-150 hover:bg-white/10 disabled:opacity-30 focus:outline-none focus:ring-0';
+    'rounded-full bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 text-sm transition-all duration-150 hover:bg-white/10 disabled:opacity-30 focus:outline-none focus:ring-0 active:scale-[0.97]';
 
   const nextButtonClasses = 
-    'rounded-full bg-primary hover:bg-primary/90 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 disabled:opacity-50';
+    'rounded-full bg-primary hover:bg-primary/90 text-white px-6 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-0 disabled:opacity-50 active:scale-[0.97]';
 
   const submitButtonClasses = 
-    'rounded-full bg-green-600/80 hover:bg-green-600 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 disabled:opacity-50';
+    'rounded-full bg-green-600/80 hover:bg-green-600 text-white px-6 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-0 disabled:opacity-50 active:scale-[0.97]';
 
   return (
     <div className="space-y-4">
-      {/* Progress bar - subtle */}
-      <div className="relative h-0.5 bg-white/10 rounded-full overflow-hidden">
-        <motion.div 
-          className="absolute inset-y-0 left-0 bg-secondary rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-        />
+      {/* Step dots progress indicator */}
+      <div className="flex items-center justify-center gap-1.5 py-1">
+        {Array.from({ length: totalSteps }).map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => {
+              // Allow clicking back to previous steps or current
+              if (i <= currentStep) setCurrentStep(i);
+            }}
+            className={
+              'rounded-full transition-all duration-300 ' +
+              (i === currentStep
+                ? 'w-5 h-1.5 bg-secondary'
+                : i < currentStep
+                  ? 'w-1.5 h-1.5 bg-white/50 hover:bg-white/70 cursor-pointer'
+                  : 'w-1.5 h-1.5 bg-white/15')
+            }
+            aria-label={`Steg ${i + 1}`}
+          />
+        ))}
       </div>
 
-      {/* Question container - compact */}
+      {/* Question container */}
       <div className="relative min-h-[180px] flex flex-col">
         <AnimatePresence mode="wait">
           {!isSubmitStep && currentQuestion ? (
@@ -241,14 +251,14 @@ export function ApplicationQuestionsWizard({
               transition={{ duration: 0.2, ease: 'easeOut' }}
               className="flex-1 flex flex-col"
             >
-              {/* Question number - minimal */}
+              {/* Question number */}
               <div className="text-center mb-2">
                 <span className="text-[10px] uppercase tracking-widest text-white/40">
                   {currentStep + 1} / {questions.length}
                 </span>
               </div>
 
-              {/* Question text - compact */}
+              {/* Question text */}
               <div className="text-center mb-4">
                 <h3 className="text-sm font-medium text-white leading-snug">
                   {currentQuestion.question_text}
@@ -282,33 +292,45 @@ export function ApplicationQuestionsWizard({
                 <h3 className="text-sm font-medium text-white">Granska dina svar</h3>
               </div>
 
-              {/* Answers summary - scrollable */}
-              <div className="flex-1 overflow-y-auto max-h-[200px] space-y-2 px-1">
+              {/* Answers summary - improved cards */}
+              <div className="flex-1 overflow-y-auto max-h-[200px] space-y-1.5 px-1">
                 {questions.map((q, idx) => {
                   const answer = answers[q.id];
                   let displayAnswer = answer || '—';
                   
-                  // Format answer based on type
                   if (q.question_type === 'yes_no') {
                     displayAnswer = answer === 'yes' ? 'Ja' : answer === 'no' ? 'Nej' : '—';
                   } else if (q.question_type === 'multiple_choice' && typeof answer === 'string') {
                     displayAnswer = answer.split('|||').filter(a => a).join(', ') || '—';
                   }
+
+                  const hasAnswer = answer && answer !== '';
                   
                   return (
                     <button
                       key={q.id}
                       type="button"
                       onClick={() => setCurrentStep(idx)}
-                      className="w-full text-left p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+                      className="w-full text-left p-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-150 group active:scale-[0.99]"
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] text-white/40 mb-0.5">Fråga {idx + 1}</p>
-                          <p className="text-xs text-white/70 truncate">{q.question_text}</p>
-                          <p className="text-xs text-white font-medium mt-0.5 truncate">{displayAnswer}</p>
+                          <p className="text-[10px] uppercase tracking-wider text-white/35 mb-0.5">
+                            Fråga {idx + 1}
+                          </p>
+                          <p className="text-xs text-white/60 truncate">{q.question_text}</p>
                         </div>
-                        <ArrowRight className="w-3 h-3 text-white/30 group-hover:text-white/60 transition-colors flex-shrink-0 mt-1" />
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className={
+                            'text-xs font-medium truncate max-w-[120px] ' +
+                            (hasAnswer ? 'text-white' : 'text-white/30')
+                          }>
+                            {typeof displayAnswer === 'string' && displayAnswer.length > 20 
+                              ? displayAnswer.slice(0, 20) + '…' 
+                              : displayAnswer}
+                          </span>
+                          <ArrowRight className="w-3 h-3 text-white/20 group-hover:text-white/50 transition-colors" />
+                        </div>
                       </div>
                     </button>
                   );
@@ -331,9 +353,8 @@ export function ApplicationQuestionsWizard({
         </AnimatePresence>
       </div>
 
-      {/* Navigation - matching WizardFooter style */}
-      <div className="flex items-center justify-between pt-2 border-t border-white/10">
-        {/* Back button */}
+      {/* Navigation */}
+      <div className="flex items-center justify-between pt-2 border-t border-white/[0.06]">
         <Button
           variant="outline"
           size="sm"
@@ -345,7 +366,6 @@ export function ApplicationQuestionsWizard({
           Tillbaka
         </Button>
 
-        {/* Next / Submit button */}
         {!isSubmitStep ? (
           <Button
             size="sm"
