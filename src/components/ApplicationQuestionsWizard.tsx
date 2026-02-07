@@ -364,14 +364,9 @@ export function ApplicationQuestionsWizard({
       {/* Navigation */}
       <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/[0.06]">
         <Button
-          variant="outline"
+          variant="glass"
           size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            (e.currentTarget as HTMLButtonElement).blur();
-            handlePrev();
-          }}
+          onClick={() => handlePrev()}
           disabled={currentStep === 0}
           className={backButtonClasses}
         >
@@ -384,13 +379,9 @@ export function ApplicationQuestionsWizard({
             <div className="w-[72px]" /> 
           ) : (
           <Button
+            variant="glass"
             size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              (e.currentTarget as HTMLButtonElement).blur();
-              handleNext();
-            }}
+            onClick={() => handleNext()}
             disabled={currentQuestion?.is_required && !isCurrentAnswered}
             className={nextButtonClasses}
           >
