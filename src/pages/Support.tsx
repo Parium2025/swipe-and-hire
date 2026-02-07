@@ -167,7 +167,7 @@ const Support = () => {
   };
 
   return (
-     <div className="space-y-8 responsive-container animate-fade-in">
+     <div className="space-y-8 responsive-container-wide animate-fade-in">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Kundtjänst</h1>
       </div>

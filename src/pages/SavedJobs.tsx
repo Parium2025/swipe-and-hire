@@ -215,7 +215,7 @@ const SavedJobs = () => {
 
   if (showLoading) {
     return (
-       <div className="responsive-container">
+       <div className="responsive-container-wide">
         <div className="text-center mb-8">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Sparade Jobb</h1>
           <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>
@@ -228,7 +228,7 @@ const SavedJobs = () => {
   }
 
   return (
-     <div className="responsive-container animate-fade-in">
+     <div className="responsive-container-wide animate-fade-in">
       <div className="text-center mb-8">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">Sparade Jobb</h1>
         <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>
