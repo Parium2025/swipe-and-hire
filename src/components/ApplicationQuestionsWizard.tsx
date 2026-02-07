@@ -371,7 +371,7 @@ export function ApplicationQuestionsWizard({
         </AnimatePresence>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation - all buttons always rendered, visibility via CSS to prevent flash */}
       <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/[0.06]">
         <button
           type="button"
@@ -385,48 +385,56 @@ export function ApplicationQuestionsWizard({
           Tillbaka
         </button>
 
-        {!isSubmitStep ? (
-          currentQuestion?.question_type === 'yes_no' ? null : (
-          <button
-            type="button"
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onClick={(e) => { e.currentTarget.blur(); handleNext(); }}
-            disabled={currentQuestion?.is_required && !isCurrentAnswered}
-            className={nextButtonClasses + ' disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center'}
-          >
-            {isLastQuestion ? 'Granska' : 'Nästa'}
-            <ArrowRight className="w-4 h-4 ml-1.5" />
-          </button>
-          )
-        ) : hasAlreadyApplied ? (
-          <button
-            type="button"
-            disabled
-            className="rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default inline-flex items-center justify-center focus:outline-none focus:ring-0 focus-visible:ring-0"
-          >
-            <CheckCircle className="mr-1.5 h-4 w-4" />
-            Redan sökt
-          </button>
-        ) : (
-          <button
-            type="button"
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onClick={(e) => { e.currentTarget.blur(); onSubmit(); }}
-            disabled={isSubmitting || !canSubmit}
-            className={submitButtonClasses + ' disabled:pointer-events-none inline-flex items-center justify-center'}
-          >
-            {isSubmitting ? (
-              'Skickar...'
-            ) : (
-              <>
-                <Send className="mr-1.5 h-3.5 w-3.5" />
-                Skicka ansökan
-              </>
-            )}
-          </button>
-        )}
+        {/* Nästa / Granska button - hidden for yes_no and on submit step */}
+        <button
+          type="button"
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onClick={(e) => { e.currentTarget.blur(); handleNext(); }}
+          disabled={currentQuestion?.is_required && !isCurrentAnswered}
+          className={
+            nextButtonClasses + ' disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center' +
+            (isSubmitStep || (currentQuestion?.question_type === 'yes_no') ? ' hidden' : '')
+          }
+        >
+          {isLastQuestion ? 'Granska' : 'Nästa'}
+          <ArrowRight className="w-4 h-4 ml-1.5" />
+        </button>
+
+        {/* Redan sökt button - only visible on submit step when already applied */}
+        <button
+          type="button"
+          disabled
+          className={
+            'rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default inline-flex items-center justify-center focus:outline-none focus:ring-0 focus-visible:ring-0' +
+            (isSubmitStep && hasAlreadyApplied ? '' : ' hidden')
+          }
+        >
+          <CheckCircle className="mr-1.5 h-4 w-4" />
+          Redan sökt
+        </button>
+
+        {/* Skicka ansökan button - only visible on submit step when not already applied */}
+        <button
+          type="button"
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onClick={(e) => { e.currentTarget.blur(); onSubmit(); }}
+          disabled={isSubmitting || !canSubmit}
+          className={
+            submitButtonClasses + ' disabled:pointer-events-none inline-flex items-center justify-center' +
+            (isSubmitStep && !hasAlreadyApplied ? '' : ' hidden')
+          }
+        >
+          {isSubmitting ? (
+            'Skickar...'
+          ) : (
+            <>
+              <Send className="mr-1.5 h-3.5 w-3.5" />
+              Skicka ansökan
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
