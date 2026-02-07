@@ -261,7 +261,7 @@ export function ApplicationQuestionsWizard({
             >
               {/* Question number */}
               <div className="text-center mb-2">
-                <span className="text-[10px] uppercase tracking-widest text-white/40">
+                <span className="text-[10px] uppercase tracking-widest text-white">
                   {currentStep + 1} / {questions.length}
                 </span>
               </div>
@@ -323,21 +323,21 @@ export function ApplicationQuestionsWizard({
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] uppercase tracking-wider text-white/35 mb-0.5">
+                          <p className="text-[10px] uppercase tracking-wider text-white/70 mb-0.5">
                             Fråga {idx + 1}
                           </p>
-                          <p className="text-xs text-white/60 truncate">{q.question_text}</p>
+                          <p className="text-xs text-white truncate">{q.question_text}</p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <span className={
                             'text-xs font-medium truncate max-w-[120px] ' +
-                            (hasAnswer ? 'text-white' : 'text-white/30')
+                            (hasAnswer ? 'text-white' : 'text-white/50')
                           }>
                             {typeof displayAnswer === 'string' && displayAnswer.length > 20 
                               ? displayAnswer.slice(0, 20) + '…' 
                               : displayAnswer}
                           </span>
-                          <ArrowRight className="w-3 h-3 text-white/20 group-hover:text-white/50 transition-colors" />
+                          <ArrowRight className="w-3 h-3 text-white/60 group-hover:text-white transition-colors" />
                         </div>
                       </div>
                     </button>
@@ -350,7 +350,7 @@ export function ApplicationQuestionsWizard({
                 <div className="mt-3 text-center">
                   <a 
                     href={`mailto:${contactEmail}?subject=Fråga om tjänsten: ${jobTitle || ''}`}
-                    className="text-xs text-white/50 hover:text-white transition-colors underline underline-offset-2"
+                    className="text-xs text-white hover:text-white/80 transition-colors underline underline-offset-2"
                   >
                     {contactEmail}
                   </a>
