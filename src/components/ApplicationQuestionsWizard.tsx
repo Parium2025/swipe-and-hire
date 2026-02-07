@@ -237,8 +237,8 @@ export function ApplicationQuestionsWizard({
 
   return (
     <div className="space-y-4">
-      {/* Step dots progress indicator */}
-      <div className="flex items-center justify-center gap-1.5 py-1">
+      {/* Step dots progress indicator - hidden when already applied (locked view) */}
+      <div className={'flex items-center justify-center gap-1.5 py-1' + (hasAlreadyApplied ? ' hidden' : '')}>
         {Array.from({ length: totalSteps }).map((_, i) => (
           <button
             key={i}
@@ -327,7 +327,28 @@ export function ApplicationQuestionsWizard({
 
                   const hasAnswer = answer && answer !== '';
                   
-                  return (
+                  return hasAlreadyApplied ? (
+                    <div
+                      key={q.id}
+                      className="w-full text-left p-2.5 rounded-lg bg-white/[0.04] border border-white/[0.06]"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] uppercase tracking-wider text-white mb-0.5">
+                            Fråga {idx + 1}
+                          </p>
+                          <p className="text-xs text-white truncate">{q.question_text}</p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-xs font-medium truncate max-w-[120px] text-white">
+                            {typeof displayAnswer === 'string' && displayAnswer.length > 20 
+                              ? displayAnswer.slice(0, 20) + '…' 
+                              : displayAnswer}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
                     <button
                       key={q.id}
                       type="button"
@@ -379,7 +400,10 @@ export function ApplicationQuestionsWizard({
           onMouseUp={handleMouseUp}
           onClick={(e) => { e.currentTarget.blur(); handlePrev(); }}
           disabled={currentStep === 0}
-          className={backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none inline-flex items-center justify-center'}
+          className={
+            backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none inline-flex items-center justify-center' +
+            (hasAlreadyApplied ? ' hidden' : '')
+          }
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />
           Tillbaka
