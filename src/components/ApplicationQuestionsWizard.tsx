@@ -40,7 +40,8 @@ export function ApplicationQuestionsWizard({
   contactEmail,
   jobTitle,
 }: ApplicationQuestionsWizardProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+  // If already applied, start directly on the review step
+  const [currentStep, setCurrentStep] = useState(hasAlreadyApplied ? questions.length : 0);
   const totalSteps = questions.length + 1;
   
   const isLastQuestion = currentStep === questions.length - 1;
@@ -396,7 +397,7 @@ export function ApplicationQuestionsWizard({
             onMouseUp={handleMouseUp}
             onClick={(e) => { e.currentTarget.blur(); handleNext(); }}
             disabled={currentQuestion?.is_required && !isCurrentAnswered}
-            className={nextButtonClasses}
+            className={isLastQuestion ? submitButtonClasses.replace('bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600', 'bg-primary hover:bg-primary/90 md:hover:bg-primary/90') + ' touch-border-white' : nextButtonClasses}
           >
             {isLastQuestion ? 'Granska' : 'Nästa'}
             <ArrowRight className="w-4 h-4 ml-1.5" />
@@ -406,7 +407,9 @@ export function ApplicationQuestionsWizard({
           <Button
             size="sm"
             disabled
-            className="rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default"
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            className="rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
             <CheckCircle className="mr-1.5 h-4 w-4" />
             Redan sökt
@@ -414,7 +417,9 @@ export function ApplicationQuestionsWizard({
         ) : (
           <Button
             size="sm"
-            onClick={onSubmit}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onClick={(e) => { e.currentTarget.blur(); onSubmit(); }}
             disabled={isSubmitting || !canSubmit}
             className={submitButtonClasses}
           >
