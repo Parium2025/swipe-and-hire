@@ -726,8 +726,8 @@ const JobSeekerNotesCard = memo(() => {
           {/* Header with toolbar */}
            <div className="flex items-center justify-between mb-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="p-1.5 rounded-lg bg-white/10 flex-shrink-0">
-                <FileText className="h-4 w-4 text-white" strokeWidth={1.5} />
+              <div className="p-2 rounded-xl bg-white/10 flex-shrink-0">
+                <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
               </div>
               <NotesToolbar editor={notesEditor} onExpand={handleExpand} />
             </div>
@@ -888,8 +888,8 @@ const JobSeekerInterviewsCard = memo(() => {
       <CardContent className="relative p-3 h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
-          <div className="p-1.5 rounded-lg bg-white/10">
-            <Calendar className="h-4 w-4 text-white" strokeWidth={1.5} />
+          <div className="p-2 rounded-xl bg-white/10">
+            <Calendar className="h-5 w-5 text-white" strokeWidth={1.5} />
           </div>
           <span className="text-[10px] text-white uppercase tracking-wider font-medium">INTERVJUER</span>
         </div>
