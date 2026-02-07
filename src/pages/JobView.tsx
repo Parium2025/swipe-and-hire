@@ -13,6 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
+import { getBenefitLabel } from '@/types/jobWizard';
+import type { JobQuestion } from '@/types/jobWizard';
 import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase, Gift, CalendarClock, Hash, Timer, CheckCircle, Heart, Monitor, Home, Wifi, ClipboardList } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,17 +25,6 @@ import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { imageCache } from '@/lib/imageCache';
 import { TruncatedText } from '@/components/TruncatedText';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
-interface JobQuestion {
-  id: string;
-  question_text: string;
-  question_type: 'text' | 'yes_no' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range' | 'video';
-  options?: string[];
-  is_required: boolean;
-  order_index: number;
-  min_value?: number;
-  max_value?: number;
-  placeholder_text?: string;
-}
 
 interface JobPosting {
   id: string;
@@ -226,42 +217,6 @@ const JobView = () => {
   
   // Check if job is expired
   const isJobExpired = job ? getTimeRemaining(job.created_at, job.expires_at).isExpired : false;
-
-  // Use centralized benefit labels from jobWizard types
-  const getBenefitLabelLocal = (benefit: string): string => {
-    const labels: Record<string, string> = {
-      friskvard: 'Friskvård',
-      tjanstepension: 'Tjänstepension',
-      kollektivavtal: 'Kollektivavtal',
-      'flexibla-tider': 'Flexibla arbetstider',
-      bonus: 'Bonus',
-      tjanstebil: 'Tjänstebil',
-      mobiltelefon: 'Mobiltelefon',
-      utbildning: 'Utbildning',
-      forsakringar: 'Försäkringar',
-      'extra-semester': 'Extra semester',
-      gym: 'Gym/träning',
-      foraldraledighet: 'Föräldraledighet',
-      foraldraledithet: 'Föräldraledighet', // Legacy typo support
-      lunch: 'Lunch/mat',
-      'fri-parkering': 'Fri parkering',
-      personalrabatter: 'Personalrabatter',
-      hemarbete: 'Hemarbete',
-      pension: 'Pension',
-      // Legacy values
-      friskvardsbidrag: 'Friskvård',
-      flexibla_arbetstider: 'Flexibla arbetstider',
-      'flexibla-arbetstider': 'Flexibla arbetstider',
-      fri_fika: 'Fri fika/frukt',
-      'fri-fika-frukt': 'Fri fika/frukt',
-      fri_parkering: 'Fri parkering',
-    };
-    // Capitalize first letter if no match found
-    if (!labels[benefit]) {
-      return benefit.charAt(0).toUpperCase() + benefit.slice(1).replace(/-/g, ' ');
-    }
-    return labels[benefit];
-  };
 
   // Map salary type to Swedish label
   const getSalaryTypeLabel = (salaryType: string): string => {
@@ -910,7 +865,7 @@ const JobView = () => {
                 <div className="flex flex-wrap gap-2">
                   {job.benefits.map((benefit, index) => (
                     <Badge key={index} variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
-                      {getBenefitLabelLocal(benefit)}
+                      {getBenefitLabel(benefit)}
                     </Badge>
                   ))}
                 </div>
@@ -925,7 +880,7 @@ const JobView = () => {
                   Ansökningsfrågor
                 </h2>
                 <ApplicationQuestionsWizard
-                  questions={jobQuestions}
+                  questions={jobQuestions as (JobQuestion & { id: string })[]}
                   answers={answers}
                   onAnswerChange={handleAnswerChange}
                   onSubmit={handleApplicationSubmit}
