@@ -46,6 +46,11 @@ export function ApplicationQuestionsWizard({
   const isLastQuestion = currentStep === questions.length - 1;
   const isSubmitStep = currentStep === questions.length;
   const currentQuestion = questions[currentStep];
+
+  // Track which step the buttons should reflect — updated only after exit animation
+  // to prevent the "Redan sökt" / "Tillbaka" flash during step transitions.
+  const [buttonStep, setButtonStep] = useState(currentStep);
+  const buttonIsSubmitStep = buttonStep === questions.length;
   
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : null;
   const isCurrentAnswered = currentQuestion 
@@ -274,7 +279,7 @@ export function ApplicationQuestionsWizard({
 
       {/* Question container */}
       <div className="relative min-h-[140px] flex flex-col">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" onExitComplete={() => setButtonStep(currentStep)}>
           {!isSubmitStep && currentQuestion ? (
             <motion.div
               key={currentQuestion.id}
@@ -393,7 +398,7 @@ export function ApplicationQuestionsWizard({
           disabled={currentStep === 0 && !hasAlreadyApplied}
           className={
             backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none' +
-            (hasAlreadyApplied && isSubmitStep ? ' hidden' : ' inline-flex items-center justify-center')
+            (hasAlreadyApplied && buttonIsSubmitStep ? ' hidden' : ' inline-flex items-center justify-center')
           }
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />
@@ -422,7 +427,7 @@ export function ApplicationQuestionsWizard({
           disabled
           className={
             'rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default focus:outline-none focus:ring-0 focus-visible:ring-0' +
-            (isSubmitStep && hasAlreadyApplied ? ' inline-flex items-center justify-center' : ' hidden')
+            (buttonIsSubmitStep && hasAlreadyApplied ? ' inline-flex items-center justify-center' : ' hidden')
           }
         >
           <CheckCircle className="mr-1.5 h-4 w-4" />
