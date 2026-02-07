@@ -366,7 +366,12 @@ export function ApplicationQuestionsWizard({
         <Button
           variant="outline"
           size="sm"
-          onClick={handlePrev}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            (e.currentTarget as HTMLButtonElement).blur();
+            handlePrev();
+          }}
           disabled={currentStep === 0}
           className={backButtonClasses}
         >
@@ -380,7 +385,12 @@ export function ApplicationQuestionsWizard({
           ) : (
           <Button
             size="sm"
-            onClick={handleNext}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              (e.currentTarget as HTMLButtonElement).blur();
+              handleNext();
+            }}
             disabled={currentQuestion?.is_required && !isCurrentAnswered}
             className={nextButtonClasses}
           >
