@@ -212,15 +212,26 @@ export function ApplicationQuestionsWizard({
     }
   };
 
-  // Shared button styles
+  // Blur handlers to prevent focus ring flash (same pattern as WizardFooter)
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.blur();
+    const activeEl = document.activeElement as HTMLElement;
+    if (activeEl?.blur) activeEl.blur();
+  };
+
+  const handleMouseUp = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.blur();
+  };
+
+  // Shared button styles (matching WizardFooter classes)
   const backButtonClasses = 
-    'rounded-full bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 text-sm transition-all duration-150 hover:bg-white/10 disabled:opacity-30 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:scale-[0.97]';
+    'rounded-full bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 text-sm transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
 
   const nextButtonClasses = 
-    'rounded-full bg-primary hover:bg-primary/90 text-white px-6 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 disabled:opacity-50 active:scale-[0.97]';
+    'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
 
   const submitButtonClasses = 
-    'rounded-full bg-green-600/80 hover:bg-green-600 text-white px-6 py-2 text-sm transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 disabled:opacity-50 active:scale-[0.97]';
+    'rounded-full bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50';
 
   return (
     <div className="space-y-4">
@@ -364,9 +375,11 @@ export function ApplicationQuestionsWizard({
       {/* Navigation */}
       <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/[0.06]">
         <Button
-          variant="glass"
+          variant="outline"
           size="sm"
-          onClick={() => handlePrev()}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onClick={(e) => { e.currentTarget.blur(); handlePrev(); }}
           disabled={currentStep === 0}
           className={backButtonClasses}
         >
@@ -379,9 +392,11 @@ export function ApplicationQuestionsWizard({
             <div className="w-[72px]" /> 
           ) : (
           <Button
-            variant="glass"
+            variant="outline"
             size="sm"
-            onClick={() => handleNext()}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onClick={(e) => { e.currentTarget.blur(); handleNext(); }}
             disabled={currentQuestion?.is_required && !isCurrentAnswered}
             className={nextButtonClasses}
           >
