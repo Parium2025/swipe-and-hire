@@ -702,15 +702,15 @@ const NotesCard = memo(() => {
         
         <CardContent className="relative p-4 h-full flex flex-col">
           {/* Header with toolbar integrated */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-white/10">
+          <div className="flex items-center justify-between mb-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="p-1.5 rounded-lg bg-white/10 flex-shrink-0">
                 <FileText className="h-4 w-4 text-white" strokeWidth={1.5} />
               </div>
               {/* Toolbar in header */}
               <NotesToolbar editor={notesEditor} onExpand={handleExpand} />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
               {isSaving && (
                 <span className="text-[10px] text-white animate-pulse">Sparar...</span>
               )}
