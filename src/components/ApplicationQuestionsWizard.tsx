@@ -387,9 +387,7 @@ export function ApplicationQuestionsWizard({
         </Button>
 
         {!isSubmitStep ? (
-          currentQuestion?.question_type === 'yes_no' ? (
-            <div className="w-[72px]" /> 
-          ) : (
+          currentQuestion?.question_type === 'yes_no' ? null : (
           <Button
             size="sm"
             onMouseDown={handleMouseDown}
