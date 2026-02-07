@@ -248,7 +248,7 @@ export function ApplicationQuestionsWizard({
       </div>
 
       {/* Question container */}
-      <div className="relative min-h-[180px] flex flex-col">
+      <div className="relative min-h-[140px] flex flex-col">
         <AnimatePresence mode="wait">
           {!isSubmitStep && currentQuestion ? (
             <motion.div
@@ -271,7 +271,7 @@ export function ApplicationQuestionsWizard({
                 <h3 className="text-sm font-medium text-white leading-snug">
                   {currentQuestion.question_text}
                   {currentQuestion.is_required && (
-                    <span className="ml-1 text-white/40 text-xs">*</span>
+                    <span className="ml-1 text-white text-xs">*</span>
                   )}
                 </h3>
               </div>
@@ -375,6 +375,9 @@ export function ApplicationQuestionsWizard({
         </Button>
 
         {!isSubmitStep ? (
+          currentQuestion?.question_type === 'yes_no' ? (
+            <div className="w-[72px]" /> 
+          ) : (
           <Button
             size="sm"
             onClick={handleNext}
@@ -384,6 +387,7 @@ export function ApplicationQuestionsWizard({
             {isLastQuestion ? 'Granska' : 'Nästa'}
             <ArrowRight className="w-4 h-4 ml-1.5" />
           </Button>
+          )
         ) : hasAlreadyApplied ? (
           <Button
             size="sm"
