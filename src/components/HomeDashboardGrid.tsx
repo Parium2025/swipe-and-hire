@@ -215,8 +215,8 @@ const NewsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaus
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots - larger, more visible dots */}
-        <div className="h-6 flex items-center mt-auto shrink-0">
+        {/* Footer with dots - centered */}
+        <div className="h-6 flex items-center justify-center mt-auto shrink-0">
           {newsItems.length > 1 && (
             <div className="flex items-center gap-1.5">
               {newsItems.map((_, i) => (
@@ -481,7 +481,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
         {/* Stats content */}
         <div 
           className={cn(
-            "flex-1 flex flex-col justify-center py-2",
+            "flex-1 flex flex-col items-center justify-center text-center py-2",
             currentStat.link && "cursor-pointer"
           )}
           onClick={() => currentStat.link && navigate(currentStat.link)}
@@ -493,6 +493,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
+              className="flex flex-col items-center"
             >
               <h3 className="text-sm font-semibold text-white leading-snug mb-0.5">
                 {currentStat.label}
@@ -505,8 +506,8 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation - larger, more visible dots */}
-        <div className="h-6 flex items-center mt-auto shrink-0">
+        {/* Dot navigation - centered */}
+        <div className="h-6 flex items-center justify-center mt-auto shrink-0">
           <div className="flex items-center gap-1.5">
             {statsArray.map((_, i) => (
               <button

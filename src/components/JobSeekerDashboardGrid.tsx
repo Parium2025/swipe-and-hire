@@ -219,8 +219,8 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
           </AnimatePresence>
         </div>
         
-        {/* Footer with dots - matching employer style exactly (larger dots) */}
-        <div className="h-6 flex items-center mt-auto shrink-0">
+        {/* Footer with dots - centered */}
+        <div className="h-6 flex items-center justify-center mt-auto shrink-0">
           {tipsItems.length > 1 && (
             <div className="flex items-center gap-1.5">
               {tipsItems.map((_, i) => (
@@ -506,7 +506,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
         {/* Stats content */}
         <div 
           className={cn(
-            "flex-1 flex flex-col justify-center py-2",
+            "flex-1 flex flex-col items-center justify-center text-center py-2",
             currentStat.link && "cursor-pointer"
           )}
           onClick={() => currentStat.link && navigate(currentStat.link)}
@@ -518,17 +518,18 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
+              className="flex flex-col items-center"
             >
               <h3 className="text-sm font-semibold text-white leading-snug mb-1">
                 {currentStat.label}
               </h3>
-              <div className="text-3xl font-bold text-white">{currentStat.value}</div>
+              <div className="text-2xl font-bold text-white">{currentStat.value}</div>
             </motion.div>
           </AnimatePresence>
         </div>
         
-        {/* Dot navigation - matching employer style exactly (larger dots) */}
-        <div className="h-6 flex items-center mt-auto shrink-0">
+        {/* Dot navigation - centered */}
+        <div className="h-6 flex items-center justify-center mt-auto shrink-0">
           <div className="flex items-center gap-1.5">
             {statsArray.map((_, i) => (
               <button
