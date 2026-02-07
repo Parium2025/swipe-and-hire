@@ -361,7 +361,7 @@ const SearchJobs = () => {
   };
 
   return (
-     <div className="space-y-4 responsive-container animate-fade-in">
+     <div className="space-y-4 responsive-container-wide animate-fade-in">
       <div className="flex justify-center items-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Sök Jobb</h1>
       </div>

@@ -143,14 +143,14 @@ const CandidatesContent = () => {
 
   if (isLoading || !showContent) {
     return (
-       <div className="responsive-container opacity-0">
+       <div className="responsive-container-wide opacity-0">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
   }
 
   return (
-     <div className="responsive-container animate-fade-in">
+     <div className="responsive-container-wide animate-fade-in">
       {/* Main Content */}
       <div className="space-y-4">
         {/* Header */}
