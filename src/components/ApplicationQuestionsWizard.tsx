@@ -223,12 +223,12 @@ export function ApplicationQuestionsWizard({
     e.currentTarget.blur();
   };
 
-  // Shared button styles (matching WizardFooter classes)
+  // Shared button styles (identical to WizardFooter)
   const backButtonClasses = 
-    'rounded-full bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 text-sm transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
+    'rounded-full bg-white/5 backdrop-blur-sm border border-white/20 text-white px-4 py-2 text-sm transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
 
   const nextButtonClasses = 
-    'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
+    'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 border border-white/20 text-white px-6 py-2 text-sm touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
 
   const submitButtonClasses = 
     'rounded-full bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50';
