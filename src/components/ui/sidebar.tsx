@@ -202,7 +202,9 @@ const Sidebar = React.forwardRef<
             onClick={() => setOpenMobile(false)}
             aria-hidden="true"
           />
-          {/* Sidebar panel – always mounted, slides via CSS transform */}
+          {/* Sidebar panel – always mounted, slides via CSS transform.
+              NOTE: We intentionally do NOT merge the parent Sidebar's className here
+              because it contains bg-transparent which would override our gradient. */}
           <div
             ref={ref}
             data-sidebar="sidebar"
@@ -211,15 +213,13 @@ const Sidebar = React.forwardRef<
               "fixed inset-y-0 z-50 flex h-full w-[--sidebar-width] flex-col bg-gradient-parium p-0 text-sidebar-foreground shadow-lg transition-transform duration-300 ease-in-out will-change-transform",
               side === "left"
                 ? (openMobile ? "left-0 translate-x-0" : "left-0 -translate-x-full")
-                : (openMobile ? "right-0 translate-x-0" : "right-0 translate-x-full"),
-              className
+                : (openMobile ? "right-0 translate-x-0" : "right-0 translate-x-full")
             )}
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
-            {...props}
           >
             {/* Close button */}
             <button
