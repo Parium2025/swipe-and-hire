@@ -258,13 +258,13 @@ All colors MUST be HSL.
     @apply border-border;
     box-sizing: border-box;
     max-width: 100%;
-    /* Crisp text rendering */
+  }
+
+  /* Crisp text only on headings – applying to every element is too expensive on mobile */
+  h1, h2, h3, h4, h5, h6 {
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Prevent subpixel blur */
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
   }
   
   /* Prevent page horizontal scroll without clipping children */
@@ -1134,11 +1134,25 @@ All colors MUST be HSL.
 
 /* Mobile Scroll Optimization - Premium Touch Experience */
 @media (max-width: 768px) {
-  /* Apply to all elements for consistent mobile scrolling */
-  * {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+  /* Remove expensive backdrop effects on mobile - invisible at 2px but costly per element */
+  .backdrop-blur-\[2px\],
+  [class*="backdrop-blur"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
+
+  /* Neutralise backdrop-brightness hover effects - only trigger on desktop hover */
+  [class*="backdrop-brightness"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Replace transition-all with specific properties to reduce scroll computation */
+  [class*="transition-all"] {
+    transition-property: background-color, border-color, color, opacity, transform !important;
+  }
+
+  /* Only apply momentum scrolling to actual scroll containers, not every element */
   
   /* Scroll containers with native momentum */
   .scroll-container {
