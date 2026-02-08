@@ -163,7 +163,7 @@ export function CandidatesTable({
           .is('job_id', null);
         return data || [];
       },
-      staleTime: 30 * 1000,
+      staleTime: Infinity,
     });
   }, [user, queryClient]);
 

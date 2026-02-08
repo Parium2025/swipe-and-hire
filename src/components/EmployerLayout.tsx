@@ -232,7 +232,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
 
         return { items, hasMore };
       },
-      staleTime: 5 * 60 * 1000,
+      staleTime: Infinity,
     });
   }, [user, queryClient]);
 

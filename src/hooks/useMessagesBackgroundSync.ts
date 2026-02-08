@@ -257,10 +257,8 @@ export function getCachedMessageProfiles(): Map<string, any> | null {
     const cached = localStorage.getItem(PROFILE_IMAGES_CACHE_KEY);
     if (cached) {
       const parsed = JSON.parse(cached);
-      // Cache valid for 10 minutes
-      if (Date.now() - parsed.timestamp < 10 * 60 * 1000) {
-        return new Map(Object.entries(parsed.profiles));
-      }
+      // No expiry — realtime subscriptions keep data fresh
+      return new Map(Object.entries(parsed.profiles));
     }
   } catch { /* ignore */ }
   return null;

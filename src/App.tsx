@@ -49,12 +49,12 @@ if (typeof window !== 'undefined') {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Längre cache-tider för bättre bildprestanda
-      staleTime: 30 * 60 * 1000, // 30 minuter - data anses färsk
-      gcTime: 60 * 60 * 1000, // 1 timme - behåll i minnet
-      refetchOnWindowFocus: false, // Ladda inte om när man kommer tillbaka
-      refetchOnMount: false, // Använd cache när möjligt
-      retry: 2, // Försök 2 gånger vid fel
+      // 🔥 PREMIUM: Permanent cache — realtime subscriptions handle all updates
+      staleTime: Infinity, // Never refetch automatically
+      gcTime: Infinity, // Keep in cache permanently during session
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      retry: 2,
     },
   },
 });

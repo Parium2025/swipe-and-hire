@@ -98,7 +98,10 @@ export const useInterviews = () => {
       return result;
     },
     enabled: !!user?.id,
-    staleTime: 30000,
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (!user?.id) return undefined;
@@ -199,20 +202,20 @@ export const useCandidateInterviews = () => {
   const getInitialData = useCallback(() => {
     if (!user?.id) return undefined;
     
-    try {
-      const cacheKey = `job_seeker_interviews_${user.id}`;
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const age = Date.now() - parsed.timestamp;
-        if (age < 5 * 60 * 1000 && parsed.items?.length >= 0) {
-          return parsed.items;
+      try {
+        const cacheKey = `job_seeker_interviews_${user.id}`;
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          // No expiry — realtime subscriptions keep data fresh
+          if (parsed.items?.length >= 0) {
+            return parsed.items;
+          }
         }
+      } catch {
+        // Ignorera cache-fel
       }
-    } catch {
-      // Ignorera cache-fel
-    }
-    return undefined;
+      return undefined;
   }, [user?.id]);
 
   const { data: interviews = [], isLoading } = useQuery({
@@ -252,8 +255,8 @@ export const useCandidateInterviews = () => {
     },
     enabled: !!user?.id,
     retry: 0,
-    staleTime: Infinity, // Bakgrundssynk hanterar uppdateringar - ingen automatisk refetch
-    gcTime: 10 * 60 * 1000, // Behåll i minnet 10 min
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    gcTime: Infinity, // Keep in cache permanently during session
     initialData: getInitialData, // Använd initialData istället för placeholderData
     initialDataUpdatedAt: () => {
       // Om vi har cache, sätt "gammalt" timestamp för att trigga bakgrunds-refetch
