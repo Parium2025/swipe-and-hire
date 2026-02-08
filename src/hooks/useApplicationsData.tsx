@@ -386,7 +386,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
       return lastPage.hasMore ? allPages.length : undefined;
     },
     enabled: !!user,
-    staleTime: 0, // Always refetch for fresh data - background loading ensures instant display
+    staleTime: 2 * 60 * 1000, // 2 minutes — realtime handles live updates
     gcTime: 10 * 60 * 1000,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
