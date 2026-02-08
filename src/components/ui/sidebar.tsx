@@ -193,16 +193,18 @@ const Sidebar = React.forwardRef<
     if (isMobile) {
       return (
         <>
-          {/* Overlay – always mounted, visibility controlled via CSS */}
+          {/* Overlay – always mounted, visibility controlled via CSS.
+              Extends below viewport (-bottom-6) to prevent black gaps on iOS. */}
           <div
             className={cn(
-              "fixed inset-0 z-50 bg-black/80 transition-opacity duration-300",
+              "fixed inset-x-0 top-0 -bottom-6 z-50 bg-black/80 transition-opacity duration-300",
               openMobile ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
             onClick={() => setOpenMobile(false)}
             aria-hidden="true"
           />
           {/* Sidebar panel – always mounted, slides via CSS transform.
+              Extends below viewport (-bottom-6) to avoid black gap on iOS.
               NOTE: We intentionally do NOT merge the parent Sidebar's className here
               because it contains bg-transparent which would override our gradient. */}
           <div
@@ -210,7 +212,7 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             data-mobile="true"
             className={cn(
-              "fixed inset-y-0 z-50 flex h-full w-[--sidebar-width] flex-col bg-gradient-parium p-0 text-sidebar-foreground shadow-lg transition-transform duration-300 ease-in-out will-change-transform",
+              "fixed top-0 -bottom-6 z-50 flex w-[--sidebar-width] flex-col bg-gradient-parium p-0 pb-6 text-sidebar-foreground shadow-lg transition-transform duration-300 ease-in-out will-change-transform",
               side === "left"
                 ? (openMobile ? "left-0 translate-x-0" : "left-0 -translate-x-full")
                 : (openMobile ? "right-0 translate-x-0" : "right-0 translate-x-full")
