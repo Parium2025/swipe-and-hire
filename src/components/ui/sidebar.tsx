@@ -192,21 +192,46 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
+        <>
+          {/* Overlay – always mounted, visibility controlled via CSS */}
+          <div
+            className={cn(
+              "fixed inset-0 z-50 bg-black/80 transition-opacity duration-300",
+              openMobile ? "opacity-100" : "opacity-0 pointer-events-none"
+            )}
+            onClick={() => setOpenMobile(false)}
+            aria-hidden="true"
+          />
+          {/* Sidebar panel – always mounted, slides via CSS transform */}
+          <div
+            ref={ref}
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-gradient-parium p-0 text-sidebar-foreground [&>button]:hidden"
+            className={cn(
+              "fixed inset-y-0 z-50 flex h-full w-[--sidebar-width] flex-col bg-gradient-parium p-0 text-sidebar-foreground shadow-lg transition-transform duration-300 ease-in-out will-change-transform",
+              side === "left"
+                ? (openMobile ? "left-0 translate-x-0" : "left-0 -translate-x-full")
+                : (openMobile ? "right-0 translate-x-0" : "right-0 translate-x-full"),
+              className
+            )}
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
-            side={side}
+            {...props}
           >
+            {/* Close button */}
+            <button
+              onClick={() => setOpenMobile(false)}
+              className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-colors outline-none focus:outline-none"
+            >
+              <PanelLeft className="h-4 w-4 text-white" />
+              <span className="sr-only">Close</span>
+            </button>
             <div className="flex h-full w-full flex-col">{children}</div>
-          </SheetContent>
-        </Sheet>
+          </div>
+        </>
       )
     }
 

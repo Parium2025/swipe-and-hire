@@ -11,7 +11,7 @@ import { useJobsData } from '@/hooks/useJobsData';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
-import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
+
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useDevice } from '@/hooks/use-device';
@@ -486,8 +486,6 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
   // Mobile/Tablet layout with sidebar
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
-      {/* Persistent logo preloader — always mounted outside Sheet to prevent flash on sidebar open */}
-      <img src={authLogoDataUri} alt="" aria-hidden="true" decoding="sync" loading="eager" className="fixed -top-[9999px] -left-[9999px] w-px h-px pointer-events-none" />
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
