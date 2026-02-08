@@ -272,7 +272,7 @@ const EmployerDashboard = memo(() => {
         <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
           {/* Desktop: Table view */}
           <div className="hidden md:block">
-            <div className="w-full">
+            <div className="w-full" style={{ contain: 'layout style' }}>
               <Table className="w-full table-fixed">
                 <TableHeader>
                   <TableRow className="border-white/20 hover:bg-transparent">
@@ -337,49 +337,50 @@ const EmployerDashboard = memo(() => {
                       return (
                       <TableRow 
                         key={job.id}
-                        className={`group border-white/10 cursor-pointer transition-colors ${
+                        className={`group border-white/10 cursor-pointer transition-[background-color] duration-150 ${
                           isExpired 
                             ? "hover:bg-red-500/10" 
                             : isDraft 
                               ? "hover:bg-amber-500/10"
                               : "hover:bg-green-500/10"
                         }`}
+                        style={{ contain: 'layout style paint' }}
                         onClick={() => handleJobRowClick(job as JobPosting)}
                         onMouseEnter={() => job.is_active && prefetchJob(job.id)}
                         onMouseLeave={cancelPrefetch}
                       >
-                        <TableCell className="font-medium text-white text-center px-2 py-3 overflow-hidden">
-                          <JobTitleCell title={job.title} employmentType={job.employment_type} />
-                        </TableCell>
-                        <TableCell className="text-center px-2 py-3">
-                          <div className="flex flex-col items-center gap-0.5">
-                            {job.is_active ? (
-                              isJobExpiredCheck(job.created_at, job.expires_at) ? (
-                               <Badge variant="glass" className="whitespace-nowrap text-xs transition-all duration-300 bg-red-500/60 border-red-400/60 text-white group-hover:backdrop-brightness-90 hover:bg-red-500/70 hover:backdrop-brightness-110">
-                                  Utgången
-                                </Badge>
-                              ) : (
-                                <Badge variant="glass" className="text-xs transition-all duration-300 bg-green-500/60 border-green-500/60 text-white group-hover:backdrop-brightness-90 hover:bg-green-500/70 hover:backdrop-brightness-110">
-                                  Aktiv
-                                </Badge>
-                              )
-                            ) : (
-                              <Badge variant="glass" className="text-xs transition-all duration-300 bg-yellow-500/60 border-yellow-500/60 text-white group-hover:backdrop-brightness-90 hover:bg-yellow-500/70 hover:backdrop-brightness-110">
-                                Utkast
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center px-2 py-3">
-                          <Badge variant="glass" className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-purple-500/30 hover:border-purple-500/50 hover:backdrop-brightness-110 hover:scale-[1.03]">
-                            {job.views_count || 0}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center px-2 py-3">
-                          <Badge variant="glass" className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-blue-500/30 hover:border-blue-500/50 hover:backdrop-brightness-110 hover:scale-[1.03]">
-                            {job.applications_count || 0}
-                          </Badge>
-                        </TableCell>
+                         <TableCell className="font-medium text-white text-center px-2 py-3 overflow-hidden">
+                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
+                         </TableCell>
+                         <TableCell className="text-center px-2 py-3">
+                           <div className="flex flex-col items-center gap-0.5">
+                             {job.is_active ? (
+                               isJobExpiredCheck(job.created_at, job.expires_at) ? (
+                                <Badge variant="glass" className="whitespace-nowrap text-xs bg-red-500/60 border-red-400/60 text-white">
+                                   Utgången
+                                 </Badge>
+                               ) : (
+                                 <Badge variant="glass" className="text-xs bg-green-500/60 border-green-500/60 text-white">
+                                   Aktiv
+                                 </Badge>
+                               )
+                             ) : (
+                               <Badge variant="glass" className="text-xs bg-yellow-500/60 border-yellow-500/60 text-white">
+                                 Utkast
+                               </Badge>
+                             )}
+                           </div>
+                         </TableCell>
+                         <TableCell className="text-center px-2 py-3">
+                           <Badge variant="glass" className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs">
+                             {job.views_count || 0}
+                           </Badge>
+                         </TableCell>
+                         <TableCell className="text-center px-2 py-3">
+                           <Badge variant="glass" className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
+                             {job.applications_count || 0}
+                           </Badge>
+                         </TableCell>
                         <TableCell className="text-white text-center px-2 py-3">
                           <div className="flex items-center justify-center gap-1 text-sm">
                             <MapPin size={12} className="flex-shrink-0" />
@@ -427,14 +428,13 @@ const EmployerDashboard = memo(() => {
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  // For drafts, use handleEditDraft to open the wizard
                                   if (!job.is_active) {
                                     handleEditDraft(job as JobPosting);
                                   } else {
                                     handleEditJob(job as any);
                                   }
                                 }}
-                                className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-brightness-110 active:scale-95"
+                                className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 border-white/20 text-white transition-[background-color,border-color] duration-150 hover:bg-white/15 hover:border-white/50 active:scale-95"
                               >
                                 <Edit size={14} />
                               </button>
@@ -444,7 +444,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleDeleteClick(job as any);
                               }}
-                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 hover:backdrop-brightness-110 active:scale-95"
+                              className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 border-white/20 text-white transition-[background-color,border-color,color] duration-150 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 active:scale-95"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -522,8 +522,8 @@ const EmployerDashboard = memo(() => {
               <>
                 <div ref={listTopRef} />
                 <div className="rounded-none bg-transparent ring-0 shadow-none">
-                  <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]">
-                    <div className="space-y-2 px-2 py-2 pb-24">
+                  <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]" style={{ willChange: 'scroll-position' }}>
+                    <div className="space-y-2 px-2 py-2 pb-24" style={{ contain: 'layout style' }}>
                       {pageJobs.map((job) => (
                         <MobileJobCard
                           key={job.id}

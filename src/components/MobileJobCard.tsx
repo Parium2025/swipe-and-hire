@@ -46,13 +46,14 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
 
   return (
     <Card 
-      className={`group bg-transparent touch-border-white shadow-none min-h-[120px] cursor-pointer transition-all duration-150 active:scale-[0.98] ${
+      className={`group bg-transparent touch-border-white shadow-none min-h-[120px] cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] ${
         jobIsExpired 
           ? "hover:bg-red-500/10 hover:border-red-500/30 active:bg-red-500/15" 
           : isDraft 
             ? "hover:bg-amber-500/10 hover:border-amber-500/30 active:bg-amber-500/15"
             : "hover:bg-white/5 hover:border-white/50 active:bg-white/10"
       }`}
+      style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 180px' } as React.CSSProperties}
       onClick={handleCardClick}
       onTouchStart={handleTouchStart}
     >
@@ -66,7 +67,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
             {job.employment_type && (
               <Badge 
                 variant="glass" 
-                className="mt-1 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-blur-sm hover:backdrop-brightness-110"
+                className="mt-1 text-xs"
               >
                 {getEmploymentTypeLabel(job.employment_type)}
               </Badge>
@@ -77,15 +78,15 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
         {/* Status Badge */}
         <div className="flex flex-col items-start gap-0.5">
           {jobIsExpired ? (
-            <Badge variant="glassDestructive" className="px-3 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:backdrop-brightness-110">
+            <Badge variant="glassDestructive" className="px-3 text-xs">
               Utgången
             </Badge>
           ) : job.is_active ? (
-            <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:backdrop-brightness-110">
+            <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
               Aktiv
             </Badge>
           ) : (
-            <Badge variant="glass" className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-amber-500/30 hover:backdrop-brightness-110">
+            <Badge variant="glass" className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
               Utkast
             </Badge>
           )}
@@ -155,14 +156,13 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                // For drafts, use onEditDraft to open the wizard
                 if (!job.is_active && onEditDraft) {
                   onEditDraft(job);
                 } else {
                   onEdit(job);
                 }
               }}
-              className="flex-1 h-11 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-blue-500/20 hover:border-blue-500/40 hover:backdrop-brightness-110"
+              className="flex-1 h-11 text-sm transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40"
             >
               <Edit className="h-4 w-4 mr-2" />
               Redigera
@@ -175,7 +175,7 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
               e.stopPropagation();
               onDelete(job);
             }}
-            className={`${jobIsExpired ? 'w-full' : 'flex-1'} h-11 text-sm transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/20 hover:border-red-500/40 hover:backdrop-brightness-110`}
+            className={`${jobIsExpired ? 'w-full' : 'flex-1'} h-11 text-sm transition-[background-color,border-color] duration-150 hover:bg-red-500/20 hover:border-red-500/40`}
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Ta bort
