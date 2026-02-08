@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { preloadImages } from "@/lib/serviceWorkerManager";
+import pariumLogoRings from "@/assets/parium-logo-rings.png";
 import {
   Sidebar,
   SidebarContent,
@@ -165,6 +166,24 @@ export function AppSidebar() {
       collapsible="icon"
     >
       <SidebarContent className="gap-0">
+        {/* Parium Logo — Home button */}
+        <div className={`px-4 pt-4 pb-2 ${collapsed ? 'flex justify-center' : ''}`}>
+          <button
+            onClick={() => handleNavigation('/home')}
+            className="flex items-center hover:opacity-80 transition-opacity"
+            aria-label="Gå till startsidan"
+          >
+            <div
+              role="img"
+              aria-label="Parium"
+              className={`bg-contain bg-left bg-no-repeat pointer-events-none ${collapsed ? 'h-8 w-8' : 'h-10 w-40'}`}
+              style={{ backgroundImage: `url(${pariumLogoRings})` }}
+            />
+          </button>
+        </div>
+
+        <SidebarSeparator className="bg-white/20 mx-4" />
+
         {/* User Profile Section - always mounted to preload, but only visible when not collapsed */}
         <div className={`p-4 ${collapsed ? 'hidden' : ''}`}>
           <div className="flex items-center gap-3">
