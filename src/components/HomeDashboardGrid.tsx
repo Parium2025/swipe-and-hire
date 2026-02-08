@@ -495,10 +495,10 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
               transition={{ duration: 0.2 }}
               className="flex flex-col items-center"
             >
-              <h3 className="text-sm font-semibold text-white leading-snug mb-0.5">
+              <h3 className="text-base font-semibold text-white leading-snug mb-0.5">
                 {currentStat.label}
               </h3>
-              <div className="text-2xl font-bold text-white mb-1">{currentStat.value}</div>
+              <div className="text-3xl font-bold text-white mb-1">{currentStat.value}</div>
               <p className="text-xs text-white">
                 {currentStat.description}
               </p>
