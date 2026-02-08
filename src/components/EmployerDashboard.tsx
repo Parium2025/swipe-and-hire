@@ -263,7 +263,7 @@ const EmployerDashboard = memo(() => {
       )}
 
       {/* Jobs Table */}
-      <Card className="bg-white/5 backdrop-blur-sm border-0">
+      <Card className="bg-white/5 border-0" style={{ contain: 'layout style' }}>
         <CardHeader className="hidden md:block md:p-4">
               <CardTitle className="text-sm text-white md:text-left">
                 Mina jobbannonser

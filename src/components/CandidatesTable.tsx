@@ -86,10 +86,10 @@ interface CandidatesTableProps {
 }
 
 const statusConfig = {
-  pending: { label: 'Ny', className: 'bg-blue-500/20 text-blue-300 border-blue-500/30 group-hover:backdrop-brightness-90 hover:bg-blue-500/30 hover:backdrop-brightness-110 transition-all duration-300' },
-  reviewing: { label: 'Granskas', className: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30 group-hover:backdrop-brightness-90 hover:bg-yellow-500/30 hover:backdrop-brightness-110 transition-all duration-300' },
-  accepted: { label: 'Accepterad', className: 'bg-green-500/20 text-green-300 border-green-500/30 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:backdrop-brightness-110 transition-all duration-300' },
-  rejected: { label: 'Avvisad', className: 'bg-red-500/20 text-red-300 border-red-500/30 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:backdrop-brightness-110 transition-all duration-300' },
+  pending: { label: 'Ny', className: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
+  reviewing: { label: 'Granskas', className: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' },
+  accepted: { label: 'Accepterad', className: 'bg-green-500/20 text-green-300 border-green-500/30' },
+  rejected: { label: 'Avvisad', className: 'bg-red-500/20 text-red-300 border-red-500/30' },
 };
 
 export function CandidatesTable({ 
@@ -352,7 +352,7 @@ export function CandidatesTable({
     <>
       {/* Bulk actions bar - only visible when in selection mode */}
       {selectionMode && (
-        <div className="mb-3 px-3 py-2 rounded-lg bg-white/[0.03] backdrop-blur-md border border-white/10 flex items-center justify-between">
+        <div className="mb-3 px-3 py-2 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-between">
           <span className="text-xs text-white">
             {selectedIds.size > 0 
               ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
@@ -403,7 +403,7 @@ export function CandidatesTable({
         </div>
       )}
 
-      <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
+      <div className="rounded-lg border border-white/10 bg-white/5 overflow-hidden" style={{ contain: 'layout style' }}>
         <Table>
           <TableHeader>
             <TableRow className="border-white/10">
@@ -471,10 +471,11 @@ export function CandidatesTable({
                 <TableRow
                   key={application.id}
                   className={cn(
-                    "group border-white/10 cursor-pointer transition-all duration-150",
+                    "group border-white/10 cursor-pointer transition-[background-color] duration-150",
                     !selectionMode && "hover:bg-white/5 active:bg-white/10",
                     isSelected && "bg-white/10"
                   )}
+                  style={{ contain: 'layout style paint' }}
                   onClick={() => handleRowClick(application)}
                   onMouseEnter={() => handlePrefetchCandidate(application)}
                 >
