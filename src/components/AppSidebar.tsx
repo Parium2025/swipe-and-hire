@@ -395,11 +395,11 @@ export function AppSidebar() {
         {/* Parium branding + Logout — pushed to bottom */}
         <div className="mt-auto flex flex-col items-center p-4">
           {!collapsed && (
-            <div className="flex items-center justify-center py-2">
+            <div className="flex items-center justify-center">
               <img
                 src="/parium-auth-logo.png"
                 alt="Parium"
-                className="w-64"
+                className="w-52"
                 draggable={false}
               />
             </div>
