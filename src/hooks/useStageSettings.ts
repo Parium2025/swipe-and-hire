@@ -88,8 +88,7 @@ interface DbStageSetting {
 
 // LocalStorage caching for instant display (no flash of default stages)
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
-// Extended to 7 days - background sync updates this frequently anyway
-const CACHE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+// No expiry — realtime subscriptions keep data fresh
 
 interface CachedStageSettings {
   settings: DbStageSetting[];
@@ -103,13 +102,7 @@ function readCachedSettings(userId: string): DbStageSetting[] | null {
     if (!raw) return null;
 
     const cached: CachedStageSettings = JSON.parse(raw);
-    const age = Date.now() - cached.timestamp;
-
-    if (age > CACHE_EXPIRY_MS) {
-      localStorage.removeItem(key);
-      return null;
-    }
-
+    // No expiry — realtime subscriptions keep data fresh
     return cached.settings;
   } catch (parseError) {
     console.warn('Failed to parse cached stage settings:', parseError);
