@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
@@ -192,48 +192,21 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <>
-          {/* Overlay – always mounted, visibility controlled via CSS.
-              Extends below viewport (-bottom-6) to prevent black gaps on iOS. */}
-          <div
-            className={cn(
-              "fixed inset-x-0 top-0 -bottom-6 z-50 bg-black/80 transition-opacity duration-300",
-              openMobile ? "opacity-100" : "opacity-0 pointer-events-none"
-            )}
-            onClick={() => setOpenMobile(false)}
-            aria-hidden="true"
-          />
-          {/* Sidebar panel – always mounted, slides via CSS transform.
-              Extends below viewport (-bottom-6) to avoid black gap on iOS.
-              NOTE: We intentionally do NOT merge the parent Sidebar's className here
-              because it contains bg-transparent which would override our gradient. */}
-          <div
-            ref={ref}
+        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+          <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className={cn(
-              "fixed top-0 -bottom-6 z-50 flex w-[--sidebar-width] flex-col bg-gradient-parium p-0 pb-6 text-sidebar-foreground shadow-lg transition-transform duration-300 ease-in-out will-change-transform",
-              side === "left"
-                ? (openMobile ? "left-0 translate-x-0" : "left-0 -translate-x-full")
-                : (openMobile ? "right-0 translate-x-0" : "right-0 translate-x-full")
-            )}
+            className="w-[--sidebar-width] bg-gradient-parium p-0 text-sidebar-foreground [&>button]:hidden"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
+            side={side}
           >
-            {/* Close button */}
-            <button
-              onClick={() => setOpenMobile(false)}
-              className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-colors outline-none focus:outline-none"
-            >
-              <PanelLeft className="h-4 w-4 text-white" />
-              <span className="sr-only">Close</span>
-            </button>
             <div className="flex h-full w-full flex-col">{children}</div>
-          </div>
-        </>
+          </SheetContent>
+        </Sheet>
       )
     }
 

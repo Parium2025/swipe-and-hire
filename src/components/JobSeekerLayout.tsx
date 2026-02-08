@@ -16,7 +16,6 @@ import { DevOfflineToggle } from '@/components/DevOfflineToggle';
 import { useMessagesPreload } from '@/hooks/useMessages';
 import { useMessagesBackgroundSync } from '@/hooks/useMessagesBackgroundSync';
 
-
 interface JobSeekerLayoutProps {
   children: ReactNode;
   developerView?: string;
@@ -80,9 +79,9 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
     return (
       <>
         {/* Fixed gradient background */}
-        <div className="fixed inset-x-0 top-0 -bottom-6 bg-parium-gradient pointer-events-none z-0" />
+        <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
         
-        <div className="h-[100dvh] flex flex-col w-full overflow-hidden relative">
+        <div className="h-screen flex flex-col w-full overflow-hidden relative">
           <AnimatedBackground showBubbles={false} />
           
           {/* Top Navigation for Desktop */}
@@ -123,11 +122,11 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
 
   // Mobile/Tablet layout with sidebar
   return (
-    <SidebarProvider defaultOpen={true} className="h-[100dvh] !min-h-0 overflow-hidden">
+    <SidebarProvider defaultOpen={true}>
       {/* Fixed gradient background - covers viewport */}
-      <div className="fixed inset-x-0 top-0 -bottom-6 bg-parium-gradient pointer-events-none z-0" />
+      <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
-      <div className="h-full flex w-full overflow-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="h-screen flex w-full overflow-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">

@@ -15,13 +15,12 @@ import authLogoDataUri from "./parium-auth-logo.png?inline";
 
 interface AuthLogoProps {
   className?: string;
-  style?: React.CSSProperties;
 }
 
 // Original PNG is 1080x432 (2.5 aspect ratio)
 const AUTH_LOGO_ASPECT = 1080 / 432;
 
-export function AuthLogoInline({ className, style }: AuthLogoProps) {
+export function AuthLogoInline({ className }: AuthLogoProps) {
   return (
     <div
       className={cn(
@@ -32,7 +31,6 @@ export function AuthLogoInline({ className, style }: AuthLogoProps) {
         aspectRatio: String(AUTH_LOGO_ASPECT),
         backgroundImage: `url(${authLogoDataUri})`,
         willChange: "transform",
-        ...style,
       }}
       data-auth-logo="true"
       aria-label="Parium"
