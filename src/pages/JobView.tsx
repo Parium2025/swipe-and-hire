@@ -356,7 +356,7 @@ const JobView = () => {
   };
 
   return (
-    <div ref={contentRef} className="min-h-screen bg-parium-gradient animate-fade-in overflow-y-auto">
+    <div ref={contentRef} className="h-screen overflow-y-auto bg-parium-gradient animate-fade-in">
        <div className="responsive-container-wide py-4">
         {/* Combined header: Tillbaka + Spara + Företag på samma rad */}
         <div className="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
