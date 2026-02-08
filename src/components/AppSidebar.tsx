@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { preloadImages } from "@/lib/serviceWorkerManager";
-import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
+
 
 import {
   Sidebar,
@@ -393,18 +393,8 @@ export function AppSidebar() {
 
         <SidebarSeparator className="bg-white/20 mx-4" />
 
-        {/* Parium branding + Logout — pushed to bottom */}
-        <div className="mt-auto flex-1 flex flex-col items-center justify-end p-4">
-          <div className={`flex-1 flex items-center justify-center ${collapsed ? 'opacity-0 invisible h-0 overflow-hidden' : ''}`}>
-            <img 
-              src={authLogoDataUri} 
-              alt="Parium" 
-              className="w-full max-w-[13rem] h-auto pointer-events-none transform-gpu" 
-              decoding="sync"
-              loading="eager"
-              draggable={false}
-            />
-          </div>
+        {/* Logout button — pushed to bottom */}
+        <div className="mt-auto p-4">
           <Button
             onClick={signOut}
             variant="glass"
