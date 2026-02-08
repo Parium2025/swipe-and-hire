@@ -1208,6 +1208,48 @@ All colors MUST be HSL.
   }
 }
 
+/* ============================================
+   WEATHER EFFECTS — Pure CSS keyframes
+   Run on the GPU compositor thread so the JS main
+   thread stays free for touch scrolling on mobile.
+   ============================================ */
+
+/* Stars twinkle: opacity oscillates between custom-property values */
+@keyframes weather-twinkle {
+  0%, 100% { opacity: var(--star-max, 0.5); }
+  50% { opacity: var(--star-min, 0.2); }
+}
+
+/* Shooting star: diagonal streak */
+@keyframes weather-shooting-star {
+  0%   { opacity: 0;   transform: translate(0, 0); }
+  12%  { opacity: 0.7; }
+  40%  { opacity: 0.5; }
+  70%  { opacity: 0.2; }
+  100% { opacity: 0;   transform: translate(-1500px, 1000px); }
+}
+
+/* Rain / thunder rain: vertical fall */
+@keyframes weather-rain {
+  from { transform: translateY(-5vh); }
+  to   { transform: translateY(115vh); }
+}
+
+/* Snow: fall + horizontal sway using custom property --sway */
+@keyframes weather-snow {
+  0%   { transform: translateY(-5vh) translateX(0) rotate(0deg); }
+  25%  { transform: translateY(25vh) translateX(var(--sway, 10px)) rotate(90deg); }
+  50%  { transform: translateY(52vh) translateX(0) rotate(180deg); }
+  75%  { transform: translateY(78vh) translateX(calc(var(--sway, 10px) * -1)) rotate(270deg); }
+  100% { transform: translateY(105vh) translateX(0) rotate(360deg); }
+}
+
+/* Cloud drift: left to right across viewport */
+@keyframes weather-cloud {
+  from { transform: translateX(-20vw); }
+  to   { transform: translateX(120vw); }
+}
+
 /* Sparkle/glitter animation for stars */
 @keyframes sparkle {
   0%, 100% {
