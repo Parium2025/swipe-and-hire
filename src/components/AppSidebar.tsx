@@ -396,8 +396,8 @@ export function AppSidebar() {
         {/* Parium branding + Logout — pushed to bottom */}
         <div className="mt-auto flex-1 flex flex-col items-center justify-end p-4">
           {!collapsed && (
-            <div className="flex-1 flex items-center justify-center">
-              <AuthLogoInline className="w-52 h-14" />
+            <div className="flex-1 flex items-center justify-center" style={{ maxWidth: 'none' }}>
+              <AuthLogoInline className="h-20" style={{ width: '14rem', maxWidth: 'none' }} />
             </div>
           )}
           <Button
