@@ -397,7 +397,7 @@ export function AppSidebar() {
         <div className="mt-auto flex-1 flex flex-col items-center justify-end p-4">
           {!collapsed && (
             <div className="flex-1 flex items-center justify-center">
-              <AuthLogoInline className="w-52" />
+              <AuthLogoInline className="w-52 h-14" />
             </div>
           )}
           <Button
