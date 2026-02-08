@@ -132,12 +132,12 @@ export const useHrNews = () => {
   return useQuery({
     queryKey: ['hr-news'],
     queryFn: fetchRecentNews,
-    staleTime: 1000 * 60 * 5, // 5 minutes - check for new articles
-    gcTime: 1000 * 60 * 60, // 1 hour in memory
+    staleTime: Infinity, // Content rarely changes — manual refetch if needed
+    gcTime: Infinity,
     retry: 2,
     retryDelay: 1000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
     // Instant load from localStorage cache
     initialData: () => readCache() ?? undefined,
     initialDataUpdatedAt: () => {
