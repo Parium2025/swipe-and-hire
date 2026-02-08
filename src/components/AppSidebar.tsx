@@ -395,7 +395,7 @@ export function AppSidebar() {
         {/* Parium branding + Logout — pushed to bottom */}
         <div className="mt-auto flex flex-col items-center p-4">
           {!collapsed && (
-            <div className="flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center">
               <img
                 src="/parium-auth-logo.png"
                 alt="Parium"
