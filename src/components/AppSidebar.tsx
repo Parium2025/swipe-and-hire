@@ -395,11 +395,13 @@ export function AppSidebar() {
 
         {/* Parium branding + Logout — pushed to bottom */}
         <div className="mt-auto flex-1 flex flex-col items-center justify-end p-4">
-          <div className={`flex-1 flex items-center justify-center transition-opacity duration-200 ${collapsed ? 'opacity-0 invisible h-0 overflow-hidden' : 'opacity-100'}`}>
+          <div className={`flex-1 flex items-center justify-center ${collapsed ? 'opacity-0 invisible h-0 overflow-hidden' : ''}`}>
             <img 
               src={authLogoDataUri} 
               alt="Parium" 
-              className="w-full max-w-[13rem] h-auto pointer-events-none" 
+              className="w-full max-w-[13rem] h-auto pointer-events-none transform-gpu" 
+              decoding="sync"
+              loading="eager"
               draggable={false}
             />
           </div>
