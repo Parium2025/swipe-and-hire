@@ -42,10 +42,8 @@ function getMessagesFromCache(): { inbox: Message[]; sent: Message[]; timestamp:
     const cached = localStorage.getItem(MESSAGES_CACHE_KEY);
     if (cached) {
       const parsed = JSON.parse(cached);
-      // Cache valid for 5 minutes
-      if (Date.now() - parsed.timestamp < 5 * 60 * 1000) {
-        return parsed;
-      }
+      // No expiry — realtime subscriptions keep data fresh
+      return parsed;
     }
   } catch {
     // Ignore cache errors

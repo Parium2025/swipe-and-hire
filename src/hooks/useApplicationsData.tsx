@@ -38,7 +38,7 @@ const PAGE_SIZE = 25;
 const MAX_AUTO_PREFETCH_PAGES = 20; // 500 kandidater innan "Vill du fortsätta?"
 const SNAPSHOT_KEY_PREFIX = 'applications_snapshot_';
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
-const SNAPSHOT_EXPIRY_MS = 5 * 60 * 1000; // 5 min
+// No expiry — realtime subscriptions + background refetch keep data fresh
 
 interface SnapshotData {
   items: ApplicationData[];
@@ -89,15 +89,7 @@ const readSnapshot = (userId: string): ApplicationData[] => {
     if (!raw) return [];
 
     const snapshot: SnapshotData = JSON.parse(raw);
-    const age = Date.now() - snapshot.timestamp;
-
-    // Extended expiry for instant display - background fetch will update anyway
-    // 30 min expiry instead of 5 min to ensure returning users see data instantly
-    const EXTENDED_EXPIRY_MS = 30 * 60 * 1000;
-    if (age > EXTENDED_EXPIRY_MS) {
-      localStorage.removeItem(key);
-      return [];
-    }
+    // No expiry — realtime subscriptions + background refetch keep data fresh
 
     // Invalidate snapshot if it contains legacy profile-media URLs (old format).
     // Those URLs are no longer a reliable source of truth; we only store storage paths.

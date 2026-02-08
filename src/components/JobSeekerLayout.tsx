@@ -70,7 +70,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
           applications_count: job.applications_count || 0,
         }));
       },
-      staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+      staleTime: Infinity,
     });
   }, [queryClient]);
 

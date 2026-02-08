@@ -157,7 +157,7 @@ export function useStageSettings() {
       return settings;
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000,
+    staleTime: Infinity,
     // Use cached data as initial data for instant display
     initialData: () => {
       if (!user) return undefined;

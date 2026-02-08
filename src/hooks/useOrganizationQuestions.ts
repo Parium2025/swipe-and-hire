@@ -114,7 +114,7 @@ export const useOrganizationQuestions = () => {
       return result;
     },
     enabled: !!user,
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: Infinity,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (!user) return undefined;

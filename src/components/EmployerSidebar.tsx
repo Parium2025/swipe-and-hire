@@ -407,7 +407,7 @@ export function EmployerSidebar() {
 
         return { items, hasMore: items.length === 25 };
       },
-      staleTime: 2 * 60 * 1000,
+      staleTime: Infinity,
     });
   };
 

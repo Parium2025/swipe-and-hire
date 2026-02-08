@@ -282,7 +282,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
       return count || 0;
     },
     enabled: !!user?.id && activeJobIds.length > 0,
-    staleTime: 5000,
+    staleTime: Infinity,
   });
   
   // Query for saved favorites count on user's active jobs
@@ -302,7 +302,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
       return count || 0;
     },
     enabled: !!user?.id && activeJobIds.length > 0,
-    staleTime: 5000,
+    staleTime: Infinity,
   });
   
   // Query for unread messages count
@@ -323,7 +323,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
       return count || 0;
     },
     enabled: !!user?.id,
-    staleTime: 5000,
+    staleTime: Infinity,
   });
 
   // Real-time subscriptions for instant updates
@@ -587,7 +587,7 @@ const NotesCard = memo(() => {
       return data;
     },
     enabled: !!user?.id,
-    staleTime: 30000,
+    staleTime: Infinity,
   });
 
   // Sync server value into cache (and editor) once it arrives
