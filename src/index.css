@@ -258,13 +258,13 @@ All colors MUST be HSL.
     @apply border-border;
     box-sizing: border-box;
     max-width: 100%;
-  }
-
-  /* Crisp text only on headings – applying to every element is too expensive on mobile */
-  h1, h2, h3, h4, h5, h6 {
+    /* Crisp text rendering */
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prevent subpixel blur */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
   
   /* Prevent page horizontal scroll without clipping children */
@@ -1134,41 +1134,11 @@ All colors MUST be HSL.
 
 /* Mobile Scroll Optimization - Premium Touch Experience */
 @media (max-width: 768px) {
-  /* Remove expensive backdrop effects on mobile - invisible at 2px but costly per element */
-  .backdrop-blur-\[2px\],
-  [class*="backdrop-blur"] {
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
+  /* Apply to all elements for consistent mobile scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
   }
-
-  /* Neutralise backdrop-brightness hover effects - only trigger on desktop hover */
-  [class*="backdrop-brightness"] {
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-  }
-
-  /* Replace transition-all with specific properties to reduce scroll computation */
-  [class*="transition-all"] {
-    transition-property: background-color, border-color, color, opacity, transform !important;
-  }
-
-  /* Reduce heavy decorative blur on mobile - saves GPU compositing layers */
-  .blur-2xl {
-    filter: blur(12px) !important; /* 40px → 12px: still visible, much cheaper */
-  }
-  .blur-3xl {
-    filter: blur(16px) !important; /* 64px → 16px */
-  }
-  .blur-\[120px\], .blur-\[100px\], .blur-\[80px\] {
-    filter: blur(20px) !important;
-  }
-
-  /* Add layout containment to card elements to isolate scroll repaints */
-  .dashboard-card-height {
-    contain: layout style paint;
-  }
-
-  /* Only apply momentum scrolling to actual scroll containers, not every element */
   
   /* Scroll containers with native momentum */
   .scroll-container {
@@ -1206,48 +1176,6 @@ All colors MUST be HSL.
     background-color: rgba(255, 255, 255, 0.1) !important;
     background: rgba(255, 255, 255, 0.1) !important;
   }
-}
-
-/* ============================================
-   WEATHER EFFECTS — Pure CSS keyframes
-   Run on the GPU compositor thread so the JS main
-   thread stays free for touch scrolling on mobile.
-   ============================================ */
-
-/* Stars twinkle: opacity oscillates between custom-property values */
-@keyframes weather-twinkle {
-  0%, 100% { opacity: var(--star-max, 0.5); }
-  50% { opacity: var(--star-min, 0.2); }
-}
-
-/* Shooting star: diagonal streak */
-@keyframes weather-shooting-star {
-  0%   { opacity: 0;   transform: translate(0, 0); }
-  12%  { opacity: 0.7; }
-  40%  { opacity: 0.5; }
-  70%  { opacity: 0.2; }
-  100% { opacity: 0;   transform: translate(-1500px, 1000px); }
-}
-
-/* Rain / thunder rain: vertical fall */
-@keyframes weather-rain {
-  from { transform: translateY(-5vh); }
-  to   { transform: translateY(115vh); }
-}
-
-/* Snow: fall + horizontal sway using custom property --sway */
-@keyframes weather-snow {
-  0%   { transform: translateY(-5vh) translateX(0) rotate(0deg); }
-  25%  { transform: translateY(25vh) translateX(var(--sway, 10px)) rotate(90deg); }
-  50%  { transform: translateY(52vh) translateX(0) rotate(180deg); }
-  75%  { transform: translateY(78vh) translateX(calc(var(--sway, 10px) * -1)) rotate(270deg); }
-  100% { transform: translateY(105vh) translateX(0) rotate(360deg); }
-}
-
-/* Cloud drift: left to right across viewport */
-@keyframes weather-cloud {
-  from { transform: translateX(-20vw); }
-  to   { transform: translateX(120vw); }
 }
 
 /* Sparkle/glitter animation for stars */

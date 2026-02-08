@@ -392,18 +392,8 @@ export function AppSidebar() {
 
         <SidebarSeparator className="bg-white/20 mx-4" />
 
-        {/* Parium branding + Logout — pushed to bottom */}
-        <div className="mt-auto flex-1 flex flex-col items-center justify-end p-4">
-          {!collapsed && (
-            <div className="flex-1 flex items-center justify-center">
-              <img
-                src="/parium-auth-logo.png"
-                alt="Parium"
-                className="w-52"
-                draggable={false}
-              />
-            </div>
-          )}
+        {/* Logout Button */}
+        <div className="mt-auto p-4">
           <Button
             onClick={signOut}
             variant="glass"
