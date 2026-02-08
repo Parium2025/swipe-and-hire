@@ -44,10 +44,10 @@ export const AnimatedBackground = memo(({ showBubbles = true, variant = 'viewpor
       )}
       
       {/* Decorative glow effect in bottom right corner - always shown */}
-      <div className="absolute -right-32 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 opacity-10 sm:opacity-15 md:opacity-40 lg:opacity-60 pointer-events-none pwa-bottom-glow">
-        <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
-        <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
-        <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
+      <div className="absolute -right-32 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 opacity-10 sm:opacity-15 md:opacity-40 lg:opacity-60 pointer-events-none pwa-bottom-glow" style={{ contain: 'strict', willChange: 'transform' }}>
+        <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[60px] md:blur-[120px]"></div>
+        <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[50px] md:blur-[100px]"></div>
+        <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[40px] md:blur-[80px]"></div>
       </div>
     </div>
   );
