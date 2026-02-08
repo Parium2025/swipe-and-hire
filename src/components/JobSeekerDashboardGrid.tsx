@@ -904,8 +904,8 @@ const JobSeekerInterviewsCard = memo(() => {
         {/* Content */}
         <div className="flex-1 overflow-hidden">
           {upcomingInterviews.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center h-full">
-              <Calendar className="h-8 w-8 text-white/60 mb-2" />
+            <div className="flex-1 flex flex-col items-center justify-center text-center">
+              <Calendar className="h-8 w-8 text-white mb-2" />
               <p className="text-sm font-medium text-white">Inga bokade intervjuer</p>
               <p className="text-xs text-white mt-1">Fortsätt söka jobb!</p>
             </div>
