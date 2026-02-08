@@ -102,8 +102,10 @@ export function useTeamMembers() {
       return members;
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes in memory
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     // Instant load from localStorage cache
     initialData: () => {
       if (!user) return undefined;

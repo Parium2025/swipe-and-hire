@@ -282,8 +282,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       return (data || []) as SearchJob[];
     },
     enabled,
-    staleTime: 30000, // 30 seconds - searches are frequently updated
-    gcTime: 5 * 60 * 1000, // 5 minutes cache
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    gcTime: Infinity,
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
 
@@ -375,8 +376,8 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       return result;
     },
     enabled: employerIds.length > 0,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    gcTime: Infinity,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (employerIds.length === 0) return {};
