@@ -386,10 +386,10 @@ export const useApplicationsData = (searchQuery: string = '') => {
       return lastPage.hasMore ? allPages.length : undefined;
     },
     enabled: !!user,
-    staleTime: 2 * 60 * 1000, // 2 minutes — realtime handles live updates
-    gcTime: 10 * 60 * 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     initialData: () => {
       if (!user) return undefined;
       

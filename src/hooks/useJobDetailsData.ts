@@ -205,18 +205,21 @@ export function useJobDetailsData(jobId: string | undefined) {
     queryKey: ['job-details', jobId],
     queryFn: () => fetchJobDetails(jobId!, user!.id),
     enabled: !!jobId && !!user,
-    staleTime: 30 * 1000, // 30 seconds
-    gcTime: 5 * 60 * 1000, // 5 minutes cache
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
-  // Applications query - cached and shows stale data while refetching
+  // Applications query - cached permanently, realtime handles updates
   const applicationsQuery = useQuery({
     queryKey: ['job-applications', jobId],
     queryFn: () => fetchApplications(jobId!, user!.id),
     enabled: !!jobId && !!user,
-    staleTime: 15 * 1000, // 15 seconds - show cached data for 15s
-    gcTime: 10 * 60 * 1000, // 10 minutes cache
-    refetchOnWindowFocus: false, // Don't refetch on tab switch
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Real-time subscription for application updates AND criterion results
@@ -314,11 +317,11 @@ export function prefetchJobDetails(jobId: string, userId: string, queryClient: R
   queryClient.prefetchQuery({
     queryKey: ['job-details', jobId],
     queryFn: () => fetchJobDetails(jobId, userId),
-    staleTime: 30 * 1000,
+    staleTime: Infinity,
   });
   queryClient.prefetchQuery({
     queryKey: ['job-applications', jobId],
     queryFn: () => fetchApplications(jobId, userId),
-    staleTime: 15 * 1000,
+    staleTime: Infinity,
   });
 }
