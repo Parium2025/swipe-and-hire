@@ -1152,6 +1152,22 @@ All colors MUST be HSL.
     transition-property: background-color, border-color, color, opacity, transform !important;
   }
 
+  /* Reduce heavy decorative blur on mobile - saves GPU compositing layers */
+  .blur-2xl {
+    filter: blur(12px) !important; /* 40px → 12px: still visible, much cheaper */
+  }
+  .blur-3xl {
+    filter: blur(16px) !important; /* 64px → 16px */
+  }
+  .blur-\[120px\], .blur-\[100px\], .blur-\[80px\] {
+    filter: blur(20px) !important;
+  }
+
+  /* Add layout containment to card elements to isolate scroll repaints */
+  .dashboard-card-height {
+    contain: layout style paint;
+  }
+
   /* Only apply momentum scrolling to actual scroll containers, not every element */
   
   /* Scroll containers with native momentum */

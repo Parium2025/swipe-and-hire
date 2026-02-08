@@ -1,5 +1,6 @@
 import { memo, useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useDevice } from '@/hooks/use-device';
 
 interface WeatherEffectsProps {
   weatherCode: number | null;
@@ -10,63 +11,53 @@ interface WeatherEffectsProps {
 type EffectType = 'rain' | 'snow' | 'thunder' | 'cloudy' | null;
 
 const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: WeatherEffectsProps) => {
+  const device = useDevice();
+  const isMobile = device === 'mobile';
+
   // Determine effect type based on weather code
   const effectType = useMemo((): EffectType => {
     if (!weatherCode || isLoading) return null;
     
-    // Fog: 45, 48 - No visual effect, just cloud emoji
-    // Cloudy: 3 (overcast)
-    if (weatherCode === 3) {
-      return 'cloudy';
-    }
-    // All rain types: 51-67 (drizzle/rain), 80-82 (showers)
-    if ((weatherCode >= 51 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) {
-      return 'rain';
-    }
-    // All snow types: 71-77 (snow), 85-86 (snow showers)
-    if ((weatherCode >= 71 && weatherCode <= 77) || (weatherCode >= 85 && weatherCode <= 86)) {
-      return 'snow';
-    }
-    // Thunder: 95-99
-    if (weatherCode >= 95 && weatherCode <= 99) {
-      return 'thunder';
-    }
+    if (weatherCode === 3) return 'cloudy';
+    if ((weatherCode >= 51 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) return 'rain';
+    if ((weatherCode >= 71 && weatherCode <= 77) || (weatherCode >= 85 && weatherCode <= 86)) return 'snow';
+    if (weatherCode >= 95 && weatherCode <= 99) return 'thunder';
     return null;
   }, [weatherCode, isLoading]);
 
-  // Show stars at evening when clear or mostly clear (codes 0, 1, 2)
   const showStars = isEvening && (weatherCode === 0 || weatherCode === 1 || weatherCode === 2);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {showStars && <StarsEffect />}
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" style={{ contain: 'strict' }}>
+      {showStars && <StarsEffect isMobile={isMobile} />}
       
-      {effectType === 'cloudy' && <CloudyEffect />}
-      {effectType === 'rain' && <RainEffect />}
-      {effectType === 'snow' && <SnowEffect />}
-      {effectType === 'thunder' && <ThunderEffect />}
+      {effectType === 'cloudy' && <CloudyEffect isMobile={isMobile} />}
+      {effectType === 'rain' && <RainEffect isMobile={isMobile} />}
+      {effectType === 'snow' && <SnowEffect isMobile={isMobile} />}
+      {effectType === 'thunder' && <ThunderEffect isMobile={isMobile} />}
     </div>
   );
 });
 
 WeatherEffects.displayName = 'WeatherEffects';
 
-// Stars Effect - White dots like a night sky with occasional shooting star
-// Stars are cached in sessionStorage to persist during navigation
+// Stars Effect - reduced count on mobile for performance
 const STARS_CACHE_KEY = 'parium_stars_config';
+const STARS_MOBILE_CACHE_KEY = 'parium_stars_config_mobile';
 
-const getOrCreateStars = () => {
+const getOrCreateStars = (isMobile: boolean) => {
+  const cacheKey = isMobile ? STARS_MOBILE_CACHE_KEY : STARS_CACHE_KEY;
+  const count = isMobile ? 20 : 50; // 60% fewer on mobile
+
   try {
-    const cached = sessionStorage.getItem(STARS_CACHE_KEY);
+    const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
-      return JSON.parse(cached);
+      const parsed = JSON.parse(cached);
+      if (parsed.length === count) return parsed;
     }
-  } catch {
-    // Ignore parse errors
-  }
+  } catch {}
   
-  // Generate new stars and cache them
-  const stars = Array.from({ length: 50 }).map((_, i) => ({
+  const stars = Array.from({ length: count }).map((_, i) => ({
     id: i,
     left: Math.random() * 100,
     top: Math.random() * 70,
@@ -77,19 +68,15 @@ const getOrCreateStars = () => {
   }));
   
   try {
-    sessionStorage.setItem(STARS_CACHE_KEY, JSON.stringify(stars));
-  } catch {
-    // Ignore storage errors
-  }
+    sessionStorage.setItem(cacheKey, JSON.stringify(stars));
+  } catch {}
   
   return stars;
 };
 
-const StarsEffect = memo(() => {
-  // Use cached stars - same configuration persists for entire session
-  const stars = useMemo(() => getOrCreateStars(), []);
+const StarsEffect = memo(({ isMobile }: { isMobile: boolean }) => {
+  const stars = useMemo(() => getOrCreateStars(isMobile), [isMobile]);
 
-  // Shooting star state with random start position
   const [shootingStar, setShootingStar] = useState<{
     active: boolean;
     startX: number;
@@ -99,29 +86,25 @@ const StarsEffect = memo(() => {
 
   useEffect(() => {
     const triggerShootingStar = () => {
-      // Random start position in upper right area
-      const startX = 5 + Math.random() * 40; // 5-45% from right
-      const startY = 3 + Math.random() * 25; // 3-28% from top
-      const size = 1 + Math.random() * 1.5; // Same size as stars (1-2.5px)
+      const startX = 5 + Math.random() * 40;
+      const startY = 3 + Math.random() * 25;
+      const size = 1 + Math.random() * 1.5;
       
       setShootingStar({ active: true, startX, startY, size });
-      
-      // Hide after animation completes (5 seconds)
-      setTimeout(() => {
-        setShootingStar(null);
-      }, 5000);
+      setTimeout(() => setShootingStar(null), 5000);
     };
 
-    // Random interval between shooting stars (25-50 seconds)
     const scheduleNext = () => {
-      const delay = 25000 + Math.random() * 25000;
+      // Longer intervals on mobile to reduce JS work
+      const delay = isMobile 
+        ? 40000 + Math.random() * 40000  
+        : 25000 + Math.random() * 25000;
       return setTimeout(() => {
         triggerShootingStar();
         scheduleNext();
       }, delay);
     };
 
-    // First shooting star after 10-20 seconds
     const initialTimeout = setTimeout(triggerShootingStar, 10000 + Math.random() * 10000);
     const intervalId = scheduleNext();
 
@@ -129,11 +112,10 @@ const StarsEffect = memo(() => {
       clearTimeout(initialTimeout);
       clearTimeout(intervalId);
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <>
-      {/* Static stars with subtle twinkle */}
       {stars.map((star) => (
         <motion.div
           key={star.id}
@@ -156,7 +138,6 @@ const StarsEffect = memo(() => {
         />
       ))}
 
-      {/* Shooting star - tiny dot like the stars, flies across entire sky */}
       {shootingStar?.active && (
         <motion.div
           className="absolute bg-white rounded-full"
@@ -186,13 +167,13 @@ const StarsEffect = memo(() => {
 StarsEffect.displayName = 'StarsEffect';
 
 
-// Cloudy Effect - Drifting clouds, appears already in progress
-const CloudyEffect = memo(() => {
+// Cloudy Effect - fewer clouds on mobile
+const CloudyEffect = memo(({ isMobile }: { isMobile: boolean }) => {
+  const count = isMobile ? 2 : 4;
   const clouds = useMemo(() => 
-    Array.from({ length: 4 }).map((_, i) => {
+    Array.from({ length: count }).map((_, i) => {
       const duration = 60 + Math.random() * 40;
-      // Start clouds at random positions across the screen
-      const initialX = Math.random() * 140 - 20; // -20vw to 120vw
+      const initialX = Math.random() * 140 - 20;
       return {
         id: i,
         top: 5 + i * 18 + Math.random() * 10,
@@ -202,7 +183,7 @@ const CloudyEffect = memo(() => {
         initialX,
       };
     }),
-  []);
+  [count]);
 
   return (
     <>
@@ -234,23 +215,23 @@ const CloudyEffect = memo(() => {
 
 CloudyEffect.displayName = 'CloudyEffect';
 
-// Rain Effect - Continuous rain, always falling from top
-const RainEffect = memo(() => {
+// Rain Effect - fewer drops on mobile
+const RainEffect = memo(({ isMobile }: { isMobile: boolean }) => {
+  const count = isMobile ? 15 : 35;
   const drops = useMemo(() => 
-    Array.from({ length: 35 }).map((_, i) => {
+    Array.from({ length: count }).map((_, i) => {
       const duration = 1.2 + Math.random() * 0.6;
-      // Stagger start times so drops are distributed across the fall cycle
-      const staggerDelay = (i / 35) * duration + Math.random() * 0.3;
+      const staggerDelay = (i / count) * duration + Math.random() * 0.3;
       return {
         id: i,
-        left: (i / 35) * 120 - 10,
+        left: (i / count) * 120 - 10,
         duration,
         delay: staggerDelay,
         height: 16 + Math.random() * 14,
         opacity: 0.35 + Math.random() * 0.25,
       };
     }),
-  []);
+  [count]);
 
   return (
     <>
@@ -283,14 +264,13 @@ const RainEffect = memo(() => {
 RainEffect.displayName = 'RainEffect';
 
 
-// Snow Effect - Continuous gentle snow, always falling from top
-const SnowEffect = memo(() => {
+// Snow Effect - fewer flakes on mobile
+const SnowEffect = memo(({ isMobile }: { isMobile: boolean }) => {
+  const count = isMobile ? 18 : 40;
   const flakes = useMemo(() => 
-    Array.from({ length: 40 }).map((_, i) => {
-      const duration = 12 + Math.random() * 6; // 12-18 seconds to fall
-      // Stagger start times so flakes are distributed across the fall cycle
-      // This creates the illusion of continuous snow without "popping"
-      const staggerDelay = (i / 40) * duration * 0.8 + Math.random() * 2;
+    Array.from({ length: count }).map((_, i) => {
+      const duration = 12 + Math.random() * 6;
+      const staggerDelay = (i / count) * duration * 0.8 + Math.random() * 2;
       return {
         id: i,
         left: Math.random() * 100,
@@ -301,7 +281,7 @@ const SnowEffect = memo(() => {
         swayAmount: 10 + Math.random() * 15,
       };
     }),
-  []);
+  [count]);
 
   return (
     <>
@@ -316,9 +296,9 @@ const SnowEffect = memo(() => {
             opacity: flake.opacity,
             filter: 'blur(0.5px)',
           }}
-          initial={{ y: '-5vh' }} // Always start above viewport
+          initial={{ y: '-5vh' }}
           animate={{
-            y: ['-5vh', '105vh'], // Fall from top to bottom
+            y: ['-5vh', '105vh'],
             x: [0, flake.swayAmount, 0, -flake.swayAmount, 0],
             rotate: [0, 180, 360],
           }}
@@ -352,41 +332,33 @@ const SnowEffect = memo(() => {
 SnowEffect.displayName = 'SnowEffect';
 
 
-// Thunder Effect - Single lightning bolt at random position
-const ThunderEffect = memo(() => {
-  // Rain drops - moderate intensity with strong wind
+// Thunder Effect - fewer rain drops on mobile
+const ThunderEffect = memo(({ isMobile }: { isMobile: boolean }) => {
+  const count = isMobile ? 18 : 40;
   const drops = useMemo(() => 
-    Array.from({ length: 40 }).map((_, i) => ({
+    Array.from({ length: count }).map((_, i) => ({
       id: i,
-      left: (i / 40) * 130 - 15, // Start further left for wind drift
+      left: (i / count) * 130 - 15,
       delay: Math.random() * 3,
       duration: 1.0 + Math.random() * 0.5,
       height: 15 + Math.random() * 12,
       width: 2,
       opacity: 0.35 + Math.random() * 0.25,
     })),
-  []);
+  [count]);
 
-  // Single lightning bolt with random position
   const [lightningState, setLightningState] = useState({
     position: 50,
     flash: false,
   });
   
   useEffect(() => {
-    // Create lightning flash
     const flash = () => {
-      // Random position for this flash
       const newPosition = 10 + Math.random() * 80;
-      
-      // Flash
       setLightningState({ position: newPosition, flash: true });
-      
-      // Quick off
       setTimeout(() => setLightningState(s => ({ ...s, flash: false })), 100);
     };
     
-    // Variable interval between lightning strikes (5-10 seconds)
     const scheduleNext = () => {
       const delay = 5000 + Math.random() * 5000;
       return setTimeout(() => {
@@ -395,7 +367,6 @@ const ThunderEffect = memo(() => {
       }, delay);
     };
     
-    // Initial flash after longer delay
     const initialTimeout = setTimeout(flash, 3000);
     const intervalId = scheduleNext();
     
@@ -407,7 +378,6 @@ const ThunderEffect = memo(() => {
 
   return (
     <>
-      {/* Rain with strong wind */}
       {drops.map((drop) => (
         <motion.div
           key={drop.id}
@@ -431,7 +401,7 @@ const ThunderEffect = memo(() => {
         />
       ))}
       
-      {/* Lightning flash - very subtle screen flash */}
+      {/* Lightning flash */}
       <motion.div
         className="absolute inset-0 bg-white/50 pointer-events-none"
         animate={{
@@ -442,7 +412,7 @@ const ThunderEffect = memo(() => {
         }}
       />
       
-      {/* Single lightning bolt at random position */}
+      {/* Single lightning bolt */}
       <motion.div
         className="absolute top-0"
         style={{ left: `${lightningState.position}%`, transform: 'translateX(-50%)' }}
