@@ -415,9 +415,10 @@ All colors MUST be HSL.
     min-height: 100svh; /* Safari: small viewport height */
   }
 
-  /* EXCEPTION: Dialog panels should size to content, not full viewport */
+  /* EXCEPTION: Dialog panels and fixed-position backgrounds should not get viewport sizing */
   .parium-panel,
-  .parium-panel.bg-parium-gradient {
+  .parium-panel.bg-parium-gradient,
+  .fixed.bg-parium-gradient {
     min-height: auto !important;
     padding-top: 0 !important;
     margin-top: 0 !important;

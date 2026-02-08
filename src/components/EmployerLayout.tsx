@@ -436,7 +436,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
         {/* Fixed gradient background */}
         <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
         
-         <div className="h-screen flex flex-col w-full overflow-hidden relative">
+         <div className="h-[100dvh] flex flex-col w-full overflow-hidden relative">
           <AnimatedBackground showBubbles={false} />
           
           {/* Top Navigation for Desktop */}
@@ -489,7 +489,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
-      <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="h-[100dvh] flex w-full overflow-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
         <EmployerSidebar />
         <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
