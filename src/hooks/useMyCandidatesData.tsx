@@ -377,9 +377,10 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: !!user,
-    staleTime: 2 * 60 * 1000, // 2 minutes — realtime handles live updates
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     // 🔥 Instant-load from localStorage cache (only for non-search queries)
     initialData: () => {
       if (!user || searchQuery) return undefined;
