@@ -123,11 +123,11 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
 
   // Mobile/Tablet layout with sidebar
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={true} className="h-[100dvh] !min-h-0 overflow-hidden">
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-x-0 top-0 -bottom-6 bg-parium-gradient pointer-events-none z-0" />
       
-      <div className="h-[100dvh] flex w-full overflow-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="h-full flex w-full overflow-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
