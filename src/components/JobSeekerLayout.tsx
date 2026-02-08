@@ -80,7 +80,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
     return (
       <>
         {/* Fixed gradient background */}
-        <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
+        <div className="fixed inset-x-0 top-0 -bottom-6 bg-parium-gradient pointer-events-none z-0" />
         
         <div className="h-[100dvh] flex flex-col w-full overflow-hidden relative">
           <AnimatedBackground showBubbles={false} />
@@ -125,7 +125,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   return (
     <SidebarProvider defaultOpen={true}>
       {/* Fixed gradient background - covers viewport */}
-      <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
+      <div className="fixed inset-x-0 top-0 -bottom-6 bg-parium-gradient pointer-events-none z-0" />
       
       <div className="h-[100dvh] flex w-full overflow-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
