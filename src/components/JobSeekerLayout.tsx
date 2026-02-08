@@ -15,7 +15,7 @@ import { useDevice } from '@/hooks/use-device';
 import { DevOfflineToggle } from '@/components/DevOfflineToggle';
 import { useMessagesPreload } from '@/hooks/useMessages';
 import { useMessagesBackgroundSync } from '@/hooks/useMessagesBackgroundSync';
-import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
+
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
@@ -124,8 +124,6 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   // Mobile/Tablet layout with sidebar
   return (
     <SidebarProvider defaultOpen={true}>
-      {/* Persistent logo preloader — always mounted outside Sheet to prevent flash on sidebar open */}
-      <img src={authLogoDataUri} alt="" aria-hidden="true" decoding="sync" loading="eager" className="fixed -top-[9999px] -left-[9999px] w-px h-px pointer-events-none" />
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
