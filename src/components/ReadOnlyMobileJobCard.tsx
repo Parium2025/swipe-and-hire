@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { supabase } from '@/integrations/supabase/client';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
+import { imageCache } from '@/lib/imageCache';
 
 interface ReadOnlyMobileJobCardProps {
   job: {
@@ -36,7 +37,37 @@ interface ReadOnlyMobileJobCardProps {
 export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  // Resolve the raw storage path to a public URL (synchronous, stable)
+  const resolvedUrl = useMemo(() => {
+    if (!job.job_image_url) return null;
+    if (job.job_image_url.startsWith('http')) return job.job_image_url;
+    const { data } = supabase.storage.from('job-images').getPublicUrl(job.job_image_url);
+    return data?.publicUrl || null;
+  }, [job.job_image_url]);
+
+  // Use imageCache for blob caching — survives navigation
+  const [displayUrl, setDisplayUrl] = useState<string | null>(() => {
+    if (!resolvedUrl) return null;
+    return imageCache.getCachedUrl(resolvedUrl) || resolvedUrl;
+  });
+
+  useEffect(() => {
+    if (!resolvedUrl) {
+      setDisplayUrl(null);
+      return;
+    }
+    // If already in blob cache, use immediately
+    const cached = imageCache.getCachedUrl(resolvedUrl);
+    if (cached) {
+      setDisplayUrl(cached);
+      return;
+    }
+    // Load into blob cache in background
+    imageCache.loadImage(resolvedUrl)
+      .then(blobUrl => setDisplayUrl(blobUrl))
+      .catch(() => setDisplayUrl(resolvedUrl)); // Fallback to network URL
+  }, [resolvedUrl]);
 
   // Get company name from either direct property or profiles join
   const companyName = job.company_name || job.profiles?.company_name || 'Okänt företag';
@@ -47,40 +78,6 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
     toggleSaveJob(job.id);
   };
 
-  // Load and cache job image using stable public URL
-  useEffect(() => {
-    const loadJobImage = async () => {
-      if (!job.job_image_url) {
-        setImageUrl(null);
-        return;
-      }
-
-      try {
-        if (job.job_image_url.startsWith('http')) {
-          setImageUrl(job.job_image_url);
-          return;
-        }
-
-        // Prefer PUBLIC URL from job-images (stable, SW-cacheable)
-        const { data } = supabase.storage
-          .from('job-images')
-          .getPublicUrl(job.job_image_url);
-        if (data?.publicUrl) {
-          setImageUrl(data.publicUrl);
-          return;
-        }
-
-        // Legacy fallback: keep as null (handled elsewhere)
-        setImageUrl(null);
-      } catch (err) {
-        console.error('Error loading job image:', err);
-        setImageUrl(null);
-      }
-    };
-
-    loadJobImage();
-  }, [job.job_image_url]);
-
   const handleCardClick = () => {
     navigate(`/job-view/${job.id}`);
   };
@@ -90,15 +87,14 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
       className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-all duration-200 hover:bg-white/10 active:scale-[0.98]"
       onClick={handleCardClick}
     >
-      {/* Job Image - Simplex style */}
-      {imageUrl && (
+      {/* Job Image - blob-cached for instant display on re-navigation */}
+      {displayUrl && (
         <div className="relative w-full h-48 overflow-hidden">
           <img
-            src={imageUrl}
+            src={displayUrl}
             alt={`${job.title} hos ${companyName}`}
             className="w-full h-full object-cover"
-            loading="eager"
-            fetchPriority="high"
+            loading="lazy"
           />
           {/* Gradient overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -139,7 +135,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
         )}
 
         {/* Status Badge (if no image) */}
-        {!imageUrl && (
+        {!displayUrl && (
           <div>
             <Badge
               variant={job.is_active ? "default" : "secondary"}
