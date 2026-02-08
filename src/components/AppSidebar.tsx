@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { preloadImages } from "@/lib/serviceWorkerManager";
-import pariumLogoRings from "@/assets/parium-logo-rings.png";
+
 import {
   Sidebar,
   SidebarContent,
@@ -29,7 +29,8 @@ import {
   Settings,
   Eye,
   Heart,
-  FileText
+  FileText,
+  Home
 } from "lucide-react";
 
 const profileItems = [
@@ -142,7 +143,8 @@ export function AppSidebar() {
 
   const isActiveUrl = (url: string) => {
     return location.pathname === url || 
-           (url === "/" && location.pathname === "/");
+           (url === "/" && location.pathname === "/") ||
+           (url === "/home" && location.pathname === "/home");
   };
 
   // Förladdda alla profilbilder via Service Worker för persistent cache
@@ -221,30 +223,13 @@ export function AppSidebar() {
 
         <SidebarSeparator className="bg-white/20 mx-4" />
 
-        {/* Parium Logo — Home button */}
-        <div className={`px-4 pt-2 pb-2 ${collapsed ? 'flex justify-center' : ''}`}>
-          <button
-            onClick={() => handleNavigation('/home')}
-            className="flex items-center hover:opacity-80 transition-opacity"
-            aria-label="Gå till startsidan"
-          >
-            <div
-              role="img"
-              aria-label="Parium"
-              className={`bg-contain bg-left bg-no-repeat pointer-events-none ${collapsed ? 'h-8 w-8' : 'h-10 w-40'}`}
-              style={{ backgroundImage: `url(${pariumLogoRings})` }}
-            />
-          </button>
-        </div>
-
-        <SidebarSeparator className="bg-white/20 mx-4" />
-
         {/* Navigation Groups */}
         {/* Main Section */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
                {[
+                 { title: 'Hem', url: '/home', icon: Home, count: undefined, showBadge: false },
                  { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: preloadedTotalJobs, showBadge: false },
                  { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: preloadedSavedJobs, showBadge: false },
                  { title: 'Mina Ansökningar', url: '/my-applications', icon: FileText, count: preloadedMyApplications, showBadge: false },
@@ -282,10 +267,12 @@ export function AppSidebar() {
                                 </span>
                               )}
                             </>
-                          ) : (
+                          ) : item.count !== undefined ? (
                             <>
                               {item.title} ({item.count ?? 0})
                             </>
+                          ) : (
+                            item.title
                           )}
                         </span>
                       )}
