@@ -59,14 +59,20 @@ const EmployerDashboard = memo(() => {
   const [draftToEdit, setDraftToEdit] = useState<JobPosting | null>(null);
   const [draftWizardOpen, setDraftWizardOpen] = useState(false);
   
-  // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
-  const [showContent, setShowContent] = useState(false);
+  // Skip fade-in animation when data is already cached (instant render on re-navigation)
+  // Only show fade-in on first load when we actually waited for data
+  const dataWasCached = useRef(!loading);
+  const [showContent, setShowContent] = useState(() => !loading);
   useEffect(() => {
-    if (!loading) {
-      const timer = setTimeout(() => setShowContent(true), 150);
-      return () => clearTimeout(timer);
+    if (!loading && !showContent) {
+      if (dataWasCached.current) {
+        setShowContent(true); // Instant — data was cached
+      } else {
+        const timer = setTimeout(() => setShowContent(true), 100);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [loading]);
+  }, [loading, showContent]);
   
   const {
     searchInput,
@@ -217,14 +223,17 @@ const EmployerDashboard = memo(() => {
   // Wait for data AND minimum delay before showing content with fade
   if (loading || !showContent) {
     return (
-       <div className="space-y-4 responsive-container-wide opacity-0">
+       <div className="space-y-4 responsive-container-wide opacity-0" aria-hidden="true">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
   }
 
+  // Use animate-fade-in only on first real load, not on cached re-navigations
+  const fadeClass = dataWasCached.current ? '' : 'animate-fade-in';
+
   return (
-     <div className="space-y-4 responsive-container-wide animate-fade-in">
+     <div className={`space-y-4 responsive-container-wide ${fadeClass}`}>
       <div className="flex justify-center items-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Mina jobbannonser</h1>
       </div>

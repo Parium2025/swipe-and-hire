@@ -118,8 +118,8 @@ export function useMyApplicationsCache() {
       return apps;
     },
     enabled: !!user,
-    staleTime: 30 * 1000, // 30 seconds
-    gcTime: 10 * 60 * 1000, // 10 minutes in memory
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    gcTime: Infinity,
     // Instant load from localStorage cache
     initialData: () => {
       if (!user) return undefined;

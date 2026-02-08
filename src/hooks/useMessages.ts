@@ -125,8 +125,9 @@ export function useMessages() {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: undefined as string | undefined,
     enabled: !!user,
-    staleTime: 30 * 1000,
-    refetchInterval: 60 * 1000,
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Infinite query for sent messages with cursor-based pagination
@@ -139,8 +140,9 @@ export function useMessages() {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: undefined as string | undefined,
     enabled: !!user,
-    staleTime: 30 * 1000,
-    refetchInterval: 60 * 1000,
+    staleTime: Infinity, // Never refetch — realtime handles all updates
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Flatten pages into message arrays
@@ -180,7 +182,7 @@ export function useMessages() {
       return { inbox, sent };
     },
     enabled: rawInbox.length > 0 || rawSent.length > 0,
-    staleTime: 30 * 1000,
+    staleTime: Infinity,
     // Use cached data for instant load
     initialData: cachedData ? { inbox: cachedData.inbox, sent: cachedData.sent } : undefined,
   });
@@ -350,7 +352,7 @@ export function useMessagesPreload() {
         setMessagesCache(inbox, sent);
         return { inbox, sent };
       },
-      staleTime: 30 * 1000,
+      staleTime: Infinity,
     });
   }, [user, queryClient]);
 }

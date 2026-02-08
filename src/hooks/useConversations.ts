@@ -308,7 +308,7 @@ export function useConversations() {
       return result;
     },
     enabled: !!user,
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: Infinity, // Never refetch — realtime handles all updates
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (!user) return undefined;
