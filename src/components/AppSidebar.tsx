@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { preloadImages } from "@/lib/serviceWorkerManager";
+import { AuthLogoInline } from "@/assets/authLogoInline";
 
 import {
   Sidebar,
@@ -396,12 +397,7 @@ export function AppSidebar() {
         <div className="mt-auto flex-1 flex flex-col items-center justify-end p-4">
           {!collapsed && (
             <div className="flex-1 flex items-center justify-center">
-              <img
-                src="/parium-auth-logo.png"
-                alt="Parium"
-                className="w-52"
-                draggable={false}
-              />
+              <AuthLogoInline className="w-52" />
             </div>
           )}
           <Button
