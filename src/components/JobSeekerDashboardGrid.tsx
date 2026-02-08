@@ -520,10 +520,10 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
               transition={{ duration: 0.2 }}
               className="flex flex-col items-center"
             >
-              <h3 className="text-sm font-semibold text-white leading-snug mb-1">
+              <h3 className="text-base font-semibold text-white leading-snug mb-1">
                 {currentStat.label}
               </h3>
-              <div className="text-2xl font-bold text-white">{currentStat.value}</div>
+              <div className="text-3xl font-bold text-white">{currentStat.value}</div>
             </motion.div>
           </AnimatePresence>
         </div>
