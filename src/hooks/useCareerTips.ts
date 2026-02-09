@@ -142,7 +142,8 @@ export const useCareerTips = () => {
     initialData: () => readCache() ?? undefined,
     initialDataUpdatedAt: () => {
       const cached = readCache();
-      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+      // Return 0 so initialData is always stale → triggers background refetch
+      return cached ? 0 : undefined;
     },
   });
 };
