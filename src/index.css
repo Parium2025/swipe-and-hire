@@ -1367,6 +1367,6 @@ All colors MUST be HSL.
    Fixed height with breakpoints for reliable proportions
    ============================================ */
 .dashboard-card-height {
-  @apply h-[160px] sm:h-[200px] md:h-[220px] lg:h-[240px];
+  @apply h-[200px] md:h-[220px] lg:h-[240px];
 }
 

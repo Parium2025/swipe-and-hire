@@ -169,7 +169,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
+      <CardContent className="relative p-4 sm:p-4 h-full flex flex-col">
         {/* Header - EXACT same as employer */}
         <div className="flex items-center justify-between">
           <div className="p-2 rounded-xl bg-white/10">
@@ -492,7 +492,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
+      <CardContent className="relative p-4 sm:p-4 h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="p-2 rounded-xl bg-white/10">
@@ -523,7 +523,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
               <h3 className="text-sm sm:text-base font-semibold text-white leading-snug mb-1">
                 {currentStat.label}
               </h3>
-              <div className="text-2xl sm:text-3xl font-bold text-white">{currentStat.value}</div>
+              <div className="text-3xl font-bold text-white">{currentStat.value}</div>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -995,7 +995,7 @@ export const JobSeekerDashboardGrid = memo(() => {
         <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
       </motion.div>
       
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
         {/* Top Left - Career Tips (Green) */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
