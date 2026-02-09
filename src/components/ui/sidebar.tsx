@@ -192,41 +192,21 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <>
-          {/* Backdrop overlay */}
-          <div
-            className={cn(
-              "fixed inset-0 z-40 bg-black/60 transition-opacity duration-300",
-              openMobile ? "opacity-100" : "opacity-0 pointer-events-none"
-            )}
-            onClick={() => setOpenMobile(false)}
-            aria-hidden="true"
-          />
-          {/* Always-mounted sidebar panel */}
-          <div
-            ref={ref}
+        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+          <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className={cn(
-              "fixed inset-y-0 z-50 flex h-full w-[--sidebar-width] flex-col bg-gradient-parium text-sidebar-foreground transition-transform duration-300 ease-out will-change-transform",
-              side === "left" ? "left-0" : "right-0",
-              openMobile
-                ? "translate-x-0"
-                : side === "left"
-                  ? "-translate-x-full"
-                  : "translate-x-full",
-              className
-            )}
+            className="w-[--sidebar-width] bg-gradient-parium p-0 text-sidebar-foreground [&>button]:hidden"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
-            {...props}
+            side={side}
           >
             <div className="flex h-full w-full flex-col">{children}</div>
-          </div>
-        </>
+          </SheetContent>
+        </Sheet>
       )
     }
 
