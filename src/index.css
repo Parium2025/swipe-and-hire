@@ -258,13 +258,8 @@ All colors MUST be HSL.
     @apply border-border;
     box-sizing: border-box;
     max-width: 100%;
-    /* Crisp text rendering */
-    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Prevent subpixel blur */
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
   }
   
   /* Prevent page horizontal scroll without clipping children */
@@ -1134,12 +1129,6 @@ All colors MUST be HSL.
 
 /* Mobile Scroll Optimization - Premium Touch Experience */
 @media (max-width: 768px) {
-  /* Apply to all elements for consistent mobile scrolling */
-  * {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-  }
-  
   /* Scroll containers with native momentum */
   .scroll-container {
     scroll-behavior: smooth;
@@ -1156,6 +1145,11 @@ All colors MUST be HSL.
   button, a, [role="button"], [onclick] {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+  }
+
+  /* Crisp text only on headings for performance */
+  h1, h2, h3, h4, h5, h6 {
+    text-rendering: optimizeLegibility;
   }
 
   /* Force transparent background on selected calendar days - override all defaults */
