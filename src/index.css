@@ -95,13 +95,8 @@ body {
   .dashboard-card-height .blur-2xl {
     filter: blur(16px) !important;
   }
-  
-  /* Scroll container: own compositor layer, isolated from overlays */
-  .mobile-scroll-container {
-    transform: translateZ(0);
-    -webkit-overflow-scrolling: touch;
-  }
 }
+
 
 /* Sidebar-specific: disable tap highlight and focus outlines to prevent white flash */
 [data-sidebar="sidebar"],
