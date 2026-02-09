@@ -304,8 +304,13 @@ All colors MUST be HSL.
   }
   
   /* Prevent page horizontal scroll without clipping children */
-  html, body, #root {
+  html, body {
     overflow-x: hidden !important;
+  }
+  /* #root uses clip (not hidden) to avoid creating a scroll container
+     that traps mouse wheel events via overscroll-behavior */
+  #root {
+    overflow-x: clip !important;
   }
   /* Allow focus rings to render fully on interactive/form elements */
   input, textarea, select, button, [role="button"], .focus-ring-allow {
@@ -368,7 +373,7 @@ All colors MUST be HSL.
   }
 
   /* Mobile fullscreen support - extend under status bar */
-  html, body, #root {
+  html, body {
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
@@ -379,6 +384,14 @@ All colors MUST be HSL.
     /* Optimerad touch-hantering för mobil */
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
+  }
+  /* #root: clip (not hidden) so it never becomes a scroll container */
+  #root {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    overflow-x: clip !important;
+    touch-action: pan-y;
   }
   
   /* Extra förhindra bounce i standalone mode */
