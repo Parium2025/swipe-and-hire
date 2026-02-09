@@ -1441,3 +1441,91 @@ All colors MUST be HSL.
   @apply h-[200px] md:h-[220px] lg:h-[240px];
 }
 
+
+/* ============================================
+   WEATHER EFFECTS - CSS animations (compositor thread)
+   Replaces framer-motion JS loops to free main thread for scrolling
+   ============================================ */
+
+/* Star twinkle - opacity oscillation */
+@keyframes star-twinkle {
+  0%, 100% { opacity: var(--star-opacity, 0.5); }
+  50% { opacity: calc(var(--star-opacity, 0.5) * 0.4); }
+}
+.weather-star {
+  position: absolute;
+  border-radius: 9999px;
+  background: white;
+  animation: star-twinkle var(--twinkle-duration, 3s) var(--twinkle-delay, 0s) ease-in-out infinite;
+  will-change: opacity;
+  contain: layout style;
+}
+
+/* Shooting star */
+@keyframes shooting-star {
+  0%   { opacity: 0; transform: translate(0, 0); }
+  10%  { opacity: 0.7; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 0; transform: translate(-1500px, 1000px); }
+}
+.weather-shooting-star {
+  position: absolute;
+  border-radius: 9999px;
+  background: white;
+  box-shadow: 0 0 2px 0.5px rgba(255,255,255,0.5);
+  animation: shooting-star 5s linear forwards;
+  will-change: transform, opacity;
+}
+
+/* Rain drop falling */
+@keyframes rain-fall {
+  0%   { transform: translateY(-5vh); }
+  100% { transform: translateY(115vh); }
+}
+.weather-raindrop {
+  position: absolute;
+  width: 2px;
+  border-radius: 9999px;
+  animation: rain-fall var(--rain-duration, 1.5s) var(--rain-delay, 0s) linear infinite;
+  will-change: transform;
+  contain: layout style;
+}
+
+/* Snow flake falling with sway */
+@keyframes snow-fall {
+  0%   { transform: translateY(-5vh) translateX(0) rotate(0deg); }
+  25%  { transform: translateY(calc(105vh * 0.25)) translateX(var(--sway, 12px)) rotate(90deg); }
+  50%  { transform: translateY(calc(105vh * 0.5)) translateX(0) rotate(180deg); }
+  75%  { transform: translateY(calc(105vh * 0.75)) translateX(calc(var(--sway, 12px) * -1)) rotate(270deg); }
+  100% { transform: translateY(105vh) translateX(0) rotate(360deg); }
+}
+.weather-snowflake {
+  position: absolute;
+  border-radius: 9999px;
+  background: white;
+  filter: blur(0.5px);
+  animation: snow-fall var(--snow-duration, 15s) var(--snow-delay, 0s) linear infinite;
+  will-change: transform;
+  contain: layout style;
+}
+
+/* Cloud drifting */
+@keyframes cloud-drift {
+  0%   { transform: translateX(var(--cloud-start, 0vw)); }
+  100% { transform: translateX(120vw); }
+}
+.weather-cloud {
+  position: absolute;
+  background: white;
+  border-radius: 9999px;
+  filter: blur(48px);
+  animation: cloud-drift var(--cloud-duration, 80s) linear infinite;
+  will-change: transform;
+  contain: layout style;
+}
+
+/* Lightning flash */
+@keyframes lightning-flash {
+  0%, 90%, 100% { opacity: 0; }
+  92%, 94% { opacity: 0.08; }
+}
