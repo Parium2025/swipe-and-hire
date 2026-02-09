@@ -55,6 +55,24 @@ body {
   min-height: 100dvh;
 }
 
+/* ============================================
+   MOBILE SCROLL PERFORMANCE
+   GPU-isolate animated overlays so they don't
+   trigger re-compositing during scroll.
+   ============================================ */
+@media (pointer: coarse) {
+  .animate-soft-bounce,
+  .animate-pulse,
+  .animate-ping {
+    will-change: transform, opacity;
+    contain: layout style;
+  }
+  
+  .pwa-bottom-glow {
+    contain: strict;
+  }
+}
+
 /* Sidebar-specific: disable tap highlight and focus outlines to prevent white flash */
 [data-sidebar="sidebar"],
 [data-sidebar="sidebar"] * {
