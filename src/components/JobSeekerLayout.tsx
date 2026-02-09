@@ -164,7 +164,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
       <div className="h-screen flex w-full overflow-hidden relative">
         <AppSidebar />
         {/* Content area - isolated from animated layers via isolation: isolate */}
-        <div className="flex-1 flex flex-col overflow-hidden relative z-10" style={{ isolation: 'isolate' }}>
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative z-10" style={{ isolation: 'isolate' }}>
           <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="text-white hover:bg-white/20 h-8 w-8" />
@@ -189,7 +189,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
           </header>
           
           {/* Scroll container - own GPU layer, completely decoupled from animated overlays */}
-          <main className="flex-1 overflow-y-auto overscroll-contain p-3 mobile-scroll-container" style={{ touchAction: 'pan-y' }}>
+          <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 mobile-scroll-container" style={{ touchAction: 'pan-y' }}>
             {children}
           </main>
         </div>
