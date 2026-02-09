@@ -57,19 +57,28 @@ body {
 
 /* ============================================
    MOBILE SCROLL PERFORMANCE
-   GPU-isolate animated overlays so they don't
-   trigger re-compositing during scroll.
+   Force animated overlays onto their own GPU compositor layers
+   so they NEVER interfere with scroll compositing.
+   
+   Key architecture:
+   - Background gradient: fixed, own layer via translateZ(0)
+   - Bubbles container: fixed, own layer via translateZ(0) + contain:strict
+   - Each bubble: own layer via translateZ(0) on animation classes
+   - Scroll container: own layer via .mobile-scroll-container
+   - These layers are composited independently = smooth 60fps scroll
    ============================================ */
 @media (pointer: coarse) {
+  /* Promote each animated element to its own GPU layer */
   .animate-soft-bounce,
   .animate-pulse,
   .animate-ping {
-    will-change: transform, opacity;
-    contain: layout style;
+    transform: translateZ(0);
+    contain: layout style paint;
   }
   
   .pwa-bottom-glow {
     contain: strict;
+    transform: translateZ(0);
   }
 
   /* Eliminate GPU-heavy backdrop-blur during scroll on touch devices.
@@ -84,14 +93,13 @@ body {
 
   /* Reduce GPU layers from decorative blur circles inside cards */
   .dashboard-card-height .blur-2xl {
-    filter: blur(16px) !important; /* Reduced from 40px default */
+    filter: blur(16px) !important;
   }
   
-  /* Promote scroll container to own compositor layer */
+  /* Scroll container: own compositor layer, isolated from overlays */
   .mobile-scroll-container {
-    will-change: scroll-position;
-    -webkit-overflow-scrolling: touch;
     transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
   }
 }
 
