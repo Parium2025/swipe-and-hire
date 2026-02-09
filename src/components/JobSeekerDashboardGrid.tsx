@@ -128,7 +128,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
   if (isLoading) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height`}>
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-white/5" />
         <CardContent className="relative p-6 h-full">
           <div className="flex items-center gap-2 mb-4">
             <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
@@ -144,7 +144,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
   if (error || !tips || tips.length === 0) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height`}>
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-white/5" />
         <CardContent className="relative p-4 h-full flex flex-col items-center justify-center">
           <Lightbulb className="h-8 w-8 text-white/60 mb-2" />
           <p className="text-sm text-white/60 text-center">
@@ -166,7 +166,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
       onTouchEnd={() => setTimeout(() => setIsPaused(false), 3000)}
       {...swipeHandlers}
     >
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
       <CardContent className="relative p-4 sm:p-4 h-full flex flex-col">
@@ -468,7 +468,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
   if (isLoading) {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height`}>
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-white/5" />
         <CardContent className="relative p-6 h-full">
           <Skeleton className="h-10 w-10 rounded-xl bg-white/20 mb-4" />
           <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
@@ -489,7 +489,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setTimeout(() => setIsPaused(false), 3000)}
     >
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
       <CardContent className="relative p-4 sm:p-4 h-full flex flex-col">
@@ -720,7 +720,7 @@ const JobSeekerNotesCard = memo(() => {
   return (
     <>
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.notes} border-0 shadow-lg dashboard-card-height`}>
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-white/5" />
         <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
         
         <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
@@ -889,7 +889,7 @@ const JobSeekerInterviewsCard = memo(() => {
 
   return (
     <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
       <CardContent className="relative p-3 h-full flex flex-col">
