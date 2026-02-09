@@ -7,7 +7,7 @@ import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { AuthLogoInline } from '@/assets/authLogoInline';
+import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -23,16 +23,21 @@ interface JobSeekerLayoutProps {
   onViewChange?: (view: string) => void;
 }
 
-// Logo that acts as sidebar trigger
+// Logo that acts as sidebar trigger — same visual as desktop PariumLogoButton
 const LogoSidebarTrigger = () => {
   const { toggleSidebar } = useSidebar();
   return (
     <button
       onClick={toggleSidebar}
-      className="touch-manipulation p-1 rounded-lg hover:bg-white/10 active:bg-white/20 transition-colors"
+      className="flex items-center hover:opacity-80 active:scale-[0.97] transition-opacity shrink-0 touch-manipulation"
       aria-label="Öppna meny"
     >
-      <AuthLogoInline className="h-8 w-auto" />
+      <div
+        role="img"
+        aria-label="Parium"
+        className="h-10 w-40 bg-contain bg-left bg-no-repeat pointer-events-none"
+        style={{ backgroundImage: `url(${pariumLogoRings})` }}
+      />
     </button>
   );
 };
