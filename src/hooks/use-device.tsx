@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useRef, useSyncExternalStore } from 'react';
 
 // Mobile breakpoint - below this we use mobile layout with sidebar
 const MOBILE_BREAKPOINT = 768;
@@ -10,12 +10,30 @@ function getDeviceType(): DeviceType {
   return window.innerWidth < MOBILE_BREAKPOINT ? 'mobile' : 'desktop';
 }
 
-// Singleton subscription - shared across all hook instances (no duplicate listeners)
+// Debounced singleton: prevents transient resize events (e.g. iOS address bar
+// retract when opening the sidebar) from flipping the layout between mobile
+// and desktop, which would unmount the entire component tree.
+let stableDevice: DeviceType = getDeviceType();
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let deviceListeners: Set<() => void> | null = null;
+
 function subscribeDevice(callback: () => void): () => void {
   if (!deviceListeners) {
     deviceListeners = new Set();
-    const handler = () => deviceListeners!.forEach(fn => fn());
+    const handler = () => {
+      const next = getDeviceType();
+      // Only notify if the value actually changed AND stays stable for 150ms
+      if (next !== stableDevice) {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          const confirmed = getDeviceType();
+          if (confirmed !== stableDevice) {
+            stableDevice = confirmed;
+            deviceListeners!.forEach(fn => fn());
+          }
+        }, 150);
+      }
+    };
     window.addEventListener('resize', handler, { passive: true });
     window.addEventListener('orientationchange', handler, { passive: true });
   }
@@ -26,7 +44,7 @@ function subscribeDevice(callback: () => void): () => void {
 }
 
 function getDeviceSnapshot(): DeviceType {
-  return getDeviceType();
+  return stableDevice;
 }
 
 function getDeviceServerSnapshot(): DeviceType {
@@ -34,7 +52,6 @@ function getDeviceServerSnapshot(): DeviceType {
 }
 
 export function useDevice(): DeviceType {
-  // useSyncExternalStore: no useEffect delay, instant sync on first render
   return useSyncExternalStore(subscribeDevice, getDeviceSnapshot, getDeviceServerSnapshot);
 }
 

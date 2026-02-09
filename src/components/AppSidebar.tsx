@@ -214,9 +214,9 @@ export function AppSidebar() {
             <img 
               src={avatarUrl} 
               alt="Preload" 
-              loading="eager"
+              loading="lazy"
               decoding="async"
-              fetchPriority="high"
+              fetchPriority="low"
             />
           )}
         </div>
