@@ -276,7 +276,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
       return count ?? 0;
     },
     enabled: !!user?.id,
-    staleTime: 5000,
+    staleTime: 30000,
   });
   
   // Query for upcoming interviews count
@@ -298,7 +298,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
       return count || 0;
     },
     enabled: !!user?.id,
-    staleTime: 5000,
+    staleTime: 30000,
   });
   
   // Query for saved jobs count
@@ -318,7 +318,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
       return count || 0;
     },
     enabled: !!user?.id,
-    staleTime: 5000,
+    staleTime: 30000,
   });
 
   // Query for unread messages count
@@ -339,7 +339,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
       return count || 0;
     },
     enabled: !!user?.id,
-    staleTime: 5000,
+    staleTime: 30000,
   });
 
   // Real-time subscriptions

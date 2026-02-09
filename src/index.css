@@ -71,6 +71,28 @@ body {
   .pwa-bottom-glow {
     contain: strict;
   }
+
+  /* Eliminate GPU-heavy backdrop-blur during scroll on touch devices.
+     bg-white/5 + backdrop-blur-[1px] is visually identical to bg-white/[0.07] 
+     without the per-frame blur compositing cost. */
+  .dashboard-card-height .backdrop-blur-\[1px\],
+  .dashboard-card-height > .backdrop-blur-\[1px\] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: rgba(255, 255, 255, 0.07) !important;
+  }
+
+  /* Reduce GPU layers from decorative blur circles inside cards */
+  .dashboard-card-height .blur-2xl {
+    filter: blur(16px) !important; /* Reduced from 40px default */
+  }
+  
+  /* Promote scroll container to own compositor layer */
+  .mobile-scroll-container {
+    will-change: scroll-position;
+    -webkit-overflow-scrolling: touch;
+    transform: translateZ(0);
+  }
 }
 
 /* Sidebar-specific: disable tap highlight and focus outlines to prevent white flash */
