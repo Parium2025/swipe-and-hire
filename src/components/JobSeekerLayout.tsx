@@ -7,6 +7,7 @@ import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { AuthLogoInline } from '@/assets/authLogoInline';
 
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -135,11 +136,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
           <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="text-white hover:bg-white/20 h-8 w-8" />
-              <img 
-                src="/lovable-uploads/parium-logo-transparent.png" 
-                alt="Parium" 
-                className="h-7 object-contain" 
-              />
+              <AuthLogoInline className="h-7 w-auto" />
             </div>
             <div className="flex items-center gap-3">
               {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (
