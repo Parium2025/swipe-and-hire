@@ -26,36 +26,32 @@ export const JobSeekerDashboardGrid = memo(() => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
         {/* Top Left - Career Tips (Green) */}
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          initial={false}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
         >
           <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
         </motion.div>
         
         {/* Top Right - Stats (Blue) */}
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          initial={false}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
         >
           <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
         </motion.div>
         
         {/* Bottom Left - Notes (Purple) */}
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          initial={false}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
         >
           <JobSeekerNotesCard />
         </motion.div>
         
         {/* Bottom Right - Interviews (Orange) */}
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          initial={false}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.25 }}
         >
           <JobSeekerInterviewsCard />
         </motion.div>
