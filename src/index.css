@@ -55,67 +55,6 @@ body {
   min-height: 100dvh;
 }
 
-/* ============================================
-   MOBILE SCROLL PERFORMANCE
-   Force animated overlays onto their own GPU compositor layers
-   so they NEVER interfere with scroll compositing.
-   
-   Key architecture:
-   - Background gradient: fixed, own layer via translateZ(0)
-   - Bubbles container: fixed, own layer via translateZ(0) + contain:strict
-   - Each bubble: own layer via translateZ(0) on animation classes
-   - Scroll container: own layer via .mobile-scroll-container
-   - These layers are composited independently = smooth 60fps scroll
-   ============================================ */
-@media (max-width: 767px) {
-  /* Promote each animated element to its own GPU layer */
-  .animate-soft-bounce,
-  .animate-pulse,
-  .animate-ping {
-    transform: translateZ(0);
-    contain: layout style paint;
-  }
-  
-  .pwa-bottom-glow {
-    contain: strict;
-    transform: translateZ(0);
-  }
-
-  /* Eliminate GPU-heavy backdrop-blur during scroll on touch devices.
-     bg-white/5 + backdrop-blur-[1px] is visually identical to bg-white/[0.07] 
-     without the per-frame blur compositing cost. */
-  .dashboard-card-height .backdrop-blur-\[1px\],
-  .dashboard-card-height > .backdrop-blur-\[1px\] {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background-color: rgba(255, 255, 255, 0.07) !important;
-  }
-
-  /* Reduce decorative blur on mobile: ~70% cheaper GPU compositing */
-  .dashboard-card-height .blur-2xl {
-    filter: blur(12px) !important;
-  }
-  .blur-3xl {
-    filter: blur(16px) !important;
-  }
-  /* Glow blurs inside AnimatedBackground */
-  .pwa-bottom-glow .blur-\[120px\] {
-    filter: blur(20px) !important;
-  }
-  .pwa-bottom-glow .blur-\[100px\] {
-    filter: blur(16px) !important;
-  }
-  .pwa-bottom-glow .blur-\[80px\] {
-    filter: blur(12px) !important;
-  }
-
-  /* Dashboard cards: each card renders in its own compositing context */
-  .dashboard-card-height {
-    contain: layout style paint;
-  }
-}
-
-
 /* Sidebar-specific: disable tap highlight and focus outlines to prevent white flash */
 [data-sidebar="sidebar"],
 [data-sidebar="sidebar"] * {
@@ -319,19 +258,18 @@ All colors MUST be HSL.
     @apply border-border;
     box-sizing: border-box;
     max-width: 100%;
+    /* Crisp text rendering */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent subpixel blur */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
   
-  /* Prevent page horizontal scroll.
-     CRITICAL: body and #root use 'clip' (not 'hidden') because 'hidden' implicitly
-     sets overflow-y: auto, turning them into scroll containers that trap mouse wheel
-     events without actually having scrollable content. 'clip' prevents horizontal
-     overflow without creating a scroll formatting context, so wheel events propagate
-     to the viewport (which is the correct scroll target). */
-  html {
-    overflow-x: hidden !important; /* html's overflow propagates to the viewport per CSS spec */
-  }
-  body, #root {
-    overflow-x: clip !important;
+  /* Prevent page horizontal scroll without clipping children */
+  html, body, #root {
+    overflow-x: hidden !important;
   }
   /* Allow focus rings to render fully on interactive/form elements */
   input, textarea, select, button, [role="button"], .focus-ring-allow {
@@ -342,7 +280,7 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
     padding-top: 0 !important;
     margin-top: 0 !important;
-    overflow-x: clip !important;
+    overflow-x: hidden !important;
     max-width: 100vw !important;
   }
 
@@ -394,35 +332,17 @@ All colors MUST be HSL.
   }
 
   /* Mobile fullscreen support - extend under status bar */
-  html {
+  html, body, #root {
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
-    overflow-x: hidden !important; /* propagates to viewport */
+    overflow-x: hidden !important;
     overscroll-behavior: none;
     overscroll-behavior-x: none;
     overscroll-behavior-y: none;
+    /* Optimerad touch-hantering för mobil */
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
-  }
-  body {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-    overflow-x: clip !important; /* clip, NOT hidden — avoids creating scroll container */
-    overscroll-behavior: none;
-    overscroll-behavior-x: none;
-    overscroll-behavior-y: none;
-    touch-action: pan-y;
-    -webkit-overflow-scrolling: touch;
-  }
-  /* #root: clip (not hidden) so it never becomes a scroll container */
-  #root {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-    overflow-x: clip !important;
-    touch-action: pan-y;
   }
   
   /* Extra förhindra bounce i standalone mode */
@@ -464,15 +384,12 @@ All colors MUST be HSL.
   }
 
   /* Safari-specifik höjdhantering för dynamiskt UI */
-  /* NOTE: Do NOT set height: 100% on html/body — it constrains body to viewport
-     height and with overflow-x: hidden, body becomes a scroll container instead
-     of letting the viewport handle scrolling natively (which works with mouse wheel). */
   html {
-    min-height: 100%;
+    height: 100%;
   }
 
   body {
-    min-height: 100%;
+    height: 100%;
   }
 
   /* Make sure the app extends to the full screen - Safari compatibility */
@@ -1459,91 +1376,3 @@ All colors MUST be HSL.
   @apply h-[200px] md:h-[220px] lg:h-[240px];
 }
 
-
-/* ============================================
-   WEATHER EFFECTS - CSS animations (compositor thread)
-   Replaces framer-motion JS loops to free main thread for scrolling
-   ============================================ */
-
-/* Star twinkle - opacity oscillation */
-@keyframes star-twinkle {
-  0%, 100% { opacity: var(--star-opacity, 0.5); }
-  50% { opacity: calc(var(--star-opacity, 0.5) * 0.4); }
-}
-.weather-star {
-  position: absolute;
-  border-radius: 9999px;
-  background: white;
-  animation: star-twinkle var(--twinkle-duration, 3s) var(--twinkle-delay, 0s) ease-in-out infinite;
-  will-change: opacity;
-  contain: layout style;
-}
-
-/* Shooting star */
-@keyframes shooting-star {
-  0%   { opacity: 0; transform: translate(0, 0); }
-  10%  { opacity: 0.7; }
-  50%  { opacity: 0.5; }
-  100% { opacity: 0; transform: translate(-1500px, 1000px); }
-}
-.weather-shooting-star {
-  position: absolute;
-  border-radius: 9999px;
-  background: white;
-  box-shadow: 0 0 2px 0.5px rgba(255,255,255,0.5);
-  animation: shooting-star 5s linear forwards;
-  will-change: transform, opacity;
-}
-
-/* Rain drop falling */
-@keyframes rain-fall {
-  0%   { transform: translateY(-5vh); }
-  100% { transform: translateY(115vh); }
-}
-.weather-raindrop {
-  position: absolute;
-  width: 2px;
-  border-radius: 9999px;
-  animation: rain-fall var(--rain-duration, 1.5s) var(--rain-delay, 0s) linear infinite;
-  will-change: transform;
-  contain: layout style;
-}
-
-/* Snow flake falling with sway */
-@keyframes snow-fall {
-  0%   { transform: translateY(-5vh) translateX(0) rotate(0deg); }
-  25%  { transform: translateY(calc(105vh * 0.25)) translateX(var(--sway, 12px)) rotate(90deg); }
-  50%  { transform: translateY(calc(105vh * 0.5)) translateX(0) rotate(180deg); }
-  75%  { transform: translateY(calc(105vh * 0.75)) translateX(calc(var(--sway, 12px) * -1)) rotate(270deg); }
-  100% { transform: translateY(105vh) translateX(0) rotate(360deg); }
-}
-.weather-snowflake {
-  position: absolute;
-  border-radius: 9999px;
-  background: white;
-  filter: blur(0.5px);
-  animation: snow-fall var(--snow-duration, 15s) var(--snow-delay, 0s) linear infinite;
-  will-change: transform;
-  contain: layout style;
-}
-
-/* Cloud drifting */
-@keyframes cloud-drift {
-  0%   { transform: translateX(var(--cloud-start, 0vw)); }
-  100% { transform: translateX(120vw); }
-}
-.weather-cloud {
-  position: absolute;
-  background: white;
-  border-radius: 9999px;
-  filter: blur(48px);
-  animation: cloud-drift var(--cloud-duration, 80s) linear infinite;
-  will-change: transform;
-  contain: layout style;
-}
-
-/* Lightning flash */
-@keyframes lightning-flash {
-  0%, 90%, 100% { opacity: 0; }
-  92%, 94% { opacity: 0.08; }
-}

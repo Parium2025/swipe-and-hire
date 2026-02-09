@@ -13,7 +13,6 @@ import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
 
-
 const getGreeting = (): { text: string; isEvening: boolean; isDaytime: boolean } => {
   const hour = new Date().getHours();
   if (hour >= 5 && hour < 9) return { text: 'God morgon', isEvening: false, isDaytime: true };
@@ -134,6 +133,7 @@ const JobSeekerHome = memo(() => {
   }, []);
   
   const showWeatherEffects = gpsGranted && mountedLongEnough && !weather.isLoading;
+  
   // Emoji logic
   const displayEmoji = useMemo(() => {
     if (!gpsGranted) {
