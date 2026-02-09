@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
-import { useDevice } from '@/hooks/use-device';
+
 
 const getGreeting = (): { text: string; isEvening: boolean; isDaytime: boolean } => {
   const hour = new Date().getHours();
@@ -58,7 +58,6 @@ DateTimeDisplay.displayName = 'DateTimeDisplay';
 const JobSeekerHome = memo(() => {
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const device = useDevice();
   
   const [showContent, setShowContent] = useState(false);
   
@@ -134,7 +133,7 @@ const JobSeekerHome = memo(() => {
     return () => clearTimeout(timer);
   }, []);
   
-  const showWeatherEffects = device === 'desktop' && gpsGranted && mountedLongEnough && !weather.isLoading;
+  const showWeatherEffects = gpsGranted && mountedLongEnough && !weather.isLoading;
   // Emoji logic
   const displayEmoji = useMemo(() => {
     if (!gpsGranted) {
