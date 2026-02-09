@@ -266,7 +266,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           loop={false}
           muted={false}
           playsInline
-          preload="metadata"
+          preload="none"
           poster={coverImageUrl || undefined}
           onEnded={handleVideoEnd}
           onTimeUpdate={handleTimeUpdate}
