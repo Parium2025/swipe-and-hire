@@ -91,9 +91,27 @@ body {
     background-color: rgba(255, 255, 255, 0.07) !important;
   }
 
-  /* Reduce GPU layers from decorative blur circles inside cards */
+  /* Reduce decorative blur on mobile: ~70% cheaper GPU compositing */
   .dashboard-card-height .blur-2xl {
+    filter: blur(12px) !important;
+  }
+  .blur-3xl {
     filter: blur(16px) !important;
+  }
+  /* Glow blurs inside AnimatedBackground */
+  .pwa-bottom-glow .blur-\[120px\] {
+    filter: blur(20px) !important;
+  }
+  .pwa-bottom-glow .blur-\[100px\] {
+    filter: blur(16px) !important;
+  }
+  .pwa-bottom-glow .blur-\[80px\] {
+    filter: blur(12px) !important;
+  }
+
+  /* Dashboard cards: each card renders in its own compositing context */
+  .dashboard-card-height {
+    contain: layout style paint;
   }
 }
 
