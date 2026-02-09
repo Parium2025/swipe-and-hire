@@ -294,6 +294,7 @@ export const useJobSeekerBackgroundSync = () => {
   }, [queryClient]);
 
   // 🚀 HUVUDFUNKTION: Förladda ALL jobbsökardata parallellt
+  // Uses staggered cache updates to avoid cascading re-renders that freeze the UI
   const preloadAllData = useCallback(async (force = false) => {
     if (!user || !isJobSeeker) return;
     
@@ -310,18 +311,44 @@ export const useJobSeekerBackgroundSync = () => {
     const userId = user.id;
 
     try {
-      // Kör alla preloads parallellt för maximal hastighet
-      await Promise.all([
-        preloadSavedJobs(userId),
-        preloadMyApplications(userId),
-        preloadMessages(userId),
-        preloadAvailableJobs(),
-        preloadCandidateInterviews(userId),
-        preloadWeatherIfStale(),
-      ]);
+      // On mobile/touch: stagger requests to avoid blocking main thread
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      
+      if (isTouchDevice) {
+        // Run critical data first, then secondary data after a yield
+        await Promise.all([
+          preloadSavedJobs(userId),
+          preloadMyApplications(userId),
+        ]);
+        
+        // Yield to browser to allow rendering
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        await Promise.all([
+          preloadMessages(userId),
+          preloadCandidateInterviews(userId),
+        ]);
+        
+        // Yield again before less critical data
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        await Promise.all([
+          preloadAvailableJobs(),
+          preloadWeatherIfStale(),
+        ]);
+      } else {
+        // Desktop: run all in parallel (more CPU/bandwidth available)
+        await Promise.all([
+          preloadSavedJobs(userId),
+          preloadMyApplications(userId),
+          preloadMessages(userId),
+          preloadAvailableJobs(),
+          preloadCandidateInterviews(userId),
+          preloadWeatherIfStale(),
+        ]);
+      }
 
       hasPreloadedRef.current = true;
-      // Uppdatera sync-tidsstämpel för offline-indikatorn
       updateLastSyncTime();
     } catch (error) {
       console.warn('[JobSeekerSync] Preload failed:', error);
@@ -362,12 +389,13 @@ export const useJobSeekerBackgroundSync = () => {
       return false;
     };
 
-    // 🚀 PERFORMANCE: Defer initial preload significantly on touch/slow
+    // 🚀 PERFORMANCE: Defer initial preload aggressively on touch/slow
+    // to avoid competing with initial rendering and touch responsiveness
     const scheduleInitialPreload = () => {
-      const delay = isTouchDevice || isSlowConnection() ? 3000 : 1000;
+      const delay = isTouchDevice || isSlowConnection() ? 5000 : 1000;
       
       if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(() => preloadAllData(), { timeout: delay });
+        (window as any).requestIdleCallback(() => preloadAllData(), { timeout: delay + 2000 });
       } else {
         setTimeout(() => preloadAllData(), delay);
       }

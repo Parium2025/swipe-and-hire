@@ -183,33 +183,32 @@ export function useMessagesBackgroundSync() {
     };
   }, [syncMessages]);
 
-  // Trigger sync on first user interaction
+  // Trigger sync on first user interaction — DESKTOP ONLY
+  // On touch devices, touchstart triggers heavy network requests that block UI responsiveness
   useEffect(() => {
     if (!user || hasInteractedRef.current) return;
+
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) return; // Skip — initial sync handles mobile via requestIdleCallback
 
     const handleInteraction = () => {
       if (hasInteractedRef.current) return;
       hasInteractedRef.current = true;
       
-      // Remove listeners
       window.removeEventListener('mousemove', handleInteraction);
       window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('touchstart', handleInteraction);
       window.removeEventListener('keydown', handleInteraction);
       
-      // Trigger sync
       syncMessages();
     };
 
     window.addEventListener('mousemove', handleInteraction, { once: true });
     window.addEventListener('click', handleInteraction, { once: true });
-    window.addEventListener('touchstart', handleInteraction, { once: true });
     window.addEventListener('keydown', handleInteraction, { once: true });
 
     return () => {
       window.removeEventListener('mousemove', handleInteraction);
       window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('touchstart', handleInteraction);
       window.removeEventListener('keydown', handleInteraction);
     };
   }, [user, syncMessages]);
@@ -230,19 +229,22 @@ export function useMessagesBackgroundSync() {
     };
   }, [user, syncMessages]);
 
-  // Initial sync on mount - DEFERRED på touch/svagt internet
+  // Initial sync on mount - HEAVILY DEFERRED on touch to avoid blocking UI
   useEffect(() => {
     if (!user) return;
     
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     
-    // På touch: defer synken för att inte blocka UI
+    // On touch: defer significantly so initial render + touch responsiveness isn't affected
     if (isTouchDevice) {
-      if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(() => syncMessages(), { timeout: 5000 });
-      } else {
-        setTimeout(() => syncMessages(), 2000);
-      }
+      const timeoutId = setTimeout(() => {
+        if ('requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(() => syncMessages(), { timeout: 10000 });
+        } else {
+          syncMessages();
+        }
+      }, 6000); // 6s delay on mobile — let the app fully render first
+      return () => clearTimeout(timeoutId);
     } else {
       syncMessages();
     }

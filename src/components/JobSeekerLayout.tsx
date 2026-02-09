@@ -148,10 +148,10 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
-      <div className="h-[100dvh] flex w-full overflow-hidden relative" style={{ WebkitOverflowScrolling: 'touch', backgroundColor: 'hsl(215 100% 12%)' }}>
+      <div className="h-[100dvh] flex w-full overflow-x-hidden relative" style={{ WebkitOverflowScrolling: 'touch', contain: 'layout style' }}>
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
-        <div className="flex-1 flex flex-col overflow-hidden relative z-10" style={{ backgroundColor: 'transparent' }}>
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">
           <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
             <div className="flex items-center">
               <LogoSidebarTrigger />
