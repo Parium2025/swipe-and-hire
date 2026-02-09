@@ -1,4 +1,5 @@
 import { memo, useMemo, useState, useEffect } from 'react';
+import { getDevice } from '@/hooks/use-device';
 
 interface WeatherEffectsProps {
   weatherCode: number | null;
@@ -7,6 +8,19 @@ interface WeatherEffectsProps {
 }
 
 type EffectType = 'rain' | 'snow' | 'thunder' | 'cloudy' | null;
+
+// Particle counts: reduced on mobile for scroll performance
+const isMobileDevice = getDevice() === 'mobile';
+const COUNTS = {
+  stars: isMobileDevice ? 20 : 50,
+  rain: isMobileDevice ? 15 : 35,
+  snow: isMobileDevice ? 18 : 40,
+  clouds: isMobileDevice ? 2 : 4,
+  thunderRain: isMobileDevice ? 18 : 40,
+};
+// Shooting star interval: longer on mobile
+const SHOOTING_STAR_MIN = isMobileDevice ? 40000 : 25000;
+const SHOOTING_STAR_MAX = isMobileDevice ? 80000 : 50000;
 
 const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: WeatherEffectsProps) => {
   const effectType = useMemo((): EffectType => {
@@ -21,7 +35,7 @@ const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: Weat
   const showStars = isEvening && (weatherCode === 0 || weatherCode === 1 || weatherCode === 2);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" style={{ contain: 'strict' }}>
       {showStars && <StarsEffect />}
       {effectType === 'cloudy' && <CloudyEffect />}
       {effectType === 'rain' && <RainEffect />}
@@ -33,16 +47,21 @@ const WeatherEffects = memo(({ weatherCode, isLoading, isEvening = false }: Weat
 
 WeatherEffects.displayName = 'WeatherEffects';
 
-// Stars - pure CSS animations instead of framer-motion
-const STARS_CACHE_KEY = 'parium_stars_config';
+// Stars - pure CSS animations
+const STARS_CACHE_KEY = 'parium_stars_config_v2'; // v2 = mobile-aware count
 
 const getOrCreateStars = () => {
+  const count = COUNTS.stars;
   try {
     const cached = sessionStorage.getItem(STARS_CACHE_KEY);
-    if (cached) return JSON.parse(cached);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      // If cached count matches current device, reuse
+      if (parsed.length === count) return parsed;
+    }
   } catch { /* ignore */ }
 
-  const stars = Array.from({ length: 50 }).map((_, i) => ({
+  const stars = Array.from({ length: count }).map((_, i) => ({
     id: i,
     left: Math.random() * 100,
     top: Math.random() * 70,
@@ -77,7 +96,7 @@ const StarsEffect = memo(() => {
     };
 
     const scheduleNext = () => {
-      const delay = 25000 + Math.random() * 25000;
+      const delay = SHOOTING_STAR_MIN + Math.random() * (SHOOTING_STAR_MAX - SHOOTING_STAR_MIN);
       return setTimeout(() => { triggerShootingStar(); scheduleNext(); }, delay);
     };
 
@@ -122,15 +141,15 @@ const StarsEffect = memo(() => {
 
 StarsEffect.displayName = 'StarsEffect';
 
-// Cloudy - pure CSS
+// Cloudy - pure CSS, reduced count on mobile
 const CloudyEffect = memo(() => {
   const clouds = useMemo(() =>
-    Array.from({ length: 4 }).map((_, i) => {
+    Array.from({ length: COUNTS.clouds }).map((_, i) => {
       const duration = 60 + Math.random() * 40;
       const initialX = Math.random() * 140 - 20;
       return {
         id: i,
-        top: 5 + i * 18 + Math.random() * 10,
+        top: 5 + i * (70 / COUNTS.clouds) + Math.random() * 10,
         size: 80 + Math.random() * 60,
         opacity: 0.06 + Math.random() * 0.04,
         duration,
@@ -161,22 +180,23 @@ const CloudyEffect = memo(() => {
 
 CloudyEffect.displayName = 'CloudyEffect';
 
-// Rain - pure CSS
+// Rain - pure CSS, reduced count on mobile
 const RainEffect = memo(() => {
+  const count = COUNTS.rain;
   const drops = useMemo(() =>
-    Array.from({ length: 35 }).map((_, i) => {
+    Array.from({ length: count }).map((_, i) => {
       const duration = 1.2 + Math.random() * 0.6;
-      const staggerDelay = (i / 35) * duration + Math.random() * 0.3;
+      const staggerDelay = (i / count) * duration + Math.random() * 0.3;
       return {
         id: i,
-        left: (i / 35) * 120 - 10,
+        left: (i / count) * 120 - 10,
         duration,
         delay: staggerDelay,
         height: 16 + Math.random() * 14,
         opacity: 0.35 + Math.random() * 0.25,
       };
     }),
-  []);
+  [count]);
 
   return (
     <>
@@ -199,12 +219,13 @@ const RainEffect = memo(() => {
 
 RainEffect.displayName = 'RainEffect';
 
-// Snow - pure CSS
+// Snow - pure CSS, reduced count on mobile
 const SnowEffect = memo(() => {
+  const count = COUNTS.snow;
   const flakes = useMemo(() =>
-    Array.from({ length: 40 }).map((_, i) => {
+    Array.from({ length: count }).map((_, i) => {
       const duration = 12 + Math.random() * 6;
-      const staggerDelay = (i / 40) * duration * 0.8 + Math.random() * 2;
+      const staggerDelay = (i / count) * duration * 0.8 + Math.random() * 2;
       return {
         id: i,
         left: Math.random() * 100,
@@ -215,7 +236,7 @@ const SnowEffect = memo(() => {
         swayAmount: 10 + Math.random() * 15,
       };
     }),
-  []);
+  [count]);
 
   return (
     <>
@@ -240,18 +261,19 @@ const SnowEffect = memo(() => {
 
 SnowEffect.displayName = 'SnowEffect';
 
-// Thunder - pure CSS for rain, minimal JS for lightning flash
+// Thunder - pure CSS rain, minimal JS for lightning
 const ThunderEffect = memo(() => {
+  const count = COUNTS.thunderRain;
   const drops = useMemo(() =>
-    Array.from({ length: 40 }).map((_, i) => ({
+    Array.from({ length: count }).map((_, i) => ({
       id: i,
-      left: (i / 40) * 130 - 15,
+      left: (i / count) * 130 - 15,
       delay: Math.random() * 3,
       duration: 1.0 + Math.random() * 0.5,
       height: 15 + Math.random() * 12,
       opacity: 0.35 + Math.random() * 0.25,
     })),
-  []);
+  [count]);
 
   const [lightningState, setLightningState] = useState({ position: 50, flash: false });
 
