@@ -67,7 +67,7 @@ body {
    - Scroll container: own layer via .mobile-scroll-container
    - These layers are composited independently = smooth 60fps scroll
    ============================================ */
-@media (pointer: coarse) {
+@media (max-width: 767px) {
   /* Promote each animated element to its own GPU layer */
   .animate-soft-bounce,
   .animate-pulse,
