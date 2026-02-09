@@ -183,13 +183,9 @@ export function useMessagesBackgroundSync() {
     };
   }, [syncMessages]);
 
-  // Trigger sync on first user interaction — DESKTOP ONLY
-  // On touch devices, touchstart triggers heavy network requests that block UI responsiveness
+  // Trigger sync on first user interaction (including touch)
   useEffect(() => {
     if (!user || hasInteractedRef.current) return;
-
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice) return; // Skip — initial sync handles mobile via requestIdleCallback
 
     const handleInteraction = () => {
       if (hasInteractedRef.current) return;
@@ -198,6 +194,7 @@ export function useMessagesBackgroundSync() {
       window.removeEventListener('mousemove', handleInteraction);
       window.removeEventListener('click', handleInteraction);
       window.removeEventListener('keydown', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
       
       syncMessages();
     };
@@ -205,11 +202,13 @@ export function useMessagesBackgroundSync() {
     window.addEventListener('mousemove', handleInteraction, { once: true });
     window.addEventListener('click', handleInteraction, { once: true });
     window.addEventListener('keydown', handleInteraction, { once: true });
+    window.addEventListener('touchstart', handleInteraction, { once: true });
 
     return () => {
       window.removeEventListener('mousemove', handleInteraction);
       window.removeEventListener('click', handleInteraction);
       window.removeEventListener('keydown', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
     };
   }, [user, syncMessages]);
 
