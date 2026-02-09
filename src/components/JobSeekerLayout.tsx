@@ -128,7 +128,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
-      <div className="h-screen flex w-full overflow-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="h-screen flex w-full overflow-hidden relative">
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col overflow-hidden relative z-10">
@@ -185,7 +185,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
             </div>
           </div>
           
-          <main className="flex-1 overflow-y-auto overscroll-contain p-3" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <main className="flex-1 overflow-y-auto overscroll-contain p-3" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
             {children}
           </main>
         </div>
