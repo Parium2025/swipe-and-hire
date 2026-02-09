@@ -32,10 +32,8 @@ export function useActivityTracker() {
       }
     };
 
-    // Defer initial update to avoid blocking mount rendering
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const initialDelay = isTouchDevice ? 3000 : 0;
-    const mountTimeout = setTimeout(updateActivity, initialDelay);
+    // Update immediately on mount
+    updateActivity();
 
     // Update on visibility change (user comes back to tab)
     const handleVisibilityChange = () => {
@@ -56,7 +54,6 @@ export function useActivityTracker() {
     const interval = setInterval(updateActivity, UPDATE_INTERVAL_MS);
 
     return () => {
-      clearTimeout(mountTimeout);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleActivity);
       clearInterval(interval);

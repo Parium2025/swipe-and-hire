@@ -311,42 +311,15 @@ export const useJobSeekerBackgroundSync = () => {
     const userId = user.id;
 
     try {
-      // On mobile/touch: stagger requests to avoid blocking main thread
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      
-      if (isTouchDevice) {
-        // Run critical data first, then secondary data after a yield
-        await Promise.all([
-          preloadSavedJobs(userId),
-          preloadMyApplications(userId),
-        ]);
-        
-        // Yield to browser to allow rendering
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        await Promise.all([
-          preloadMessages(userId),
-          preloadCandidateInterviews(userId),
-        ]);
-        
-        // Yield again before less critical data
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        await Promise.all([
-          preloadAvailableJobs(),
-          preloadWeatherIfStale(),
-        ]);
-      } else {
-        // Desktop: run all in parallel (more CPU/bandwidth available)
-        await Promise.all([
-          preloadSavedJobs(userId),
-          preloadMyApplications(userId),
-          preloadMessages(userId),
-          preloadAvailableJobs(),
-          preloadCandidateInterviews(userId),
-          preloadWeatherIfStale(),
-        ]);
-      }
+      // Run ALL data in parallel — immediate, no delays
+      await Promise.all([
+        preloadSavedJobs(userId),
+        preloadMyApplications(userId),
+        preloadMessages(userId),
+        preloadAvailableJobs(),
+        preloadCandidateInterviews(userId),
+        preloadWeatherIfStale(),
+      ]);
 
       hasPreloadedRef.current = true;
       updateLastSyncTime();
@@ -376,87 +349,21 @@ export const useJobSeekerBackgroundSync = () => {
   useEffect(() => {
     if (!user || !isJobSeeker) return;
 
-    // 🚀 TOUCH OPTIMIZATION: Detect if we're on a touch device
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    // 🌐 NETWORK OPTIMIZATION: Detect slow connection
-    const isSlowConnection = () => {
-      if ('connection' in navigator) {
-        const conn = (navigator as any).connection;
-        if (conn?.effectiveType === '2g' || conn?.effectiveType === 'slow-2g') return true;
-        if (conn?.saveData) return true;
-      }
-      return false;
-    };
+    // 🚀 IMMEDIATE: Preload all data right away — no delays
+    preloadAllData();
 
-    // 🚀 PERFORMANCE: Defer initial preload aggressively on touch/slow
-    // to avoid competing with initial rendering and touch responsiveness
-    const scheduleInitialPreload = () => {
-      const delay = isTouchDevice || isSlowConnection() ? 5000 : 1000;
-      
-      if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(() => preloadAllData(), { timeout: delay + 2000 });
-      } else {
-        setTimeout(() => preloadAllData(), delay);
-      }
-    };
-    
-    scheduleInitialPreload();
-
-    // Lyssna på tab-focus - MED DEBOUNCE på touch
-    let visibilityTimeout: NodeJS.Timeout | null = null;
+    // Tab-focus: sync immediately when user returns
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // På touch/svagt internet: vänta 2 sekunder innan sync
-        const delay = isTouchDevice || isSlowConnection() ? 2000 : 0;
-        
-        if (visibilityTimeout) clearTimeout(visibilityTimeout);
-        visibilityTimeout = setTimeout(() => {
-          hasPreloadedRef.current = false;
-          // Använd requestIdleCallback för att inte blocka UI
-          if ('requestIdleCallback' in window) {
-            (window as any).requestIdleCallback(() => preloadAllData(true), { timeout: 5000 });
-          } else {
-            preloadAllData(true);
-          }
-        }, delay);
+        hasPreloadedRef.current = false;
+        preloadAllData(true);
       }
-    };
-
-    // På touch: INGEN omedelbar preload vid första interaktion (blockar touch response)
-    // Desktop: behåll beteendet
-    let firstInteractionHandled = false;
-    const handleFirstInteraction = () => {
-      if (firstInteractionHandled || isTouchDevice) return; // Skip på touch
-      firstInteractionHandled = true;
-      
-      // Defer till idle
-      if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(() => preloadAllData(), { timeout: 2000 });
-      } else {
-        setTimeout(() => preloadAllData(), 500);
-      }
-      
-      document.removeEventListener('mousemove', handleFirstInteraction);
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('keydown', handleFirstInteraction);
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Endast desktop-interaktioner
-    if (!isTouchDevice) {
-      document.addEventListener('mousemove', handleFirstInteraction, { once: true });
-      document.addEventListener('click', handleFirstInteraction, { once: true });
-      document.addEventListener('keydown', handleFirstInteraction, { once: true });
-    }
 
     return () => {
-      if (visibilityTimeout) clearTimeout(visibilityTimeout);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('mousemove', handleFirstInteraction);
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('keydown', handleFirstInteraction);
     };
   }, [user, isJobSeeker, preloadAllData]);
 

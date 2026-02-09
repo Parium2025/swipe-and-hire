@@ -229,25 +229,10 @@ export function useMessagesBackgroundSync() {
     };
   }, [user, syncMessages]);
 
-  // Initial sync on mount - HEAVILY DEFERRED on touch to avoid blocking UI
+  // Initial sync on mount - immediate
   useEffect(() => {
     if (!user) return;
-    
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    // On touch: defer significantly so initial render + touch responsiveness isn't affected
-    if (isTouchDevice) {
-      const timeoutId = setTimeout(() => {
-        if ('requestIdleCallback' in window) {
-          (window as any).requestIdleCallback(() => syncMessages(), { timeout: 10000 });
-        } else {
-          syncMessages();
-        }
-      }, 6000); // 6s delay on mobile — let the app fully render first
-      return () => clearTimeout(timeoutId);
-    } else {
-      syncMessages();
-    }
+    syncMessages();
   }, [user, syncMessages]);
 
   return { syncMessages };
