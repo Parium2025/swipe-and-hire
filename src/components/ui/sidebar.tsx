@@ -192,21 +192,43 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
+        <>
+          {/* Overlay – always mounted, visibility via opacity + pointer-events */}
+          <div
+            className={cn(
+              "fixed inset-0 z-50 bg-black/60 transition-opacity duration-300",
+              openMobile ? "opacity-100" : "opacity-0 pointer-events-none"
+            )}
+            onClick={() => setOpenMobile(false)}
+            aria-hidden="true"
+          />
+          {/* Sidebar panel – always mounted, slides via translate */}
+          <div
+            ref={ref}
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-gradient-parium p-0 text-sidebar-foreground [&>button]:hidden"
+            className={cn(
+              "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] flex-col bg-gradient-parium text-sidebar-foreground transition-transform duration-300 ease-out will-change-transform",
+              side === "left" ? "left-0" : "right-0",
+              openMobile
+                ? "translate-x-0"
+                : side === "left"
+                  ? "-translate-x-full"
+                  : "translate-x-full",
+              className
+            )}
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
-            side={side}
+            {...props}
           >
-            <div className="flex h-full w-full flex-col">{children}</div>
-          </SheetContent>
-        </Sheet>
+            <div className="flex h-full w-full flex-col overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+              {children}
+            </div>
+          </div>
+        </>
       )
     }
 
