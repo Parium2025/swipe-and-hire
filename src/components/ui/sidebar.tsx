@@ -191,6 +191,8 @@ const Sidebar = React.forwardRef<
     }
 
     if (isMobile) {
+      // On mobile, ignore external className/props that could override the panel styling
+      // (e.g. AppSidebar passes bg-transparent which is for desktop only)
       return (
         <>
           {/* Overlay – always mounted, visibility via opacity + pointer-events */}
@@ -202,27 +204,25 @@ const Sidebar = React.forwardRef<
             onClick={() => setOpenMobile(false)}
             aria-hidden="true"
           />
-          {/* Sidebar panel – always mounted, slides via translate */}
+          {/* Sidebar panel – always mounted, slides via CSS transform */}
           <div
             ref={ref}
             data-sidebar="sidebar"
             data-mobile="true"
             className={cn(
-              "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] flex-col bg-gradient-parium text-sidebar-foreground transition-transform duration-300 ease-out will-change-transform",
+              "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] flex-col bg-gradient-parium p-0 text-sidebar-foreground transition-transform duration-300 ease-out will-change-transform",
               side === "left" ? "left-0" : "right-0",
               openMobile
                 ? "translate-x-0"
                 : side === "left"
                   ? "-translate-x-full"
-                  : "translate-x-full",
-              className
+                  : "translate-x-full"
             )}
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
-            {...props}
           >
             <div className="flex h-full w-full flex-col overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
               {children}
