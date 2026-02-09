@@ -169,7 +169,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-4 h-full flex flex-col">
+      <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
         {/* Header - EXACT same as employer */}
         <div className="flex items-center justify-between">
           <div className="p-2 rounded-xl bg-white/10">
@@ -193,7 +193,7 @@ const CareerTipsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; set
                 onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
                 className={currentTip.source_url ? 'cursor-pointer group' : ''}
               >
-                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
+                <h3 className="text-xs sm:text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
                   {currentTip.title}
                 </h3>
                 <p className="text-xs text-white line-clamp-1 mb-1">
@@ -492,7 +492,7 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-4 h-full flex flex-col">
+      <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="p-2 rounded-xl bg-white/10">
@@ -520,10 +520,10 @@ const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean;
               transition={{ duration: 0.2 }}
               className="flex flex-col items-center"
             >
-              <h3 className="text-base font-semibold text-white leading-snug mb-1">
+              <h3 className="text-sm sm:text-base font-semibold text-white leading-snug mb-1">
                 {currentStat.label}
               </h3>
-              <div className="text-3xl font-bold text-white">{currentStat.value}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white">{currentStat.value}</div>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -723,7 +723,7 @@ const JobSeekerNotesCard = memo(() => {
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
         
-        <CardContent className="relative p-4 h-full flex flex-col">
+        <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
           {/* Header with toolbar */}
            <div className="flex items-center justify-between mb-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -984,18 +984,18 @@ export const JobSeekerDashboardGrid = memo(() => {
   const [isCardsPaused, setIsCardsPaused] = useState(false);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2 sm:space-y-4">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="flex items-center gap-2"
       >
-        <h2 className="text-lg font-semibold text-white">Din översikt</h2>
-        <Sparkles className="h-5 w-5 text-white" />
+        <h2 className="text-base sm:text-lg font-semibold text-white">Din översikt</h2>
+        <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
       </motion.div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:gap-5">
         {/* Top Left - Career Tips (Green) */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
