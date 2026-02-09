@@ -50,6 +50,9 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   // Desktop uses top nav, mobile/tablet uses sidebar
   const isDesktop = device === 'desktop';
   
+  // Detect touch device once for deferring heavy work
+  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  
   // Track user activity for "last seen" feature
   useActivityTracker();
   
@@ -65,34 +68,49 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   // 🚀 Messages Background Sync - triggers on login, tab focus, and user interaction
   useMessagesBackgroundSync();
 
-  // Prefetch public jobs in background so they're ready instantly when navigating to /search-jobs
+  // Prefetch public jobs — deferred on mobile to avoid blocking initial render
   useEffect(() => {
-    // Prefetch with empty filters (default view)
-    queryClient.prefetchQuery({
-      queryKey: ['public-jobs', [], 'all-categories', [], []],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from('job_postings')
-          .select(`
-            *,
-            profiles!job_postings_employer_id_fkey(company_name)
-          `)
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(100);
-        
-        if (error) throw error;
-        
-        return (data || []).map(job => ({
-          ...job,
-          company_name: job.profiles?.company_name || 'Okänt företag',
-          views_count: job.views_count || 0,
-          applications_count: job.applications_count || 0,
-        }));
-      },
-      staleTime: Infinity,
-    });
-  }, [queryClient]);
+    const doPrefetch = () => {
+      queryClient.prefetchQuery({
+        queryKey: ['public-jobs', [], 'all-categories', [], []],
+        queryFn: async () => {
+          const { data, error } = await supabase
+            .from('job_postings')
+            .select(`
+              *,
+              profiles!job_postings_employer_id_fkey(company_name)
+            `)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .limit(100);
+          
+          if (error) throw error;
+          
+          return (data || []).map(job => ({
+            ...job,
+            company_name: job.profiles?.company_name || 'Okänt företag',
+            views_count: job.views_count || 0,
+            applications_count: job.applications_count || 0,
+          }));
+        },
+        staleTime: Infinity,
+      });
+    };
+
+    if (isTouchDevice) {
+      // Defer 8s on mobile to let initial render complete
+      const timeout = setTimeout(() => {
+        if ('requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(doPrefetch, { timeout: 12000 });
+        } else {
+          doPrefetch();
+        }
+      }, 8000);
+      return () => clearTimeout(timeout);
+    } else {
+      doPrefetch();
+    }
+  }, [queryClient, isTouchDevice]);
 
   // Desktop layout with top navigation
   if (isDesktop) {
@@ -148,7 +166,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
-      <div className="h-[100dvh] flex w-full overflow-x-hidden relative" style={{ WebkitOverflowScrolling: 'touch', contain: 'layout style' }}>
+      <div className="h-[100dvh] flex w-full overflow-hidden relative" style={{ WebkitOverflowScrolling: 'touch', contain: 'layout style' }}>
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">

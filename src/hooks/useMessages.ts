@@ -297,6 +297,7 @@ export function useMessages() {
 }
 
 // Hook for background preloading - call this in layout/app component
+// On touch devices, defers to avoid blocking initial render
 export function useMessagesPreload() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -304,53 +305,69 @@ export function useMessagesPreload() {
   useEffect(() => {
     if (!user) return;
 
-    // Prefetch messages data in background
-    queryClient.prefetchQuery({
-      queryKey: ['messages', 'all', user.id],
-      queryFn: async () => {
-        const [inboxResult, sentResult] = await Promise.all([
-          supabase
-            .from('messages')
-            .select(`*, job:job_id (title)`)
-            .eq('recipient_id', user.id)
-            .order('created_at', { ascending: false }),
-          supabase
-            .from('messages')
-            .select(`*, job:job_id (title)`)
-            .eq('sender_id', user.id)
-            .order('created_at', { ascending: false }),
-        ]);
+    const doPrefetch = () => {
+      queryClient.prefetchQuery({
+        queryKey: ['messages', 'all', user.id],
+        queryFn: async () => {
+          const [inboxResult, sentResult] = await Promise.all([
+            supabase
+              .from('messages')
+              .select(`*, job:job_id (title)`)
+              .eq('recipient_id', user.id)
+              .order('created_at', { ascending: false }),
+            supabase
+              .from('messages')
+              .select(`*, job:job_id (title)`)
+              .eq('sender_id', user.id)
+              .order('created_at', { ascending: false }),
+          ]);
 
-        const allUserIds = [
-          ...new Set([
-            ...(inboxResult.data?.map(m => m.sender_id) || []),
-            ...(sentResult.data?.map(m => m.recipient_id) || []),
-          ])
-        ];
+          const allUserIds = [
+            ...new Set([
+              ...(inboxResult.data?.map(m => m.sender_id) || []),
+              ...(sentResult.data?.map(m => m.recipient_id) || []),
+            ])
+          ];
 
-        let profileMap = new Map();
-        if (allUserIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-            .in('user_id', allUserIds);
-          profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+          let profileMap = new Map();
+          if (allUserIds.length > 0) {
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
+              .in('user_id', allUserIds);
+            profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+          }
+
+          const inbox = (inboxResult.data || []).map(msg => ({
+            ...msg,
+            sender_profile: profileMap.get(msg.sender_id) || null,
+          }));
+
+          const sent = (sentResult.data || []).map(msg => ({
+            ...msg,
+            recipient_profile: profileMap.get(msg.recipient_id) || null,
+          }));
+
+          setMessagesCache(inbox, sent);
+          return { inbox, sent };
+        },
+        staleTime: Infinity,
+      });
+    };
+
+    // On touch devices: defer heavily to avoid competing with initial render
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) {
+      const timeout = setTimeout(() => {
+        if ('requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(doPrefetch, { timeout: 10000 });
+        } else {
+          doPrefetch();
         }
-
-        const inbox = (inboxResult.data || []).map(msg => ({
-          ...msg,
-          sender_profile: profileMap.get(msg.sender_id) || null,
-        }));
-
-        const sent = (sentResult.data || []).map(msg => ({
-          ...msg,
-          recipient_profile: profileMap.get(msg.recipient_id) || null,
-        }));
-
-        setMessagesCache(inbox, sent);
-        return { inbox, sent };
-      },
-      staleTime: Infinity,
-    });
+      }, 7000);
+      return () => clearTimeout(timeout);
+    } else {
+      doPrefetch();
+    }
   }, [user, queryClient]);
 }
