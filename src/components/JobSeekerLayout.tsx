@@ -1,6 +1,6 @@
 import { ReactNode, memo, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/AppSidebar';
 import JobSeekerTopNav from '@/components/JobSeekerTopNav';
 import DeveloperControls from '@/components/DeveloperControls';
@@ -22,6 +22,20 @@ interface JobSeekerLayoutProps {
   developerView?: string;
   onViewChange?: (view: string) => void;
 }
+
+// Logo that acts as sidebar trigger
+const LogoSidebarTrigger = () => {
+  const { toggleSidebar } = useSidebar();
+  return (
+    <button
+      onClick={toggleSidebar}
+      className="touch-manipulation p-1 rounded-lg hover:bg-white/10 active:bg-white/20 transition-colors"
+      aria-label="Öppna meny"
+    >
+      <AuthLogoInline className="h-8 w-auto" />
+    </button>
+  );
+};
 
 const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
   const { user, profile } = useAuth();
@@ -134,9 +148,8 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
         <AppSidebar />
         <div className="flex-1 flex flex-col overflow-hidden relative z-10">
           <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="text-white hover:bg-white/20 h-8 w-8" />
-              <AuthLogoInline className="h-7 w-auto" />
+            <div className="flex items-center">
+              <LogoSidebarTrigger />
             </div>
             <div className="flex items-center gap-3">
               {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (
