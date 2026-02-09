@@ -113,7 +113,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
-      <div className="h-[100dvh] flex w-full overflow-hidden relative" style={{ WebkitOverflowScrolling: 'touch', contain: 'layout style' }}>
+      <div className="h-[100dvh] flex w-full overflow-hidden relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">

@@ -58,12 +58,7 @@ const JobSeekerHome = memo(() => {
   const navigate = useNavigate();
   const { profile } = useAuth();
   
-  const [showContent, setShowContent] = useState(false);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => setShowContent(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+  const showContent = true;
 
   const firstName = profile?.first_name || 'du';
   
@@ -125,12 +120,7 @@ const JobSeekerHome = memo(() => {
   });
   
   // Delay for cache clearing
-  const [mountedLongEnough, setMountedLongEnough] = useState(false);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => setMountedLongEnough(true), 200);
-    return () => clearTimeout(timer);
-  }, []);
+  const mountedLongEnough = true;
   
   const showWeatherEffects = gpsGranted && mountedLongEnough && !weather.isLoading;
   
