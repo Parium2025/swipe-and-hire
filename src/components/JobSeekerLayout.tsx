@@ -7,7 +7,7 @@ import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { TruncatedText } from '@/components/TruncatedText';
+
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
@@ -135,13 +135,11 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
           <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="text-white hover:bg-white/20 h-8 w-8" />
-              <div className="flex-1 min-w-0">
-                <h1 className="text-lg font-bold text-white">Parium</h1>
-                <TruncatedText
-                  text={`Jobbsökare: ${profile?.first_name} ${profile?.last_name}`}
-                  className="text-sm text-white truncate block"
-                />
-              </div>
+              <img 
+                src="/lovable-uploads/parium-logo-transparent.png" 
+                alt="Parium" 
+                className="h-7 object-contain" 
+              />
             </div>
             <div className="flex items-center gap-3">
               {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (
