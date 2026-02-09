@@ -349,7 +349,7 @@ export const useJobSeekerBackgroundSync = () => {
   useEffect(() => {
     if (!user || !isJobSeeker) return;
 
-    // 🚀 IMMEDIATE: Preload all data right away — no delays
+    // 🚀 IMMEDIATE: Preload all data right away
     preloadAllData();
 
     // Tab-focus: sync immediately when user returns
@@ -360,10 +360,27 @@ export const useJobSeekerBackgroundSync = () => {
       }
     };
 
+    // First interaction triggers sync (desktop: mousemove, all: click/touch)
+    let firstInteractionHandled = false;
+    const handleFirstInteraction = () => {
+      if (firstInteractionHandled) return;
+      firstInteractionHandled = true;
+      preloadAllData();
+      document.removeEventListener('mousemove', handleFirstInteraction);
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('mousemove', handleFirstInteraction, { once: true });
+    document.addEventListener('click', handleFirstInteraction, { once: true });
+    document.addEventListener('touchstart', handleFirstInteraction, { once: true });
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('mousemove', handleFirstInteraction);
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
     };
   }, [user, isJobSeeker, preloadAllData]);
 
