@@ -165,7 +165,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
         <AppSidebar />
         
         {/* Sticky header - stays at top during document scroll */}
-        <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-parium-dark/95 backdrop-blur-sm px-3">
+        <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-parium-dark px-3">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="text-white hover:bg-white/20 h-8 w-8" />
             <div className="flex-1 min-w-0">
