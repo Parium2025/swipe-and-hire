@@ -132,17 +132,17 @@ export const useCareerTips = () => {
   return useQuery({
     queryKey: ['career-tips'],
     queryFn: fetchRecentCareerTips,
-    staleTime: Infinity, // Content rarely changes — manual refetch if needed
+    staleTime: 5 * 60 * 1000, // 5 min — refetch i bakgrunden efter 5 min
     gcTime: Infinity,
     retry: 2,
     retryDelay: 1000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnWindowFocus: true, // Hämta ny data när användaren kommer tillbaka
+    refetchOnMount: 'always', // Alltid hämta i bakgrunden vid mount
     // Instant load from localStorage cache
     initialData: () => readCache() ?? undefined,
     initialDataUpdatedAt: () => {
       const cached = readCache();
-      // Return 0 so initialData is always stale → triggers background refetch
+      // Return 0 so initialData is always stale → triggers background refetch immediately
       return cached ? 0 : undefined;
     },
   });
