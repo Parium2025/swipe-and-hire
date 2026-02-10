@@ -17,6 +17,7 @@ type StatData = {
   value: number;
   description: string;
   link?: string;
+  emptyHint?: string;
 };
 
 interface JobSeekerStatsCardProps {
@@ -132,10 +133,10 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const navigate = useNavigate();
 
   const statsArray: StatData[] = useMemo(() => [
-    { icon: Send, label: 'Skickade ansökningar', value: applicationsCount, description: 'Dina jobbansökningar', link: '/my-applications' },
-    { icon: Calendar, label: 'Bokade intervjuer', value: interviewsCount, description: 'Kommande intervjuer' },
-    { icon: Heart, label: 'Sparade jobb', value: savedJobsCount, description: 'Jobb du sparat', link: '/saved-jobs' },
-    { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden', link: '/messages' },
+    { icon: Send, label: 'Skickade ansökningar', value: applicationsCount, description: 'Dina jobbansökningar', link: '/my-applications', emptyHint: 'Börja söka jobb!' },
+    { icon: Calendar, label: 'Bokade intervjuer', value: interviewsCount, description: 'Kommande intervjuer', emptyHint: 'Inga bokade än' },
+    { icon: Heart, label: 'Sparade jobb', value: savedJobsCount, description: 'Jobb du sparat', link: '/saved-jobs', emptyHint: 'Spara jobb du gillar' },
+    { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden', link: '/messages', emptyHint: 'Inga olästa' },
   ], [applicationsCount, interviewsCount, savedJobsCount, unreadMessagesCount]);
 
   const goNext = useCallback(() => {
@@ -229,6 +230,9 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
                 {currentStat.label}
               </h3>
               <div className="text-3xl font-bold text-white">{currentStat.value}</div>
+              {currentStat.value === 0 && currentStat.emptyHint && (
+                <p className="text-xs text-white/70 mt-1">{currentStat.emptyHint}</p>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
