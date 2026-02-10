@@ -469,9 +469,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (session?.user) {
         fetchUserData(session.user.id).then(() => {
-          // 🎯 Vänta på media innan vi släpper initial loading
+          // 🎯 Vänta på media innan vi släpper initial loading (använd ref, inte state - undvik stale closure)
           const checkMediaReady = setInterval(() => {
-            if (mediaPreloadComplete) {
+            if (mediaPreloadCompleteRef.current) {
               clearInterval(checkMediaReady);
               if (mounted) {
                 setLoading(false);
@@ -480,7 +480,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }, 50);
           
-          // Timeout efter max 1.1 sekunder för initial load (matchar "Loggar in..." screen)
+          // Timeout efter max 1.1 sekunder för initial load (fallback om media är seg)
           setTimeout(() => {
             clearInterval(checkMediaReady);
             if (mounted) {
