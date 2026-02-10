@@ -288,12 +288,22 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
   }, [value, editor]);
 
   const updateScrollInfo = useCallback(() => {
-    const editorElement = document.querySelector('.ProseMirror');
+    const editorElement = editor?.view?.dom;
     if (editorElement) {
       const { scrollTop, scrollHeight, clientHeight } = editorElement;
       setScrollInfo({ scrollTop, scrollHeight, clientHeight });
     }
-  }, []);
+  }, [editor]);
+
+  // Attach scroll listener directly to ProseMirror DOM element
+  useEffect(() => {
+    const dom = editor?.view?.dom;
+    if (!dom) return;
+    const handler = () => updateScrollInfo();
+    dom.addEventListener('scroll', handler, { passive: true });
+    updateScrollInfo();
+    return () => dom.removeEventListener('scroll', handler);
+  }, [editor, updateScrollInfo]);
 
   useEffect(() => {
     updateScrollInfo();
@@ -331,7 +341,6 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
         <EditorContent 
           editor={editor} 
           className="h-full [&_.ProseMirror]:h-full"
-          onScroll={updateScrollInfo}
         />
         
         {/* Mini scrollbar indicator */}
