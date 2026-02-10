@@ -294,7 +294,8 @@ export const useJobSeekerBackgroundSync = () => {
   }, [queryClient]);
 
   // 🚀 HUVUDFUNKTION: Förladda ALL jobbsökardata parallellt
-  // Uses staggered cache updates to avoid cascading re-renders that freeze the UI
+  // Uses requestIdleCallback to avoid blocking CSS transitions (sidebar, navigation)
+  // This is how Spotify/TikTok/Airbnb handle background data: never compete with animations
   const preloadAllData = useCallback(async (force = false) => {
     if (!user || !isJobSeeker) return;
     
@@ -330,6 +331,16 @@ export const useJobSeekerBackgroundSync = () => {
     }
   }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadMessages, preloadAvailableJobs, preloadCandidateInterviews, preloadWeatherIfStale]);
 
+  // 🕐 Schemalägg preload via requestIdleCallback så den ALDRIG blockerar animationer
+  const schedulePreload = useCallback((force = false) => {
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(() => preloadAllData(force), { timeout: 2000 });
+    } else {
+      // Fallback för Safari: kör efter nuvarande frame + micro-tasks
+      setTimeout(() => preloadAllData(force), 50);
+    }
+  }, [preloadAllData]);
+
   // Exponera preload-funktionen globalt
   useEffect(() => {
     if (user && isJobSeeker) {
@@ -345,27 +356,31 @@ export const useJobSeekerBackgroundSync = () => {
 
   // 📡 Realtime ersätter periodisk refresh - ingen polling behövs
 
+  // 📡 Realtime ersätter periodisk refresh - ingen polling behövs
+
   // 🖱️ AKTIVITETS-TRIGGERS (OPTIMERAD FÖR TOUCH/SVAGT INTERNET)
+  // All triggers use schedulePreload (requestIdleCallback) so data fetching
+  // NEVER blocks CSS transitions like sidebar open/close
   useEffect(() => {
     if (!user || !isJobSeeker) return;
 
-    // 🚀 IMMEDIATE: Preload all data right away
-    preloadAllData();
+    // 🚀 Deferred: Preload data when browser is idle (not during initial paint)
+    schedulePreload();
 
-    // Tab-focus: sync immediately when user returns
+    // Tab-focus: sync when user returns, but deferred
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         hasPreloadedRef.current = false;
-        preloadAllData(true);
+        schedulePreload(true);
       }
     };
 
-    // First interaction triggers sync (desktop: mousemove, all: click/touch)
+    // First interaction triggers sync — deferred to not block touch feedback
     let firstInteractionHandled = false;
     const handleFirstInteraction = () => {
       if (firstInteractionHandled) return;
       firstInteractionHandled = true;
-      preloadAllData();
+      schedulePreload();
       document.removeEventListener('mousemove', handleFirstInteraction);
       document.removeEventListener('click', handleFirstInteraction);
       document.removeEventListener('touchstart', handleFirstInteraction);
@@ -382,7 +397,7 @@ export const useJobSeekerBackgroundSync = () => {
       document.removeEventListener('click', handleFirstInteraction);
       document.removeEventListener('touchstart', handleFirstInteraction);
     };
-  }, [user, isJobSeeker, preloadAllData]);
+  }, [user, isJobSeeker, schedulePreload]);
 
   // 📡 REALTIME SUBSCRIPTIONS
   useEffect(() => {
