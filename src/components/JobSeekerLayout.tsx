@@ -166,6 +166,10 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
             <div className="flex items-center">
               <LogoSidebarTrigger />
             </div>
+            {/* Centered brand name */}
+            <span className="absolute left-1/2 -translate-x-1/2 text-white text-base font-semibold tracking-tight select-none pointer-events-none">
+              Parium
+            </span>
             <div className="flex items-center gap-2">
               {/* Search button */}
               <button
