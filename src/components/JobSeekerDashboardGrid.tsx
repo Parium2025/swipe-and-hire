@@ -1,6 +1,7 @@
 import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { CareerTipsCard } from '@/components/dashboard/CareerTipsCard';
 import { JobSeekerStatsCard } from '@/components/dashboard/JobSeekerStatsCard';
 import { JobSeekerNotesCard } from '@/components/dashboard/JobSeekerNotesCard';
@@ -8,8 +9,48 @@ import { JobSeekerInterviewsCard } from '@/components/dashboard/JobSeekerIntervi
 
 // Main Dashboard Grid for Job Seekers
 export const JobSeekerDashboardGrid = memo(() => {
-  // Shared pause state - hovering on either green or blue card pauses both
   const [isCardsPaused, setIsCardsPaused] = useState(false);
+  const isMobile = useIsMobile();
+
+  // Mobile: Statistik → Intervjuer → Nyheter → Anteckningar
+  // Desktop: behåll 2x2 grid (Nyheter/Stats top, Notes/Interviews bottom)
+  const mobileOrder = (
+    <>
+      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
+        <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      </motion.div>
+      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
+        <JobSeekerInterviewsCard />
+      </motion.div>
+      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
+        <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      </motion.div>
+      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
+        <JobSeekerNotesCard />
+      </motion.div>
+    </>
+  );
+
+  const desktopOrder = (
+    <>
+      {/* Top Left - Career Tips (Green) */}
+      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
+        <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      </motion.div>
+      {/* Top Right - Stats (Blue) */}
+      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
+        <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      </motion.div>
+      {/* Bottom Left - Notes (Purple) */}
+      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
+        <JobSeekerNotesCard />
+      </motion.div>
+      {/* Bottom Right - Interviews (Orange) */}
+      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
+        <JobSeekerInterviewsCard />
+      </motion.div>
+    </>
+  );
 
   return (
     <div className="space-y-2 sm:space-y-4">
@@ -24,37 +65,7 @@ export const JobSeekerDashboardGrid = memo(() => {
       </motion.div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-        {/* Top Left - Career Tips (Green) */}
-        <motion.div
-          initial={false}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-        >
-          <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-        </motion.div>
-        
-        {/* Top Right - Stats (Blue) */}
-        <motion.div
-          initial={false}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-        >
-          <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-        </motion.div>
-        
-        {/* Bottom Left - Notes (Purple) */}
-        <motion.div
-          initial={false}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-        >
-          <JobSeekerNotesCard />
-        </motion.div>
-        
-        {/* Bottom Right - Interviews (Orange) */}
-        <motion.div
-          initial={false}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-        >
-          <JobSeekerInterviewsCard />
-        </motion.div>
+        {isMobile ? mobileOrder : desktopOrder}
       </div>
     </div>
   );
