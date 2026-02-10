@@ -18,8 +18,27 @@ export interface HrNewsItem {
   is_translated?: boolean;
 }
 
-// LocalStorage cache for instant load - no expiry, always syncs in background
+// LocalStorage cache for instant load - syncs based on cron schedule
 const CACHE_KEY = 'parium_hr_news_cache';
+
+// Cron runs at 06, 11, 18, 23 UTC — calculate ms until next slot
+function msUntilNextCronSlot(): number {
+  const now = new Date();
+  const slots = [6, 11, 18, 23];
+  const currentHour = now.getUTCHours();
+  const currentMinutes = now.getUTCMinutes();
+
+  let nextSlotHour = slots.find(h => h > currentHour || (h === currentHour && currentMinutes < 5));
+  if (nextSlotHour == null) {
+    nextSlotHour = slots[0];
+  }
+
+  const next = new Date(now);
+  next.setUTCHours(nextSlotHour, 5, 0, 0);
+  if (next <= now) next.setUTCDate(next.getUTCDate() + 1);
+
+  return next.getTime() - now.getTime();
+}
 
 interface CachedData {
   items: HrNewsItem[];
@@ -132,17 +151,16 @@ export const useHrNews = () => {
   return useQuery({
     queryKey: ['hr-news'],
     queryFn: fetchRecentNews,
-    staleTime: Infinity, // Content rarely changes — manual refetch if needed
+    staleTime: msUntilNextCronSlot(),
     gcTime: Infinity,
     retry: 2,
     retryDelay: 1000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     // Instant load from localStorage cache
     initialData: () => readCache() ?? undefined,
     initialDataUpdatedAt: () => {
       const cached = readCache();
-      // Return 0 so initialData is always stale → triggers background refetch
       return cached ? 0 : undefined;
     },
   });
