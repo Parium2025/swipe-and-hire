@@ -1,4 +1,5 @@
 import { ReactNode, memo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/AppSidebar';
@@ -7,6 +8,9 @@ import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Search } from 'lucide-react';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 
 import { useActivityTracker } from '@/hooks/useActivityTracker';
@@ -40,8 +44,49 @@ const LogoSidebarTrigger = () => {
   );
 };
 
+// Mobile profile avatar - navigates to /profile on tap
+const MobileProfileAvatar = () => {
+  const { profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
+  const navigate = useNavigate();
+  const fallbackUrl = useMediaUrl(
+    (!preloadedAvatarUrl && !preloadedCoverUrl) ? profile?.profile_image_url : null,
+    'profile-image'
+  );
+  const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || fallbackUrl || null;
+  
+  const initials = (() => {
+    const f = profile?.first_name || '';
+    const l = profile?.last_name || '';
+    if (f && l) return (f[0] + l[0]).toUpperCase();
+    if (f) return f.substring(0, 2).toUpperCase();
+    return 'JS';
+  })();
+
+  return (
+    <button
+      onClick={() => navigate('/profile')}
+      className="flex items-center justify-center"
+      aria-label="Min profil"
+    >
+      {avatarUrl ? (
+        <Avatar className="h-8 w-8 ring-2 ring-white/20">
+          <AvatarImage src={avatarUrl} alt="Profil" />
+          <AvatarFallback className="bg-white/20 text-white text-xs font-semibold" delayMs={150}>
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+      ) : (
+        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20">
+          {initials}
+        </div>
+      )}
+    </button>
+  );
+};
+
 const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
-  const { user, profile } = useAuth();
+  const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const device = useDevice();
   
@@ -121,7 +166,17 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
             <div className="flex items-center">
               <LogoSidebarTrigger />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {/* Search button */}
+              <button
+                onClick={() => navigate('/search-jobs')}
+                className="flex items-center justify-center h-9 w-9 rounded-lg text-white hover:bg-white/10 transition-colors"
+                aria-label="Sök jobb"
+              >
+                <Search className="h-[18px] w-[18px]" />
+              </button>
+              {/* Profile Avatar */}
+              <MobileProfileAvatar />
               {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (
                 <div className="hidden md:block">
                   <DeveloperControls 
