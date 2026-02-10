@@ -271,11 +271,15 @@ All colors MUST be HSL.
     overflow: visible !important;
   }
 
+  html {
+    /* Fallback that bleeds through during iOS viewport shifts.
+       Must be clearly BLUE (not near-black) so the user sees blue, not black. */
+    background: hsl(215 85% 18%);
+  }
+
   body {
     @apply text-foreground;
-    /* bg-background removed: the gradient covers everything; a solid bg would
-       bleed through as a black/white bar when iOS retracts the address bar */
-    background-color: hsl(215 100% 12%);
+    background: hsl(215 85% 18%);
     padding-top: 0 !important;
     margin-top: 0 !important;
     overflow-x: hidden !important;

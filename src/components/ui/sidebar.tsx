@@ -198,7 +198,7 @@ const Sidebar = React.forwardRef<
           {/* Overlay – always mounted, visibility via opacity + pointer-events */}
           <div
             className={cn(
-              "fixed inset-0 z-50 bg-black/60 transition-opacity duration-300",
+              "fixed inset-0 z-50 bg-[hsl(215_85%_10%)]/70 transition-opacity duration-300",
               openMobile ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
             onClick={() => setOpenMobile(false)}
