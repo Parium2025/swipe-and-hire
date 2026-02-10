@@ -231,7 +231,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
               </h3>
               <div className="text-3xl font-bold text-white">{currentStat.value}</div>
               {currentStat.value === 0 && currentStat.emptyHint && (
-                <p className="text-xs text-white/70 mt-1">{currentStat.emptyHint}</p>
+                <p className="text-xs text-white mt-1">{currentStat.emptyHint}</p>
               )}
             </motion.div>
           </AnimatePresence>
