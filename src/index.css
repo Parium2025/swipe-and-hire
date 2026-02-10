@@ -272,7 +272,10 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    /* bg-background removed: the gradient covers everything; a solid bg would
+       bleed through as a black/white bar when iOS retracts the address bar */
+    background-color: hsl(215 100% 12%);
     padding-top: 0 !important;
     margin-top: 0 !important;
     overflow-x: hidden !important;
