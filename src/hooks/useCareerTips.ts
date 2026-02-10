@@ -18,8 +18,29 @@ export interface CareerTipItem {
   is_translated?: boolean;
 }
 
-// LocalStorage cache for instant load - no expiry, always syncs in background
+// LocalStorage cache for instant load - syncs based on cron schedule
 const CACHE_KEY = 'parium_career_tips_cache';
+
+// Cron runs at 06, 11, 18, 23 UTC — calculate ms until next slot
+function msUntilNextCronSlot(): number {
+  const now = new Date();
+  const slots = [6, 11, 18, 23];
+  const currentHour = now.getUTCHours();
+  const currentMinutes = now.getUTCMinutes();
+
+  // Find next slot
+  let nextSlotHour = slots.find(h => h > currentHour || (h === currentHour && currentMinutes < 5));
+  if (nextSlotHour == null) {
+    // Wrap to first slot tomorrow
+    nextSlotHour = slots[0];
+  }
+
+  const next = new Date(now);
+  next.setUTCHours(nextSlotHour, 5, 0, 0); // 5 min buffer for edge fn to finish
+  if (next <= now) next.setUTCDate(next.getUTCDate() + 1);
+
+  return next.getTime() - now.getTime();
+}
 
 interface CachedData {
   items: CareerTipItem[];
@@ -132,17 +153,17 @@ export const useCareerTips = () => {
   return useQuery({
     queryKey: ['career-tips'],
     queryFn: fetchRecentCareerTips,
-    staleTime: 5 * 60 * 1000, // 5 min — refetch i bakgrunden efter 5 min
+    staleTime: msUntilNextCronSlot(), // Giltig tills nästa cron-körning
     gcTime: Infinity,
     retry: 2,
     retryDelay: 1000,
-    refetchOnWindowFocus: true, // Hämta ny data när användaren kommer tillbaka
-    refetchOnMount: 'always', // Alltid hämta i bakgrunden vid mount
+    refetchOnWindowFocus: true, // Kolla vid fokus — men bara om staleTime passerat
+    refetchOnMount: true, // Refetch vid mount om stale
     // Instant load from localStorage cache
     initialData: () => readCache() ?? undefined,
     initialDataUpdatedAt: () => {
       const cached = readCache();
-      // Return 0 so initialData is always stale → triggers background refetch immediately
+      // Return 0 so initialData is always stale on first load → triggers one background refetch
       return cached ? 0 : undefined;
     },
   });
