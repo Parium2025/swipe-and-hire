@@ -1,13 +1,6 @@
-import { memo, useMemo, useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { memo, useMemo, useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWeather } from '@/hooks/useWeather';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  Search,
-  Sparkles,
-} from 'lucide-react';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
@@ -55,15 +48,13 @@ const DateTimeDisplay = memo(() => {
 DateTimeDisplay.displayName = 'DateTimeDisplay';
 
 const JobSeekerHome = memo(() => {
-  const navigate = useNavigate();
   const { profile } = useAuth();
-  
-  const showContent = true;
 
   const firstName = profile?.first_name || 'du';
   
   // Reactive greeting
   const [greeting, setGreeting] = useState(() => getGreeting());
+  const greetingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
   useEffect(() => {
     const now = new Date();
@@ -72,17 +63,15 @@ const JobSeekerHome = memo(() => {
     const syncTimeout = setTimeout(() => {
       setGreeting(getGreeting());
       
-      const interval = setInterval(() => {
+      greetingIntervalRef.current = setInterval(() => {
         setGreeting(getGreeting());
       }, 60000);
-      
-      (window as any).__jobseekerGreetingInterval = interval;
     }, msUntilNextMinute);
     
     return () => {
       clearTimeout(syncTimeout);
-      if ((window as any).__jobseekerGreetingInterval) {
-        clearInterval((window as any).__jobseekerGreetingInterval);
+      if (greetingIntervalRef.current) {
+        clearInterval(greetingIntervalRef.current);
       }
     };
   }, []);
@@ -119,10 +108,7 @@ const JobSeekerHome = memo(() => {
     backgroundLocationEnabled: (profile as any)?.background_location_enabled ?? false,
   });
   
-  // Delay for cache clearing
-  const mountedLongEnough = true;
-  
-  const showWeatherEffects = gpsGranted && mountedLongEnough && !weather.isLoading;
+  const showWeatherEffects = gpsGranted && !weather.isLoading;
   
   // Emoji logic
   const displayEmoji = useMemo(() => {
@@ -157,13 +143,6 @@ const JobSeekerHome = memo(() => {
     return getEmojiForCode(weatherCode);
   }, [weather.weatherCode, isEvening, gpsGranted, isDaytime]);
 
-  if (!showContent) {
-    return (
-      <div className="space-y-6 responsive-container-wide py-8 opacity-0">
-        {/* Invisible placeholder */}
-      </div>
-    );
-  }
 
   return (
     <>
