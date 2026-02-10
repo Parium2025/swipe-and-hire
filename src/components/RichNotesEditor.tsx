@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState, forwardRef, useImperativeHandle } from 'react';
+import { memo, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo, Heading1, Heading2, Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -204,49 +204,26 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
   hideToolbar = false,
   onEditorReady
 }, ref) => {
-  const [scrollInfo, setScrollInfo] = useState({ scrollTop: 0, scrollHeight: 0, clientHeight: 0 });
+  const scrollTrackRef = useRef<HTMLDivElement>(null);
+  const scrollThumbRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number>(0);
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        bulletList: {
-          HTMLAttributes: {
-            class: 'list-disc ml-4 my-1',
-          },
-        },
-        orderedList: {
-          HTMLAttributes: {
-            class: 'list-decimal ml-4 my-1',
-          },
-        },
-        listItem: {
-          HTMLAttributes: {
-            class: 'my-0.5',
-          },
-        },
+        bulletList: { HTMLAttributes: { class: 'list-disc ml-4 my-1' } },
+        orderedList: { HTMLAttributes: { class: 'list-decimal ml-4 my-1' } },
+        listItem: { HTMLAttributes: { class: 'my-0.5' } },
       }),
-      TaskList.configure({
-        HTMLAttributes: {
-          class: 'task-list',
-        },
-      }),
-      TaskItem.configure({
-        nested: false,
-        HTMLAttributes: {
-          class: 'task-item',
-        },
-      }),
-      Placeholder.configure({
-        placeholder,
-        emptyEditorClass: 'is-editor-empty',
-      }),
+      TaskList.configure({ HTMLAttributes: { class: 'task-list' } }),
+      TaskItem.configure({ nested: false, HTMLAttributes: { class: 'task-item' } }),
+      Placeholder.configure({ placeholder, emptyEditorClass: 'is-editor-empty' }),
     ],
     content: value || '',
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
-      const isEmpty = editor.isEmpty;
-      onChange(isEmpty ? '' : html);
-      updateScrollInfo();
+      onChange(editor.isEmpty ? '' : html);
+      updateScrollbar();
     },
     editorProps: {
       attributes: {
@@ -263,101 +240,93 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
     },
   });
 
-  // Expose editor via ref
-  useImperativeHandle(ref, () => ({
-    getEditor: () => editor,
-  }), [editor]);
+  useImperativeHandle(ref, () => ({ getEditor: () => editor }), [editor]);
 
-  // Notify parent when editor is ready
   useEffect(() => {
-    if (editor && onEditorReady) {
-      onEditorReady(editor);
-    }
+    if (editor && onEditorReady) onEditorReady(editor);
   }, [editor, onEditorReady]);
 
-  // Sync external value changes
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
       const editorEmpty = editor.isEmpty;
       const valueEmpty = !value || value === '<p></p>' || value.trim() === '';
-      
       if (editorEmpty && valueEmpty) return;
-      
       editor.commands.setContent(value || '', { emitUpdate: false });
     }
   }, [value, editor]);
 
-  const updateScrollInfo = useCallback(() => {
-    const editorElement = editor?.view?.dom;
-    if (editorElement) {
-      const { scrollTop, scrollHeight, clientHeight } = editorElement;
-      setScrollInfo({ scrollTop, scrollHeight, clientHeight });
-    }
-  }, [editor]);
-
-  // Attach scroll listener directly to ProseMirror DOM element
-  useEffect(() => {
+  // Direct DOM scrollbar update — no React state, instant response
+  const updateScrollbar = useCallback(() => {
     const dom = editor?.view?.dom;
-    if (!dom) return;
-    const handler = () => updateScrollInfo();
-    dom.addEventListener('scroll', handler, { passive: true });
-    updateScrollInfo();
-    return () => dom.removeEventListener('scroll', handler);
-  }, [editor, updateScrollInfo]);
+    const track = scrollTrackRef.current;
+    const thumb = scrollThumbRef.current;
+    if (!dom || !track || !thumb) return;
 
-  useEffect(() => {
-    updateScrollInfo();
-    const timer = setTimeout(updateScrollInfo, 100);
-    return () => clearTimeout(timer);
-  }, [value, updateScrollInfo]);
-
-  const scrollbarInfo = useMemo(() => {
-    const { scrollTop, scrollHeight, clientHeight } = scrollInfo;
+    const { scrollTop, scrollHeight, clientHeight } = dom;
     const hasScroll = scrollHeight > clientHeight + 5;
-    if (!hasScroll) return { show: false, thumbTop: 0, thumbHeight: 0 };
-    
+
+    track.style.display = hasScroll ? '' : 'none';
+    if (!hasScroll) return;
+
     const thumbHeight = Math.max((clientHeight / scrollHeight) * 100, 20);
     const maxScroll = scrollHeight - clientHeight;
     const thumbTop = maxScroll > 0 ? (scrollTop / maxScroll) * (100 - thumbHeight) : 0;
-    
-    return { show: true, thumbTop, thumbHeight };
-  }, [scrollInfo]);
 
-  if (!editor) {
-    return null;
-  }
+    thumb.style.top = `${thumbTop}%`;
+    thumb.style.height = `${thumbHeight}%`;
+  }, [editor]);
+
+  // Attach scroll listener with rAF throttle
+  useEffect(() => {
+    const dom = editor?.view?.dom;
+    if (!dom) return;
+    const handler = () => {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(updateScrollbar);
+    };
+    dom.addEventListener('scroll', handler, { passive: true });
+    updateScrollbar();
+    return () => {
+      dom.removeEventListener('scroll', handler);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [editor, updateScrollbar]);
+
+  // Update on content changes
+  useEffect(() => {
+    updateScrollbar();
+    const timer = setTimeout(updateScrollbar, 100);
+    return () => clearTimeout(timer);
+  }, [value, updateScrollbar]);
+
+  if (!editor) return null;
 
   return (
     <div className={cn("flex flex-col h-full rich-notes-editor", className)}>
-      {/* Toolbar - only show if not hidden */}
       {!hideToolbar && (
         <div className="pb-1.5 mb-1.5 border-b border-white/10">
           <NotesToolbar editor={editor} />
         </div>
       )}
       
-      {/* Editor with scrollbar indicator */}
       <div className="relative flex-1 min-h-0">
         <EditorContent 
           editor={editor} 
           className="h-full [&_.ProseMirror]:h-full"
         />
         
-        {/* Mini scrollbar indicator */}
-        {scrollbarInfo.show && (
+        {/* Mini scrollbar indicator — updated via direct DOM, no re-renders */}
+        <div 
+          ref={scrollTrackRef}
+          className="absolute right-1 top-1 bottom-1 w-1 rounded-full bg-white/10 pointer-events-none"
+          aria-hidden="true"
+          style={{ display: 'none' }}
+        >
           <div 
-            className="absolute right-1 top-1 bottom-1 w-1 rounded-full bg-white/10 pointer-events-none"
-            aria-hidden="true"
-          >
-            <div 
-              className="absolute w-full rounded-full bg-white/40 transition-all duration-100"
-              style={{
-                top: `${scrollbarInfo.thumbTop}%`,
-                height: `${scrollbarInfo.thumbHeight}%`,
-              }}
-            />
-          </div>
-        )}
+            ref={scrollThumbRef}
+            className="absolute w-full rounded-full bg-white/40"
+          />
+        </div>
       </div>
     </div>
   );
