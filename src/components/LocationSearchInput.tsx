@@ -264,14 +264,14 @@ const LocationSearchInput = ({
         <PopoverTrigger asChild>
           <button
             className={cn(
-              "w-full h-[44px] flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50",
+              "w-full h-10 md:h-[44px] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50",
               "focus:outline-none focus:ring-2 focus:ring-white/20"
             )}
             aria-label="Välj plats"
           >
             <MapPin className="h-4 w-4 text-white flex-shrink-0" />
             <span className="text-sm text-white flex-1 truncate">
-              {searchInput || "Sök på län eller stad/postnummer"}
+              {searchInput || "Län, stad eller postnummer"}
             </span>
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-white flex-shrink-0" />
