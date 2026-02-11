@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer, CheckCircle, Bookmark, Bell, Sparkles } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -78,6 +79,7 @@ const SearchJobs = () => {
   const { savedSearches, saveSearch, deleteSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
   const isTouchCapable = useTouchCapable();
+  const isMobile = useIsMobile();
   const [swipeModeActive, setSwipeModeActive] = useState(false);
 
   // Handler to apply a saved search - sets all the filter states
@@ -861,10 +863,34 @@ const SearchJobs = () => {
             )}
 
             {/* Job Cards */}
-            <div className="space-y-4">
+            <div className={isMobile ? "grid grid-cols-1 gap-4" : "space-y-4"}>
               {displayedJobs.map((job) => {
                 const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                 
+                // Mobile: use image cards (ReadOnlyMobileJobCard style)
+                if (isMobile) {
+                  return (
+                    <ReadOnlyMobileJobCard
+                      key={job.id}
+                      job={{
+                        id: job.id,
+                        title: job.title,
+                        location: job.location,
+                        employment_type: job.employment_type,
+                        is_active: job.is_active,
+                        views_count: job.views_count,
+                        applications_count: job.applications_count,
+                        created_at: job.created_at,
+                        expires_at: job.expires_at,
+                        job_image_url: job.job_image_url,
+                        company_name: job.company_name,
+                      }}
+                      hasApplied={appliedJobIds.has(job.id)}
+                    />
+                  );
+                }
+                
+                // Desktop: existing card design
                 return (
                   <Card 
                     key={job.id}

@@ -30,16 +30,15 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   const hasMultiColumnCard = stats.some(s => s.subItems && s.subItems.length > 0);
   
   // Dynamically set grid columns based on number of cards and whether any have subItems
-  // For simple 4-card layouts (like job seeker), use 4 columns to fill width
-  // For complex layouts with subItems, use 5 columns
+  // Mobile: 2x2 grid for readability, Desktop: fill width
   const gridColsClass = hasMultiColumnCard 
-    ? 'grid-cols-5' 
+    ? 'grid-cols-2 md:grid-cols-5' 
     : stats.length === 4 
-      ? 'grid-cols-4' 
-      : 'grid-cols-5';
+      ? 'grid-cols-2 md:grid-cols-4' 
+      : 'grid-cols-2 md:grid-cols-5';
   
   return (
-    <div className={`grid ${gridColsClass} gap-1 sm:gap-1.5 md:gap-2`}>
+    <div className={`grid ${gridColsClass} gap-2 md:gap-2`}>
       {stats.map((stat, index) => {
         // Cards with subItems span 2 columns
         const hasSubItems = stat.subItems && stat.subItems.length > 0;
@@ -103,21 +102,21 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
           ) : (
             // Standard layout for cards without subItems
             <>
-              <CardHeader className="flex flex-row items-center justify-center gap-0.5 sm:gap-1 md:gap-2 space-y-0 p-1 sm:p-1.5 md:p-3 min-w-0 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
-                <stat.icon className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-white flex-shrink-0" />
-                <span className="text-[10px] sm:text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">
+            <CardHeader className="flex flex-row items-center justify-center gap-1 md:gap-2 space-y-0 p-2 md:p-3 min-w-0 min-h-[32px] md:min-h-[40px]">
+                <stat.icon className="h-3.5 w-3.5 md:h-4 md:w-4 text-white flex-shrink-0" />
+                <span className="text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">
                   {stat.title}
                 </span>
               </CardHeader>
-              <CardContent className="px-1 pb-1 sm:px-1.5 sm:pb-1.5 md:px-3 md:pb-3">
+              <CardContent className="px-2 pb-2 md:px-3 md:pb-3">
                 <div 
-                  className="text-sm sm:text-base md:text-xl font-bold text-white text-center transition-opacity duration-500 flex justify-center"
+                  className="text-base md:text-xl font-bold text-white text-center transition-opacity duration-500 flex justify-center"
                   style={{ opacity: stat.loading ? 0.5 : 1 }}
                 >
-                  {typeof stat.value === 'number' ? (
-                    <AnimatedCounter 
-                      value={stat.value} 
-                      className="text-sm sm:text-base md:text-xl font-bold" 
+                    {typeof stat.value === 'number' ? (
+                      <AnimatedCounter 
+                        value={stat.value} 
+                        className="text-base md:text-xl font-bold" 
                       cacheKey={stat.cacheKey}
                     />
                   ) : (
