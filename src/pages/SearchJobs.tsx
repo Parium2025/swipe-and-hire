@@ -439,9 +439,9 @@ const SearchJobs = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {/* Location Filter */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-white flex items-center gap-2">
-                  <MapPin className="h-3 w-3" />
-                  Plats
+                <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none">
+                  <MapPin className="h-3 w-3 flex-shrink-0" />
+                  <span className="leading-none">Plats</span>
                 </Label>
                 <LocationSearchInput
                   value={selectedPostalCode || selectedCity}
@@ -452,9 +452,9 @@ const SearchJobs = () => {
 
               {/* Yrkesområde Filter */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-white flex items-center gap-2">
-                  <Briefcase className="h-3 w-3" />
-                  Yrkesområde
+                <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none">
+                  <Briefcase className="h-3 w-3 flex-shrink-0" />
+                  <span className="leading-none">Yrkesområde</span>
                 </Label>
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
@@ -463,7 +463,7 @@ const SearchJobs = () => {
                       aria-label="Välj yrkesområde"
                     >
                       <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
-                      <span className="text-sm text-white flex-1 truncate">
+                      <span className="text-sm text-white flex-1 truncate leading-none">
                         {selectedCategory === 'all-categories'
                           ? 'Alla yrkesområden'
                           : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
@@ -535,7 +535,7 @@ const SearchJobs = () => {
                       aria-label="Välj specifik roll"
                     >
                       <Users className="h-4 w-4 text-white flex-shrink-0" />
-                      <span className="text-sm text-white flex-1 truncate">
+                      <span className="text-sm text-white flex-1 truncate leading-none">
                         {selectedSubcategories.length === 0
                           ? 'Alla roller'
                           : selectedSubcategories.length === 1
@@ -609,9 +609,9 @@ const SearchJobs = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Employment Type */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-white flex items-center gap-2">
-                      <Clock className="h-3 w-3" />
-                      Anställning
+                    <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none">
+                      <Clock className="h-3 w-3 flex-shrink-0" />
+                      <span className="leading-none">Anställning</span>
                     </Label>
                     <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
@@ -620,7 +620,7 @@ const SearchJobs = () => {
                           aria-label="Välj anställningstyp"
                         >
                           <Clock className="h-4 w-4 text-white flex-shrink-0" />
-                          <span className="text-sm text-white flex-1 truncate">
+                          <span className="text-sm text-white flex-1 truncate leading-none">
                             {selectedEmploymentTypes.length === 0 
                               ? 'Alla anställningar' 
                               : selectedEmploymentTypes.length === 1
@@ -668,9 +668,9 @@ const SearchJobs = () => {
 
                   {/* Sort Dropdown */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-white flex items-center gap-2">
-                      <ArrowUpDown className="h-3 w-3" />
-                      Sortering
+                    <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none">
+                      <ArrowUpDown className="h-3 w-3 flex-shrink-0" />
+                      <span className="leading-none">Sortering</span>
                     </Label>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -679,7 +679,7 @@ const SearchJobs = () => {
                           aria-label="Välj sortering"
                         >
                           <ArrowUpDown className="h-4 w-4 text-white flex-shrink-0" />
-                          <span className="text-sm text-white flex-1 truncate">{sortLabels[sortBy]}</span>
+                          <span className="text-sm text-white flex-1 truncate leading-none">{sortLabels[sortBy]}</span>
                           <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
                         </button>
                       </DropdownMenuTrigger>
