@@ -292,7 +292,7 @@ const LocationSearchInput = ({
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          className="z-50 w-[var(--radix-popover-trigger-width)] p-0 bg-slate-900/85 backdrop-blur-xl border border-white/20 pointer-events-auto" 
+          className="z-50 w-[var(--radix-popover-trigger-width)] p-0 bg-slate-900 border border-white/20 pointer-events-auto" 
           align="start"
           side="bottom"
           sideOffset={4}
@@ -313,7 +313,7 @@ const LocationSearchInput = ({
                 className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none text-white placeholder:text-white"
               />
             </div>
-            <CommandList className="max-h-[300px] overflow-y-auto">
+            <CommandList className="max-h-[300px] overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
               {/* Only show "no results" for text searches when there are no matching results */}
               {!(/^\d+$/.test(dropdownSearch.trim())) && !hasMatchingResults() && (
                 <CommandEmpty className="text-white py-4 text-center text-sm">Ingen plats hittades.</CommandEmpty>
