@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { Heart, X, MapPin, Building2, Users, Briefcase, Timer, ChevronLeft, Share2, ChevronUp, CheckCircle, Eye } from 'lucide-react';
@@ -133,7 +134,7 @@ export function SwipeFullscreen({ jobs, appliedJobIds, onClose }: SwipeFullscree
   }, [goNext, goPrev, handleSwipeLeft, onClose, handleSave]);
 
   if (!currentJob) {
-    return (
+    return createPortal(
       <div className="fixed inset-0 z-[100] bg-parium-gradient flex flex-col items-center justify-center p-6">
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center space-y-6">
           <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center">
@@ -145,7 +146,8 @@ export function SwipeFullscreen({ jobs, appliedJobIds, onClose }: SwipeFullscree
             Tillbaka till sökning
           </button>
         </motion.div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
@@ -154,7 +156,7 @@ export function SwipeFullscreen({ jobs, appliedJobIds, onClose }: SwipeFullscree
   const saved = isJobSaved(currentJob.id);
   const applied = appliedJobIds.has(currentJob.id);
 
-  return (
+  return createPortal(
     <div ref={containerRef} className="fixed inset-0 z-[100] bg-parium-gradient flex flex-col overflow-hidden" style={{ touchAction: 'none' }}>
       {/* Top Bar */}
       <div className="relative z-10 flex items-center justify-between px-4 pt-[env(safe-area-inset-top)] h-14 shrink-0">
@@ -337,6 +339,7 @@ export function SwipeFullscreen({ jobs, appliedJobIds, onClose }: SwipeFullscree
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
