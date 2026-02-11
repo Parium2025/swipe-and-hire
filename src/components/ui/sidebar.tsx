@@ -175,6 +175,16 @@ const Sidebar = React.forwardRef<
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
+    // Defer transitions until after first paint to prevent GPU contention
+    // that causes the header to freeze/flash on initial mount
+    const [transitionsReady, setTransitionsReady] = React.useState(false)
+    React.useEffect(() => {
+      const raf = requestAnimationFrame(() => {
+        requestAnimationFrame(() => setTransitionsReady(true))
+      })
+      return () => cancelAnimationFrame(raf)
+    }, [])
+
     if (collapsible === "none") {
       return (
         <div
@@ -198,7 +208,8 @@ const Sidebar = React.forwardRef<
           {/* Overlay – always mounted, visibility via opacity + pointer-events */}
           <div
             className={cn(
-              "fixed inset-0 z-50 bg-[hsl(215_85%_10%)]/70 transition-opacity duration-300",
+              "fixed inset-0 z-50 bg-[hsl(215_85%_10%)]/70",
+              transitionsReady && "transition-opacity duration-300",
               openMobile ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
             onClick={() => setOpenMobile(false)}
@@ -210,7 +221,8 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             data-mobile="true"
             className={cn(
-              "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] flex-col bg-gradient-parium p-0 text-sidebar-foreground transition-transform duration-300 ease-out will-change-transform",
+              "fixed inset-y-0 z-50 flex h-[100dvh] w-[--sidebar-width] flex-col bg-gradient-parium p-0 text-sidebar-foreground ease-out",
+              transitionsReady && "transition-transform duration-300 will-change-transform",
               side === "left" ? "left-0" : "right-0",
               openMobile
                 ? "translate-x-0"
