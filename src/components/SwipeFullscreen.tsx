@@ -1,11 +1,8 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { Heart, X, MapPin, Building2, Users, Briefcase, Timer, ChevronLeft, Share2, ChevronUp, CheckCircle, Eye } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
+import { motion, useMotionValue, useTransform, animate, PanInfo } from 'framer-motion';
+import { Heart, X, MapPin, Building2, ChevronLeft, Share2, CheckCircle, Undo2 } from 'lucide-react';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -33,43 +30,212 @@ interface SwipeFullscreenProps {
   onClose: () => void;
 }
 
+// ─── Resolve storage URL ────────────────────────────────────────────
+function resolveImageUrl(url?: string): string | null {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  const { data } = supabase.storage.from('job-images').getPublicUrl(url);
+  return data?.publicUrl || null;
+}
+
+// ─── Single swipeable card ──────────────────────────────────────────
+interface CardProps {
+  job: SwipeJob;
+  isTop: boolean;
+  applied: boolean;
+  onSwipeRight: () => void;
+  onSwipeLeft: () => void;
+  onSwipeComplete: () => void;
+  dragEnabled: boolean;
+}
+
+const SWIPE_THRESHOLD = 120;
+const VELOCITY_THRESHOLD = 500;
+const EXIT_X = typeof window !== 'undefined' ? window.innerWidth * 1.5 : 600;
+
+function SwipeCard({ job, isTop, applied, onSwipeRight, onSwipeLeft, onSwipeComplete, dragEnabled }: CardProps) {
+  const x = useMotionValue(0);
+  
+  // Rotation follows drag (-12° to +12°)
+  const rotate = useTransform(x, [-300, 0, 300], [-12, 0, 12]);
+  
+  // Opacity of like/nope labels
+  const likeOpacity = useTransform(x, [0, 80, 150], [0, 0.5, 1]);
+  const nopeOpacity = useTransform(x, [-150, -80, 0], [1, 0.5, 0]);
+  
+  // Card scale for background card
+  const scale = isTop ? 1 : 0.95;
+  const yOffset = isTop ? 0 : 8;
+
+  const imageUrl = resolveImageUrl(job.job_image_url);
+
+  const handleDragEnd = useCallback((_: any, info: PanInfo) => {
+    const { offset, velocity } = info;
+    
+    // Swipe right = like (apply)
+    if (offset.x > SWIPE_THRESHOLD || velocity.x > VELOCITY_THRESHOLD) {
+      animate(x, EXIT_X, { type: 'spring', stiffness: 600, damping: 30 });
+      onSwipeRight();
+      setTimeout(onSwipeComplete, 300);
+      return;
+    }
+    
+    // Swipe left = nope (skip)
+    if (offset.x < -SWIPE_THRESHOLD || velocity.x < -VELOCITY_THRESHOLD) {
+      animate(x, -EXIT_X, { type: 'spring', stiffness: 600, damping: 30 });
+      onSwipeLeft();
+      setTimeout(onSwipeComplete, 300);
+      return;
+    }
+    
+    // Snap back
+    animate(x, 0, { type: 'spring', stiffness: 500, damping: 25 });
+  }, [x, onSwipeRight, onSwipeLeft, onSwipeComplete]);
+
+  return (
+    <motion.div
+      className="absolute inset-4 sm:inset-6 rounded-2xl overflow-hidden shadow-2xl"
+      style={{
+        x: isTop ? x : 0,
+        rotate: isTop ? rotate : 0,
+        scale,
+        y: yOffset,
+        zIndex: isTop ? 10 : 5,
+        touchAction: 'none',
+      }}
+      drag={isTop && dragEnabled ? 'x' : false}
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.8}
+      onDragEnd={isTop ? handleDragEnd : undefined}
+      initial={false}
+      animate={{ scale, y: yOffset }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+    >
+      {/* Image / placeholder background */}
+      <div className="absolute inset-0">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={job.title}
+            className="w-full h-full object-cover"
+            loading="eager"
+            draggable={false}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[hsl(215,85%,25%)] to-[hsl(215,85%,15%)] flex items-center justify-center">
+            <Building2 className="w-24 h-24 text-white/10" />
+          </div>
+        )}
+      </div>
+
+      {/* Gradient overlay — bottom heavy for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+      {/* LIKE stamp */}
+      {isTop && (
+        <motion.div
+          className="absolute top-8 left-6 z-20 border-4 border-green-400 rounded-lg px-4 py-1 -rotate-12"
+          style={{ opacity: likeOpacity }}
+        >
+          <span className="text-green-400 text-3xl font-black tracking-wider">LIKE</span>
+        </motion.div>
+      )}
+
+      {/* NOPE stamp */}
+      {isTop && (
+        <motion.div
+          className="absolute top-8 right-6 z-20 border-4 border-red-400 rounded-lg px-4 py-1 rotate-12"
+          style={{ opacity: nopeOpacity }}
+        >
+          <span className="text-red-400 text-3xl font-black tracking-wider">NOPE</span>
+        </motion.div>
+      )}
+
+      {/* Applied badge */}
+      {applied && (
+        <div className="absolute top-6 left-6 z-20">
+          <div className="flex items-center gap-1.5 bg-green-500/90 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
+            <CheckCircle className="h-3.5 w-3.5" />
+            Redan sökt
+          </div>
+        </div>
+      )}
+
+      {/* Bottom content — Tinder style */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+        <h2 className="text-2xl font-bold text-white leading-tight tracking-tight">{job.title}</h2>
+        
+        <div className="flex items-center gap-2 mt-2">
+          <Building2 className="w-4 h-4 text-white/80 shrink-0" />
+          <span className="text-white/90 font-medium text-base">{job.company_name}</span>
+        </div>
+        
+        {job.location && (
+          <div className="flex items-center gap-2 mt-1">
+            <MapPin className="w-4 h-4 text-white/70 shrink-0" />
+            <span className="text-white/80 text-sm">{job.location}</span>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Main component ─────────────────────────────────────────────────
 export function SwipeFullscreen({ jobs, appliedJobIds, onClose }: SwipeFullscreenProps) {
   const navigate = useNavigate();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState<'up' | 'down' | 'left' | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [history, setHistory] = useState<number[]>([]);
+  const [animating, setAnimating] = useState(false);
+  const [lastAction, setLastAction] = useState<'like' | 'nope' | null>(null);
 
   const currentJob = jobs[currentIndex];
-  const progress = jobs.length > 0 ? ((currentIndex + 1) / jobs.length) * 100 : 0;
+  const nextJob = jobs[currentIndex + 1];
 
-  // Resolve image URL
-  const resolveImageUrl = useCallback((url?: string) => {
-    if (!url) return null;
-    if (url.startsWith('http')) return url;
-    const { data } = supabase.storage.from('job-images').getPublicUrl(url);
-    return data?.publicUrl || null;
-  }, []);
+  // Keyboard
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (animating) return;
+      if (e.key === 'ArrowRight') triggerLike();
+      if (e.key === 'ArrowLeft') triggerNope();
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'z' && (e.metaKey || e.ctrlKey)) handleUndo();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [animating, currentIndex]);
 
-  const goNext = useCallback(() => {
-    if (currentIndex < jobs.length - 1) {
-      setDirection('up');
-      setCurrentIndex(prev => prev + 1);
-    }
-  }, [currentIndex, jobs.length]);
-
-  const goPrev = useCallback(() => {
-    if (currentIndex > 0) {
-      setDirection('down');
-      setCurrentIndex(prev => prev - 1);
-    }
+  const advanceCard = useCallback(() => {
+    setHistory(prev => [...prev, currentIndex]);
+    setCurrentIndex(prev => prev + 1);
+    setAnimating(false);
   }, [currentIndex]);
 
-  const handleSwipeLeft = useCallback(() => {
-    if (!currentJob) return;
-    // Navigate to job detail/application page
-    navigate(`/job-view/${currentJob.id}`);
-  }, [currentJob, navigate]);
+  const triggerLike = useCallback(() => {
+    if (animating || !currentJob) return;
+    setAnimating(true);
+    setLastAction('like');
+    // Navigate to application after animation
+    const jobId = currentJob.id;
+    setTimeout(() => {
+      navigate(`/job-application/${jobId}`);
+    }, 350);
+  }, [animating, currentJob, navigate]);
+
+  const triggerNope = useCallback(() => {
+    if (animating || !currentJob) return;
+    setAnimating(true);
+    setLastAction('nope');
+  }, [animating, currentJob]);
+
+  const handleUndo = useCallback(() => {
+    if (history.length === 0) return;
+    const prevIndex = history[history.length - 1];
+    setHistory(prev => prev.slice(0, -1));
+    setCurrentIndex(prevIndex);
+    setLastAction(null);
+  }, [history]);
 
   const handleSave = useCallback(() => {
     if (!currentJob) return;
@@ -86,63 +252,31 @@ export function SwipeFullscreen({ jobs, appliedJobIds, onClose }: SwipeFullscree
           text: `${currentJob.title} hos ${currentJob.company_name}`,
           url,
         });
-      } catch {
-        // User cancelled
-      }
+      } catch { /* cancelled */ }
     } else {
       await navigator.clipboard.writeText(url);
-      toast({ title: 'Länk kopierad!', description: 'Jobblänken har kopierats till urklipp.' });
+      toast({ title: 'Länk kopierad!' });
     }
   }, [currentJob]);
 
-  // Handle drag end for vertical + horizontal swipe
-  const handleDragEnd = useCallback((_: any, info: PanInfo) => {
-    const { offset, velocity } = info;
-    const swipeThreshold = 80;
-    const velocityThreshold = 300;
-
-    // Horizontal swipe left = interested → job detail
-    if (offset.x < -swipeThreshold || velocity.x < -velocityThreshold) {
-      handleSwipeLeft();
-      return;
-    }
-
-    // Vertical swipe up = next job
-    if (offset.y < -swipeThreshold || velocity.y < -velocityThreshold) {
-      goNext();
-      return;
-    }
-
-    // Vertical swipe down = previous job
-    if (offset.y > swipeThreshold || velocity.y > velocityThreshold) {
-      goPrev();
-      return;
-    }
-  }, [handleSwipeLeft, goNext, goPrev]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowUp' || e.key === 'k') goPrev();
-      if (e.key === 'ArrowDown' || e.key === 'j') goNext();
-      if (e.key === 'ArrowLeft' || e.key === 'Enter') handleSwipeLeft();
-      if (e.key === 'Escape') onClose();
-      if (e.key === 's') handleSave();
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [goNext, goPrev, handleSwipeLeft, onClose, handleSave]);
-
+  // ─── Empty state ────────────────────────────────────────────────
   if (!currentJob) {
     return createPortal(
-      <div className="fixed inset-0 z-[100] bg-parium-gradient flex flex-col items-center justify-center p-6">
-        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center space-y-6">
+      <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col items-center justify-center p-6">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-center space-y-6"
+        >
           <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center">
             <CheckCircle className="w-10 h-10 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-white">Alla jobb visade!</h2>
-          <p className="text-white/70 max-w-xs">Du har gått igenom alla tillgängliga jobb i din sökning.</p>
-          <button onClick={onClose} className="h-12 px-8 bg-white/10 border border-white/20 rounded-full text-white font-medium active:scale-95 transition-transform">
+          <h2 className="text-2xl font-bold text-white">Inga fler jobb!</h2>
+          <p className="text-white/60 max-w-xs">Du har gått igenom alla tillgängliga jobb. Försök ändra dina filter.</p>
+          <button
+            onClick={onClose}
+            className="h-12 px-8 bg-white/10 border border-white/20 rounded-full text-white font-medium active:scale-95 transition-transform min-h-[44px]"
+          >
             Tillbaka till sökning
           </button>
         </motion.div>
@@ -151,191 +285,109 @@ export function SwipeFullscreen({ jobs, appliedJobIds, onClose }: SwipeFullscree
     );
   }
 
-  const imageUrl = resolveImageUrl(currentJob.job_image_url);
-  const { text: timeText, isExpired } = getTimeRemaining(currentJob.created_at, currentJob.expires_at);
   const saved = isJobSaved(currentJob.id);
   const applied = appliedJobIds.has(currentJob.id);
 
+  // ─── Main render ────────────────────────────────────────────────
   return createPortal(
-    <div ref={containerRef} className="fixed inset-0 z-[100] bg-parium-gradient flex flex-col overflow-hidden" style={{ touchAction: 'none' }}>
-      {/* Top Bar */}
-      <div className="relative z-10 flex items-center justify-between px-4 pt-[env(safe-area-inset-top)] h-14 shrink-0">
-        <button onClick={onClose} className="flex items-center gap-1 text-white active:scale-95 transition-transform min-h-[44px] min-w-[44px]" aria-label="Stäng">
+    <div className="fixed inset-0 z-[9999] bg-parium-gradient flex flex-col" style={{ touchAction: 'none' }}>
+      {/* Top bar */}
+      <div className="relative z-20 flex items-center justify-between px-4 h-14 shrink-0" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+        <button
+          onClick={onClose}
+          className="flex items-center gap-1 text-white active:scale-95 transition-transform min-h-[44px] min-w-[44px]"
+          aria-label="Tillbaka"
+        >
           <ChevronLeft className="h-5 w-5" />
           <span className="text-sm font-medium">Tillbaka</span>
         </button>
-        <div className="text-white/70 text-sm font-medium">
+        <span className="text-white/50 text-sm font-medium">
           {currentIndex + 1} / {jobs.length}
-        </div>
+        </span>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-0.5 bg-white/10 shrink-0">
-        <motion.div className="h-full bg-white/60" animate={{ width: `${progress}%` }} transition={{ duration: 0.3 }} />
-      </div>
-
-      {/* Swipeable Card Area */}
+      {/* Card stack area */}
       <div className="flex-1 relative overflow-hidden">
-        <AnimatePresence mode="popLayout" initial={false}>
-          <motion.div
-            key={currentJob.id}
-            className="absolute inset-0 flex flex-col"
-            initial={{ 
-              y: direction === 'up' ? '100%' : direction === 'down' ? '-100%' : 0,
-              x: direction === 'left' ? '-100%' : 0,
-              opacity: 0 
-            }}
-            animate={{ y: 0, x: 0, opacity: 1 }}
-            exit={{ 
-              y: direction === 'up' ? '-100%' : direction === 'down' ? '100%' : 0,
-              x: direction === 'left' ? '-100%' : 0,
-              opacity: 0 
-            }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            drag
-            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-            dragElastic={0.4}
-            onDragEnd={handleDragEnd}
-            style={{ touchAction: 'none' }}
-          >
-            {/* Hero Image / Gradient */}
-            <div className="relative h-[45%] shrink-0 overflow-hidden">
-              {imageUrl ? (
-                <img src={imageUrl} alt={currentJob.title} className="w-full h-full object-cover" loading="eager" />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center">
-                  <Building2 className="w-20 h-20 text-white/15" />
-                </div>
-              )}
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[hsl(215,85%,18%)] via-transparent to-transparent" />
-              
-              {/* Swipe hint overlay - left */}
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-white/40">
-                <ChevronLeft className="w-5 h-5 animate-pulse" />
-                <span className="text-xs">Svep för att ansöka</span>
-              </div>
+        {/* Background card (next) */}
+        {nextJob && (
+          <SwipeCard
+            key={nextJob.id + '-bg'}
+            job={nextJob}
+            isTop={false}
+            applied={appliedJobIds.has(nextJob.id)}
+            onSwipeRight={() => {}}
+            onSwipeLeft={() => {}}
+            onSwipeComplete={() => {}}
+            dragEnabled={false}
+          />
+        )}
 
-              {/* Applied badge */}
-              {applied && (
-                <div className="absolute top-4 left-4">
-                  <Badge className="bg-green-500/80 text-white border-0 shadow-lg">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Redan sökt
-                  </Badge>
-                </div>
-              )}
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 px-5 pt-5 pb-4 overflow-y-auto space-y-4" style={{ WebkitOverflowScrolling: 'touch' }}>
-              {/* Title + Company */}
-              <div>
-                <h2 className="text-2xl font-bold text-white leading-tight">{currentJob.title}</h2>
-                <div className="flex items-center gap-2 mt-2 text-white/80">
-                  <Building2 className="w-4 h-4 shrink-0" />
-                  <span className="font-medium">{currentJob.company_name}</span>
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2">
-                {currentJob.location && (
-                  <Badge variant="glass" className="text-sm">
-                    <MapPin className="w-3.5 h-3.5 mr-1" />
-                    {currentJob.location}
-                  </Badge>
-                )}
-                {currentJob.employment_type && (
-                  <Badge variant="glass" className="text-sm">
-                    <Briefcase className="w-3.5 h-3.5 mr-1" />
-                    {getEmploymentTypeLabel(currentJob.employment_type)}
-                  </Badge>
-                )}
-                <Badge variant="glass" className="text-sm">
-                  <Users className="w-3.5 h-3.5 mr-1" />
-                  {currentJob.applications_count || 0} sökande
-                </Badge>
-                {!isExpired && (
-                  <Badge variant="glass" className="text-sm">
-                    <Timer className="w-3.5 h-3.5 mr-1" />
-                    {timeText} kvar
-                  </Badge>
-                )}
-                {isExpired && (
-                  <Badge className="bg-red-500/20 text-white border-red-500/30 text-sm">
-                    Utgången
-                  </Badge>
-                )}
-              </div>
-
-              {/* Description preview */}
-              {currentJob.description && (
-                <p className="text-white/70 text-sm leading-relaxed line-clamp-4">
-                  {currentJob.description.replace(/<[^>]*>/g, '').substring(0, 300)}
-                </p>
-              )}
-
-              {/* View more prompt */}
-              <button
-                onClick={() => navigate(`/job-view/${currentJob.id}`)}
-                className="flex items-center gap-2 text-white/60 text-sm active:scale-95 transition-transform"
-              >
-                <Eye className="w-4 h-4" />
-                <span>Visa fullständig annons</span>
-              </button>
-            </div>
-          </motion.div>
-        </AnimatePresence>
+        {/* Top card (current) */}
+        <SwipeCard
+          key={currentJob.id}
+          job={currentJob}
+          isTop={true}
+          applied={applied}
+          onSwipeRight={triggerLike}
+          onSwipeLeft={triggerNope}
+          onSwipeComplete={advanceCard}
+          dragEnabled={!animating}
+        />
       </div>
 
-      {/* Bottom Actions */}
-      <div className="shrink-0 px-4 pb-[env(safe-area-inset-bottom)] pb-6">
-        {/* Navigation hint */}
-        <div className="flex items-center justify-center gap-1 text-white/30 text-xs mb-3">
-          <ChevronUp className="w-3 h-3" />
-          <span>Svep upp för nästa jobb</span>
-        </div>
-
-        <div className="flex items-center justify-center gap-5">
-          {/* Skip button */}
+      {/* Bottom action bar — Tinder style */}
+      <div className="shrink-0 pb-6 pt-3 px-4" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1.5rem)' }}>
+        <div className="flex items-center justify-center gap-4">
+          {/* Undo */}
           <button
-            onClick={goNext}
-            className="w-14 h-14 rounded-full bg-white/5 border border-white/20 flex items-center justify-center active:scale-90 transition-transform"
-            aria-label="Nästa jobb"
+            onClick={handleUndo}
+            disabled={history.length === 0}
+            className="w-12 h-12 rounded-full bg-white/5 border border-white/15 flex items-center justify-center active:scale-90 transition-all disabled:opacity-30"
+            aria-label="Ångra"
           >
-            <X className="w-6 h-6 text-white/70" />
+            <Undo2 className="w-5 h-5 text-yellow-400" />
           </button>
 
-          {/* Save button */}
+          {/* Nope (X) */}
+          <button
+            onClick={triggerNope}
+            disabled={animating}
+            className="w-16 h-16 rounded-full bg-white/5 border-2 border-red-400/40 flex items-center justify-center active:scale-90 transition-all disabled:opacity-50"
+            aria-label="Skippa"
+          >
+            <X className="w-8 h-8 text-red-400" />
+          </button>
+
+          {/* Save (Heart) */}
           <button
             onClick={handleSave}
-            className={`w-16 h-16 rounded-full flex items-center justify-center active:scale-90 transition-all ${
+            className={`w-12 h-12 rounded-full flex items-center justify-center active:scale-90 transition-all ${
               saved
-                ? 'bg-red-500/20 border-2 border-red-400/50'
-                : 'bg-white/5 border-2 border-white/20'
+                ? 'bg-blue-500/20 border border-blue-400/50'
+                : 'bg-white/5 border border-white/15'
             }`}
-            aria-label={saved ? 'Sparad' : 'Spara jobb'}
+            aria-label={saved ? 'Sparad' : 'Spara'}
           >
-            <Heart className={`w-7 h-7 transition-all ${saved ? 'text-red-400 fill-red-400 scale-110' : 'text-white'}`} />
+            <Heart className={`w-5 h-5 transition-all ${saved ? 'text-blue-400 fill-blue-400' : 'text-blue-400'}`} />
           </button>
 
-          {/* Apply / View button */}
+          {/* Like (Apply) — green, large */}
           <button
-            onClick={handleSwipeLeft}
-            className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:scale-90 transition-transform"
-            aria-label="Visa och ansök"
+            onClick={triggerLike}
+            disabled={animating}
+            className="w-16 h-16 rounded-full bg-white/5 border-2 border-green-400/40 flex items-center justify-center active:scale-90 transition-all disabled:opacity-50"
+            aria-label="Gillar — ansök"
           >
-            <ChevronLeft className="w-6 h-6 text-white" />
+            <Heart className="w-8 h-8 text-green-400" />
           </button>
 
-          {/* Share button */}
+          {/* Share */}
           <button
             onClick={handleShare}
-            className="w-14 h-14 rounded-full bg-white/5 border border-white/20 flex items-center justify-center active:scale-90 transition-transform"
-            aria-label="Dela jobb"
+            className="w-12 h-12 rounded-full bg-white/5 border border-white/15 flex items-center justify-center active:scale-90 transition-all"
+            aria-label="Dela"
           >
-            <Share2 className="w-6 h-6 text-white/70" />
+            <Share2 className="w-5 h-5 text-purple-400" />
           </button>
         </div>
       </div>
