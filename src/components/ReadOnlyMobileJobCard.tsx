@@ -42,8 +42,7 @@ const TitleWithTooltip = ({ title }: { title: string }) => {
       <h3
         ref={titleRef}
         onClick={handleTap}
-        className="text-[15px] font-bold text-white leading-snug line-clamp-2 cursor-pointer"
-        style={{ minHeight: 'calc(2 * 15px * 1.375)' }}
+        className="text-[15px] font-bold text-white leading-snug line-clamp-2 cursor-pointer break-all"
       >
         {title}
       </h3>
