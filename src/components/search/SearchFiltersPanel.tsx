@@ -444,7 +444,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
           {/* Clear all filters button */}
           <div className="pt-2 flex justify-center">
             <button 
-              className="h-9 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 rounded-full px-5 text-xs text-white/70 hover:text-white transition-all duration-300 focus:outline-none"
+              className="h-9 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 rounded-full px-5 text-xs text-white hover:text-white transition-all duration-300 focus:outline-none"
               onClick={onClearAll}
             >
               Rensa alla filter
