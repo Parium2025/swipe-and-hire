@@ -2,7 +2,7 @@ import { memo, useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle } from 'lucide-react';
+import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +32,25 @@ interface ReadOnlyMobileJobCardProps {
     };
   };
   hasApplied?: boolean;
+}
+
+// Deterministic gradient based on job id for visual variety
+const GRADIENTS = [
+  'from-blue-900/40 via-indigo-900/30 to-slate-900/50',
+  'from-purple-900/40 via-violet-900/30 to-slate-900/50',
+  'from-emerald-900/40 via-teal-900/30 to-slate-900/50',
+  'from-amber-900/40 via-orange-900/30 to-slate-900/50',
+  'from-rose-900/40 via-pink-900/30 to-slate-900/50',
+  'from-cyan-900/40 via-sky-900/30 to-slate-900/50',
+];
+
+function getGradientForId(id: string) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash) + id.charCodeAt(i);
+    hash |= 0;
+  }
+  return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
 }
 
 export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnlyMobileJobCardProps) => {
@@ -64,6 +83,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
   const companyName = job.company_name || job.profiles?.company_name || 'Okänt företag';
   const isSaved = isJobSaved(job.id);
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
+  const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
 
   const handleSaveClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -75,65 +95,53 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
       className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98]"
       onClick={() => navigate(`/job-view/${job.id}`)}
     >
-      {/* Job Image */}
-      {displayUrl && (
-        <div className="relative w-full h-40 overflow-hidden">
-          <img
-            src={displayUrl}
-            alt={`${job.title} hos ${companyName}`}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          
-          {/* Save button on image */}
-          <button
-            onClick={handleSaveClick}
-            aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
-            className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90"
-          >
-            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
-          </button>
-
-          {/* Applied badge on image */}
-          {hasApplied && (
-            <div className="absolute top-2.5 left-2.5">
-              <Badge className="bg-green-500/90 text-white border-0 text-[11px] px-2 py-0.5">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Redan sökt
-              </Badge>
+      {/* Visual header — image or gradient placeholder */}
+      <div className="relative w-full h-40 overflow-hidden">
+        {displayUrl ? (
+          <>
+            <img
+              src={displayUrl}
+              alt={`${job.title} hos ${companyName}`}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          </>
+        ) : (
+          /* Gradient placeholder with icon for cards without image */
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+            <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
+              <Briefcase className="h-7 w-7 text-white/40" />
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="relative p-3.5 space-y-2">
-        {/* Save button — always top-right of content area when no image */}
-        {!displayUrl && (
-          <button
-            onClick={handleSaveClick}
-            aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
-            className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-white/10 border border-white/20 transition-all duration-150 active:scale-90 z-10"
-          >
-            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
-          </button>
+          </div>
         )}
+        
+        {/* Save button — always on image/placeholder area */}
+        <button
+          onClick={handleSaveClick}
+          aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
+          className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90"
+        >
+          <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
+        </button>
 
-        {/* Applied badge when no image */}
-        {!displayUrl && hasApplied && (
-          <div className="absolute top-2.5 left-3.5 z-10">
+        {/* Applied badge */}
+        {hasApplied && (
+          <div className="absolute top-2.5 left-2.5">
             <Badge className="bg-green-500/90 text-white border-0 text-[11px] px-2 py-0.5">
               <CheckCircle className="h-3 w-3 mr-1" />
               Redan sökt
             </Badge>
           </div>
         )}
+      </div>
 
-        {/* Title — add right padding to avoid overlap with heart button when no image */}
+      {/* Content */}
+      <div className="p-3.5 space-y-2">
+        {/* Title */}
         <TruncatedText
           text={job.title}
-          className={`text-[15px] font-bold text-white leading-snug line-clamp-2 ${!displayUrl ? 'pr-10' : ''}`}
+          className="text-[15px] font-bold text-white leading-snug line-clamp-2"
         />
 
         {/* Company + Location — single compact row */}
@@ -145,21 +153,22 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
           <span className="truncate">{job.location}</span>
         </div>
 
-        {/* Tags row — employment type + time remaining */}
+        {/* Tags row — employment type as primary, metadata as secondary */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {job.employment_type && (
             <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
               {getEmploymentTypeLabel(job.employment_type)}
             </Badge>
           )}
-          <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
-            <Timer className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-none">{isExpired ? 'Utgången' : `${timeText} kvar`}</span>
-          </Badge>
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
-            <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="leading-none">{job.applications_count || 0} sökande</span>
-          </Badge>
+          <span className={`text-[11px] text-white/50 inline-flex items-center gap-0.5 ${isExpired ? 'text-red-400/70' : ''}`}>
+            <Timer className="h-3 w-3 flex-shrink-0" />
+            {isExpired ? 'Utgången' : `${timeText} kvar`}
+          </span>
+          <span className="text-white/20">·</span>
+          <span className="text-[11px] text-white/50 inline-flex items-center gap-0.5">
+            <Users className="h-3 w-3 flex-shrink-0" />
+            {job.applications_count || 0}
+          </span>
         </div>
       </div>
     </Card>
