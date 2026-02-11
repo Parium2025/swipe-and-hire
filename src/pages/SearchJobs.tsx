@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { TrendingUp, Users, Briefcase, Building, Building2, ChevronDown, Star, Sparkles } from 'lucide-react';
+import { TrendingUp, Briefcase, Building, Building2, ChevronDown, Star, Sparkles } from 'lucide-react';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
@@ -433,16 +433,10 @@ const SearchJobs = () => {
       )}
 
 
-      {/* Result indicator */}
-      {searchInput && (
+      {/* Result indicator — only shown when no results */}
+      {searchInput && filteredAndSortedJobs.length === 0 && (
         <div className="text-sm text-white mb-4">
-          {filteredAndSortedJobs.length === 0 ? (
-            <span>Inga jobb matchar din sökning</span>
-          ) : (
-            <span>
-              Visar {filteredAndSortedJobs.length} av {jobs.length} jobb
-            </span>
-          )}
+          <span>Inga jobb matchar din sökning</span>
         </div>
       )}
 
@@ -558,12 +552,12 @@ const SearchJobs = () => {
       {/* Infinite Scroll Trigger */}
       <div ref={loadMoreTriggerRef} className="h-1" />
       
-      {/* Loading indicator when fetching more */}
+      {/* Loading indicator with progress */}
       {hasMoreJobs && (
         <div className="flex justify-center py-4">
           <div className="flex items-center gap-2 text-white/60 text-sm">
             <div className="w-4 h-4 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
-            <span>Laddar fler jobb...</span>
+            <span>Visar {displayCount} av {filteredAndSortedJobs.length} jobb</span>
           </div>
         </div>
       )}
