@@ -1,5 +1,5 @@
 import { ReactNode, memo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/AppSidebar';
@@ -87,6 +87,7 @@ const MobileProfileAvatar = () => {
 const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
   const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const device = useDevice();
   
@@ -171,14 +172,16 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
               Parium
             </span>
             <div className="flex items-center gap-2">
-              {/* Search button */}
-              <button
-                onClick={() => navigate('/search-jobs')}
-                className="flex items-center justify-center h-9 w-9 rounded-lg text-white hover:bg-white/10 transition-colors"
-                aria-label="Sök jobb"
-              >
-                <Search className="h-[18px] w-[18px]" />
-              </button>
+              {/* Search button - hidden on /search-jobs */}
+              {location.pathname !== '/search-jobs' && (
+                <button
+                  onClick={() => navigate('/search-jobs')}
+                  className="flex items-center justify-center h-9 w-9 rounded-lg text-white hover:bg-white/10 transition-colors"
+                  aria-label="Sök jobb"
+                >
+                  <Search className="h-[18px] w-[18px]" />
+                </button>
+              )}
               {/* Profile Avatar */}
               <MobileProfileAvatar />
               {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (
