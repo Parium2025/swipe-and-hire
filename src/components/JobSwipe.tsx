@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -97,6 +98,7 @@ const JobSwipe = () => {
   const [currentJobQuestions, setCurrentJobQuestions] = useState<any[]>([]);
   const [currentJobImageUrl, setCurrentJobImageUrl] = useState<string | null>(null);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchJobs();
@@ -394,7 +396,15 @@ const JobSwipe = () => {
 
   return (
     <div className="max-w-md mx-auto p-3 sm:p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
-      <div className="mb-4 text-center">
+      <div className="mb-4 text-center relative">
+        {/* Stäng-knapp */}
+        <button
+          onClick={() => navigate(-1)}
+          aria-label="Stäng"
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors active:scale-90"
+        >
+          <X className="h-4 w-4 text-white" />
+        </button>
         <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Upptäck jobb</h2>
         <p className="text-sm text-white mt-1">
           {currentJobIndex + 1} av {jobs.length} jobb
