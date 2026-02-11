@@ -154,7 +154,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
 
   // Mobile/Tablet layout with sidebar
   return (
-    <SidebarProvider defaultOpen={false} className="bg-gradient-parium">
+    <SidebarProvider defaultOpen={true} className="bg-gradient-parium">
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
