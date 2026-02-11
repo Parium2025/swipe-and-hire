@@ -104,11 +104,33 @@ export const jobSearchSynonyms: SearchSynonyms = {
   // Kök/restaurang-relaterade termer
   'kök': ['kock', 'kökschef', 'souschef', 'konditor', 'bagare', 'servitör', 'servitris', 'hovmästare', 'restaurang', 'storhushåll', 'cateringpersonal'],
   
-  // Platser (Helsingborg och andra större städer)
+  // Platser (större städer med stadsdelar/förorter)
   'helsingborg': ['helsingborg', '252', '254', '256', 'norra hamnen', 'västra hamnen', 'fredriksdal'],
-  'malmö': ['malmö', '200', '201', '202', '203', '204', '205', '206', '207', '208', '209', '21'],
-  'stockholm': ['stockholm', '100', '101', '102', '103', '104', '105', '106', '107', '108', '109', '11', '12', '13', '14', '15', '16'],
-  'göteborg': ['göteborg', '400', '401', '402', '403', '404', '405', '406', '407', '408', '409', '41', '42', '43'],
+  'malmö': ['malmö', 'skåne', '200', '201', '202', '203', '204', '205', '206', '207', '208', '209', '21', 'limhamn', 'hyllie', 'rosengård'],
+  'stockholm': ['stockholm', 'stockholms', 'stockholms län', '100', '101', '102', '103', '104', '105', '106', '107', '108', '109', '11', '12', '13', '14', '15', '16', 'farsta', 'johanneshov', 'södermalm', 'kungsholmen', 'norrmalm', 'vasastan', 'östermalm', 'bromma', 'hägersten', 'enskede', 'skärholmen', 'solna', 'sundbyberg', 'nacka', 'lidingö', 'täby', 'danderyd', 'sollentuna', 'huddinge', 'botkyrka', 'haninge', 'tyresö', 'vallentuna', 'upplands väsby', 'järfälla', 'sigtuna'],
+  'göteborg': ['göteborg', 'göteborgs', 'västra götaland', '400', '401', '402', '403', '404', '405', '406', '407', '408', '409', '41', '42', '43', 'mölndal', 'partille', 'kungälv', 'härryda'],
+  'uppsala': ['uppsala', 'uppsalas', 'uppsala län', 'knivsta', 'enköping', 'håbo', 'tierp', 'östhammar', 'älvkarleby'],
+  'linköping': ['linköping', 'östergötland', 'norrköping', 'mjölby', 'motala', 'finspång'],
+  'örebro': ['örebro', 'örebro län', 'kumla', 'hallsberg', 'karlskoga', 'degerfors'],
+  'västerås': ['västerås', 'västmanland', 'västmanlands län', 'köping', 'sala', 'fagersta'],
+  'umeå': ['umeå', 'västerbotten', 'västerbottens län', 'skellefteå', 'lycksele'],
+  'luleå': ['luleå', 'norrbotten', 'norrbottens län', 'boden', 'piteå', 'gällivare', 'kiruna'],
+  'sundsvall': ['sundsvall', 'västernorrland', 'västernorrlands län', 'härnösand', 'kramfors', 'ånge'],
+  'karlstad': ['karlstad', 'värmland', 'värmlands län', 'hammarö', 'grums', 'kristinehamn'],
+  'jönköping': ['jönköping', 'jönköpings län', 'huskvarna', 'nässjö', 'vetlanda', 'värnamo'],
+  'växjö': ['växjö', 'kronoberg', 'kronobergs län', 'alvesta', 'ljungby'],
+  'kalmar': ['kalmar', 'kalmar län', 'nybro', 'oskarshamn', 'borgholm'],
+  
+  // Geografiska regioner → län-mappningar
+  'lappland': ['norrbotten', 'norrbottens län', 'västerbotten', 'västerbottens län', 'kiruna', 'gällivare', 'jokkmokk', 'lycksele', 'sorsele', 'vilhelmina', 'storuman', 'dorotea', 'åsele', 'lappland'],
+  'norrland': ['norrbotten', 'norrbottens län', 'västerbotten', 'västerbottens län', 'västernorrland', 'västernorrlands län', 'jämtland', 'jämtlands län', 'gävleborg', 'gävleborgs län', 'norrland'],
+  'svealand': ['stockholm', 'stockholms län', 'uppsala', 'uppsala län', 'södermanland', 'södermanlands län', 'örebro', 'örebro län', 'västmanland', 'västmanlands län', 'dalarna', 'dalarnas län', 'gävleborg', 'gävleborgs län', 'värmland', 'värmlands län', 'svealand'],
+  'götaland': ['skåne', 'skåne län', 'västra götaland', 'västra götalands län', 'östergötland', 'östergötlands län', 'jönköping', 'jönköpings län', 'kronoberg', 'kronobergs län', 'kalmar', 'kalmar län', 'blekinge', 'blekinge län', 'halland', 'hallands län', 'gotland', 'gotlands län', 'götaland'],
+  'skåne': ['skåne', 'skåne län', 'malmö', 'helsingborg', 'lund', 'kristianstad', 'landskrona', 'trelleborg', 'ängelholm', 'eslöv', 'hässleholm', 'ystad'],
+  'dalarna': ['dalarna', 'dalarnas län', 'falun', 'borlänge', 'mora', 'leksand', 'avesta', 'ludvika'],
+  'halland': ['halland', 'hallands län', 'halmstad', 'varberg', 'falkenberg', 'kungsbacka', 'laholm'],
+  'blekinge': ['blekinge', 'blekinge län', 'karlskrona', 'karlshamn', 'ronneby', 'sölvesborg'],
+  'gotland': ['gotland', 'gotlands län', 'visby'],
   
   // Anställningstyper
   'heltid': ['heltid', '100%', 'hel tjänst', 'full time', 'fulltime'],
