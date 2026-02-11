@@ -195,24 +195,7 @@ const SearchJobs = () => {
     }
   }, [jobImageUrls]);
 
-  // Realtime-prenumeration för live-uppdatering av jobb
-  useEffect(() => {
-    const channel = supabase
-      .channel('search-jobs-realtime')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'job_postings' },
-        () => {
-          // Invalidera och hämta ny data när jobb ändras
-          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
+  // Realtime hanteras redan av useOptimizedJobSearch — ingen dubbel prenumeration behövs
 
   // Sort jobs (filtering is now done in database for performance)
   const filteredAndSortedJobs = useMemo(() => {
@@ -241,6 +224,24 @@ const SearchJobs = () => {
   }, [filteredAndSortedJobs, displayCount]);
 
   const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
+
+  // Memoize swipe jobs to avoid re-mapping on every render
+  const swipeJobs = useMemo(() => filteredAndSortedJobs.map(job => ({
+    id: job.id,
+    title: job.title,
+    company_name: job.company_name,
+    location: job.location,
+    employment_type: job.employment_type,
+    job_image_url: job.job_image_url,
+    views_count: job.views_count,
+    applications_count: job.applications_count,
+    created_at: job.created_at,
+    expires_at: job.expires_at,
+    employer_id: job.employer_id,
+    description: job.description,
+    salary_min: job.salary_min,
+    salary_max: job.salary_max,
+  })), [filteredAndSortedJobs]);
 
   // Find matching companies for smart search suggestion
   // 🔥 CRITICAL: Använd debouncedSearch OCH kontrollera att det matchar searchInput
@@ -331,23 +332,20 @@ const SearchJobs = () => {
     return 'Enligt överenskommelse';
   };
 
-  // Använd cachade värden från AuthProvider för omedelbar visning
-  // Filter to only count non-expired jobs
-  const activeJobs = useMemo(() => 
-    jobs.filter(j => !getTimeRemaining(j.created_at, j.expires_at).isExpired),
-    [jobs]
-  );
-  
+  // jobs from useOptimizedJobSearch already filters expired — use directly
+  const activeJobCount = useMemo(() => filteredAndSortedJobs.length, [filteredAndSortedJobs]);
+  const uniqueCompanyCount = useMemo(() => new Set(filteredAndSortedJobs.map(j => j.company_name)).size, [filteredAndSortedJobs]);
+  const newThisWeekCount = useMemo(() => {
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return filteredAndSortedJobs.filter(j => new Date(j.created_at).getTime() > weekAgo).length;
+  }, [filteredAndSortedJobs]);
+
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Aktiva jobb', value: activeJobs.length, loading: false, cacheKey: 'search_active_jobs' },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: activeJobs.filter(j => j.is_active).length, loading: false, cacheKey: 'search_active_ads' },
-    { icon: Building, title: 'Unika företag', value: new Set(activeJobs.map(j => j.company_name)).size, loading: false, cacheKey: 'search_unique_companies' },
-    { icon: Users, title: 'Nya denna vecka', value: activeJobs.filter(j => {
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return new Date(j.created_at) > weekAgo;
-    }).length, loading: false, cacheKey: 'search_new_this_week' },
-  ], [activeJobs]);
+    { icon: Briefcase, title: 'Aktiva jobb', value: activeJobCount, loading: false, cacheKey: 'search_active_jobs' },
+    { icon: TrendingUp, title: 'Aktiva annonser', value: activeJobCount, loading: false, cacheKey: 'search_active_ads' },
+    { icon: Building, title: 'Unika företag', value: uniqueCompanyCount, loading: false, cacheKey: 'search_unique_companies' },
+    { icon: Users, title: 'Nya denna vecka', value: newThisWeekCount, loading: false, cacheKey: 'search_new_this_week' },
+  ], [activeJobCount, uniqueCompanyCount, newThisWeekCount]);
 
   const sortLabels = {
     newest: 'Nyast först',
@@ -822,11 +820,11 @@ const SearchJobs = () => {
           <h2 className="text-sm font-medium text-white">Jobbsökresultat</h2>
           <div className="flex items-center gap-4 text-xs text-white md:hidden">
             <div className="flex flex-col items-center">
-              <span className="flex items-center gap-1 font-semibold"><Briefcase className="h-3 w-3" />{filteredAndSortedJobs.filter(j => !getTimeRemaining(j.created_at, j.expires_at).isExpired).length}</span>
+              <span className="flex items-center gap-1 font-semibold"><Briefcase className="h-3 w-3" />{activeJobCount}</span>
               <span className="text-[9px] text-white leading-tight">Aktiva jobb</span>
             </div>
             <div className="flex flex-col items-center">
-              <span className="flex items-center gap-1 font-semibold"><Building className="h-3 w-3" />{new Set(filteredAndSortedJobs.map(j => j.company_name)).size}</span>
+              <span className="flex items-center gap-1 font-semibold"><Building className="h-3 w-3" />{uniqueCompanyCount}</span>
               <span className="text-[9px] text-white leading-tight">Antal företag</span>
             </div>
           </div>
@@ -1050,22 +1048,7 @@ const SearchJobs = () => {
       {/* Swipe Mode Fullscreen Overlay */}
       {isTouchCapable && swipeModeActive && (
         <SwipeFullscreen
-          jobs={filteredAndSortedJobs.map(job => ({
-            id: job.id,
-            title: job.title,
-            company_name: job.company_name,
-            location: job.location,
-            employment_type: job.employment_type,
-            job_image_url: job.job_image_url,
-            views_count: job.views_count,
-            applications_count: job.applications_count,
-            created_at: job.created_at,
-            expires_at: job.expires_at,
-            employer_id: job.employer_id,
-            description: job.description,
-            salary_min: job.salary_min,
-            salary_max: job.salary_max,
-          }))}
+          jobs={swipeJobs}
           appliedJobIds={appliedJobIds}
           onClose={() => setSwipeModeActive(false)}
         />
