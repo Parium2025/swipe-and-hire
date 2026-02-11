@@ -78,8 +78,6 @@ const SearchJobs = () => {
   const { savedSearches, saveSearch, deleteSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
   const isTouchCapable = useTouchCapable();
-  // DEV: force swipe mode visible for development — remove before release
-  const showSwipeMode = isTouchCapable || import.meta.env.DEV;
   const [swipeModeActive, setSwipeModeActive] = useState(false);
 
   // Handler to apply a saved search - sets all the filter states
@@ -850,7 +848,7 @@ const SearchJobs = () => {
           <>
             {/* Mobile: Swipe Mode Toggle */}
             {/* Swipe Mode Toggle - only for touch devices */}
-            {showSwipeMode && (
+            {isTouchCapable && (
               <div className="flex justify-center mb-4">
                 <button
                   onClick={() => setSwipeModeActive(true)}
@@ -1011,7 +1009,7 @@ const SearchJobs = () => {
         onSave={saveSearch}
       />
       {/* Swipe Mode Fullscreen Overlay */}
-      {showSwipeMode && swipeModeActive && (
+      {isTouchCapable && swipeModeActive && (
         <SwipeFullscreen
           jobs={filteredAndSortedJobs.map(job => ({
             id: job.id,
