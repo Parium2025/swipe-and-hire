@@ -208,14 +208,57 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Determine if city is a county (län) for optimized query
+  // detectedLocationSearch is computed below but we need it here — use a ref pattern
   const isCounty = city.endsWith(' län');
-  const countyFilter = isCounty ? city : '';
-  const cityFilter = isCounty ? '' : city;
+  const baseCityFilter = isCounty ? '' : city;
+  const baseCountyFilter = isCounty ? city : '';
+
+  // Known location keys from smartSearch synonyms — used to detect location-based searches
+  const locationKeys = useMemo(() => new Set([
+    'helsingborg', 'malmö', 'malmo', 'stockholm', 'göteborg', 'goteborg', 'uppsala', 
+    'linköping', 'linkoping', 'örebro', 'orebro', 'västerås', 'vasteras', 'umeå', 'umea',
+    'luleå', 'lulea', 'sundsvall', 'karlstad', 'jönköping', 'jonkoping', 'växjö', 'vaxjo',
+    'kalmar', 'lappland', 'norrland', 'svealand', 'götaland', 'skåne', 'dalarna', 
+    'halland', 'blekinge', 'gotland',
+    // All Swedish counties
+    'stockholms län', 'västra götalands län', 'skåne län', 'östergötlands län',
+    'jönköpings län', 'kronobergs län', 'kalmar län', 'blekinge län', 'hallands län',
+    'gotlands län', 'uppsala län', 'södermanlands län', 'örebro län', 'västmanlands län',
+    'dalarnas län', 'gävleborgs län', 'värmlands län', 'västernorrlands län', 
+    'jämtlands län', 'västerbottens län', 'norrbottens län',
+  ]), []);
+
+  // Detect if the search query is purely a location search
+  const detectedLocationSearch = useMemo(() => {
+    const trimmed = searchQuery.trim().toLowerCase();
+    if (!trimmed) return null;
+
+    // Direct match against known location keys
+    if (locationKeys.has(trimmed)) return trimmed;
+
+    // Check typo corrections for city names
+    const normalized = normalizeSwedish(trimmed);
+    for (const [typo, corrections] of Object.entries(typoCorrections)) {
+      if (normalized === typo || levenshteinDistance(normalized, typo) <= 1) {
+        // Check if any correction is a known location
+        for (const correction of corrections) {
+          if (locationKeys.has(correction)) return correction;
+        }
+      }
+    }
+
+    return null;
+  }, [searchQuery, locationKeys]);
 
   // Detect salary search and expand terms with fuzzy matching
   const { expandedSearchQuery, salarySearch } = useMemo(() => {
     if (!searchQuery.trim()) return { expandedSearchQuery: '', salarySearch: null };
     
+    // If it's a location search, don't use it as a text query — it goes to city/county filter
+    if (detectedLocationSearch) {
+      return { expandedSearchQuery: '', salarySearch: null };
+    }
+
     // Check if it's a salary search first
     const salaryResult = detectSalarySearch(searchQuery);
     if (salaryResult.isSalarySearch) {
@@ -231,7 +274,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       expandedSearchQuery: expanded.join(' '),
       salarySearch: null
     };
-  }, [searchQuery]);
+  }, [searchQuery, detectedLocationSearch]);
 
   // Map employment type values to database codes
   const employmentCodes = useMemo(() => {
@@ -265,6 +308,23 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     }
     return '';
   }, [subcategories]);
+
+  // Merge detected location search into city/county filters
+  const cityFilter = useMemo(() => {
+    if (detectedLocationSearch && !baseCityFilter) {
+      // If the detected location ends with "län", it's a county — don't use as city
+      if (detectedLocationSearch.endsWith(' län')) return '';
+      return detectedLocationSearch;
+    }
+    return baseCityFilter;
+  }, [detectedLocationSearch, baseCityFilter]);
+
+  const countyFilter = useMemo(() => {
+    if (detectedLocationSearch && !baseCountyFilter) {
+      if (detectedLocationSearch.endsWith(' län')) return detectedLocationSearch;
+    }
+    return baseCountyFilter;
+  }, [detectedLocationSearch, baseCountyFilter]);
 
   // Combine all search terms
   const fullSearchQuery = useMemo(() => {
