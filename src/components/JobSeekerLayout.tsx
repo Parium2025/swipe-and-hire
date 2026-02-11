@@ -111,7 +111,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
         {/* Fixed gradient background */}
         <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
         
-        <div className="min-h-screen flex flex-col w-full overflow-x-hidden relative">
+        <div className="h-[100dvh] flex flex-col w-full overflow-hidden relative">
           <AnimatedBackground showBubbles={false} />
           
           {/* Top Navigation for Desktop */}
