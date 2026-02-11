@@ -154,7 +154,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
 
   // Mobile/Tablet layout with sidebar
   return (
-    <SidebarProvider defaultOpen={true} className="bg-gradient-parium">
+    <SidebarProvider defaultOpen={false} className="bg-gradient-parium">
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
@@ -162,7 +162,7 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">
-          <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
+          <header className="shrink-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
             <div className="flex items-center">
               <LogoSidebarTrigger />
             </div>
