@@ -434,8 +434,8 @@ const SearchJobs = () => {
 
 
       {/* Result indicator — only shown when no results */}
-      {searchInput && filteredAndSortedJobs.length === 0 && (
-        <div className="text-sm text-white mb-4">
+      {searchInput && filteredAndSortedJobs.length === 0 && !isLoading && (
+        <div className="text-sm text-white mb-4 text-center">
           <span>Inga jobb matchar din sökning</span>
         </div>
       )}
@@ -458,8 +458,8 @@ const SearchJobs = () => {
           </div>
         </div>
         
-        {isLoading ? (
-          // Skeleton cards
+        {isLoading && filteredAndSortedJobs.length > 0 ? (
+          // Only show skeleton when transitioning from results → new results (not from empty)
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
               <Card key={i} className="bg-white/5 border-white/10">
