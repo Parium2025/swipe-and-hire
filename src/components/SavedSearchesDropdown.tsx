@@ -110,7 +110,7 @@ export function SavedSearchesDropdown({
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
+          className="w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:w-80 p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
           align="center"
         >
           <div className="p-3 border-b border-white/10">
