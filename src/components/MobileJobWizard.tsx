@@ -2288,8 +2288,12 @@ const MobileJobWizard = ({
       let jobPost;
       let error;
 
-      // If editing an existing draft, update it instead of creating new
-      if (existingJob?.id) {
+      // When publishing a draft that was previously inactive, ALWAYS create a new job
+      // with a fresh ID. This ensures old applications don't carry over to the new posting.
+      // Only update in-place when editing an active job's details (not republishing).
+      const shouldUpdateExisting = existingJob?.id && !isPublishingDraft;
+
+      if (shouldUpdateExisting) {
         const { data, error: updateError } = await supabase
           .from('job_postings')
           .update(jobData)
@@ -2299,6 +2303,7 @@ const MobileJobWizard = ({
         jobPost = data;
         error = updateError;
       } else {
+        // New job or republishing a draft — always insert with fresh UUID
         const { data, error: insertError } = await supabase
           .from('job_postings')
           .insert([jobData as any])
@@ -2306,6 +2311,14 @@ const MobileJobWizard = ({
           .single();
         jobPost = data;
         error = insertError;
+
+        // If republishing, soft-delete the old job so it doesn't linger
+        if (isPublishingDraft && existingJob?.id && !insertError) {
+          await supabase
+            .from('job_postings')
+            .update({ deleted_at: new Date().toISOString(), is_active: false })
+            .eq('id', existingJob.id);
+        }
       }
 
       if (error) {
@@ -2319,8 +2332,8 @@ const MobileJobWizard = ({
 
       // Save questions to job_questions table if there are any
       if (jobPost) {
-        // If editing existing job, delete old questions first
-        if (existingJob?.id) {
+        // If updating existing job in-place, delete old questions first
+        if (shouldUpdateExisting) {
           await supabase
             .from('job_questions')
             .delete()
