@@ -108,11 +108,32 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
       )}
 
       {/* Content */}
-      <div className="p-3.5 space-y-2">
-        {/* Title */}
+      <div className="relative p-3.5 space-y-2">
+        {/* Save button — always top-right of content area when no image */}
+        {!displayUrl && (
+          <button
+            onClick={handleSaveClick}
+            aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
+            className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-white/10 border border-white/20 transition-all duration-150 active:scale-90 z-10"
+          >
+            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
+          </button>
+        )}
+
+        {/* Applied badge when no image */}
+        {!displayUrl && hasApplied && (
+          <div className="absolute top-2.5 left-3.5 z-10">
+            <Badge className="bg-green-500/90 text-white border-0 text-[11px] px-2 py-0.5">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Redan sökt
+            </Badge>
+          </div>
+        )}
+
+        {/* Title — add right padding to avoid overlap with heart button when no image */}
         <TruncatedText
           text={job.title}
-          className="text-[15px] font-bold text-white leading-snug line-clamp-2"
+          className={`text-[15px] font-bold text-white leading-snug line-clamp-2 ${!displayUrl ? 'pr-10' : ''}`}
         />
 
         {/* Company + Location — single compact row */}
@@ -140,25 +161,6 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
             <span className="leading-none">{job.applications_count || 0} sökande</span>
           </Badge>
         </div>
-
-        {/* No-image fallback: save button row */}
-        {!displayUrl && (
-          <div className="flex items-center justify-between pt-1">
-            {hasApplied && (
-              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-[11px] px-2 py-0.5">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Redan sökt
-              </Badge>
-            )}
-            <button
-              onClick={handleSaveClick}
-              aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
-              className="ml-auto h-9 w-9 flex items-center justify-center rounded-full bg-white/10 border border-white/20 transition-all duration-150 active:scale-90"
-            >
-              <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
-            </button>
-          </div>
-        )}
       </div>
     </Card>
   );
