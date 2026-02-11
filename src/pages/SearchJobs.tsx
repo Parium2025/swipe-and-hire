@@ -372,7 +372,7 @@ const SearchJobs = () => {
 
       {/* Filters Card */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardContent className="p-4 space-y-4">
+        <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
           {/* Search Field with Save Search Button */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -399,10 +399,10 @@ const SearchJobs = () => {
             </div>
             <div className="relative">
               <Input
-                placeholder="Sök efter jobbtitel, företag, plats..."
+                placeholder="Jobbtitel, företag, plats..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-4 pr-10 bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white"
+                className="pl-4 pr-10 h-10 md:h-11 text-sm bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/60"
               />
               {searchInput && (
                 <button
@@ -435,9 +435,9 @@ const SearchJobs = () => {
           </button>
 
           {/* Collapsible Filter Section */}
-          <div className={`space-y-4 overflow-hidden transition-all duration-300 ${filtersExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Location Filter - Postal Code OR City */}
+          <div className={`space-y-3 md:space-y-4 overflow-hidden transition-all duration-300 ${filtersExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              {/* Location Filter */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-white flex items-center gap-2">
                   <MapPin className="h-3 w-3" />
@@ -459,7 +459,7 @@ const SearchJobs = () => {
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className="w-full h-[44px] flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="w-full h-10 md:h-[44px] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                       aria-label="Välj yrkesområde"
                     >
                       <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
@@ -531,7 +531,7 @@ const SearchJobs = () => {
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className="w-full h-[44px] flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="w-full h-10 md:h-[44px] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                       aria-label="Välj specifik roll"
                     >
                       <Users className="h-4 w-4 text-white flex-shrink-0" />
@@ -616,7 +616,7 @@ const SearchJobs = () => {
                     <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <button
-                          className="w-full h-[44px] flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                          className="w-full h-10 md:h-[44px] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                           aria-label="Välj anställningstyp"
                         >
                           <Clock className="h-4 w-4 text-white flex-shrink-0" />
@@ -675,7 +675,7 @@ const SearchJobs = () => {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button
-                          className="w-full h-[44px] flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+                          className="w-full h-10 md:h-[44px] flex items-center gap-2 md:gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                           aria-label="Välj sortering"
                         >
                           <ArrowUpDown className="h-4 w-4 text-white flex-shrink-0" />
