@@ -53,6 +53,20 @@ function getGradientForId(id: string) {
   return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
 }
 
+/** Get initials from company name: 
+ *  - 1 word → first + last letter (e.g. "Hoffstens" → "HS")
+ *  - 2+ words → first letter of first + first letter of last word (e.g. "Hoffstens Motor" → "HM")
+ */
+function getCompanyInitials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return '?';
+  if (words.length === 1) {
+    const w = words[0];
+    return (w[0] + w[w.length - 1]).toUpperCase();
+  }
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+}
+
 export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
@@ -84,6 +98,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
   const isSaved = isJobSaved(job.id);
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
+  const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 
   const handleSaveClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -108,10 +123,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>
         ) : (
-          /* Gradient placeholder with icon for cards without image */
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+          /* Gradient placeholder with company initials */
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-2`}>
             <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-              <Briefcase className="h-7 w-7 text-white/40" />
+              <span className="text-xl font-bold text-white/50 tracking-wide">{initials}</span>
             </div>
           </div>
         )}
@@ -153,22 +168,21 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
           <span className="truncate">{job.location}</span>
         </div>
 
-        {/* Tags row — employment type as primary, metadata as secondary */}
+        {/* Tags row — badges restored */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {job.employment_type && (
             <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
               {getEmploymentTypeLabel(job.employment_type)}
             </Badge>
           )}
-          <span className={`text-[11px] text-white/50 inline-flex items-center gap-0.5 ${isExpired ? 'text-red-400/70' : ''}`}>
-            <Timer className="h-3 w-3 flex-shrink-0" />
-            {isExpired ? 'Utgången' : `${timeText} kvar`}
-          </span>
-          <span className="text-white/20">·</span>
-          <span className="text-[11px] text-white/50 inline-flex items-center gap-0.5">
-            <Users className="h-3 w-3 flex-shrink-0" />
-            {job.applications_count || 0}
-          </span>
+          <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
+            <Timer className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none">{isExpired ? 'Utgången' : `${timeText} kvar`}</span>
+          </Badge>
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
+            <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none">{job.applications_count || 0} sökande</span>
+          </Badge>
         </div>
       </div>
     </Card>
