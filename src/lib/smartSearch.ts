@@ -144,6 +144,33 @@ export const jobSearchSynonyms: SearchSynonyms = {
   'hybrid': ['hybrid', 'flexibelt', 'blandad arbetsplats'],
 };
 
+// Keys that represent location-based synonym groups (not job titles or employment types)
+export const locationSynonymKeys = new Set([
+  'helsingborg', 'malmö', 'stockholm', 'göteborg', 'uppsala', 'linköping', 'örebro',
+  'västerås', 'umeå', 'luleå', 'sundsvall', 'karlstad', 'jönköping', 'växjö', 'kalmar',
+  'lappland', 'norrland', 'svealand', 'götaland', 'skåne', 'dalarna', 'halland', 
+  'blekinge', 'gotland',
+]);
+
+// Build a comprehensive set of ALL known location terms (keys + all their values)
+// Used to detect if a search query is a location search
+export const allKnownLocationTerms: Set<string> = (() => {
+  const terms = new Set<string>();
+  for (const key of locationSynonymKeys) {
+    terms.add(key);
+    const synonyms = jobSearchSynonyms[key];
+    if (synonyms) {
+      synonyms.forEach(s => {
+        // Skip postal code numbers — they shouldn't trigger location detection
+        if (!/^\d+$/.test(s)) {
+          terms.add(s.toLowerCase());
+        }
+      });
+    }
+  }
+  return terms;
+})();
+
 // Function to expand search terms with synonyms
 export const expandSearchTerms = (searchTerm: string): string[] => {
   const normalizedTerm = searchTerm.toLowerCase().trim();
