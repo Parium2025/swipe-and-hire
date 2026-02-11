@@ -107,7 +107,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
               placeholder="Jobbtitel, Företag, Plats..."
               value={searchInput}
               onChange={(e) => onSearchInputChange(e.target.value)}
-              className="pl-9 pr-10 !h-10 !min-h-[40px] md:!h-11 md:!min-h-[44px] text-sm bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/60"
+              className="pl-9 pr-10 !h-10 !min-h-[40px] md:!h-11 md:!min-h-[44px] text-sm bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/60 placeholder:text-center"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
             {searchInput && (
