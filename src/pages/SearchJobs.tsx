@@ -367,9 +367,15 @@ const SearchJobs = () => {
       {/* Compact header: title centered + stats inline on mobile */}
       <div className="flex items-center justify-center relative mb-1 md:mb-4">
         <h1 className="text-lg md:text-2xl font-semibold text-white tracking-tight text-center">Sök Jobb</h1>
-        <div className="absolute right-0 flex items-center gap-3 text-xs text-white md:hidden">
-          <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{activeJobs.length}</span>
-          <span className="flex items-center gap-1"><Building className="h-3 w-3" />{new Set(activeJobs.map(j => j.company_name)).size}</span>
+        <div className="absolute right-0 flex items-center gap-4 text-xs text-white md:hidden">
+          <div className="flex flex-col items-center">
+            <span className="flex items-center gap-1 font-semibold"><Briefcase className="h-3 w-3" />{activeJobs.length}</span>
+            <span className="text-[9px] text-white/60 leading-tight">aktiva jobb</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="flex items-center gap-1 font-semibold"><Building className="h-3 w-3" />{new Set(activeJobs.map(j => j.company_name)).size}</span>
+            <span className="text-[9px] text-white/60 leading-tight">företag</span>
+          </div>
         </div>
       </div>
 
