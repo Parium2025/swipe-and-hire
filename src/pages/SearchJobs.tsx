@@ -364,10 +364,10 @@ const SearchJobs = () => {
 
   return (
      <div className="space-y-3 md:space-y-4 responsive-container-wide animate-fade-in">
-      {/* Compact header: title + stats inline on mobile */}
-      <div className="flex items-center justify-between mb-1 md:mb-4">
-        <h1 className="text-lg md:text-2xl font-semibold text-white tracking-tight">Sök Jobb</h1>
-        <div className="flex items-center gap-3 text-xs text-white/60 md:hidden">
+      {/* Compact header: title centered + stats inline on mobile */}
+      <div className="flex items-center justify-center relative mb-1 md:mb-4">
+        <h1 className="text-lg md:text-2xl font-semibold text-white tracking-tight text-center">Sök Jobb</h1>
+        <div className="absolute right-0 flex items-center gap-3 text-xs text-white md:hidden">
           <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{activeJobs.length}</span>
           <span className="flex items-center gap-1"><Building className="h-3 w-3" />{new Set(activeJobs.map(j => j.company_name)).size}</span>
         </div>
@@ -384,10 +384,6 @@ const SearchJobs = () => {
           {/* Search Field with Save Search Button */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium text-white flex items-center gap-2">
-                <Search className="h-3 w-3" />
-                Sök jobb
-              </Label>
               {/* Save Search Button - shows when filters are active */}
               {hasActiveFilters({
                 search_query: searchInput,
@@ -395,23 +391,24 @@ const SearchJobs = () => {
                 county: selectedPostalCode,
                 employment_types: selectedEmploymentTypes,
                 category: selectedCategory !== 'all-categories' ? selectedCategory : undefined,
-              }) && (
+              }) ? (
                 <button
                   onClick={() => setSaveSearchDialogOpen(true)}
-                  className="inline-flex items-center gap-1.5 h-7 px-2 text-xs text-white rounded-md transition-all duration-200 md:hover:bg-white/10 active:scale-95"
+                  className="inline-flex items-center gap-1.5 h-7 px-2 text-xs text-white rounded-md transition-all duration-200 md:hover:bg-white/10 active:scale-95 ml-auto"
                 >
                   <Bookmark className="h-3.5 w-3.5 text-white" />
                   <span className="hidden sm:inline">Spara sökning</span>
                 </button>
-              )}
+              ) : <span />}
             </div>
             <div className="relative">
               <Input
                 placeholder="Jobbtitel, företag, plats..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-4 pr-10 !h-10 !min-h-[40px] md:!h-11 md:!min-h-[44px] text-sm bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/60"
+                className="pl-9 pr-10 !h-10 !min-h-[40px] md:!h-11 md:!min-h-[44px] text-sm bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/60"
               />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 pointer-events-none" />
               {searchInput && (
                 <button
                   onClick={() => setSearchInput('')}
