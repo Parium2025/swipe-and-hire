@@ -363,12 +363,20 @@ const SearchJobs = () => {
   };
 
   return (
-     <div className="space-y-4 responsive-container-wide animate-fade-in">
-      <div className="flex justify-center items-center mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Sök Jobb</h1>
+     <div className="space-y-3 md:space-y-4 responsive-container-wide animate-fade-in">
+      {/* Compact header: title + stats inline on mobile */}
+      <div className="flex items-center justify-between mb-1 md:mb-4">
+        <h1 className="text-lg md:text-2xl font-semibold text-white tracking-tight">Sök Jobb</h1>
+        <div className="flex items-center gap-3 text-xs text-white/60 md:hidden">
+          <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{activeJobs.length}</span>
+          <span className="flex items-center gap-1"><Building className="h-3 w-3" />{new Set(activeJobs.map(j => j.company_name)).size}</span>
+        </div>
       </div>
 
-      <StatsGrid stats={statsCards} />
+      {/* Stats grid — hidden on mobile (shown inline above), visible on desktop */}
+      <div className="hidden md:block">
+        <StatsGrid stats={statsCards} />
+      </div>
 
       {/* Filters Card */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
