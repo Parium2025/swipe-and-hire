@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer, CheckCircle, Bookmark, Bell, Sparkles } from 'lucide-react';
+import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Sparkles, Bookmark, Bell } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -38,6 +38,7 @@ import { useSavedSearches, SearchCriteria } from '@/hooks/useSavedSearches';
 import { SaveSearchDialog } from '@/components/SaveSearchDialog';
 import { SavedSearchesDropdown } from '@/components/SavedSearchesDropdown';
 import { useBatchPrefetchReviews, useBatchPrefetchCompanyProfiles } from '@/hooks/useCompanyReviewsCache';
+import { DesktopJobCard } from '@/components/search/DesktopJobCard';
 
 interface Job {
   id: string;
@@ -68,6 +69,18 @@ interface Job {
     company_name: string | null;
   };
 }
+
+// Pure utility — moved outside component to avoid re-creation on every render
+const formatSalary = (min?: number, max?: number) => {
+  if (min && max) {
+    return `${min.toLocaleString()} - ${max.toLocaleString()} kr/mån`;
+  } else if (min) {
+    return `Från ${min.toLocaleString()} kr/mån`;
+  } else if (max) {
+    return `Upp till ${max.toLocaleString()} kr/mån`;
+  }
+  return 'Enligt överenskommelse';
+};
 
 const SearchJobs = () => {
   const navigate = useNavigate();
@@ -321,16 +334,7 @@ const SearchJobs = () => {
     setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
   }, [filteredAndSortedJobs.length, loadMoreSize]);
 
-  const formatSalary = (min?: number, max?: number) => {
-    if (min && max) {
-      return `${min.toLocaleString()} - ${max.toLocaleString()} kr/mån`;
-    } else if (min) {
-      return `Från ${min.toLocaleString()} kr/mån`;
-    } else if (max) {
-      return `Upp till ${max.toLocaleString()} kr/mån`;
-    }
-    return 'Enligt överenskommelse';
-  };
+  // formatSalary moved to top-level scope for performance
 
   // jobs from useOptimizedJobSearch already filters expired — use directly
   const activeJobCount = useMemo(() => filteredAndSortedJobs.length, [filteredAndSortedJobs]);
@@ -901,101 +905,19 @@ const SearchJobs = () => {
                   );
                 }
                 
-                // Desktop: existing card design
+                // Desktop: extracted memoized component
                 return (
-                  <Card 
+                  <DesktopJobCard
                     key={job.id}
-                    onClick={() => navigate(`/job-view/${job.id}`)}
-                    className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
-                  >
-                    <CardContent className="p-4 min-h-[120px] relative">
-                      {/* Already applied badge - top right corner */}
-                      {appliedJobIds.has(job.id) && (
-                        <Badge variant="glass" className="absolute top-3 right-3 bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2.5 py-1">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Redan sökt
-                        </Badge>
-                      )}
-                      
-                      <div className="flex items-start justify-between gap-4">
-                        <div className={`flex-1 min-w-0 ${appliedJobIds.has(job.id) ? 'max-w-[calc(100%-100px)]' : ''}`}>
-                          {/* Job Title */}
-                          <TruncatedText 
-                            text={job.title}
-                            className="text-lg font-semibold text-white truncate group-hover:text-white transition-colors block break-all"
-                          />
-
-                          {/* Company - clickable to open profile */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (job.employer_id) {
-                                setSelectedCompanyId(job.employer_id);
-                                setCompanyDialogOpen(true);
-                              }
-                            }}
-                            className="flex items-center gap-2 mt-1 text-white hover:text-white/80 transition-colors"
-                          >
-                            <Building2 className="h-4 w-4 flex-shrink-0" />
-                            <span className="truncate underline-offset-2 hover:underline">
-                              {job.company_name || 'Okänt företag'}
-                            </span>
-                          </button>
-
-                          {/* Meta info */}
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm text-white">
-                            {job.location && (
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-3.5 w-3.5" />
-                                <span>{job.location}</span>
-                              </div>
-                            )}
-                            {job.employment_type && (
-                              <div className="flex items-center gap-1">
-                                <Briefcase className="h-3.5 w-3.5" />
-                                <span>{getEmploymentTypeLabel(job.employment_type)}</span>
-                              </div>
-                            )}
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3.5 w-3.5" />
-                              <span>{formatDateShortSv(job.created_at)}</span>
-                            </div>
-                            {/* Antal sökande badge */}
-                            <Badge variant="glass" className="text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50">
-                              <Users className="h-3 w-3 mr-1" />
-                              {job.applications_count || 0} sökande
-                            </Badge>
-                            {/* Days remaining badge */}
-                            {isExpired ? (
-                              <Badge variant="glass" className="bg-red-500/20 text-white border-red-500/30 text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-red-500/30 hover:border-red-500/50">
-                                Utgången
-                              </Badge>
-                            ) : (
-                              <Badge variant="glass" className="text-xs px-2.5 py-1 transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50">
-                                <Timer className="h-3 w-3 mr-1" />
-                                {timeText} kvar
-                              </Badge>
-                            )}
-                            {/* Save job button */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleSaveJob(job.id);
-                              }}
-                              className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border backdrop-blur-[2px] transition-all duration-300 group-hover:backdrop-brightness-90 ${
-                                isJobSaved(job.id)
-                                  ? 'bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30 hover:border-red-500/50'
-                                  : 'bg-white/10 text-white border-white/25 hover:bg-white/15 hover:border-white/50'
-                              }`}
-                            >
-                              <Heart className={`h-3 w-3 ${isJobSaved(job.id) ? 'fill-red-300' : ''}`} />
-                              {isJobSaved(job.id) ? 'Sparad' : 'Spara'}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    job={job}
+                    hasApplied={appliedJobIds.has(job.id)}
+                    isJobSaved={isJobSaved(job.id)}
+                    onToggleSave={toggleSaveJob}
+                    onOpenCompanyProfile={(employerId) => {
+                      setSelectedCompanyId(employerId);
+                      setCompanyDialogOpen(true);
+                    }}
+                  />
                 );
               })}
             </div>
