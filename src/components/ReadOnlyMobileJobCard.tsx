@@ -8,6 +8,7 @@ import { getTimeRemaining } from '@/lib/date';
 import { supabase } from '@/integrations/supabase/client';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { imageCache } from '@/lib/imageCache';
+import { TruncatedText } from '@/components/TruncatedText';
 
 interface ReadOnlyMobileJobCardProps {
   job: {
@@ -109,9 +110,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
       {/* Content */}
       <div className="p-3.5 space-y-2">
         {/* Title */}
-        <h3 className="text-[15px] font-bold text-white leading-snug line-clamp-2">
-          {job.title}
-        </h3>
+        <TruncatedText
+          text={job.title}
+          className="text-[15px] font-bold text-white leading-snug line-clamp-2"
+        />
 
         {/* Company + Location — single compact row */}
         <div className="flex items-center gap-1.5 text-[13px] text-white">
