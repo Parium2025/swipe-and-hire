@@ -2,8 +2,7 @@ import { memo, useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Eye, Users, MapPin, Calendar, Building2, Heart, Timer, CheckCircle } from 'lucide-react';
+import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,7 +37,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
   const navigate = useNavigate();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
 
-  // Resolve the raw storage path to a public URL (synchronous, stable)
+  // Resolve the raw storage path to a public URL
   const resolvedUrl = useMemo(() => {
     if (!job.job_image_url) return null;
     if (job.job_image_url.startsWith('http')) return job.job_image_url;
@@ -46,165 +45,118 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
     return data?.publicUrl || null;
   }, [job.job_image_url]);
 
-  // Use imageCache for blob caching — survives navigation
+  // Use imageCache for blob caching
   const [displayUrl, setDisplayUrl] = useState<string | null>(() => {
     if (!resolvedUrl) return null;
     return imageCache.getCachedUrl(resolvedUrl) || resolvedUrl;
   });
 
   useEffect(() => {
-    if (!resolvedUrl) {
-      setDisplayUrl(null);
-      return;
-    }
-    // If already in blob cache, use immediately
+    if (!resolvedUrl) { setDisplayUrl(null); return; }
     const cached = imageCache.getCachedUrl(resolvedUrl);
-    if (cached) {
-      setDisplayUrl(cached);
-      return;
-    }
-    // Load into blob cache in background
+    if (cached) { setDisplayUrl(cached); return; }
     imageCache.loadImage(resolvedUrl)
       .then(blobUrl => setDisplayUrl(blobUrl))
-      .catch(() => setDisplayUrl(resolvedUrl)); // Fallback to network URL
+      .catch(() => setDisplayUrl(resolvedUrl));
   }, [resolvedUrl]);
 
-  // Get company name from either direct property or profiles join
   const companyName = job.company_name || job.profiles?.company_name || 'Okänt företag';
   const isSaved = isJobSaved(job.id);
+  const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
 
   const handleSaveClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleSaveJob(job.id);
   };
 
-  const handleCardClick = () => {
-    navigate(`/job-view/${job.id}`);
-  };
-
   return (
     <Card 
-      className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-all duration-200 hover:bg-white/10 active:scale-[0.98]"
-      onClick={handleCardClick}
+      className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98]"
+      onClick={() => navigate(`/job-view/${job.id}`)}
     >
-      {/* Job Image - blob-cached for instant display on re-navigation */}
+      {/* Job Image */}
       {displayUrl && (
-        <div className="relative w-full h-48 overflow-hidden">
+        <div className="relative w-full h-40 overflow-hidden">
           <img
             src={displayUrl}
             alt={`${job.title} hos ${companyName}`}
             className="w-full h-full object-cover"
             loading="lazy"
           />
-          {/* Gradient overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           
-          {/* Status Badge on image */}
-          <div className="absolute top-3 right-3">
-            <Badge
-              variant={job.is_active ? "default" : "secondary"}
-              className={`text-xs ${job.is_active ? "bg-green-500/90 text-white border-green-600" : "bg-gray-500/90 text-white border-gray-600"}`}
-            >
-              {job.is_active ? 'Aktiv' : 'Inaktiv'}
-            </Badge>
-          </div>
+          {/* Save button on image */}
+          <button
+            onClick={handleSaveClick}
+            aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
+            className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90"
+          >
+            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
+          </button>
+
+          {/* Applied badge on image */}
+          {hasApplied && (
+            <div className="absolute top-2.5 left-2.5">
+              <Badge className="bg-green-500/90 text-white border-0 text-[11px] px-2 py-0.5">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Redan sökt
+              </Badge>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Content Section */}
-      <div className="p-4 space-y-3">
-        {/* Title & Company */}
-        <div className="space-y-2">
-          <h3 className="text-base font-bold text-white line-clamp-2 leading-tight">
-            {job.title}
-          </h3>
-          <div className="flex items-center gap-2 text-sm text-white">
-            <Building2 className="h-4 w-4 flex-shrink-0 text-white" />
-            <span className="font-medium text-white">{companyName}</span>
-          </div>
+      {/* Content */}
+      <div className="p-3.5 space-y-2">
+        {/* Title */}
+        <h3 className="text-[15px] font-bold text-white leading-snug line-clamp-2">
+          {job.title}
+        </h3>
+
+        {/* Company + Location — single compact row */}
+        <div className="flex items-center gap-1.5 text-[13px] text-white/80">
+          <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white/60" />
+          <span className="truncate font-medium">{companyName}</span>
+          <span className="text-white/30">·</span>
+          <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-white/60" />
+          <span className="truncate">{job.location}</span>
         </div>
 
-        {/* Employment Type Badge */}
-        {job.employment_type && (
-          <Badge 
-            variant="glass" 
-            className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-blur-sm hover:backdrop-brightness-110"
-          >
-            {getEmploymentTypeLabel(job.employment_type)}
-          </Badge>
-        )}
-
-        {/* Status Badge (if no image) */}
-        {!displayUrl && (
-          <div>
-            <Badge
-              variant={job.is_active ? "default" : "secondary"}
-              className={`text-xs ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
-            >
-              {job.is_active ? 'Aktiv' : 'Inaktiv'}
-            </Badge>
-          </div>
-        )}
-
-        {/* Location */}
-        <div className="flex items-center gap-2 text-sm text-white">
-          <MapPin className="h-4 w-4 flex-shrink-0 text-white" />
-          <span className="truncate text-white">{job.location}</span>
-        </div>
-
-        {/* Stats Row with Save Button */}
-        <div className="flex items-center gap-4 text-xs text-white pt-2 border-t border-white/10">
-          <div className="flex items-center gap-1">
-            <Eye className="h-3.5 w-3.5" />
-            <span>{job.views_count || 0}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" />
-            <span>{job.applications_count || 0} sökande</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Calendar className="h-3.5 w-3.5" />
-            <span>
-              {new Date(job.created_at).toLocaleDateString('sv-SE', { 
-                day: 'numeric', 
-                month: 'short'
-              })}
-            </span>
-          </div>
-          {/* Visa "dagar kvar" eller "Utgången" */}
-          {(() => {
-            const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
-            if (isExpired) {
-              return (
-                <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-blur-sm hover:backdrop-brightness-110">
-                  Utgången
-                </Badge>
-              );
-            }
-            return (
-              <Badge variant="glass" className="text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-white/15 hover:border-white/50 hover:backdrop-blur-sm hover:backdrop-brightness-110">
-                <Timer className="h-3 w-3 mr-1" />
-                {text} kvar
-              </Badge>
-            );
-          })()}
-          {/* Visa "Redan sökt" badge på mobil */}
-          {hasApplied && (
-            <Badge variant="glass" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs transition-all duration-300 group-hover:backdrop-brightness-90 hover:bg-green-500/30 hover:border-green-500/50">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Redan sökt
+        {/* Tags row — employment type + time remaining */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {job.employment_type && (
+            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15">
+              {getEmploymentTypeLabel(job.employment_type)}
             </Badge>
           )}
-          <Button
-            variant="glass"
-            size="icon"
-            onClick={handleSaveClick}
-            aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
-            className="ml-auto h-10 w-10 min-h-touch min-w-touch p-0 rounded-full transition-all duration-300 group-hover:backdrop-brightness-90 active:scale-95 active:bg-white/20"
-          >
-            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : ''}`} />
-          </Button>
+          <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
+            <Timer className="h-3 w-3 mr-0.5" />
+            {isExpired ? 'Utgången' : `${timeText} kvar`}
+          </Badge>
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15">
+            <Users className="h-3 w-3 mr-0.5" />
+            {job.applications_count || 0} sökande
+          </Badge>
         </div>
+
+        {/* No-image fallback: save button row */}
+        {!displayUrl && (
+          <div className="flex items-center justify-between pt-1">
+            {hasApplied && (
+              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-[11px] px-2 py-0.5">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Redan sökt
+              </Badge>
+            )}
+            <button
+              onClick={handleSaveClick}
+              aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
+              className="ml-auto h-9 w-9 flex items-center justify-center rounded-full bg-white/10 border border-white/20 transition-all duration-150 active:scale-90"
+            >
+              <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
+            </button>
+          </div>
+        )}
       </div>
     </Card>
   );
