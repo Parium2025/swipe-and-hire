@@ -95,7 +95,7 @@ export function SavedSearchesDropdown({
       }}>
         <PopoverTrigger asChild>
           <button
-            className="relative flex items-center gap-2 text-xs text-white rounded-md px-2 py-1.5 transition-all duration-200 md:hover:bg-white/10 active:scale-95"
+            className="relative w-full flex items-center justify-center gap-2 text-xs text-white rounded-md px-2 py-1.5 transition-all duration-200 md:hover:bg-white/10 active:scale-95"
           >
             <Bell className="h-3 w-3 text-white" />
             <span>{savedSearches.length} sparad{savedSearches.length !== 1 ? 'e' : ''} sökning{savedSearches.length !== 1 ? 'ar' : ''}</span>
@@ -110,8 +110,8 @@ export function SavedSearchesDropdown({
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:w-80 p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
-          align="center"
+          className="w-[var(--radix-popover-trigger-width)] p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
+          align="start"
         >
           <div className="p-3 border-b border-white/10">
             <h4 className="text-sm font-medium text-white">Sparade sökningar</h4>
