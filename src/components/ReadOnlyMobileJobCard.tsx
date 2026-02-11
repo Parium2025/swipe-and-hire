@@ -125,17 +125,17 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
         {/* Tags row — employment type + time remaining */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {job.employment_type && (
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15">
+            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
               {getEmploymentTypeLabel(job.employment_type)}
             </Badge>
           )}
-          <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
-            <Timer className="h-3 w-3 mr-0.5" />
-            {isExpired ? 'Utgången' : `${timeText} kvar`}
+          <Badge variant="glass" className={`text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center ${isExpired ? 'bg-red-500/20 text-red-300 border-red-500/30' : ''}`}>
+            <Timer className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none">{isExpired ? 'Utgången' : `${timeText} kvar`}</span>
           </Badge>
-          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15">
-            <Users className="h-3 w-3 mr-0.5" />
-            {job.applications_count || 0} sökande
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
+            <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none">{job.applications_count || 0} sökande</span>
           </Badge>
         </div>
 
