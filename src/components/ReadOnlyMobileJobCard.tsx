@@ -114,11 +114,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
         </h3>
 
         {/* Company + Location — single compact row */}
-        <div className="flex items-center gap-1.5 text-[13px] text-white/80">
-          <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white/60" />
+        <div className="flex items-center gap-1.5 text-[13px] text-white">
+          <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
           <span className="truncate font-medium">{companyName}</span>
           <span className="text-white/30">·</span>
-          <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-white/60" />
+          <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-white" />
           <span className="truncate">{job.location}</span>
         </div>
 
