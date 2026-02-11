@@ -563,7 +563,7 @@ const SearchJobs = () => {
       )}
       
       {/* Show message when all jobs are loaded */}
-      {!hasMoreJobs && filteredAndSortedJobs.length > 0 && (
+      {!hasMoreJobs && filteredAndSortedJobs.length > 20 && (
         <div className="text-center py-6">
           <p className="text-white text-sm">
             Alla {filteredAndSortedJobs.length} jobb visas
