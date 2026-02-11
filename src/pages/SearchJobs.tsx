@@ -370,11 +370,11 @@ const SearchJobs = () => {
         <div className="absolute right-0 flex items-center gap-4 text-xs text-white md:hidden">
           <div className="flex flex-col items-center">
             <span className="flex items-center gap-1 font-semibold"><Briefcase className="h-3 w-3" />{activeJobs.length}</span>
-            <span className="text-[9px] text-white/60 leading-tight">aktiva jobb</span>
+            <span className="text-[9px] text-white leading-tight">Aktiva jobb</span>
           </div>
           <div className="flex flex-col items-center">
             <span className="flex items-center gap-1 font-semibold"><Building className="h-3 w-3" />{new Set(activeJobs.map(j => j.company_name)).size}</span>
-            <span className="text-[9px] text-white/60 leading-tight">företag</span>
+            <span className="text-[9px] text-white leading-tight">Antal företag</span>
           </div>
         </div>
       </div>
