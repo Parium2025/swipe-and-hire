@@ -2,7 +2,7 @@ import { useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-quer
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo, useEffect, useCallback, useRef } from 'react';
 import { getTimeRemaining } from '@/lib/date';
-import { expandSearchTerms, detectSalarySearch } from '@/lib/smartSearch';
+import { expandSearchTerms, detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
 
 export interface SearchJob {
   id: string;
@@ -213,42 +213,27 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   const baseCityFilter = isCounty ? '' : city;
   const baseCountyFilter = isCounty ? city : '';
 
-  // Known location keys from smartSearch synonyms — used to detect location-based searches
-  const locationKeys = useMemo(() => new Set([
-    'helsingborg', 'malmö', 'malmo', 'stockholm', 'göteborg', 'goteborg', 'uppsala', 
-    'linköping', 'linkoping', 'örebro', 'orebro', 'västerås', 'vasteras', 'umeå', 'umea',
-    'luleå', 'lulea', 'sundsvall', 'karlstad', 'jönköping', 'jonkoping', 'växjö', 'vaxjo',
-    'kalmar', 'lappland', 'norrland', 'svealand', 'götaland', 'skåne', 'dalarna', 
-    'halland', 'blekinge', 'gotland',
-    // All Swedish counties
-    'stockholms län', 'västra götalands län', 'skåne län', 'östergötlands län',
-    'jönköpings län', 'kronobergs län', 'kalmar län', 'blekinge län', 'hallands län',
-    'gotlands län', 'uppsala län', 'södermanlands län', 'örebro län', 'västmanlands län',
-    'dalarnas län', 'gävleborgs län', 'värmlands län', 'västernorrlands län', 
-    'jämtlands län', 'västerbottens län', 'norrbottens län',
-  ]), []);
-
   // Detect if the search query is purely a location search
+  // Uses the comprehensive set of ALL known Swedish locations from smartSearch
   const detectedLocationSearch = useMemo(() => {
     const trimmed = searchQuery.trim().toLowerCase();
     if (!trimmed) return null;
 
-    // Direct match against known location keys
-    if (locationKeys.has(trimmed)) return trimmed;
+    // Direct match against all known location terms (cities, districts, regions, counties)
+    if (allKnownLocationTerms.has(trimmed)) return trimmed;
 
     // Check typo corrections for city names
     const normalized = normalizeSwedish(trimmed);
     for (const [typo, corrections] of Object.entries(typoCorrections)) {
       if (normalized === typo || levenshteinDistance(normalized, typo) <= 1) {
-        // Check if any correction is a known location
         for (const correction of corrections) {
-          if (locationKeys.has(correction)) return correction;
+          if (allKnownLocationTerms.has(correction)) return correction;
         }
       }
     }
 
     return null;
-  }, [searchQuery, locationKeys]);
+  }, [searchQuery]);
 
   // Detect salary search and expand terms with fuzzy matching
   const { expandedSearchQuery, salarySearch } = useMemo(() => {
