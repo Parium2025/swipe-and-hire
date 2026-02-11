@@ -215,14 +215,24 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
 
   // Detect if the search query is purely a location search
   // Uses the comprehensive set of ALL known Swedish locations from smartSearch
+  // Supports PREFIX matching: "skån" → "skåne", "far" → "farsta", "lul" → "luleå"
   const detectedLocationSearch = useMemo(() => {
     const trimmed = searchQuery.trim().toLowerCase();
-    if (!trimmed) return null;
+    if (!trimmed || trimmed.length < 3) return null; // Need at least 3 chars for prefix
 
-    // Direct match against all known location terms (cities, districts, regions, counties)
+    // 1. Exact match — fastest path
     if (allKnownLocationTerms.has(trimmed)) return trimmed;
 
-    // Check typo corrections for city names
+    // 2. Prefix match — find the best (shortest) location that starts with the query
+    let bestMatch: string | null = null;
+    for (const term of allKnownLocationTerms) {
+      if (term.startsWith(trimmed) && (!bestMatch || term.length < bestMatch.length)) {
+        bestMatch = term;
+      }
+    }
+    if (bestMatch) return bestMatch;
+
+    // 3. Typo corrections for city names
     const normalized = normalizeSwedish(trimmed);
     for (const [typo, corrections] of Object.entries(typoCorrections)) {
       if (normalized === typo || levenshteinDistance(normalized, typo) <= 1) {
@@ -231,6 +241,14 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         }
       }
     }
+
+    // 4. Prefix match on normalized form (handles å/ä/ö typos like "skan" → "skåne")
+    for (const term of allKnownLocationTerms) {
+      if (normalizeSwedish(term).startsWith(normalized) && (!bestMatch || term.length < bestMatch.length)) {
+        bestMatch = term;
+      }
+    }
+    if (bestMatch) return bestMatch;
 
     return null;
   }, [searchQuery]);
