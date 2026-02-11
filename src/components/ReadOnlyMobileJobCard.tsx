@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,55 +8,6 @@ import { getTimeRemaining } from '@/lib/date';
 import { supabase } from '@/integrations/supabase/client';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { imageCache } from '@/lib/imageCache';
-
-/** Touch-friendly tooltip for long titles: tap to reveal full text */
-const TitleWithTooltip = ({ title }: { title: string }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const isTruncated = useRef(false);
-
-  useEffect(() => {
-    const el = titleRef.current;
-    if (el) {
-      isTruncated.current = el.scrollHeight > el.clientHeight;
-    }
-  }, [title]);
-
-  const handleTap = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isTruncated.current) {
-      setShowTooltip(prev => !prev);
-    }
-  }, []);
-
-  // Close on outside tap
-  useEffect(() => {
-    if (!showTooltip) return;
-    const close = () => setShowTooltip(false);
-    document.addEventListener('click', close, { once: true });
-    return () => document.removeEventListener('click', close);
-  }, [showTooltip]);
-
-  return (
-    <div className="relative">
-      <h3
-        ref={titleRef}
-        onClick={handleTap}
-        className="text-[15px] font-bold text-white leading-snug line-clamp-2 cursor-pointer break-all"
-      >
-        {title}
-      </h3>
-      {showTooltip && (
-        <div
-          className="absolute z-50 left-0 right-0 top-full mt-1 p-2.5 rounded-lg bg-slate-900/95 backdrop-blur-sm border border-white/20 shadow-xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <p className="text-[13px] text-white leading-snug">{title}</p>
-        </div>
-      )}
-    </div>
-  );
-};
 
 interface ReadOnlyMobileJobCardProps {
   job: {
@@ -157,8 +108,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
 
       {/* Content */}
       <div className="p-3.5 space-y-2">
-        {/* Title — max 2 lines, tap for full title tooltip */}
-        <TitleWithTooltip title={job.title} />
+        {/* Title */}
+        <h3 className="text-[15px] font-bold text-white leading-snug line-clamp-2">
+          {job.title}
+        </h3>
 
         {/* Company + Location — single compact row */}
         <div className="flex items-center gap-1.5 text-[13px] text-white">
