@@ -10,8 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Building2, Clock, X, ChevronDown, Check, Search, ArrowUpDown, Star, Timer, CheckCircle, Bookmark, Bell, Sparkles } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { JobSwipeMode } from '@/components/JobSwipeMode';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { SwipeFullscreen } from '@/components/SwipeFullscreen';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
@@ -77,7 +77,7 @@ const SearchJobs = () => {
   const blurHandlers = useBlurHandlers();
   const { savedSearches, saveSearch, deleteSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
-  const isMobile = useIsMobile();
+  const isTouchCapable = useTouchCapable();
   const [swipeModeActive, setSwipeModeActive] = useState(false);
 
   // Handler to apply a saved search - sets all the filter states
@@ -847,15 +847,18 @@ const SearchJobs = () => {
         ) : (
           <>
             {/* Mobile: Swipe Mode Toggle */}
-            <div className="md:hidden flex justify-center mb-4">
-              <Button
-                onClick={() => setSwipeModeActive(true)}
-                className="bg-gradient-to-r from-parium-blue to-blue-600 hover:from-parium-blue/90 hover:to-blue-600/90 text-white font-medium shadow-lg shadow-parium-blue/25 transition-all active:scale-95"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Swipe Mode
-              </Button>
-            </div>
+            {/* Swipe Mode Toggle - only for touch devices */}
+            {isTouchCapable && (
+              <div className="flex justify-center mb-4">
+                <button
+                  onClick={() => setSwipeModeActive(true)}
+                  className="h-11 px-6 flex items-center gap-2 bg-white/10 border border-white/20 rounded-full text-white font-medium active:scale-95 transition-all hover:bg-white/15"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Swipe Mode
+                </button>
+              </div>
+            )}
 
             {/* Job Cards */}
             <div className="space-y-4">
@@ -1005,9 +1008,9 @@ const SearchJobs = () => {
         }}
         onSave={saveSearch}
       />
-      {/* Swipe Mode Overlay */}
-      {isMobile && swipeModeActive && (
-        <JobSwipeMode
+      {/* Swipe Mode Fullscreen Overlay */}
+      {isTouchCapable && swipeModeActive && (
+        <SwipeFullscreen
           jobs={filteredAndSortedJobs.map(job => ({
             id: job.id,
             title: job.title,
@@ -1017,6 +1020,12 @@ const SearchJobs = () => {
             job_image_url: job.job_image_url,
             views_count: job.views_count,
             applications_count: job.applications_count,
+            created_at: job.created_at,
+            expires_at: job.expires_at,
+            employer_id: job.employer_id,
+            description: job.description,
+            salary_min: job.salary_min,
+            salary_max: job.salary_max,
           }))}
           appliedJobIds={appliedJobIds}
           onClose={() => setSwipeModeActive(false)}
