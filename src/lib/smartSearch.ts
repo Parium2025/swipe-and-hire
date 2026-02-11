@@ -172,21 +172,32 @@ export const allKnownLocationTerms: Set<string> = (() => {
 })();
 
 // Function to expand search terms with synonyms
+// Supports PREFIX matching: "del" → deltid group, "kok" → kök/kock group, "rek" → rekryterare group
 export const expandSearchTerms = (searchTerm: string): string[] => {
   const normalizedTerm = searchTerm.toLowerCase().trim();
   const expandedTerms = new Set<string>();
   
   // Add the original term
   expandedTerms.add(normalizedTerm);
+
+  if (normalizedTerm.length < 2) return Array.from(expandedTerms);
   
-  // Check for exact matches and partial matches in synonyms
+  // Check for exact, partial, AND prefix matches in synonyms
   for (const [key, synonyms] of Object.entries(jobSearchSynonyms)) {
-    // Check if the search term matches the key or any synonym
-    if (key.includes(normalizedTerm) || normalizedTerm.includes(key) || 
-        synonyms.some(synonym => 
-          synonym.toLowerCase().includes(normalizedTerm) || 
-          normalizedTerm.includes(synonym.toLowerCase())
-        )) {
+    const keyMatches = 
+      key.includes(normalizedTerm) || normalizedTerm.includes(key) ||
+      // PREFIX: key starts with the search term (e.g., "rek" matches "rekryterare")
+      key.startsWith(normalizedTerm);
+
+    const synonymMatches = synonyms.some(synonym => {
+      const lowerSynonym = synonym.toLowerCase();
+      return lowerSynonym.includes(normalizedTerm) || 
+             normalizedTerm.includes(lowerSynonym) ||
+             // PREFIX: synonym starts with the search term (e.g., "del" matches "deltid")
+             lowerSynonym.startsWith(normalizedTerm);
+    });
+
+    if (keyMatches || synonymMatches) {
       // Add all related terms
       synonyms.forEach(synonym => expandedTerms.add(synonym.toLowerCase()));
       expandedTerms.add(key);
