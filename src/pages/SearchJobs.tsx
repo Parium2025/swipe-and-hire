@@ -330,16 +330,9 @@ const SearchJobs = () => {
 
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Aktiva jobb', value: activeJobCount, loading: false, cacheKey: 'search_active_jobs' },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: activeJobCount, loading: false, cacheKey: 'search_active_ads' },
     { icon: Building, title: 'Unika företag', value: uniqueCompanyCount, loading: false, cacheKey: 'search_unique_companies' },
-    { icon: Users, title: 'Nya denna vecka', value: newThisWeekCount, loading: false, cacheKey: 'search_new_this_week' },
+    { icon: TrendingUp, title: 'Nya denna vecka', value: newThisWeekCount, loading: false, cacheKey: 'search_new_this_week' },
   ], [activeJobCount, uniqueCompanyCount, newThisWeekCount]);
-
-  const sortLabels = {
-    newest: 'Nyast först',
-    oldest: 'Äldst först',
-    'most-views': 'Mest visade',
-  };
 
   const handleClearAllFilters = useCallback(() => {
     setSelectedPostalCode('');
