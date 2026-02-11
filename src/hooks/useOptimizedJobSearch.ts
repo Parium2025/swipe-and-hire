@@ -96,6 +96,7 @@ const levenshteinDistance = (a: string, b: string): number => {
 
 // Common Swedish job-related typo corrections
 const typoCorrections: Record<string, string[]> = {
+  // Yrkesrelaterade
   'utveklare': ['utvecklare'],
   'utvekalre': ['utvecklare'],
   'utvecklre': ['utvecklare'],
@@ -129,6 +130,36 @@ const typoCorrections: Record<string, string[]> = {
   'cheff': ['chef'],
   'ledre': ['ledare'],
   'teknker': ['tekniker'],
+  
+  // Stadsnamn-typos
+  'stocholm': ['stockholm', 'stockholms'],
+  'stockolm': ['stockholm', 'stockholms'],
+  'stokholm': ['stockholm', 'stockholms'],
+  'goteborg': ['göteborg', 'göteborgs'],
+  'goeteborg': ['göteborg', 'göteborgs'],
+  'malmo': ['malmö'],
+  'malmoe': ['malmö'],
+  'helsingbrog': ['helsingborg'],
+  'hellsingborg': ['helsingborg'],
+  'helsingbourg': ['helsingborg'],
+  'linkoping': ['linköping'],
+  'linkoepping': ['linköping'],
+  'jonkoping': ['jönköping'],
+  'jonkoeping': ['jönköping'],
+  'norrkoping': ['norrköping'],
+  'norkoping': ['norrköping'],
+  'orebro': ['örebro'],
+  'oerebro': ['örebro'],
+  'vasteras': ['västerås'],
+  'vaesteras': ['västerås'],
+  'umea': ['umeå'],
+  'lulea': ['luleå'],
+  'sundvall': ['sundsvall'],
+  'karlsatd': ['karlstad'],
+  'vaxjo': ['växjö'],
+  'vaexjoe': ['växjö'],
+  'uppsla': ['uppsala'],
+  'uppsal': ['uppsala'],
 };
 
 // Expand search with fuzzy matching for typos
