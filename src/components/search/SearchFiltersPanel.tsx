@@ -104,7 +104,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
           </div>
           <div className="relative">
             <Input
-              placeholder="Jobbtitel, företag, plats..."
+              placeholder="Jobbtitel, Företag, Plats..."
               value={searchInput}
               onChange={(e) => onSearchInputChange(e.target.value)}
               className="pl-9 pr-10 !h-10 !min-h-[40px] md:!h-11 md:!min-h-[44px] text-sm bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/60"
