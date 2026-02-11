@@ -110,8 +110,8 @@ export function SavedSearchesDropdown({
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-80 p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
-          align="start"
+          className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
+          align="center"
         >
           <div className="p-3 border-b border-white/10">
             <h4 className="text-sm font-medium text-white">Sparade sökningar</h4>
