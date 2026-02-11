@@ -145,8 +145,8 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {/* Location Filter */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none">
-                <MapPin className="h-3 w-3 flex-shrink-0" />
+              <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
+                <MapPin className="h-4 w-4 flex-shrink-0" />
                 <span className="leading-none">Plats</span>
               </Label>
               <LocationSearchInput
@@ -158,8 +158,8 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
 
             {/* Yrkesområde Filter */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none">
-                <Briefcase className="h-3 w-3 flex-shrink-0" />
+              <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
+                <Briefcase className="h-4 w-4 flex-shrink-0" />
                 <span className="leading-none">Yrkesområde</span>
               </Label>
               <DropdownMenu modal={false}>
@@ -314,8 +314,8 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Employment Type */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none">
-                    <Clock className="h-3 w-3 flex-shrink-0" />
+                   <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
+                    <Clock className="h-4 w-4 flex-shrink-0" />
                     <span className="leading-none">Anställning</span>
                   </Label>
                   <DropdownMenu modal={false}>
@@ -373,8 +373,8 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
 
                 {/* Sort Dropdown */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none">
-                    <ArrowUpDown className="h-3 w-3 flex-shrink-0" />
+                  <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
+                    <ArrowUpDown className="h-4 w-4 flex-shrink-0" />
                     <span className="leading-none">Sortering</span>
                   </Label>
                   <DropdownMenu>
