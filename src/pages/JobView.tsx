@@ -106,8 +106,8 @@ const JobView = () => {
 
   const fetchJob = async () => {
     try {
-      // 🔥 Fetch job + questions + application status in PARALLEL to prevent race conditions
-      const [jobResult, questionsResult] = await Promise.all([
+      // 🔥 Fetch job + questions + application status ALL in PARALLEL
+      const [jobResult, questionsResult, applicationResult] = await Promise.all([
         supabase
           .from('job_postings')
           .select(`
@@ -127,31 +127,29 @@ const JobView = () => {
           .select('*')
           .eq('job_id', jobId!)
           .order('order_index'),
+        user
+          ? supabase
+              .from('job_applications')
+              .select('id')
+              .eq('job_id', jobId!)
+              .eq('applicant_id', user.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
       ]);
 
       if (jobResult.error) throw jobResult.error;
       const data = jobResult.data;
 
-      // Check if user already applied (parallel with image resolution)
-      let alreadyApplied = false;
-      if (user) {
-        const { data: existingApplication } = await supabase
-          .from('job_applications')
-          .select('id')
-          .eq('job_id', jobId!)
-          .eq('applicant_id', user.id)
-          .maybeSingle();
-        alreadyApplied = !!existingApplication;
-      }
-
-      // Batch ALL state updates together to prevent flicker
+      // 🔥 CRITICAL: Batch ALL state updates + setLoading in ONE synchronous block
+      // React 18 batches these into a single render — no flicker possible
       setJob(data);
       if (!questionsResult.error && questionsResult.data) {
         setJobQuestions(questionsResult.data as JobQuestion[]);
       }
-      setHasAlreadyApplied(alreadyApplied);
+      setHasAlreadyApplied(!!applicationResult.data);
+      setLoading(false);
 
-      // Load job image if exists (non-blocking, after state is set)
+      // Non-blocking: resolve image URL AFTER UI is shown
       const rawImageUrl = data.job_image_desktop_url || data.job_image_url;
       if (rawImageUrl) {
         try {
@@ -189,7 +187,6 @@ const JobView = () => {
         variant: 'destructive',
       });
       navigate('/search-jobs');
-    } finally {
       setLoading(false);
     }
   };
