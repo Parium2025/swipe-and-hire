@@ -18,7 +18,7 @@ import {
   getRemoteWorkLabel,
   getSalaryTransparencyLabel,
 } from '@/lib/jobViewHelpers';
-import { ArrowLeft, Send, Users, Timer, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Send, Users, Timer, CheckCircle, Building2, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
@@ -476,29 +476,40 @@ const JobView = () => {
               </div>
             )}
 
-            {/* Titel under bilden — alltid synlig (på mobil döljs overlay-titeln) */}
+            {/* Titel under bilden — matchar sökkortens layout */}
             {imageUrl && (
-              <div className="sm:hidden bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
+              <div className="sm:hidden space-y-2">
+                {/* Title */}
                 <TruncatedText
                   text={job.title}
-                  className="text-white text-xl font-bold leading-tight line-clamp-3"
-                  tooltipSide="bottom"
+                  className="text-[15px] font-bold text-white leading-snug line-clamp-2"
                 />
-                <div className="flex flex-wrap items-center gap-2 mt-3 text-sm text-white">
-                  {job.employment_type && (
-                    <span>{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
-                  )}
+
+                {/* Company + Location — same as ReadOnlyMobileJobCard */}
+                <div className="flex items-center gap-1.5 text-[13px] text-white">
+                  <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
+                  <span className="truncate font-medium">{job.profiles?.company_name || 'Okänt företag'}</span>
                   {job.location && (
                     <>
-                      <span className="text-white/60">·</span>
-                      <span>{job.location.toUpperCase()}</span>
+                      <span className="text-white/30">·</span>
+                      <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-white" />
+                      <span className="truncate">{job.location}</span>
                     </>
                   )}
+                </div>
+
+                {/* Tags row — badges */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {job.employment_type && (
+                    <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
+                      {getEmploymentTypeLabel(job.employment_type)}
+                    </Badge>
+                  )}
                   {job.positions_count && job.positions_count > 1 && (
-                    <>
-                      <span className="text-white/60">·</span>
-                      <span>{job.positions_count} lediga tjänster</span>
-                    </>
+                    <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
+                      <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
+                      <span className="leading-none">{job.positions_count} lediga tjänster</span>
+                    </Badge>
                   )}
                 </div>
               </div>
@@ -775,27 +786,27 @@ const JobView = () => {
             )}
 
             {/* Publicerad & countdown — diskret, kompakt */}
-            <div className="flex items-center justify-center gap-3 py-2 text-white/50 text-xs">
-              <span>
+            <div className="flex items-center justify-center gap-3 py-2 text-xs">
+              <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
                 Publicerad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
                   year: 'numeric', 
                   month: 'long', 
                   day: 'numeric' 
                 })}
-              </span>
+              </Badge>
               {(() => {
                 const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                 if (isExpired) {
                   return (
-                    <Badge variant="secondary" className="bg-red-500/20 text-white border-red-500/30 text-xs hover:bg-red-500/30 hover:border-red-500/50 transition-all duration-300">
+                    <Badge variant="glass" className="text-[11px] px-2 py-0.5 bg-red-500/20 text-white border-red-500/30 leading-none">
                       Utgången
                     </Badge>
                   );
                 }
                 return (
-                  <Badge variant="glass" className="text-xs">
+                  <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
                     <Timer className="h-3 w-3 mr-1" />
-                    {text}
+                    {text} kvar
                   </Badge>
                 );
               })()}
