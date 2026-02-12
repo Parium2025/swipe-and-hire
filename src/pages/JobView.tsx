@@ -70,21 +70,27 @@ interface JobPosting {
   };
 }
 
+// Module-level cache: survives component remounts during viewport resizes
+const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean }>();
+
 const JobView = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
-  const [job, setJob] = useState<JobPosting | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [jobQuestions, setJobQuestions] = useState<JobQuestion[]>([]);
-  const hasLoadedOnce = useRef(false);
+  
+  // Seed from module cache to eliminate blank frame on remount
+  const cached = jobId ? _jobCache.get(jobId) : undefined;
+  const [job, setJob] = useState<JobPosting | null>(cached?.job ?? null);
+  const [loading, setLoading] = useState(!cached);
+  const [jobQuestions, setJobQuestions] = useState<JobQuestion[]>(cached?.questions ?? []);
+  const hasLoadedOnce = useRef(!!cached);
   const [applying, setApplying] = useState(false);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
+  const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
   const contentRef = useRef<HTMLDivElement>(null);
   
   // Track job view when user reads content
@@ -92,8 +98,8 @@ const JobView = () => {
     jobId,
     userId: user?.id,
     contentRef,
-    scrollThreshold: 0.7, // 70% scrolled
-    minTimeOnPage: 3000, // 3 seconds minimum
+    scrollThreshold: 0.7,
+    minTimeOnPage: 3000,
   });
   
   // Preloada bilden när den finns tillgänglig
@@ -143,11 +149,17 @@ const JobView = () => {
 
       // 🔥 CRITICAL: Batch ALL state updates + setLoading in ONE synchronous block
       // React 18 batches these into a single render — no flicker possible
-      setJob(data);
-      if (!questionsResult.error && questionsResult.data) {
-        setJobQuestions(questionsResult.data as JobQuestion[]);
+      const questions = (!questionsResult.error && questionsResult.data) ? questionsResult.data as JobQuestion[] : [];
+      const applied = !!applicationResult.data;
+
+      // Persist in module-level cache so viewport-resize remounts are instant
+      if (jobId) {
+        _jobCache.set(jobId, { job: data, questions, applied });
       }
-      setHasAlreadyApplied(!!applicationResult.data);
+
+      setJob(data);
+      setJobQuestions(questions);
+      setHasAlreadyApplied(applied);
       hasLoadedOnce.current = true;
       setLoading(false);
 
@@ -347,7 +359,7 @@ const JobView = () => {
 
   return (
     <div ref={contentRef} className="h-screen overflow-y-auto bg-parium-gradient animate-fade-in">
-       <div className="responsive-container-wide py-4">
+       <div className="jobview-container py-4">
         {/* Combined header: Tillbaka + Spara + Företag på samma rad */}
         <div className="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
           {/* Vänster: Tillbaka */}
