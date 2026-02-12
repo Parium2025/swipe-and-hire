@@ -89,7 +89,17 @@ const JobView = () => {
   const [applying, setApplying] = useState(false);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(() => {
+    // Sync: resolve from cache at mount for instant hero image
+    const rawImg = cached?.job?.job_image_desktop_url || cached?.job?.job_image_url;
+    if (!rawImg) return null;
+    let resolved = rawImg;
+    if (!rawImg.startsWith('http')) {
+      const pub = supabase.storage.from('job-images').getPublicUrl(rawImg).data.publicUrl;
+      resolved = pub && pub.includes('/storage/') ? pub : rawImg;
+    }
+    return imageCache.getCachedUrl(resolved) || resolved;
+  });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
     // Sync: check if logo is already in the image cache
     const rawLogo = cached?.job?.profiles?.company_logo_url;
@@ -168,30 +178,36 @@ const JobView = () => {
       hasLoadedOnce.current = true;
       setLoading(false);
 
-      // Non-blocking: resolve image URL AFTER UI is shown
+      // Resolve image URL — check cache FIRST for instant display
       const rawImageUrl = data.job_image_desktop_url || data.job_image_url;
       if (rawImageUrl) {
-        try {
-          let resolved: string | null = null;
-          if (typeof rawImageUrl === 'string' && rawImageUrl.startsWith('http')) {
-            resolved = rawImageUrl;
-          } else {
-            const pub = supabase.storage
-              .from('job-images')
-              .getPublicUrl(rawImageUrl).data.publicUrl;
-            if (pub && pub.includes('/storage/')) {
-              resolved = pub;
-            } else {
-              const legacySigned = await convertToSignedUrl(rawImageUrl, 'job-applications', 3600);
-              if (legacySigned) resolved = legacySigned;
-            }
+        let resolved: string | null = null;
+        if (typeof rawImageUrl === 'string' && rawImageUrl.startsWith('http')) {
+          resolved = rawImageUrl;
+        } else {
+          const pub = supabase.storage
+            .from('job-images')
+            .getPublicUrl(rawImageUrl).data.publicUrl;
+          if (pub && pub.includes('/storage/')) {
+            resolved = pub;
           }
-          if (resolved) {
-            setImageUrl(resolved);
+        }
+        if (resolved) {
+          // Sync: use cached blob URL if available (from search card preload)
+          const cachedBlob = imageCache.getCachedUrl(resolved);
+          setImageUrl(cachedBlob || resolved);
+          // Background: ensure it's cached for future visits
+          if (!cachedBlob) {
             imageCache.loadImage(resolved).catch(() => {});
           }
-        } catch (err) {
-          console.error('Error loading job image:', err);
+        } else if (rawImageUrl) {
+          // Legacy signed URL fallback (async)
+          convertToSignedUrl(rawImageUrl, 'job-applications', 3600).then(signed => {
+            if (signed) {
+              setImageUrl(signed);
+              imageCache.loadImage(signed).catch(() => {});
+            }
+          }).catch(() => {});
         }
       }
 
