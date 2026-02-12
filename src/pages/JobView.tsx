@@ -347,29 +347,18 @@ const JobView = () => {
   }
 
   const handleBack = () => {
-    const currentPath = window.location.pathname;
-    const fallback = () => window.location.assign('/search-jobs');
-
     const state = window.history.state as any;
     const idx = typeof state?.idx === 'number' ? state.idx : undefined;
 
-    // Prefer going back when possible...
     if ((typeof idx === 'number' && idx > 0) || window.history.length > 1) {
       navigate(-1);
-
-      // ...but if routing/history is broken (or there is no real previous entry), force exit.
-      window.setTimeout(() => {
-        if (window.location.pathname === currentPath) fallback();
-      }, 150);
-      return;
+    } else {
+      navigate('/search-jobs', { replace: true });
     }
-
-    // No usable history -> force exit immediately.
-    fallback();
   };
 
   return (
-    <div ref={contentRef} className="min-h-[100dvh] overflow-y-auto bg-parium-gradient will-change-scroll overscroll-contain [-webkit-overflow-scrolling:touch]">
+    <div ref={contentRef} className="min-h-[100dvh] overflow-y-auto bg-parium-gradient will-change-scroll overscroll-contain [-webkit-overflow-scrolling:touch] animate-fade-in">
        <div className="jobview-container py-4">
         {/* Combined header: Tillbaka + Spara + Företag på samma rad */}
         <div className="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
