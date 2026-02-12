@@ -439,8 +439,8 @@ const JobView = () => {
                 {/* Gradient overlay för läsbarhet */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 
-                {/* Text overlay - Simplex style */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                {/* Text overlay - only on larger screens; mobile keeps image clean */}
+                <div className="absolute inset-0 hidden sm:flex flex-col items-center justify-center text-center px-6">
                 {/* Huvudrubrik - kompakt och centrerad, tillåt radbrytning */}
                   <TruncatedText
                     text={job.title}
