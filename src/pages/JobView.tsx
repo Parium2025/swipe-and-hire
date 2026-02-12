@@ -90,6 +90,11 @@ const JobView = () => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
+    // Sync: check if logo is already in the image cache
+    const rawLogo = cached?.job?.profiles?.company_logo_url;
+    return rawLogo ? (imageCache.getCachedUrl(rawLogo) || rawLogo) : null;
+  });
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
   const contentRef = useRef<HTMLDivElement>(null);
   
@@ -190,9 +195,15 @@ const JobView = () => {
         }
       }
 
-      // Prefetch company logo
+      // Prefetch company logo and store cached blob URL
       if (data.profiles?.company_logo_url) {
-        imageCache.loadImage(data.profiles.company_logo_url).catch(() => {});
+        const rawLogo = data.profiles.company_logo_url;
+        // Set raw URL immediately so avatar shows something
+        setCompanyLogoUrl(imageCache.getCachedUrl(rawLogo) || rawLogo);
+        // Then cache it for instant future renders
+        imageCache.loadImage(rawLogo).then(blobUrl => {
+          setCompanyLogoUrl(blobUrl);
+        }).catch(() => {});
       }
     } catch (error: any) {
       toast({
@@ -380,7 +391,7 @@ const JobView = () => {
           >
             <Avatar className="h-10 w-10">
               <AvatarImage 
-                src={job.profiles?.company_logo_url || ''} 
+                src={companyLogoUrl || ''} 
                 alt={job.profiles?.company_name || 'Företagslogga'}
               />
               <AvatarFallback className="bg-white/20 text-white font-semibold text-sm" delayMs={150}>
