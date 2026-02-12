@@ -458,8 +458,8 @@ const SearchJobs = () => {
           </div>
         </div>
         
-        {isLoading && filteredAndSortedJobs.length > 0 ? (
-          // Only show skeleton when transitioning from results → new results (not from empty)
+        {isLoading ? (
+          // Show skeletons during any loading state (initial, back-navigation, filter change)
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
               <Card key={i} className="bg-white/5 border-white/10">
