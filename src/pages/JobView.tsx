@@ -478,15 +478,15 @@ const JobView = () => {
 
             {/* Titel under bilden — matchar sökkortens layout */}
             {imageUrl && (
-              <div className="sm:hidden space-y-2">
+              <div className="sm:hidden space-y-2 text-center">
                 {/* Title */}
                 <TruncatedText
                   text={job.title}
                   className="text-[15px] font-bold text-white leading-snug line-clamp-2"
                 />
 
-                {/* Company + Location — same as ReadOnlyMobileJobCard */}
-                <div className="flex items-center gap-1.5 text-[13px] text-white">
+                {/* Company + Location — centered */}
+                <div className="flex items-center justify-center gap-1.5 text-[13px] text-white">
                   <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
                   <span className="truncate font-medium">{job.profiles?.company_name || 'Okänt företag'}</span>
                   {job.location && (
@@ -498,8 +498,8 @@ const JobView = () => {
                   )}
                 </div>
 
-                {/* Tags row — badges */}
-                <div className="flex items-center gap-1.5 flex-wrap">
+                {/* Tags row — centered badges */}
+                <div className="flex items-center justify-center gap-1.5 flex-wrap">
                   {job.employment_type && (
                     <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
                       {getEmploymentTypeLabel(job.employment_type)}
