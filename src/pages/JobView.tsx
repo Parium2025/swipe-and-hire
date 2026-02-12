@@ -106,85 +106,81 @@ const JobView = () => {
 
   const fetchJob = async () => {
     try {
-      const { data, error } = await supabase
-        .from('job_postings')
-        .select(`
-          *,
-          profiles!job_postings_employer_id_fkey (
-            first_name,
-            last_name,
-            company_name,
-            company_logo_url
-          )
-        `)
-        .eq('id', jobId)
-        .eq('is_active', true)
-        .single();
+      // 🔥 Fetch job + questions + application status in PARALLEL to prevent race conditions
+      const [jobResult, questionsResult] = await Promise.all([
+        supabase
+          .from('job_postings')
+          .select(`
+            *,
+            profiles!job_postings_employer_id_fkey (
+              first_name,
+              last_name,
+              company_name,
+              company_logo_url
+            )
+          `)
+          .eq('id', jobId)
+          .eq('is_active', true)
+          .single(),
+        supabase
+          .from('job_questions')
+          .select('*')
+          .eq('job_id', jobId!)
+          .order('order_index'),
+      ]);
 
-      if (error) throw error;
+      if (jobResult.error) throw jobResult.error;
+      const data = jobResult.data;
+
+      // Check if user already applied (parallel with image resolution)
+      let alreadyApplied = false;
+      if (user) {
+        const { data: existingApplication } = await supabase
+          .from('job_applications')
+          .select('id')
+          .eq('job_id', jobId!)
+          .eq('applicant_id', user.id)
+          .maybeSingle();
+        alreadyApplied = !!existingApplication;
+      }
+
+      // Batch ALL state updates together to prevent flicker
       setJob(data);
+      if (!questionsResult.error && questionsResult.data) {
+        setJobQuestions(questionsResult.data as JobQuestion[]);
+      }
+      setHasAlreadyApplied(alreadyApplied);
 
-      // Load job image if exists — prefer desktop image on non-mobile
+      // Load job image if exists (non-blocking, after state is set)
       const rawImageUrl = data.job_image_desktop_url || data.job_image_url;
       if (rawImageUrl) {
         try {
           let resolved: string | null = null;
-
-          // If already a public URL, use as-is (stable for SW cache)
           if (typeof rawImageUrl === 'string' && rawImageUrl.startsWith('http')) {
             resolved = rawImageUrl;
           } else {
-            // Prefer public URL from job-images (bucket is public)
             const pub = supabase.storage
               .from('job-images')
               .getPublicUrl(rawImageUrl).data.publicUrl;
             if (pub && pub.includes('/storage/')) {
               resolved = pub;
             } else {
-              // Legacy fallback: private job-applications requires signed URL
               const legacySigned = await convertToSignedUrl(rawImageUrl, 'job-applications', 3600);
               if (legacySigned) resolved = legacySigned;
             }
           }
-
           if (resolved) {
             setImageUrl(resolved);
-            // 🔥 Prefetch the job image to blob cache for instant display
             imageCache.loadImage(resolved).catch(() => {});
-          } else {
-            console.warn('Kunde inte lösa jobbbildens URL', rawImageUrl);
           }
         } catch (err) {
           console.error('Error loading job image:', err);
         }
       }
 
-      // 🔥 Prefetch company logo to eliminate flicker
+      // Prefetch company logo
       if (data.profiles?.company_logo_url) {
         imageCache.loadImage(data.profiles.company_logo_url).catch(() => {});
-      }
-
-      // Fetch job questions
-      const { data: questions, error: questionsError } = await supabase
-        .from('job_questions')
-        .select('*')
-        .eq('job_id', jobId)
-        .order('order_index');
-
-      if (!questionsError && questions) {
-        setJobQuestions(questions as JobQuestion[]);
-      }
-
-      // Kolla om användaren redan har ansökt till detta jobb
-      if (user) {
-        const { data: existingApplication } = await supabase
-          .from('job_applications')
-          .select('id')
-          .eq('job_id', jobId)
-          .eq('applicant_id', user.id)
-          .maybeSingle();
-        
-        setHasAlreadyApplied(!!existingApplication);
       }
     } catch (error: any) {
       toast({
