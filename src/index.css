@@ -1377,3 +1377,17 @@ All colors MUST be HSL.
   @apply h-[200px] md:h-[220px] lg:h-[240px];
 }
 
+/* JobView: full-width on mobile, constrained on larger screens */
+.jobview-container {
+  width: 100%;
+  padding-inline: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .jobview-container {
+    max-width: clamp(20rem, 82vw, 76rem);
+    margin-inline: auto;
+    padding-inline: clamp(0.75rem, 2.5vw, 2rem);
+  }
+}
+
