@@ -436,7 +436,7 @@ const JobView = () => {
                   className="w-full h-full object-cover"
                   loading="eager"
                   fetchPriority="high"
-                  onLoad={() => console.log('Job image loaded', imageUrl)}
+                  onLoad={() => {}}
                   onError={(e) => {
                     console.error('Job image failed to load', imageUrl);
                     setImageUrl(null);
