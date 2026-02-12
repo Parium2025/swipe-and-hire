@@ -79,6 +79,7 @@ const JobView = () => {
   const [job, setJob] = useState<JobPosting | null>(null);
   const [loading, setLoading] = useState(true);
   const [jobQuestions, setJobQuestions] = useState<JobQuestion[]>([]);
+  const hasLoadedOnce = useRef(false);
   const [applying, setApplying] = useState(false);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
@@ -147,6 +148,7 @@ const JobView = () => {
         setJobQuestions(questionsResult.data as JobQuestion[]);
       }
       setHasAlreadyApplied(!!applicationResult.data);
+      hasLoadedOnce.current = true;
       setLoading(false);
 
       // Non-blocking: resolve image URL AFTER UI is shown
@@ -309,8 +311,8 @@ const JobView = () => {
   // Mobile now uses the same layout as desktop (responsive)
 
   // Desktop/Tablet view - no loading text, just fade in content
-  if (loading) {
-    return null; // Return nothing while loading for smooth fade-in
+  if (loading && !hasLoadedOnce.current) {
+    return null; // Return nothing on FIRST load only for smooth fade-in
   }
 
   if (!job) {
