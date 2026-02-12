@@ -2,10 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useDevice } from '@/hooks/use-device';
 import { useJobViewTracker } from '@/hooks/useJobViewTracker';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
-import JobSwipe from '@/components/JobSwipe';
 import { Button } from '@/components/ui/button';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
@@ -76,7 +74,7 @@ const JobView = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const device = useDevice();
+  
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const [job, setJob] = useState<JobPosting | null>(null);
   const [loading, setLoading] = useState(true);
@@ -315,10 +313,7 @@ const JobView = () => {
     }
   };
 
-  // Show swipe interface on mobile
-  if (device === 'mobile') {
-    return <JobSwipe />;
-  }
+  // Mobile now uses the same layout as desktop (responsive)
 
   // Desktop/Tablet view - no loading text, just fade in content
   if (loading) {
@@ -490,16 +485,16 @@ const JobView = () => {
             {/* 1. Om tjänsten (Description) */}
 
             {/* 2. Om tjänsten (Description) */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
               <h2 className="text-section-title mb-3">Om tjänsten</h2>
-              <p className="text-body whitespace-pre-wrap">
+              <p className="text-body whitespace-pre-wrap break-words overflow-hidden">
                 {job.description}
               </p>
             </div>
 
 
             {/* 4. Detaljer om tjänsten — kompakt faktaruta */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
               <h2 className="text-section-title mb-3">
                 Detaljer om tjänsten
               </h2>
@@ -632,7 +627,7 @@ const JobView = () => {
 
             {/* 5. Förmåner */}
             {job.benefits && job.benefits.length > 0 && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
                 <h2 className="text-section-title mb-3">
                   Förmåner
                 </h2>
