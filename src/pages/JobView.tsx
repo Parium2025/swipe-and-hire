@@ -475,6 +475,34 @@ const JobView = () => {
                 </div>
               </div>
             )}
+
+            {/* Titel under bilden — alltid synlig (på mobil döljs overlay-titeln) */}
+            {imageUrl && (
+              <div className="sm:hidden bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
+                <TruncatedText
+                  text={job.title}
+                  className="text-white text-xl font-bold leading-tight line-clamp-3"
+                  tooltipSide="bottom"
+                />
+                <div className="flex flex-wrap items-center gap-2 mt-3 text-sm text-white">
+                  {job.employment_type && (
+                    <span>{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
+                  )}
+                  {job.location && (
+                    <>
+                      <span className="text-white/60">·</span>
+                      <span>{job.location.toUpperCase()}</span>
+                    </>
+                  )}
+                  {job.positions_count && job.positions_count > 1 && (
+                    <>
+                      <span className="text-white/60">·</span>
+                      <span>{job.positions_count} lediga tjänster</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
             
             {/* Om det inte finns bild, visa titel i vanligt kort */}
             {!imageUrl && (
@@ -646,6 +674,19 @@ const JobView = () => {
                     <span className="font-medium">{getSalaryTransparencyLabel(job.salary_transparency)}</span>
                   </div>
                 )}
+
+                {/* Kontakt */}
+                {job.contact_email && (
+                  <div className="text-white text-sm sm:col-span-2 pt-1">
+                    <span className="mr-1.5">Kontakt:</span>
+                    <a 
+                      href={`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`}
+                      className="font-medium underline underline-offset-2 hover:text-white/80 transition-colors"
+                    >
+                      {job.contact_email}
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -733,21 +774,15 @@ const JobView = () => {
               </div>
             )}
 
-            {/* Job posted date and countdown */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center space-y-2">
-              {/* Expired job warning - inside the same box */}
-              {isJobExpired && (
-                <p className="text-red-400 text-sm font-medium">
-                  Denna annons har utgått och tar inte längre emot ansökningar.
-                </p>
-              )}
-              <p className="text-body-sm">
+            {/* Publicerad & countdown — diskret, kompakt */}
+            <div className="flex items-center justify-center gap-3 py-2 text-white/50 text-xs">
+              <span>
                 Publicerad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
                   year: 'numeric', 
                   month: 'long', 
                   day: 'numeric' 
                 })}
-              </p>
+              </span>
               {(() => {
                 const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
                 if (isExpired) {
@@ -760,7 +795,7 @@ const JobView = () => {
                 return (
                   <Badge variant="glass" className="text-xs">
                     <Timer className="h-3 w-3 mr-1" />
-                    {text} kvar att ansöka
+                    {text}
                   </Badge>
                 );
               })()}
