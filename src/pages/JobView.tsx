@@ -350,9 +350,10 @@ const JobView = () => {
     const state = window.history.state as any;
     const idx = typeof state?.idx === 'number' ? state.idx : undefined;
 
-    if ((typeof idx === 'number' && idx > 0) || window.history.length > 1) {
+    if (typeof idx === 'number' && idx > 0) {
       navigate(-1);
     } else {
+      // No previous route in React Router history — go to search
       navigate('/search-jobs', { replace: true });
     }
   };
