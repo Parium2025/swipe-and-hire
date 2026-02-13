@@ -2,18 +2,16 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
 /**
- * Custom ScrollRestoration for inner <main> scroll containers.
- * Saves scroll position per location.key and restores on POP (back/forward).
- *
- * Key challenge: when React renders a new route into <main>, scrollTop resets
- * to 0 which fires a scroll event. We guard against this by freezing saves
- * during navigation transitions.
+ * Scroll restoration for inner <main> scroll containers.
+ * Saves by pathname so back-navigation always restores correctly.
  */
 
+// Store scroll positions by pathname
 const scrollPositions = new Map<string, number>();
-let navigationInProgress = false;
+let isFrozen = false;
 
-const getScrollContainer = (): HTMLElement | null => {
+const getMainContainer = (): HTMLElement | null => {
+  // Find the scrollable <main> used by JobSeekerLayout / EmployerLayout
   const mains = document.querySelectorAll('main');
   for (const m of mains) {
     const style = window.getComputedStyle(m);
@@ -25,73 +23,79 @@ const getScrollContainer = (): HTMLElement | null => {
 };
 
 export function ScrollRestoration() {
-  const location = useLocation();
+  const { pathname } = useLocation();
   const navigationType = useNavigationType();
-  const currentKeyRef = useRef(location.key);
+  const prevPathRef = useRef(pathname);
 
-  // Continuously save scroll position on scroll events
+  // Continuously track scroll position for current pathname
   useEffect(() => {
-    const container = getScrollContainer();
+    const container = getMainContainer();
     if (!container) return;
 
     const onScroll = () => {
-      // Don't save during navigation — React may have reset scrollTop to 0
-      if (navigationInProgress) return;
-      const key = currentKeyRef.current;
-      if (key) {
-        scrollPositions.set(key, container.scrollTop);
-      }
+      if (isFrozen) return;
+      scrollPositions.set(pathname, container.scrollTop);
     };
 
     container.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       container.removeEventListener('scroll', onScroll);
     };
-  }, [location.key]);
+  }, [pathname]);
 
-  // Handle navigation: save outgoing position, restore or reset incoming
+  // On route change: save outgoing, restore incoming
   useLayoutEffect(() => {
-    const prevKey = currentKeyRef.current;
-    const container = getScrollContainer();
+    const prevPath = prevPathRef.current;
+    
+    // Freeze to prevent scroll-reset events from overwriting saved positions
+    isFrozen = true;
 
-    // Freeze scroll saving during transition
-    navigationInProgress = true;
+    // Save outgoing path's scroll position (captured by scroll listener earlier)
+    // No need to re-save here — the scroll listener already saved the latest value
 
-    // Save outgoing scroll position BEFORE React commits new content
-    // (useLayoutEffect runs synchronously after render but before paint)
-    // Note: by this point React has already committed the new children,
-    // so we rely on the scroll listener having saved the position earlier.
-    // The freeze above prevents the reset-to-0 from overwriting it.
+    prevPathRef.current = pathname;
 
-    // Update current key
-    currentKeyRef.current = location.key;
-
-    // Restore or reset after DOM settles
-    requestAnimationFrame(() => {
-      const c = getScrollContainer();
-      if (!c) {
-        navigationInProgress = false;
+    // Restore scroll position for the new route
+    const tryRestore = (attempts = 0) => {
+      const container = getMainContainer();
+      if (!container) {
+        if (attempts < 5) {
+          requestAnimationFrame(() => tryRestore(attempts + 1));
+        } else {
+          isFrozen = false;
+        }
         return;
       }
 
       if (navigationType === 'POP') {
-        const saved = scrollPositions.get(location.key);
+        // Back/forward navigation — restore saved position
+        const saved = scrollPositions.get(pathname);
         if (saved !== undefined && saved > 0) {
-          c.scrollTop = saved;
+          container.scrollTop = saved;
+          // Verify it took effect (content might not be tall enough yet)
+          requestAnimationFrame(() => {
+            if (container.scrollTop !== saved && saved > 0 && attempts < 10) {
+              container.scrollTop = saved;
+            }
+            isFrozen = false;
+          });
+        } else {
+          isFrozen = false;
         }
       } else {
-        // New navigation — scroll to top
-        c.scrollTop = 0;
+        // PUSH navigation — scroll to top
+        container.scrollTop = 0;
+        requestAnimationFrame(() => {
+          isFrozen = false;
+        });
       }
+    };
 
-      // Unfreeze after another frame to let the scroll settle
-      requestAnimationFrame(() => {
-        navigationInProgress = false;
-      });
-    });
-  }, [location.key, navigationType]);
+    // Wait for React to commit DOM, then restore
+    requestAnimationFrame(() => tryRestore());
+  }, [pathname, navigationType]);
 
-  // Disable browser's native scroll restoration
+  // Use manual scroll restoration
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
