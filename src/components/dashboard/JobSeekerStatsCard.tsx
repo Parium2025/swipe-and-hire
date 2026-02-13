@@ -31,7 +31,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const hasMountedRef = useRef(false);
   const queryClient = useQueryClient();
   
-  const { data: applicationsCount = 0 } = useQuery({
+  const { data: applicationsCount = 0, isSuccess: appSuccess } = useQuery({
     queryKey: ['my-applications-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -46,7 +46,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     staleTime: Infinity,
   });
   
-  const { data: interviewsCount = 0 } = useQuery<number>({
+  const { data: interviewsCount = 0, isSuccess: intSuccess } = useQuery<number>({
     queryKey: ['my-interviews-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -63,7 +63,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     staleTime: Infinity,
   });
   
-  const { data: savedJobsCount = 0 } = useQuery<number>({
+  const { data: savedJobsCount = 0, isSuccess: savedSuccess } = useQuery<number>({
     queryKey: ['saved-jobs-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -78,7 +78,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     staleTime: Infinity,
   });
 
-  const { data: unreadMessagesCount = 0 } = useQuery<number>({
+  const { data: unreadMessagesCount = 0, isSuccess: msgSuccess } = useQuery<number>({
     queryKey: ['unread-messages-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -93,6 +93,8 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     enabled: !!user?.id,
     staleTime: Infinity,
   });
+
+  const dataReady = appSuccess && intSuccess && savedSuccess && msgSuccess;
 
   // Real-time subscriptions
   useEffect(() => {
@@ -218,8 +220,10 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
               <h3 className="text-sm sm:text-base font-semibold text-white leading-snug mb-1">
                 {currentStat.label}
               </h3>
-              <div className="text-3xl font-bold text-white">{currentStat.value}</div>
-              {currentStat.value === 0 && currentStat.emptyHint && (
+              <div className="text-3xl font-bold text-white">
+                {dataReady ? currentStat.value : '–'}
+              </div>
+              {dataReady && currentStat.value === 0 && currentStat.emptyHint && (
                 <p className="text-xs text-white mt-1">{currentStat.emptyHint}</p>
               )}
             </motion.div>
