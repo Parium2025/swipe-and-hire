@@ -162,23 +162,31 @@ export class AuthStorageAdapter implements Storage {
       return null;
     }
     
-    // Try the preferred storage first
-    const storage = this.getStorage();
-    let value = storage.getItem(key);
-    
-    // If not found in preferred storage, check the other one (for migration)
-    if (!value && key.includes('supabase')) {
-      const otherStorage = shouldRememberUser() ? sessionStorage : localStorage;
-      value = otherStorage.getItem(key);
-      
-      // If found in other storage, migrate to preferred storage
-      if (value) {
-        storage.setItem(key, value);
-        otherStorage.removeItem(key);
+    // For auth keys: ALWAYS read from localStorage first.
+    // On mobile, sessionStorage is wiped when the OS reclaims the tab/webview,
+    // so relying on it causes unexpected logouts when switching apps or locking the screen.
+    if (key.includes('supabase')) {
+      let value: string | null = null;
+      try {
+        value = localStorage.getItem(key);
+      } catch {
+        // localStorage unavailable (private browsing edge case)
       }
+      // Fallback to sessionStorage if localStorage is empty
+      if (!value) {
+        try {
+          value = sessionStorage.getItem(key);
+          // Migrate to localStorage so future reads are stable
+          if (value) {
+            try { localStorage.setItem(key, value); } catch {}
+          }
+        } catch {}
+      }
+      return value;
     }
     
-    return value;
+    // Non-auth keys: use preferred storage
+    return this.getStorage().getItem(key);
   }
 
   setItem(key: string, value: string): void {
