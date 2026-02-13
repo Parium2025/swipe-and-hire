@@ -23,6 +23,7 @@ import { SaveSearchDialog } from '@/components/SaveSearchDialog';
 import { useBatchPrefetchReviews, useBatchPrefetchCompanyProfiles } from '@/hooks/useCompanyReviewsCache';
 import { DesktopJobCard } from '@/components/search/DesktopJobCard';
 import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
+import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 
 interface Job {
   id: string;
@@ -72,6 +73,7 @@ const SearchJobs = () => {
   const queryClient = useQueryClient();
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
+  const { seedJobsFromSearch } = useJobPrefetchCache();
   
   const { savedSearches, saveSearch, deleteSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
@@ -191,6 +193,13 @@ const SearchJobs = () => {
       preloadImages(jobImageUrls);
     }
   }, [jobImageUrls]);
+
+  // 🔥 PREFETCH: Seed job data into React Query cache for instant JobView rendering
+  useEffect(() => {
+    if (jobs.length > 0) {
+      seedJobsFromSearch(jobs);
+    }
+  }, [jobs, seedJobsFromSearch]);
 
   // Realtime hanteras redan av useOptimizedJobSearch — ingen dubbel prenumeration behövs
 
