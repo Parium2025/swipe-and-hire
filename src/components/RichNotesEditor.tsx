@@ -255,9 +255,18 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
     }
   }, [value, editor]);
 
+  // Safe accessor for editor DOM — Tiptap throws if view isn't mounted yet
+  const getEditorDom = useCallback((): HTMLElement | null => {
+    try {
+      return editor?.view?.dom ?? null;
+    } catch {
+      return null;
+    }
+  }, [editor]);
+
   // Direct DOM scrollbar update — no React state, instant response
   const updateScrollbar = useCallback(() => {
-    const dom = editor?.view?.dom;
+    const dom = getEditorDom();
     const track = scrollTrackRef.current;
     const thumb = scrollThumbRef.current;
     if (!dom || !track || !thumb) return;
@@ -274,11 +283,11 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
 
     thumb.style.top = `${thumbTop}%`;
     thumb.style.height = `${thumbHeight}%`;
-  }, [editor]);
+  }, [getEditorDom]);
 
   // Attach scroll listener with rAF throttle
   useEffect(() => {
-    const dom = editor?.view?.dom;
+    const dom = getEditorDom();
     if (!dom) return;
     const handler = () => {
       cancelAnimationFrame(rafRef.current);
@@ -290,7 +299,7 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
       dom.removeEventListener('scroll', handler);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [editor, updateScrollbar]);
+  }, [editor, getEditorDom, updateScrollbar]);
 
   // Update on content changes
   useEffect(() => {
