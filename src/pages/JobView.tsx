@@ -474,12 +474,10 @@ const JobView = () => {
                         {getEmploymentTypeLabel(job.employment_type)}
                       </Badge>
                     )}
-                    {job.positions_count && job.positions_count > 1 && (
-                      <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
-                        <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
-                        <span className="leading-none">{job.positions_count} lediga tjänster</span>
-                      </Badge>
-                    )}
+                    <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
+                      <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
+                      <span className="leading-none">{(job.positions_count || 1) === 1 ? '1 ledig tjänst' : `${job.positions_count} lediga tjänster`}</span>
+                    </Badge>
                   </div>
 
                   {/* Metadata — desktop/tablet */}
@@ -493,12 +491,8 @@ const JobView = () => {
                     {job.location && (
                       <span className="text-white">{job.location.toUpperCase()}</span>
                     )}
-                    {job.positions_count && job.positions_count > 1 && (
-                      <>
-                        <span className="text-white/60">·</span>
-                        <span className="text-white">{job.positions_count} lediga tjänster</span>
-                      </>
-                    )}
+                    <span className="text-white/60">·</span>
+                    <span className="text-white">{(job.positions_count || 1) === 1 ? '1 ledig tjänst' : `${job.positions_count} lediga tjänster`}</span>
                   </div>
                 </div>
               </div>
@@ -522,12 +516,8 @@ const JobView = () => {
                       <span>{job.location.toUpperCase()}</span>
                     </>
                   )}
-                  {job.positions_count && job.positions_count > 1 && (
-                    <>
-                      <span className="text-white/60">·</span>
-                      <span>{job.positions_count} lediga tjänster</span>
-                    </>
-                  )}
+                  <span className="text-white/60">·</span>
+                  <span>{(job.positions_count || 1) === 1 ? '1 ledig tjänst' : `${job.positions_count} lediga tjänster`}</span>
                 </div>
               </div>
             )}
@@ -641,12 +631,10 @@ const JobView = () => {
                 )}
 
                 {/* Antal tjänster */}
-                {job.positions_count && job.positions_count > 1 && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Antal tjänster:</span>
-                    <span className="font-medium">{job.positions_count} st</span>
-                  </div>
-                )}
+                <div className="flex text-white text-sm">
+                  <span className="shrink-0 w-[110px]">Antal tjänster:</span>
+                  <span className="font-medium">{(job.positions_count || 1)} st</span>
+                </div>
 
                 {/* Yrkeskategori */}
                 {job.occupation && (

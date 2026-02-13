@@ -184,12 +184,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
             <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
             <span className="leading-none">{job.applications_count || 0} sökande</span>
           </Badge>
-          {job.positions_count && job.positions_count > 1 && (
-            <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
-              <UserCheck className="h-3 w-3 mr-0.5 flex-shrink-0" />
-              <span className="leading-none">{job.positions_count} lediga tjänster</span>
-            </Badge>
-          )}
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
+            <UserCheck className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none">{(job.positions_count || 1) === 1 ? '1 ledig tjänst' : `${job.positions_count} lediga tjänster`}</span>
+          </Badge>
         </div>
       </div>
     </Card>

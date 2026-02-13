@@ -476,12 +476,10 @@ const JobSwipe = () => {
                   {getEmploymentTypeLabel(currentJob.employment_type)}
                 </Badge>
               )}
-              {currentJob.positions_count && currentJob.positions_count > 1 && (
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Hash className="h-3 w-3" />
-                  {currentJob.positions_count} tjänster
-                </Badge>
-              )}
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Hash className="h-3 w-3" />
+                {(currentJob.positions_count || 1) === 1 ? '1 tjänst' : `${currentJob.positions_count} tjänster`}
+              </Badge>
             </div>
 
             {/* Salary with transparency */}
