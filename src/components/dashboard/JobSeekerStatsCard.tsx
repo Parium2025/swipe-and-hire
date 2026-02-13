@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useCallback, useEffect } from 'react';
+import { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
@@ -28,6 +28,7 @@ interface JobSeekerStatsCardProps {
 export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStatsCardProps) => {
   const { user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const hasMountedRef = useRef(false);
   const queryClient = useQueryClient();
   
   const { data: applicationsCount = 0 } = useQuery({
@@ -204,14 +205,15 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
           )}
           onClick={() => currentStat.link && navigate(currentStat.link)}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentIndex}
-              initial={{ opacity: 0, y: 10 }}
+              initial={hasMountedRef.current ? { opacity: 0, y: 10 } : false}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
               className="flex flex-col items-center"
+              onAnimationComplete={() => { hasMountedRef.current = true; }}
             >
               <h3 className="text-sm sm:text-base font-semibold text-white leading-snug mb-1">
                 {currentStat.label}
