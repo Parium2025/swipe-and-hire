@@ -4,12 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { TrendingUp, Briefcase, Building, Building2, ChevronDown, Star, Sparkles } from 'lucide-react';
+import { TrendingUp, Briefcase, Building } from 'lucide-react';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { getTimeRemaining } from '@/lib/date';
@@ -23,6 +22,8 @@ import { SaveSearchDialog } from '@/components/SaveSearchDialog';
 import { useBatchPrefetchReviews, useBatchPrefetchCompanyProfiles } from '@/hooks/useCompanyReviewsCache';
 import { DesktopJobCard } from '@/components/search/DesktopJobCard';
 import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
+import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard';
+import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 
 interface Job {
@@ -400,45 +401,13 @@ const SearchJobs = () => {
 
       {/* Company Suggestion Card - LinkedIn style */}
       {matchingCompany && searchInput.trim() && (
-        <button
-          onClick={() => {
-            setSelectedCompanyId(matchingCompany.id);
+        <CompanySuggestionCard
+          company={matchingCompany}
+          onOpenProfile={(id) => {
+            setSelectedCompanyId(id);
             setCompanyDialogOpen(true);
           }}
-          className="w-full text-left"
-        >
-          <Card className="bg-white/5 backdrop-blur-sm border-white/20 transition-all duration-300 hover:bg-white/10 hover:border-white/30 cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-12 w-12 flex-shrink-0">
-                  <AvatarImage src={matchingCompany.logo || ''} alt={matchingCompany.name} />
-                  <AvatarFallback className="bg-white/20 text-white text-lg font-bold" delayMs={150}>
-                    {matchingCompany.name.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-white flex-shrink-0" />
-                    <span className="text-xs text-white uppercase tracking-wide">Företag</span>
-                  </div>
-                  <h3 className="text-base font-semibold text-white truncate mt-1">
-                    {matchingCompany.name} - {matchingCompany.jobCount} aktiv{matchingCompany.jobCount !== 1 ? 'a' : 't'} jobb
-                  </h3>
-                  <div className="flex items-center gap-2 text-sm text-white">
-                    <span>Se företagsprofil och recensioner</span>
-                    {matchingCompany.avgRating && matchingCompany.reviewCount > 0 && (
-                      <span className="flex items-center gap-1 text-white">
-                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                        {matchingCompany.avgRating.toFixed(1)} ({matchingCompany.reviewCount})
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <ChevronDown className="h-5 w-5 text-white -rotate-90 flex-shrink-0" />
-              </div>
-            </CardContent>
-          </Card>
-        </button>
+        />
       )}
 
 
@@ -499,15 +468,7 @@ const SearchJobs = () => {
             {/* Mobile: Swipe Mode Toggle */}
             {/* Swipe Mode Toggle - only for touch devices */}
             {isTouchCapable && (
-              <div className="flex justify-center mb-4">
-                <button
-                  onClick={() => setSwipeModeActive(true)}
-                  className="h-11 px-6 flex items-center gap-2 bg-white/10 border border-white/20 rounded-full text-white font-medium active:scale-95 transition-all hover:bg-white/15"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Swipe Mode
-                </button>
-              </div>
+              <SwipeModeToggle onActivate={() => setSwipeModeActive(true)} />
             )}
 
             {/* Job Cards */}
