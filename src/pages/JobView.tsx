@@ -443,19 +443,47 @@ const JobView = () => {
                   }}
                 />
                 {/* Gradient overlay för läsbarhet */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 
-                {/* Text overlay - only on larger screens; mobile keeps image clean */}
-                <div className="absolute inset-0 hidden sm:flex flex-col items-center justify-center text-center px-6">
-                {/* Huvudrubrik - kompakt och centrerad, tillåt radbrytning */}
+                {/* Text overlay — alla skärmstorlekar, bottom-aligned */}
+                <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end text-center px-4 pb-4 sm:px-6 sm:pb-6">
+                  {/* Titel */}
                   <TruncatedText
                     text={job.title}
-                    className="text-white text-xl md:text-2xl lg:text-3xl font-bold leading-tight max-w-4xl w-full text-center line-clamp-3"
+                    className="text-white text-[15px] sm:text-xl md:text-2xl lg:text-3xl font-bold leading-snug sm:leading-tight max-w-4xl w-full text-center line-clamp-2 sm:line-clamp-3"
                     tooltipSide="bottom"
                   />
                   
-                  {/* Metadata på en rad under rubriken */}
-                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm md:text-base text-white">
+                  {/* Company + Location — mobil */}
+                  <div className="mt-2 sm:hidden flex items-center justify-center gap-1.5 text-[13px] text-white">
+                    <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
+                    <span className="truncate font-medium">{job.profiles?.company_name || 'Okänt företag'}</span>
+                    {job.location && (
+                      <>
+                        <span className="text-white/30">·</span>
+                        <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-white" />
+                        <span className="truncate">{job.location}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Badges — mobil */}
+                  <div className="mt-1.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
+                    {job.employment_type && (
+                      <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
+                        {getEmploymentTypeLabel(job.employment_type)}
+                      </Badge>
+                    )}
+                    {job.positions_count && job.positions_count > 1 && (
+                      <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
+                        <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
+                        <span className="leading-none">{job.positions_count} lediga tjänster</span>
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Metadata — desktop/tablet */}
+                  <div className="mt-4 hidden sm:flex flex-wrap items-center justify-center gap-2 text-sm md:text-base text-white">
                     {job.employment_type && (
                       <span className="text-white">{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
                     )}
@@ -472,45 +500,6 @@ const JobView = () => {
                       </>
                     )}
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* Titel under bilden — matchar sökkortens layout */}
-            {imageUrl && (
-              <div className="sm:hidden space-y-2 text-center">
-                {/* Title */}
-                <TruncatedText
-                  text={job.title}
-                  className="text-[15px] font-bold text-white leading-snug line-clamp-2"
-                />
-
-                {/* Company + Location — centered */}
-                <div className="flex items-center justify-center gap-1.5 text-[13px] text-white">
-                  <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
-                  <span className="truncate font-medium">{job.profiles?.company_name || 'Okänt företag'}</span>
-                  {job.location && (
-                    <>
-                      <span className="text-white/30">·</span>
-                      <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-white" />
-                      <span className="truncate">{job.location}</span>
-                    </>
-                  )}
-                </div>
-
-                {/* Tags row — centered badges */}
-                <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                  {job.employment_type && (
-                    <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
-                      {getEmploymentTypeLabel(job.employment_type)}
-                    </Badge>
-                  )}
-                  {job.positions_count && job.positions_count > 1 && (
-                    <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
-                      <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
-                      <span className="leading-none">{job.positions_count} lediga tjänster</span>
-                    </Badge>
-                  )}
                 </div>
               </div>
             )}
