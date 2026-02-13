@@ -25,13 +25,32 @@ interface JobSeekerStatsCardProps {
   setIsPaused: (v: boolean) => void;
 }
 
+// Cache helpers for instant rendering on refresh
+const STATS_CACHE_KEY = 'parium-jobseeker-stats';
+
+const readCachedStats = (): Record<string, number> => {
+  try {
+    const raw = localStorage.getItem(STATS_CACHE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+};
+
+const writeCachedStats = (key: string, value: number) => {
+  try {
+    const current = readCachedStats();
+    current[key] = value;
+    localStorage.setItem(STATS_CACHE_KEY, JSON.stringify(current));
+  } catch {}
+};
+
 export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStatsCardProps) => {
   const { user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const hasMountedRef = useRef(false);
   const queryClient = useQueryClient();
+  const cachedStats = useMemo(() => readCachedStats(), []);
   
-  const { data: applicationsCount = 0, isSuccess: appSuccess } = useQuery({
+  const { data: applicationsCount = cachedStats['applications'] ?? 0, isSuccess: appSuccess } = useQuery({
     queryKey: ['my-applications-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -40,13 +59,15 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
         .select('*', { count: 'exact', head: true })
         .eq('applicant_id', user.id);
       if (error) { console.error('Error fetching applications count:', error); return 0; }
-      return count ?? 0;
+      const val = count ?? 0;
+      writeCachedStats('applications', val);
+      return val;
     },
     enabled: !!user?.id,
     staleTime: Infinity,
   });
   
-  const { data: interviewsCount = 0, isSuccess: intSuccess } = useQuery<number>({
+  const { data: interviewsCount = cachedStats['interviews'] ?? 0, isSuccess: intSuccess } = useQuery<number>({
     queryKey: ['my-interviews-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -57,13 +78,15 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
         .gte('scheduled_at', new Date().toISOString())
         .in('status', ['pending', 'confirmed']);
       if (error) { console.error('Error fetching interviews:', error); return 0; }
-      return count || 0;
+      const val = count || 0;
+      writeCachedStats('interviews', val);
+      return val;
     },
     enabled: !!user?.id,
     staleTime: Infinity,
   });
   
-  const { data: savedJobsCount = 0, isSuccess: savedSuccess } = useQuery<number>({
+  const { data: savedJobsCount = cachedStats['saved'] ?? 0, isSuccess: savedSuccess } = useQuery<number>({
     queryKey: ['saved-jobs-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -72,13 +95,15 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id);
       if (error) { console.error('Error fetching saved jobs:', error); return 0; }
-      return count || 0;
+      const val = count || 0;
+      writeCachedStats('saved', val);
+      return val;
     },
     enabled: !!user?.id,
     staleTime: Infinity,
   });
 
-  const { data: unreadMessagesCount = 0, isSuccess: msgSuccess } = useQuery<number>({
+  const { data: unreadMessagesCount = cachedStats['messages'] ?? 0, isSuccess: msgSuccess } = useQuery<number>({
     queryKey: ['unread-messages-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -88,7 +113,9 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
         .eq('recipient_id', user.id)
         .eq('is_read', false);
       if (error) { console.error('Error fetching unread messages:', error); return 0; }
-      return count || 0;
+      const val = count || 0;
+      writeCachedStats('messages', val);
+      return val;
     },
     enabled: !!user?.id,
     staleTime: Infinity,
@@ -221,9 +248,9 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
                 {currentStat.label}
               </h3>
               <div className="text-3xl font-bold text-white">
-                {dataReady ? currentStat.value : '–'}
+                {currentStat.value}
               </div>
-              {dataReady && currentStat.value === 0 && currentStat.emptyHint && (
+              {currentStat.value === 0 && currentStat.emptyHint && (dataReady || Object.keys(cachedStats).length > 0) && (
                 <p className="text-xs text-white mt-1">{currentStat.emptyHint}</p>
               )}
             </motion.div>
