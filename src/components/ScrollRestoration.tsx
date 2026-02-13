@@ -1,88 +1,97 @@
-import { useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
 /**
- * Custom ScrollRestoration that works with inner <main> scroll containers.
- * Saves scroll position per route key and restores on POP (back/forward).
+ * Custom ScrollRestoration for inner <main> scroll containers.
+ * Saves scroll position per location.key and restores on POP (back/forward).
+ *
+ * Key challenge: when React renders a new route into <main>, scrollTop resets
+ * to 0 which fires a scroll event. We guard against this by freezing saves
+ * during navigation transitions.
  */
 
 const scrollPositions = new Map<string, number>();
+let navigationInProgress = false;
+
+const getScrollContainer = (): HTMLElement | null => {
+  const mains = document.querySelectorAll('main');
+  for (const m of mains) {
+    const style = window.getComputedStyle(m);
+    if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+      return m;
+    }
+  }
+  return null;
+};
 
 export function ScrollRestoration() {
   const location = useLocation();
   const navigationType = useNavigationType();
-  const prevKeyRef = useRef<string | null>(null);
+  const currentKeyRef = useRef(location.key);
 
-  // Find the scrollable <main> element inside the layout
-  const getScrollContainer = useCallback((): HTMLElement | null => {
-    // The layout uses <main> with overflow-y-auto as the scroll container
-    const mains = document.querySelectorAll('main');
-    for (const m of mains) {
-      const style = window.getComputedStyle(m);
-      if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
-        return m;
-      }
-    }
-    return null;
-  }, []);
-
-  // Save current scroll position before navigating away
+  // Continuously save scroll position on scroll events
   useEffect(() => {
     const container = getScrollContainer();
     if (!container) return;
 
-    const saveScroll = () => {
-      const key = prevKeyRef.current || location.key;
+    const onScroll = () => {
+      // Don't save during navigation — React may have reset scrollTop to 0
+      if (navigationInProgress) return;
+      const key = currentKeyRef.current;
       if (key) {
         scrollPositions.set(key, container.scrollTop);
       }
     };
 
-    container.addEventListener('scroll', saveScroll, { passive: true });
+    container.addEventListener('scroll', onScroll, { passive: true });
     return () => {
-      // Save final position on cleanup (navigation happening)
-      saveScroll();
-      container.removeEventListener('scroll', saveScroll);
+      container.removeEventListener('scroll', onScroll);
     };
-  }, [location.key, getScrollContainer]);
+  }, [location.key]);
 
-  // Restore or reset scroll on navigation
+  // Handle navigation: save outgoing position, restore or reset incoming
   useLayoutEffect(() => {
-    // Save previous route's position
-    if (prevKeyRef.current) {
-      const container = getScrollContainer();
-      if (container) {
-        scrollPositions.set(prevKeyRef.current, container.scrollTop);
-      }
-    }
+    const prevKey = currentKeyRef.current;
+    const container = getScrollContainer();
 
-    const restoreScroll = () => {
-      const container = getScrollContainer();
-      if (!container) return;
+    // Freeze scroll saving during transition
+    navigationInProgress = true;
+
+    // Save outgoing scroll position BEFORE React commits new content
+    // (useLayoutEffect runs synchronously after render but before paint)
+    // Note: by this point React has already committed the new children,
+    // so we rely on the scroll listener having saved the position earlier.
+    // The freeze above prevents the reset-to-0 from overwriting it.
+
+    // Update current key
+    currentKeyRef.current = location.key;
+
+    // Restore or reset after DOM settles
+    requestAnimationFrame(() => {
+      const c = getScrollContainer();
+      if (!c) {
+        navigationInProgress = false;
+        return;
+      }
 
       if (navigationType === 'POP') {
-        // Back/forward — restore saved position
         const saved = scrollPositions.get(location.key);
-        if (saved !== undefined) {
-          container.scrollTop = saved;
+        if (saved !== undefined && saved > 0) {
+          c.scrollTop = saved;
         }
       } else {
         // New navigation — scroll to top
-        container.scrollTop = 0;
+        c.scrollTop = 0;
       }
-    };
 
-    // Use rAF to ensure DOM has updated
-    requestAnimationFrame(() => {
-      restoreScroll();
-      // Double-rAF for lazy-loaded content
-      requestAnimationFrame(restoreScroll);
+      // Unfreeze after another frame to let the scroll settle
+      requestAnimationFrame(() => {
+        navigationInProgress = false;
+      });
     });
+  }, [location.key, navigationType]);
 
-    prevKeyRef.current = location.key;
-  }, [location.key, navigationType, getScrollContainer]);
-
-  // Disable browser's native scroll restoration (we handle it manually)
+  // Disable browser's native scroll restoration
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
