@@ -564,40 +564,40 @@ const JobView = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
                 {/* Anställningsform */}
                 {job.employment_type && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Anställning:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Anställning:</span>
                     <span className="font-medium">{getEmploymentTypeLabel(job.employment_type)}</span>
                   </div>
                 )}
 
                 {/* Arbetsschema */}
                 {job.work_schedule && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Schema:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Schema:</span>
                     <span className="font-medium">{cap(job.work_schedule)}</span>
                   </div>
                 )}
 
                 {/* Plats */}
                 {job.location && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Ort:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Ort:</span>
                     <span className="font-medium">{cap(job.location)}</span>
                   </div>
                 )}
 
                 {/* Bolagsnamn */}
                 {job.workplace_name && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Bolagsnamn:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Bolagsnamn:</span>
                     <span className="font-medium">{cap(job.workplace_name)}</span>
                   </div>
                 )}
 
                 {/* Arbetsplatsadress */}
                 {job.workplace_address && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Adress:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Adress:</span>
                     <span className="font-medium">
                       {job.workplace_address}
                       {job.workplace_postal_code && `, ${job.workplace_postal_code}`}
@@ -609,8 +609,8 @@ const JobView = () => {
 
                 {/* Arbetsort (om skild från location) */}
                 {job.workplace_city && job.workplace_city !== job.location && !job.workplace_address && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Stad:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Stad:</span>
                     <span className="font-medium">
                       {job.workplace_city}
                       {job.workplace_municipality && job.workplace_municipality !== job.workplace_city ? `, ${job.workplace_municipality}` : ''}
@@ -619,77 +619,79 @@ const JobView = () => {
                   </div>
                 )}
 
-                {/* Kommun (visas separat om inte redan inkluderad ovan) */}
+                {/* Kommun */}
                 {job.workplace_municipality && !job.workplace_address && (!job.workplace_city || job.workplace_city === job.location) && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Kommun:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Kommun:</span>
                     <span className="font-medium">{job.workplace_municipality}</span>
                   </div>
                 )}
 
                 {/* Platstyp */}
                 {job.work_location_type && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Platstyp:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Platstyp:</span>
                     <span className="font-medium">{getWorkLocationLabel(job.work_location_type)}</span>
                   </div>
                 )}
 
                 {/* Distansarbete */}
                 {job.remote_work_possible && job.remote_work_possible !== 'no' && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Distans:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Distans:</span>
                     <span className="font-medium">{getRemoteWorkLabel(job.remote_work_possible)}</span>
                   </div>
                 )}
 
                 {/* Arbetstider */}
                 {(job.work_start_time || job.work_end_time) && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Arbetstid:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Arbetstid:</span>
                     <span className="font-medium">{job.work_start_time} – {job.work_end_time}</span>
                   </div>
                 )}
 
                 {/* Antal tjänster */}
                 {job.positions_count && job.positions_count > 1 && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Antal tjänster:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Antal tjänster:</span>
                     <span className="font-medium">{job.positions_count} st</span>
                   </div>
                 )}
 
                 {/* Yrkeskategori */}
                 {job.occupation && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Yrke:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Yrke:</span>
                     <span className="font-medium">{cap(job.occupation)}</span>
                   </div>
                 )}
 
                 {/* Lön */}
                 {formatSalary(job.salary_min, job.salary_max, job.salary_type) && (
-                  <div className="text-white text-sm sm:col-span-2 pt-1">
-                    <span className="mr-1.5">Lön:</span>
-                    <span className="font-semibold">{formatSalary(job.salary_min, job.salary_max, job.salary_type)}</span>
-                    {job.salary_type && (
-                      <span className="text-white/70 ml-1.5 text-xs">({getSalaryTypeLabel(job.salary_type)})</span>
-                    )}
+                  <div className="flex text-white text-sm sm:col-span-2 pt-1">
+                    <span className="shrink-0 w-[110px]">Lön:</span>
+                    <span className="font-semibold">
+                      {formatSalary(job.salary_min, job.salary_max, job.salary_type)}
+                      {job.salary_type && (
+                        <span className="text-white/70 ml-1.5 text-xs">({getSalaryTypeLabel(job.salary_type)})</span>
+                      )}
+                    </span>
                   </div>
                 )}
 
                 {/* Lönetransparens fallback */}
                 {!formatSalary(job.salary_min, job.salary_max, job.salary_type) && job.salary_transparency && (
-                  <div className="text-white text-sm">
-                    <span className="mr-1.5">Lön:</span>
+                  <div className="flex text-white text-sm">
+                    <span className="shrink-0 w-[110px]">Lön:</span>
                     <span className="font-medium">{getSalaryTransparencyLabel(job.salary_transparency)}</span>
                   </div>
                 )}
 
                 {/* Kontakt */}
                 {job.contact_email && (
-                  <div className="text-white text-sm sm:col-span-2 pt-1">
-                    <span className="mr-1.5">Kontakt:</span>
+                  <div className="flex text-white text-sm sm:col-span-2 pt-1">
+                    <span className="shrink-0 w-[110px]">Kontakt:</span>
                     <a 
                       href={`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`}
                       className="font-medium underline underline-offset-2 hover:text-white/80 transition-colors"
