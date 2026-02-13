@@ -343,7 +343,7 @@ const JobView = () => {
   };
 
   return (
-    <div ref={contentRef} className="min-h-full">
+    <div ref={contentRef} className="min-h-full animate-fade-in">
        <div className="jobview-container py-4">
         {/* Combined header */}
         <div className="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
