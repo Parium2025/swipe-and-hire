@@ -1,16 +1,17 @@
 import { useEffect, useCallback } from 'react';
-import { updateLastActivity, hasSessionExpiredDueToInactivity, clearActivityTracking } from '@/lib/authStorage';
+import { updateLastActivity, hasSessionExpiredDueToInactivity, clearActivityTracking, refreshSessionSentinel } from '@/lib/authStorage';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Hook that tracks user activity and handles 24-hour inactivity timeout
- * Should be used in the root component (App.tsx or AuthProvider)
+ * Also refreshes the session sentinel so the tab is recognized as alive
  */
 export const useInactivityTimeout = (isAuthenticated: boolean) => {
   // Update activity on user interactions
   const handleActivity = useCallback(() => {
     if (isAuthenticated) {
       updateLastActivity();
+      refreshSessionSentinel();
     }
   }, [isAuthenticated]);
 

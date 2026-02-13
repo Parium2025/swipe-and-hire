@@ -6,7 +6,34 @@
 
 const REMEMBER_ME_KEY = 'parium-remember-me';
 const LAST_ACTIVITY_KEY = 'parium-last-activity';
+const SESSION_SENTINEL_KEY = 'parium-session-alive';
 const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+/**
+ * Session sentinel: a sessionStorage flag that indicates the browser tab is still open.
+ * - Survives normal app-switching on mobile (tab stays alive in background)
+ * - Disappears when the user actually closes the tab/browser/app
+ * - Used to log out non-"remember me" users when they reopen a closed tab
+ */
+export const refreshSessionSentinel = (): void => {
+  try {
+    sessionStorage.setItem(SESSION_SENTINEL_KEY, '1');
+  } catch {}
+};
+
+export const isSessionSentinelAlive = (): boolean => {
+  try {
+    return sessionStorage.getItem(SESSION_SENTINEL_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+export const clearSessionSentinel = (): void => {
+  try {
+    sessionStorage.removeItem(SESSION_SENTINEL_KEY);
+  } catch {}
+};
 
 // Track if we should use persistent storage
 export const shouldRememberUser = (): boolean => {
@@ -153,13 +180,30 @@ export class AuthStorageAdapter implements Storage {
   }
 
   getItem(key: string): string | null {
-    // If session expired due to inactivity, clear auth data and return null
-    if (key.includes('supabase.auth') && hasSessionExpiredDueToInactivity()) {
-      console.log('⏰ Session expired due to 24h inactivity - logging out');
-      console.log(`📊 Last activity: ${getTimeSinceLastActivity()}`);
-      this.clearAuthData();
-      clearActivityTracking();
-      return null;
+    if (key.includes('supabase.auth')) {
+      // Check 24h inactivity timeout (applies to all users)
+      if (hasSessionExpiredDueToInactivity()) {
+        console.log('⏰ Session expired due to 24h inactivity - logging out');
+        console.log(`📊 Last activity: ${getTimeSinceLastActivity()}`);
+        this.clearAuthData();
+        clearActivityTracking();
+        return null;
+      }
+
+      // If "remember me" is OFF, check session sentinel.
+      // Missing sentinel = tab/app was closed → log out.
+      if (!shouldRememberUser() && !isSessionSentinelAlive()) {
+        // Check if there's actually auth data stored (i.e. user was logged in before)
+        const hasStoredAuth = (() => {
+          try { return !!localStorage.getItem(key); } catch { return false; }
+        })();
+        if (hasStoredAuth) {
+          console.log('🚪 Session ended: tab/app was closed without "remember me" — logging out');
+          this.clearAuthData();
+          clearActivityTracking();
+          return null;
+        }
+      }
     }
     
     // For auth keys: ALWAYS read from localStorage first.
@@ -203,6 +247,7 @@ export class AuthStorageAdapter implements Storage {
         console.warn('Failed to write auth key to sessionStorage:', ssError);
       }
       updateLastActivity();
+      refreshSessionSentinel();
     } else {
       // For non-auth keys, use preferred storage
       this.getStorage().setItem(key, value);
