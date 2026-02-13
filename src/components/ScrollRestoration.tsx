@@ -36,7 +36,13 @@ export function ScrollRestoration() {
 
     const onScroll = () => {
       if (isFrozen) return;
-      scrollPositions.set(pathname, container.scrollTop);
+      const pos = container.scrollTop;
+      // Never overwrite a valid position with 0 — the browser fires
+      // a scroll-to-zero event when <main> unmounts during route changes,
+      // which arrives BEFORE isFrozen is set in useLayoutEffect.
+      if (pos > 0) {
+        scrollPositions.set(pathname, pos);
+      }
     };
 
     container.addEventListener('scroll', onScroll, { passive: true });
