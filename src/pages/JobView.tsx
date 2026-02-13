@@ -442,8 +442,8 @@ const JobView = () => {
                     setImageUrl(null);
                   }}
                 />
-                {/* Gradient overlay för läsbarhet */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                {/* Gradient overlay för läsbarhet av text */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
                 {/* Text overlay — alla skärmstorlekar, bottom-aligned */}
                 <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end text-center px-4 pb-4 sm:px-6 sm:pb-6">
