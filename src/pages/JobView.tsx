@@ -6,28 +6,18 @@ import { useJobViewTracker } from '@/hooks/useJobViewTracker';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { Button } from '@/components/ui/button';
 import { useOnline } from '@/hooks/useOnlineStatus';
-import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
-import { getBenefitLabel } from '@/types/jobWizard';
 import type { JobQuestion } from '@/types/jobWizard';
-import {
-  capitalize as cap,
-  getSalaryTypeLabel,
-  formatSalary,
-  getWorkLocationLabel,
-  getRemoteWorkLabel,
-  getSalaryTransparencyLabel,
-} from '@/lib/jobViewHelpers';
-import { ArrowLeft, Send, Users, Timer, CheckCircle, Building2, MapPin } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Send, Users, CheckCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { imageCache } from '@/lib/imageCache';
-import { TruncatedText } from '@/components/TruncatedText';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
+import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
+import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 
 interface JobPosting {
   id: string;
@@ -77,21 +67,34 @@ const JobView = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { getPrefetchedJob } = useJobPrefetchCache();
   
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   
-  // Seed from module cache to eliminate blank frame on remount
+  // Try module cache first, then React Query prefetch cache from search results
   const cached = jobId ? _jobCache.get(jobId) : undefined;
-  const [job, setJob] = useState<JobPosting | null>(cached?.job ?? null);
-  const [loading, setLoading] = useState(!cached);
+  const prefetched = !cached && jobId ? getPrefetchedJob(jobId) : undefined;
+  
+  // Build initial job from prefetch data if available (partial — no profiles join)
+  const initialJob: JobPosting | null = cached?.job ?? (prefetched ? {
+    ...prefetched,
+    description: prefetched.description || '',
+    location: prefetched.location || '',
+    profiles: {
+      company_name: prefetched.company_name,
+      company_logo_url: prefetched.company_logo_url,
+    },
+  } as JobPosting : null);
+
+  const [job, setJob] = useState<JobPosting | null>(initialJob);
+  const [loading, setLoading] = useState(!initialJob);
   const [jobQuestions, setJobQuestions] = useState<JobQuestion[]>(cached?.questions ?? []);
-  const hasLoadedOnce = useRef(!!cached);
+  const hasLoadedOnce = useRef(!!initialJob);
   const [applying, setApplying] = useState(false);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
-    // Sync: resolve from cache at mount for instant hero image
-    const rawImg = cached?.job?.job_image_desktop_url || cached?.job?.job_image_url;
+    const rawImg = initialJob?.job_image_desktop_url || initialJob?.job_image_url;
     if (!rawImg) return null;
     let resolved = rawImg;
     if (!rawImg.startsWith('http')) {
@@ -101,8 +104,7 @@ const JobView = () => {
     return imageCache.getCachedUrl(resolved) || resolved;
   });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
-    // Sync: check if logo is already in the image cache
-    const rawLogo = cached?.job?.profiles?.company_logo_url;
+    const rawLogo = initialJob?.profiles?.company_logo_url;
     return rawLogo ? (imageCache.getCachedUrl(rawLogo) || rawLogo) : null;
   });
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? false);
@@ -117,7 +119,6 @@ const JobView = () => {
     minTimeOnPage: 3000,
   });
   
-  // Preloada bilden när den finns tillgänglig
   useImagePreloader(imageUrl ? [imageUrl] : [], { priority: 'high' });
 
   useEffect(() => {
@@ -128,7 +129,6 @@ const JobView = () => {
 
   const fetchJob = async () => {
     try {
-      // 🔥 Fetch job + questions + application status ALL in PARALLEL
       const [jobResult, questionsResult, applicationResult] = await Promise.all([
         supabase
           .from('job_postings')
@@ -162,12 +162,9 @@ const JobView = () => {
       if (jobResult.error) throw jobResult.error;
       const data = jobResult.data;
 
-      // 🔥 CRITICAL: Batch ALL state updates + setLoading in ONE synchronous block
-      // React 18 batches these into a single render — no flicker possible
       const questions = (!questionsResult.error && questionsResult.data) ? questionsResult.data as JobQuestion[] : [];
       const applied = !!applicationResult.data;
 
-      // Persist in module-level cache so viewport-resize remounts are instant
       if (jobId) {
         _jobCache.set(jobId, { job: data, questions, applied });
       }
@@ -178,7 +175,7 @@ const JobView = () => {
       hasLoadedOnce.current = true;
       setLoading(false);
 
-      // Resolve image URL — check cache FIRST for instant display
+      // Resolve image URL
       const rawImageUrl = data.job_image_desktop_url || data.job_image_url;
       if (rawImageUrl) {
         let resolved: string | null = null;
@@ -193,15 +190,12 @@ const JobView = () => {
           }
         }
         if (resolved) {
-          // Sync: use cached blob URL if available (from search card preload)
           const cachedBlob = imageCache.getCachedUrl(resolved);
           setImageUrl(cachedBlob || resolved);
-          // Background: ensure it's cached for future visits
           if (!cachedBlob) {
             imageCache.loadImage(resolved).catch(() => {});
           }
         } else if (rawImageUrl) {
-          // Legacy signed URL fallback (async)
           convertToSignedUrl(rawImageUrl, 'job-applications', 3600).then(signed => {
             if (signed) {
               setImageUrl(signed);
@@ -211,12 +205,10 @@ const JobView = () => {
         }
       }
 
-      // Prefetch company logo and store cached blob URL
+      // Prefetch company logo
       if (data.profiles?.company_logo_url) {
         const rawLogo = data.profiles.company_logo_url;
-        // Set raw URL immediately so avatar shows something
         setCompanyLogoUrl(imageCache.getCachedUrl(rawLogo) || rawLogo);
-        // Then cache it for instant future renders
         imageCache.loadImage(rawLogo).then(blobUrl => {
           setCompanyLogoUrl(blobUrl);
         }).catch(() => {});
@@ -233,13 +225,9 @@ const JobView = () => {
   };
 
   const handleAnswerChange = (questionId: string, value: any) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: value
-    }));
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
-  // Check if all required questions are answered
   const allRequiredQuestionsAnswered = () => {
     const requiredQuestions = jobQuestions.filter(q => q.is_required);
     return requiredQuestions.every(q => {
@@ -251,12 +239,7 @@ const JobView = () => {
   };
 
   const canSubmitApplication = allRequiredQuestionsAnswered();
-  
-  // Check if job is expired
   const isJobExpired = job ? getTimeRemaining(job.created_at, job.expires_at).isExpired : false;
-
-  // Helper functions are now imported from '@/lib/jobViewHelpers'
-
   const { isOnline, showOfflineToast } = useOnline();
 
   const handleApplicationSubmit = async () => {
@@ -265,7 +248,6 @@ const JobView = () => {
       return;
     }
 
-    // Validate required questions
     const missingRequired = jobQuestions
       .filter(q => q.is_required)
       .find(q => !answers[q.id] || answers[q.id] === '');
@@ -282,21 +264,18 @@ const JobView = () => {
     try {
       setApplying(true);
       
-      // Fetch user profile to get contact info
       const { data: profile } = await supabase
         .from('profiles')
         .select('first_name, last_name, phone, email, home_location, location, birth_date, bio, cv_url, availability, employment_type')
         .eq('user_id', user?.id)
         .maybeSingle();
       
-      // Calculate age from birth_date
       let age = null;
       if (profile?.birth_date) {
         const birthYear = new Date(profile.birth_date).getFullYear();
         age = new Date().getFullYear() - birthYear;
       }
       
-      // Save application to database with contact info
       const { error } = await supabase
         .from('job_applications')
         .insert({
@@ -318,13 +297,9 @@ const JobView = () => {
 
       if (error) throw error;
 
-      // Trigger CV summary generation in background (fire and forget)
       if (profile?.cv_url) {
         supabase.functions.invoke('generate-cv-summary', {
-          body: {
-            applicant_id: user?.id,
-            job_id: jobId,
-          },
+          body: { applicant_id: user?.id, job_id: jobId },
         }).catch(err => console.warn('Background CV summary generation failed:', err));
       }
 
@@ -333,9 +308,7 @@ const JobView = () => {
         description: 'Din ansökan har skickats till arbetsgivaren',
       });
 
-      setTimeout(() => {
-        navigate('/search-jobs');
-      }, 1500);
+      setTimeout(() => { navigate('/search-jobs'); }, 1500);
     } catch (error: any) {
       toast({
         title: 'Ett fel uppstod',
@@ -347,11 +320,8 @@ const JobView = () => {
     }
   };
 
-  // Mobile now uses the same layout as desktop (responsive)
-
-  // Desktop/Tablet view - no loading text, just fade in content
   if (loading && !hasLoadedOnce.current) {
-    return null; // Return nothing on FIRST load only for smooth fade-in
+    return null;
   }
 
   if (!job) {
@@ -365,11 +335,9 @@ const JobView = () => {
   const handleBack = () => {
     const state = window.history.state as any;
     const idx = typeof state?.idx === 'number' ? state.idx : undefined;
-
     if (typeof idx === 'number' && idx > 0) {
       navigate(-1);
     } else {
-      // No previous route in React Router history — go to search
       navigate('/search-jobs', { replace: true });
     }
   };
@@ -377,9 +345,8 @@ const JobView = () => {
   return (
     <div ref={contentRef} className="h-[100dvh] overflow-y-auto bg-parium-gradient will-change-scroll overscroll-contain [-webkit-overflow-scrolling:touch] animate-fade-in">
        <div className="jobview-container py-4">
-        {/* Combined header: Tillbaka + Spara + Företag på samma rad */}
+        {/* Combined header */}
         <div className="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
-          {/* Vänster: Tillbaka */}
           <Button
             type="button"
             onClick={handleBack}
@@ -390,7 +357,6 @@ const JobView = () => {
             Tillbaka
           </Button>
           
-          {/* Företagsinfo till höger - clickable */}
           <button
             onClick={() => setShowCompanyProfile(true)}
             className="flex items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
@@ -422,111 +388,21 @@ const JobView = () => {
           </button>
         </div>
 
-        {/* Main content grid */}
+        {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          
-          {/* Left column - Job info */}
           <div className="lg:col-span-3 space-y-3">
             
-            {imageUrl && (
-              <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
-                <img
-                  src={imageUrl}
-                  alt={`${job.title} hos ${job.profiles?.company_name || 'företaget'}`}
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                  fetchPriority="high"
-                  onLoad={() => {}}
-                  onError={(e) => {
-                    console.error('Job image failed to load', imageUrl);
-                    setImageUrl(null);
-                  }}
-                />
-                {/* Gradient overlay för läsbarhet */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                
-                {/* Text overlay — alla skärmstorlekar, bottom-aligned */}
-                <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end text-center px-4 pb-4 sm:px-6 sm:pb-6">
-                  {/* Titel */}
-                  <TruncatedText
-                    text={job.title}
-                    className="text-white text-[15px] sm:text-xl md:text-2xl lg:text-3xl font-bold leading-snug sm:leading-tight max-w-4xl w-full text-center line-clamp-2 sm:line-clamp-3"
-                    tooltipSide="bottom"
-                  />
-                  
-                  {/* Company + Location — mobil */}
-                  <div className="mt-2 sm:hidden flex items-center justify-center gap-1.5 text-[13px] text-white">
-                    <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
-                    <span className="truncate font-medium">{job.profiles?.company_name || 'Okänt företag'}</span>
-                    {job.location && (
-                      <>
-                        <span className="text-white/30">·</span>
-                        <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-white" />
-                        <span className="truncate">{job.location}</span>
-                      </>
-                    )}
-                  </div>
+            {/* Hero section */}
+            <JobViewHero
+              title={job.title}
+              imageUrl={imageUrl}
+              companyName={job.profiles?.company_name || 'Okänt företag'}
+              location={job.location}
+              employmentType={job.employment_type}
+              positionsCount={job.positions_count}
+            />
 
-                  {/* Badges — mobil */}
-                  <div className="mt-1.5 sm:hidden flex items-center justify-center gap-1.5 flex-wrap">
-                    {job.employment_type && (
-                      <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
-                        {getEmploymentTypeLabel(job.employment_type)}
-                      </Badge>
-                    )}
-                    <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
-                      <Users className="h-3 w-3 mr-0.5 flex-shrink-0" />
-                      <span className="leading-none">{(job.positions_count || 1) === 1 ? '1 ledig tjänst' : `${job.positions_count} lediga tjänster`}</span>
-                    </Badge>
-                  </div>
-
-                  {/* Metadata — desktop/tablet */}
-                  <div className="mt-4 hidden sm:flex flex-wrap items-center justify-center gap-2 text-sm md:text-base text-white">
-                    {job.employment_type && (
-                      <span className="text-white">{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
-                    )}
-                    {job.employment_type && job.location && (
-                      <span className="text-white/60">·</span>
-                    )}
-                    {job.location && (
-                      <span className="text-white">{job.location.toUpperCase()}</span>
-                    )}
-                    <span className="text-white/60">·</span>
-                    <span className="text-white">{(job.positions_count || 1) === 1 ? '1 ledig tjänst' : `${job.positions_count} lediga tjänster`}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Om det inte finns bild, visa titel i vanligt kort */}
-            {!imageUrl && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
-                <TruncatedText
-                  text={job.title}
-                  className="text-white text-xl md:text-2xl font-bold leading-tight line-clamp-3"
-                  tooltipSide="bottom"
-                />
-                <div className="flex flex-wrap items-center gap-2 mt-3 text-sm text-white">
-                  {job.employment_type && (
-                    <span>{getEmploymentTypeLabel(job.employment_type).toUpperCase()}</span>
-                  )}
-                  {job.location && (
-                    <>
-                      <span className="text-white/60">·</span>
-                      <span>{job.location.toUpperCase()}</span>
-                    </>
-                  )}
-                  <span className="text-white/60">·</span>
-                  <span>{(job.positions_count || 1) === 1 ? '1 ledig tjänst' : `${job.positions_count} lediga tjänster`}</span>
-                </div>
-              </div>
-            )}
-
-            {/* ━━━ PREMIUM SECTION ORDER ━━━ */}
-
-            {/* 1. Om tjänsten (Description) */}
-
-            {/* 2. Om tjänsten (Description) */}
+            {/* Description */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
               <h2 className="text-section-title mb-3">Om tjänsten</h2>
               <p className="text-body whitespace-pre-wrap break-words overflow-hidden">
@@ -534,175 +410,38 @@ const JobView = () => {
               </p>
             </div>
 
+            {/* Details */}
+            <JobViewDetails
+              employmentType={job.employment_type}
+              workSchedule={job.work_schedule}
+              location={job.location}
+              workplaceName={job.workplace_name}
+              workplaceAddress={job.workplace_address}
+              workplacePostalCode={job.workplace_postal_code}
+              workplaceCity={job.workplace_city}
+              workplaceMunicipality={job.workplace_municipality}
+              workplaceCounty={job.workplace_county}
+              workLocationType={job.work_location_type}
+              remoteWorkPossible={job.remote_work_possible}
+              workStartTime={job.work_start_time}
+              workEndTime={job.work_end_time}
+              positionsCount={job.positions_count}
+              occupation={job.occupation}
+              salaryMin={job.salary_min}
+              salaryMax={job.salary_max}
+              salaryType={job.salary_type}
+              salaryTransparency={job.salary_transparency}
+              contactEmail={job.contact_email}
+              jobTitle={job.title}
+            />
 
-            {/* 4. Detaljer om tjänsten — kompakt faktaruta */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
-              <h2 className="text-section-title mb-3">
-                Detaljer om tjänsten
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
-                {/* Anställningsform */}
-                {job.employment_type && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Anställning:</span>
-                    <span className="font-medium">{getEmploymentTypeLabel(job.employment_type)}</span>
-                  </div>
-                )}
+            {/* Benefits */}
+            <JobViewBenefits benefits={job.benefits || []} />
 
-                {/* Arbetsschema */}
-                {job.work_schedule && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Schema:</span>
-                    <span className="font-medium">{cap(job.work_schedule)}</span>
-                  </div>
-                )}
-
-                {/* Plats */}
-                {job.location && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Ort:</span>
-                    <span className="font-medium">{cap(job.location)}</span>
-                  </div>
-                )}
-
-                {/* Bolagsnamn */}
-                {job.workplace_name && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Bolagsnamn:</span>
-                    <span className="font-medium">{cap(job.workplace_name)}</span>
-                  </div>
-                )}
-
-                {/* Arbetsplatsadress */}
-                {job.workplace_address && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Adress:</span>
-                    <span className="font-medium">
-                      {job.workplace_address}
-                      {job.workplace_postal_code && `, ${job.workplace_postal_code}`}
-                      {job.workplace_city && ` ${job.workplace_city}`}
-                      {job.workplace_municipality && job.workplace_municipality !== job.workplace_city && ` (${job.workplace_municipality})`}
-                    </span>
-                  </div>
-                )}
-
-                {/* Arbetsort (om skild från location) */}
-                {job.workplace_city && job.workplace_city !== job.location && !job.workplace_address && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Stad:</span>
-                    <span className="font-medium">
-                      {job.workplace_city}
-                      {job.workplace_municipality && job.workplace_municipality !== job.workplace_city ? `, ${job.workplace_municipality}` : ''}
-                      {job.workplace_county ? `, ${job.workplace_county}` : ''}
-                    </span>
-                  </div>
-                )}
-
-                {/* Kommun */}
-                {job.workplace_municipality && !job.workplace_address && (!job.workplace_city || job.workplace_city === job.location) && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Kommun:</span>
-                    <span className="font-medium">{job.workplace_municipality}</span>
-                  </div>
-                )}
-
-                {/* Platstyp */}
-                {job.work_location_type && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Platstyp:</span>
-                    <span className="font-medium">{getWorkLocationLabel(job.work_location_type)}</span>
-                  </div>
-                )}
-
-                {/* Distansarbete */}
-                {job.remote_work_possible && job.remote_work_possible !== 'no' && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Distans:</span>
-                    <span className="font-medium">{getRemoteWorkLabel(job.remote_work_possible)}</span>
-                  </div>
-                )}
-
-                {/* Arbetstider */}
-                {(job.work_start_time || job.work_end_time) && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Arbetstid:</span>
-                    <span className="font-medium">{job.work_start_time} – {job.work_end_time}</span>
-                  </div>
-                )}
-
-                {/* Antal tjänster */}
-                <div className="flex text-white text-sm">
-                  <span className="shrink-0 w-[110px]">Antal tjänster:</span>
-                  <span className="font-medium">{(job.positions_count || 1)} st</span>
-                </div>
-
-                {/* Yrkeskategori */}
-                {job.occupation && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Yrke:</span>
-                    <span className="font-medium">{cap(job.occupation)}</span>
-                  </div>
-                )}
-
-                {/* Lön */}
-                {formatSalary(job.salary_min, job.salary_max, job.salary_type) && (
-                  <div className="flex text-white text-sm sm:col-span-2 pt-1">
-                    <span className="shrink-0 w-[110px]">Lön:</span>
-                    <span className="font-semibold">
-                      {formatSalary(job.salary_min, job.salary_max, job.salary_type)}
-                      {job.salary_type && (
-                        <span className="text-white/70 ml-1.5 text-xs">({getSalaryTypeLabel(job.salary_type)})</span>
-                      )}
-                    </span>
-                  </div>
-                )}
-
-                {/* Lönetransparens fallback */}
-                {!formatSalary(job.salary_min, job.salary_max, job.salary_type) && job.salary_transparency && (
-                  <div className="flex text-white text-sm">
-                    <span className="shrink-0 w-[110px]">Lön:</span>
-                    <span className="font-medium">{getSalaryTransparencyLabel(job.salary_transparency)}</span>
-                  </div>
-                )}
-
-                {/* Kontakt */}
-                {job.contact_email && (
-                  <div className="flex text-white text-sm sm:col-span-2 pt-1">
-                    <span className="shrink-0 w-[110px]">Kontakt:</span>
-                    <a 
-                      href={`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`}
-                      className="font-medium underline underline-offset-2 hover:text-white/80 transition-colors"
-                    >
-                      {job.contact_email}
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 5. Förmåner */}
-            {job.benefits && job.benefits.length > 0 && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
-                <h2 className="text-section-title mb-3">
-                  Förmåner
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {job.benefits.map((benefit, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
-                      {getBenefitLabel(benefit)}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-
-            {/* 6. Ansökningsfrågor */}
+            {/* Application questions */}
             {jobQuestions.length > 0 && !isJobExpired && (
               <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06]">
-                <h2 className="text-section-title mb-3">
-                  Ansökningsfrågor
-                </h2>
+                <h2 className="text-section-title mb-3">Ansökningsfrågor</h2>
                 <ApplicationQuestionsWizard
                   questions={jobQuestions as (JobQuestion & { id: string })[]}
                   answers={answers}
@@ -717,7 +456,7 @@ const JobView = () => {
               </div>
             )}
 
-            {/* No questions - show direct submit */}
+            {/* No questions - direct submit */}
             {jobQuestions.length === 0 && !isJobExpired && (
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-4">
                 <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
@@ -764,32 +503,8 @@ const JobView = () => {
               </div>
             )}
 
-            {/* Publicerad & countdown — diskret, kompakt */}
-            <div className="flex items-center justify-center gap-3 py-2 text-xs">
-              <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
-                Publicerad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </Badge>
-              {(() => {
-                const { text, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
-                if (isExpired) {
-                  return (
-                    <Badge variant="glass" className="text-[11px] px-2 py-0.5 bg-red-500/20 text-white border-red-500/30 leading-none">
-                      Utgången
-                    </Badge>
-                  );
-                }
-                return (
-                  <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
-                    <Timer className="h-3 w-3 mr-1" />
-                    {text} kvar
-                  </Badge>
-                );
-              })()}
-            </div>
+            {/* Footer: published date & countdown */}
+            <JobViewFooter createdAt={job.created_at} expiresAt={job.expires_at} />
           </div>
         </div>
       </div>
