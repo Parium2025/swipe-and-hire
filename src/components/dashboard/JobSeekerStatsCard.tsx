@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import { Send, Calendar, Heart, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,7 +30,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const [currentIndex, setCurrentIndex] = useState(0);
   const queryClient = useQueryClient();
   
-  const { data: applicationsCount = 0, isLoading: applicationsLoading } = useQuery({
+  const { data: applicationsCount = 0 } = useQuery({
     queryKey: ['my-applications-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -42,10 +42,10 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       return count ?? 0;
     },
     enabled: !!user?.id,
-    staleTime: 5000,
+    staleTime: Infinity,
   });
   
-  const { data: interviewsCount = 0, isLoading: interviewsLoading } = useQuery<number>({
+  const { data: interviewsCount = 0 } = useQuery<number>({
     queryKey: ['my-interviews-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -59,10 +59,10 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       return count || 0;
     },
     enabled: !!user?.id,
-    staleTime: 5000,
+    staleTime: Infinity,
   });
   
-  const { data: savedJobsCount = 0, isLoading: savedLoading } = useQuery<number>({
+  const { data: savedJobsCount = 0 } = useQuery<number>({
     queryKey: ['saved-jobs-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -74,10 +74,10 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       return count || 0;
     },
     enabled: !!user?.id,
-    staleTime: 5000,
+    staleTime: Infinity,
   });
 
-  const { data: unreadMessagesCount = 0, isLoading: messagesLoading } = useQuery<number>({
+  const { data: unreadMessagesCount = 0 } = useQuery<number>({
     queryKey: ['unread-messages-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -90,7 +90,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       return count || 0;
     },
     enabled: !!user?.id,
-    staleTime: 5000,
+    staleTime: Infinity,
   });
 
   // Real-time subscriptions
@@ -129,7 +129,6 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     };
   }, [user?.id, queryClient]);
 
-  const isLoading = applicationsLoading || interviewsLoading || savedLoading || messagesLoading;
   const navigate = useNavigate();
 
   const statsArray: StatData[] = useMemo(() => [
@@ -170,18 +169,6 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       if (interval) clearInterval(interval);
     };
   }, [isPaused, statsArray.length]);
-
-  if (isLoading) {
-    return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height`}>
-        <div className="absolute inset-0 bg-white/5" />
-        <CardContent className="relative p-6 h-full">
-          <Skeleton className="h-10 w-10 rounded-xl bg-white/20 mb-4" />
-          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
-        </CardContent>
-      </Card>
-    );
-  }
 
   const currentStat = statsArray[currentIndex];
   const Icon = currentStat.icon;
