@@ -286,15 +286,20 @@ const JobSwipe = () => {
 
       if (error) throw error;
 
-      // Send confirmation email in background
-      supabase.functions.invoke('send-application-confirmation', {
-        body: {
-          applicant_email: email || user?.email || profile?.email || '',
-          applicant_first_name: first_name || profile?.first_name || 'Jobbsökare',
-          job_title: currentJob.title,
-          company_name: currentJob.profiles?.company_name || 'Företaget',
-        },
-      }).catch((e) => console.warn('Confirmation email failed:', e));
+      // Send confirmation email in background with detailed logging
+      const emailPayload = {
+        applicant_email: email || user?.email || profile?.email || '',
+        applicant_first_name: first_name || profile?.first_name || 'Jobbsökare',
+        job_title: currentJob.title,
+        company_name: currentJob.profiles?.company_name || 'Företaget',
+      };
+      console.log('📧 Sending application confirmation email:', { to: emailPayload.applicant_email, job: emailPayload.job_title });
+      supabase.functions.invoke('send-application-confirmation', { body: emailPayload })
+        .then(({ data, error }) => {
+          if (error) console.error('❌ Confirmation email failed:', error);
+          else console.log('✅ Confirmation email sent:', data);
+        })
+        .catch((e) => console.error('❌ Confirmation email network error:', e));
 
       // Queue CV for analysis (rate-limit safe, handles millions of users)
       if (profile?.cv_url) {

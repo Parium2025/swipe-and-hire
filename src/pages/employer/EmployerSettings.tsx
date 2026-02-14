@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
 import { Capacitor } from '@capacitor/core';
-import { MapPin, Smartphone, WifiOff, Bug, Bell } from 'lucide-react';
+import { MapPin, Smartphone, WifiOff, Bug, Bell, Mail } from 'lucide-react';
 import { MessageTemplatesSettings } from '@/components/MessageTemplatesSettings';
 import { useForceOffline } from '@/hooks/useOnlineStatus';
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
@@ -155,41 +155,42 @@ const EmployerSettings = () => {
             <h3 className="text-sm font-medium text-white">Aviseringar</h3>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-sm text-white">Nya ansökningar</Label>
-              <p className="text-sm text-white/70">När någon söker dina jobb</p>
+          {/* Column headers */}
+          <div className="flex items-center justify-end gap-6 pr-1 pb-1 border-b border-white/10">
+            <div className="flex items-center gap-1 text-xs text-white/50">
+              <Smartphone className="h-3 w-3" />
+              <span>Push</span>
             </div>
-            <Switch
-              checked={isEnabled('new_application')}
-              onCheckedChange={(checked) => toggle('new_application', checked)}
-              disabled={prefsLoading}
-            />
+            <div className="flex items-center gap-1 text-xs text-white/50">
+              <Mail className="h-3 w-3" />
+              <span>Mejl</span>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-sm text-white">Meddelanden</Label>
-              <p className="text-sm text-white/70">När du får nya meddelanden</p>
+          {[
+            { type: 'new_application' as const, label: 'Nya ansökningar', desc: 'När någon söker dina jobb' },
+            { type: 'new_message' as const, label: 'Meddelanden', desc: 'När du får nya meddelanden' },
+            { type: 'interview_scheduled' as const, label: 'Intervjupåminnelser', desc: 'Påminnelser om bokade intervjuer' },
+          ].map(({ type, label, desc }) => (
+            <div key={type} className="flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <Label className="text-sm text-white">{label}</Label>
+                <p className="text-sm text-white/70">{desc}</p>
+              </div>
+              <div className="flex items-center gap-6 ml-3">
+                <Switch
+                  checked={isEnabled(type, 'push')}
+                  onCheckedChange={(checked) => toggle(type, checked, 'push')}
+                  disabled={prefsLoading}
+                />
+                <Switch
+                  checked={isEnabled(type, 'email')}
+                  onCheckedChange={(checked) => toggle(type, checked, 'email')}
+                  disabled={prefsLoading}
+                />
+              </div>
             </div>
-            <Switch
-              checked={isEnabled('new_message')}
-              onCheckedChange={(checked) => toggle('new_message', checked)}
-              disabled={prefsLoading}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-sm text-white">Intervjupåminnelser</Label>
-              <p className="text-sm text-white/70">Påminnelser om bokade intervjuer</p>
-            </div>
-            <Switch
-              checked={isEnabled('interview_scheduled')}
-              onCheckedChange={(checked) => toggle('interview_scheduled', checked)}
-              disabled={prefsLoading}
-            />
-          </div>
+          ))}
         </div>
       </div>
 

@@ -10,9 +10,12 @@ export type NotificationType =
   | 'job_closed'
   | 'saved_job_expiring';
 
+export type NotificationChannel = 'push' | 'email';
+
 interface NotificationPreference {
   notification_type: NotificationType;
   is_enabled: boolean;
+  email_enabled: boolean;
 }
 
 export const useNotificationPreferences = () => {
@@ -25,7 +28,7 @@ export const useNotificationPreferences = () => {
       if (!user?.id) return [];
       const { data, error } = await supabase
         .from('notification_preferences')
-        .select('notification_type, is_enabled')
+        .select('notification_type, is_enabled, email_enabled')
         .eq('user_id', user.id);
       if (error) throw error;
       return data as NotificationPreference[];
@@ -34,24 +37,47 @@ export const useNotificationPreferences = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  const isEnabled = (type: NotificationType): boolean => {
+  const isEnabled = (type: NotificationType, channel: NotificationChannel = 'push'): boolean => {
     const pref = preferences.find(p => p.notification_type === type);
-    return pref?.is_enabled ?? true; // default enabled
+    if (!pref) return true; // default enabled
+    return channel === 'email' ? pref.email_enabled : pref.is_enabled;
   };
 
   const toggleMutation = useMutation({
-    mutationFn: async ({ type, enabled }: { type: NotificationType; enabled: boolean }) => {
+    mutationFn: async ({ type, enabled, channel }: { type: NotificationType; enabled: boolean; channel: NotificationChannel }) => {
       if (!user?.id) throw new Error('Not authenticated');
       
-      const { error } = await supabase
+      const updateField = channel === 'email' ? 'email_enabled' : 'is_enabled';
+      
+      // First check if row exists
+      const { data: existing } = await supabase
         .from('notification_preferences')
-        .upsert(
-          { user_id: user.id, notification_type: type, is_enabled: enabled, updated_at: new Date().toISOString() },
-          { onConflict: 'user_id,notification_type' }
-        );
-      if (error) throw error;
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('notification_type', type)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from('notification_preferences')
+          .update({ [updateField]: enabled, updated_at: new Date().toISOString() })
+          .eq('user_id', user.id)
+          .eq('notification_type', type);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('notification_preferences')
+          .insert({
+            user_id: user.id,
+            notification_type: type,
+            is_enabled: channel === 'push' ? enabled : true,
+            email_enabled: channel === 'email' ? enabled : true,
+            updated_at: new Date().toISOString(),
+          });
+        if (error) throw error;
+      }
     },
-    onMutate: async ({ type, enabled }) => {
+    onMutate: async ({ type, enabled, channel }) => {
       await queryClient.cancelQueries({ queryKey: ['notification-preferences', user?.id] });
       const previous = queryClient.getQueryData<NotificationPreference[]>(['notification-preferences', user?.id]);
       
@@ -60,9 +86,16 @@ export const useNotificationPreferences = () => {
         (old = []) => {
           const exists = old.find(p => p.notification_type === type);
           if (exists) {
-            return old.map(p => p.notification_type === type ? { ...p, is_enabled: enabled } : p);
+            return old.map(p => p.notification_type === type 
+              ? { ...p, [channel === 'email' ? 'email_enabled' : 'is_enabled']: enabled } 
+              : p
+            );
           }
-          return [...old, { notification_type: type, is_enabled: enabled }];
+          return [...old, { 
+            notification_type: type, 
+            is_enabled: channel === 'push' ? enabled : true,
+            email_enabled: channel === 'email' ? enabled : true,
+          }];
         }
       );
       return { previous };
@@ -76,7 +109,8 @@ export const useNotificationPreferences = () => {
 
   return {
     isEnabled,
-    toggle: (type: NotificationType, enabled: boolean) => toggleMutation.mutate({ type, enabled }),
+    toggle: (type: NotificationType, enabled: boolean, channel: NotificationChannel = 'push') => 
+      toggleMutation.mutate({ type, enabled, channel }),
     isLoading,
   };
 };

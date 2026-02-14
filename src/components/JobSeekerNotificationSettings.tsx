@@ -1,4 +1,4 @@
-import { Bell } from 'lucide-react';
+import { Bell, Mail, Smartphone } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useNotificationPreferences, NotificationType } from '@/hooks/useNotificationPreferences';
@@ -22,17 +22,36 @@ export const JobSeekerNotificationSettings = () => {
           <h3 className="text-sm font-medium text-white">Aviseringar</h3>
         </div>
 
+        {/* Column headers */}
+        <div className="flex items-center justify-end gap-6 pr-1 pb-1 border-b border-white/10">
+          <div className="flex items-center gap-1 text-xs text-white/50">
+            <Smartphone className="h-3 w-3" />
+            <span>Push</span>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-white/50">
+            <Mail className="h-3 w-3" />
+            <span>Mejl</span>
+          </div>
+        </div>
+
         {JOBSEEKER_NOTIFICATION_TYPES.map(({ type, label, description }) => (
           <div key={type} className="flex items-center justify-between">
-            <div>
+            <div className="flex-1 min-w-0">
               <Label className="text-sm text-white">{label}</Label>
               <p className="text-sm text-white/70">{description}</p>
             </div>
-            <Switch
-              checked={isEnabled(type)}
-              onCheckedChange={(checked) => toggle(type, checked)}
-              disabled={isLoading}
-            />
+            <div className="flex items-center gap-6 ml-3">
+              <Switch
+                checked={isEnabled(type, 'push')}
+                onCheckedChange={(checked) => toggle(type, checked, 'push')}
+                disabled={isLoading}
+              />
+              <Switch
+                checked={isEnabled(type, 'email')}
+                onCheckedChange={(checked) => toggle(type, checked, 'email')}
+                disabled={isLoading}
+              />
+            </div>
           </div>
         ))}
       </div>
