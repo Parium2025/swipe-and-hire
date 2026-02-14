@@ -427,11 +427,11 @@ const SearchJobs = () => {
           <div className="flex items-center gap-5 text-sm text-white md:hidden">
             <div className="flex flex-col items-center">
               <span className="flex items-center gap-1 font-semibold"><Briefcase className="h-4 w-4" />{activeJobCount}</span>
-              <span className="text-[11px] text-white/80 leading-tight">Aktiva jobb</span>
+              <span className="text-[11px] text-white leading-tight">Aktiva jobb</span>
             </div>
             <div className="flex flex-col items-center">
               <span className="flex items-center gap-1 font-semibold"><Building className="h-4 w-4" />{uniqueCompanyCount}</span>
-              <span className="text-[11px] text-white/80 leading-tight">Antal företag</span>
+              <span className="text-[11px] text-white leading-tight">Antal företag</span>
             </div>
           </div>
         </div>
