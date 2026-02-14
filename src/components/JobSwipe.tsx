@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -98,6 +99,7 @@ const JobSwipe = () => {
   const [currentJobQuestions, setCurrentJobQuestions] = useState<any[]>([]);
   const [currentJobImageUrl, setCurrentJobImageUrl] = useState<string | null>(null);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -308,6 +310,11 @@ const JobSwipe = () => {
           }
         });
       }
+
+      // Invalidate queries so My Applications and search badges update
+      queryClient.invalidateQueries({ queryKey: ['my-applications', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user?.id] });
 
       toast({
         title: "Ansökan skickad!",

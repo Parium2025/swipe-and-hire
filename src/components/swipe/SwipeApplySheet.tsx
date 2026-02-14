@@ -4,6 +4,7 @@ import { X, CheckCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
 import type { JobQuestion } from '@/types/jobWizard';
 
@@ -18,6 +19,7 @@ interface SwipeApplySheetProps {
 
 export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -153,6 +155,12 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
       }
 
       setSubmitted(true);
+      
+      // Invalidate queries so My Applications and search badges update
+      queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
+      
       toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats` });
 
       setTimeout(() => {
