@@ -135,6 +135,16 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
 
       if (error) throw error;
 
+      // Send confirmation email in background
+      supabase.functions.invoke('send-application-confirmation', {
+        body: {
+          applicant_email: user.email || profile?.email || '',
+          applicant_first_name: profile?.first_name || 'Jobbsökare',
+          job_title: jobTitle,
+          company_name: companyName,
+        },
+      }).catch((e) => console.warn('Confirmation email failed:', e));
+
       // Trigger CV summary in background
       if (profile?.cv_url) {
         supabase.functions.invoke('generate-cv-summary', {

@@ -33,8 +33,10 @@ import {
   Plus,
   CheckSquare,
   Square,
-  Trash2
+  Trash2,
+  QrCode
 } from 'lucide-react';
+import JobQrCodeButton from '@/components/JobQrCode';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
@@ -1001,6 +1003,9 @@ const JobDetails = () => {
                   {isSelectionMode ? 'Avbryt' : 'Välj'}
                 </Button>
               )}
+              
+              {/* QR Code button */}
+              <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
             </div>
             
             {/* Recruiter */}
