@@ -268,7 +268,7 @@ const SavedJobs = () => {
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
             >
-            <ArrowDownUp className="h-4 w-4 text-white/60 shrink-0" />
+            <ArrowDownUp className="h-4 w-4 text-white shrink-0" />
             {([
               { key: 'newest', label: 'Nyast först' },
               { key: 'oldest', label: 'Äldst först' },
