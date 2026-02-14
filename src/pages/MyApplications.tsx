@@ -104,7 +104,7 @@ const getStatusIcon = (status: string, isExpiredOrDeleted: boolean) => {
 
 const getStatusBadgeClasses = (status: string, isExpiredOrDeleted: boolean) => {
   if (isExpiredOrDeleted) {
-    return 'bg-white/10 backdrop-blur-sm text-white border-white/20';
+    return 'bg-red-500/20 text-red-300 border-red-500/30';
   }
   switch (status) {
     case 'pending':
