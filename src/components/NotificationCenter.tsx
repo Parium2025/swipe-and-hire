@@ -2,6 +2,7 @@ import { memo, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle } from 'lucide-react';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
@@ -33,38 +34,46 @@ function NotificationItem({
   onNavigate: (route: string) => void;
 }) {
   const Icon = typeIcons[notification.type] || Bell;
-  const colorClass = typeColors[notification.type] || 'text-white/60';
+  const colorClass = typeColors[notification.type] || 'text-white';
   const route = notification.metadata?.route as string | undefined;
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: sv });
 
   return (
-    <button
-      onClick={() => {
-        if (!notification.is_read) onRead(notification.id);
-        if (route) onNavigate(route);
-      }}
-      className={`w-full flex items-start gap-3 px-3 py-2.5 text-left transition-colors rounded-lg ${
-        notification.is_read 
-          ? 'opacity-60 hover:bg-white/5' 
-          : 'hover:bg-white/10 bg-white/5'
-      }`}
-    >
-      <div className={`mt-0.5 shrink-0 ${colorClass}`}>
-        <Icon className="h-4 w-4" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-white truncate">{notification.title}</span>
-          {!notification.is_read && (
-            <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
-          )}
-        </div>
-        {notification.body && (
-          <p className="text-xs text-white mt-0.5 line-clamp-2">{notification.body}</p>
-        )}
-        <span className="text-[10px] text-white mt-1 block">{timeAgo}</span>
-      </div>
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={() => {
+            if (!notification.is_read) onRead(notification.id);
+            if (route) onNavigate(route);
+          }}
+          className={`w-full flex items-start gap-3 px-3 py-2.5 text-left transition-colors rounded-lg ${
+            notification.is_read 
+              ? 'opacity-60 hover:bg-white/5' 
+              : 'hover:bg-white/10 bg-white/5'
+          }`}
+        >
+          <div className={`mt-0.5 shrink-0 ${colorClass}`}>
+            <Icon className="h-4 w-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-white truncate">{notification.title}</span>
+              {!notification.is_read && (
+                <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
+              )}
+            </div>
+            {notification.body && (
+              <p className="text-xs text-white mt-0.5 line-clamp-2">{notification.body}</p>
+            )}
+            <span className="text-[10px] text-white mt-1 block">{timeAgo}</span>
+          </div>
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="left" className="max-w-[240px] text-xs">
+        <p className="font-medium">{notification.title}</p>
+        {notification.body && <p className="mt-1 opacity-80">{notification.body}</p>}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -126,22 +135,34 @@ function NotificationCenter() {
             <h3 className="text-sm font-semibold text-white">Notifikationer</h3>
             <div className="flex items-center gap-1">
               {unreadCount > 0 && (
-                <button
-                  onClick={() => markAllAsRead()}
-                  className="text-xs text-white hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"
-                  title="Markera alla som lästa"
-                >
-                  <CheckCheck className="h-3.5 w-3.5 text-white" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => markAllAsRead()}
+                      className="flex items-center justify-center h-7 w-7 rounded-full text-white hover:bg-white/10 transition-colors"
+                    >
+                      <CheckCheck className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    Markera alla som lästa
+                  </TooltipContent>
+                </Tooltip>
               )}
               {notifications.length > 0 && (
-                <button
-                  onClick={() => clearAll()}
-                  className="text-xs text-white hover:text-red-400 transition-colors px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"
-                  title="Rensa alla"
-                >
-                  <Trash2 className="h-3.5 w-3.5 text-white" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => clearAll()}
+                      className="flex items-center justify-center h-7 w-7 rounded-full text-white hover:text-red-400 hover:bg-white/10 transition-colors"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    Rensa alla
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>
