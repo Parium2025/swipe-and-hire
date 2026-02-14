@@ -84,7 +84,7 @@ const SearchJobs = () => {
   // toast and blurHandlers removed — no longer needed after filter extraction
   const queryClient = useQueryClient();
   const { preloadedTotalJobs, preloadedUniqueCompanies, preloadedNewThisWeek, user } = useAuth();
-  const { isJobSaved, toggleSaveJob } = useSavedJobs();
+  const { isJobSaved, toggleSaveJob, unsaveJob } = useSavedJobs();
   const { seedJobsFromSearch } = useJobPrefetchCache();
   
   const { savedSearches, saveSearch, deleteSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
@@ -100,9 +100,9 @@ const SearchJobs = () => {
 
   const confirmUnsave = useCallback(() => {
     if (!jobToUnsave) return;
-    toggleSaveJob(jobToUnsave.id);
+    unsaveJob(jobToUnsave.id);
     setJobToUnsave(null);
-  }, [jobToUnsave, toggleSaveJob]);
+  }, [jobToUnsave, unsaveJob]);
 
   // Handler to apply a saved search - sets all the filter states
   // 🔥 PREMIUM: Sätter BÅDE searchInput OCH debouncedSearch direkt för omedelbar respons
