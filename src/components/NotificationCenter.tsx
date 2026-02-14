@@ -100,7 +100,9 @@ function NotificationCenter() {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-[300px] max-h-[480px] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl z-[10000] rounded-xl p-0 overflow-hidden"
+        sideOffset={8}
+        className="max-h-[480px] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl z-[10000] rounded-xl p-0 overflow-hidden"
+        style={{ width: 'calc(100vw - 24px)', maxWidth: '400px' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
