@@ -1,12 +1,24 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, Loader2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
+import { Heart, Loader2, Trash2, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { useSavedJobs } from '@/hooks/useSavedJobs';
 
 interface SavedJob {
   id: string;
@@ -70,9 +82,11 @@ const fetchSavedJobs = async (userId: string): Promise<SavedJob[]> => {
 };
 
 const SavedJobs = () => {
-  const { user } = useAuth();
+  const { user, refreshSidebarCounts } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { toggleSaveJob } = useSavedJobs();
+  const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
   const { data: savedJobs = [], isLoading, isFetched } = useQuery({
     queryKey: ['saved-jobs', user?.id],
@@ -127,6 +141,19 @@ const SavedJobs = () => {
 
     return () => { supabase.removeChannel(channel); };
   }, [queryClient, user?.id]);
+
+  const handleUnsaveClick = (jobId: string, jobTitle: string) => {
+    setJobToRemove({ id: jobId, title: jobTitle });
+  };
+
+  const confirmRemove = () => {
+    if (!jobToRemove) return;
+    toggleSaveJob(jobToRemove.id);
+    setJobToRemove(null);
+    // Refetch to update the list
+    queryClient.invalidateQueries({ queryKey: ['saved-jobs', user?.id] });
+    refreshSidebarCounts();
+  };
 
   const showLoading = isLoading && !isFetched && savedJobs.length === 0;
 
@@ -195,11 +222,55 @@ const SavedJobs = () => {
                   positions_count: job.positions_count || undefined,
                 }}
                 hasApplied={appliedJobIds.has(job.id)}
+                onUnsaveClick={handleUnsaveClick}
               />
             );
           })}
         </div>
       )}
+
+      {/* Bekräftelsedialog för borttagning */}
+      <AlertDialog open={!!jobToRemove} onOpenChange={() => setJobToRemove(null)}>
+        <AlertDialogContentNoFocus 
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+        >
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort sparat jobb
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-white text-sm leading-relaxed">
+              {jobToRemove && (
+                <>
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">"{jobToRemove.title}"</span>? Denna åtgärd går inte att ångra.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+            <AlertDialogCancel 
+              onClick={() => setJobToRemove(null)}
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemove}
+              variant="destructiveSoft"
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-1 text-sm flex items-center justify-center rounded-full"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
     </div>
   );
 };

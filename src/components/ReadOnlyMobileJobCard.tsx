@@ -33,6 +33,8 @@ interface ReadOnlyMobileJobCardProps {
     };
   };
   hasApplied?: boolean;
+  /** If provided, heart-unsave click calls this instead of toggling directly */
+  onUnsaveClick?: (jobId: string, jobTitle: string) => void;
 }
 
 // Deterministic gradient based on job id for visual variety
@@ -68,7 +70,7 @@ function getCompanyInitials(name: string): string {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
-export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnlyMobileJobCardProps) => {
+export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
 
@@ -103,7 +105,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false }: ReadOnly
 
   const handleSaveClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleSaveJob(job.id);
+    if (isSaved && onUnsaveClick) {
+      onUnsaveClick(job.id, job.title);
+    } else {
+      toggleSaveJob(job.id);
+    }
   };
 
   return (
