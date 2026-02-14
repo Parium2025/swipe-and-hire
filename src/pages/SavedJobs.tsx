@@ -134,8 +134,9 @@ const SavedJobs = () => {
       return new Set((data || []).map(a => a.job_id));
     },
     enabled: !!user,
-    staleTime: 60000,
+    staleTime: 0,
     gcTime: Infinity,
+    structuralSharing: false,
   });
 
   // Real-time för applications_count uppdateringar

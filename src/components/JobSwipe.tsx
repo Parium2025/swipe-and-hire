@@ -12,6 +12,7 @@ import JobApplicationDialog from './JobApplicationDialog';
 import { toast } from '@/hooks/use-toast';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 import { useOnline } from '@/hooks/useOnlineStatus';
+import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 
 // Map benefit keys to Swedish labels
 const getBenefitLabel = (benefit: string): string => {
@@ -312,6 +313,9 @@ const JobSwipe = () => {
       }
 
       // Invalidate queries so My Applications and search badges update
+      // Clear localStorage cache so My Applications page shows fresh data
+      clearMyApplicationsLocalCache();
+      
       queryClient.invalidateQueries({ queryKey: ['my-applications', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
       queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user?.id] });
