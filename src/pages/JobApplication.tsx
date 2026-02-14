@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Upload, Send } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import FileUpload from '@/components/FileUpload';
+import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 
 // Draft key for localStorage
 const JOB_APPLICATION_DRAFT_PREFIX = 'parium_draft_job-application-';
@@ -321,6 +322,9 @@ const JobApplication = () => {
         clearJobApplicationDraft(jobId);
         console.log('💾 Job application draft cleared after submission');
       }
+
+      // Clear localStorage cache so My Applications page shows fresh data
+      clearMyApplicationsLocalCache();
 
       // Invalidate queries so My Applications and search badges update
       queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });

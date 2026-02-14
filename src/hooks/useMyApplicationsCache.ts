@@ -37,6 +37,11 @@ const CACHE_KEY = 'parium_my_applications_cache_v2';
 // Clear old cache key on load
 try { localStorage.removeItem('parium_my_applications_cache'); } catch { /* ignore */ }
 
+/** Clear the localStorage cache so next mount fetches fresh data */
+export function clearMyApplicationsLocalCache(): void {
+  try { localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
+}
+
 interface CachedData {
   applications: Application[];
   userId: string;

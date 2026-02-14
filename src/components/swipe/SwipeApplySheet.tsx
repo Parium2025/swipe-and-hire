@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
+import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import type { JobQuestion } from '@/types/jobWizard';
 
 interface SwipeApplySheetProps {
@@ -155,6 +156,9 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
       }
 
       setSubmitted(true);
+      
+      // Clear localStorage cache so My Applications page shows fresh data
+      clearMyApplicationsLocalCache();
       
       // Invalidate queries so My Applications and search badges update
       queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });

@@ -145,8 +145,9 @@ const SearchJobs = () => {
       return new Set((data || []).map(a => a.job_id));
     },
     enabled: !!user,
-    staleTime: 60000,
+    staleTime: 0,
     gcTime: Infinity,
+    structuralSharing: false,
   });
   const [searchInput, setSearchInput] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
