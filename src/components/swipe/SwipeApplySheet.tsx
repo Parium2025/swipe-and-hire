@@ -138,15 +138,20 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
 
       if (error) throw error;
 
-      // Send confirmation email in background
-      supabase.functions.invoke('send-application-confirmation', {
-        body: {
-          applicant_email: user.email || profile?.email || '',
-          applicant_first_name: profile?.first_name || 'Jobbsökare',
-          job_title: jobTitle,
-          company_name: companyName,
-        },
-      }).catch((e) => console.warn('Confirmation email failed:', e));
+      // Send confirmation email in background with detailed logging
+      const emailPayload = {
+        applicant_email: user.email || profile?.email || '',
+        applicant_first_name: profile?.first_name || 'Jobbsökare',
+        job_title: jobTitle,
+        company_name: companyName,
+      };
+      console.log('📧 Sending application confirmation email:', { to: emailPayload.applicant_email, job: emailPayload.job_title });
+      supabase.functions.invoke('send-application-confirmation', { body: emailPayload })
+        .then(({ data, error }) => {
+          if (error) console.error('❌ Confirmation email failed:', error);
+          else console.log('✅ Confirmation email sent:', data);
+        })
+        .catch((e) => console.error('❌ Confirmation email network error:', e));
 
       // Trigger CV summary in background
       if (profile?.cv_url) {

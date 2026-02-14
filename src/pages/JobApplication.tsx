@@ -307,15 +307,20 @@ const JobApplication = () => {
 
       if (error) throw error;
 
-      // Send confirmation email in background
-      supabase.functions.invoke('send-application-confirmation', {
-        body: {
-          applicant_email: formData.email,
-          applicant_first_name: formData.firstName,
-          job_title: job.title,
-          company_name: job.profiles?.company_name || 'Företaget',
-        },
-      }).catch((e) => console.warn('Confirmation email failed:', e));
+      // Send confirmation email in background with detailed logging
+      const emailPayload = {
+        applicant_email: formData.email,
+        applicant_first_name: formData.firstName,
+        job_title: job.title,
+        company_name: job.profiles?.company_name || 'Företaget',
+      };
+      console.log('📧 Sending application confirmation email:', { to: emailPayload.applicant_email, job: emailPayload.job_title });
+      supabase.functions.invoke('send-application-confirmation', { body: emailPayload })
+        .then(({ data, error }) => {
+          if (error) console.error('❌ Confirmation email failed:', error);
+          else console.log('✅ Confirmation email sent:', data);
+        })
+        .catch((e) => console.error('❌ Confirmation email network error:', e));
 
       // Clear draft on successful submission
       if (jobId) {
