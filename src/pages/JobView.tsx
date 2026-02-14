@@ -306,6 +306,23 @@ const JobView = () => {
 
       if (error) throw error;
 
+      // Send confirmation email
+      const applicantEmail = user?.email || profile?.email;
+      if (applicantEmail) {
+        const emailPayload = {
+          applicant_email: applicantEmail,
+          applicant_first_name: profile?.first_name || 'Sökande',
+          job_title: job?.title || 'Tjänst',
+          company_name: job?.profiles?.company_name || 'Företag',
+        };
+        console.log('📧 Sending application confirmation email:', { to: emailPayload.applicant_email, job: emailPayload.job_title });
+        supabase.functions.invoke('send-application-confirmation', { body: emailPayload })
+          .then(({ data, error }) => {
+            if (error) console.error('❌ Confirmation email failed:', error);
+            else console.log('✅ Confirmation email sent:', data);
+          });
+      }
+
       if (profile?.cv_url) {
         supabase.functions.invoke('generate-cv-summary', {
           body: { applicant_id: user?.id, job_id: jobId },
