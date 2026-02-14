@@ -177,6 +177,11 @@ export const useSavedJobs = () => {
           .from('saved_jobs')
           .insert({ user_id: user.id, job_id: jobId });
 
+        // Ignore duplicate key - job is already saved, which is what we want
+        if (error && error.code === '23505') {
+          // Already saved, no action needed
+          return;
+        }
         if (error) throw error;
         toast.success('Jobbet har sparats till dina favoriter');
       }
@@ -198,6 +203,41 @@ export const useSavedJobs = () => {
     }
   }, [user, savedJobIds, isOnline, showOfflineToast]);
 
+  // Explicit unsave - always deletes, no toggle logic
+  const unsaveJob = useCallback(async (jobId: string) => {
+    if (!user) return;
+    if (!isOnline) { showOfflineToast(); return; }
+
+    // Optimistic update
+    setSavedJobIds(prev => {
+      const next = new Set(prev);
+      next.delete(jobId);
+      saveToCache(user.id, next);
+      return next;
+    });
+
+    try {
+      const { error } = await supabase
+        .from('saved_jobs')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('job_id', jobId);
+
+      if (error) throw error;
+      toast.success('Jobb borttaget från sparade');
+    } catch (err) {
+      // Revert
+      setSavedJobIds(prev => {
+        const next = new Set(prev);
+        next.add(jobId);
+        saveToCache(user.id, next);
+        return next;
+      });
+      console.error('Error unsaving job:', err);
+      toast.error('Kunde inte ta bort jobbet');
+    }
+  }, [user, isOnline, showOfflineToast]);
+
   const isJobSaved = useCallback((jobId: string) => {
     return savedJobIds.has(jobId);
   }, [savedJobIds]);
@@ -206,6 +246,7 @@ export const useSavedJobs = () => {
     savedJobIds,
     isJobSaved,
     toggleSaveJob,
+    unsaveJob,
     isLoading,
     savedCount: savedJobIds.size,
   };

@@ -85,7 +85,7 @@ const SavedJobs = () => {
   const { user, refreshSidebarCounts } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { toggleSaveJob } = useSavedJobs();
+  const { unsaveJob } = useSavedJobs();
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
   const { data: savedJobs = [], isLoading, isFetched } = useQuery({
@@ -148,7 +148,7 @@ const SavedJobs = () => {
 
   const confirmRemove = () => {
     if (!jobToRemove) return;
-    toggleSaveJob(jobToRemove.id);
+    unsaveJob(jobToRemove.id);
     setJobToRemove(null);
     // Refetch to update the list
     queryClient.invalidateQueries({ queryKey: ['saved-jobs', user?.id] });
