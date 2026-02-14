@@ -15,12 +15,12 @@ const typeIcons: Record<string, typeof Bell> = {
 };
 
 const typeColors: Record<string, string> = {
-  new_application: 'text-emerald-400',
-  application_status: 'text-blue-400',
-  interview_scheduled: 'text-amber-400',
-  message: 'text-purple-400',
-  job_expired: 'text-red-400',
-  saved_search_match: 'text-cyan-400',
+  new_application: 'text-white',
+  application_status: 'text-white',
+  interview_scheduled: 'text-white',
+  message: 'text-white',
+  job_expired: 'text-white',
+  saved_search_match: 'text-white',
 };
 
 function NotificationItem({ 
@@ -60,9 +60,9 @@ function NotificationItem({
           )}
         </div>
         {notification.body && (
-          <p className="text-xs text-white/60 mt-0.5 line-clamp-2">{notification.body}</p>
+          <p className="text-xs text-white mt-0.5 line-clamp-2">{notification.body}</p>
         )}
-        <span className="text-[10px] text-white/40 mt-1 block">{timeAgo}</span>
+        <span className="text-[10px] text-white mt-1 block">{timeAgo}</span>
       </div>
     </button>
   );
@@ -128,19 +128,19 @@ function NotificationCenter() {
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllAsRead()}
-                  className="text-xs text-white/50 hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"
+                  className="text-xs text-white hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"
                   title="Markera alla som lästa"
                 >
-                  <CheckCheck className="h-3.5 w-3.5" />
+                  <CheckCheck className="h-3.5 w-3.5 text-white" />
                 </button>
               )}
               {notifications.length > 0 && (
                 <button
                   onClick={() => clearAll()}
-                  className="text-xs text-white/50 hover:text-red-400 transition-colors px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"
+                  className="text-xs text-white hover:text-red-400 transition-colors px-2 py-1 rounded hover:bg-white/10 flex items-center gap-1"
                   title="Rensa alla"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-3.5 w-3.5 text-white" />
                 </button>
               )}
             </div>
