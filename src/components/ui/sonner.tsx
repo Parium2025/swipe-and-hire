@@ -44,7 +44,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       style={{ zIndex: 99999 }}
       duration={4000}
       closeButton
-      richColors
+      visibleToasts={2}
+      gap={8}
       toastOptions={{
         closeButton: true,
         classNames: {
@@ -61,7 +62,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           error:
             "group-[.toaster]:!bg-red-900/90 group-[.toaster]:!border-red-500/30",
           success:
-            "group-[.toaster]:!bg-emerald-900/90 group-[.toaster]:!border-emerald-500/30",
+            "group-[.toaster]:!bg-[hsl(200_100%_15%)] group-[.toaster]:!border-[hsl(200_100%_60%/0.35)]",
           info:
             "group-[.toaster]:!bg-slate-900/85",
         },
