@@ -164,29 +164,39 @@ const SavedJobs = () => {
   };
 
   const sortedJobs = useMemo(() => {
-    const filtered = savedJobs.filter(sj => sj.job_postings !== null);
-    return [...filtered].sort((a, b) => {
-      const jobA = a.job_postings!;
-      const jobB = b.job_postings!;
-      switch (sortBy) {
-        case 'newest':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        case 'oldest':
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-        case 'expired': {
-          const aExp = isExpired(jobA.expires_at) || !jobA.is_active ? 0 : 1;
-          const bExp = isExpired(jobB.expires_at) || !jobB.is_active ? 0 : 1;
-          return aExp - bExp; // expired first
-        }
-        case 'active': {
-          const aActive = jobA.is_active && !isExpired(jobA.expires_at) ? 0 : 1;
-          const bActive = jobB.is_active && !isExpired(jobB.expires_at) ? 0 : 1;
-          return aActive - bActive; // active first
-        }
-        default:
-          return 0;
-      }
-    });
+    const withJobs = savedJobs.filter(sj => sj.job_postings !== null);
+    
+    // Filter based on selected chip
+    let filtered: typeof withJobs;
+    switch (sortBy) {
+      case 'newest':
+        // Only active (non-expired) jobs, newest first
+        filtered = withJobs
+          .filter(sj => sj.job_postings!.is_active && !isExpired(sj.job_postings!.expires_at))
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case 'oldest':
+        // Only active (non-expired) jobs, oldest first
+        filtered = withJobs
+          .filter(sj => sj.job_postings!.is_active && !isExpired(sj.job_postings!.expires_at))
+          .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case 'active':
+        // Only active jobs
+        filtered = withJobs
+          .filter(sj => sj.job_postings!.is_active && !isExpired(sj.job_postings!.expires_at))
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case 'expired':
+        // Only expired/inactive jobs
+        filtered = withJobs
+          .filter(sj => !sj.job_postings!.is_active || isExpired(sj.job_postings!.expires_at))
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      default:
+        filtered = withJobs;
+    }
+    return filtered;
   }, [savedJobs, sortBy]);
 
   const showLoading = isLoading && !isFetched && savedJobs.length === 0;
