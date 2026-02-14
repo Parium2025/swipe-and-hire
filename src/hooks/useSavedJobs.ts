@@ -172,10 +172,10 @@ export const useSavedJobs = () => {
         if (error) throw error;
         toast.success('Jobb borttaget från sparade');
       } else {
-        // Add to saved — use upsert to handle duplicate key gracefully
+        // Add to saved
         const { error } = await supabase
           .from('saved_jobs')
-          .upsert({ user_id: user.id, job_id: jobId }, { onConflict: 'user_id,job_id' });
+          .insert({ user_id: user.id, job_id: jobId });
 
         if (error) throw error;
         toast.success('Jobbet har sparats till dina favoriter');
