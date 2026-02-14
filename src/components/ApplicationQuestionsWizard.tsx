@@ -58,7 +58,7 @@ export function ApplicationQuestionsWizard({
     if (wasOnQuestion && nowOnReview && wizardRef.current) {
       // Small delay to let the animation start, then scroll into view
       requestAnimationFrame(() => {
-        wizardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        wizardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
       });
     }
     prevStepRef.current = currentStep;
