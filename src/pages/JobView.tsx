@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { getTimeRemaining } from '@/lib/date';
 import type { JobQuestion } from '@/types/jobWizard';
-import { ArrowLeft, Send, Users, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Send, Users, CheckCircle, Share2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
@@ -357,35 +357,60 @@ const JobView = () => {
             Tillbaka
           </Button>
           
-          <button
-            onClick={() => setShowCompanyProfile(true)}
-            className="flex items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
-          >
-            <Avatar className="h-10 w-10">
-              <AvatarImage 
-                src={companyLogoUrl || ''} 
-                alt={job.profiles?.company_name || 'Företagslogga'}
-              />
-              <AvatarFallback className="bg-white/20 text-white font-semibold text-sm" delayMs={150}>
-                {job.profiles?.company_name
-                  ? job.profiles.company_name.substring(0, 2).toUpperCase()
-                  : job.profiles?.first_name && job.profiles?.last_name
-                  ? `${job.profiles.first_name[0]}${job.profiles.last_name[0]}`.toUpperCase()
-                  : 'FÖ'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="text-left">
-              <h3 className="text-white font-bold text-sm">
-                {job.profiles?.company_name || 
-                 `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
-                 'Företag'}
-              </h3>
-              <div className="flex items-center text-[10px] mt-0.5 text-white">
-                <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
-                Se företagsprofil
+          <div className="flex items-center gap-2">
+            <button
+              onClick={async () => {
+                const shareUrl = `${window.location.origin}/job/${jobId}`;
+                const shareData = {
+                  title: job.title,
+                  text: `${job.title} hos ${job.profiles?.company_name || 'Företag'} – ${job.location || ''}`,
+                  url: shareUrl,
+                };
+                if (navigator.share) {
+                  try {
+                    await navigator.share(shareData);
+                  } catch {}
+                } else {
+                  await navigator.clipboard.writeText(shareUrl);
+                  toast({ title: 'Länk kopierad!', description: 'Annonsens länk har kopierats till urklipp' });
+                }
+              }}
+              className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all"
+              aria-label="Dela annons"
+            >
+              <Share2 className="h-5 w-5 text-white" />
+            </button>
+
+            <button
+              onClick={() => setShowCompanyProfile(true)}
+              className="flex items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
+            >
+              <Avatar className="h-10 w-10">
+                <AvatarImage 
+                  src={companyLogoUrl || ''} 
+                  alt={job.profiles?.company_name || 'Företagslogga'}
+                />
+                <AvatarFallback className="bg-white/20 text-white font-semibold text-sm" delayMs={150}>
+                  {job.profiles?.company_name
+                    ? job.profiles.company_name.substring(0, 2).toUpperCase()
+                    : job.profiles?.first_name && job.profiles?.last_name
+                    ? `${job.profiles.first_name[0]}${job.profiles.last_name[0]}`.toUpperCase()
+                    : 'FÖ'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-left">
+                <h3 className="text-white font-bold text-sm">
+                  {job.profiles?.company_name || 
+                   `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
+                   'Företag'}
+                </h3>
+                <div className="flex items-center text-[10px] mt-0.5 text-white">
+                  <Users className="h-2.5 w-2.5 mr-0.5 text-white" />
+                  Se företagsprofil
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+          </div>
         </div>
 
         {/* Main content */}
