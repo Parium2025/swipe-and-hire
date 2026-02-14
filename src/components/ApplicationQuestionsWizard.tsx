@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -34,8 +34,7 @@ export function ApplicationQuestionsWizard({
   contactEmail,
   jobTitle,
 }: ApplicationQuestionsWizardProps) {
-  // Track previous step to detect "back to review" transitions
-  const prevStepRef = useRef(hasAlreadyApplied ? questions.length : 0);
+  // If already applied, start directly on the review step
   const [currentStep, setCurrentStep] = useState(hasAlreadyApplied ? questions.length : 0);
   const totalSteps = questions.length + 1;
   
@@ -47,22 +46,6 @@ export function ApplicationQuestionsWizard({
   // to prevent the "Redan sökt" / "Tillbaka" flash during step transitions.
   const [buttonStep, setButtonStep] = useState(currentStep);
   const buttonIsSubmitStep = buttonStep === questions.length;
-
-  // Ref for the wizard container to scroll into view on step changes
-  const wizardRef = useRef<HTMLDivElement>(null);
-
-  // When returning to the review step from a question, scroll the section into view
-  useEffect(() => {
-    const wasOnQuestion = prevStepRef.current < questions.length;
-    const nowOnReview = currentStep === questions.length;
-    if (wasOnQuestion && nowOnReview && wizardRef.current) {
-      // Small delay to let the animation start, then scroll into view
-      requestAnimationFrame(() => {
-        wizardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      });
-    }
-    prevStepRef.current = currentStep;
-  }, [currentStep, questions.length]);
   
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : null;
   const isCurrentAnswered = currentQuestion 
@@ -265,7 +248,7 @@ export function ApplicationQuestionsWizard({
     'rounded-full bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50';
 
   return (
-    <div ref={wizardRef} className="space-y-4">
+    <div className="space-y-4">
       {/* Step dots progress indicator - hidden when already applied (locked view) */}
       <div className={'flex items-center justify-center gap-1.5 py-1' + (hasAlreadyApplied ? ' hidden' : '')}>
         {Array.from({ length: totalSteps }).map((_, i) => (
