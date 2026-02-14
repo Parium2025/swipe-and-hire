@@ -172,10 +172,10 @@ export const useSavedJobs = () => {
         if (error) throw error;
         toast.success('Jobb borttaget från sparade');
       } else {
-        // Add to saved
+        // Add to saved — use upsert to handle duplicate key gracefully
         const { error } = await supabase
           .from('saved_jobs')
-          .insert({ user_id: user.id, job_id: jobId });
+          .upsert({ user_id: user.id, job_id: jobId }, { onConflict: 'user_id,job_id' });
 
         if (error) throw error;
         toast.success('Jobbet har sparats till dina favoriter');
@@ -194,7 +194,7 @@ export const useSavedJobs = () => {
         return next;
       });
       console.error('Error toggling saved job:', err);
-      toast.error('Kunde inte spara jobbet');
+      toast.error(isSaved ? 'Kunde inte ta bort jobbet' : 'Kunde inte spara jobbet');
     }
   }, [user, savedJobIds, isOnline, showOfflineToast]);
 
