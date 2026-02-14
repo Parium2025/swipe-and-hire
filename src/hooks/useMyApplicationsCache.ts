@@ -82,8 +82,6 @@ export function useMyApplicationsCache() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Check for cached data
-  const hasCachedData = user ? readCache(user.id) !== null : false;
 
   const { data: applications = [], isLoading: queryLoading, error, refetch } = useQuery({
     queryKey: ['my-applications', user?.id],
@@ -132,23 +130,18 @@ export function useMyApplicationsCache() {
       return apps;
     },
     enabled: !!user,
-    staleTime: 0, // Always refetch on mount to catch missed updates; realtime handles live sync
-    gcTime: Infinity,
-    // Instant load from localStorage cache
-    initialData: () => {
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000, // 5 minutes — prevents stale data persisting forever
+    refetchOnMount: 'always', // Always refetch when component mounts
+    structuralSharing: false, // Ensure new data triggers re-render
+    placeholderData: () => {
       if (!user) return undefined;
-      const cached = readCache(user.id);
-      return cached ?? undefined;
-    },
-    initialDataUpdatedAt: () => {
-      if (!user) return undefined;
-      const cached = readCache(user.id);
-      return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
+      return readCache(user.id) ?? undefined;
     },
   });
 
-  // Only show loading if we don't have cached data
-  const isLoading = queryLoading && !hasCachedData;
+  // Only show loading if we have no data at all (no placeholder, no fetched data)
+  const isLoading = queryLoading && applications.length === 0;
 
   // Real-time subscription for application updates
   useEffect(() => {
