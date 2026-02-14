@@ -46,7 +46,6 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TruncatedText } from '@/components/TruncatedText';
 import MyCandidates from '@/pages/MyCandidates';
-import JobView from '@/pages/JobView';
 import Messages from '@/pages/Messages';
 import JobSeekerMessages from '@/pages/JobSeekerMessages';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
@@ -425,7 +424,7 @@ const Index = () => {
   // isAdmin is now from database via useIsOrgAdmin hook
 
   // Render sidebar layout for profile pages and employer routes
-  const sidebarRoutes = ['/home', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates', '/job-view'];
+  const sidebarRoutes = ['/home', '/profile', '/profile-preview', '/search-jobs', '/saved-jobs', '/my-applications', '/messages', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute && role !== 'employer') {
@@ -464,10 +463,9 @@ const Index = () => {
             return <SupportAdmin />;
           } else {
             navigate('/support');
-           return <Support />;
+            return <Support />;
           }
         default:
-          if (path.startsWith('/job-view/')) return <JobView />;
           return <JobSeekerHome />;
       }
     };
