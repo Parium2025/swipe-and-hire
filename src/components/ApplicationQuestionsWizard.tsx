@@ -55,7 +55,6 @@ export function ApplicationQuestionsWizard({
 
   const handleNext = useCallback(() => {
     if (currentStep < totalSteps - 1) {
-      setNavigatedBack(false);
       setCurrentStep(prev => prev + 1);
     }
   }, [currentStep, totalSteps]);
@@ -97,6 +96,7 @@ export function ApplicationQuestionsWizard({
                   return;
                 }
                 onAnswerChange(question.id, 'yes');
+                setNavigatedBack(false);
                 setTimeout(() => handleNext(), 250);
               })()}
               disabled={isLocked}
@@ -118,6 +118,7 @@ export function ApplicationQuestionsWizard({
                   return;
                 }
                 onAnswerChange(question.id, 'no');
+                setNavigatedBack(false);
                 setTimeout(() => handleNext(), 250);
               })()}
               disabled={isLocked}
