@@ -86,6 +86,7 @@ import { useStageSettings, getIconByName, DEFAULT_STAGE_KEYS, CandidateStage } f
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
 import { smartSearchCandidates } from '@/lib/smartSearch';
+import { CandidateCompareDialog } from '@/components/CandidateCompareDialog';
 
 
 interface CandidateCardProps {
@@ -574,6 +575,7 @@ const MyCandidates = () => {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<Set<string>>(new Set());
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [showCompareDialog, setShowCompareDialog] = useState(false);
   
   // Toggle selection of a candidate
   const toggleCandidateSelection = useCallback((candidateId: string) => {
@@ -1630,6 +1632,22 @@ const MyCandidates = () => {
               {allVisibleSelected ? 'Avmarkera alla' : 'Välj alla'}
             </Button>
 
+            {/* Compare button - only when exactly 2 selected */}
+            {selectedCandidateIds.size === 2 && (
+              <>
+                <Button
+                  variant="glass"
+                  size="sm"
+                  onClick={() => setShowCompareDialog(true)}
+                  className="h-8 px-3 text-xs"
+                >
+                  <Users className="h-3.5 w-3.5 mr-1" />
+                  Jämför
+                </Button>
+                <div className="w-px h-5 bg-white/20" />
+              </>
+            )}
+
             <div className="w-px h-5 bg-white/20" />
 
             {/* Move to stage dropdown */}
@@ -1681,6 +1699,14 @@ const MyCandidates = () => {
           </div>
         </div>
       )}
+
+      {/* Candidate Compare Dialog */}
+      <CandidateCompareDialog
+        candidates={selectedCandidates.slice(0, 2)}
+        open={showCompareDialog}
+        onOpenChange={setShowCompareDialog}
+        stageConfig={activeStageConfig}
+      />
 
     </div>
   );
