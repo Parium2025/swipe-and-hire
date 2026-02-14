@@ -8,7 +8,8 @@ export type NotificationType =
   | 'interview_scheduled' 
   | 'saved_search_match'
   | 'job_closed'
-  | 'saved_job_expiring';
+  | 'saved_job_expiring'
+  | 'application_status';
 
 export type NotificationChannel = 'push' | 'email';
 
