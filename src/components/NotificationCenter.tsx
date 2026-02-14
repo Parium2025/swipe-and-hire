@@ -114,7 +114,7 @@ function NotificationCenter() {
       {open && (
         <div
           ref={panelRef}
-          className="fixed z-[10000] w-[280px] max-h-[400px] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-xl p-0 overflow-hidden"
+          className="fixed z-[10000] w-[280px] max-h-[min(70vh,600px)] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-xl p-0 overflow-hidden flex flex-col"
           style={{
             top: '60px',
             left: '50%',
@@ -147,7 +147,7 @@ function NotificationCenter() {
           </div>
 
           {/* Notification list */}
-          <div className="overflow-y-auto max-h-[340px] p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="overflow-y-auto flex-1 p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-white">
                 <Bell className="h-8 w-8 mb-3 opacity-60" />
