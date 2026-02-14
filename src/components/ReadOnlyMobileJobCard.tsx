@@ -50,11 +50,11 @@ interface ReadOnlyMobileJobCardProps {
 // Deterministic gradient based on job id for visual variety
 const GRADIENTS = [
   'from-blue-900/40 via-indigo-900/30 to-slate-900/50',
-  'from-purple-900/40 via-violet-900/30 to-slate-900/50',
-  'from-emerald-900/40 via-teal-900/30 to-slate-900/50',
-  'from-amber-900/40 via-orange-900/30 to-slate-900/50',
-  'from-rose-900/40 via-pink-900/30 to-slate-900/50',
-  'from-cyan-900/40 via-sky-900/30 to-slate-900/50',
+  'from-indigo-900/40 via-blue-900/30 to-slate-900/50',
+  'from-sky-900/40 via-blue-900/30 to-slate-900/50',
+  'from-blue-900/40 via-sky-900/30 to-slate-900/50',
+  'from-indigo-900/40 via-slate-900/30 to-blue-900/50',
+  'from-cyan-900/40 via-blue-900/30 to-slate-900/50',
 ];
 
 function getGradientForId(id: string) {
