@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -56,6 +57,7 @@ const JobApplication = () => {
   const { jobId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { setHasUnsavedChanges } = useUnsavedChanges();
   
@@ -319,6 +321,11 @@ const JobApplication = () => {
         clearJobApplicationDraft(jobId);
         console.log('💾 Job application draft cleared after submission');
       }
+
+      // Invalidate queries so My Applications and search badges update
+      queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
 
       toast({
         title: "Ansökan skickad!",
