@@ -87,7 +87,7 @@ function NotificationCenter() {
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <button
-          className="relative flex items-center justify-center h-8 w-8 rounded-lg text-white hover:bg-white/10 transition-colors"
+          className="relative flex items-center justify-center h-9 w-9 rounded-lg text-white hover:bg-white/10 transition-colors"
           aria-label="Notifikationer"
         >
           <Bell className="h-[18px] w-[18px]" />
@@ -99,7 +99,7 @@ function NotificationCenter() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="end"
+        align="center"
         className="w-[340px] max-h-[480px] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl z-[10000] rounded-xl p-0 overflow-hidden"
       >
         {/* Header */}
@@ -130,8 +130,8 @@ function NotificationCenter() {
         {/* Notification list */}
         <div className="overflow-y-auto max-h-[400px] p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
           {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-white/40">
-              <Bell className="h-8 w-8 mb-3 opacity-30" />
+            <div className="flex flex-col items-center justify-center py-12 text-white">
+              <Bell className="h-8 w-8 mb-3 opacity-60" />
               <p className="text-sm">Inga notifikationer</p>
             </div>
           ) : (
