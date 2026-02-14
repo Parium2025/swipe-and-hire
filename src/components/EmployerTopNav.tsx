@@ -45,6 +45,7 @@ const dashboardItems = [
 const candidateItems = [
   { title: "Alla Kandidater", url: "/candidates", icon: Users },
   { title: "Mina Kandidater", url: "/my-candidates", icon: UserCheck },
+  { title: "Statistik", url: "/reports", icon: BarChart3 },
 ];
 
 // Företag dropdown items (inkl inställningar)
@@ -52,7 +53,6 @@ const businessItems = [
   { title: "Företagsprofil", url: "/company-profile", icon: Building },
   { title: "Recensioner", url: "/reviews", icon: Star },
   { title: "Fakturering", url: "/billing", icon: CreditCard },
-  { title: "Rapporter", url: "/reports", icon: FileText },
   { title: "Inställningar", url: "/settings", icon: Settings },
 ];
 
