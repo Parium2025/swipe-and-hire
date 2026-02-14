@@ -231,9 +231,7 @@ const MyApplications = () => {
               if (!job) return null;
 
               const company = job.profiles;
-              const location = job.workplace_city 
-                ? `${job.workplace_city}${job.workplace_county ? `, ${job.workplace_county}` : ''}`
-                : job.location || '';
+              const location = job.workplace_city || job.location || '';
 
               const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
               const isExpiredOrDeleted = !!(job.deleted_at || timeInfo.isExpired);

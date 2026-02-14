@@ -304,9 +304,7 @@ const SavedJobs = () => {
                   job={{
                     id: job.id,
                     title: job.title,
-                    location: job.workplace_city && job.workplace_county
-                      ? `${job.workplace_city}, ${job.workplace_county}`
-                      : job.workplace_city || job.location || '',
+                    location: job.workplace_city || job.location || '',
                     employment_type: job.employment_type || undefined,
                     is_active: job.is_active,
                     views_count: job.views_count ?? 0,
