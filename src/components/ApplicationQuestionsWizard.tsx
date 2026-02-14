@@ -36,6 +36,7 @@ export function ApplicationQuestionsWizard({
 }: ApplicationQuestionsWizardProps) {
   // If already applied, start directly on the review step
   const [currentStep, setCurrentStep] = useState(hasAlreadyApplied ? questions.length : 0);
+  const [navigatedBack, setNavigatedBack] = useState(false);
   const totalSteps = questions.length + 1;
   
   const isLastQuestion = currentStep === questions.length - 1;
@@ -54,12 +55,14 @@ export function ApplicationQuestionsWizard({
 
   const handleNext = useCallback(() => {
     if (currentStep < totalSteps - 1) {
+      setNavigatedBack(false);
       setCurrentStep(prev => prev + 1);
     }
   }, [currentStep, totalSteps]);
 
   const handlePrev = useCallback(() => {
     if (currentStep > 0) {
+      setNavigatedBack(true);
       setCurrentStep(prev => prev - 1);
     }
   }, [currentStep]);
@@ -265,7 +268,10 @@ export function ApplicationQuestionsWizard({
             type="button"
             onClick={() => {
               // Allow clicking back to previous steps or current
-              if (i <= currentStep) setCurrentStep(i);
+              if (i <= currentStep) {
+                if (i < currentStep) setNavigatedBack(true);
+                setCurrentStep(i);
+              }
             }}
             className={
               'rounded-full transition-all duration-300 ' +
@@ -421,7 +427,7 @@ export function ApplicationQuestionsWizard({
           disabled={currentQuestion?.is_required && !isCurrentAnswered}
           className={
             nextButtonClasses + ' disabled:opacity-50 disabled:pointer-events-none' +
-            (isSubmitStep || hasAlreadyApplied || (currentQuestion?.question_type === 'yes_no' && !isCurrentAnswered) ? ' hidden' : ' inline-flex items-center justify-center')
+            (isSubmitStep || hasAlreadyApplied || (currentQuestion?.question_type === 'yes_no' && !(navigatedBack && isCurrentAnswered)) ? ' hidden' : ' inline-flex items-center justify-center')
           }
         >
           {isLastQuestion ? 'Granska' : 'Nästa'}
