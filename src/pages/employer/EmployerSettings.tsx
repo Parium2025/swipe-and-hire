@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
 import { Capacitor } from '@capacitor/core';
 import { MapPin, Smartphone, WifiOff, Bug } from 'lucide-react';
+import { MessageTemplatesSettings } from '@/components/MessageTemplatesSettings';
 import { useForceOffline } from '@/hooks/useOnlineStatus';
 
 const EmployerSettings = () => {
@@ -232,6 +233,9 @@ const EmployerSettings = () => {
           </div>
         </div>
       </div>
+
+      {/* Message Templates */}
+      <MessageTemplatesSettings />
 
       {/* Team Management - Only visible for admins */}
       <TeamManagement />

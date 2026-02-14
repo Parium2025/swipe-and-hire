@@ -677,6 +677,42 @@ export type Database = {
         }
         Relationships: []
       }
+      employer_message_templates: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          employer_id: string
+          id: string
+          is_default: boolean
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          employer_id: string
+          id?: string
+          is_default?: boolean
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          employer_id?: string
+          id?: string
+          is_default?: boolean
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employer_notes: {
         Row: {
           content: string
