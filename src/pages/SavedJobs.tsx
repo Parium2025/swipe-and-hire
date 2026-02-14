@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,10 +15,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { Heart, Loader2, Trash2, AlertTriangle } from 'lucide-react';
+import { Heart, Loader2, Trash2, AlertTriangle, ArrowDownUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
+
+type SortOption = 'newest' | 'oldest' | 'expired' | 'active';
 
 interface SavedJob {
   id: string;
@@ -86,6 +88,7 @@ const SavedJobs = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { unsaveJob } = useSavedJobs();
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
 
   const { data: savedJobs = [], isLoading, isFetched } = useQuery({
@@ -155,6 +158,37 @@ const SavedJobs = () => {
     refreshSidebarCounts();
   };
 
+  const isExpired = (expiresAt: string | null) => {
+    if (!expiresAt) return false;
+    return new Date(expiresAt) < new Date();
+  };
+
+  const sortedJobs = useMemo(() => {
+    const filtered = savedJobs.filter(sj => sj.job_postings !== null);
+    return [...filtered].sort((a, b) => {
+      const jobA = a.job_postings!;
+      const jobB = b.job_postings!;
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'oldest':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case 'expired': {
+          const aExp = isExpired(jobA.expires_at) || !jobA.is_active ? 0 : 1;
+          const bExp = isExpired(jobB.expires_at) || !jobB.is_active ? 0 : 1;
+          return aExp - bExp; // expired first
+        }
+        case 'active': {
+          const aActive = jobA.is_active && !isExpired(jobA.expires_at) ? 0 : 1;
+          const bActive = jobB.is_active && !isExpired(jobB.expires_at) ? 0 : 1;
+          return aActive - bActive; // active first
+        }
+        default:
+          return 0;
+      }
+    });
+  }, [savedJobs, sortBy]);
+
   const showLoading = isLoading && !isFetched && savedJobs.length === 0;
 
   if (showLoading) {
@@ -178,7 +212,7 @@ const SavedJobs = () => {
         <p className="text-sm text-white">Dina favorit-jobb samlade på ett ställe</p>
       </div>
 
-      {savedJobs.length === 0 ? (
+      {sortedJobs.length === 0 ? (
         <Card className="bg-white/5 border-white/10">
           <CardContent className="p-8 text-center">
             <Heart className="h-12 w-12 text-white mx-auto mb-4" />
@@ -192,41 +226,65 @@ const SavedJobs = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {savedJobs.map((savedJob) => {
-            const job = savedJob.job_postings;
-            if (!job) return null;
+        <>
+          {/* Sort chips */}
+          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-none">
+            <ArrowDownUp className="h-4 w-4 text-white/60 shrink-0" />
+            {([
+              { key: 'newest', label: 'Nyast först' },
+              { key: 'oldest', label: 'Äldst först' },
+              { key: 'active', label: 'Aktiva' },
+              { key: 'expired', label: 'Utgångna' },
+            ] as const).map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setSortBy(key)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                  sortBy === key
+                    ? 'bg-white/20 text-white border border-white/30'
+                    : 'bg-white/5 text-white/60 border border-white/10 md:hover:bg-white/10 md:hover:text-white/80'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-            const companyName =
-              job.profiles?.company_name ||
-              `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim() ||
-              'Företag';
+          <div className="space-y-4">
+            {sortedJobs.map((savedJob) => {
+              const job = savedJob.job_postings!;
 
-            return (
-              <ReadOnlyMobileJobCard
-                key={savedJob.id}
-                job={{
-                  id: job.id,
-                  title: job.title,
-                  location: job.workplace_city && job.workplace_county
-                    ? `${job.workplace_city}, ${job.workplace_county}`
-                    : job.workplace_city || job.location || '',
-                  employment_type: job.employment_type || undefined,
-                  is_active: job.is_active,
-                  views_count: job.views_count ?? 0,
-                  applications_count: job.applications_count ?? 0,
-                  created_at: job.created_at,
-                  expires_at: job.expires_at || undefined,
-                  job_image_url: job.job_image_url || undefined,
-                  company_name: companyName,
-                  positions_count: job.positions_count || undefined,
-                }}
-                hasApplied={appliedJobIds.has(job.id)}
-                onUnsaveClick={handleUnsaveClick}
-              />
-            );
-          })}
-        </div>
+              const companyName =
+                job.profiles?.company_name ||
+                `${job.profiles?.first_name || ''} ${job.profiles?.last_name || ''}`.trim() ||
+                'Företag';
+
+              return (
+                <ReadOnlyMobileJobCard
+                  key={savedJob.id}
+                  job={{
+                    id: job.id,
+                    title: job.title,
+                    location: job.workplace_city && job.workplace_county
+                      ? `${job.workplace_city}, ${job.workplace_county}`
+                      : job.workplace_city || job.location || '',
+                    employment_type: job.employment_type || undefined,
+                    is_active: job.is_active,
+                    views_count: job.views_count ?? 0,
+                    applications_count: job.applications_count ?? 0,
+                    created_at: job.created_at,
+                    expires_at: job.expires_at || undefined,
+                    job_image_url: job.job_image_url || undefined,
+                    company_name: companyName,
+                    positions_count: job.positions_count || undefined,
+                  }}
+                  hasApplied={appliedJobIds.has(job.id)}
+                  onUnsaveClick={handleUnsaveClick}
+                />
+              );
+            })}
+          </div>
+        </>
       )}
 
       {/* Bekräftelsedialog för borttagning */}
