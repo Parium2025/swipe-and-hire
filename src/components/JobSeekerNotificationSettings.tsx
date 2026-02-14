@@ -22,15 +22,11 @@ export const JobSeekerNotificationSettings = () => {
           <h3 className="text-sm font-medium text-white">Aviseringar</h3>
         </div>
 
-        {/* Column headers */}
+        {/* Column header */}
         <div className="flex items-center justify-end gap-6 pr-1 pb-1 border-b border-white/10">
           <div className="flex items-center gap-1 text-xs text-white/50">
             <Smartphone className="h-3 w-3" />
             <span>Push</span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-white/50">
-            <Mail className="h-3 w-3" />
-            <span>Mejl</span>
           </div>
         </div>
 
@@ -44,11 +40,6 @@ export const JobSeekerNotificationSettings = () => {
               <Switch
                 checked={isEnabled(type, 'push')}
                 onCheckedChange={(checked) => toggle(type, checked, 'push')}
-                disabled={isLoading}
-              />
-              <Switch
-                checked={isEnabled(type, 'email')}
-                onCheckedChange={(checked) => toggle(type, checked, 'email')}
                 disabled={isLoading}
               />
             </div>
