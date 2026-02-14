@@ -214,8 +214,21 @@ const handler = async (req: Request): Promise<Response> => {
 
         console.log(`Sending auto-close messages to ${applicants.length} candidates for "${job.title}"`);
 
-        // Compose the auto-close message
-        const messageContent = `Hej! Tjänsten "${job.title}" hos ${companyName} har nu avslutats. Vi ser över alla kandidater som sökt och kontaktar dig om du blir aktuell för att gå vidare. Tack för ditt intresse och lycka till! 🙏`;
+        // Check if employer has a default message template
+        let messageContent = `Hej! Tjänsten "${job.title}" hos ${companyName} har nu avslutats. Vi ser över alla kandidater som sökt och kontaktar dig om du blir aktuell för att gå vidare. Tack för ditt intresse och lycka till! 🙏`;
+
+        const { data: defaultTemplate } = await supabase
+          .from("employer_message_templates")
+          .select("content")
+          .eq("employer_id", job.employer_id)
+          .eq("category", "rejection")
+          .eq("is_default", true)
+          .limit(1)
+          .maybeSingle();
+
+        if (defaultTemplate?.content) {
+          messageContent = defaultTemplate.content.replace(/\{job_title\}/g, job.title);
+        }
 
         // Send message to each candidate via the messages table
         const messagesToInsert = applicants.map(app => ({
