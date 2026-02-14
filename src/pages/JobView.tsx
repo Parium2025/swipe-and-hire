@@ -91,7 +91,12 @@ const JobView = () => {
   const [jobQuestions, setJobQuestions] = useState<JobQuestion[]>(cached?.questions ?? []);
   const hasLoadedOnce = useRef(!!initialJob);
   const [applying, setApplying] = useState(false);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<Record<string, any>>(() => {
+    try {
+      const saved = localStorage.getItem(`job-answers-draft-${jobId}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  });
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
     const rawImg = initialJob?.job_image_desktop_url || initialJob?.job_image_url;
@@ -225,7 +230,11 @@ const JobView = () => {
   };
 
   const handleAnswerChange = (questionId: string, value: any) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+    setAnswers(prev => {
+      const next = { ...prev, [questionId]: value };
+      try { localStorage.setItem(`job-answers-draft-${jobId}`, JSON.stringify(next)); } catch {}
+      return next;
+    });
   };
 
   const allRequiredQuestionsAnswered = () => {
@@ -308,6 +317,7 @@ const JobView = () => {
         description: 'Din ansökan har skickats till arbetsgivaren',
       });
 
+      try { localStorage.removeItem(`job-answers-draft-${jobId}`); } catch {}
       setTimeout(() => { navigate('/search-jobs'); }, 1500);
     } catch (error: any) {
       toast({
