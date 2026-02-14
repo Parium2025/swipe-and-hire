@@ -2,11 +2,9 @@ import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { MyCandidateData } from '@/hooks/useMyCandidatesData';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
-import { Star, MapPin, Briefcase, Calendar, FileText, Clock, ArrowDown, ExternalLink } from 'lucide-react';
+import { Star, MapPin, Briefcase, Calendar, FileText, Clock, ArrowDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatCompactTime } from '@/lib/date';
-import { useMediaUrl } from '@/hooks/useMediaUrl';
-import { useMemo } from 'react';
 
 interface CandidateCompareDialogProps {
   candidates: MyCandidateData[];
@@ -33,16 +31,11 @@ const CompareRow = ({
   label,
   icon: Icon,
   values,
-  highlight = false,
 }: {
   label: string;
   icon: React.ElementType;
   values: (string | null | undefined)[];
-  highlight?: boolean;
 }) => {
-  // Determine which is "better" for highlighting
-  const highlightIndex = highlight && values[0] && values[1] && values[0] !== values[1] ? -1 : -1;
-
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] gap-3 py-2.5 border-b border-white/5 last:border-0">
       <div className="text-sm text-white/90 text-right truncate">
