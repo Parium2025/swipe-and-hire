@@ -9,7 +9,7 @@ import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare, X, ArrowUpDown, ArrowUp, ArrowDown, XCircle, MessageCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { Button } from '@/components/ui/button';
@@ -227,6 +227,54 @@ export function CandidatesTable({
     onUpdate();
   }, [applications, selectedIds, addCandidates, onSelectionModeChange, onUpdate]);
 
+  // Handle bulk reject
+  const handleBulkReject = useCallback(async () => {
+    const selectedApps = applications.filter(a => selectedIds.has(a.id));
+    if (selectedApps.length === 0) return;
+
+    try {
+      const updates = selectedApps.map(app =>
+        supabase
+          .from('job_applications')
+          .update({ status: 'rejected' })
+          .eq('id', app.id)
+      );
+      await Promise.all(updates);
+      toast.success(`${selectedApps.length} kandidat${selectedApps.length !== 1 ? 'er' : ''} nekad${selectedApps.length !== 1 ? 'e' : ''}`);
+      setSelectedIds(new Set());
+      onSelectionModeChange?.(false);
+      onUpdate();
+    } catch {
+      toast.error('Kunde inte uppdatera status');
+    }
+  }, [applications, selectedIds, onSelectionModeChange, onUpdate]);
+
+  // Handle bulk send message
+  const [bulkMessageOpen, setBulkMessageOpen] = useState(false);
+  const handleBulkSendMessage = useCallback(async (content: string) => {
+    const selectedApps = applications.filter(a => selectedIds.has(a.id));
+    if (selectedApps.length === 0 || !user) return;
+
+    try {
+      const messages = selectedApps.map(app => ({
+        sender_id: user.id,
+        recipient_id: app.applicant_id,
+        content,
+        job_id: app.job_id,
+      }));
+      
+      const { error } = await supabase.from('messages').insert(messages);
+      if (error) throw error;
+      
+      toast.success(`Meddelande skickat till ${selectedApps.length} kandidat${selectedApps.length !== 1 ? 'er' : ''}`);
+      setSelectedIds(new Set());
+      onSelectionModeChange?.(false);
+      setBulkMessageOpen(false);
+    } catch {
+      toast.error('Kunde inte skicka meddelanden');
+    }
+  }, [applications, selectedIds, user, onSelectionModeChange]);
+
   // Sorting logic - 3-step toggle: neutral → desc → asc → neutral
   const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
@@ -376,7 +424,7 @@ export function CandidatesTable({
                       Åtgärder
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-[hsl(222,47%,11%)] border-white/10 min-w-[180px]">
+                   <DropdownMenuContent align="end" className="bg-[hsl(222,47%,11%)] border-white/10 min-w-[180px]">
                     <DropdownMenuItem 
                       className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
                       onClick={handleBulkAddToMyCandidates}
@@ -385,9 +433,19 @@ export function CandidatesTable({
                       <UserPlus className="h-4 w-4 mr-2" />
                       {addCandidates.isPending ? 'Lägger till...' : 'Lägg till i Mina kandidater'}
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-400 cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-red-400">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Ta bort
+                    <DropdownMenuItem 
+                      className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                      onClick={() => setBulkMessageOpen(true)}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Skicka meddelande
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="text-red-400 cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-red-400"
+                      onClick={handleBulkReject}
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Neka alla markerade
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -659,6 +717,70 @@ export function CandidatesTable({
           candidateName={`${selectedApplicationForTeam.first_name || ''} ${selectedApplicationForTeam.last_name || ''}`.trim() || 'Kandidat'}
         />
       )}
+
+      {/* Bulk message dialog */}
+      {bulkMessageOpen && (
+        <BulkMessageDialog
+          open={bulkMessageOpen}
+          onOpenChange={setBulkMessageOpen}
+          count={selectedIds.size}
+          onSend={handleBulkSendMessage}
+        />
+      )}
     </>
   );
 };
+
+// Simple inline bulk message dialog
+function BulkMessageDialog({ 
+  open, onOpenChange, count, onSend 
+}: { 
+  open: boolean; 
+  onOpenChange: (v: boolean) => void; 
+  count: number;
+  onSend: (content: string) => Promise<void>;
+}) {
+  const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const handleSend = async () => {
+    if (!message.trim()) return;
+    setSending(true);
+    await onSend(message.trim());
+    setSending(false);
+    setMessage('');
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => onOpenChange(false)}>
+      <div className="bg-slate-900 border border-white/20 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <h3 className="text-lg font-semibold text-white mb-1">Skicka meddelande</h3>
+        <p className="text-sm text-white/60 mb-4">Till {count} kandidat{count !== 1 ? 'er' : ''}</p>
+        <textarea
+          value={message}
+          onChange={e => setMessage(e.target.value)}
+          placeholder="Skriv ditt meddelande..."
+          className="w-full h-32 bg-white/5 border border-white/20 rounded-lg p-3 text-white text-sm resize-none focus:outline-none focus:ring-1 focus:ring-white/30 placeholder:text-white/30"
+          autoFocus
+        />
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="px-4 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 text-sm transition-colors"
+          >
+            Avbryt
+          </button>
+          <button
+            onClick={handleSend}
+            disabled={!message.trim() || sending}
+            className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm hover:bg-white/20 transition-colors disabled:opacity-40"
+          >
+            {sending ? 'Skickar...' : 'Skicka'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

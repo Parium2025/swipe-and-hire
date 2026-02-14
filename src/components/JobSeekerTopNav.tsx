@@ -30,6 +30,7 @@ import {
   Bell
 } from "lucide-react";
 import { PariumLogoButton } from "@/components/PariumLogoButton";
+import NotificationCenter from "@/components/NotificationCenter";
 
 // Jobb dropdown items
 const jobItems = [
@@ -304,6 +305,9 @@ function JobSeekerTopNav() {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+          {/* Notification Center */}
+          <NotificationCenter />
+
           {/* Profil Dropdown - after Support, with avatar/video */}
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>

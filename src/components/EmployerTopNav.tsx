@@ -33,6 +33,7 @@ import {
   LayoutDashboard
 } from "lucide-react";
 import { PariumLogoButton } from "@/components/PariumLogoButton";
+import NotificationCenter from "@/components/NotificationCenter";
 
 // Dashboard dropdown items
 const dashboardItems = [
@@ -389,6 +390,9 @@ function EmployerTopNav() {
               })}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Notification Center */}
+          <NotificationCenter />
 
           {/* Profil Dropdown */}
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
