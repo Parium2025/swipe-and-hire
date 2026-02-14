@@ -1530,6 +1530,33 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          notification_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          notification_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          notification_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -2233,6 +2260,10 @@ export type Database = {
       }
       is_conversation_member: {
         Args: { p_conversation_id: string }
+        Returns: boolean
+      }
+      is_notification_enabled: {
+        Args: { p_type: string; p_user_id: string }
         Returns: boolean
       }
       is_org_admin: { Args: { p_user_id: string }; Returns: boolean }
