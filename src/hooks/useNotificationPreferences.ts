@@ -7,7 +7,8 @@ export type NotificationType =
   | 'new_message' 
   | 'interview_scheduled' 
   | 'saved_search_match'
-  | 'job_closed';
+  | 'job_closed'
+  | 'saved_job_expiring';
 
 interface NotificationPreference {
   notification_type: NotificationType;

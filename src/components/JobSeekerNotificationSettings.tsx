@@ -7,6 +7,7 @@ const JOBSEEKER_NOTIFICATION_TYPES: { type: NotificationType; label: string; des
   { type: 'interview_scheduled', label: 'Intervjuinbjudningar', description: 'När du blir inbjuden till intervju' },
   { type: 'new_message', label: 'Meddelanden', description: 'När du får nya meddelanden' },
   { type: 'saved_search_match', label: 'Matchande jobb', description: 'När nya jobb matchar dina sparade sökningar' },
+  { type: 'saved_job_expiring', label: 'Sparade jobb utgår', description: 'När ett sparat jobb snart går ut' },
   { type: 'job_closed', label: 'Avslutade annonser', description: 'När en annons du sökt stängs' },
 ];
 
