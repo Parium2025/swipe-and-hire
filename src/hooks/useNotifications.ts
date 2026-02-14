@@ -57,8 +57,7 @@ export function useNotifications() {
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(50);
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       const items = (data || []) as AppNotification[];
@@ -92,7 +91,7 @@ export function useNotifications() {
         (payload) => {
           const newNotif = payload.new as AppNotification;
           setNotifications(prev => {
-            const updated = [newNotif, ...prev].slice(0, 50);
+            const updated = [newNotif, ...prev];
             setCache(user.id, updated);
             return updated;
           });
