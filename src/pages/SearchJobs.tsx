@@ -518,6 +518,8 @@ const SearchJobs = () => {
                       }}
                       hasApplied={appliedJobIds.has(job.id)}
                       onUnsaveClick={handleUnsaveClick}
+                      isSavedExternal={isJobSaved(job.id)}
+                      onToggleSave={toggleSaveJob}
                     />
                   );
                 }

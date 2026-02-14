@@ -35,6 +35,10 @@ interface ReadOnlyMobileJobCardProps {
   hasApplied?: boolean;
   /** If provided, heart-unsave click calls this instead of toggling directly */
   onUnsaveClick?: (jobId: string, jobTitle: string) => void;
+  /** External saved state - if provided, used instead of internal hook */
+  isSavedExternal?: boolean;
+  /** External toggle function - if provided, used instead of internal hook */
+  onToggleSave?: (jobId: string) => void;
 }
 
 // Deterministic gradient based on job id for visual variety
@@ -70,9 +74,13 @@ function getCompanyInitials(name: string): string {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
-export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick }: ReadOnlyMobileJobCardProps) => {
+export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, isSavedExternal, onToggleSave }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
+
+  // Use external state if provided, otherwise fall back to internal hook
+  const isSaved = isSavedExternal !== undefined ? isSavedExternal : isJobSaved(job.id);
+  const doToggle = onToggleSave || toggleSaveJob;
 
   // Resolve the raw storage path to a public URL
   const resolvedUrl = useMemo(() => {
@@ -98,7 +106,6 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   }, [resolvedUrl]);
 
   const companyName = job.company_name || job.profiles?.company_name || 'Okänt företag';
-  const isSaved = isJobSaved(job.id);
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
@@ -108,7 +115,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
     if (isSaved && onUnsaveClick) {
       onUnsaveClick(job.id, job.title);
     } else {
-      toggleSaveJob(job.id);
+      doToggle(job.id);
     }
   };
 
