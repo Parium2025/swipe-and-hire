@@ -64,7 +64,7 @@ interface Application {
 
 const getStatusLabel = (status: string, isExpiredOrDeleted: boolean) => {
   if (isExpiredOrDeleted) {
-    return 'Avslutad';
+    return 'Utgången';
   }
   switch (status) {
     case 'pending':
@@ -104,7 +104,7 @@ const getStatusIcon = (status: string, isExpiredOrDeleted: boolean) => {
 
 const getStatusBadgeClasses = (status: string, isExpiredOrDeleted: boolean) => {
   if (isExpiredOrDeleted) {
-    return 'bg-gray-500/80 text-white border-0';
+    return 'bg-red-500/80 text-white border-0';
   }
   switch (status) {
     case 'pending':
