@@ -42,16 +42,17 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme="dark"
       className="toaster group"
       style={{ zIndex: 99999 }}
+      position="top-center"
       duration={4000}
       closeButton
-      visibleToasts={2}
-      gap={8}
+      visibleToasts={3}
+      expand={false}
+      gap={6}
       toastOptions={{
         closeButton: true,
         classNames: {
           toast:
             "group toast relative group-[.toaster]:backdrop-blur-xl group-[.toaster]:text-white group-[.toaster]:border group-[.toaster]:border-white/20 group-[.toaster]:shadow-lg cursor-pointer select-none",
-          // Gör hela toasten klickbar utan att visa ett X
           closeButton:
             "absolute inset-0 z-20 h-full w-full opacity-0 transform-none rounded-none border-0 bg-transparent p-0 m-0 pointer-events-auto hover:opacity-0 focus:opacity-0",
           description: "group-[.toast]:text-white/90",
