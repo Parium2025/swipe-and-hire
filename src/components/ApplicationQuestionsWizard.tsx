@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -258,6 +258,16 @@ export function ApplicationQuestionsWizard({
   const submitButtonClasses = 
     'rounded-full bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50';
 
+  // Scroll the wizard navigation into view after step changes
+  const navRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // Small delay to let AnimatePresence finish
+    const timer = setTimeout(() => {
+      navRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [currentStep]);
+
   return (
     <div className="space-y-4">
       {/* Step dots progress indicator - hidden when already applied (locked view) */}
@@ -402,7 +412,7 @@ export function ApplicationQuestionsWizard({
       </div>
 
       {/* Navigation - all buttons always rendered, visibility via CSS to prevent flash */}
-      <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/[0.06]">
+      <div ref={navRef} className="flex items-center justify-center gap-3 pt-2 border-t border-white/[0.06]">
         <button
           type="button"
           onMouseDown={handleMouseDown}
