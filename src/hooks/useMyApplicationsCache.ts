@@ -124,7 +124,7 @@ export function useMyApplicationsCache() {
       return apps;
     },
     enabled: !!user,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    staleTime: 0, // Always refetch on mount to catch missed updates; realtime handles live sync
     gcTime: Infinity,
     // Instant load from localStorage cache
     initialData: () => {
