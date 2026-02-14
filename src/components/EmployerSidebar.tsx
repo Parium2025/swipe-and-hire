@@ -63,6 +63,12 @@ const employerNavItems = [
     group: "huvudmeny"
   },
   {
+    title: "Statistik",
+    url: "/reports",
+    icon: BarChart3,
+    group: "huvudmeny"
+  },
+  {
     title: "Meddelanden",
     url: "/messages",
     icon: MessageCircle,
@@ -87,12 +93,6 @@ const businessNavItems = [
     title: "Fakturering",
     url: "/billing",
     icon: CreditCard, 
-    group: "företag"
-  },
-  {
-    title: "Rapporter",
-    url: "/reports",
-    icon: FileText,
     group: "företag"
   }
 ];
