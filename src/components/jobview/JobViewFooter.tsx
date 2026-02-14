@@ -12,7 +12,7 @@ export const JobViewFooter = memo(function JobViewFooter({ createdAt, expiresAt 
   const { text, isExpired } = getTimeRemaining(createdAt, expiresAt);
 
   return (
-    <div className="flex items-center justify-center gap-3 py-2 text-xs">
+    <div data-job-footer className="flex items-center justify-center gap-3 py-2 text-xs">
       <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
         Publicerad: {new Date(createdAt).toLocaleDateString('sv-SE', { 
           year: 'numeric', 
