@@ -36,6 +36,7 @@ import EmployerProfile from '@/pages/employer/EmployerProfile';
 import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
+import EmployerAnalytics from '@/components/EmployerAnalytics';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft, Search, Loader2, CheckSquare, X } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -516,6 +517,8 @@ const Index = () => {
           return <JobTemplatesOverview />;
         case '/settings':
           return <EmployerSettings />;
+        case '/reports':
+          return <EmployerAnalytics />;
         case '/billing':
           return <Billing />;
         case '/support':
