@@ -2,10 +2,10 @@ import { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, Check, CheckCheck, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, X } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -84,8 +84,8 @@ function NotificationCenter() {
   };
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <button
           className="relative flex items-center justify-center h-9 w-9 rounded-lg text-white hover:bg-white/10 transition-colors"
           aria-label="Notifikationer"
@@ -97,10 +97,10 @@ function NotificationCenter() {
             </span>
           )}
         </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="center"
-        className="w-[340px] max-h-[480px] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl z-[10000] rounded-xl p-0 overflow-hidden"
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        className="w-[300px] max-h-[480px] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl z-[10000] rounded-xl p-0 overflow-hidden"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
@@ -145,8 +145,8 @@ function NotificationCenter() {
             ))
           )}
         </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </PopoverContent>
+    </Popover>
   );
 }
 
