@@ -166,37 +166,22 @@ const SavedJobs = () => {
   const sortedJobs = useMemo(() => {
     const withJobs = savedJobs.filter(sj => sj.job_postings !== null);
     
-    // Filter based on selected chip
-    let filtered: typeof withJobs;
     switch (sortBy) {
       case 'newest':
-        // Only active (non-expired) jobs, newest first
-        filtered = withJobs
-          .filter(sj => sj.job_postings!.is_active && !isExpired(sj.job_postings!.expires_at))
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
+        return [...withJobs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       case 'oldest':
-        // Only active (non-expired) jobs, oldest first
-        filtered = withJobs
-          .filter(sj => sj.job_postings!.is_active && !isExpired(sj.job_postings!.expires_at))
-          .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-        break;
+        return [...withJobs].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
       case 'active':
-        // Only active jobs
-        filtered = withJobs
+        return withJobs
           .filter(sj => sj.job_postings!.is_active && !isExpired(sj.job_postings!.expires_at))
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
       case 'expired':
-        // Only expired/inactive jobs
-        filtered = withJobs
+        return withJobs
           .filter(sj => !sj.job_postings!.is_active || isExpired(sj.job_postings!.expires_at))
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
       default:
-        filtered = withJobs;
+        return withJobs;
     }
-    return filtered;
   }, [savedJobs, sortBy]);
 
   const showLoading = isLoading && !isFetched && savedJobs.length === 0;
@@ -243,8 +228,8 @@ const SavedJobs = () => {
             {([
               { key: 'newest', label: 'Nyast först' },
               { key: 'oldest', label: 'Äldst först' },
-              { key: 'active', label: 'Aktiva' },
-              { key: 'expired', label: 'Utgångna' },
+              { key: 'active', label: 'Visa aktiva' },
+              { key: 'expired', label: 'Visa utgångna' },
             ] as const).map(({ key, label }) => (
               <button
                 key={key}
