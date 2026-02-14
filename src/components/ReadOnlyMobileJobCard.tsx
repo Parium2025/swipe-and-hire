@@ -1,8 +1,8 @@
-import { memo, useState, useEffect, useMemo } from 'react';
+import { memo, useState, useEffect, useMemo, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck } from 'lucide-react';
+import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2 } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,10 +35,16 @@ interface ReadOnlyMobileJobCardProps {
   hasApplied?: boolean;
   /** If provided, heart-unsave click calls this instead of toggling directly */
   onUnsaveClick?: (jobId: string, jobTitle: string) => void;
+  /** If provided, shows trash icon instead of heart and calls this on click */
+  onDeleteClick?: (jobId: string, jobTitle: string) => void;
   /** External saved state - if provided, used instead of internal hook */
   isSavedExternal?: boolean;
   /** External toggle function - if provided, used instead of internal hook */
   onToggleSave?: (jobId: string) => void;
+  /** Custom status badge to show on top-left (replaces "Redan sökt" badge) */
+  statusBadge?: ReactNode;
+  /** Hide the save/heart button entirely */
+  hideSaveButton?: boolean;
 }
 
 // Deterministic gradient based on job id for visual variety
@@ -74,7 +80,7 @@ function getCompanyInitials(name: string): string {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
-export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, isSavedExternal, onToggleSave }: ReadOnlyMobileJobCardProps) => {
+export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, onDeleteClick, isSavedExternal, onToggleSave, statusBadge, hideSaveButton = false }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
 
@@ -119,6 +125,15 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
     }
   };
 
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDeleteClick?.(job.id, job.title);
+  };
+
+  // Determine which action button to show
+  const showDeleteButton = !!onDeleteClick;
+  const showSaveButton = !hideSaveButton && !showDeleteButton;
+
   return (
     <Card 
       className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98]"
@@ -145,17 +160,33 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           </div>
         )}
         
-        {/* Save button — always on image/placeholder area */}
-        <button
-          onClick={handleSaveClick}
-          aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
-          className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90"
-        >
-          <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
-        </button>
+        {/* Action button — delete (trash) or save (heart) */}
+        {showDeleteButton && (
+          <button
+            onClick={handleDeleteClick}
+            aria-label="Ta bort ansökan"
+            className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90 hover:bg-red-500/30 hover:border-red-500/40"
+          >
+            <Trash2 className="h-4 w-4 text-white" />
+          </button>
+        )}
+        {showSaveButton && (
+          <button
+            onClick={handleSaveClick}
+            aria-label={isSaved ? "Ta bort från sparade" : "Spara jobb"}
+            className="absolute top-2.5 right-2.5 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 transition-all duration-150 active:scale-90"
+          >
+            <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-400 text-red-400' : 'text-white'}`} />
+          </button>
+        )}
 
-        {/* Applied badge */}
-        {hasApplied && (
+        {/* Status badge or Applied badge — top-left */}
+        {statusBadge && (
+          <div className="absolute top-2.5 left-2.5">
+            {statusBadge}
+          </div>
+        )}
+        {!statusBadge && hasApplied && (
           <div className="absolute top-2.5 left-2.5">
             <Badge className="bg-green-500/90 text-white border-0 text-[11px] px-2 py-0.5">
               <CheckCircle className="h-3 w-3 mr-1" />

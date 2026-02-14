@@ -21,6 +21,9 @@ interface Application {
     expires_at: string | null;
     deleted_at: string | null;
     applications_count: number | null;
+    views_count: number | null;
+    job_image_url: string | null;
+    positions_count: number | null;
     profiles: {
       company_name: string | null;
       company_logo_url: string | null;
@@ -99,6 +102,9 @@ export function useMyApplicationsCache() {
             expires_at,
             deleted_at,
             applications_count,
+            views_count,
+            job_image_url,
+            positions_count,
             profiles:employer_id (
               company_name,
               company_logo_url
