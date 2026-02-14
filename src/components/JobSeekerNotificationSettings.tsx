@@ -25,11 +25,11 @@ export const JobSeekerNotificationSettings = () => {
 
         {/* Column headers */}
         <div className="flex items-center justify-end gap-6 pr-1 pb-1 border-b border-white/10">
-          <div className="flex items-center gap-1 text-xs text-white/50">
+          <div className="flex items-center gap-1 text-xs text-white">
             <Smartphone className="h-3 w-3" />
             <span>Push</span>
           </div>
-          <div className="flex items-center gap-1 text-xs text-white/50">
+          <div className="flex items-center gap-1 text-xs text-white">
             <Mail className="h-3 w-3" />
             <span>Mejl</span>
           </div>
