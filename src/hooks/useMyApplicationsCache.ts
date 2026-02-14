@@ -32,7 +32,10 @@ interface Application {
 }
 
 // LocalStorage cache for instant load - no expiry, background sync keeps fresh
-const CACHE_KEY = 'parium_my_applications_cache';
+const CACHE_KEY = 'parium_my_applications_cache_v2';
+
+// Clear old cache key on load
+try { localStorage.removeItem('parium_my_applications_cache'); } catch { /* ignore */ }
 
 interface CachedData {
   applications: Application[];
