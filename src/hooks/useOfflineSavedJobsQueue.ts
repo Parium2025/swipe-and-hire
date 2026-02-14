@@ -6,9 +6,11 @@ interface QueuedAction {
   jobId: string;
   action: 'save' | 'unsave';
   timestamp: number;
+  attempts: number;
 }
 
 const QUEUE_KEY = 'parium_offline_saved_jobs_queue';
+const MAX_ATTEMPTS = 3;
 
 function getQueue(): QueuedAction[] {
   try {
@@ -30,6 +32,7 @@ function saveQueue(queue: QueuedAction[]) {
 /**
  * Offline queue for saved job toggles.
  * Queues save/unsave actions when offline, syncs when back online.
+ * Failed items are retried up to MAX_ATTEMPTS before being dropped.
  */
 export function useOfflineSavedJobsQueue(userId: string | undefined) {
   const [queue, setQueue] = useState<QueuedAction[]>([]);
@@ -47,7 +50,7 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     const currentQueue = getQueue();
     // Deduplicate: remove any existing action for this jobId, keep latest
     const filtered = currentQueue.filter(q => q.jobId !== jobId);
-    const newQueue = [...filtered, { jobId, action, timestamp: Date.now() }];
+    const newQueue = [...filtered, { jobId, action, timestamp: Date.now(), attempts: 0 }];
     saveQueue(newQueue);
     setQueue(newQueue);
   }, []);
@@ -60,6 +63,7 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     if (currentQueue.length === 0) return;
 
     syncInProgress.current = true;
+    const remaining: QueuedAction[] = [];
     let synced = 0;
 
     for (const item of currentQueue) {
@@ -81,12 +85,19 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
         synced++;
       } catch (err) {
         console.error('Failed to sync saved job action:', err);
+        // Retry logic: increment attempts, keep if under max
+        const updated = { ...item, attempts: item.attempts + 1 };
+        if (updated.attempts < MAX_ATTEMPTS) {
+          remaining.push(updated);
+        } else {
+          console.warn('Saved job action exceeded max attempts, dropping:', item.jobId, item.action);
+        }
       }
     }
 
-    // Clear queue after sync
-    saveQueue([]);
-    setQueue([]);
+    // Save only failed items that still have retries left
+    saveQueue(remaining);
+    setQueue(remaining);
     syncInProgress.current = false;
 
     if (synced > 0) {
