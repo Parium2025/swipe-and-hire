@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -258,17 +258,7 @@ export function ApplicationQuestionsWizard({
   const submitButtonClasses = 
     'rounded-full bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-6 py-2 text-sm transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50';
 
-  // Scroll so the navigation buttons + page footer stay visible after step changes
   const navRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // Find the JobViewFooter (sibling after the wizard) or fall back to nav buttons
-      const footer = navRef.current?.closest('.space-y-4')?.parentElement?.querySelector('[data-job-footer]');
-      const target = footer || navRef.current;
-      target?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [currentStep]);
 
   return (
     <div className="space-y-4">
