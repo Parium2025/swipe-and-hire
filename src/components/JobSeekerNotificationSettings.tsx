@@ -39,7 +39,7 @@ export const JobSeekerNotificationSettings = () => {
           <div key={type} className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <Label className="text-sm text-white">{label}</Label>
-              <p className="text-sm text-white/70">{description}</p>
+              <p className="text-sm text-white">{description}</p>
             </div>
             <div className="flex items-center gap-6 ml-3">
               <Switch
