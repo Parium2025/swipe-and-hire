@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -90,6 +90,29 @@ const SavedJobs = () => {
   const { unsaveJob } = useSavedJobs();
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [jobToRemove, setJobToRemove] = useState<{ id: string; title: string } | null>(null);
+
+  // Mouse-drag scrolling for sort chips
+  const chipsRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    isDragging.current = true;
+    startX.current = e.pageX - (chipsRef.current?.offsetLeft || 0);
+    scrollLeft.current = chipsRef.current?.scrollLeft || 0;
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging.current || !chipsRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - (chipsRef.current.offsetLeft || 0);
+    chipsRef.current.scrollLeft = scrollLeft.current - (x - startX.current);
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isDragging.current = false;
+  }, []);
 
   const { data: savedJobs = [], isLoading, isFetched } = useQuery({
     queryKey: ['saved-jobs', user?.id],
@@ -237,7 +260,14 @@ const SavedJobs = () => {
       ) : (
         <>
           {/* Sort chips */}
-          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-none">
+           <div
+              ref={chipsRef}
+              className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-none cursor-grab active:cursor-grabbing select-none"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
             <ArrowDownUp className="h-4 w-4 text-white/60 shrink-0" />
             {([
               { key: 'newest', label: 'Nyast först' },
