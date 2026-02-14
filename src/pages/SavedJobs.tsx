@@ -166,18 +166,32 @@ const SavedJobs = () => {
   const sortedJobs = useMemo(() => {
     const withJobs = savedJobs.filter(sj => sj.job_postings !== null);
     
+    const isJobExpired = (sj: SavedJob) => !sj.job_postings!.is_active || isExpired(sj.job_postings!.expires_at);
+    
+    // Helper: active first, then expired; within each group sort by date
+    const sortWithPriority = (list: SavedJob[], ascending: boolean) => {
+      return [...list].sort((a, b) => {
+        const aExp = isJobExpired(a) ? 1 : 0;
+        const bExp = isJobExpired(b) ? 1 : 0;
+        if (aExp !== bExp) return aExp - bExp; // active first
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return ascending ? dateA - dateB : dateB - dateA;
+      });
+    };
+    
     switch (sortBy) {
       case 'newest':
-        return [...withJobs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        return sortWithPriority(withJobs, false);
       case 'oldest':
-        return [...withJobs].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        return sortWithPriority(withJobs, true);
       case 'active':
         return withJobs
-          .filter(sj => sj.job_postings!.is_active && !isExpired(sj.job_postings!.expires_at))
+          .filter(sj => !isJobExpired(sj))
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       case 'expired':
         return withJobs
-          .filter(sj => !sj.job_postings!.is_active || isExpired(sj.job_postings!.expires_at))
+          .filter(sj => isJobExpired(sj))
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       default:
         return withJobs;
