@@ -1,4 +1,3 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,9 +7,10 @@ import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
 import { Capacitor } from '@capacitor/core';
-import { MapPin, Smartphone, WifiOff, Bug } from 'lucide-react';
+import { MapPin, Smartphone, WifiOff, Bug, Bell } from 'lucide-react';
 import { MessageTemplatesSettings } from '@/components/MessageTemplatesSettings';
 import { useForceOffline } from '@/hooks/useOnlineStatus';
+import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 
 const EmployerSettings = () => {
   const { user, profile, updateProfile, updatePassword } = useAuth();
@@ -19,12 +19,7 @@ const EmployerSettings = () => {
     newPassword: '',
     confirmPassword: ''
   });
-  const [notifications, setNotifications] = useState({
-    emailNotifications: true,
-    newApplications: true,
-    messagesFromCandidates: true,
-    weeklyReports: false
-  });
+  const { isEnabled, toggle, isLoading: prefsLoading } = useNotificationPreferences();
   const [backgroundLocationEnabled, setBackgroundLocationEnabled] = useState(false);
   const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
   const isNativeApp = Capacitor.isNativePlatform();
@@ -155,47 +150,44 @@ const EmployerSettings = () => {
 
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
         <div className="space-y-5 md:space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-sm text-white">E-postaviseringar</Label>
-              <p className="text-sm text-white">Få aviseringar via e-post</p>
-            </div>
-            <Switch
-              checked={notifications.emailNotifications}
-              onCheckedChange={(checked) => setNotifications({...notifications, emailNotifications: checked})}
-            />
+          <div className="flex items-center gap-2 mb-2">
+            <Bell className="h-4 w-4 text-white" />
+            <h3 className="text-sm font-medium text-white">Aviseringar</h3>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div>
               <Label className="text-sm text-white">Nya ansökningar</Label>
-              <p className="text-sm text-white">När någon söker dina jobb</p>
+              <p className="text-sm text-white/70">När någon söker dina jobb</p>
             </div>
             <Switch
-              checked={notifications.newApplications}
-              onCheckedChange={(checked) => setNotifications({...notifications, newApplications: checked})}
+              checked={isEnabled('new_application')}
+              onCheckedChange={(checked) => toggle('new_application', checked)}
+              disabled={prefsLoading}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <Label className="text-sm text-white">Meddelanden från kandidater</Label>
-              <p className="text-sm text-white">När kandidater skickar meddelanden</p>
+              <Label className="text-sm text-white">Meddelanden</Label>
+              <p className="text-sm text-white/70">När du får nya meddelanden</p>
             </div>
             <Switch
-              checked={notifications.messagesFromCandidates}
-              onCheckedChange={(checked) => setNotifications({...notifications, messagesFromCandidates: checked})}
+              checked={isEnabled('new_message')}
+              onCheckedChange={(checked) => toggle('new_message', checked)}
+              disabled={prefsLoading}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <Label className="text-sm text-white">Veckorapporter</Label>
-              <p className="text-sm text-white">Få veckovisa statistikrapporter</p>
+              <Label className="text-sm text-white">Intervjupåminnelser</Label>
+              <p className="text-sm text-white/70">Påminnelser om bokade intervjuer</p>
             </div>
             <Switch
-              checked={notifications.weeklyReports}
-              onCheckedChange={(checked) => setNotifications({...notifications, weeklyReports: checked})}
+              checked={isEnabled('interview_scheduled')}
+              onCheckedChange={(checked) => toggle('interview_scheduled', checked)}
+              disabled={prefsLoading}
             />
           </div>
         </div>
