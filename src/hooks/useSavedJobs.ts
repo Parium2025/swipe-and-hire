@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useOnline } from '@/hooks/useOnlineStatus';
+import { useOfflineSavedJobsQueue } from '@/hooks/useOfflineSavedJobsQueue';
 
 const CACHE_KEY = 'parium_saved_jobs_cache';
 // No TTL - always use cache for instant load, background sync keeps fresh
@@ -133,6 +134,7 @@ export const useSavedJobs = () => {
   }, [user, fetchSavedJobs]);
 
   const { isOnline, showOfflineToast } = useOnline();
+  const { enqueue } = useOfflineSavedJobsQueue(user?.id);
 
   const toggleSaveJob = useCallback(async (jobId: string) => {
     if (!user) {
@@ -140,14 +142,9 @@ export const useSavedJobs = () => {
       return;
     }
 
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
-
     const isSaved = savedJobIds.has(jobId);
 
-    // Optimistic update
+    // Optimistic update (works both online and offline)
     setSavedJobIds(prev => {
       const next = new Set(prev);
       if (isSaved) {
@@ -155,10 +152,18 @@ export const useSavedJobs = () => {
       } else {
         next.add(jobId);
       }
-      // Update cache immediately for instant navigation
       saveToCache(user.id, next);
       return next;
     });
+
+    // If offline, queue the action for later sync
+    if (!isOnline) {
+      enqueue(jobId, isSaved ? 'unsave' : 'save');
+      toast.success(isSaved ? 'Borttaget (synkas vid anslutning)' : 'Sparat (synkas vid anslutning)', {
+        duration: 2000,
+      });
+      return;
+    }
 
     try {
       if (isSaved) {
@@ -201,7 +206,7 @@ export const useSavedJobs = () => {
       console.error('Error toggling saved job:', err);
       toast.error(isSaved ? 'Kunde inte ta bort jobbet' : 'Kunde inte spara jobbet');
     }
-  }, [user, savedJobIds, isOnline, showOfflineToast]);
+  }, [user, savedJobIds, isOnline, enqueue]);
 
   // Explicit unsave - always deletes, no toggle logic
   const unsaveJob = useCallback(async (jobId: string) => {
