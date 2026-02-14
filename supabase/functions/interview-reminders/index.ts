@@ -20,7 +20,6 @@ interface Interview {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -33,14 +32,15 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const now = new Date();
-    
-    // Find interviews starting in 9-11 minutes (giving 1 minute buffer for cron timing)
+
+    // ─────────────────────────────────────────────────────────
+    // PART 1: 10-minute pre-interview reminders (existing)
+    // ─────────────────────────────────────────────────────────
     const nineMinutesFromNow = new Date(now.getTime() + 9 * 60 * 1000);
     const elevenMinutesFromNow = new Date(now.getTime() + 11 * 60 * 1000);
 
     console.log(`Looking for confirmed interviews between ${nineMinutesFromNow.toISOString()} and ${elevenMinutesFromNow.toISOString()}`);
 
-    // Get confirmed interviews starting in ~10 minutes
     const { data: upcomingInterviews, error: interviewsError } = await supabase
       .from("interviews")
       .select(`
@@ -63,113 +63,195 @@ Deno.serve(async (req) => {
       throw interviewsError;
     }
 
-    if (!upcomingInterviews || upcomingInterviews.length === 0) {
-      console.log("No upcoming interviews found in the 10-minute window");
-      return new Response(
-        JSON.stringify({ success: true, reminders_sent: 0, message: "No interviews to remind" }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    console.log(`Found ${upcomingInterviews.length} interviews to send reminders for`);
-
     let remindersSent = 0;
     const errors: string[] = [];
 
-    for (const interview of upcomingInterviews as Interview[]) {
-      const jobTitle = interview.job_postings?.title || "intervju";
-      const scheduledTime = new Date(interview.scheduled_at);
-      const timeString = scheduledTime.toLocaleTimeString("sv-SE", { 
-        hour: "2-digit", 
-        minute: "2-digit",
-        timeZone: "Europe/Stockholm"
-      });
+    if (upcomingInterviews && upcomingInterviews.length > 0) {
+      console.log(`Found ${upcomingInterviews.length} interviews to send reminders for`);
 
-      // Prepare notification content
-      const locationInfo = interview.location_type === "video" 
-        ? "Videomöte" 
-        : interview.location_type === "office"
-        ? "På plats"
-        : "Telefonintervju";
-
-      // Send reminder to candidate (applicant)
-      try {
-        const candidateTitle = "Intervju om 10 minuter ⏰";
-        const candidateBody = `Din intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`;
-
-        const candidateResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${supabaseServiceKey}`,
-          },
-          body: JSON.stringify({
-            recipient_id: interview.applicant_id,
-            title: candidateTitle,
-            body: candidateBody,
-            data: {
-              type: "interview_reminder",
-              interview_id: interview.id,
-              route: "/my-applications",
-            },
-          }),
+      for (const interview of upcomingInterviews as Interview[]) {
+        const jobTitle = interview.job_postings?.title || "intervju";
+        const scheduledTime = new Date(interview.scheduled_at);
+        const timeString = scheduledTime.toLocaleTimeString("sv-SE", {
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Europe/Stockholm",
         });
 
-        const candidateResult = await candidateResponse.json();
-        if (candidateResult.success || candidateResult.sent >= 0) {
-          console.log(`Reminder sent to candidate ${interview.applicant_id} for interview ${interview.id}`);
-          remindersSent++;
-        } else {
-          console.log(`No tokens for candidate ${interview.applicant_id}: ${candidateResult.message || candidateResult.error}`);
+        const locationInfo = interview.location_type === "video"
+          ? "Videomöte"
+          : interview.location_type === "office"
+          ? "På plats"
+          : "Telefonintervju";
+
+        // Send reminder to candidate
+        try {
+          const candidateResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseServiceKey}`,
+            },
+            body: JSON.stringify({
+              recipient_id: interview.applicant_id,
+              title: "Intervju om 10 minuter ⏰",
+              body: `Din intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
+              data: {
+                type: "interview_reminder",
+                interview_id: interview.id,
+                route: "/my-applications",
+              },
+            }),
+          });
+          const candidateResult = await candidateResponse.json();
+          if (candidateResult.success || candidateResult.sent >= 0) {
+            console.log(`Reminder sent to candidate ${interview.applicant_id}`);
+            remindersSent++;
+          }
+        } catch (err) {
+          console.error(`Error sending reminder to candidate ${interview.applicant_id}:`, err);
+          errors.push(`Candidate ${interview.applicant_id}: ${err.message}`);
         }
-      } catch (err) {
-        console.error(`Error sending reminder to candidate ${interview.applicant_id}:`, err);
-        errors.push(`Candidate ${interview.applicant_id}: ${err.message}`);
+
+        // Send reminder to employer
+        try {
+          const employerResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseServiceKey}`,
+            },
+            body: JSON.stringify({
+              recipient_id: interview.employer_id,
+              title: "Intervju om 10 minuter ⏰",
+              body: `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
+              data: {
+                type: "interview_reminder",
+                interview_id: interview.id,
+                route: "/employer",
+              },
+            }),
+          });
+          const employerResult = await employerResponse.json();
+          if (employerResult.success || employerResult.sent >= 0) {
+            console.log(`Reminder sent to employer ${interview.employer_id}`);
+            remindersSent++;
+          }
+        } catch (err) {
+          console.error(`Error sending reminder to employer ${interview.employer_id}:`, err);
+          errors.push(`Employer ${interview.employer_id}: ${err.message}`);
+        }
       }
+    } else {
+      console.log("No upcoming interviews found in the 10-minute window");
+    }
 
-      // Send reminder to employer
-      try {
-        const employerTitle = "Intervju om 10 minuter ⏰";
-        const employerBody = `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`;
+    // ─────────────────────────────────────────────────────────
+    // PART 2: Post-interview follow-up reminders (NEW)
+    // Reminds recruiters 3 days after an interview if they
+    // haven't taken action (changed candidate status).
+    // ─────────────────────────────────────────────────────────
+    let followupRemindersSent = 0;
 
-        const employerResponse = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${supabaseServiceKey}`,
-          },
-          body: JSON.stringify({
-            recipient_id: interview.employer_id,
-            title: employerTitle,
-            body: employerBody,
-            data: {
-              type: "interview_reminder",
-              interview_id: interview.id,
-              route: "/employer",
-            },
-          }),
-        });
+    const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+    const fourDaysAgo = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000);
 
-        const employerResult = await employerResponse.json();
-        if (employerResult.success || employerResult.sent >= 0) {
-          console.log(`Reminder sent to employer ${interview.employer_id} for interview ${interview.id}`);
-          remindersSent++;
-        } else {
-          console.log(`No tokens for employer ${interview.employer_id}: ${employerResult.message || employerResult.error}`);
+    // Find interviews that happened 3-4 days ago, are confirmed, 
+    // and haven't had a follow-up reminder sent yet
+    const { data: pastInterviews, error: pastError } = await supabase
+      .from("interviews")
+      .select(`
+        id,
+        applicant_id,
+        employer_id,
+        job_id,
+        job_postings(title)
+      `)
+      .in("status", ["confirmed", "completed"])
+      .gte("scheduled_at", fourDaysAgo.toISOString())
+      .lte("scheduled_at", threeDaysAgo.toISOString())
+      .is("followup_reminder_sent_at", null);
+
+    if (pastError) {
+      console.error("Error fetching past interviews for follow-up:", pastError);
+    } else if (pastInterviews && pastInterviews.length > 0) {
+      console.log(`Found ${pastInterviews.length} interviews needing follow-up reminders`);
+
+      for (const interview of pastInterviews) {
+        const jobTitle = (interview.job_postings as any)?.title || "tjänsten";
+
+        // Check if the recruiter has already taken action on this candidate
+        // (changed status from pending/reviewed, or added to my_candidates with stage change)
+        const { data: application } = await supabase
+          .from("job_applications")
+          .select("status")
+          .eq("job_id", interview.job_id!)
+          .eq("applicant_id", interview.applicant_id)
+          .single();
+
+        // If the candidate is still in "interview" status, the recruiter hasn't acted
+        const needsReminder = application?.status === "interview" || application?.status === "pending" || application?.status === "reviewed";
+
+        if (needsReminder) {
+          // Get candidate name for the reminder
+          const { data: candidateProfile } = await supabase
+            .from("profiles")
+            .select("first_name, last_name")
+            .eq("user_id", interview.applicant_id)
+            .single();
+
+          const candidateName = candidateProfile
+            ? `${candidateProfile.first_name || ""} ${candidateProfile.last_name || ""}`.trim()
+            : "kandidaten";
+
+          // Send push notification to recruiter
+          try {
+            const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${supabaseServiceKey}`,
+              },
+              body: JSON.stringify({
+                recipient_id: interview.employer_id,
+                title: "Dags att ge återkoppling 💬",
+                body: `Det har gått 3 dagar sedan intervjun med ${candidateName} för "${jobTitle}". Ge kandidaten besked!`,
+                data: {
+                  type: "followup_reminder",
+                  interview_id: interview.id,
+                  applicant_id: interview.applicant_id,
+                  route: "/employer",
+                },
+              }),
+            });
+
+            const result = await response.json();
+            if (result.success || result.sent >= 0) {
+              followupRemindersSent++;
+              console.log(`Follow-up reminder sent to employer ${interview.employer_id} for candidate ${candidateName}`);
+            }
+          } catch (err) {
+            console.error(`Error sending follow-up reminder for interview ${interview.id}:`, err);
+            errors.push(`Followup ${interview.id}: ${err.message}`);
+          }
         }
-      } catch (err) {
-        console.error(`Error sending reminder to employer ${interview.employer_id}:`, err);
-        errors.push(`Employer ${interview.employer_id}: ${err.message}`);
+
+        // Mark reminder as sent regardless (to avoid re-sending)
+        await supabase
+          .from("interviews")
+          .update({ followup_reminder_sent_at: now.toISOString() })
+          .eq("id", interview.id);
       }
     }
 
-    console.log(`Interview reminders completed: ${remindersSent} reminders sent`);
+    console.log(`Interview reminders completed: ${remindersSent} pre-reminders, ${followupRemindersSent} follow-up reminders`);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        interviews_processed: upcomingInterviews.length,
+      JSON.stringify({
+        success: true,
+        interviews_processed: upcomingInterviews?.length || 0,
         reminders_sent: remindersSent,
+        followup_reminders_sent: followupRemindersSent,
         errors: errors.length > 0 ? errors : undefined,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -708,6 +708,7 @@ export type Database = {
           created_at: string
           duration_minutes: number
           employer_id: string
+          followup_reminder_sent_at: string | null
           id: string
           job_id: string | null
           location_details: string | null
@@ -724,6 +725,7 @@ export type Database = {
           created_at?: string
           duration_minutes?: number
           employer_id: string
+          followup_reminder_sent_at?: string | null
           id?: string
           job_id?: string | null
           location_details?: string | null
@@ -740,6 +742,7 @@ export type Database = {
           created_at?: string
           duration_minutes?: number
           employer_id?: string
+          followup_reminder_sent_at?: string | null
           id?: string
           job_id?: string | null
           location_details?: string | null
@@ -904,6 +907,7 @@ export type Database = {
         Row: {
           application_instructions: string | null
           applications_count: number | null
+          auto_close_notified_at: string | null
           benefits: string[] | null
           category: string | null
           contact_email: string | null
@@ -945,6 +949,7 @@ export type Database = {
         Insert: {
           application_instructions?: string | null
           applications_count?: number | null
+          auto_close_notified_at?: string | null
           benefits?: string[] | null
           category?: string | null
           contact_email?: string | null
@@ -986,6 +991,7 @@ export type Database = {
         Update: {
           application_instructions?: string | null
           applications_count?: number | null
+          auto_close_notified_at?: string | null
           benefits?: string[] | null
           category?: string | null
           contact_email?: string | null
