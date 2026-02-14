@@ -283,6 +283,16 @@ const JobSwipe = () => {
 
       if (error) throw error;
 
+      // Send confirmation email in background
+      supabase.functions.invoke('send-application-confirmation', {
+        body: {
+          applicant_email: email || user?.email || profile?.email || '',
+          applicant_first_name: first_name || profile?.first_name || 'Jobbsökare',
+          job_title: currentJob.title,
+          company_name: currentJob.profiles?.company_name || 'Företaget',
+        },
+      }).catch((e) => console.warn('Confirmation email failed:', e));
+
       // Queue CV for analysis (rate-limit safe, handles millions of users)
       if (profile?.cv_url) {
         supabase.rpc('queue_cv_analysis', {

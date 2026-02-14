@@ -10,8 +10,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search } from 'lucide-react';
+import { Search, Bell } from 'lucide-react';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
+import NotificationCenter from '@/components/NotificationCenter';
 
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { useJobSeekerDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -104,7 +105,6 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
   useJobSeekerBackgroundSync();
   
 
-
   // Desktop layout with top navigation
   if (isDesktop) {
     return (
@@ -182,6 +182,8 @@ const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeek
                   <Search className="h-[18px] w-[18px]" />
                 </button>
               )}
+              {/* Notification Bell */}
+              <NotificationCenter />
               {/* Profile Avatar */}
               <MobileProfileAvatar />
               {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && onViewChange && (

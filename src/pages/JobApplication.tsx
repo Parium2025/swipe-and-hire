@@ -304,6 +304,16 @@ const JobApplication = () => {
 
       if (error) throw error;
 
+      // Send confirmation email in background
+      supabase.functions.invoke('send-application-confirmation', {
+        body: {
+          applicant_email: formData.email,
+          applicant_first_name: formData.firstName,
+          job_title: job.title,
+          company_name: job.profiles?.company_name || 'Företaget',
+        },
+      }).catch((e) => console.warn('Confirmation email failed:', e));
+
       // Clear draft on successful submission
       if (jobId) {
         clearJobApplicationDraft(jobId);
