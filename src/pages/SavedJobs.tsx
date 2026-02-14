@@ -230,7 +230,7 @@ const SavedJobs = () => {
       )}
 
       {/* Bekräftelsedialog för borttagning */}
-      <AlertDialog open={!!jobToRemove} onOpenChange={() => setJobToRemove(null)}>
+      <AlertDialog open={!!jobToRemove} onOpenChange={(open) => { if (!open) setJobToRemove(null); }}>
         <AlertDialogContentNoFocus 
           className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
         >
@@ -253,14 +253,16 @@ const SavedJobs = () => {
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
             <AlertDialogCancel 
-              onClick={() => setJobToRemove(null)}
               style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
               className="flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmRemove}
+              onClick={(e) => {
+                e.preventDefault();
+                confirmRemove();
+              }}
               variant="destructiveSoft"
               style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
               className="flex-1 text-sm flex items-center justify-center rounded-full"

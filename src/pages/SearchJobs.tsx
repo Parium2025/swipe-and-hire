@@ -594,7 +594,7 @@ const SearchJobs = () => {
       )}
 
       {/* Bekräftelsedialog för att avspara jobb */}
-      <AlertDialog open={!!jobToUnsave} onOpenChange={() => setJobToUnsave(null)}>
+      <AlertDialog open={!!jobToUnsave} onOpenChange={(open) => { if (!open) setJobToUnsave(null); }}>
         <AlertDialogContentNoFocus 
           className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
         >
@@ -617,14 +617,16 @@ const SearchJobs = () => {
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
             <AlertDialogCancel 
-              onClick={() => setJobToUnsave(null)}
               style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
               className="flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmUnsave}
+              onClick={(e) => {
+                e.preventDefault();
+                confirmUnsave();
+              }}
               variant="destructiveSoft"
               style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
               className="flex-1 text-sm flex items-center justify-center rounded-full"
