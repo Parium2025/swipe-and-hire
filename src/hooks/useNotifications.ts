@@ -74,6 +74,19 @@ export function useNotifications() {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  // Refetch when user returns to tab (after reading article, etc.)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchNotifications();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchNotifications]);
+
   // Realtime subscription
   useEffect(() => {
     if (!user) return;
