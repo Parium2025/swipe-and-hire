@@ -108,7 +108,7 @@ export const JobViewHero = memo(function JobViewHero({
   if (!imageUrl) {
     return (
       <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
-        <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+        <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center pb-16`}>
           <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
             <span className="text-3xl font-bold text-white/50 tracking-wide">{initials}</span>
           </div>
