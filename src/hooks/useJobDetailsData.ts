@@ -196,30 +196,87 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
   });
 }
 
+// localStorage cache for job details
+const JOB_DETAIL_CACHE_KEY = 'parium_job_detail_';
+const JOB_APPS_CACHE_KEY = 'parium_job_apps_';
+
+function readJobDetailCache(jobId: string): JobPosting | null {
+  try {
+    const raw = localStorage.getItem(JOB_DETAIL_CACHE_KEY + jobId);
+    if (!raw) return null;
+    return JSON.parse(raw).data;
+  } catch { return null; }
+}
+
+function writeJobDetailCache(jobId: string, data: JobPosting): void {
+  try {
+    localStorage.setItem(JOB_DETAIL_CACHE_KEY + jobId, JSON.stringify({ data, timestamp: Date.now() }));
+  } catch { /* storage full */ }
+}
+
+function readJobAppsCache(jobId: string): JobApplication[] | null {
+  try {
+    const raw = localStorage.getItem(JOB_APPS_CACHE_KEY + jobId);
+    if (!raw) return null;
+    return JSON.parse(raw).data;
+  } catch { return null; }
+}
+
+function writeJobAppsCache(jobId: string, data: JobApplication[]): void {
+  try {
+    // Only cache first 50 to save space
+    localStorage.setItem(JOB_APPS_CACHE_KEY + jobId, JSON.stringify({ data: data.slice(0, 50), timestamp: Date.now() }));
+  } catch { /* storage full */ }
+}
+
 export function useJobDetailsData(jobId: string | undefined) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Job details query - cached for 5 min, stale after 30s
+  // Job details query
   const jobQuery = useQuery({
     queryKey: ['job-details', jobId],
-    queryFn: () => fetchJobDetails(jobId!, user!.id),
+    queryFn: async () => {
+      const result = await fetchJobDetails(jobId!, user!.id);
+      if (result && jobId) writeJobDetailCache(jobId, result);
+      return result;
+    },
     enabled: !!jobId && !!user,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
+    initialData: () => {
+      if (!jobId) return undefined;
+      return readJobDetailCache(jobId) ?? undefined;
+    },
+    initialDataUpdatedAt: () => {
+      if (!jobId) return undefined;
+      return readJobDetailCache(jobId) ? Date.now() - 60000 : undefined;
+    },
   });
 
-  // Applications query - cached permanently, realtime handles updates
+  // Applications query
   const applicationsQuery = useQuery({
     queryKey: ['job-applications', jobId],
-    queryFn: () => fetchApplications(jobId!, user!.id),
+    queryFn: async () => {
+      const result = await fetchApplications(jobId!, user!.id);
+      if (jobId) writeJobAppsCache(jobId, result);
+      return result;
+    },
     enabled: !!jobId && !!user,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
+    staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
+    initialData: () => {
+      if (!jobId) return undefined;
+      return readJobAppsCache(jobId) ?? undefined;
+    },
+    initialDataUpdatedAt: () => {
+      if (!jobId) return undefined;
+      return readJobAppsCache(jobId) ? Date.now() - 60000 : undefined;
+    },
   });
 
   // Real-time subscription for application updates AND criterion results

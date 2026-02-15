@@ -19,6 +19,22 @@ export interface CandidateActivity {
   user_last_name?: string;
 }
 
+const ACTIVITY_CACHE_KEY = 'parium_candidate_activities_';
+
+function readActivityCache(applicantId: string): CandidateActivity[] | null {
+  try {
+    const raw = localStorage.getItem(ACTIVITY_CACHE_KEY + applicantId);
+    if (!raw) return null;
+    return JSON.parse(raw).data;
+  } catch { return null; }
+}
+
+function writeActivityCache(applicantId: string, data: CandidateActivity[]): void {
+  try {
+    localStorage.setItem(ACTIVITY_CACHE_KEY + applicantId, JSON.stringify({ data: data.slice(0, 50), timestamp: Date.now() }));
+  } catch { /* storage full */ }
+}
+
 export function useCandidateActivities(applicantId: string | null) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -53,15 +69,26 @@ export function useCandidateActivities(applicantId: string | null) {
       );
 
       // Combine data
-      return activitiesData.map(activity => ({
+      const result = activitiesData.map(activity => ({
         ...activity,
         activity_type: activity.activity_type as ActivityType,
         user_first_name: profileMap.get(activity.user_id)?.first_name || 'Okänd',
         user_last_name: profileMap.get(activity.user_id)?.last_name || '',
       })) as CandidateActivity[];
+
+      if (applicantId) writeActivityCache(applicantId, result);
+      return result;
     },
     enabled: !!applicantId && !!user,
     staleTime: 30 * 1000,
+    initialData: () => {
+      if (!applicantId) return undefined;
+      return readActivityCache(applicantId) ?? undefined;
+    },
+    initialDataUpdatedAt: () => {
+      if (!applicantId) return undefined;
+      return readActivityCache(applicantId) ? 0 : undefined;
+    },
   });
 
   // Real-time subscription for activity updates

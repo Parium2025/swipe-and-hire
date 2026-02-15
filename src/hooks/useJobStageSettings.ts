@@ -71,6 +71,22 @@ interface DbJobStageSetting {
   order_index: number;
 }
 
+const JOB_STAGE_CACHE_KEY = 'parium_job_stages_';
+
+function readStageCache(jobId: string): DbJobStageSetting[] | null {
+  try {
+    const raw = localStorage.getItem(JOB_STAGE_CACHE_KEY + jobId);
+    if (!raw) return null;
+    return JSON.parse(raw).data;
+  } catch { return null; }
+}
+
+function writeStageCache(jobId: string, data: DbJobStageSetting[]): void {
+  try {
+    localStorage.setItem(JOB_STAGE_CACHE_KEY + jobId, JSON.stringify({ data, timestamp: Date.now() }));
+  } catch { /* storage full */ }
+}
+
 export function useJobStageSettings(jobId: string | undefined) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -87,9 +103,19 @@ export function useJobStageSettings(jobId: string | undefined) {
         .order('order_index');
       
       if (error) throw error;
-      return (data || []) as DbJobStageSetting[];
+      const result = (data || []) as DbJobStageSetting[];
+      writeStageCache(jobId, result);
+      return result;
     },
     enabled: !!user && !!jobId,
+    initialData: () => {
+      if (!jobId) return undefined;
+      return readStageCache(jobId) ?? undefined;
+    },
+    initialDataUpdatedAt: () => {
+      if (!jobId) return undefined;
+      return readStageCache(jobId) ? Date.now() - 60000 : undefined;
+    },
   });
 
   // Merge DB settings with defaults
