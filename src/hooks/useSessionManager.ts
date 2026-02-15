@@ -128,35 +128,19 @@ export function useSessionManager(
       });
 
       if (isValid === false) {
-        // Session row gone — check if genuinely kicked or cron cleanup
-        console.log('⚠️ Heartbeat: session expired — checking active sessions…');
+        console.log('⚠️ Heartbeat: session expired — attempting re-registration…');
 
         try {
-          const { data: activeSessions } = await supabase.rpc('get_active_sessions');
-          const otherSessions = ((activeSessions as any[]) || []).filter(
-            (s) => s.session_token !== token
-          );
-
-          if (otherSessions.length >= 2) {
-            // Genuinely kicked
-            console.log('🚫 Heartbeat: genuinely kicked — 2 other sessions active');
-            onKicked();
-            return;
-          }
-
-          // Safe to re-register
-          console.log(`✅ Heartbeat: ${otherSessions.length} other session(s) — re-registering`);
-          registeredRef.current = false;
-
-          const { error } = await supabase.rpc('register_session', {
+          const { data, error } = await supabase.rpc('reregister_session', {
             p_session_token: token,
             p_device_label: getDeviceLabel(),
-            p_ip_address: null,
             p_user_agent: navigator.userAgent.substring(0, 200),
           });
 
-          if (error) {
-            console.warn('Heartbeat re-registration failed — kicking:', error.message);
+          const result = data as Record<string, unknown> | null;
+
+          if (error || result?.status === 'rejected') {
+            console.log('🚫 Heartbeat: genuinely kicked — cannot re-register');
             onKicked();
             return;
           }
@@ -201,39 +185,22 @@ export function useSessionManager(
       });
 
       if (isValid === false && !alreadyKickedRef.current) {
-        // Session row is gone — check if we were genuinely kicked (2 other sessions exist)
-        // or if it was just cron cleanup (< 2 sessions exist).
-        console.log('⚠️ Session missing — checking if kicked or cron cleanup…');
+        console.log('⚠️ Session missing — attempting re-registration…');
 
         try {
-          const { data: activeSessions } = await supabase.rpc('get_active_sessions');
-          const otherSessions = ((activeSessions as any[]) || []).filter(
-            (s) => s.session_token !== token
-          );
-
-          if (otherSessions.length >= 2) {
-            // 2 other sessions exist → we were genuinely kicked by a new device
-            alreadyKickedRef.current = true;
-            registeredRef.current = false;
-            console.log('🚫 Genuinely kicked — 2 other sessions active');
-            onKicked();
-            return;
-          }
-
-          // < 2 other sessions → cron cleanup, safe to re-register
-          console.log(`✅ Only ${otherSessions.length} other session(s) — re-registering (cron cleanup)`);
-          registeredRef.current = false;
-
-          const { data, error } = await supabase.rpc('register_session', {
+          const { data, error } = await supabase.rpc('reregister_session', {
             p_session_token: token,
             p_device_label: getDeviceLabel(),
-            p_ip_address: null,
             p_user_agent: navigator.userAgent.substring(0, 200),
           });
 
-          if (error) {
+          const result = data as Record<string, unknown> | null;
+
+          if (error || result?.status === 'rejected') {
+            // 2+ other sessions exist → genuinely kicked
             alreadyKickedRef.current = true;
-            console.log('🚫 Re-registration failed — kicking user');
+            registeredRef.current = false;
+            console.log('🚫 Genuinely kicked — re-registration rejected');
             onKicked();
             return;
           }
@@ -241,7 +208,6 @@ export function useSessionManager(
           registeredRef.current = true;
           console.log('✅ Session silently re-registered after cron cleanup');
         } catch {
-          // Network error — don't kick, try again next cycle
           console.warn('Re-registration network error — will retry');
         }
       }

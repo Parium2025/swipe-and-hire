@@ -2342,6 +2342,14 @@ export type Database = {
         Returns: Json
       }
       remove_session: { Args: { p_session_token: string }; Returns: undefined }
+      reregister_session: {
+        Args: {
+          p_device_label: string
+          p_session_token: string
+          p_user_agent?: string
+        }
+        Returns: Json
+      }
       same_organization: {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean
