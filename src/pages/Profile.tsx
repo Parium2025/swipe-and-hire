@@ -35,6 +35,7 @@ import { isValidSwedishPhone } from '@/lib/phoneValidation';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCachedImage } from '@/hooks/useCachedImage';
 import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificationSettings';
+import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 
 // Draft key for localStorage
 const PROFILE_DRAFT_KEY = 'parium_draft_profile';
@@ -2267,6 +2268,11 @@ const Profile = () => {
       {/* Notification Settings */}
       <div className="responsive-container mt-8">
         <JobSeekerNotificationSettings />
+      </div>
+
+      {/* Active Sessions */}
+      <div className="responsive-container mt-8">
+        <ActiveSessionsSettings />
       </div>
 
       {/* Image Editors */}
