@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { supabase } from '@/integrations/supabase/client';
+import { getIsOnline } from '@/lib/connectivityManager';
+import { useOfflineApplicationQueue } from '@/hooks/useOfflineApplicationQueue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -61,6 +63,7 @@ const JobApplication = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { setHasUnsavedChanges } = useUnsavedChanges();
+  const { enqueueApplication } = useOfflineApplicationQueue(user?.id);
   
   const [job, setJob] = useState<JobPosting | null>(null);
   const [questions, setQuestions] = useState<JobQuestion[]>([]);
@@ -256,64 +259,97 @@ const JobApplication = () => {
       });
       return;
     }
-    
-    // Check if online before submitting
-    if (!navigator.onLine) {
-      toast({
-        title: 'Offline',
-        description: 'Du måste vara online för att skicka din ansökan',
-        variant: 'destructive'
+
+    setSubmitting(true);
+
+    // Build the application payload
+    // Try to get profile snapshot if online, otherwise use null
+    let profileImageSnapshot: string | null = null;
+    let videoSnapshot: string | null = null;
+
+    if (getIsOnline()) {
+      try {
+        const { data: currentProfile } = await supabase
+          .from('profiles')
+          .select('profile_image_url, video_url')
+          .eq('user_id', user.id)
+          .single();
+        profileImageSnapshot = currentProfile?.profile_image_url || null;
+        videoSnapshot = currentProfile?.video_url || null;
+      } catch {
+        // Continue without snapshot — not critical
+      }
+    }
+
+    const applicationPayload = {
+      job_id: job.id,
+      applicant_id: user.id,
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      age: formData.age ? parseInt(formData.age) : null,
+      location: formData.location,
+      bio: formData.personalLetter,
+      cv_url: formData.cvUrl,
+      profile_image_snapshot_url: profileImageSnapshot,
+      video_snapshot_url: videoSnapshot,
+      custom_answers: {
+        driversLicense: formData.driversLicense,
+        hasOwnCar: formData.hasOwnCar,
+        previousRecyclingExperience: formData.previousRecyclingExperience,
+        mainOccupation: formData.mainOccupation,
+        whenCanStart: formData.whenCanStart,
+        currentOccupation: formData.currentOccupation,
+        isStudying: formData.isStudying,
+        additionalDocuments: formData.additionalDocuments,
+        ...formData.customAnswers
+      }
+    };
+
+    const emailPayload = {
+      applicant_email: formData.email,
+      applicant_first_name: formData.firstName,
+      job_title: job.title,
+      company_name: companyName,
+    };
+
+    // 🌐 OFFLINE PATH: Queue for later sync
+    if (!getIsOnline()) {
+      enqueueApplication({
+        jobId: job.id,
+        jobTitle: job.title,
+        companyName,
+        applicantId: user.id,
+        payload: applicationPayload,
+        emailPayload,
       });
+
+      // Clear draft — data is safe in the queue
+      if (jobId) {
+        clearJobApplicationDraft(jobId);
+      }
+      setHasUnsavedChanges(false);
+
+      toast({
+        title: "Ansökan köad ✓",
+        description: "Skickas automatiskt när du är online igen"
+      });
+
+      setSubmitting(false);
+      navigate('/dashboard');
       return;
     }
 
-    setSubmitting(true);
+    // 🟢 ONLINE PATH: Submit directly
     try {
-      // Fetch current profile to snapshot profile image and video at time of application
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('profile_image_url, video_url')
-        .eq('user_id', user.id)
-        .single();
-
       const { error } = await supabase
         .from('job_applications')
-        .insert({
-          job_id: job.id,
-          applicant_id: user.id,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          age: formData.age ? parseInt(formData.age) : null,
-          location: formData.location,
-          bio: formData.personalLetter,
-          cv_url: formData.cvUrl,
-          // Snapshot profile image and video at time of application
-          profile_image_snapshot_url: currentProfile?.profile_image_url || null,
-          video_snapshot_url: currentProfile?.video_url || null,
-          custom_answers: {
-            driversLicense: formData.driversLicense,
-            hasOwnCar: formData.hasOwnCar,
-            previousRecyclingExperience: formData.previousRecyclingExperience,
-            mainOccupation: formData.mainOccupation,
-            whenCanStart: formData.whenCanStart,
-            currentOccupation: formData.currentOccupation,
-            isStudying: formData.isStudying,
-            additionalDocuments: formData.additionalDocuments,
-            ...formData.customAnswers
-          }
-        });
+        .insert(applicationPayload);
 
       if (error) throw error;
 
-      // Send confirmation email in background with detailed logging
-      const emailPayload = {
-        applicant_email: formData.email,
-        applicant_first_name: formData.firstName,
-        job_title: job.title,
-        company_name: job.profiles?.company_name || 'Företaget',
-      };
+      // Send confirmation email in background
       console.log('📧 Sending application confirmation email:', { to: emailPayload.applicant_email, job: emailPayload.job_title });
       supabase.functions.invoke('send-application-confirmation', { body: emailPayload })
         .then(({ data, error }) => {
@@ -344,11 +380,28 @@ const JobApplication = () => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Error submitting application:', error);
-      toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte skicka ansökan",
-        variant: "destructive"
+
+      // 🔄 FALLBACK: If online submit fails (e.g. network dropped mid-request),
+      // queue it for automatic retry
+      enqueueApplication({
+        jobId: job.id,
+        jobTitle: job.title,
+        companyName,
+        applicantId: user.id,
+        payload: applicationPayload,
+        emailPayload,
       });
+
+      toast({
+        title: "Ansökan köad",
+        description: "Nätverksfel – skickas automatiskt när anslutningen är stabil"
+      });
+
+      if (jobId) {
+        clearJobApplicationDraft(jobId);
+      }
+      setHasUnsavedChanges(false);
+      navigate('/dashboard');
     } finally {
       setSubmitting(false);
     }
