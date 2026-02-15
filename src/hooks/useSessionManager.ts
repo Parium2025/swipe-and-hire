@@ -24,12 +24,47 @@ function getOrCreateSessionToken(): string {
 }
 
 /**
- * Detect device label from user agent
+ * Detect detailed device label from user agent.
+ * Returns a human-readable label like "iPhone · Safari", "Android · Chrome", "Windows · Chrome", etc.
  */
 function getDeviceLabel(): string {
-  const ua = navigator.userAgent.toLowerCase();
-  if (/android|iphone|ipad|ipod|mobile/.test(ua)) return 'app';
-  return 'web';
+  const ua = navigator.userAgent;
+
+  // Detect OS/device
+  let device = 'Okänd enhet';
+  if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) {
+    device = 'iPad';
+  } else if (/iPhone/i.test(ua)) {
+    device = 'iPhone';
+  } else if (/Android/i.test(ua) && /Mobile/i.test(ua)) {
+    device = 'Android';
+  } else if (/Android/i.test(ua)) {
+    device = 'Android-surfplatta';
+  } else if (/Macintosh|Mac OS/i.test(ua)) {
+    device = 'Mac';
+  } else if (/Windows/i.test(ua)) {
+    device = 'Windows';
+  } else if (/Linux/i.test(ua)) {
+    device = 'Linux';
+  } else if (/CrOS/i.test(ua)) {
+    device = 'Chromebook';
+  }
+
+  // Detect browser
+  let browser = '';
+  if (/Edg\//i.test(ua)) {
+    browser = 'Edge';
+  } else if (/OPR\//i.test(ua) || /Opera/i.test(ua)) {
+    browser = 'Opera';
+  } else if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) {
+    browser = 'Chrome';
+  } else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) {
+    browser = 'Safari';
+  } else if (/Firefox/i.test(ua)) {
+    browser = 'Firefox';
+  }
+
+  return browser ? `${device} · ${browser}` : device;
 }
 
 /**
