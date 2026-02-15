@@ -303,7 +303,7 @@ export function ApplicationQuestionsWizard({
       </div>
 
       {/* Question container */}
-      <div className="relative min-h-[280px] sm:min-h-[300px] md:min-h-[320px] flex flex-col">
+      <div className="relative min-h-[300px] sm:min-h-[300px] md:min-h-[320px] flex flex-col">
         {!isSubmitStep && currentQuestion ? (
             <div
               key={currentQuestion.id}
