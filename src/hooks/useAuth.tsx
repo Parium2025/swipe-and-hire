@@ -1967,6 +1967,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     clearSessionToken();
     clearAllAppCaches();
+    
+    // 🎬 Same premium fade animation as manual logout
+    authSplashEvents.show();
+    await new Promise(resolve => setTimeout(resolve, 550));
+    
     await supabase.auth.signOut({ scope: 'local' });
     
     // Persistent toast — stays until user dismisses it, then redirect

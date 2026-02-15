@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const SESSION_TOKEN_KEY = 'parium_session_token';
-const HEARTBEAT_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes — must be well under DB cleanup threshold (20 min)
 const VALIDITY_CHECK_INTERVAL_MS = 15 * 1000; // 15 seconds — fast kick detection
 
 /**

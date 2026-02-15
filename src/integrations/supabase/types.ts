@@ -2334,7 +2334,7 @@ export type Database = {
       }
       register_session: {
         Args: {
-          p_device_label?: string
+          p_device_label: string
           p_ip_address?: string
           p_session_token: string
           p_user_agent?: string
