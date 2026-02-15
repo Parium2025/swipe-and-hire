@@ -11,7 +11,7 @@ const handler = async (req: Request): Promise<Response> => {
   console.log("email-confirm hook accessed with token:", token);
 
   const envRedirect = Deno.env.get("REDIRECT_URL") || "";
-  const defaultRedirect = "https://swipe-and-hire.lovable.app";
+  const defaultRedirect = "https://parium.se";
 
   // If REDIRECT_URL mistakenly points to a Supabase domain, fall back to app URL
   const redirectBase = envRedirect.includes("supabase.co")

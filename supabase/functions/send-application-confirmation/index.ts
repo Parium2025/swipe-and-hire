@@ -52,7 +52,7 @@ const getTemplate = (firstName: string, jobTitle: string, companyName: string) =
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 0;">
                 <tr>
                   <td align="center">
-                    <a href="https://parium-ab.lovable.app/my-applications" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 15px; font-weight: bold; line-height: 46px; text-align: center; text-decoration: none; width: 240px;">Se mina ansökningar</a>
+                    <a href="https://parium.se/my-applications" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 15px; font-weight: bold; line-height: 46px; text-align: center; text-decoration: none; width: 240px;">Se mina ansökningar</a>
                   </td>
                 </tr>
               </table>

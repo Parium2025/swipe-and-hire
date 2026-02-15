@@ -70,7 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
       const isEmployer = (profile?.role || '').toLowerCase() === 'employer';
       const companyName = profile?.company_name || 'Ditt företag';
 
-      const appUrl = Deno.env.get("REDIRECT_URL") || "https://swipe-and-hire.lovable.app";
+      const appUrl = Deno.env.get("REDIRECT_URL") || "https://parium.se";
       const loginUrl = `${appUrl}/auth`;
 
       const subject = isEmployer
