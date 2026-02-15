@@ -128,15 +128,27 @@ export function useSessionManager(
       });
 
       if (isValid === false) {
-        // Session row is gone — could be:
-        // 1. Kicked by another device (handled by Realtime DELETE listener)
-        // 2. Expired while offline (cron cleaned it up)
-        // → Try to silently re-register before assuming kicked
-        console.log('⚠️ Session expired — attempting silent re-registration…');
-        registeredRef.current = false;
+        // Session row gone — check if genuinely kicked or cron cleanup
+        console.log('⚠️ Heartbeat: session expired — checking active sessions…');
 
         try {
-          const { data, error } = await supabase.rpc('register_session', {
+          const { data: activeSessions } = await supabase.rpc('get_active_sessions');
+          const otherSessions = ((activeSessions as any[]) || []).filter(
+            (s) => s.session_token !== token
+          );
+
+          if (otherSessions.length >= 2) {
+            // Genuinely kicked
+            console.log('🚫 Heartbeat: genuinely kicked — 2 other sessions active');
+            onKicked();
+            return;
+          }
+
+          // Safe to re-register
+          console.log(`✅ Heartbeat: ${otherSessions.length} other session(s) — re-registering`);
+          registeredRef.current = false;
+
+          const { error } = await supabase.rpc('register_session', {
             p_session_token: token,
             p_device_label: getDeviceLabel(),
             p_ip_address: null,
@@ -144,22 +156,15 @@ export function useSessionManager(
           });
 
           if (error) {
-            console.warn('Re-registration failed — kicking user:', error.message);
+            console.warn('Heartbeat re-registration failed — kicking:', error.message);
             onKicked();
             return;
           }
 
           registeredRef.current = true;
-          const result = data as Record<string, unknown> | null;
-
-          if (result?.status === 'kicked_oldest') {
-            console.log(`📱 Re-registered and kicked oldest session (${result.kicked_device || 'unknown'})`);
-          } else {
-            console.log('✅ Session silently re-registered after offline period');
-          }
+          console.log('✅ Heartbeat: session re-registered after cron cleanup');
         } catch (reRegErr) {
-          console.warn('Re-registration error — kicking user:', reRegErr);
-          onKicked();
+          console.warn('Heartbeat re-registration error:', reRegErr);
         }
       }
     } catch (err) {
@@ -196,12 +201,29 @@ export function useSessionManager(
       });
 
       if (isValid === false && !alreadyKickedRef.current) {
-        // Session row is gone — could be cron cleanup OR a real kick.
-        // Try silent re-registration before assuming kicked.
-        console.log('⚠️ Session missing — attempting silent re-registration…');
-        registeredRef.current = false;
+        // Session row is gone — check if we were genuinely kicked (2 other sessions exist)
+        // or if it was just cron cleanup (< 2 sessions exist).
+        console.log('⚠️ Session missing — checking if kicked or cron cleanup…');
 
         try {
+          const { data: activeSessions } = await supabase.rpc('get_active_sessions');
+          const otherSessions = ((activeSessions as any[]) || []).filter(
+            (s) => s.session_token !== token
+          );
+
+          if (otherSessions.length >= 2) {
+            // 2 other sessions exist → we were genuinely kicked by a new device
+            alreadyKickedRef.current = true;
+            registeredRef.current = false;
+            console.log('🚫 Genuinely kicked — 2 other sessions active');
+            onKicked();
+            return;
+          }
+
+          // < 2 other sessions → cron cleanup, safe to re-register
+          console.log(`✅ Only ${otherSessions.length} other session(s) — re-registering (cron cleanup)`);
+          registeredRef.current = false;
+
           const { data, error } = await supabase.rpc('register_session', {
             p_session_token: token,
             p_device_label: getDeviceLabel(),
@@ -210,7 +232,6 @@ export function useSessionManager(
           });
 
           if (error) {
-            // Can't re-register (e.g. not authenticated anymore) → kick
             alreadyKickedRef.current = true;
             console.log('🚫 Re-registration failed — kicking user');
             onKicked();
@@ -218,15 +239,9 @@ export function useSessionManager(
           }
 
           registeredRef.current = true;
-          const result = data as Record<string, unknown> | null;
-
-          if (result?.status === 'kicked_oldest') {
-            console.log(`📱 Re-registered and kicked oldest session (${result.kicked_device || 'unknown'})`);
-          } else {
-            console.log('✅ Session silently re-registered (was cleaned by cron, not kicked)');
-          }
+          console.log('✅ Session silently re-registered after cron cleanup');
         } catch {
-          // Network error during re-registration — don't kick, try again next cycle
+          // Network error — don't kick, try again next cycle
           console.warn('Re-registration network error — will retry');
         }
       }
