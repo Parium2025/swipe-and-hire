@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, createContext, useContext, useRef, createElement } from 'react';
 import { toast } from 'sonner';
+import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 
 // Global state för forcerad offline (för dev/test)
 let forceOfflineMode = false;
@@ -14,34 +15,25 @@ export const getForceOfflineMode = () => forceOfflineMode;
 
 /**
  * Hook för att övervaka online/offline status (utan toast - använd useOnlineStatusWithToast för det)
+ * Använder connectivityManager för riktigt connectivity-test (inte bara navigator.onLine)
  */
 export const useOnlineStatus = () => {
-  const [isOnline, setIsOnline] = useState(navigator.onLine && !forceOfflineMode);
+  const [isOnline, setIsOnline] = useState(getIsOnline() && !forceOfflineMode);
 
   useEffect(() => {
-    const updateStatus = () => {
-      setIsOnline(navigator.onLine && !forceOfflineMode);
+    // Lyssna på riktiga connectivity-ändringar (ping-baserat)
+    const unsubConnectivity = onConnectivityChange((online) => {
+      setIsOnline(online && !forceOfflineMode);
+    });
+
+    const handleForceChange = () => {
+      setIsOnline(getIsOnline() && !forceOfflineMode);
     };
-
-    const handleOnline = () => {
-      console.log('📡 Online');
-      updateStatus();
-    };
-
-    const handleOffline = () => {
-      console.log('🔌 Offline');
-      updateStatus();
-    };
-
-    forceOfflineListeners.add(updateStatus);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    forceOfflineListeners.add(handleForceChange);
 
     return () => {
-      forceOfflineListeners.delete(updateStatus);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      unsubConnectivity();
+      forceOfflineListeners.delete(handleForceChange);
     };
   }, []);
 
@@ -52,104 +44,66 @@ export const useOnlineStatus = () => {
  * Hook för online-status MED återanslutnings-toast (endast för OnlineStatusProvider)
  */
 export const useOnlineStatusWithToast = () => {
-  const [isOnline, setIsOnline] = useState(navigator.onLine && !forceOfflineMode);
+  const [isOnline, setIsOnline] = useState(getIsOnline() && !forceOfflineMode);
   const wasOfflineRef = useRef(false);
 
   useEffect(() => {
-    const updateStatus = (showReconnectToast = false) => {
-      const newOnlineStatus = navigator.onLine && !forceOfflineMode;
-      
-      // Visa återanslutnings-toast om vi var offline och nu är online
-      if (showReconnectToast && wasOfflineRef.current && newOnlineStatus) {
-        let reconnectToastId: string | number = '';
-        const dismiss = () => toast.dismiss(reconnectToastId);
+    const showReconnectToast = () => {
+      let reconnectToastId: string | number = '';
+      const dismiss = () => toast.dismiss(reconnectToastId);
 
-        const content = createElement(
-          'div',
-          {
-            role: 'button',
-            tabIndex: 0,
-            className: 'w-full select-none cursor-pointer',
-            onClick: dismiss,
-            onTouchStart: dismiss,
-            onKeyDown: (e: any) => {
-              if (e.key === 'Enter' || e.key === ' ') dismiss();
-            },
+      const content = createElement(
+        'div',
+        {
+          role: 'button',
+          tabIndex: 0,
+          className: 'w-full select-none cursor-pointer',
+          onClick: dismiss,
+          onTouchStart: dismiss,
+          onKeyDown: (e: any) => {
+            if (e.key === 'Enter' || e.key === ' ') dismiss();
           },
-          createElement('div', { className: 'font-medium leading-none' }, 'Ansluten igen'),
-          createElement(
-            'div',
-            { className: 'mt-1 text-sm opacity-90' },
-            'Du är nu online och kan fortsätta arbeta'
-          )
-        );
-
-        reconnectToastId = toast.success(content, {
-          duration: 3000,
-          closeButton: false,
-        });
-      }
-      
-      wasOfflineRef.current = !newOnlineStatus;
-      setIsOnline(newOnlineStatus);
-    };
-
-    const handleOnline = () => {
-      console.log('📡 Online');
-      updateStatus(true);
-    };
-
-    const handleOffline = () => {
-      console.log('🔌 Offline');
-      updateStatus(false);
-    };
-
-    const handleForceOfflineChange = () => {
-      const newOnlineStatus = navigator.onLine && !forceOfflineMode;
-      
-      if (wasOfflineRef.current && newOnlineStatus) {
-        let reconnectToastId: string | number = '';
-        const dismiss = () => toast.dismiss(reconnectToastId);
-
-        const content = createElement(
+        },
+        createElement('div', { className: 'font-medium leading-none' }, 'Ansluten igen'),
+        createElement(
           'div',
-          {
-            role: 'button',
-            tabIndex: 0,
-            className: 'w-full select-none cursor-pointer',
-            onClick: dismiss,
-            onTouchStart: dismiss,
-            onKeyDown: (e: any) => {
-              if (e.key === 'Enter' || e.key === ' ') dismiss();
-            },
-          },
-          createElement('div', { className: 'font-medium leading-none' }, 'Ansluten igen'),
-          createElement(
-            'div',
-            { className: 'mt-1 text-sm opacity-90' },
-            'Du är nu online och kan fortsätta arbeta'
-          )
-        );
+          { className: 'mt-1 text-sm opacity-90' },
+          'Du är nu online och kan fortsätta arbeta'
+        )
+      );
 
-        reconnectToastId = toast.success(content, {
-          duration: 3000,
-          closeButton: false,
-        });
-      }
-      
-      wasOfflineRef.current = !newOnlineStatus;
-      setIsOnline(newOnlineStatus);
+      reconnectToastId = toast.success(content, {
+        duration: 3000,
+        closeButton: false,
+      });
     };
 
-    forceOfflineListeners.add(handleForceOfflineChange);
+    const handleConnectivityChange = (online: boolean) => {
+      const effectiveOnline = online && !forceOfflineMode;
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+      if (wasOfflineRef.current && effectiveOnline) {
+        showReconnectToast();
+      }
+
+      wasOfflineRef.current = !effectiveOnline;
+      setIsOnline(effectiveOnline);
+    };
+
+    const unsubConnectivity = onConnectivityChange(handleConnectivityChange);
+
+    const handleForceChange = () => {
+      const effectiveOnline = getIsOnline() && !forceOfflineMode;
+      if (wasOfflineRef.current && effectiveOnline) {
+        showReconnectToast();
+      }
+      wasOfflineRef.current = !effectiveOnline;
+      setIsOnline(effectiveOnline);
+    };
+    forceOfflineListeners.add(handleForceChange);
 
     return () => {
-      forceOfflineListeners.delete(handleForceOfflineChange);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      unsubConnectivity();
+      forceOfflineListeners.delete(handleForceChange);
     };
   }, []);
 
