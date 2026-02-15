@@ -303,7 +303,12 @@ export function ApplicationQuestionsWizard({
       </div>
 
       {/* Question container */}
-      <div className="relative min-h-[300px] sm:min-h-[300px] md:min-h-[320px] flex flex-col">
+      <div className={`relative flex flex-col ${
+        questions.length <= 1 ? 'min-h-[160px] sm:min-h-[180px] md:min-h-[200px]' :
+        questions.length <= 2 ? 'min-h-[200px] sm:min-h-[220px] md:min-h-[240px]' :
+        questions.length <= 3 ? 'min-h-[240px] sm:min-h-[260px] md:min-h-[280px]' :
+        'min-h-[300px] sm:min-h-[300px] md:min-h-[320px]'
+      }`}>
         {!isSubmitStep && currentQuestion ? (
             <div
               key={currentQuestion.id}
