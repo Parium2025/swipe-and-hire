@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,16 +42,8 @@ export function ApplicationQuestionsWizard({
   const isSubmitStep = currentStep === questions.length;
   const currentQuestion = questions[currentStep];
 
-  // Track which step the buttons should reflect — updated only after exit animation
-  // to prevent the "Redan sökt" / "Tillbaka" flash during step transitions.
-  const [buttonStep, setButtonStep] = useState(currentStep);
-  const buttonIsSubmitStep = buttonStep === questions.length;
-
-  // Sync buttonStep when currentStep changes (replaces AnimatePresence onExitComplete)
-  useEffect(() => {
-    const timer = setTimeout(() => setButtonStep(currentStep), 120);
-    return () => clearTimeout(timer);
-  }, [currentStep]);
+  // buttonIsSubmitStep now tracks currentStep directly (no delay needed without AnimatePresence)
+  const buttonIsSubmitStep = isSubmitStep;
   
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : null;
   const isCurrentAnswered = currentQuestion 
