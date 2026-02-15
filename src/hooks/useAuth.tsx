@@ -1122,20 +1122,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Remove session tracking before signing out
       await removeSession();
       
-      // Försök server-side logout, men fortsätt oavsett resultat.
-      // Om sessionen redan är ogiltig (kickad av 2-session-gränsen)
-      // returnerar servern 403 "Session not found" — det ska inte blockera utloggning.
+      // Logga ut BARA denna enhet (scope: 'local').
+      // 'global' invaliderar alla sessioner på alla enheter — det vill vi INTE.
+      // Varje enhet ska kunna logga ut oberoende av varandra.
       try {
-        const { error: signOutError } = await supabase.auth.signOut({ scope: 'global' });
-        if (signOutError) {
-          console.warn('Server-side signOut returned error (session likely already invalidated):', signOutError.message);
-          // Force clear local auth state when server rejects (403 = session gone)
-          await supabase.auth.signOut({ scope: 'local' });
-        }
+        await supabase.auth.signOut({ scope: 'local' });
       } catch (serverErr) {
-        console.warn('Server-side signOut threw:', serverErr);
-        // Force clear local auth state
-        try { await supabase.auth.signOut({ scope: 'local' }); } catch {}
+        console.warn('SignOut failed:', serverErr);
       }
       
       // 🧹 Alltid rensa lokalt — oavsett om server-logout lyckades
