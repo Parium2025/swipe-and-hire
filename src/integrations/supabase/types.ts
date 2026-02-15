@@ -2123,6 +2123,39 @@ export type Database = {
           },
         ]
       }
+      user_sessions: {
+        Row: {
+          created_at: string
+          device_label: string | null
+          id: string
+          ip_address: string | null
+          last_heartbeat_at: string
+          session_token: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_label?: string | null
+          id?: string
+          ip_address?: string | null
+          last_heartbeat_at?: string
+          session_token: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_label?: string | null
+          id?: string
+          ip_address?: string | null
+          last_heartbeat_at?: string
+          session_token?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_stage_settings: {
         Row: {
           color: string | null
@@ -2257,6 +2290,7 @@ export type Database = {
         Args: { p_applicant_id: string; p_employer_id: string }
         Returns: boolean
       }
+      heartbeat_session: { Args: { p_session_token: string }; Returns: boolean }
       is_conversation_admin: {
         Args: { p_conversation_id: string }
         Returns: boolean
@@ -2270,6 +2304,7 @@ export type Database = {
         Returns: boolean
       }
       is_org_admin: { Args: { p_user_id: string }; Returns: boolean }
+      is_session_valid: { Args: { p_session_token: string }; Returns: boolean }
       queue_cv_analysis: {
         Args: {
           p_applicant_id: string
@@ -2284,6 +2319,16 @@ export type Database = {
         Args: { p_job_id: string; p_user_id: string }
         Returns: boolean
       }
+      register_session: {
+        Args: {
+          p_device_label?: string
+          p_ip_address?: string
+          p_session_token: string
+          p_user_agent?: string
+        }
+        Returns: Json
+      }
+      remove_session: { Args: { p_session_token: string }; Returns: undefined }
       same_organization: {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean

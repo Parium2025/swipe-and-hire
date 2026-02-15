@@ -11,6 +11,7 @@ import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
 import { authSplashEvents } from '@/lib/authSplashEvents';
+import { useSessionManager, clearSessionToken } from '@/hooks/useSessionManager';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -1118,6 +1119,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Vänta för smooth känsla
       await new Promise(resolve => setTimeout(resolve, 550));
       
+      // Remove session tracking before signing out
+      await removeSession();
+      
       // Låt backend sköta sessionen
       await supabase.auth.signOut({ scope: 'global' });
       
@@ -1127,6 +1131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 🗑️ Rensa ALLA app-cacher (väder, betyg, snapshots etc) för att 
       // garantera att ingen gammal data visas vid nästa inloggning
       clearAllAppCaches();
+      clearSessionToken();
       
       // Vänta resterande tid för smooth övergång
       await new Promise(resolve => setTimeout(resolve, 550));
@@ -1949,6 +1954,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Track user activity for 24-hour inactivity timeout
   useInactivityTimeout(!!user);
+
+  // Session limiter: max 2 concurrent sessions per user
+  const handleSessionKicked = useCallback(async () => {
+    // We got kicked by another device logging in
+    clearSessionToken();
+    clearAllAppCaches();
+    await supabase.auth.signOut({ scope: 'local' });
+    window.location.href = '/auth';
+  }, []);
+
+  const { removeSession } = useSessionManager(user?.id ?? null, handleSessionKicked);
 
   return (
     <AuthContext.Provider value={value}>
