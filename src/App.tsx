@@ -34,6 +34,7 @@ import { cleanupOldDrafts } from "@/lib/draftUtils";
 import { ScrollRestoration } from "@/components/ScrollRestoration";
 import { CriticalAssetPreloads } from "@/components/CriticalAssetPreloads";
 import { AuthSplashScreen } from "@/components/AuthSplashScreen";
+import { RealtimeKeepAlive } from "@/components/RealtimeKeepAlive";
 
 // Run draft cleanup once on app load (removes drafts older than 1 day)
 // Defer to idle time to avoid blocking first paint
@@ -138,6 +139,7 @@ const App = () => {
             <BrowserRouter>
               <UnsavedChangesProvider>
                 <PushNotificationProvider />
+                <RealtimeKeepAlive />
                 {/* Auth splash screen - visas vid navigering till /auth */}
                 <AuthSplashScreen />
                 <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
