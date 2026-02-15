@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 const SESSION_TOKEN_KEY = 'parium_session_token';
-const HEARTBEAT_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
+const HEARTBEAT_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 /**
  * Generate a unique session token per browser (persisted in localStorage).
