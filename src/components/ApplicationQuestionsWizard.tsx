@@ -241,7 +241,7 @@ export function ApplicationQuestionsWizard({
     }
   };
 
-  // Blur handlers to prevent focus ring flash (same pattern as WizardFooter)
+  // Blur handlers to prevent focus ring flash (synced with WizardFooter pattern)
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.blur();
     const activeEl = document.activeElement as HTMLElement;
@@ -250,6 +250,19 @@ export function ApplicationQuestionsWizard({
 
   const handleMouseUp = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.blur();
+  };
+
+  // Container-level touch/mouse blur (same as WizardFooter)
+  const handleContainerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  };
+
+  const handleContainerTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
   };
 
   // Shared button styles (copy-pasted from WizardFooter, only px adjusted for compact size)
@@ -408,7 +421,12 @@ export function ApplicationQuestionsWizard({
       </div>
 
       {/* Navigation - all buttons always rendered, visibility via CSS to prevent flash */}
-      <div ref={navRef} className="flex items-center justify-center gap-3 pt-2 border-t border-white/[0.06]">
+      <div
+        ref={navRef}
+        className="flex items-center justify-center gap-3 pt-2 border-t border-white/[0.06]"
+        onMouseDown={handleContainerMouseDown}
+        onTouchStart={handleContainerTouchStart}
+      >
         <button
           type="button"
           onMouseDown={handleMouseDown}
