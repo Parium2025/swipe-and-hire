@@ -206,14 +206,18 @@ export function useSessionManager(
           event: 'DELETE',
           schema: 'public',
           table: 'user_sessions',
-          filter: `user_id=eq.${userId}`,
+          // NO filter — Supabase Realtime cannot filter DELETE events reliably
+          // (filter is applied on `new` which is null for DELETEs).
+          // We match manually in the callback instead.
         },
         (payload) => {
+          const old = payload.old as any;
+          // Only react to deletions of OUR user's sessions
+          if (old?.user_id !== userId) return;
           // Check if the deleted session is ours
-          const deletedToken = (payload.old as any)?.session_token;
+          const deletedToken = old?.session_token;
           if (deletedToken === sessionTokenRef.current) {
             console.log('🚫 This session was kicked by another device');
-            // Store that we were kicked so we can show the toast with device info
             kickedRef.current = true;
           }
         }
@@ -227,7 +231,6 @@ export function useSessionManager(
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          // If we just got kicked, the INSERT tells us which device replaced us
           if (kickedRef.current) {
             kickedRef.current = false;
             const newDevice = (payload.new as any)?.device_label || 'en annan enhet';
