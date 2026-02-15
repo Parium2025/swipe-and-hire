@@ -394,29 +394,6 @@ const JobView = () => {
           
           <div className="flex items-center gap-2">
             <button
-              onClick={async () => {
-                const shareUrl = `${window.location.origin}/job/${jobId}`;
-                const shareData = {
-                  title: job.title,
-                  text: `${job.title} hos ${job.profiles?.company_name || 'Företag'} – ${job.location || ''}`,
-                  url: shareUrl,
-                };
-                if (navigator.share) {
-                  try {
-                    await navigator.share(shareData);
-                  } catch {}
-                } else {
-                  await navigator.clipboard.writeText(shareUrl);
-                  toast({ title: 'Länk kopierad!', description: 'Annonsens länk har kopierats till urklipp' });
-                }
-              }}
-              className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all"
-              aria-label="Dela annons"
-            >
-              <Share2 className="h-5 w-5 text-white" />
-            </button>
-
-            <button
               onClick={() => setShowCompanyProfile(true)}
               className="flex items-center space-x-2 hover:bg-white/10 p-1.5 rounded-lg transition-all cursor-pointer"
             >
@@ -444,6 +421,29 @@ const JobView = () => {
                   Se företagsprofil
                 </div>
               </div>
+            </button>
+
+            <button
+              onClick={async () => {
+                const shareUrl = `${window.location.origin}/job/${jobId}`;
+                const shareData = {
+                  title: job.title,
+                  text: `${job.title} hos ${job.profiles?.company_name || 'Företag'} – ${job.location || ''}`,
+                  url: shareUrl,
+                };
+                if (navigator.share) {
+                  try {
+                    await navigator.share(shareData);
+                  } catch {}
+                } else {
+                  await navigator.clipboard.writeText(shareUrl);
+                  toast({ title: 'Länk kopierad!', description: 'Annonsens länk har kopierats till urklipp' });
+                }
+              }}
+              className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all"
+              aria-label="Dela annons"
+            >
+              <Share2 className="h-5 w-5 text-white" />
             </button>
           </div>
         </div>
