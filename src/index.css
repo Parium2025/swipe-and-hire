@@ -19,6 +19,19 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   touch-action: manipulation;
+  /* Prevent iOS Safari elastic overscroll / rubber-banding */
+  overscroll-behavior: none;
+  overflow-y: auto;
+}
+
+body {
+  /* Prevent iOS Safari viewport bounce that hides the top nav */
+  overscroll-behavior: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ============================================
