@@ -13,10 +13,13 @@ import { User, MapPin, Building, FileText, Camera, Globe, Users } from 'lucide-r
 import FileUpload from './FileUpload';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
+import { useOfflineProfileQueue } from '@/hooks/useOfflineProfileQueue';
+import { getIsOnline } from '@/lib/connectivityManager';
 
 const ProfileSetup = () => {
   const { profile, userRole, updateProfile, user } = useAuth();
   const { toast } = useToast();
+  const { enqueueProfileUpdate } = useOfflineProfileQueue(user?.id);
   const [loading, setLoading] = useState(false);
   
   // Form fields
@@ -119,6 +122,17 @@ const ProfileSetup = () => {
       if (cvUrl) {
         updates.cv_url = cvUrl;
         updates.cv_filename = cvFileName || null;
+      }
+
+      // 🚀 OFFLINE: Queue profile updates for auto-sync
+      if (!getIsOnline()) {
+        enqueueProfileUpdate(updates);
+        toast({
+          title: "Profil köad ✓",
+          description: "Sparas automatiskt när du är online igen"
+        });
+        setLoading(false);
+        return;
       }
 
       const result = await updateProfile(updates);
