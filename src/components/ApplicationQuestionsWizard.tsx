@@ -55,12 +55,15 @@ export function ApplicationQuestionsWizard({
 
   const handleNext = useCallback(() => {
     if (currentStep < totalSteps - 1) {
+      (document.activeElement as HTMLElement)?.blur();
       setCurrentStep(prev => prev + 1);
     }
   }, [currentStep, totalSteps]);
 
   const handlePrev = useCallback(() => {
     if (currentStep > 0) {
+      // Blur any focused element before step change to prevent focus-ring flash
+      (document.activeElement as HTMLElement)?.blur();
       setNavigatedBack(true);
       setCurrentStep(prev => prev - 1);
     }
