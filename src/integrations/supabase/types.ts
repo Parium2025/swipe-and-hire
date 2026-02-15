@@ -2201,6 +2201,7 @@ export type Database = {
     }
     Functions: {
       can_view_job_application: { Args: { p_job_id: string }; Returns: boolean }
+      cleanup_stale_sessions: { Args: never; Returns: number }
       complete_cv_analysis: {
         Args: {
           p_error_message?: string
