@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef, ReactNode, useC
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
 import { getMediaUrl } from '@/lib/mediaManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
@@ -1966,20 +1967,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     clearSessionToken();
     clearAllAppCaches();
-    
-    // Show toast so user knows what happened
-    toast({
-      title: 'Du har loggats ut',
-      description: 'En ny session startades på en annan enhet och denna session avslutades.',
-      variant: 'default',
-      duration: 6000,
-    });
-    
     await supabase.auth.signOut({ scope: 'local' });
-    // Give user time to read the toast before redirecting
-    setTimeout(() => {
-      window.location.href = '/auth';
-    }, 2500);
+    
+    // Persistent toast — stays until user dismisses it, then redirect
+    sonnerToast('Du har loggats ut', {
+      description: 'En ny session startades på en annan enhet och denna session avslutades. Tryck här för att fortsätta.',
+      duration: Infinity,
+      onDismiss: () => {
+        window.location.href = '/auth';
+      },
+      onAutoClose: () => {
+        window.location.href = '/auth';
+      },
+    });
   }, []);
 
   const { removeSession } = useSessionManager(user?.id ?? null, handleSessionKicked);
