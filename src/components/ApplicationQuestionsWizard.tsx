@@ -311,10 +311,10 @@ export function ApplicationQuestionsWizard({
           {!isSubmitStep && currentQuestion ? (
             <motion.div
               key={currentQuestion.id}
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
               className="flex-1 flex flex-col"
             >
               {/* Question number */}
@@ -344,10 +344,10 @@ export function ApplicationQuestionsWizard({
           ) : isSubmitStep ? (
             <motion.div
               key="submit-step"
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
               className="flex-1 flex flex-col"
             >
               {/* Header */}
