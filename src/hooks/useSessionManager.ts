@@ -70,7 +70,7 @@ function getDeviceLabel(): string {
 /**
  * Hook that manages max 2 concurrent sessions per user.
  * - Registers session on login
- * - Sends heartbeat every 30 min
+ * - Sends heartbeat every 10 min
  * - Listens for session deletion (kicked by another device)
  * - Removes session on logout
  */
