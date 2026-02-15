@@ -184,6 +184,8 @@ export function useSessionManager(
   }, []);
 
   // Fast validity check — polls every 15s to detect if our session was kicked
+  // If session is gone, try to re-register first (it may have been cleaned by cron).
+  // Only kick if re-registration shows we replaced someone (meaning 2 others exist).
   const checkSessionValidity = useCallback(async () => {
     const token = sessionTokenRef.current;
     if (!token || !userId || !registeredRef.current || alreadyKickedRef.current) return;
@@ -194,10 +196,39 @@ export function useSessionManager(
       });
 
       if (isValid === false && !alreadyKickedRef.current) {
-        alreadyKickedRef.current = true;
+        // Session row is gone — could be cron cleanup OR a real kick.
+        // Try silent re-registration before assuming kicked.
+        console.log('⚠️ Session missing — attempting silent re-registration…');
         registeredRef.current = false;
-        console.log('🚫 Session no longer valid — kicked by another device');
-        onKicked();
+
+        try {
+          const { data, error } = await supabase.rpc('register_session', {
+            p_session_token: token,
+            p_device_label: getDeviceLabel(),
+            p_ip_address: null,
+            p_user_agent: navigator.userAgent.substring(0, 200),
+          });
+
+          if (error) {
+            // Can't re-register (e.g. not authenticated anymore) → kick
+            alreadyKickedRef.current = true;
+            console.log('🚫 Re-registration failed — kicking user');
+            onKicked();
+            return;
+          }
+
+          registeredRef.current = true;
+          const result = data as Record<string, unknown> | null;
+
+          if (result?.status === 'kicked_oldest') {
+            console.log(`📱 Re-registered and kicked oldest session (${result.kicked_device || 'unknown'})`);
+          } else {
+            console.log('✅ Session silently re-registered (was cleaned by cron, not kicked)');
+          }
+        } catch {
+          // Network error during re-registration — don't kick, try again next cycle
+          console.warn('Re-registration network error — will retry');
+        }
       }
     } catch {
       // Network error — skip, try again next interval
