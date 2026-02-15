@@ -1,5 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Send, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -47,6 +46,12 @@ export function ApplicationQuestionsWizard({
   // to prevent the "Redan sökt" / "Tillbaka" flash during step transitions.
   const [buttonStep, setButtonStep] = useState(currentStep);
   const buttonIsSubmitStep = buttonStep === questions.length;
+
+  // Sync buttonStep when currentStep changes (replaces AnimatePresence onExitComplete)
+  useEffect(() => {
+    const timer = setTimeout(() => setButtonStep(currentStep), 120);
+    return () => clearTimeout(timer);
+  }, [currentStep]);
   
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : null;
   const isCurrentAnswered = currentQuestion 
@@ -307,15 +312,10 @@ export function ApplicationQuestionsWizard({
 
       {/* Question container */}
       <div className="relative min-h-[280px] sm:min-h-[300px] md:min-h-[320px] flex flex-col">
-        <AnimatePresence mode="wait" onExitComplete={() => setButtonStep(currentStep)}>
-          {!isSubmitStep && currentQuestion ? (
-            <motion.div
+        {!isSubmitStep && currentQuestion ? (
+            <div
               key={currentQuestion.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.12 }}
-              className="flex-1 flex flex-col"
+              className="flex-1 flex flex-col transition-opacity duration-100"
             >
               {/* Question number */}
               <div className="text-center mb-2">
@@ -340,15 +340,11 @@ export function ApplicationQuestionsWizard({
                   {renderQuestionInput(currentQuestion)}
                 </div>
               </div>
-            </motion.div>
+            </div>
           ) : isSubmitStep ? (
-            <motion.div
+            <div
               key="submit-step"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.12 }}
-              className="flex-1 flex flex-col"
+              className="flex-1 flex flex-col transition-opacity duration-100"
             >
               {/* Header */}
               <div className="text-center mb-3">
@@ -415,9 +411,8 @@ export function ApplicationQuestionsWizard({
                   </a>
                 </div>
               )}
-            </motion.div>
+            </div>
           ) : null}
-        </AnimatePresence>
       </div>
 
       {/* Navigation - all buttons always rendered, visibility via CSS to prevent flash */}
