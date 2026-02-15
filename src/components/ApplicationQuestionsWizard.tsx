@@ -290,7 +290,7 @@ export function ApplicationQuestionsWizard({
       </div>
 
       {/* Question container */}
-      <div className="relative min-h-[200px] sm:min-h-[280px] md:min-h-[320px] flex flex-col">
+      <div className="relative min-h-[240px] sm:min-h-[300px] md:min-h-[320px] flex flex-col">
         <AnimatePresence mode="wait" onExitComplete={() => setButtonStep(currentStep)}>
           {!isSubmitStep && currentQuestion ? (
             <motion.div
