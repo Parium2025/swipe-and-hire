@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
 const SESSION_TOKEN_KEY = 'parium_session_token';
 const HEARTBEAT_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
@@ -81,10 +80,9 @@ export function useSessionManager(
 ) {
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const validityCheckIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const sessionTokenRef = useRef<string | null>(null);
   const registeredRef = useRef(false);
-  const kickedRef = useRef(false);
+  const alreadyKickedRef = useRef(false); // Prevent double-kick
 
   // Register session when user logs in
   const registerSession = useCallback(async () => {
@@ -188,21 +186,17 @@ export function useSessionManager(
   // Fast validity check — polls every 15s to detect if our session was kicked
   const checkSessionValidity = useCallback(async () => {
     const token = sessionTokenRef.current;
-    if (!token || !userId || !registeredRef.current) return;
+    if (!token || !userId || !registeredRef.current || alreadyKickedRef.current) return;
 
     try {
       const { data: isValid } = await supabase.rpc('is_session_valid', {
         p_session_token: token,
       });
 
-      if (isValid === false) {
+      if (isValid === false && !alreadyKickedRef.current) {
+        alreadyKickedRef.current = true;
+        registeredRef.current = false;
         console.log('🚫 Session no longer valid — kicked by another device');
-        toast({
-          title: 'Du har loggats ut',
-          description: 'En ny session startades på en annan enhet och denna session avslutades.',
-          variant: 'default',
-          duration: 8000,
-        });
         onKicked();
       }
     } catch {

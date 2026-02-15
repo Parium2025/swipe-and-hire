@@ -282,6 +282,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch { return 0; }
   });
   const isManualSignOutRef = useRef(false);
+  const isSessionKickRef = useRef(false); // Suppress duplicate toast on session kick
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
   const mediaPreloadCompleteRef = useRef(false);
@@ -379,6 +380,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           previousUserId !== null && 
           newUserId === null &&
           !isManualSignOutRef.current &&
+          !isSessionKickRef.current &&
           event !== 'INITIAL_SESSION'
         ) {
           console.log('🔄 Session ended in another tab - user was logged out');
@@ -1959,11 +1961,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Session limiter: max 2 concurrent sessions per user
   const handleSessionKicked = useCallback(async () => {
-    // We got kicked by another device logging in
+    // Flag to prevent onAuthStateChange from showing a duplicate toast
+    isSessionKickRef.current = true;
+    
     clearSessionToken();
     clearAllAppCaches();
+    
+    // Show toast so user knows what happened
+    toast({
+      title: 'Du har loggats ut',
+      description: 'En ny session startades på en annan enhet och denna session avslutades.',
+      variant: 'default',
+      duration: 6000,
+    });
+    
     await supabase.auth.signOut({ scope: 'local' });
-    window.location.href = '/auth';
+    // Give user time to read the toast before redirecting
+    setTimeout(() => {
+      window.location.href = '/auth';
+    }, 2500);
   }, []);
 
   const { removeSession } = useSessionManager(user?.id ?? null, handleSessionKicked);
