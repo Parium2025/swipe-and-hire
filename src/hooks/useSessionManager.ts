@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 
 const SESSION_TOKEN_KEY = 'parium_session_token';
 const HEARTBEAT_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+const VALIDITY_CHECK_INTERVAL_MS = 15 * 1000; // 15 seconds — fast kick detection
 
 /**
  * Generate a unique session token per browser (persisted in localStorage).
@@ -79,6 +80,7 @@ export function useSessionManager(
   onKicked: () => void
 ) {
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const validityCheckIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const sessionTokenRef = useRef<string | null>(null);
   const registeredRef = useRef(false);
@@ -183,7 +185,32 @@ export function useSessionManager(
     sessionTokenRef.current = null;
   }, []);
 
-  // Listen for realtime deletion of our session (kicked)
+  // Fast validity check — polls every 15s to detect if our session was kicked
+  const checkSessionValidity = useCallback(async () => {
+    const token = sessionTokenRef.current;
+    if (!token || !userId || !registeredRef.current) return;
+
+    try {
+      const { data: isValid } = await supabase.rpc('is_session_valid', {
+        p_session_token: token,
+      });
+
+      if (isValid === false) {
+        console.log('🚫 Session no longer valid — kicked by another device');
+        toast({
+          title: 'Du har loggats ut',
+          description: 'En ny session startades på en annan enhet och denna session avslutades.',
+          variant: 'default',
+          duration: 8000,
+        });
+        onKicked();
+      }
+    } catch {
+      // Network error — skip, try again next interval
+    }
+  }, [userId, onKicked]);
+
+  // Set up session management
   useEffect(() => {
     if (!userId) return;
 
@@ -193,88 +220,27 @@ export function useSessionManager(
     // Register on mount
     registerSession();
 
-    // Start heartbeat
+    // Start heartbeat (keeps session alive)
     heartbeatIntervalRef.current = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
 
-    // Listen for our session being deleted (another device kicked us)
-    // Also listen for INSERT to detect which new device replaced us
-    const channel = supabase
-      .channel(`session-watch-${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'user_sessions',
-          // NO filter — Supabase Realtime cannot filter DELETE events reliably
-          // (filter is applied on `new` which is null for DELETEs).
-          // We match manually in the callback instead.
-        },
-        (payload) => {
-          const old = payload.old as any;
-          // Only react to deletions of OUR user's sessions
-          if (old?.user_id !== userId) return;
-          // Check if the deleted session is ours
-          const deletedToken = old?.session_token;
-          if (deletedToken === sessionTokenRef.current) {
-            console.log('🚫 This session was kicked by another device');
-            kickedRef.current = true;
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'user_sessions',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          if (kickedRef.current) {
-            kickedRef.current = false;
-            const newDevice = (payload.new as any)?.device_label || 'en annan enhet';
-            toast({
-              title: 'Du har loggats ut',
-              description: `En ny session startades på ${newDevice} och denna session avslutades.`,
-              variant: 'default',
-              duration: 8000,
-            });
-            onKicked();
-          }
-        }
-      )
-      .subscribe();
-
-    // Fallback: if DELETE fires but INSERT never comes (edge case), kick after 3s
-    const originalKickedRef = kickedRef;
-    const fallbackCheck = setInterval(() => {
-      if (originalKickedRef.current) {
-        originalKickedRef.current = false;
-        toast({
-          title: 'Du har loggats ut',
-          description: 'Någon loggade in på en annan enhet och din session avslutades.',
-          variant: 'default',
-          duration: 8000,
-        });
-        onKicked();
-      }
-    }, 3000);
-
-    realtimeChannelRef.current = channel;
+    // Start fast validity check (detects kicks within ~15s)
+    // Skip the first 5 seconds to allow registration to complete
+    const validityStartDelay = setTimeout(() => {
+      validityCheckIntervalRef.current = setInterval(checkSessionValidity, VALIDITY_CHECK_INTERVAL_MS);
+    }, 5000);
 
     return () => {
-      clearInterval(fallbackCheck);
+      clearTimeout(validityStartDelay);
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
         heartbeatIntervalRef.current = null;
       }
-      if (realtimeChannelRef.current) {
-        supabase.removeChannel(realtimeChannelRef.current);
-        realtimeChannelRef.current = null;
+      if (validityCheckIntervalRef.current) {
+        clearInterval(validityCheckIntervalRef.current);
+        validityCheckIntervalRef.current = null;
       }
     };
-  }, [userId, registerSession, sendHeartbeat, onKicked]);
+  }, [userId, registerSession, sendHeartbeat, checkSessionValidity]);
 
   return { removeSession };
 }
