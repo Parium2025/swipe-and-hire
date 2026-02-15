@@ -16,6 +16,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw, ExternalLink, Bot, AlertTriangle, Loader2, WifiOff } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
+import { useOfflineProfileQueue } from '@/hooks/useOfflineProfileQueue';
+import { getIsOnline } from '@/lib/connectivityManager';
 import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { CvViewer } from '@/components/CvViewer';
@@ -189,6 +191,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+  const { enqueueProfileUpdate } = useOfflineProfileQueue(user?.id);
   const [loading, setLoading] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
@@ -1328,7 +1331,44 @@ const Profile = () => {
     e.preventDefault();
 
     if (!isOnline) {
-      showOfflineToast();
+      // 🚀 OFFLINE: Queue text-based profile updates for auto-sync
+      const valid = validateRequiredFields();
+      if (!valid) {
+        toast({
+          title: "Komplettera uppgifter",
+          description: "Fyll i alla obligatoriska fält markerade med rött.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const offlineUpdates: any = {
+        first_name: firstName.trim() || null,
+        last_name: lastName.trim() || null,
+        bio: bio.trim() || null,
+        location: userLocation.trim() || null,
+        city: userLocation.trim() || null,
+        postal_code: postalCode.trim() || null,
+        phone: phone.trim() || null,
+        birth_date: birthDate || null,
+        employment_type: employmentStatus || null,
+        work_schedule: workingHours || null,
+        availability: availability || null,
+      };
+
+      if (isEmployer) {
+        offlineUpdates.company_name = companyName.trim() || null;
+        offlineUpdates.org_number = orgNumber.trim() || null;
+      }
+
+      enqueueProfileUpdate(offlineUpdates);
+      setHasUnsavedChanges(false);
+
+      toast({
+        title: "Ändringar köade ✓",
+        description: "Sparas automatiskt när du är online igen",
+        duration: 4000,
+      });
       return;
     }
 
