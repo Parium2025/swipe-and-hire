@@ -19,6 +19,24 @@ interface NotificationPreference {
   email_enabled: boolean;
 }
 
+const CACHE_KEY = 'parium_notif_prefs_';
+
+function readCache(userId: string): NotificationPreference[] | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY + userId);
+    if (!raw) return null;
+    return JSON.parse(raw).items;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(userId: string, items: NotificationPreference[]): void {
+  try {
+    localStorage.setItem(CACHE_KEY + userId, JSON.stringify({ items, timestamp: Date.now() }));
+  } catch { /* storage full */ }
+}
+
 export const useNotificationPreferences = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -32,10 +50,21 @@ export const useNotificationPreferences = () => {
         .select('notification_type, is_enabled, email_enabled')
         .eq('user_id', user.id);
       if (error) throw error;
-      return data as NotificationPreference[];
+      const result = data as NotificationPreference[];
+      writeCache(user.id, result);
+      return result;
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5,
+    initialData: () => {
+      if (!user?.id) return undefined;
+      return readCache(user.id) ?? undefined;
+    },
+    initialDataUpdatedAt: () => {
+      if (!user?.id) return undefined;
+      const cached = readCache(user.id);
+      return cached ? 0 : undefined;
+    },
   });
 
   const isEnabled = (type: NotificationType, channel: NotificationChannel = 'push'): boolean => {
