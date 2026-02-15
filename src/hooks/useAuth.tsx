@@ -1122,14 +1122,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Remove session tracking before signing out
       await removeSession();
       
-      // Låt backend sköta sessionen
-      await supabase.auth.signOut({ scope: 'global' });
+      // Försök server-side logout, men fortsätt oavsett resultat.
+      // Om sessionen redan är ogiltig (kickad av 2-session-gränsen)
+      // returnerar servern 403 "Session not found" — det ska inte blockera utloggning.
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (serverErr) {
+        console.warn('Server-side signOut failed (session likely already invalidated):', serverErr);
+      }
       
-      // Rensa alla sparade formulärutkast vid utloggning
+      // 🧹 Alltid rensa lokalt — oavsett om server-logout lyckades
       clearAllDrafts();
-      
-      // 🗑️ Rensa ALLA app-cacher (väder, betyg, snapshots etc) för att 
-      // garantera att ingen gammal data visas vid nästa inloggning
       clearAllAppCaches();
       clearSessionToken();
       
@@ -1137,11 +1140,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await new Promise(resolve => setTimeout(resolve, 550));
     } catch (error: any) {
       console.error('Sign out error:', error);
-      toast({
-        variant: "destructive",
-        title: "Fel",
-        description: "Kunde inte logga ut. Försök igen.",
-      });
+      // Även vid oväntat fel: rensa lokalt så användaren inte fastnar
+      clearAllDrafts();
+      clearAllAppCaches();
+      clearSessionToken();
     } finally {
       setLoading(false);
       isManualSignOutRef.current = false;
