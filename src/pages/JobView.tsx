@@ -157,7 +157,7 @@ const JobView = () => {
         user
           ? supabase
               .from('job_applications')
-              .select('id')
+              .select('id, custom_answers')
               .eq('job_id', jobId!)
               .eq('applicant_id', user.id)
               .maybeSingle()
@@ -177,6 +177,14 @@ const JobView = () => {
       setJob(data);
       setJobQuestions(questions);
       setHasAlreadyApplied(applied);
+
+      // If already applied, load saved answers from the application
+      if (applied && applicationResult.data?.custom_answers) {
+        const savedAnswers = applicationResult.data.custom_answers as Record<string, any>;
+        if (savedAnswers && typeof savedAnswers === 'object') {
+          setAnswers(savedAnswers);
+        }
+      }
       hasLoadedOnce.current = true;
       setLoading(false);
 
