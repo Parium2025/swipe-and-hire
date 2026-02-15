@@ -560,7 +560,7 @@ const SearchJobs = () => {
       
       {/* Show message when all jobs are loaded */}
       {!hasMoreJobs && filteredAndSortedJobs.length > 0 && (
-        <div className="text-center py-0">
+        <div className="text-center pt-1 pb-0">
           <p className="text-white text-sm">
             Alla {filteredAndSortedJobs.length} jobb visas
           </p>
