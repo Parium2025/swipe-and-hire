@@ -11,6 +11,7 @@ import { MapPin, Smartphone, WifiOff, Bug, Bell, Mail } from 'lucide-react';
 import { MessageTemplatesSettings } from '@/components/MessageTemplatesSettings';
 import { useForceOffline } from '@/hooks/useOnlineStatus';
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
+import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 
 const EmployerSettings = () => {
   const { user, profile, updateProfile, updatePassword } = useAuth();
@@ -229,6 +230,9 @@ const EmployerSettings = () => {
 
       {/* Message Templates */}
       <MessageTemplatesSettings />
+
+      {/* Active Sessions */}
+      <ActiveSessionsSettings />
 
       {/* Team Management - Only visible for admins */}
       <TeamManagement />

@@ -2230,6 +2230,17 @@ export type Database = {
         Args: { p_job_id: string }
         Returns: boolean
       }
+      get_active_sessions: {
+        Args: never
+        Returns: {
+          created_at: string
+          device_label: string
+          id: string
+          is_current: boolean
+          last_heartbeat_at: string
+          session_token: string
+        }[]
+      }
       get_applicant_latest_activity: {
         Args: { p_applicant_ids: string[]; p_employer_id: string }
         Returns: {
@@ -2305,6 +2316,7 @@ export type Database = {
       }
       is_org_admin: { Args: { p_user_id: string }; Returns: boolean }
       is_session_valid: { Args: { p_session_token: string }; Returns: boolean }
+      kick_session: { Args: { p_session_id: string }; Returns: boolean }
       queue_cv_analysis: {
         Args: {
           p_applicant_id: string

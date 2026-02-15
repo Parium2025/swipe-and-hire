@@ -82,6 +82,7 @@ export function useSessionManager(
   const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const sessionTokenRef = useRef<string | null>(null);
   const registeredRef = useRef(false);
+  const kickedRef = useRef(false);
 
   // Register session when user logs in
   const registerSession = useCallback(async () => {
@@ -107,7 +108,7 @@ export function useSessionManager(
 
       const result = data as Record<string, unknown> | null;
       if (result?.status === 'kicked_oldest') {
-        console.log(`📱 Kicked oldest session (${result.kicked_device || 'unknown device'}) to make room`);
+        console.log(`📱 Kicked oldest session (${result.kicked_device || 'unknown device'}) to make room for ${result.new_device || 'this device'}`);
       }
     } catch (err) {
       console.warn('Session registration error:', err);
@@ -163,6 +164,7 @@ export function useSessionManager(
     heartbeatIntervalRef.current = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
 
     // Listen for our session being deleted (another device kicked us)
+    // Also listen for INSERT to detect which new device replaced us
     const channel = supabase
       .channel(`session-watch-${userId}`)
       .on(
@@ -178,9 +180,27 @@ export function useSessionManager(
           const deletedToken = (payload.old as any)?.session_token;
           if (deletedToken === sessionTokenRef.current) {
             console.log('🚫 This session was kicked by another device');
+            // Store that we were kicked so we can show the toast with device info
+            kickedRef.current = true;
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'user_sessions',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          // If we just got kicked, the INSERT tells us which device replaced us
+          if (kickedRef.current) {
+            kickedRef.current = false;
+            const newDevice = (payload.new as any)?.device_label || 'en annan enhet';
             toast({
               title: 'Du har loggats ut',
-              description: 'Någon loggade in på en annan enhet och din session avslutades.',
+              description: `En ny session startades på ${newDevice} och denna session avslutades.`,
               variant: 'default',
               duration: 8000,
             });
@@ -190,9 +210,25 @@ export function useSessionManager(
       )
       .subscribe();
 
+    // Fallback: if DELETE fires but INSERT never comes (edge case), kick after 3s
+    const originalKickedRef = kickedRef;
+    const fallbackCheck = setInterval(() => {
+      if (originalKickedRef.current) {
+        originalKickedRef.current = false;
+        toast({
+          title: 'Du har loggats ut',
+          description: 'Någon loggade in på en annan enhet och din session avslutades.',
+          variant: 'default',
+          duration: 8000,
+        });
+        onKicked();
+      }
+    }, 3000);
+
     realtimeChannelRef.current = channel;
 
     return () => {
+      clearInterval(fallbackCheck);
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
         heartbeatIntervalRef.current = null;
