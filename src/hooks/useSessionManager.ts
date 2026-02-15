@@ -116,6 +116,8 @@ export function useSessionManager(
   }, [userId]);
 
   // Heartbeat to keep session alive
+  // If heartbeat returns false (session expired after offline), try to re-register.
+  // Only kick if re-registration reveals we're over the session limit AND got replaced.
   const sendHeartbeat = useCallback(async () => {
     const token = sessionTokenRef.current;
     if (!token || !userId) return;
@@ -126,12 +128,43 @@ export function useSessionManager(
       });
 
       if (isValid === false) {
-        // Session was removed (kicked by another device)
-        console.log('💔 Session invalidated - kicked by another device');
-        onKicked();
+        // Session row is gone — could be:
+        // 1. Kicked by another device (handled by Realtime DELETE listener)
+        // 2. Expired while offline (cron cleaned it up)
+        // → Try to silently re-register before assuming kicked
+        console.log('⚠️ Session expired — attempting silent re-registration…');
+        registeredRef.current = false;
+
+        try {
+          const { data, error } = await supabase.rpc('register_session', {
+            p_session_token: token,
+            p_device_label: getDeviceLabel(),
+            p_ip_address: null,
+            p_user_agent: navigator.userAgent.substring(0, 200),
+          });
+
+          if (error) {
+            console.warn('Re-registration failed — kicking user:', error.message);
+            onKicked();
+            return;
+          }
+
+          registeredRef.current = true;
+          const result = data as Record<string, unknown> | null;
+
+          if (result?.status === 'kicked_oldest') {
+            console.log(`📱 Re-registered and kicked oldest session (${result.kicked_device || 'unknown'})`);
+          } else {
+            console.log('✅ Session silently re-registered after offline period');
+          }
+        } catch (reRegErr) {
+          console.warn('Re-registration error — kicking user:', reRegErr);
+          onKicked();
+        }
       }
     } catch (err) {
-      console.warn('Heartbeat failed:', err);
+      // Network error (still offline) — do nothing, try again next interval
+      console.warn('Heartbeat failed (likely offline):', err);
     }
   }, [userId, onKicked]);
 
