@@ -2,6 +2,8 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
+import { initConnectivityManager } from "@/lib/connectivityManager";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // 🚀 CRITICAL: Lazy load heavy pages for instant /auth load on mobile
@@ -55,10 +57,28 @@ const queryClient = new QueryClient({
       gcTime: Infinity, // Keep in cache permanently during session
       refetchOnWindowFocus: false,
       refetchOnMount: false,
+      refetchOnReconnect: 'always', // 🌐 Always refetch when reconnecting
+      retry: 3,
+      // 🚀 Exponential backoff: 1s → 2s → 4s (capped at 15s, doubled on slow networks)
+      retryDelay: (attemptIndex) => {
+        const base = Math.min(1000 * 2 ** attemptIndex, 15000);
+        return isSlowConnection() ? base * 2 : base;
+      },
+    },
+    mutations: {
       retry: 2,
+      retryDelay: (attemptIndex) => {
+        const base = Math.min(1000 * 2 ** attemptIndex, 10000);
+        return isSlowConnection() ? base * 2 : base;
+      },
     },
   },
 });
+
+// 🌐 Initialize connectivity manager with ping-based detection
+// This replaces the unreliable navigator.onLine with actual server pings
+// and integrates with React Query's onlineManager for automatic pause/resume
+initConnectivityManager(queryClient);
 
 // Minimal loading fallback - just gradient background, no spinner
 const LazyFallback = () => (
