@@ -16,12 +16,33 @@ import ResetRedirect from "./pages/ResetRedirect";
 import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
 
+// 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
+// imported module" errors from showing the error boundary. On failure it reloads
+// the page once (guarded by sessionStorage flag to avoid infinite loops).
+function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
+  return lazy(() =>
+    factory().catch((err) => {
+      const key = 'chunk-reload-' + factory.toString().slice(0, 60);
+      const alreadyRetried = sessionStorage.getItem(key);
+      if (!alreadyRetried) {
+        sessionStorage.setItem(key, '1');
+        window.location.reload();
+        // Return a never-resolving promise so React doesn't try to render while reloading
+        return new Promise(() => {});
+      }
+      // Already retried once — clear flag for next time and let error propagate
+      sessionStorage.removeItem(key);
+      throw err;
+    })
+  );
+}
+
 // Heavy pages - lazy loaded to reduce initial bundle by ~60%
-const Index = lazy(() => import("./pages/Index"));
-const JobApplication = lazy(() => import("./pages/JobApplication"));
-const JobView = lazy(() => import("./pages/JobView"));
-const CvTunnel = lazy(() => import("./pages/CvTunnel"));
-const MediaMigration = lazy(() => import("./pages/MediaMigration"));
+const Index = lazyWithRetry(() => import("./pages/Index"));
+const JobApplication = lazyWithRetry(() => import("./pages/JobApplication"));
+const JobView = lazyWithRetry(() => import("./pages/JobView"));
+const CvTunnel = lazyWithRetry(() => import("./pages/CvTunnel"));
+const MediaMigration = lazyWithRetry(() => import("./pages/MediaMigration"));
 
 import { AuthProvider } from "@/hooks/useAuth";
 import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
