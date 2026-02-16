@@ -19,6 +19,10 @@ export const JobSeekerNotesCard = memo(() => {
   const [notesEditor, setNotesEditor] = useState<Editor | null>(null);
   const [expandedEditor, setExpandedEditor] = useState<Editor | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const expandedScrollRef = useRef<HTMLDivElement>(null);
+  const expandedTrackRef = useRef<HTMLDivElement>(null);
+  const expandedThumbRef = useRef<HTMLDivElement>(null);
+  const expandedRafRef = useRef<number>(0);
 
   const cacheKey = user?.id ? `jobseeker_notes_cache_${user.id}` : 'jobseeker_notes_cache';
 
@@ -94,6 +98,51 @@ export const JobSeekerNotesCard = memo(() => {
   const handleExpandedEditorReady = useCallback((editor: Editor) => { setExpandedEditor(editor); }, []);
   const handleExpand = useCallback(() => { setIsExpanded(true); }, []);
   const handleCloseExpanded = useCallback(() => { setIsExpanded(false); }, []);
+
+  // Expanded scrollbar tracking
+  const updateExpandedScrollbar = useCallback(() => {
+    const el = expandedScrollRef.current;
+    const track = expandedTrackRef.current;
+    const thumb = expandedThumbRef.current;
+    if (!el || !track || !thumb) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const hasScroll = scrollHeight > clientHeight + 5;
+    track.style.display = hasScroll ? '' : 'none';
+    if (!hasScroll) return;
+    const thumbH = Math.max((clientHeight / scrollHeight) * 100, 20);
+    const maxScroll = scrollHeight - clientHeight;
+    const thumbTop = maxScroll > 0 ? (scrollTop / maxScroll) * (100 - thumbH) : 0;
+    thumb.style.top = `${thumbTop}%`;
+    thumb.style.height = `${thumbH}%`;
+  }, []);
+
+  useEffect(() => {
+    if (!isExpanded) return;
+    const el = expandedScrollRef.current;
+    if (!el) return;
+    const handler = () => {
+      cancelAnimationFrame(expandedRafRef.current);
+      expandedRafRef.current = requestAnimationFrame(updateExpandedScrollbar);
+    };
+    el.addEventListener('scroll', handler, { passive: true });
+    // Initial + delayed update
+    updateExpandedScrollbar();
+    const t = setTimeout(updateExpandedScrollbar, 200);
+    return () => {
+      el.removeEventListener('scroll', handler);
+      cancelAnimationFrame(expandedRafRef.current);
+      clearTimeout(t);
+    };
+  }, [isExpanded, updateExpandedScrollbar]);
+
+  // Update scrollbar when content changes in expanded mode
+  useEffect(() => {
+    if (isExpanded) {
+      updateExpandedScrollbar();
+      const t = setTimeout(updateExpandedScrollbar, 100);
+      return () => clearTimeout(t);
+    }
+  }, [content, isExpanded, updateExpandedScrollbar]);
 
   useEffect(() => {
     if (!isExpanded) return;
@@ -235,21 +284,38 @@ export const JobSeekerNotesCard = memo(() => {
               <NotesToolbar editor={expandedEditor} />
             </div>
             
-            {/* Editor — scrollable area uses overflow-y-auto on a wrapper instead of relying on ProseMirror chain */}
-            <div className="flex-1 min-h-0 relative overflow-y-auto overscroll-contain touch-auto [-webkit-overflow-scrolling:touch] bg-white/10 rounded-lg">
-              <RichNotesEditor
-                value={content}
-                onChange={handleChange}
-                placeholder="Skriv karriärmål, påminnelser..."
-                hideToolbar
-                externalScroll
-                onEditorReady={handleExpandedEditorReady}
-              />
+            {/* Editor — scrollable wrapper with mini scrollbar */}
+            <div className="flex-1 min-h-0 relative">
+              <div 
+                ref={expandedScrollRef}
+                className="absolute inset-0 overflow-y-auto overscroll-contain touch-auto [-webkit-overflow-scrolling:touch] bg-white/10 rounded-lg pr-3"
+              >
+                <RichNotesEditor
+                  value={content}
+                  onChange={handleChange}
+                  placeholder="Skriv karriärmål, påminnelser..."
+                  hideToolbar
+                  externalScroll
+                  onEditorReady={handleExpandedEditorReady}
+                />
+              </div>
+              {/* Mini scrollbar indicator */}
+              <div 
+                ref={expandedTrackRef}
+                className="absolute right-1 top-1 bottom-1 w-1 rounded-full bg-white/10 pointer-events-none"
+                aria-hidden="true"
+                style={{ display: 'none' }}
+              >
+                <div 
+                  ref={expandedThumbRef}
+                  className="absolute w-full rounded-full bg-white/40"
+                />
+              </div>
             </div>
             
             {/* Character/word counter */}
             <div className="flex items-center justify-end gap-4 mt-2 pt-2 border-t border-white/10 shrink-0">
-              <span className="text-xs text-white/60">
+              <span className="text-xs text-pure-white">
                 {textStats.charCount} tecken · {textStats.wordCount} ord
               </span>
             </div>
