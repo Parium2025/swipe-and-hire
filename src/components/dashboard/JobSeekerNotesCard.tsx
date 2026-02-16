@@ -1,13 +1,14 @@
 import { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileText, X } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { FileText, X, Maximize2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
 import type { Editor } from '@tiptap/react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { GRADIENTS } from './dashboardConstants';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 type NoteData = { id: string; user_id: string; content: string | null; created_at: string; updated_at: string } | null;
 
@@ -40,7 +41,6 @@ export const JobSeekerNotesCard = memo(() => {
     }
   }, [cacheKey, user?.id]);
 
-  // Cross-tab sync via localStorage
   useEffect(() => {
     if (typeof window === 'undefined' || !user?.id) return;
     const onStorage = (e: StorageEvent) => {
@@ -54,7 +54,6 @@ export const JobSeekerNotesCard = memo(() => {
     return () => window.removeEventListener('storage', onStorage);
   }, [cacheKey, user?.id]);
 
-  // Fetch existing note
   const { data: noteData, isFetched } = useQuery<NoteData>({
     queryKey: ['jobseeker-notes', user?.id],
     queryFn: async (): Promise<NoteData> => {
@@ -70,7 +69,6 @@ export const JobSeekerNotesCard = memo(() => {
     staleTime: 30000,
   });
 
-  // Sync server value into cache
   useEffect(() => {
     if (typeof window === 'undefined' || !user?.id) return;
     if (!noteData) return;
@@ -97,7 +95,6 @@ export const JobSeekerNotesCard = memo(() => {
   const handleExpand = useCallback(() => { setIsExpanded(true); }, []);
   const handleCloseExpanded = useCallback(() => { setIsExpanded(false); }, []);
 
-  // Escape key to close fullscreen
   useEffect(() => {
     if (!isExpanded) return;
     const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsExpanded(false); };
@@ -105,7 +102,6 @@ export const JobSeekerNotesCard = memo(() => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isExpanded]);
 
-  // Character and word count
   const textStats = useMemo(() => {
     const plainText = content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
     const charCount = plainText.length;
@@ -113,7 +109,6 @@ export const JobSeekerNotesCard = memo(() => {
     return { charCount, wordCount };
   }, [content]);
 
-  // Auto-save with debounce
   useEffect(() => {
     if (!user?.id || !isFetched) return;
     const serverContent = noteData?.content ?? '';
@@ -141,6 +136,16 @@ export const JobSeekerNotesCard = memo(() => {
     return () => clearTimeout(timer);
   }, [content, user?.id, isFetched, noteData, queryClient]);
 
+  const saveIndicator = (
+    <span className="text-[11px] text-white/70 font-medium">
+      {isSaving ? (
+        <span className="animate-pulse">Sparar...</span>
+      ) : lastSaved ? (
+        'Sparat ✓'
+      ) : null}
+    </span>
+  );
+
   return (
     <>
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.notes} border-0 shadow-lg dashboard-card-height`}>
@@ -148,28 +153,33 @@ export const JobSeekerNotesCard = memo(() => {
         <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
         
         <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
-          {/* Header with toolbar */}
-           <div className="flex items-center justify-between mb-2 min-w-0">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="p-2 rounded-xl bg-white/10 flex-shrink-0">
-                <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
+          {/* Row 1: Title + save status + expand */}
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-white/10 flex-shrink-0">
+                <FileText className="h-4 w-4 text-white" strokeWidth={1.5} />
               </div>
-              <NotesToolbar editor={notesEditor} onExpand={handleExpand} compact />
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-              {isSaving && (
-                <span className="text-[10px] text-white animate-pulse">Sparar...</span>
-              )}
-              {!isSaving && lastSaved && (
-                <span className="text-[10px] text-white">Sparat</span>
-              )}
-              <span className="text-[10px] text-white uppercase tracking-wider font-medium">
-                ANTECKNINGAR
+              <span className="text-xs text-white/80 uppercase tracking-wider font-semibold">
+                Anteckningar
               </span>
             </div>
+            <div className="flex items-center gap-2">
+              {saveIndicator}
+              <button
+                onClick={handleExpand}
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
+              >
+                <Maximize2 className="h-3.5 w-3.5 text-white" />
+              </button>
+            </div>
+          </div>
+
+          {/* Row 2: Toolbar - full width, no cramming */}
+          <div className="mb-2 pb-1.5 border-b border-white/10">
+            <NotesToolbar editor={notesEditor} />
           </div>
           
-          {/* Notes editor */}
+          {/* Editor area */}
           <div className="flex-1 min-h-0 relative">
             <RichNotesEditor
               value={content}
@@ -178,53 +188,54 @@ export const JobSeekerNotesCard = memo(() => {
               hideToolbar
               onEditorReady={handleEditorReady}
             />
-            {/* Soft fade at the bottom instead of hard clip */}
-            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-purple-600/80 to-transparent pointer-events-none rounded-b-lg" />
+            {/* Soft fade at bottom */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-6 pointer-events-none rounded-b-lg"
+              style={{ background: 'linear-gradient(to top, rgba(124, 58, 237, 0.7), transparent)' }}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* Fullscreen Notes Dialog */}
+      {/* Fullscreen Notes Dialog — true fullscreen on mobile */}
       <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
         <DialogContent 
           hideClose 
-          className="max-w-4xl h-[80vh] bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 border-0 p-0 overflow-hidden"
+          className="max-w-4xl w-[calc(100%-2rem)] h-[90dvh] sm:h-[80vh] bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 border-0 p-0 overflow-hidden"
         >
+          <VisuallyHidden>
+            <DialogTitle>Anteckningar</DialogTitle>
+          </VisuallyHidden>
           <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px] pointer-events-none" />
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="relative flex flex-col h-full p-4 sm:p-6">
             {/* Header */}
-            <div className="flex flex-col gap-2 mb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-white/10">
-                    <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
-                  </div>
-                  <h2 className="text-lg sm:text-xl font-semibold text-white">Anteckningar</h2>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-white/10">
+                  <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
                 </div>
-                <div className="flex items-center gap-3">
-                  {isSaving && (
-                    <span className="text-xs text-white/80 animate-pulse">Sparar...</span>
-                  )}
-                  {!isSaving && lastSaved && (
-                    <span className="text-xs text-white/80">Sparat</span>
-                  )}
-                  <button
-                    onClick={handleCloseExpanded}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
-                  >
-                    <X className="h-4 w-4 text-white" />
-                  </button>
-                </div>
+                <h2 className="text-lg sm:text-xl font-semibold text-white">Anteckningar</h2>
               </div>
-              <div className="flex items-center">
-                <NotesToolbar editor={expandedEditor} />
+              <div className="flex items-center gap-3">
+                {saveIndicator}
+                <button
+                  onClick={handleCloseExpanded}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
+                >
+                  <X className="h-4 w-4 text-white" />
+                </button>
               </div>
             </div>
+
+            {/* Toolbar */}
+            <div className="mb-3 pb-2 border-b border-white/10">
+              <NotesToolbar editor={expandedEditor} />
+            </div>
             
-            {/* Editor */}
+            {/* Editor — fills all remaining space */}
             <div className="flex-1 min-h-0 overflow-hidden">
               <RichNotesEditor
                 value={content}
@@ -232,17 +243,14 @@ export const JobSeekerNotesCard = memo(() => {
                 placeholder="Skriv karriärmål, påminnelser..."
                 hideToolbar
                 onEditorReady={handleExpandedEditorReady}
-                className="h-full [&_.ProseMirror]:min-h-[300px]"
+                className="h-full"
               />
             </div>
             
             {/* Character/word counter */}
-            <div className="flex items-center justify-end gap-4 mt-3 pt-3 border-t border-white/10">
-              <span className="text-xs text-white">
-                {textStats.charCount} tecken
-              </span>
-              <span className="text-xs text-white">
-                {textStats.wordCount} ord
+            <div className="flex items-center justify-end gap-4 mt-2 pt-2 border-t border-white/10">
+              <span className="text-xs text-white/60">
+                {textStats.charCount} tecken · {textStats.wordCount} ord
               </span>
             </div>
           </div>
