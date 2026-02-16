@@ -153,7 +153,7 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
   const scrollTrackRef = useRef<HTMLDivElement>(null);
   const scrollThumbRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
-  const selfUpdateRef = useRef(false);
+  const lastEmittedRef = useRef<string>(value || '');
 
   const editor = useEditor({
     extensions: [
@@ -169,9 +169,9 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
     ],
     content: value || '',
     onUpdate: ({ editor }) => {
-      selfUpdateRef.current = true;
-      const html = editor.getHTML();
-      onChange(editor.isEmpty ? '' : html);
+      const html = editor.isEmpty ? '' : editor.getHTML();
+      lastEmittedRef.current = html;
+      onChange(html);
       updateScrollbar();
     },
     editorProps: {
@@ -198,16 +198,15 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
   }, [editor, onEditorReady]);
 
   useEffect(() => {
-    if (selfUpdateRef.current) {
-      selfUpdateRef.current = false;
-      return;
-    }
-    if (editor && value !== editor.getHTML()) {
-      const editorEmpty = editor.isEmpty;
-      const valueEmpty = !value || value === '<p></p>' || value.trim() === '';
-      if (editorEmpty && valueEmpty) return;
-      editor.commands.setContent(value || '', { emitUpdate: false });
-    }
+    if (!editor) return;
+    // Only sync if the incoming value differs from what the editor last emitted
+    // This prevents clobbering the editor during rapid typing
+    if (value === lastEmittedRef.current) return;
+    const editorEmpty = editor.isEmpty;
+    const valueEmpty = !value || value === '<p></p>' || value.trim() === '';
+    if (editorEmpty && valueEmpty) return;
+    lastEmittedRef.current = value || '';
+    editor.commands.setContent(value || '', { emitUpdate: false });
   }, [value, editor]);
 
   // Safe accessor for editor DOM — Tiptap throws if view isn't mounted yet
