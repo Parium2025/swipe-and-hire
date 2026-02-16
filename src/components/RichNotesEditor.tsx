@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo, Maximize2 } from 'lucide-react';
+import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
@@ -50,7 +50,7 @@ const ToolbarButton = memo(({
           onClick={onClick}
           disabled={disabled}
           className={cn(
-            "w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 caret-transparent",
+            "w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-150 caret-transparent",
             "hover:bg-white/20",
             "active:scale-90",
             "disabled:opacity-30 disabled:cursor-not-allowed",
@@ -73,12 +73,9 @@ ToolbarButton.displayName = 'ToolbarButton';
 interface NotesToolbarProps {
   editor: Editor | null;
   className?: string;
-  onExpand?: () => void;
-  /** When true, hides less-used buttons on small screens. Default: false (show all) */
-  compact?: boolean;
 }
 
-export const NotesToolbar = memo(({ editor, className, onExpand, compact = false }: NotesToolbarProps) => {
+export const NotesToolbar = memo(({ editor, className }: NotesToolbarProps) => {
   const handleBold = useCallback(() => {
     editor?.chain().focus().toggleBold().run();
   }, [editor]);
@@ -110,7 +107,7 @@ export const NotesToolbar = memo(({ editor, className, onExpand, compact = false
   if (!editor) return null;
 
   return (
-    <div className={cn("flex items-center gap-1 flex-shrink min-w-0 overflow-hidden", className)}>
+    <div className={cn("flex items-center gap-1 flex-wrap", className)}>
       {/* Core formatting - always visible */}
       <ToolbarButton 
         onClick={handleBold} 
@@ -159,16 +156,6 @@ export const NotesToolbar = memo(({ editor, className, onExpand, compact = false
           disabled={!editor.can().redo()}
         />
       </div>
-      {onExpand && (
-        <>
-          <div className="w-px h-4 bg-white/20 mx-1 flex-shrink-0" />
-          <ToolbarButton 
-            onClick={onExpand} 
-            icon={Maximize2} 
-            title="Expandera" 
-          />
-        </>
-      )}
     </div>
   );
 });

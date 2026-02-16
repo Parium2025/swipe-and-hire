@@ -21,7 +21,8 @@ import {
   Video,
   Building2,
   Phone,
-  X
+  X,
+  Maximize2
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -701,27 +702,36 @@ const NotesCard = memo(() => {
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
         
-        <CardContent className="relative p-4 h-full flex flex-col">
-          {/* Header with toolbar integrated */}
-          <div className="flex items-center justify-between mb-2 min-w-0">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="p-2 rounded-xl bg-white/10 flex-shrink-0">
-                <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
+        <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
+          {/* Row 1: Title + save status + expand */}
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-white/10 flex-shrink-0">
+                <FileText className="h-4 w-4 text-white" strokeWidth={1.5} />
               </div>
-              {/* Toolbar in header */}
-              <NotesToolbar editor={notesEditor} onExpand={handleExpand} compact />
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-              {isSaving && (
-                <span className="text-[10px] text-white animate-pulse">Sparar...</span>
-              )}
-              {!isSaving && lastSaved && (
-                <span className="text-[10px] text-white">Sparat</span>
-              )}
-              <span className="text-[10px] text-white uppercase tracking-wider font-medium">
-                ANTECKNINGAR
+              <span className="text-xs text-white/80 uppercase tracking-wider font-semibold">
+                Anteckningar
               </span>
             </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {isSaving && (
+                <span className="text-[11px] text-white/70 animate-pulse">Sparar...</span>
+              )}
+              {!isSaving && lastSaved && (
+                <span className="text-[11px] text-white/70">Sparat ✓</span>
+              )}
+              <button
+                onClick={handleExpand}
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
+              >
+                <Maximize2 className="h-3.5 w-3.5 text-white" />
+              </button>
+            </div>
+          </div>
+
+          {/* Row 2: Toolbar - full width */}
+          <div className="mb-2 pb-1.5 border-b border-white/10">
+            <NotesToolbar editor={notesEditor} />
           </div>
           
           {/* Notes editor - toolbar hidden, more space for writing */}
