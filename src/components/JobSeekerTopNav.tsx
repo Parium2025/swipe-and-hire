@@ -195,7 +195,7 @@ function JobSeekerTopNav() {
                     <span className="flex-1">{item.title}</span>
                     {showNewMatchBadge ? (
                       <span className="flex items-center gap-1.5">
-                        {count !== null && <span className="text-white/60 text-xs">({count})</span>}
+                        {count !== null && <span className="text-white text-xs">({count})</span>}
                         <span className="min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-sm">
                           {totalNewMatches > 9 ? '9+' : totalNewMatches}
                         </span>
