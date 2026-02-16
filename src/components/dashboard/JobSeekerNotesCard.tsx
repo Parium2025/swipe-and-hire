@@ -116,22 +116,35 @@ export const JobSeekerNotesCard = memo(() => {
     thumb.style.height = `${thumbH}%`;
   }, []);
 
+  // Attach scroll listener — retry until element is mounted
   useEffect(() => {
     if (!isExpanded) return;
-    const el = expandedScrollRef.current;
-    if (!el) return;
-    const handler = () => {
-      cancelAnimationFrame(expandedRafRef.current);
-      expandedRafRef.current = requestAnimationFrame(updateExpandedScrollbar);
+    let attempts = 0;
+    let scrollHandler: (() => void) | null = null;
+    let attachedEl: HTMLElement | null = null;
+
+    const tryAttach = () => {
+      const el = expandedScrollRef.current;
+      if (!el) {
+        if (attempts++ < 20) setTimeout(tryAttach, 50);
+        return;
+      }
+      attachedEl = el;
+      scrollHandler = () => {
+        cancelAnimationFrame(expandedRafRef.current);
+        expandedRafRef.current = requestAnimationFrame(updateExpandedScrollbar);
+      };
+      el.addEventListener('scroll', scrollHandler, { passive: true });
+      updateExpandedScrollbar();
+      setTimeout(updateExpandedScrollbar, 200);
     };
-    el.addEventListener('scroll', handler, { passive: true });
-    // Initial + delayed update
-    updateExpandedScrollbar();
-    const t = setTimeout(updateExpandedScrollbar, 200);
+    tryAttach();
+
     return () => {
-      el.removeEventListener('scroll', handler);
+      if (attachedEl && scrollHandler) {
+        attachedEl.removeEventListener('scroll', scrollHandler);
+      }
       cancelAnimationFrame(expandedRafRef.current);
-      clearTimeout(t);
     };
   }, [isExpanded, updateExpandedScrollbar]);
 
