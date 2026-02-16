@@ -145,6 +145,7 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
   const scrollTrackRef = useRef<HTMLDivElement>(null);
   const scrollThumbRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
+  const selfUpdateRef = useRef(false);
 
   const editor = useEditor({
     extensions: [
@@ -159,6 +160,7 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
     ],
     content: value || '',
     onUpdate: ({ editor }) => {
+      selfUpdateRef.current = true;
       const html = editor.getHTML();
       onChange(editor.isEmpty ? '' : html);
       updateScrollbar();
@@ -187,6 +189,10 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
   }, [editor, onEditorReady]);
 
   useEffect(() => {
+    if (selfUpdateRef.current) {
+      selfUpdateRef.current = false;
+      return;
+    }
     if (editor && value !== editor.getHTML()) {
       const editorEmpty = editor.isEmpty;
       const valueEmpty = !value || value === '<p></p>' || value.trim() === '';

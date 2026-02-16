@@ -200,7 +200,7 @@ export const JobSeekerNotesCard = memo(() => {
   }, [content, user?.id, isFetched, noteData, queryClient]);
 
   const saveIndicator = (
-    <span className="text-[11px] text-white/70 font-medium">
+    <span className="text-[11px] text-white font-medium">
       {isSaving ? (
         <span className="animate-pulse">Sparar...</span>
       ) : lastSaved ? (
