@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, startTransition } from 'react';
-import { useBlurHandlers } from '@/hooks/useBlurHandlers';
+
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,7 +48,7 @@ const AuthMobile = ({
   initialMode,
   initialRole
 }: AuthMobileProps) => {
-  const blurHandlers = useBlurHandlers();
+  
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [isLogin, setIsLogin] = useState(initialMode !== 'register');
@@ -595,7 +595,7 @@ const AuthMobile = ({
                           className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 sm:h-9"
                 />
               </div>
-                <Button type="submit" variant="glass" className="w-full min-h-[44px]" disabled={loading} {...blurHandlers}>
+                <Button type="submit" variant="glass" className="w-full min-h-[44px]" disabled={loading} onMouseDown={(e) => e.preventDefault()}>
                 {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
               <div className="text-center">
@@ -749,7 +749,7 @@ const AuthMobile = ({
                         <span className="text-sm text-white">Håll mig inloggad</span>
                       </label>
                       
-                       <Button type="submit" variant="glass" className="w-full min-h-[44px]" disabled={loading} {...blurHandlers}>
+                       <Button type="submit" variant="glass" className="w-full min-h-[44px]" disabled={loading} onMouseDown={(e) => e.preventDefault()}>
                          Logga in
                        </Button>
                        
@@ -1234,7 +1234,7 @@ const AuthMobile = ({
                           variant="glass"
                           className={`w-full min-h-[44px] ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''}`}
                           disabled={loading || hasRegistered}
-                          {...blurHandlers}
+                          onMouseDown={(e) => e.preventDefault()}
                         >
                          {loading ? "Registrerar..." : "Registrera"}
                        </Button>
