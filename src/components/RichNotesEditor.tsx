@@ -150,6 +150,7 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
+        undoRedo: { newGroupDelay: 800 },
         bulletList: { HTMLAttributes: { class: 'list-disc ml-4 my-1' } },
         orderedList: { HTMLAttributes: { class: 'list-decimal ml-4 my-1' } },
         listItem: { HTMLAttributes: { class: 'my-0.5' } },
