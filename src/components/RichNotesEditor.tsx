@@ -26,13 +26,15 @@ const ToolbarButton = memo(({
   icon: Icon, 
   title,
   isActive = false,
-  disabled = false
+  disabled = false,
+  compact = false
 }: { 
   onClick: () => void; 
   icon: React.ComponentType<{ className?: string }>; 
   title: string;
   isActive?: boolean;
   disabled?: boolean;
+  compact?: boolean;
 }) => (
   <TooltipProvider delayDuration={300}>
     <Tooltip>
@@ -44,20 +46,20 @@ const ToolbarButton = memo(({
             e.preventDefault();
           }}
           onFocus={(e) => {
-            // Prevent focus from triggering tooltip on dialog open
             e.currentTarget.blur();
           }}
           onClick={onClick}
           disabled={disabled}
           className={cn(
-            "w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-150 caret-transparent",
+            "flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-150 caret-transparent",
+            compact ? "w-7 h-7" : "w-8 h-8",
             "hover:bg-white/20",
             "active:scale-90",
             "disabled:opacity-30 disabled:cursor-not-allowed",
             isActive && "bg-white/25 shadow-sm"
           )}
         >
-          <Icon className="h-4 w-4 text-pure-white" />
+          <Icon className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4", "text-pure-white")} />
         </button>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -73,9 +75,11 @@ ToolbarButton.displayName = 'ToolbarButton';
 interface NotesToolbarProps {
   editor: Editor | null;
   className?: string;
+  compact?: boolean;
+  showUndoRedo?: boolean;
 }
 
-export const NotesToolbar = memo(({ editor, className }: NotesToolbarProps) => {
+export const NotesToolbar = memo(({ editor, className, compact = false, showUndoRedo = true }: NotesToolbarProps) => {
   const handleBold = useCallback(() => {
     editor?.chain().focus().toggleBold().run();
   }, [editor]);
@@ -107,55 +111,20 @@ export const NotesToolbar = memo(({ editor, className }: NotesToolbarProps) => {
   if (!editor) return null;
 
   return (
-    <div className={cn("flex items-center gap-1 flex-wrap", className)}>
-      {/* Core formatting - always visible */}
-      <ToolbarButton 
-        onClick={handleBold} 
-        icon={Bold} 
-        title="Fet" 
-        isActive={editor.isActive('bold')}
-      />
-      <ToolbarButton 
-        onClick={handleItalic} 
-        icon={Italic} 
-        title="Kursiv" 
-        isActive={editor.isActive('italic')}
-      />
-      <ToolbarButton 
-        onClick={handleStrikethrough} 
-        icon={Strikethrough} 
-        title="Genomstruken" 
-        isActive={editor.isActive('strike')}
-      />
-      <div className="w-px h-4 bg-white/20 mx-1 flex-shrink-0" />
-      <ToolbarButton 
-        onClick={handleBulletList} 
-        icon={List} 
-        title="Punktlista" 
-        isActive={editor.isActive('bulletList')}
-      />
-      <ToolbarButton 
-        onClick={handleCheckbox} 
-        icon={CheckSquare} 
-        title="Checkbox" 
-        isActive={editor.isActive('taskList')}
-      />
-      {/* Undo/Redo - always visible */}
-      <div className="contents">
-        <div className="w-px h-4 bg-white/20 mx-1 flex-shrink-0" />
-        <ToolbarButton 
-          onClick={handleUndo} 
-          icon={Undo} 
-          title="Ångra" 
-          disabled={!editor.can().undo()}
-        />
-        <ToolbarButton 
-          onClick={handleRedo} 
-          icon={Redo} 
-          title="Gör om" 
-          disabled={!editor.can().redo()}
-        />
-      </div>
+    <div className={cn("flex items-center gap-0.5 flex-wrap", compact ? "gap-0" : "gap-1", className)}>
+      <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} />
+      <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} />
+      <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} />
+      <div className={cn("w-px bg-white/20 flex-shrink-0", compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
+      <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" isActive={editor.isActive('bulletList')} compact={compact} />
+      <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" isActive={editor.isActive('taskList')} compact={compact} />
+      {showUndoRedo && (
+        <>
+          <div className={cn("w-px bg-white/20 flex-shrink-0", compact ? "h-3 mx-0.5" : "h-4 mx-1")} />
+          <ToolbarButton onClick={handleUndo} icon={Undo} title="Ångra" disabled={!editor.can().undo()} compact={compact} />
+          <ToolbarButton onClick={handleRedo} icon={Redo} title="Gör om" disabled={!editor.can().redo()} compact={compact} />
+        </>
+      )}
     </div>
   );
 });

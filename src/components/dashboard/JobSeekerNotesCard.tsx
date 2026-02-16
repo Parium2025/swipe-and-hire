@@ -176,7 +176,7 @@ export const JobSeekerNotesCard = memo(() => {
 
           {/* Row 2: Toolbar - full width, no cramming */}
           <div className="mb-2 pb-1.5 border-b border-white/10">
-            <NotesToolbar editor={notesEditor} />
+            <NotesToolbar editor={notesEditor} compact showUndoRedo={false} />
           </div>
           
           {/* Editor area */}

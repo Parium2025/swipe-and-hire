@@ -731,7 +731,7 @@ const NotesCard = memo(() => {
 
           {/* Row 2: Toolbar - full width */}
           <div className="mb-2 pb-1.5 border-b border-white/10">
-            <NotesToolbar editor={notesEditor} />
+            <NotesToolbar editor={notesEditor} compact showUndoRedo={false} />
           </div>
           
           {/* Notes editor - toolbar hidden, more space for writing */}
