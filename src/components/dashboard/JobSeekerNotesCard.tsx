@@ -201,7 +201,7 @@ export const JobSeekerNotesCard = memo(() => {
       <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
         <DialogContent 
           hideClose 
-          className="max-w-4xl w-[calc(100%-2rem)] h-[90dvh] sm:h-[80vh] bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 border-0 p-0 overflow-hidden"
+          className="max-w-4xl w-[calc(100%-2rem)] h-[90dvh] sm:h-[80vh] bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 border-0 p-0 flex flex-col"
         >
           <VisuallyHidden>
             <DialogTitle>Anteckningar</DialogTitle>
@@ -236,7 +236,7 @@ export const JobSeekerNotesCard = memo(() => {
             </div>
             
             {/* Editor — fills all remaining space */}
-            <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0">
               <RichNotesEditor
                 value={content}
                 onChange={handleChange}
