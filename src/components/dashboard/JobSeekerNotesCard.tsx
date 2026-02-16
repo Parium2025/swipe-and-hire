@@ -106,6 +106,7 @@ export const JobSeekerNotesCard = memo(() => {
     const thumb = expandedThumbRef.current;
     if (!el || !track || !thumb) return;
     const { scrollTop, scrollHeight, clientHeight } = el;
+    console.log('[expanded-scroll]', { scrollTop, scrollHeight, clientHeight, hasScroll: scrollHeight > clientHeight + 5 });
     const hasScroll = scrollHeight > clientHeight + 5;
     track.style.display = hasScroll ? '' : 'none';
     if (!hasScroll) return;
