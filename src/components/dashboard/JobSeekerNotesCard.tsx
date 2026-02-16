@@ -299,10 +299,10 @@ export const JobSeekerNotesCard = memo(() => {
             </div>
             
             {/* Editor — scrollable wrapper with mini scrollbar */}
-            <div className="flex-1 min-h-0 relative">
+            <div className="flex-1 min-h-0 relative bg-white/10 rounded-lg overflow-hidden">
               <div 
                 ref={expandedScrollRef}
-                className="absolute inset-0 overflow-y-auto overscroll-contain touch-auto [-webkit-overflow-scrolling:touch] bg-white/10 rounded-lg pr-3"
+                className="absolute inset-0 overflow-y-auto overscroll-contain touch-auto [-webkit-overflow-scrolling:touch] pr-3"
               >
                 <RichNotesEditor
                   value={content}
