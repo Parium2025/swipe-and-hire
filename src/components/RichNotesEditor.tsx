@@ -143,8 +143,8 @@ export const NotesToolbar = memo(({ editor, className, onExpand, compact = false
         title="Checkbox" 
         isActive={editor.isActive('taskList')}
       />
-      {/* Undo/Redo - hidden on tight spaces */}
-      <div className={compact ? "hidden md:contents" : "contents"}>
+      {/* Undo/Redo - always visible */}
+      <div className="contents">
         <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
         <ToolbarButton 
           onClick={handleUndo} 
@@ -298,10 +298,10 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
         </div>
       )}
       
-      <div className="relative flex-1 min-h-0">
+      <div className="relative flex-1 min-h-0 overflow-hidden">
         <EditorContent 
           editor={editor} 
-          className="h-full [&_.ProseMirror]:h-full"
+          className="h-full [&_.ProseMirror]:h-full [&_.ProseMirror]:overflow-y-auto [&_.ProseMirror]:pb-8"
         />
         
         {/* Mini scrollbar indicator — updated via direct DOM, no re-renders */}
