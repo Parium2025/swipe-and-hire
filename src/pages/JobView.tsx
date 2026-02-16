@@ -520,14 +520,14 @@ const JobView = () => {
             {jobQuestions.length === 0 && !isJobExpired && (
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-4">
                 <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
-                <p className="text-sm text-white/60">Detta jobb kräver inga extra frågor.</p>
+                <p className="text-sm text-white">Detta jobb kräver inga extra frågor.</p>
                 
                 {job.contact_email && (
                   <div className="pt-2">
-                    <p className="text-xs text-white/40 mb-1">Har du frågor?</p>
+                    <p className="text-xs text-white mb-1">Har du frågor?</p>
                     <a 
                       href={`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`}
-                      className="text-sm text-white/60 hover:text-white transition-colors underline underline-offset-2"
+                      className="text-sm text-white hover:text-white/80 transition-colors underline underline-offset-2"
                     >
                       {job.contact_email}
                     </a>
