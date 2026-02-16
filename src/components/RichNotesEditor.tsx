@@ -15,6 +15,8 @@ interface RichNotesEditorProps {
   className?: string;
   hideToolbar?: boolean;
   onEditorReady?: (editor: Editor) => void;
+  /** When true, scrolling is handled by a parent container — editor grows with content */
+  externalScroll?: boolean;
 }
 
 export interface RichNotesEditorHandle {
@@ -137,7 +139,8 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
   placeholder = "Skriv påminnelser och anteckningar...",
   className,
   hideToolbar = false,
-  onEditorReady
+  onEditorReady,
+  externalScroll = false
 }, ref) => {
   const scrollTrackRef = useRef<HTMLDivElement>(null);
   const scrollThumbRef = useRef<HTMLDivElement>(null);
@@ -163,7 +166,7 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
     editorProps: {
       attributes: {
         class: cn(
-          "relative h-full overflow-y-auto overscroll-contain",
+          "relative",
           "bg-white/10 rounded-lg p-2 pr-4",
           "text-sm leading-relaxed",
           "text-pure-white",
@@ -248,32 +251,47 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
   if (!editor) return null;
 
   return (
-    <div className={cn("flex flex-col h-full rich-notes-editor", className)}>
+    <div className={cn(
+      "flex flex-col rich-notes-editor",
+      !externalScroll && "h-full",
+      className
+    )}>
       {!hideToolbar && (
         <div className="pb-1.5 mb-1.5 border-b border-white/10">
           <NotesToolbar editor={editor} />
         </div>
       )}
       
-      <div className="relative flex-1 min-h-0">
-        <EditorContent 
-          editor={editor} 
-          className="h-full [&_.ProseMirror]:h-full [&_.ProseMirror]:overflow-y-auto [&_.ProseMirror]:overscroll-contain [&_.ProseMirror]:pb-8 [&_.ProseMirror]:[--webkit-overflow-scrolling:touch]"
-        />
-        
-        {/* Mini scrollbar indicator — updated via direct DOM, no re-renders */}
-        <div 
-          ref={scrollTrackRef}
-          className="absolute right-1 top-1 bottom-1 w-1 rounded-full bg-white/10 pointer-events-none"
-          aria-hidden="true"
-          style={{ display: 'none' }}
-        >
-          <div 
-            ref={scrollThumbRef}
-            className="absolute w-full rounded-full bg-white/40"
+      {externalScroll ? (
+        /* External scroll mode: editor grows with content, parent scrolls */
+        <div className="relative">
+          <EditorContent 
+            editor={editor} 
+            className="[&_.ProseMirror]:pb-8"
           />
         </div>
-      </div>
+      ) : (
+        /* Internal scroll mode: editor scrolls within fixed container */
+        <div className="relative flex-1 min-h-0 overflow-hidden">
+          <EditorContent 
+            editor={editor} 
+            className="h-full [&_.ProseMirror]:h-full [&_.ProseMirror]:overflow-y-auto [&_.ProseMirror]:overscroll-contain [&_.ProseMirror]:pb-8 [&_.ProseMirror]:[-webkit-overflow-scrolling:touch]"
+          />
+          
+          {/* Mini scrollbar indicator */}
+          <div 
+            ref={scrollTrackRef}
+            className="absolute right-1 top-1 bottom-1 w-1 rounded-full bg-white/10 pointer-events-none"
+            aria-hidden="true"
+            style={{ display: 'none' }}
+          >
+            <div 
+              ref={scrollThumbRef}
+              className="absolute w-full rounded-full bg-white/40"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }));
