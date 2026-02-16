@@ -9,7 +9,6 @@ const supabase = createClient(
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-// CORS headers - allow both sandbox and production domains
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -20,6 +19,69 @@ interface ResetPasswordRequest {
   email: string;
 }
 
+const getResetTemplate = (resetUrl: string) => `
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Återställ ditt lösenord – Parium</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
+          <tr>
+            <td style="background-color: #1E3A8A; padding: 32px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="margin: 0 0 4px 0; font-size: 24px; font-weight: bold; color: #ffffff;">Parium</h1>
+              <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.8);">Återställ ditt lösenord</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 36px 30px;">
+              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
+                Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.
+              </p>
+              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
+                Klicka på knappen nedan för att skapa ett nytt lösenord.
+              </p>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="${resetUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 15px; font-weight: bold; line-height: 46px; text-align: center; text-decoration: none; width: 240px; -webkit-text-size-adjust: none;">Återställ lösenord</a>
+                  </td>
+                </tr>
+              </table>
+              <div style="background-color: #F0F9FF; border-left: 4px solid #1E3A8A; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+                <p style="margin: 0; font-size: 14px; color: #1E3A8A; font-weight: 600;">Säkerhetsnotis</p>
+                <p style="margin: 4px 0 0 0; font-size: 14px; color: #6B7280;">
+                  Denna länk är tidsbegränsad. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
+                </p>
+              </div>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                <tr>
+                  <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
+                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #6B7280;">Fungerar inte knappen? Kopiera länken nedan:</p>
+                    <p style="margin: 0; font-size: 12px; color: #1E3A8A; word-break: break-all;">${resetUrl}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #F9FAFB; padding: 20px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
+              <p style="margin: 0; font-size: 13px; color: #9CA3AF;">Parium AB · Stockholm<br/>Du får detta mail för att du begärde en lösenordsåterställning i Parium-appen.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -29,24 +91,14 @@ const handler = async (req: Request): Promise<Response> => {
     const { email }: ResetPasswordRequest = await req.json();
 
     if (!email) {
-      return new Response(JSON.stringify({ 
-        error: "Email krävs" 
-      }), {
+      return new Response(JSON.stringify({ error: "Email krävs" }), {
         status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
     console.log(`Sending password reset email to: ${email}`);
 
-    // Generera issued timestamp
-    const issued = Date.now();
-    
-    // SECURITY: Always return success to prevent user enumeration
-    // Don't reveal if the user exists or not
     let resetUrl = null;
     
     try {
@@ -55,110 +107,29 @@ const handler = async (req: Request): Promise<Response> => {
         email: email,
       });
 
-    if (!error && data.properties) {
-      console.log('🔍 generateLink properties:', data.properties);
+      if (!error && data.properties) {
+        console.log('🔍 generateLink properties:', data.properties);
 
-      // KRITISKT: Använd Supabase's action_link direkt för att undvika för tidigt konsumering av token
-      // När vi bygger vår egen URL med token_hash konsumeras token för tidigt av Supabase
-      if (data.properties.action_link) {
-        // Supabase action_link innehåller redan rätt token och redirectar korrekt
-        resetUrl = data.properties.action_link;
-        console.log(`✅ USING SUPABASE ACTION LINK: ${resetUrl}`);
-        console.log(`📍 This prevents premature token consumption`);
-      } else {
-        console.error('❌ No action_link found in Supabase response');
+        if (data.properties.action_link) {
+          resetUrl = data.properties.action_link;
+          console.log(`✅ USING SUPABASE ACTION LINK: ${resetUrl}`);
+        } else {
+          console.error('❌ No action_link found in Supabase response');
+        }
       }
-    }
     } catch (linkError) {
-      // Don't log errors that might reveal user existence
       console.log('Password reset attempted for:', email.substring(0, 3) + '***');
     }
 
-    // Only send email if we have a valid reset URL (user exists)
-    let emailResponse = null;
     if (resetUrl) {
       console.log('✅ Sending reset email for valid user');
       
-      emailResponse = await resend.emails.send({
-      from: "Parium <noreply@parium.se>",
-      to: [email],
-      subject: "Återställ ditt lösenord - Parium",
-      text: `Hej!
-
-Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.
-
-Klicka på länken nedan för att skapa ett nytt lösenord:
-${resetUrl}
-
-Denna länk är tidsbegränsad. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
-
-Med vänliga hälsningar,
-Parium Team
-
-Parium AB, Stockholm`,
-      html: `
-        <!DOCTYPE html>
-        <html lang="sv">
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Lösenordsåterställning</title>
-        </head>
-        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #ffffff;">
-          
-          <div style="max-width: 600px; margin: 0 auto; text-align: left; padding: 40px 20px;">
-            
-            <p style="color: #333333; margin: 0 0 15px 0; font-size: 16px;">
-              Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.
-            </p>
-            
-            <p style="color: #333333; margin: 0 0 30px 0; font-size: 16px;">
-              Klicka på knappen nedan för att skapa ett nytt lösenord.
-            </p>
-            
-            <!-- CTA Button -->
-            <div style="margin: 30px 0; text-align: center;">
-              <a href="${resetUrl}" 
-                 style="display: inline-block; background-color: #1a237e; color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
-                Återställ lösenord
-              </a>
-            </div>
-            
-            <!-- Security Notice -->
-            <div style="background-color: #e2e8f0; padding: 20px; margin: 30px 0; border-radius: 8px;">
-              <p style="color: #4a5568; font-size: 14px; margin: 0 0 5px 0; font-weight: 600;">
-                Säkerhetsmeddelande
-              </p>
-              <p style="color: #718096; font-size: 14px; margin: 0;">
-                Denna länk är tidsbegränsad. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
-              </p>
-            </div>
-            
-            <!-- Alternative link -->
-            <div style="margin: 30px 0;">
-              <p style="color: #718096; font-size: 12px; margin: 0 0 10px 0;">
-                Fungerar inte knappen? Kopiera länken nedan:
-              </p>
-              <p style="color: #4299e1; font-size: 12px; word-break: break-all; margin: 0;">
-                ${resetUrl}
-              </p>
-            </div>
-            
-            <!-- Footer -->
-            <div style="margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
-              <p style="color: #4a5568; font-size: 14px; margin: 0 0 5px 0;">
-                Parium AB · Stockholm
-              </p>
-              <p style="color: #718096; font-size: 12px; margin: 0;">
-                Du får detta mail för att du begärde ett återställnings mail i Parium-appen.
-              </p>
-            </div>
-            
-          </div>
-          
-        </body>
-        </html>
-      `,
+      const emailResponse = await resend.emails.send({
+        from: "Parium <noreply@parium.se>",
+        to: [email],
+        subject: "Återställ ditt lösenord – Parium",
+        text: `Hej!\n\nVi har fått en begäran om att återställa lösenordet för ditt Parium-konto.\n\nKlicka på länken nedan för att skapa ett nytt lösenord:\n${resetUrl}\n\nDenna länk är tidsbegränsad. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.\n\nParium AB · Stockholm`,
+        html: getResetTemplate(resetUrl),
       });
       
       console.log("Password reset email sent successfully:", emailResponse?.data?.id);
@@ -166,26 +137,19 @@ Parium AB, Stockholm`,
       console.log("Password reset attempted for non-existent user");
     }
 
-    // SECURITY: Always return the same success message regardless of whether user exists
     return new Response(JSON.stringify({ 
       success: true, 
       message: "If an account with that email exists, you will receive a password reset link shortly."
     }), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
 
   } catch (error: any) {
     console.error("Error in send-reset-password:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
 };
