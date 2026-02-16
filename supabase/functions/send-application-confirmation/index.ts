@@ -47,7 +47,7 @@ const getTemplate = (firstName: string, jobTitle: string, companyName: string) =
                 <p style="margin: 4px 0 0; font-size: 14px; color: #6B7280;">${companyName}</p>
               </div>
               <p style="margin: 20px 0 0; font-size: 15px; color: #333; line-height: 1.6;">
-                Arbetsgivaren kommer att granska din ansökan och återkoppla. Du kan följa statusen i appen under <strong>Mina Ansökningar</strong>.
+                Arbetsgivaren kommer att granska din ansökan och återkoppla.
               </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 0;">
                 <tr>
@@ -56,7 +56,7 @@ const getTemplate = (firstName: string, jobTitle: string, companyName: string) =
                   </td>
                 </tr>
               </table>
-              <p style="margin: 28px 0 0; font-size: 15px; color: #333; line-height: 1.6;">
+              <p style="margin: 28px 0 0; font-size: 15px; color: #333; line-height: 1.6; text-align: center;">
                 Lycka till! 🍀
               </p>
             </td>
