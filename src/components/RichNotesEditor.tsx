@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo, Heading1, Heading2, Maximize2 } from 'lucide-react';
+import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo, Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
@@ -107,14 +107,6 @@ export const NotesToolbar = memo(({ editor, className, onExpand, compact = false
     editor?.chain().focus().redo().run();
   }, [editor]);
 
-  const handleHeading1 = useCallback(() => {
-    editor?.chain().focus().toggleHeading({ level: 1 }).run();
-  }, [editor]);
-
-  const handleHeading2 = useCallback(() => {
-    editor?.chain().focus().toggleHeading({ level: 2 }).run();
-  }, [editor]);
-
   if (!editor) return null;
 
   return (
@@ -151,21 +143,8 @@ export const NotesToolbar = memo(({ editor, className, onExpand, compact = false
         title="Checkbox" 
         isActive={editor.isActive('taskList')}
       />
-      {/* Headings + Undo/Redo - hidden on tight spaces */}
+      {/* Undo/Redo - hidden on tight spaces */}
       <div className={compact ? "hidden md:contents" : "contents"}>
-        <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
-        <ToolbarButton 
-          onClick={handleHeading1} 
-          icon={Heading1} 
-          title="Rubrik 1" 
-          isActive={editor.isActive('heading', { level: 1 })}
-        />
-        <ToolbarButton 
-          onClick={handleHeading2} 
-          icon={Heading2} 
-          title="Rubrik 2" 
-          isActive={editor.isActive('heading', { level: 2 })}
-        />
         <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
         <ToolbarButton 
           onClick={handleUndo} 
@@ -234,7 +213,8 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
           "text-pure-white",
           "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
           "touch-auto",
-          "min-h-[100px]"
+          "min-h-[100px]",
+          "pb-4"
         ),
       },
     },
