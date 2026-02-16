@@ -106,7 +106,7 @@ Parium AB, Stockholm`,
         </head>
         <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #ffffff;">
           
-          <div style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px 20px;">
+          <div style="max-width: 600px; margin: 0 auto; text-align: left; padding: 40px 20px;">
             
             <p style="color: #333333; margin: 0 0 15px 0; font-size: 16px;">
               Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.
@@ -117,7 +117,7 @@ Parium AB, Stockholm`,
             </p>
             
             <!-- CTA Button -->
-            <div style="margin: 30px 0;">
+            <div style="margin: 30px 0; text-align: center;">
               <a href="${resetUrl}" 
                  style="display: inline-block; background-color: #1a237e; color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
                 Återställ lösenord
