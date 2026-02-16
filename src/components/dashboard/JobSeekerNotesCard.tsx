@@ -106,13 +106,13 @@ export const JobSeekerNotesCard = memo(() => {
     const thumb = expandedThumbRef.current;
     if (!el || !track || !thumb) return;
     const { scrollTop, scrollHeight, clientHeight } = el;
-    console.log('[expanded-scroll]', { scrollTop, scrollHeight, clientHeight, hasScroll: scrollHeight > clientHeight + 5 });
     const hasScroll = scrollHeight > clientHeight + 5;
     track.style.display = hasScroll ? '' : 'none';
     if (!hasScroll) return;
     const thumbH = Math.max((clientHeight / scrollHeight) * 100, 20);
     const maxScroll = scrollHeight - clientHeight;
     const thumbTop = maxScroll > 0 ? (scrollTop / maxScroll) * (100 - thumbH) : 0;
+    thumb.style.transition = 'top 0.15s ease-out, height 0.15s ease-out';
     thumb.style.top = `${thumbTop}%`;
     thumb.style.height = `${thumbH}%`;
   }, []);
