@@ -50,14 +50,14 @@ const ToolbarButton = memo(({
           onClick={onClick}
           disabled={disabled}
           className={cn(
-            "w-5 h-5 flex items-center justify-center rounded transition-all duration-150 caret-transparent",
+            "w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150 caret-transparent",
             "hover:bg-white/20",
-            "active:scale-95",
+            "active:scale-90",
             "disabled:opacity-30 disabled:cursor-not-allowed",
-            isActive && "bg-white/25"
+            isActive && "bg-white/25 shadow-sm"
           )}
         >
-          <Icon className="h-3 w-3 text-pure-white" />
+          <Icon className="h-4 w-4 text-pure-white" />
         </button>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -110,7 +110,7 @@ export const NotesToolbar = memo(({ editor, className, onExpand, compact = false
   if (!editor) return null;
 
   return (
-    <div className={cn("flex items-center gap-0.5 flex-shrink min-w-0 overflow-hidden", className)}>
+    <div className={cn("flex items-center gap-1 flex-shrink min-w-0 overflow-hidden", className)}>
       {/* Core formatting - always visible */}
       <ToolbarButton 
         onClick={handleBold} 
@@ -130,7 +130,7 @@ export const NotesToolbar = memo(({ editor, className, onExpand, compact = false
         title="Genomstruken" 
         isActive={editor.isActive('strike')}
       />
-      <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
+      <div className="w-px h-4 bg-white/20 mx-1 flex-shrink-0" />
       <ToolbarButton 
         onClick={handleBulletList} 
         icon={List} 
@@ -145,7 +145,7 @@ export const NotesToolbar = memo(({ editor, className, onExpand, compact = false
       />
       {/* Undo/Redo - always visible */}
       <div className="contents">
-        <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
+        <div className="w-px h-4 bg-white/20 mx-1 flex-shrink-0" />
         <ToolbarButton 
           onClick={handleUndo} 
           icon={Undo} 
@@ -161,7 +161,7 @@ export const NotesToolbar = memo(({ editor, className, onExpand, compact = false
       </div>
       {onExpand && (
         <>
-          <div className="w-px h-3 bg-white/20 mx-0.5 flex-shrink-0" />
+          <div className="w-px h-4 bg-white/20 mx-1 flex-shrink-0" />
           <ToolbarButton 
             onClick={onExpand} 
             icon={Maximize2} 

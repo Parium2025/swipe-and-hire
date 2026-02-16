@@ -170,7 +170,7 @@ export const JobSeekerNotesCard = memo(() => {
           </div>
           
           {/* Notes editor */}
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 relative">
             <RichNotesEditor
               value={content}
               onChange={handleChange}
@@ -178,6 +178,8 @@ export const JobSeekerNotesCard = memo(() => {
               hideToolbar
               onEditorReady={handleEditorReady}
             />
+            {/* Soft fade at the bottom instead of hard clip */}
+            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-purple-600/80 to-transparent pointer-events-none rounded-b-lg" />
           </div>
         </CardContent>
       </Card>
