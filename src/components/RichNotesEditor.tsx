@@ -267,7 +267,7 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
         <div className="relative min-h-full">
           <EditorContent 
             editor={editor} 
-            className="[&_.ProseMirror]:pb-8 [&_.ProseMirror]:min-h-full [&_.ProseMirror]:bg-transparent"
+            className="[&_.ProseMirror]:pb-8 [&_.ProseMirror]:min-h-full [&_.ProseMirror]:!bg-transparent [&_.ProseMirror]:!rounded-none"
           />
         </div>
       ) : (
