@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { memo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Bold, Italic, Strikethrough, List, CheckSquare, Undo, Redo } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -81,7 +81,15 @@ interface NotesToolbarProps {
   showUndoRedo?: boolean;
 }
 
-export const NotesToolbar = memo(({ editor, className, compact = false, showUndoRedo = true }: NotesToolbarProps) => {
+export const NotesToolbar = ({ editor, className, compact = false, showUndoRedo = true }: NotesToolbarProps) => {
+  // Force re-render on every editor transaction so undo/redo disabled state updates in real-time
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!editor) return;
+    const handler = () => setTick(t => t + 1);
+    editor.on('transaction', handler);
+    return () => { editor.off('transaction', handler); };
+  }, [editor]);
   const handleBold = useCallback(() => {
     editor?.chain().focus().toggleBold().run();
   }, [editor]);
@@ -129,7 +137,7 @@ export const NotesToolbar = memo(({ editor, className, compact = false, showUndo
       )}
     </div>
   );
-});
+};
 
 NotesToolbar.displayName = 'NotesToolbar';
 
