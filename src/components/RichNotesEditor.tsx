@@ -263,11 +263,11 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
       )}
       
       {externalScroll ? (
-        /* External scroll mode: editor grows with content, parent scrolls */
+        /* External scroll mode: editor grows with content, parent scrolls. Background removed from ProseMirror so the fixed parent can own it. */
         <div className="relative min-h-full">
           <EditorContent 
             editor={editor} 
-            className="[&_.ProseMirror]:pb-8 [&_.ProseMirror]:min-h-full"
+            className="[&_.ProseMirror]:pb-8 [&_.ProseMirror]:min-h-full [&_.ProseMirror]:bg-transparent"
           />
         </div>
       ) : (
