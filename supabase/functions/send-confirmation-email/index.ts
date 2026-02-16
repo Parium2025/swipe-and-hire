@@ -30,61 +30,61 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
       <td align="center" style="padding: 40px 20px;">
         <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
           <tr>
-            <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: bold; color: #ffffff;">Parium</h1>
-              <p style="margin: 0; font-size: 16px; color: #ffffff;">Framtiden börjar med ett swipe</p>
+            <td style="background-color: #1E3A8A; padding: 32px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="margin: 0 0 4px 0; font-size: 24px; font-weight: bold; color: #ffffff;">Parium</h1>
+              <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.8);">Framtiden börjar med ett swipe</p>
             </td>
           </tr>
           <tr>
-            <td style="padding: 40px 30px;">
-               <p style="margin: 0 0 24px 0; font-size: 16px; color: #333333; text-align: center; line-height: 1.6;">
-                 Hej ${firstName}!
-               </p>
-               <p style="margin: 0 0 24px 0; font-size: 16px; color: #333333; text-align: center; line-height: 1.6;">
-                 Välkommen till Parium — nästa steg i ett smartare jobbsökande.<br>
-                 Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
-               </p>
-               <p style="margin: 0 0 12px 0; font-size: 16px; color: #333333; text-align: center; line-height: 1.6; font-weight: bold;">
-                 Med Parium kan du:
-               </p>
-              <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px auto 30px auto; max-width: 450px;">
+            <td style="padding: 36px 30px;">
+              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
+                Hej ${firstName}!
+              </p>
+              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
+                Välkommen till Parium — nästa steg i ett smartare jobbsökande.
+                Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
+              </p>
+              <p style="margin: 0 0 12px 0; font-size: 16px; color: #333; line-height: 1.6; font-weight: bold;">
+                Med Parium kan du:
+              </p>
+              <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px 0 30px 0; max-width: 450px;">
                 <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #333333; font-size: 16px; line-height: 1.6;">•</td>
-                  <td style="color: #333333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Hitta jobb som verkligen matchar din profil</td>
+                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
+                  <td style="color: #333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Hitta jobb som verkligen matchar din profil</td>
                 </tr>
                 <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #333333; font-size: 16px; line-height: 1.6;">•</td>
-                  <td style="color: #333333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Swipea dig igenom alternativ och ansöka på några sekunder</td>
+                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
+                  <td style="color: #333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Swipea dig igenom alternativ och ansöka på några sekunder</td>
                 </tr>
                 <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #333333; font-size: 16px; line-height: 1.6;">•</td>
-                  <td style="color: #333333; font-size: 16px; line-height: 1.6;">Spara tid med verktyg som gör processen både enkel och effektiv</td>
+                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
+                  <td style="color: #333; font-size: 16px; line-height: 1.6;">Spara tid med verktyg som gör processen både enkel och effektiv</td>
                 </tr>
               </table>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
                 <tr>
                   <td align="center" style="padding: 0;">
-                    <a href="${confirmationUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none;">Bekräfta mitt konto</a>
+                    <a href="${confirmationUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 15px; font-weight: bold; line-height: 46px; text-align: center; text-decoration: none; width: 240px; -webkit-text-size-adjust: none;">Bekräfta mitt konto</a>
                   </td>
                 </tr>
               </table>
-              <p style="margin: 30px 0 0 0; font-size: 16px; color: #333333; text-align: center; line-height: 1.6;">
+              <p style="margin: 28px 0 0 0; font-size: 16px; color: #333; line-height: 1.6;">
                 Tack för ditt förtroende.<br>
                 Det här kan bli början på något riktigt bra!
               </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                 <tr>
                   <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
-                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #6B7280; text-align: center;">Fungerar inte knappen? Kopiera länken nedan:</p>
-                    <p style="margin: 0; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">${confirmationUrl}</p>
+                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #6B7280;">Fungerar inte knappen? Kopiera länken nedan:</p>
+                    <p style="margin: 0; font-size: 12px; color: #1E3A8A; word-break: break-all;">${confirmationUrl}</p>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
           <tr>
-            <td style="background-color: #F9FAFB; padding: 24px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
-              <p style="margin: 0; font-size: 14px; color: #6B7280;">Parium AB · Stockholm<br/>Du får detta mail för att du registrerat ett konto i Parium-appen.</p>
+            <td style="background-color: #F9FAFB; padding: 20px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
+              <p style="margin: 0; font-size: 13px; color: #9CA3AF;">Parium AB · Stockholm<br/>Du får detta mail för att du registrerat ett konto i Parium-appen.</p>
             </td>
           </tr>
         </table>
@@ -109,59 +109,57 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string, company
       <td align="center" style="padding: 40px 20px;">
         <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
           <tr>
-            <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: bold; color: #ffffff;">Parium</h1>
-              <p style="margin: 0; font-size: 16px; color: #ffffff;">Framtiden börjar med ett swipe</p>
+            <td style="background-color: #1E3A8A; padding: 32px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="margin: 0 0 4px 0; font-size: 24px; font-weight: bold; color: #ffffff;">Parium</h1>
+              <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.8);">Framtiden börjar med ett swipe</p>
             </td>
           </tr>
           <tr>
-            <td style="padding: 40px 30px;">
-              <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+            <td style="padding: 36px 30px;">
+              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
                 Hej ${firstName}!
               </p>
-              <p style="margin: 0 0 30px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                Välkommen till Parium - plattformen där <strong>${companyName}</strong> möter framtida talanger. Vi hjälper er att rekrytera snabbare, mer effektivt och utan krångel.
+              <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
+                Välkommen till Parium — plattformen där <strong>${companyName}</strong> möter framtida talanger. Vi hjälper er att rekrytera snabbare, mer effektivt och utan krångel.
               </p>
-              <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px auto 30px auto; max-width: 450px;">
+              <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px 0 30px 0; max-width: 450px;">
                 <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
-                  <td style="color: #111827; font-size: 16px; line-height: 24px; padding-bottom: 12px; text-align: left;">En smidig rekryteringsprocess från start till mål</td>
+                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
+                  <td style="color: #333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">En smidig rekryteringsprocess från start till mål</td>
                 </tr>
                 <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
-                  <td style="color: #111827; font-size: 16px; line-height: 24px; padding-bottom: 12px; text-align: left;">Direktkontakt med kandidater</td>
+                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
+                  <td style="color: #333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Direktkontakt med kandidater</td>
                 </tr>
                 <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
-                  <td style="color: #111827; font-size: 16px; line-height: 24px; text-align: left;">Effektiva verktyg som stödjer er rekrytering</td>
+                  <td style="vertical-align: top; padding-right: 8px; color: #333; font-size: 16px; line-height: 1.6;">•</td>
+                  <td style="color: #333; font-size: 16px; line-height: 1.6;">Effektiva verktyg som stödjer er rekrytering</td>
                 </tr>
               </table>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
                 <tr>
                   <td align="center" style="padding: 0;">
-                    <a href="${confirmationUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none;">
-                      Bekräfta företagskonto
-                    </a>
+                    <a href="${confirmationUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 15px; font-weight: bold; line-height: 46px; text-align: center; text-decoration: none; width: 240px; -webkit-text-size-adjust: none;">Bekräfta företagskonto</a>
                   </td>
                 </tr>
               </table>
-              <p style="margin: 20px 0 0 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+              <p style="margin: 28px 0 0 0; font-size: 16px; color: #333; line-height: 1.6;">
                 Tack för att du väljer Parium för er rekrytering.<br>
                 Tillsammans skapar vi framtidens arbetsliv!
               </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                 <tr>
                   <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
-                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #6B7280; text-align: center;">Fungerar inte knappen? Kopiera länken nedan:</p>
-                    <p style="margin: 0; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">${confirmationUrl}</p>
+                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #6B7280;">Fungerar inte knappen? Kopiera länken nedan:</p>
+                    <p style="margin: 0; font-size: 12px; color: #1E3A8A; word-break: break-all;">${confirmationUrl}</p>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
           <tr>
-            <td style="background-color: #F9FAFB; padding: 24px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
-              <p style="margin: 0; font-size: 14px; color: #6B7280;">Parium AB · Stockholm<br/>Du får detta mail för att du registrerat ett företagskonto i Parium-appen.</p>
+            <td style="background-color: #F9FAFB; padding: 20px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
+              <p style="margin: 0; font-size: 13px; color: #9CA3AF;">Parium AB · Stockholm<br/>Du får detta mail för att du registrerat ett företagskonto i Parium-appen.</p>
             </td>
           </tr>
         </table>
@@ -173,7 +171,6 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string, company
 `;
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -183,7 +180,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending confirmation email to ${email} with role ${role}`);
 
-    // Choose the correct template based on role
     const emailHtml = role === 'employer' 
       ? getEmployerTemplate(first_name, confirmation_url, company_name || 'ert företag')
       : getJobSeekerTemplate(first_name, confirmation_url);
@@ -203,20 +199,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
     console.error("Error in send-confirmation-email function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );  }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+    );
+  }
 };
 
 serve(handler);
