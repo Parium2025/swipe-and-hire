@@ -78,6 +78,13 @@ export function useSessionManager(
   userId: string | null,
   onKicked: () => void
 ) {
+  // Skip session management in Lovable preview or non-production environments
+  // to avoid the preview iframe counting as a separate device
+  const isPreviewEnv = typeof window !== 'undefined' && (
+    window.location.hostname.includes('lovable.app') ||
+    window.location.hostname.includes('localhost') ||
+    window.self !== window.top // inside an iframe
+  );
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const validityCheckIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionTokenRef = useRef<string | null>(null);
@@ -86,7 +93,7 @@ export function useSessionManager(
 
   // Register session when user logs in
   const registerSession = useCallback(async () => {
-    if (!userId || registeredRef.current) return;
+    if (!userId || registeredRef.current || isPreviewEnv) return;
 
     const token = getOrCreateSessionToken();
     sessionTokenRef.current = token;
@@ -113,7 +120,7 @@ export function useSessionManager(
     } catch (err) {
       console.warn('Session registration error:', err);
     }
-  }, [userId]);
+  }, [userId, isPreviewEnv]);
 
   // Heartbeat to keep session alive
   // If heartbeat returns false (session expired after offline), try to re-register.
@@ -218,7 +225,7 @@ export function useSessionManager(
 
   // Set up session management
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || isPreviewEnv) return;
 
     const token = getOrCreateSessionToken();
     sessionTokenRef.current = token;
