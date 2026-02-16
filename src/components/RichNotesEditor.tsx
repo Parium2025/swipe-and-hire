@@ -163,14 +163,15 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
     editorProps: {
       attributes: {
         class: cn(
-          "relative h-full overflow-y-auto",
+          "relative h-full overflow-y-auto overscroll-contain",
           "bg-white/10 rounded-lg p-2 pr-4",
           "text-sm leading-relaxed",
           "text-pure-white",
           "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
           "touch-auto",
           "min-h-[100px]",
-          "pb-4"
+          "pb-4",
+          "[&]:[-webkit-overflow-scrolling:touch]"
         ),
       },
     },
@@ -254,10 +255,10 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
         </div>
       )}
       
-      <div className="relative flex-1 min-h-0 overflow-hidden">
+      <div className="relative flex-1 min-h-0">
         <EditorContent 
           editor={editor} 
-          className="h-full [&_.ProseMirror]:h-full [&_.ProseMirror]:overflow-y-auto [&_.ProseMirror]:pb-8"
+          className="h-full [&_.ProseMirror]:h-full [&_.ProseMirror]:overflow-y-auto [&_.ProseMirror]:overscroll-contain [&_.ProseMirror]:pb-8 [&_.ProseMirror]:[--webkit-overflow-scrolling:touch]"
         />
         
         {/* Mini scrollbar indicator — updated via direct DOM, no re-renders */}
