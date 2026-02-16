@@ -201,7 +201,7 @@ export const JobSeekerNotesCard = memo(() => {
       <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
         <DialogContent 
           hideClose 
-          className="max-w-4xl w-[calc(100%-2rem)] h-[90dvh] sm:h-[80vh] bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 border-0 p-0 flex flex-col"
+          className="max-w-4xl w-[calc(100%-2rem)] h-[90dvh] sm:h-[80vh] bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 border-0 p-0 !flex !flex-col overflow-hidden"
         >
           <VisuallyHidden>
             <DialogTitle>Anteckningar</DialogTitle>
@@ -210,9 +210,9 @@ export const JobSeekerNotesCard = memo(() => {
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="relative flex flex-col h-full p-4 sm:p-6">
+          <div className="relative flex flex-col flex-1 min-h-0 p-4 sm:p-6">
             {/* Header */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-white/10">
                   <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
@@ -231,24 +231,24 @@ export const JobSeekerNotesCard = memo(() => {
             </div>
 
             {/* Toolbar */}
-            <div className="mb-3 pb-2 border-b border-white/10">
+            <div className="mb-3 pb-2 border-b border-white/10 shrink-0">
               <NotesToolbar editor={expandedEditor} />
             </div>
             
-            {/* Editor — fills all remaining space */}
-            <div className="flex-1 min-h-0">
+            {/* Editor — scrollable area uses overflow-y-auto on a wrapper instead of relying on ProseMirror chain */}
+            <div className="flex-1 min-h-0 relative overflow-y-auto overscroll-contain touch-auto [-webkit-overflow-scrolling:touch] bg-white/10 rounded-lg">
               <RichNotesEditor
                 value={content}
                 onChange={handleChange}
                 placeholder="Skriv karriärmål, påminnelser..."
                 hideToolbar
+                externalScroll
                 onEditorReady={handleExpandedEditorReady}
-                className="h-full"
               />
             </div>
             
             {/* Character/word counter */}
-            <div className="flex items-center justify-end gap-4 mt-2 pt-2 border-t border-white/10">
+            <div className="flex items-center justify-end gap-4 mt-2 pt-2 border-t border-white/10 shrink-0">
               <span className="text-xs text-white/60">
                 {textStats.charCount} tecken · {textStats.wordCount} ord
               </span>
