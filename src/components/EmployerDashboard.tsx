@@ -16,6 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
 import { MobileJobCard } from '@/components/MobileJobCard';
+import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
 import {
   AlertDialog,
@@ -524,16 +525,65 @@ const EmployerDashboard = memo(() => {
                 <div className="rounded-none bg-transparent ring-0 shadow-none">
                   <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]" style={{ willChange: 'scroll-position' }}>
                     <div className="space-y-2 px-2 py-2 pb-24" style={{ contain: 'layout style' }}>
-                      {pageJobs.map((job) => (
-                        <MobileJobCard
-                          key={job.id}
-                          job={job as any}
-                          onEdit={handleEditJob}
-                          onDelete={handleDeleteClick}
-                          onEditDraft={(j) => handleEditDraft(j as JobPosting)}
-                          onPrefetch={prefetchJob}
-                        />
-                      ))}
+                      {pageJobs.map((job) => {
+                        const jobPosting = job as JobPosting;
+                        const isDraft = !job.is_active;
+                        const isExpired = job.is_active && isJobExpiredCheck(job.created_at, jobPosting.expires_at);
+                        return (
+                          <ReadOnlyMobileJobCard
+                            key={job.id}
+                            job={job as any}
+                            hideSaveButton
+                            onCardClick={(jobId) => {
+                              if (isDraft) {
+                                handleEditDraft(jobPosting);
+                              } else {
+                                navigate(`/job-details/${jobId}`);
+                              }
+                            }}
+                            statusBadge={
+                              isDraft ? (
+                                <Badge variant="glass" className="text-[11px] px-2 py-0.5 bg-yellow-500/60 border-yellow-500/60 text-white">Utkast</Badge>
+                              ) : isExpired ? (
+                                <Badge variant="glass" className="text-[11px] px-2 py-0.5 bg-red-500/60 border-red-400/60 text-white">Utgången</Badge>
+                              ) : (
+                                <Badge variant="glass" className="text-[11px] px-2 py-0.5 bg-green-500/60 border-green-500/60 text-white">Aktiv</Badge>
+                              )
+                            }
+                            footer={
+                              <div className="flex items-center gap-2 pt-1">
+                                {(!isExpired || isDraft) && (
+                                  <Button
+                                    variant="glass"
+                                    size="sm"
+                                    className="flex-1 text-xs h-8"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (isDraft) handleEditDraft(jobPosting);
+                                      else handleEditJob(jobPosting);
+                                    }}
+                                  >
+                                    <Edit className="h-3.5 w-3.5 mr-1" />
+                                    Redigera
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="glass"
+                                  size="sm"
+                                  className="flex-1 text-xs h-8 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(jobPosting);
+                                  }}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                  Ta bort
+                                </Button>
+                              </div>
+                            }
+                          />
+                        );
+                      })}
                     </div>
                   </ScrollArea>
                 </div>
