@@ -25,6 +25,7 @@ import {
   Maximize2
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Textarea } from '@/components/ui/textarea';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
 import type { Editor } from '@tiptap/react';
@@ -538,6 +539,10 @@ const NotesCard = memo(() => {
   const [notesEditor, setNotesEditor] = useState<Editor | null>(null);
   const [expandedEditor, setExpandedEditor] = useState<Editor | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const expandedScrollRef = useRef<HTMLDivElement>(null);
+  const expandedTrackRef = useRef<HTMLDivElement>(null);
+  const expandedThumbRef = useRef<HTMLDivElement>(null);
+  const expandedRafRef = useRef<number>(0);
 
   const cacheKey = user?.id ? `employer_notes_cache_${user.id}` : 'employer_notes_cache';
 
@@ -633,16 +638,69 @@ const NotesCard = memo(() => {
     setIsExpanded(false);
   }, []);
 
+  // Expanded scrollbar tracking
+  const updateExpandedScrollbar = useCallback(() => {
+    const el = expandedScrollRef.current;
+    const track = expandedTrackRef.current;
+    const thumb = expandedThumbRef.current;
+    if (!el || !track || !thumb) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const hasScroll = scrollHeight > clientHeight + 5;
+    track.style.display = hasScroll ? '' : 'none';
+    if (!hasScroll) return;
+    const thumbH = Math.max((clientHeight / scrollHeight) * 100, 20);
+    const maxScroll = scrollHeight - clientHeight;
+    const thumbTop = maxScroll > 0 ? (scrollTop / maxScroll) * (100 - thumbH) : 0;
+    thumb.style.transition = 'top 0.15s ease-out, height 0.15s ease-out';
+    thumb.style.top = `${thumbTop}%`;
+    thumb.style.height = `${thumbH}%`;
+  }, []);
+
+  // Attach scroll listener — retry until element is mounted
+  useEffect(() => {
+    if (!isExpanded) return;
+    let attempts = 0;
+    let scrollHandler: (() => void) | null = null;
+    let attachedEl: HTMLElement | null = null;
+
+    const tryAttach = () => {
+      const el = expandedScrollRef.current;
+      if (!el) {
+        if (attempts++ < 20) setTimeout(tryAttach, 50);
+        return;
+      }
+      attachedEl = el;
+      scrollHandler = () => {
+        cancelAnimationFrame(expandedRafRef.current);
+        expandedRafRef.current = requestAnimationFrame(updateExpandedScrollbar);
+      };
+      el.addEventListener('scroll', scrollHandler, { passive: true });
+      updateExpandedScrollbar();
+      setTimeout(updateExpandedScrollbar, 200);
+    };
+    tryAttach();
+
+    return () => {
+      if (attachedEl && scrollHandler) {
+        attachedEl.removeEventListener('scroll', scrollHandler);
+      }
+      cancelAnimationFrame(expandedRafRef.current);
+    };
+  }, [isExpanded, updateExpandedScrollbar]);
+
+  // Update scrollbar when content changes in expanded mode
+  useEffect(() => {
+    if (isExpanded) {
+      updateExpandedScrollbar();
+      const t = setTimeout(updateExpandedScrollbar, 100);
+      return () => clearTimeout(t);
+    }
+  }, [content, isExpanded, updateExpandedScrollbar]);
+
   // Escape key to close fullscreen
   useEffect(() => {
     if (!isExpanded) return;
-    
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsExpanded(false);
-      }
-    };
-    
+    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsExpanded(false); };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isExpanded]);
@@ -696,10 +754,20 @@ const NotesCard = memo(() => {
     return () => clearTimeout(timer);
   }, [content, user?.id, isFetched, noteData, queryClient]);
 
+  const saveIndicator = (
+    <span className="text-[11px] text-white font-medium">
+      {isSaving ? (
+        <span className="animate-pulse">Sparar...</span>
+      ) : lastSaved ? (
+        'Sparat ✓'
+      ) : null}
+    </span>
+  );
+
   return (
     <>
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.placeholder1} border-0 shadow-lg dashboard-card-height`}>
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-white/5" />
         <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
         
         <CardContent className="relative p-3 sm:p-4 h-full flex flex-col">
@@ -713,13 +781,8 @@ const NotesCard = memo(() => {
                 Anteckningar
               </span>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {isSaving && (
-                <span className="text-[11px] text-white/70 animate-pulse">Sparar...</span>
-              )}
-              {!isSaving && lastSaved && (
-                <span className="text-[11px] text-white/70">Sparat ✓</span>
-              )}
+            <div className="flex items-center gap-2">
+              {saveIndicator}
               <button
                 onClick={handleExpand}
                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
@@ -734,14 +797,19 @@ const NotesCard = memo(() => {
             <NotesToolbar editor={notesEditor} compact showUndoRedo={false} />
           </div>
           
-          {/* Notes editor - toolbar hidden, more space for writing */}
-          <div className="flex-1 min-h-0">
+          {/* Editor area */}
+          <div className="flex-1 min-h-0 relative">
             <RichNotesEditor
               value={content}
               onChange={handleChange}
               placeholder="Skriv påminnelser och anteckningar..."
               hideToolbar
               onEditorReady={handleEditorReady}
+            />
+            {/* Soft fade at bottom */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-6 pointer-events-none rounded-b-lg"
+              style={{ background: 'linear-gradient(to top, rgba(124, 58, 237, 0.7), transparent)' }}
             />
           </div>
         </CardContent>
@@ -751,63 +819,73 @@ const NotesCard = memo(() => {
       <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
         <DialogContent 
           hideClose 
-          className="max-w-4xl h-[80vh] bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 border-0 p-0 overflow-hidden"
+          className="max-w-4xl w-[calc(100%-2rem)] h-[90dvh] sm:h-[80vh] bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 border-0 p-0 !flex !flex-col overflow-hidden"
         >
+          <VisuallyHidden>
+            <DialogTitle>Anteckningar</DialogTitle>
+          </VisuallyHidden>
           <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px] pointer-events-none" />
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="relative flex flex-col h-full p-4 sm:p-6">
+          <div className="relative flex flex-col flex-1 min-h-0 p-4 sm:p-6">
             {/* Header */}
-            <div className="flex flex-col gap-2 mb-4">
-              {/* Top row: icon + title + save status + close */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-white/10">
-                    <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
-                  </div>
-                  <h2 className="text-lg sm:text-xl font-semibold text-white">Anteckningar</h2>
+            <div className="flex items-center justify-between mb-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-white/10">
+                  <FileText className="h-5 w-5 text-white" strokeWidth={1.5} />
                 </div>
-                <div className="flex items-center gap-3">
-                  {isSaving && (
-                    <span className="text-xs text-white/80 animate-pulse">Sparar...</span>
-                  )}
-                  {!isSaving && lastSaved && (
-                    <span className="text-xs text-white/80">Sparat</span>
-                  )}
-                  <button
-                    onClick={handleCloseExpanded}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
-                  >
-                    <X className="h-4 w-4 text-white" />
-                  </button>
-                </div>
+                <h2 className="text-lg sm:text-xl font-semibold text-white">Anteckningar</h2>
               </div>
-              {/* Toolbar on its own row - always visible, wraps nicely */}
-              <div className="flex items-center">
-                <NotesToolbar editor={expandedEditor} />
+              <div className="flex items-center gap-3">
+                {saveIndicator}
+                <button
+                  onClick={handleCloseExpanded}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
+                >
+                  <X className="h-4 w-4 text-white" />
+                </button>
               </div>
             </div>
+
+            {/* Toolbar */}
+            <div className="mb-3 pb-2 border-b border-white/10 shrink-0">
+              <NotesToolbar editor={expandedEditor} />
+            </div>
             
-            {/* Editor */}
-            <div className="flex-1 min-h-0 overflow-hidden">
-              <RichNotesEditor
-                value={content}
-                onChange={handleChange}
-                placeholder="Skriv påminnelser och anteckningar..."
-                hideToolbar
-                onEditorReady={handleExpandedEditorReady}
-                className="h-full [&_.ProseMirror]:min-h-[300px]"
-              />
+            {/* Editor — scrollable wrapper with mini scrollbar */}
+            <div className="flex-1 min-h-0 relative bg-white/10 rounded-lg overflow-hidden">
+              <div 
+                ref={expandedScrollRef}
+                className="absolute inset-0 overflow-y-auto overscroll-contain touch-auto [-webkit-overflow-scrolling:touch] pr-3"
+              >
+                <RichNotesEditor
+                  value={content}
+                  onChange={handleChange}
+                  placeholder="Skriv påminnelser och anteckningar..."
+                  hideToolbar
+                  externalScroll
+                  onEditorReady={handleExpandedEditorReady}
+                />
+              </div>
+              {/* Mini scrollbar indicator */}
+              <div 
+                ref={expandedTrackRef}
+                className="absolute right-1 top-1 bottom-1 w-1 rounded-full bg-white/10 pointer-events-none"
+                aria-hidden="true"
+                style={{ display: 'none' }}
+              >
+                <div 
+                  ref={expandedThumbRef}
+                  className="absolute w-full rounded-full bg-white/40"
+                />
+              </div>
             </div>
             
             {/* Character/word counter */}
-            <div className="flex items-center justify-end gap-4 mt-3 pt-3 border-t border-white/10">
-              <span className="text-xs text-white">
-                {textStats.charCount} tecken
-              </span>
-              <span className="text-xs text-white">
-                {textStats.wordCount} ord
+            <div className="flex items-center justify-end gap-4 mt-2 pt-2 border-t border-white/10 shrink-0">
+              <span className="text-xs text-pure-white">
+                {textStats.charCount} tecken · {textStats.wordCount} ord
               </span>
             </div>
           </div>
