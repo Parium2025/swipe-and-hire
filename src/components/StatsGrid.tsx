@@ -32,10 +32,10 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   // Dynamically set grid columns based on number of cards and whether any have subItems
   // Mobile: 2x2 grid for readability, Desktop: fill width
   const gridColsClass = hasMultiColumnCard 
-    ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-5' 
+    ? 'grid-cols-5' 
     : stats.length === 4 
-      ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4' 
-      : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-5';
+      ? 'grid-cols-4' 
+      : 'grid-cols-5';
   
   return (
     <div className={`grid ${gridColsClass} gap-2 md:gap-2`}>
