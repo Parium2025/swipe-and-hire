@@ -551,34 +551,30 @@ const EmployerDashboard = memo(() => {
                               )
                             }
                             footer={
-                              <div className="flex items-center gap-2 pt-1">
+                              <div className="flex items-center gap-2 pt-1.5">
                                 {(!isExpired || isDraft) && (
-                                  <Button
-                                    variant="glass"
-                                    size="sm"
-                                    className="flex-1 text-xs h-8"
+                                  <button
+                                    className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white h-8 rounded-lg border border-white/20 bg-white/5 transition-colors duration-150 active:scale-[0.97] hover:bg-white/10"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       if (isDraft) handleEditDraft(jobPosting);
                                       else handleEditJob(jobPosting);
                                     }}
                                   >
-                                    <Edit className="h-3.5 w-3.5 mr-1" />
+                                    <Edit className="h-3.5 w-3.5" />
                                     Redigera
-                                  </Button>
+                                  </button>
                                 )}
-                                <Button
-                                  variant="glass"
-                                  size="sm"
-                                  className="flex-1 text-xs h-8 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400"
+                                <button
+                                  className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white h-8 rounded-lg border border-white/20 bg-white/5 transition-colors duration-150 active:scale-[0.97] hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteClick(jobPosting);
                                   }}
                                 >
-                                  <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                  <Trash2 className="h-3.5 w-3.5" />
                                   Ta bort
-                                </Button>
+                                </button>
                               </div>
                             }
                           />
