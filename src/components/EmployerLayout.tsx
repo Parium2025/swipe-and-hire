@@ -488,10 +488,10 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
       {/* Fixed gradient background - covers viewport */}
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
       
-      <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="h-[100dvh] flex w-full overflow-hidden relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
         <EmployerSidebar />
-        <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">
           <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="text-white hover:bg-white/20 h-8 w-8" />
@@ -527,7 +527,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
             <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-secondary/60 rounded-full animate-pulse" style={{ animationDuration: '2.5s', animationDelay: '-1.3s', animationFillMode: 'backwards', willChange: 'opacity' }}></div>
           </div>
           
-          <main className="flex-1 overflow-hidden p-3">
+          <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 pb-8" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
             {children}
           </main>
           
