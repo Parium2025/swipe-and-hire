@@ -167,10 +167,24 @@ const Dashboard = memo(() => {
         </div>
       )}
 
-      <Card className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg">
-        <CardHeader className="p-6 md:p-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <CardTitle className="text-sm text-white text-center md:text-left">
+      {/* Mobile: Title + Tabs without card wrapper */}
+      <div className="md:hidden text-center space-y-3">
+        <h3 className="text-sm text-white font-medium">
+          {activeTab === 'active' ? 'Aktiva jobb' : 'Utgångna jobb'} av {profile?.company_name || 'ditt företag'}
+        </h3>
+        <JobStatusTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          activeCount={activeJobs.length}
+          expiredCount={expiredJobs.length}
+        />
+      </div>
+
+      {/* Desktop: Card-wrapped table */}
+      <Card className="hidden md:block bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg">
+        <CardHeader className="p-4">
+          <div className="flex flex-row items-center justify-between gap-4">
+            <CardTitle className="text-sm text-white text-left">
               {activeTab === 'active' ? 'Aktiva jobb' : 'Utgångna jobb'} av {profile?.company_name || 'ditt företag'}
             </CardTitle>
             <JobStatusTabs
@@ -181,7 +195,7 @@ const Dashboard = memo(() => {
             />
           </div>
         </CardHeader>
-        <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
+        <CardContent className="px-4 pb-4">
           
           {/* Desktop: Table view */}
           <div className="hidden md:block w-full">
@@ -418,151 +432,81 @@ const Dashboard = memo(() => {
               </Pagination>
             )}
           </div>
-
-          {/* Mobile: Card list view */}
-          <div className="block md:hidden">
-            {isLoading ? (
-              <div className="space-y-3 px-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
-                    <div className="flex items-start gap-3">
-                      <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-3/4 bg-white/10" />
-                        <Skeleton className="h-3 w-1/2 bg-white/10" />
-                        <div className="flex gap-2 mt-2">
-                          <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
-                          <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : filteredAndSortedJobs.length === 0 ? (
-              <div className="text-center text-white py-8 font-medium text-sm">
-                {searchTerm 
-                  ? 'Inga annonser matchar din sökning' 
-                  : activeTab === 'active' 
-                    ? 'Inga aktiva jobbannonser. Skapa din första annons!' 
-                    : 'Inga utgångna jobbannonser.'}
-              </div>
-            ) : (
-              <>
-                <div className="rounded-none bg-transparent ring-0 shadow-none">
-                  <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]">
-                    <div className="space-y-2 px-2 py-2 pb-24">
-                      {pageJobs.map((job) => (
-                        <ReadOnlyMobileJobCard
-                          key={job.id}
-                          job={job as any}
-                        />
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-
-                {/* Mobile Pagination */}
-                {totalPages > 1 && (
-                  <Pagination className="mt-3">
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPage(p => Math.max(1, p - 1));
-                          }}
-                          className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                        />
-                      </PaginationItem>
-
-                      {page > 2 && (
-                        <>
-                          <PaginationItem>
-                            <PaginationLink
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setPage(1);
-                              }}
-                              className="cursor-pointer"
-                            >
-                              1
-                            </PaginationLink>
-                          </PaginationItem>
-                          {page > 3 && <PaginationEllipsis />}
-                        </>
-                      )}
-
-                      {page > 1 && (
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setPage(page - 1);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            {page - 1}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )}
-
-                      <PaginationItem>
-                        <PaginationLink isActive>
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-
-                      {page < totalPages && (
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setPage(page + 1);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            {page + 1}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )}
-
-                      {page < totalPages - 1 && (
-                        <>
-                          {page < totalPages - 2 && <PaginationEllipsis />}
-                          <PaginationItem>
-                            <PaginationLink
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setPage(totalPages);
-                              }}
-                              className="cursor-pointer"
-                            >
-                              {totalPages}
-                            </PaginationLink>
-                          </PaginationItem>
-                        </>
-                      )}
-
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPage(p => Math.min(totalPages, p + 1));
-                          }}
-                          className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                    <span className="ml-4 text-sm text-white">Sida {page} av {totalPages}</span>
-                  </Pagination>
-                )}
-              </>
-            )}
-          </div>
-
         </CardContent>
       </Card>
+
+      {/* Mobile: Card list view — no wrapper card */}
+      <div className="block md:hidden">
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/10">
+                <div className="flex items-start gap-3">
+                  <Skeleton className="h-10 w-10 rounded-lg bg-white/10" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4 bg-white/10" />
+                    <Skeleton className="h-3 w-1/2 bg-white/10" />
+                    <div className="flex gap-2 mt-2">
+                      <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
+                      <Skeleton className="h-5 w-20 rounded-full bg-white/10" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredAndSortedJobs.length === 0 ? (
+          <div className="text-center text-white py-8 font-medium text-sm">
+            {searchTerm 
+              ? 'Inga annonser matchar din sökning' 
+              : activeTab === 'active' 
+                ? 'Inga aktiva jobbannonser. Skapa din första annons!' 
+                : 'Inga utgångna jobbannonser.'}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {pageJobs.map((job) => (
+              <ReadOnlyMobileJobCard
+                key={job.id}
+                job={job as any}
+                hideSaveButton
+              />
+            ))}
+
+            {/* Mobile Pagination */}
+            {totalPages > 1 && (
+              <Pagination className="mt-3">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(p => Math.max(1, p - 1));
+                      }}
+                      className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink isActive>
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(p => Math.min(totalPages, p + 1));
+                      }}
+                      className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+                <span className="ml-4 text-sm text-white">Sida {page} av {totalPages}</span>
+              </Pagination>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 });
