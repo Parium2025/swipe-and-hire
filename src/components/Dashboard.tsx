@@ -117,7 +117,7 @@ const Dashboard = memo(() => {
 
   // Use filtered stats (excluding expired jobs) for accurate representation
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Totalt annonser', value: isLoading ? preloadedEmployerActiveJobs : filteredStats.totalJobs, loading: false },
+    { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : filteredStats.totalJobs, loading: false },
     { 
       icon: TrendingUp, 
       title: 'Aktiva', 
@@ -127,7 +127,7 @@ const Dashboard = memo(() => {
         { label: 'Utgångna', value: expiredJobs.length },
       ]
     },
-    { icon: Eye, title: 'Totala visningar', value: isLoading ? preloadedEmployerTotalViews : filteredStats.totalViews, loading: false },
+    { icon: Eye, title: 'Visningar', value: isLoading ? preloadedEmployerTotalViews : filteredStats.totalViews, loading: false },
     { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : filteredStats.totalApplications, loading: false },
   ], [filteredStats, expiredJobs.length, isLoading, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
