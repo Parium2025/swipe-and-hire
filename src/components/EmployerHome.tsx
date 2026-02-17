@@ -1,17 +1,11 @@
-import { memo, useMemo, useEffect, useState, useCallback } from 'react';
+import { memo, useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useWeather } from '@/hooks/useWeather';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Briefcase, 
-  Users, 
-  Plus,
-  Database,
-  AlertTriangle,
-} from 'lucide-react';
+import { Briefcase, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { isJobExpiredCheck } from '@/lib/date';
 import WeatherEffects from '@/components/WeatherEffects';
@@ -144,29 +138,24 @@ const EmployerHome = memo(() => {
   
   // Reactive greeting that updates automatically
   const [greeting, setGreeting] = useState(() => getGreeting());
+  const greetingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
   useEffect(() => {
-    // Calculate ms until next minute (sync with clock)
     const now = new Date();
     const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
     
-    // First sync to the exact minute change
     const syncTimeout = setTimeout(() => {
       setGreeting(getGreeting());
       
-      // Then update every 60 seconds exactly on the minute
-      const interval = setInterval(() => {
+      greetingIntervalRef.current = setInterval(() => {
         setGreeting(getGreeting());
       }, 60000);
-      
-      // Store interval for cleanup
-      (window as any).__greetingInterval = interval;
     }, msUntilNextMinute);
     
     return () => {
       clearTimeout(syncTimeout);
-      if ((window as any).__greetingInterval) {
-        clearInterval((window as any).__greetingInterval);
+      if (greetingIntervalRef.current) {
+        clearInterval(greetingIntervalRef.current);
       }
     };
   }, []);
@@ -298,7 +287,7 @@ const EmployerHome = memo(() => {
           ) : null}
         </motion.div>
 
-        {/* Quick summary */}
+
 
         {/* Dashboard Grid - News, Stats, and more */}
         <HomeDashboardGrid />
