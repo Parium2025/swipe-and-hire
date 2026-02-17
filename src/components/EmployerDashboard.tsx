@@ -541,17 +541,8 @@ const EmployerDashboard = memo(() => {
                                 navigate(`/job-details/${jobId}`);
                               }
                             }}
-                            statusBadge={
-                              isDraft ? (
-                                <Badge variant="glass" className="text-[11px] px-2 py-0.5 bg-yellow-500/60 border-yellow-500/60 text-white">Utkast</Badge>
-                              ) : isExpired ? (
-                                <Badge variant="glass" className="text-[11px] px-2 py-0.5 bg-red-500/60 border-red-400/60 text-white">Utgången</Badge>
-                              ) : (
-                                <Badge variant="glass" className="text-[11px] px-2 py-0.5 bg-green-500/60 border-green-500/60 text-white">Aktiv</Badge>
-                              )
-                            }
                             footer={
-                              <div className="flex items-center gap-2 pt-1.5">
+                              <div className="flex items-center gap-2">
                                 {(!isExpired || isDraft) && (
                                   <button
                                     className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white h-8 rounded-lg border border-white/20 bg-white/5 transition-colors duration-150 active:scale-[0.97] hover:bg-white/10"
