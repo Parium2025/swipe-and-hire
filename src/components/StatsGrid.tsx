@@ -101,12 +101,10 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
         <div className="hidden md:grid md:grid-cols-5 gap-2">
           {stats.map((stat, i) => renderCard(stat, i, stat.subItems && stat.subItems.length > 0 ? 'col-span-2' : ''))}
         </div>
-        {/* Mobile: Aktiva/Utgångna full width, then remaining in a row */}
+        {/* Mobile: Aktiva/Utgångna full width, then remaining stacked below */}
         <div className="md:hidden space-y-2">
           {multiColCards.map((stat, i) => renderCard(stat, i))}
-          <div className="grid grid-cols-3 gap-2">
-            {regularCards.map((stat, i) => renderCard(stat, i + multiColCards.length))}
-          </div>
+          {regularCards.map((stat, i) => renderCard(stat, i + multiColCards.length))}
         </div>
       </>
     );
