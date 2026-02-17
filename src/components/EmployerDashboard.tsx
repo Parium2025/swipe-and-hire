@@ -522,9 +522,7 @@ const EmployerDashboard = memo(() => {
             ) : (
               <>
                 <div ref={listTopRef} />
-                <div className="rounded-none bg-transparent ring-0 shadow-none">
-                  <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]" style={{ willChange: 'scroll-position' }}>
-                    <div className="space-y-2 pb-24" style={{ contain: 'layout style' }}>
+                    <div className="space-y-2 pb-24">
                       {pageJobs.map((job) => {
                         const jobPosting = job as JobPosting;
                         const isDraft = !job.is_active;
@@ -572,8 +570,6 @@ const EmployerDashboard = memo(() => {
                         );
                       })}
                     </div>
-                  </ScrollArea>
-                </div>
 
                 {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-6 mt-3 text-xs">
