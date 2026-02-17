@@ -162,12 +162,14 @@ const NewsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaus
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.news} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setTimeout(() => setIsPaused(false), 3000)}
       {...swipeHandlers}
     >
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-4 h-full flex flex-col">
+      <CardContent className="relative p-4 sm:p-4 h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="p-2 rounded-xl bg-white/10">
@@ -191,7 +193,7 @@ const NewsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaus
                 onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
                 className={currentNews.source_url ? 'cursor-pointer group' : ''}
               >
-                <h3 className="text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
+                <h3 className="text-xs sm:text-sm font-semibold text-white leading-snug mb-1 line-clamp-2">
                   {currentNews.title}
                 </h3>
                 <p className="text-xs text-white line-clamp-1 mb-1">
@@ -462,14 +464,16 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
   return (
     <Card 
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height touch-pan-y`}
-      {...swipeHandlers}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setTimeout(() => setIsPaused(false), 3000)}
+      {...swipeHandlers}
     >
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       
-      <CardContent className="relative p-4 h-full flex flex-col">
+      <CardContent className="relative p-4 sm:p-4 h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="p-2 rounded-xl bg-white/10">
@@ -488,22 +492,26 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
           )}
           onClick={() => currentStat.link && navigate(currentStat.link)}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentIndex}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               className="flex flex-col items-center"
             >
-              <h3 className="text-base font-semibold text-white leading-snug mb-0.5">
+              <h3 className="text-sm sm:text-base font-semibold text-white leading-snug mb-1">
                 {currentStat.label}
               </h3>
-              <div className="text-3xl font-bold text-white mb-1">{currentStat.value}</div>
-              <p className="text-xs text-white">
-                {currentStat.description}
-              </p>
+              <div className="text-3xl font-bold text-white">
+                {currentStat.value}
+              </div>
+              {currentStat.value === 0 && (
+                <p className="text-xs text-white mt-1">
+                  {currentStat.description}
+                </p>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -1074,38 +1082,22 @@ export const HomeDashboardGrid = memo(() => {
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
         {/* Top Left - News (Green) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
+        <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
           <NewsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
         </motion.div>
         
         {/* Top Right - Stats (Blue) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-        >
+        <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
           <StatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
         </motion.div>
         
         {/* Bottom Left - Notes (Purple) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
+        <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
           <NotesCard />
         </motion.div>
         
         {/* Bottom Right - Interviews (Orange) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.25 }}
-        >
+        <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
           <InterviewsCard />
         </motion.div>
       </div>
