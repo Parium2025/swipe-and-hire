@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import EmployerSidebar from '@/components/EmployerSidebar';
 import EmployerTopNav from '@/components/EmployerTopNav';
 import DeveloperControls from '@/components/DeveloperControls';
@@ -19,12 +19,76 @@ import { useCandidateBackgroundSync } from '@/hooks/useCandidateBackgroundSync';
 import { useEagerRatingsPreload } from '@/hooks/useEagerRatingsPreload';
 import { useEmployerBackgroundSync } from '@/hooks/useEmployerBackgroundSync';
 import { DevOfflineToggle } from '@/components/DevOfflineToggle';
+import { Plus } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
+import pariumLogoRings from '@/assets/parium-logo-rings.png';
+import NotificationCenter from '@/components/NotificationCenter';
 
 interface EmployerLayoutProps {
   children: ReactNode;
   developerView: string;
   onViewChange: (view: string) => void;
 }
+
+// Logo that acts as sidebar trigger — same visual as job seeker side
+const EmployerLogoSidebarTrigger = () => {
+  const { toggleSidebar } = useSidebar();
+  return (
+    <button
+      onClick={toggleSidebar}
+      className="flex items-center hover:opacity-80 active:scale-[0.97] transition-opacity shrink-0 touch-manipulation"
+      aria-label="Öppna meny"
+    >
+      <div
+        role="img"
+        aria-label="Parium"
+        className="h-10 w-40 bg-contain bg-left bg-no-repeat pointer-events-none"
+        style={{ backgroundImage: `url(${pariumLogoRings})` }}
+      />
+    </button>
+  );
+};
+
+// Mobile profile avatar for employer
+const EmployerMobileProfileAvatar = () => {
+  const { profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
+  const navigate = useNavigate();
+  const fallbackUrl = useMediaUrl(
+    (!preloadedAvatarUrl && !preloadedCoverUrl) ? ((profile as any)?.company_logo_url || profile?.profile_image_url) : null,
+    'profile-image'
+  );
+  const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || fallbackUrl || null;
+  
+  const initials = (() => {
+    const f = profile?.first_name || '';
+    const l = profile?.last_name || '';
+    if (f && l) return (f[0] + l[0]).toUpperCase();
+    if (f) return f.substring(0, 2).toUpperCase();
+    return 'AG';
+  })();
+
+  return (
+    <button
+      onClick={() => navigate('/employer-profile')}
+      className="flex items-center justify-center"
+      aria-label="Min profil"
+    >
+      {avatarUrl ? (
+        <Avatar className="h-8 w-8 ring-2 ring-white/20">
+          <AvatarImage src={avatarUrl} alt="Profil" />
+          <AvatarFallback className="bg-white/20 text-white text-xs font-semibold" delayMs={150}>
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+      ) : (
+        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20">
+          {initials}
+        </div>
+      )}
+    </button>
+  );
+};
 
 // Inner component that uses the KanbanLayout context
 const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: EmployerLayoutProps) => {
@@ -492,25 +556,44 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
         <AnimatedBackground showBubbles={false} />
         <EmployerSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">
-          <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="text-white hover:bg-white/20 h-8 w-8" />
-              <div>
-                <h1 className="text-lg font-bold text-white">Parium</h1>
-                <p className="text-sm text-white">
-                  Admin: {profile?.first_name} {profile?.last_name}
-                </p>
-              </div>
+          <header className="shrink-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
+            <div className="flex items-center">
+              <EmployerLogoSidebarTrigger />
             </div>
-            <div className="flex items-center gap-3">
-              <CreateJobSimpleDialog
-                onJobCreated={() => {
-                  invalidateJobs();
-                }}
-                triggerRef={createJobButtonRef}
-              />
+            {/* Centered brand name */}
+            <span className="absolute left-1/2 -translate-x-1/2 text-white text-base font-semibold tracking-tight select-none pointer-events-none">
+              Parium
+            </span>
+            <div className="flex items-center gap-2">
+              {/* Create job - plus icon only */}
+              <button
+                onClick={() => createJobButtonRef.current?.click()}
+                className="flex items-center justify-center h-9 w-9 rounded-lg text-white hover:bg-white/10 transition-colors"
+                aria-label="Skapa ny annons"
+              >
+                <Plus className="h-[18px] w-[18px]" />
+              </button>
+              {/* Notification Bell */}
+              <NotificationCenter />
+              {/* Profile Avatar */}
+              <EmployerMobileProfileAvatar />
+              {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && (
+                <div className="hidden md:block">
+                  <DeveloperControls 
+                    onViewChange={onViewChange}
+                    currentView={developerView}
+                  />
+                </div>
+              )}
             </div>
           </header>
+          {/* Hidden trigger for CreateJobSimpleDialog */}
+          <div className="hidden">
+            <CreateJobSimpleDialog
+              onJobCreated={() => { invalidateJobs(); }}
+              triggerRef={createJobButtonRef}
+            />
+          </div>
           
           {/* Bubbles positioned below header */}
           <div className="absolute left-0 right-0 top-14 pointer-events-none z-20" style={{ height: 'calc(100vh - 3.5rem)', willChange: 'transform' }}>
