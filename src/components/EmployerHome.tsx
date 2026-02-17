@@ -266,7 +266,7 @@ const EmployerHome = memo(() => {
       <GpsPrompt />
       {/* Visa vädereffekter endast efter kort mount-delay (ger cache-rensning tid) */}
       {showWeatherEffects && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
-      <div className="space-y-6 responsive-container-wide py-3 animate-fade-in relative z-10">
+      <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 animate-fade-in relative z-10">
         {/* System Health badge removed - use nav bar icon instead */}
 
         {/* Personal greeting */}
@@ -274,10 +274,10 @@ const EmployerHome = memo(() => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="text-center md:text-left flex flex-col gap-2"
+          className="text-center md:text-left flex flex-col gap-1 sm:gap-2"
         >
           <div className="flex items-center gap-2 justify-center md:justify-start">
-            <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
               {greetingText}, {firstName} 👋
             </h1>
           </div>
