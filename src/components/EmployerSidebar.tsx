@@ -32,12 +32,19 @@ import {
   FileText,
   Star,
   UserCircle,
-  UserCheck
+  UserCheck,
+  Home
 } from "lucide-react";
 
 
 // Navigation items for employer sidebar
 const employerNavItems = [
+  {
+    title: "Hem",
+    url: "/",
+    icon: Home,
+    group: "huvudmeny"
+  },
   {
     title: "Dashboard",
     url: "/dashboard",
