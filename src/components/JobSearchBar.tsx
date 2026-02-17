@@ -172,7 +172,7 @@ export const JobSearchBar = ({
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-white" />
           <Input
-            placeholder="Titel, plats, anställningstyp..."
+            placeholder="Titel, Plats, Anställningstyp..."
             value={searchInput}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9 pr-10 h-9 text-sm text-center bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white placeholder:text-center focus:outline-none focus-visible:outline-none focus:ring-0"
