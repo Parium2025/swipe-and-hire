@@ -206,7 +206,7 @@ const EmployerDashboard = memo(() => {
   );
   
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Mina annonser', value: loading ? preloadedEmployerMyJobs : jobs.length, loading: false },
+    { icon: Briefcase, title: 'Annonser', value: loading ? preloadedEmployerMyJobs : jobs.length, loading: false },
     { 
       icon: TrendingUp, 
       title: 'Aktiva', 
@@ -217,7 +217,7 @@ const EmployerDashboard = memo(() => {
         { label: 'Utkast', value: draftJobsCount },
       ]
     },
-    { icon: Eye, title: 'Totala visningar', value: loading ? preloadedEmployerTotalViews : activeJobs.reduce((s, j) => s + j.views_count, 0), loading: false },
+    { icon: Eye, title: 'Visningar', value: loading ? preloadedEmployerTotalViews : activeJobs.reduce((s, j) => s + j.views_count, 0), loading: false },
     { icon: Users, title: 'Ansökningar', value: loading ? preloadedEmployerTotalApplications : activeJobs.reduce((s, j) => s + j.applications_count, 0), loading: false },
   ], [jobs, activeJobs, expiredJobsCount, draftJobsCount, loading, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
