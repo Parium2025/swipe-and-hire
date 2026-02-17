@@ -522,7 +522,7 @@ const EmployerDashboard = memo(() => {
             ) : (
               <>
                 <div ref={listTopRef} />
-                    <div className="space-y-2 pb-24">
+                    <div className="grid grid-cols-1 gap-4 pb-24">
                       {pageJobs.map((job) => {
                         const jobPosting = job as JobPosting;
                         const isDraft = !job.is_active;
