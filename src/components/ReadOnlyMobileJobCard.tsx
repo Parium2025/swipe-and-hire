@@ -45,6 +45,10 @@ interface ReadOnlyMobileJobCardProps {
   statusBadge?: ReactNode;
   /** Hide the save/heart button entirely */
   hideSaveButton?: boolean;
+  /** Override default card click navigation */
+  onCardClick?: (jobId: string) => void;
+  /** Extra content rendered below the tags row (e.g. edit/delete buttons) */
+  footer?: ReactNode;
 }
 
 // Deterministic gradient based on job id for visual variety
@@ -80,7 +84,7 @@ function getCompanyInitials(name: string): string {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
-export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, onDeleteClick, isSavedExternal, onToggleSave, statusBadge, hideSaveButton = false }: ReadOnlyMobileJobCardProps) => {
+export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveClick, onDeleteClick, isSavedExternal, onToggleSave, statusBadge, hideSaveButton = false, onCardClick, footer }: ReadOnlyMobileJobCardProps) => {
   const navigate = useNavigate();
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
 
@@ -137,7 +141,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   return (
     <Card 
       className="group bg-white/5 backdrop-blur-sm border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color,transform] duration-150 active:scale-[0.98]"
-      onClick={() => navigate(`/job-view/${job.id}`)}
+      onClick={() => onCardClick ? onCardClick(job.id) : navigate(`/job-view/${job.id}`)}
     >
       {/* Visual header — image or gradient placeholder */}
       <div className="relative w-full h-40 overflow-hidden">
@@ -231,6 +235,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             <span className="leading-none">{job.applications_count || 0} sökande</span>
           </Badge>
         </div>
+        {footer && footer}
       </div>
     </Card>
   );
