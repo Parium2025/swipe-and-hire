@@ -122,7 +122,8 @@ const LOGO_CACHE_KEY = 'parium_company_logo_url';
 
 export function EmployerSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
-  const collapsed = state === 'collapsed';
+  // On mobile, always show labels (the sidebar slides in full-width)
+  const collapsed = isMobile ? false : state === 'collapsed';
   const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
