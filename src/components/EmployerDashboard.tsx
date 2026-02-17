@@ -264,13 +264,14 @@ const EmployerDashboard = memo(() => {
       )}
 
       {/* Jobs Table */}
-      <Card className="bg-white/5 border-0" style={{ contain: 'layout style' }}>
-        <CardHeader className="hidden md:block md:p-4">
+      {/* Desktop: Jobs Table inside Card */}
+      <Card className="bg-white/5 border-0 hidden md:block" style={{ contain: 'layout style' }}>
+        <CardHeader className="md:p-4">
               <CardTitle className="text-sm text-white md:text-left">
                 Mina jobbannonser
               </CardTitle>
         </CardHeader>
-        <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
+        <CardContent className="px-4 pb-4">
           {/* Desktop: Table view */}
           <div className="hidden md:block">
             <div className="w-full" style={{ contain: 'layout style' }}>
@@ -492,9 +493,11 @@ const EmployerDashboard = memo(() => {
               </div>
             )}
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Mobile: Card view */}
-          <div className="md:hidden">
+      {/* Mobile: Card view — outside Card wrapper for edge-to-edge layout */}
+      <div className="md:hidden">
             {loading ? (
               <div className="space-y-3 px-2">
                 {Array.from({ length: 4 }).map((_, i) => (
@@ -605,8 +608,6 @@ const EmployerDashboard = memo(() => {
               </>
             )}
           </div>
-        </CardContent>
-      </Card>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus 
