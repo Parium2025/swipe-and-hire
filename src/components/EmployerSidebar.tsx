@@ -41,7 +41,7 @@ import {
 const employerNavItems = [
   {
     title: "Hem",
-    url: "/",
+    url: "/home",
     icon: Home,
     group: "huvudmeny"
   },
