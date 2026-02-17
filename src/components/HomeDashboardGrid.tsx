@@ -1061,15 +1061,15 @@ export const HomeDashboardGrid = memo(() => {
   const [isCardsPaused, setIsCardsPaused] = useState(false);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2 sm:space-y-4">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="flex items-center gap-2"
       >
-        <h2 className="text-lg font-semibold text-white">Din översikt</h2>
-        <Sparkles className="h-5 w-5 text-white" />
+        <h2 className="text-base sm:text-lg font-semibold text-white">Din översikt</h2>
+        <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
       </motion.div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
