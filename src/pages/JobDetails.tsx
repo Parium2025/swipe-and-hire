@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import { useTouchCapable } from '@/hooks/useInputCapability';
+import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
@@ -523,7 +525,7 @@ const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  // toast is now imported from sonner directly
+  const isTouchDevice = useTouchCapable();
   
   // Get kanban layout context for dynamic column widths
   const { setStageCount } = useKanbanLayout();
@@ -776,6 +778,23 @@ const JobDetails = () => {
     setDialogOpen(true);
   }, []);
 
+  // Mobile: move candidate to a different stage via dropdown
+  const handleMobileMove = useCallback(async (applicationId: string, newStage: string) => {
+    updateApplicationLocally(applicationId, { status: newStage as JobApplication['status'] });
+    const stageLabel = stageSettings[newStage]?.label || newStage;
+    try {
+      const { error } = await supabase
+        .from('job_applications')
+        .update({ status: newStage })
+        .eq('id', applicationId);
+      if (error) throw error;
+      toast.success(`Flyttad till "${stageLabel}"`);
+    } catch {
+      refetch();
+      toast.error('Kunde inte flytta kandidaten');
+    }
+  }, [updateApplicationLocally, stageSettings, refetch]);
+
   // DnD handlers
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -991,8 +1010,8 @@ const JobDetails = () => {
                 <span className="text-white text-xs hidden md:inline">Ansökningar</span>
               </div>
               
-              {/* Välj button for selection mode */}
-              {applications.length > 0 && (
+              {/* Välj button for selection mode - desktop only */}
+              {!isTouchDevice && applications.length > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -1039,73 +1058,83 @@ const JobDetails = () => {
           </div>
         </div>
 
-        {/* Kanban View with Drag and Drop */}
-        <DndContext
-          sensors={sensors}
-          collisionDetection={collisionDetectionStrategy}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-          measuring={{
-            droppable: {
-              strategy: MeasuringStrategy.Always,
-            },
-          }}
-        >
-          <div 
-            className="flex gap-3 pb-4 pt-2 w-full" 
-            style={{ 
-              height: 'calc(100vh - 300px)',
-              overflowX: 'hidden',
-              overflowY: 'hidden',
+        {/* Touch devices: tab-based candidate list. Desktop: kanban with drag-and-drop */}
+        {isTouchDevice ? (
+          <MobileCandidateView
+            applications={applications}
+            stages={activeStages}
+            stageSettings={stageSettings}
+            criteriaCount={criteriaCount}
+            onOpenProfile={handleOpenProfile}
+            onMoveToStage={handleMobileMove}
+            onMarkAsViewed={markApplicationAsViewed}
+          />
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={collisionDetectionStrategy}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            measuring={{
+              droppable: {
+                strategy: MeasuringStrategy.Always,
+              },
             }}
           >
-            {activeStages.map((status) => {
-              const config = stageSettings[status] || { label: status, color: '#0EA5E9', iconName: 'inbox', isCustom: false };
-              return (
-                <StatusColumn 
-                  key={status}
-                  jobId={jobId || ''}
-                  status={status}
-                  applications={applicationsByStatus[status] || []}
-                  onOpenProfile={handleOpenProfile}
-                  onMarkAsViewed={markApplicationAsViewed}
-                  onOpenCriteriaDialog={status === 'pending' ? () => setCriteriaDialogOpen(true) : undefined}
-                  stageConfig={config}
-                  totalStageCount={activeStages.length}
-                  criteriaCount={criteriaCount}
-                  isSelectionMode={isSelectionMode}
-                  selectedApplicationIds={selectedApplicationIds}
-                  onToggleSelect={toggleApplicationSelection}
-                />
-              );
-            })}
-            {/* Add new stage button (max 5 stages) */}
-            {activeStages.length < 5 && (
-              <div className="flex-shrink-0 flex items-start pt-1">
-                <CreateJobStageDialog 
-                  jobId={jobId || ''}
-                  currentStageCount={activeStages.length}
-                  trigger={
-                    <button className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
-                      <Plus className="h-3.5 w-3.5" />
-                      Nytt steg
-                    </button>
-                  }
-                />
-              </div>
-            )}
-          </div>
+            <div 
+              className="flex gap-3 pb-4 pt-2 w-full" 
+              style={{ 
+                height: 'calc(100vh - 300px)',
+                overflowX: 'hidden',
+                overflowY: 'hidden',
+              }}
+            >
+              {activeStages.map((status) => {
+                const config = stageSettings[status] || { label: status, color: '#0EA5E9', iconName: 'inbox', isCustom: false };
+                return (
+                  <StatusColumn 
+                    key={status}
+                    jobId={jobId || ''}
+                    status={status}
+                    applications={applicationsByStatus[status] || []}
+                    onOpenProfile={handleOpenProfile}
+                    onMarkAsViewed={markApplicationAsViewed}
+                    onOpenCriteriaDialog={status === 'pending' ? () => setCriteriaDialogOpen(true) : undefined}
+                    stageConfig={config}
+                    totalStageCount={activeStages.length}
+                    criteriaCount={criteriaCount}
+                    isSelectionMode={isSelectionMode}
+                    selectedApplicationIds={selectedApplicationIds}
+                    onToggleSelect={toggleApplicationSelection}
+                  />
+                );
+              })}
+              {activeStages.length < 5 && (
+                <div className="flex-shrink-0 flex items-start pt-1">
+                  <CreateJobStageDialog 
+                    jobId={jobId || ''}
+                    currentStageCount={activeStages.length}
+                    trigger={
+                      <button className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
+                        <Plus className="h-3.5 w-3.5" />
+                        Nytt steg
+                      </button>
+                    }
+                  />
+                </div>
+              )}
+            </div>
 
-          {/* Drag Overlay */}
-          <DragOverlay modifiers={[snapCenterToCursor]} dropAnimation={null}>
-            {activeApplication ? (
-              <div className="opacity-95 pointer-events-none">
-                <ApplicationCardContent application={activeApplication} isDragging />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+            <DragOverlay modifiers={[snapCenterToCursor]} dropAnimation={null}>
+              {activeApplication ? (
+                <div className="opacity-95 pointer-events-none">
+                  <ApplicationCardContent application={activeApplication} isDragging />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        )}
 
         {/* Candidate Profile Dialog */}
         <CandidateProfileDialog
