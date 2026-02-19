@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { StageSettings, DEFAULT_STAGE_KEYS, getIconByName } from '@/hooks/useStageSettings';
 
@@ -26,6 +27,8 @@ interface DbStageSetting {
  * Used when viewing another team member's candidate list.
  */
 export function useColleagueStageSettings(colleagueId: string | null) {
+  const queryClient = useQueryClient();
+
   const { data: dbSettings, isLoading } = useQuery({
     queryKey: ['colleague-stage-settings', colleagueId],
     queryFn: async () => {
@@ -43,6 +46,31 @@ export function useColleagueStageSettings(colleagueId: string | null) {
     enabled: !!colleagueId,
     staleTime: 5 * 60 * 1000,
   });
+
+  // Realtime subscription for colleague stage changes
+  useEffect(() => {
+    if (!colleagueId) return;
+
+    const channel = supabase
+      .channel(`colleague-stages-${colleagueId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_stage_settings',
+          filter: `user_id=eq.${colleagueId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['colleague-stage-settings', colleagueId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [colleagueId, queryClient]);
 
   // Get deleted default stages (marked with __DELETED__)
   const deletedDefaultStages = new Set(
