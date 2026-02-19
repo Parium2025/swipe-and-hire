@@ -140,7 +140,10 @@ export function JobStageSettingsMenu({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-0.5 rounded hover:bg-white/20 transition-colors text-white/70 hover:text-white">
+          <button 
+            className="p-1.5 -m-1 rounded-full md:hover:bg-white/20 active:bg-white/15 transition-colors text-white/70 active:text-white touch-manipulation"
+            onMouseDown={(e) => e.preventDefault()}
+          >
             <MoreVertical className="h-3.5 w-3.5" />
           </button>
         </DropdownMenuTrigger>
