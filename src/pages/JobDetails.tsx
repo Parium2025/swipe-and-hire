@@ -1092,12 +1092,13 @@ const JobDetails = () => {
               },
             }}
           >
-            <div 
-              className="flex gap-3 pb-4 pt-2 w-full overflow-x-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30" 
-              style={{ 
-                height: 'calc(100vh - 300px)',
-                overflowY: 'hidden',
-              }}
+             <div 
+               className="flex gap-3 pb-4 pt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30" 
+               style={{ 
+                 height: 'calc(100vh - 300px)',
+                 overflowY: 'hidden',
+                 WebkitOverflowScrolling: 'touch',
+               }}
             >
               {activeStages.map((status) => {
                 const config = stageSettings[status] || { label: status, color: '#0EA5E9', iconName: 'inbox', isCustom: false };
