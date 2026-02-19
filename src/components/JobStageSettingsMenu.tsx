@@ -141,16 +141,16 @@ export function JobStageSettingsMenu({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button 
-            className="p-1.5 -m-1 rounded-full md:hover:bg-white/20 active:bg-white/15 transition-colors text-white/70 active:text-white touch-manipulation"
+            className="p-1 rounded-full md:hover:bg-white/20 active:bg-white/15 transition-colors text-white/70 active:text-white touch-manipulation"
             onMouseDown={(e) => e.preventDefault()}
           >
-            <MoreVertical className="h-3.5 w-3.5" />
+            <MoreVertical className="h-4 w-4" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="center" 
           sideOffset={8}
-          className="w-40 border-white/20 py-1 animate-scale-in"
+          className="w-40 border-white/20 py-1"
         >
           <DropdownMenuItem 
             onClick={handleOpenRenameDialog}
@@ -171,7 +171,7 @@ export function JobStageSettingsMenu({
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent 
-                className="p-2 bg-card-parium border-white/20 animate-scale-in"
+                className="p-2 bg-card-parium border-white/20"
                 sideOffset={4}
               >
                 <HexColorPicker 
@@ -189,7 +189,7 @@ export function JobStageSettingsMenu({
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent 
-                className="bg-card-parium border-white/20 w-48 animate-scale-in"
+                className="bg-card-parium border-white/20 w-48"
               >
                 <div className="grid grid-cols-5 gap-0.5 p-1.5">
                   {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (

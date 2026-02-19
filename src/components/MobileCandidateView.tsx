@@ -264,7 +264,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
               {cfg.label}
               <span
-                className="text-[10px] px-1.5 py-0.5 rounded-full text-white"
+                className="text-[10px] h-5 w-5 flex items-center justify-center rounded-full text-white"
                 style={{ backgroundColor: `${cfg.color}66` }}
               >
                 {count}
