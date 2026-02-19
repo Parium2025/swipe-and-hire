@@ -434,14 +434,14 @@ const StatusColumn = ({
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
-        style={{ backgroundColor: `${displayColor}33` }}
+        style={{ backgroundColor: `${displayColor}55` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
           <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
           <span className="font-medium text-xs text-white truncate flex-1 min-w-0">{stageConfig.label}</span>
           <span 
             className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: `${displayColor}66` }}
+            style={{ backgroundColor: `${displayColor}88` }}
           >
             {applications.length}
           </span>
