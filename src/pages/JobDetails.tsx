@@ -429,7 +429,8 @@ const StatusColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-none w-[calc((100%-3rem)/5)] flex flex-col transition-colors h-full min-w-0"
+      className="flex-none flex flex-col transition-colors h-full min-w-[200px]"
+      style={{ width: 'calc((100% - 3rem) / ' + Math.min(totalStageCount, 5) + ')' }}
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -1089,10 +1090,9 @@ const JobDetails = () => {
             }}
           >
             <div 
-              className="flex gap-3 pb-4 pt-2 w-full" 
+              className="flex gap-3 pb-4 pt-2 w-full overflow-x-auto no-scrollbar" 
               style={{ 
                 height: 'calc(100vh - 300px)',
-                overflowX: 'hidden',
                 overflowY: 'hidden',
               }}
             >
@@ -1116,7 +1116,7 @@ const JobDetails = () => {
                   />
                 );
               })}
-              {activeStages.length < 5 && (
+              {activeStages.length < 8 && (
                 <div className="flex-shrink-0 flex items-start pt-1">
                   <CreateJobStageDialog 
                     jobId={jobId || ''}
