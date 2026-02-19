@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// Max 5 stages allowed
-export const MAX_KANBAN_STAGES = 5;
+// Max 8 stages allowed
+export const MAX_KANBAN_STAGES = 8;
 
 // Minimum column width to prevent truncation (in pixels)
 const MIN_COLUMN_WIDTH = 280;
