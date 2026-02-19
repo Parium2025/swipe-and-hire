@@ -146,29 +146,29 @@ export function JobStageSettingsMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="w-48 border-white/20"
+          className="w-40 border-white/20 py-1"
         >
           <DropdownMenuItem 
             onClick={handleOpenRenameDialog}
-            className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer"
+            className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer text-xs py-1.5 px-2"
           >
-            <Pencil className="h-4 w-4 mr-2" />
+            <Pencil className="h-3 w-3 mr-1.5" />
             Byt namn
           </DropdownMenuItem>
           
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
-              <Palette className="h-4 w-4 mr-2" />
+            <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer text-xs py-1.5 px-2">
+              <Palette className="h-3 w-3 mr-1.5" />
               <span className="flex-1">Välj färg</span>
               <div 
-                className="w-5 h-5 rounded-full border border-white/30 ml-2"
+                className="w-4 h-4 rounded-full border border-white/30 ml-1.5"
                 style={{ backgroundColor: `${displayColor}99` }}
               />
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent 
-                className="p-3 bg-card-parium border-white/20"
-                sideOffset={8}
+                className="p-2 bg-card-parium border-white/20"
+                sideOffset={4}
               >
                 <HexColorPicker 
                   color={displayColor} 
@@ -179,27 +179,27 @@ export function JobStageSettingsMenu({
           </DropdownMenuSub>
           
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
-              <Image className="h-4 w-4 mr-2" />
+            <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer text-xs py-1.5 px-2">
+              <Image className="h-3 w-3 mr-1.5" />
               Välj ikon
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent 
-                className="bg-card-parium border-white/20 w-56"
+                className="bg-card-parium border-white/20 w-48"
               >
-                <div className="grid grid-cols-5 gap-1 p-2">
+                <div className="grid grid-cols-5 gap-0.5 p-1.5">
                   {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
                     <button
                       key={name}
                       onClick={() => handleIconChange(name)}
-                      className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
+                      className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${
                         settings?.iconName === name 
                           ? 'bg-white/30 text-white' 
                           : 'hover:bg-white/20 text-white'
                       }`}
                       title={label}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-3.5 w-3.5" />
                     </button>
                   ))}
                 </div>
@@ -207,26 +207,26 @@ export function JobStageSettingsMenu({
             </DropdownMenuPortal>
           </DropdownMenuSub>
           
-          <DropdownMenuSeparator className="bg-white/10" />
+          <DropdownMenuSeparator className="bg-white/10 my-0.5" />
           
           {canDelete ? (
             <DropdownMenuItem 
               onClick={handleDeleteClick}
-              className={`cursor-pointer ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
+              className={`cursor-pointer text-xs py-1.5 px-2 ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-3 w-3 mr-1.5" />
               Ta bort steg
               {candidateCount > 0 && (
-                <span className="ml-auto text-xs text-white/40">({candidateCount})</span>
+                <span className="ml-auto text-[10px] text-white/40">({candidateCount})</span>
               )}
             </DropdownMenuItem>
           ) : (
-            <div className="px-2 py-1.5">
-              <div className="flex items-center gap-2 text-sm text-white/40">
-                <Trash2 className="h-4 w-4" />
+            <div className="px-2 py-1">
+              <div className="flex items-center gap-1.5 text-xs text-white/40">
+                <Trash2 className="h-3 w-3" />
                 Ta bort steg
               </div>
-              <p className="text-xs text-white mt-1 ml-6">
+              <p className="text-[10px] text-white mt-0.5 ml-5 leading-tight">
                 Det måste alltid finnas minst ett steg för att organisera kandidater.
               </p>
             </div>
