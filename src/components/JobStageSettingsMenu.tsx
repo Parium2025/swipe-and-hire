@@ -150,28 +150,28 @@ export function JobStageSettingsMenu({
         <DropdownMenuContent 
           align="center" 
           sideOffset={8}
-          className="w-40 border-white/20 py-1"
+          className="w-40 border-white/20 py-1 animate-scale-in"
         >
           <DropdownMenuItem 
             onClick={handleOpenRenameDialog}
-            className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer text-xs py-1.5 px-2 min-h-0"
+            className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
           >
-            <Pencil className="h-3 w-3 mr-1.5" />
+            <Pencil className="h-3 w-3 mr-1.5 flex-shrink-0" />
             Byt namn
           </DropdownMenuItem>
           
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer text-xs py-1.5 px-2">
-              <Palette className="h-3 w-3 mr-1.5" />
+            <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
+              <Palette className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="flex-1">Välj färg</span>
               <div 
-                className="w-4 h-4 rounded-full border border-white/30 ml-1.5"
+                className="w-4 h-4 rounded-full border border-white/30 ml-1.5 flex-shrink-0"
                 style={{ backgroundColor: `${displayColor}99` }}
               />
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent 
-                className="p-2 bg-card-parium border-white/20"
+                className="p-2 bg-card-parium border-white/20 animate-scale-in"
                 sideOffset={4}
               >
                 <HexColorPicker 
@@ -183,23 +183,23 @@ export function JobStageSettingsMenu({
           </DropdownMenuSub>
           
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer text-xs py-1.5 px-2">
-              <Image className="h-3 w-3 mr-1.5" />
+            <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
+              <Image className="h-3 w-3 mr-1.5 flex-shrink-0" />
               Välj ikon
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent 
-                className="bg-card-parium border-white/20 w-48"
+                className="bg-card-parium border-white/20 w-48 animate-scale-in"
               >
                 <div className="grid grid-cols-5 gap-0.5 p-1.5">
                   {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
                     <button
                       key={name}
                       onClick={() => handleIconChange(name)}
-                      className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${
+                      className={`w-8 h-8 rounded-md flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
                         settings?.iconName === name 
-                          ? 'bg-white/30 text-white' 
-                          : 'hover:bg-white/20 text-white'
+                          ? 'bg-white/30 text-white ring-1 ring-white/40' 
+                          : 'md:hover:bg-white/20 active:bg-white/15 text-white/80'
                       }`}
                       title={label}
                     >
@@ -216,9 +216,9 @@ export function JobStageSettingsMenu({
           {canDelete ? (
             <DropdownMenuItem 
               onClick={handleDeleteClick}
-              className={`cursor-pointer text-xs py-1.5 px-2 min-h-0 ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
+              className={`cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100 active:bg-white/10 ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
             >
-              <Trash2 className="h-3 w-3 mr-1.5" />
+              <Trash2 className="h-3 w-3 mr-1.5 flex-shrink-0" />
               Ta bort steg
               {candidateCount > 0 && (
                 <span className="ml-auto text-[10px] text-white/40">({candidateCount})</span>
@@ -227,7 +227,7 @@ export function JobStageSettingsMenu({
           ) : (
             <div className="px-2 py-1">
               <div className="flex items-center gap-1.5 text-xs text-white/40">
-                <Trash2 className="h-3 w-3" />
+                <Trash2 className="h-3 w-3 flex-shrink-0" />
                 Ta bort steg
               </div>
               <p className="text-[10px] text-white mt-0.5 ml-5 leading-tight">
