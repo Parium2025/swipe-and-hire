@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -31,8 +31,33 @@ export function useMessageReactions(messageId: string, currentUserId: string) {
       if (error) throw error;
       return data as MessageReaction[];
     },
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000,
   });
+
+  // Realtime subscription for reactions
+  useEffect(() => {
+    if (!messageId) return;
+
+    const channel = supabase
+      .channel(`message-reactions-${messageId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'message_reactions',
+          filter: `message_id=eq.${messageId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['message-reactions', messageId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [messageId, queryClient]);
 
   // Group reactions by emoji
   const groupedReactions: GroupedReaction[] = reactions.reduce((acc, reaction) => {
