@@ -262,13 +262,13 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   ? 'ring-white/40 shadow-lg'
                   : 'ring-white/20'
               }`}
-              style={{ backgroundColor: `${cfg.color}33` }}
+              style={{ backgroundColor: `${cfg.color}55` }}
             >
               <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
               {cfg.label}
               <span
                 className="text-[10px] h-5 w-5 flex items-center justify-center rounded-full text-white"
-                style={{ backgroundColor: `${cfg.color}66` }}
+                style={{ backgroundColor: `${cfg.color}88` }}
               >
                 {count}
               </span>
