@@ -251,10 +251,13 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           const targetStageLabel = stageSettings[targetStageKey]?.label;
 
           return (
-            <button
+            <div
               key={stage}
+              role="button"
+              tabIndex={0}
               onClick={() => setActiveTab(stage)}
-              className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 min-h-touch shrink-0 ring-1 ring-inset backdrop-blur-sm ${
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
+              className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 min-h-touch shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer ${
                 isActive
                   ? 'ring-white/40 shadow-lg'
                   : 'ring-white/20'
@@ -270,7 +273,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                 {count}
               </span>
               {/* Stage settings menu (3-dot) */}
-              <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()} onTouchStart={e => e.stopPropagation()}>
+              <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
                 <JobStageSettingsMenu
                   jobId={jobId}
                   stageKey={stage}
@@ -280,7 +283,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   targetStageLabel={targetStageLabel}
                 />
               </span>
-            </button>
+            </div>
           );
         })}
 
