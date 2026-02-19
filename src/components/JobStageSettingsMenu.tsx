@@ -150,7 +150,7 @@ export function JobStageSettingsMenu({
         >
           <DropdownMenuItem 
             onClick={handleOpenRenameDialog}
-            className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer text-xs py-1.5 px-2"
+            className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer text-xs py-1.5 px-2 min-h-0"
           >
             <Pencil className="h-3 w-3 mr-1.5" />
             Byt namn
@@ -212,7 +212,7 @@ export function JobStageSettingsMenu({
           {canDelete ? (
             <DropdownMenuItem 
               onClick={handleDeleteClick}
-              className={`cursor-pointer text-xs py-1.5 px-2 ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
+              className={`cursor-pointer text-xs py-1.5 px-2 min-h-0 ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
             >
               <Trash2 className="h-3 w-3 mr-1.5" />
               Ta bort steg
