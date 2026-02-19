@@ -34,6 +34,7 @@ import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle } from 'luc
 import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS, getJobStageIconByName } from '@/hooks/useJobStageSettings';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface JobStageSettingsMenuProps {
   jobId: string;
@@ -58,8 +59,11 @@ export function JobStageSettingsMenu({
 }: JobStageSettingsMenuProps) {
   const { stageSettings, updateStage, deleteStage } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
+  const isMobile = useIsMobile();
   
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [colorDialogOpen, setColorDialogOpen] = useState(false);
+  const [iconDialogOpen, setIconDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [newLabel, setNewLabel] = useState(settings?.label || '');
@@ -106,6 +110,7 @@ export function JobStageSettingsMenu({
   const handleIconChange = (iconName: string) => {
     updateStage({ stageKey, updates: { iconName } });
     toast.success('Ikon uppdaterad');
+    setIconDialogOpen(false);
   };
 
   // Check if we can delete this stage (must have at least 1 stage left)
@@ -162,56 +167,82 @@ export function JobStageSettingsMenu({
             Byt namn
           </DropdownMenuItem>
           
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
+          {/* Color picker: dialog on mobile, submenu on desktop */}
+          {isMobile ? (
+            <DropdownMenuItem 
+              onSelect={() => { setTimeout(() => setColorDialogOpen(true), 100); }}
+              className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+            >
               <Palette className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="flex-1">Välj färg</span>
               <div 
                 className="w-4 h-4 rounded-full border border-white/30 ml-1.5 flex-shrink-0"
                 style={{ backgroundColor: `${displayColor}99` }}
               />
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent 
-                className="p-2 bg-card-parium border-white/20"
-                sideOffset={4}
-              >
-                <HexColorPicker 
-                  color={displayColor} 
-                  onChange={handleColorChange}
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
+                <Palette className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                <span className="flex-1">Välj färg</span>
+                <div 
+                  className="w-4 h-4 rounded-full border border-white/30 ml-1.5 flex-shrink-0"
+                  style={{ backgroundColor: `${displayColor}99` }}
                 />
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent 
+                  className="p-2 bg-card-parium border-white/20"
+                  sideOffset={4}
+                >
+                  <HexColorPicker 
+                    color={displayColor} 
+                    onChange={handleColorChange}
+                  />
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          )}
           
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
+          {/* Icon picker: dialog on mobile, submenu on desktop */}
+          {isMobile ? (
+            <DropdownMenuItem 
+              onSelect={() => { setTimeout(() => setIconDialogOpen(true), 100); }}
+              className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+            >
               <Image className="h-3 w-3 mr-1.5 flex-shrink-0" />
               Välj ikon
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent 
-                className="bg-card-parium border-white/20 w-48"
-              >
-                <div className="grid grid-cols-5 gap-0.5 p-1.5">
-                  {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
-                    <button
-                      key={name}
-                      onClick={() => handleIconChange(name)}
-                      className={`w-8 h-8 rounded-md flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
-                        settings?.iconName === name 
-                          ? 'bg-white/30 text-white ring-1 ring-white/40' 
-                          : 'md:hover:bg-white/20 active:bg-white/15 text-white/80'
-                      }`}
-                      title={label}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                    </button>
-                  ))}
-                </div>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
+                <Image className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                Välj ikon
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent 
+                  className="bg-card-parium border-white/20 w-48"
+                >
+                  <div className="grid grid-cols-5 gap-0.5 p-1.5">
+                    {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
+                      <button
+                        key={name}
+                        onClick={() => handleIconChange(name)}
+                        className={`w-8 h-8 rounded-md flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
+                          settings?.iconName === name 
+                            ? 'bg-white/30 text-white ring-1 ring-white/40' 
+                            : 'md:hover:bg-white/20 active:bg-white/15 text-white/80'
+                        }`}
+                        title={label}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                      </button>
+                    ))}
+                  </div>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          )}
           
           <DropdownMenuSeparator className="bg-white/10 my-0.5" />
           
@@ -275,6 +306,61 @@ export function JobStageSettingsMenu({
               Spara
             </Button>
           </DialogFooter>
+        </DialogContentNoFocus>
+      </Dialog>
+
+      {/* Color picker dialog (mobile only) */}
+      <Dialog open={colorDialogOpen} onOpenChange={setColorDialogOpen}>
+        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-xs w-[calc(100vw-2rem)]">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Palette className="h-4 w-4" />
+              Välj färg
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            <HexColorPicker 
+              color={displayColor} 
+              onChange={handleColorChange}
+              style={{ width: '100%', maxWidth: '260px' }}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setColorDialogOpen(false)}
+              className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 w-full touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
+              Klar
+            </Button>
+          </DialogFooter>
+        </DialogContentNoFocus>
+      </Dialog>
+
+      {/* Icon picker dialog (mobile only) */}
+      <Dialog open={iconDialogOpen} onOpenChange={setIconDialogOpen}>
+        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-xs w-[calc(100vw-2rem)]">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Image className="h-4 w-4" />
+              Välj ikon
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-5 gap-1.5 py-4">
+            {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
+              <button
+                key={name}
+                onClick={() => handleIconChange(name)}
+                className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
+                  settings?.iconName === name 
+                    ? 'bg-white/30 text-white ring-1 ring-white/40' 
+                    : 'bg-white/5 active:bg-white/15 text-white/80'
+                }`}
+                title={label}
+              >
+                <Icon className="h-5 w-5" />
+              </button>
+            ))}
+          </div>
         </DialogContentNoFocus>
       </Dialog>
 
