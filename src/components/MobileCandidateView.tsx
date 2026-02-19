@@ -257,7 +257,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 min-h-touch shrink-0 ring-1 ring-inset backdrop-blur-sm ${
                 isActive
                   ? 'ring-white/40 shadow-lg'
-                  : 'ring-white/20 opacity-80'
+                  : 'ring-white/20'
               }`}
               style={{ backgroundColor: `${cfg.color}33` }}
             >
