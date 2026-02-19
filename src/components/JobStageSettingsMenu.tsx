@@ -153,7 +153,10 @@ export function JobStageSettingsMenu({
           className="w-40 border-white/20 py-1"
         >
           <DropdownMenuItem 
-            onClick={handleOpenRenameDialog}
+            onSelect={(e) => {
+              e.preventDefault();
+              setTimeout(handleOpenRenameDialog, 10);
+            }}
             className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
           >
             <Pencil className="h-3 w-3 mr-1.5 flex-shrink-0" />
@@ -215,7 +218,7 @@ export function JobStageSettingsMenu({
           
           {canDelete ? (
             <DropdownMenuItem 
-              onClick={handleDeleteClick}
+              onSelect={(e) => { e.preventDefault(); setTimeout(handleDeleteClick, 10); }}
               className={`cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100 active:bg-white/10 ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
             >
               <Trash2 className="h-3 w-3 mr-1.5 flex-shrink-0" />
