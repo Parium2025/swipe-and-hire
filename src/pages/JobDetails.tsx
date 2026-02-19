@@ -931,86 +931,87 @@ const JobDetails = () => {
   }
 
   return (
-     <div className="space-y-4 responsive-container-wide py-4 pb-safe min-h-screen animate-fade-in">
+     <div className="space-y-3 md:space-y-4 responsive-container-wide py-3 md:py-4 pb-safe min-h-screen animate-fade-in">
         {/* Job Title and Stats - Compact */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-2.5 md:p-4">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <TruncatedText 
-                text={job.title}
-                className="text-base md:text-lg font-bold text-white mb-1 md:mb-1.5 two-line-ellipsis block"
-              />
-              <div className="flex flex-wrap items-center gap-1.5 md:gap-2 text-xs md:text-sm">
-                <div className="flex items-center gap-1 text-white">
-                  <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                  {job.location}
-                </div>
-                {(() => {
-                  const isExpired = job.expires_at && new Date(job.expires_at) < new Date();
-                  const statusLabel = isExpired ? 'Utgången' : (job.is_active ? 'Aktiv' : 'Inaktiv');
-                  const statusColor = isExpired 
-                    ? 'bg-red-500/20 text-white border-red-500/30 hover:bg-red-500/30'
-                    : job.is_active 
-                      ? 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30'
-                      : 'bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30';
-                  
-                  return (
-                    <Badge
-                      className={`text-xs whitespace-nowrap cursor-pointer transition-colors border ${statusColor}`}
-                      onClick={async () => {
-                        try {
-                          const { error } = await supabase
-                            .from('job_postings')
-                            .update({ is_active: !job.is_active })
-                            .eq('id', jobId);
-
-                          if (error) throw error;
-
-                          toast.success(
-                            job.is_active ? 'Jobb inaktiverat' : 'Jobb aktiverat',
-                            { description: job.is_active ? 'Jobbet är nu inaktivt.' : 'Jobbet är nu aktivt.' }
-                          );
-
-                          updateJobLocally({ is_active: !job.is_active });
-                          refetch();
-                        } catch (error: any) {
-                          toast.error('Fel', { description: error.message });
-                        }
-                      }}
-                    >
-                      {statusLabel}
-                    </Badge>
-                  );
-                })()}
-                {job.expires_at && (
-                  <span className="text-white text-xs">
-                    {new Date(job.expires_at) < new Date() 
-                      ? `Gick ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
-                      : `Går ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
-                    }
-                  </span>
-                )}
-              </div>
-            </div>
+        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-2 md:p-4">
+          {/* Mobile: ultra-compact single row title + close */}
+          <div className="flex items-center justify-between gap-2">
+            <TruncatedText 
+              text={job.title}
+              className="text-sm md:text-lg font-bold text-white truncate block flex-1 min-w-0"
+            />
             <button
               onClick={() => navigate(-1)}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none"
+              className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4 md:h-5 md:w-5" />
             </button>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3 mt-2 md:mt-3">
-            {/* Stats */}
-            <div className="flex items-center gap-2 md:gap-3 flex-1">
-              <div className="bg-white/5 rounded-lg px-2 md:px-3 py-1 md:py-1.5 flex items-center gap-1.5 md:gap-2">
+          {/* Location + status + expiry — single row */}
+          <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-1 md:mt-1.5 text-[11px] md:text-sm">
+            <div className="flex items-center gap-1 text-white">
+              <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5" />
+              {job.location}
+            </div>
+            {(() => {
+              const isExpired = job.expires_at && new Date(job.expires_at) < new Date();
+              const statusLabel = isExpired ? 'Utgången' : (job.is_active ? 'Aktiv' : 'Inaktiv');
+              const statusColor = isExpired 
+                ? 'bg-red-500/20 text-white border-red-500/30 hover:bg-red-500/30'
+                : job.is_active 
+                  ? 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30'
+                  : 'bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30';
+              
+              return (
+                <Badge
+                  className={`text-[10px] md:text-xs whitespace-nowrap cursor-pointer transition-colors border ${statusColor}`}
+                  onClick={async () => {
+                    try {
+                      const { error } = await supabase
+                        .from('job_postings')
+                        .update({ is_active: !job.is_active })
+                        .eq('id', jobId);
+
+                      if (error) throw error;
+
+                      toast.success(
+                        job.is_active ? 'Jobb inaktiverat' : 'Jobb aktiverat',
+                        { description: job.is_active ? 'Jobbet är nu inaktivt.' : 'Jobbet är nu aktivt.' }
+                      );
+
+                      updateJobLocally({ is_active: !job.is_active });
+                      refetch();
+                    } catch (error: any) {
+                      toast.error('Fel', { description: error.message });
+                    }
+                  }}
+                >
+                  {statusLabel}
+                </Badge>
+              );
+            })()}
+            {job.expires_at && (
+              <span className="text-white text-[11px] md:text-xs">
+                {new Date(job.expires_at) < new Date() 
+                  ? `Gick ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
+                  : `Går ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
+                }
+              </span>
+            )}
+          </div>
+
+          {/* Stats row */}
+          <div className="flex items-center gap-1.5 md:gap-3 mt-1.5 md:mt-3">
+            <div className="flex items-center gap-1.5 md:gap-3 flex-1">
+              <div className="bg-white/5 rounded-md md:rounded-lg px-1.5 md:px-3 py-0.5 md:py-1.5 flex items-center gap-1 md:gap-2">
                 <Eye className="h-3 w-3 md:h-3.5 md:w-3.5 text-white" />
-                <span className="text-white text-xs md:text-sm font-medium">{job.views_count}</span>
+                <span className="text-white text-[11px] md:text-sm font-medium">{job.views_count}</span>
                 <span className="text-white text-xs hidden md:inline">Visningar</span>
               </div>
-              <div className="bg-white/5 rounded-lg px-2 md:px-3 py-1 md:py-1.5 flex items-center gap-1.5 md:gap-2">
+              <div className="bg-white/5 rounded-md md:rounded-lg px-1.5 md:px-3 py-0.5 md:py-1.5 flex items-center gap-1 md:gap-2">
                 <Users className="h-3 w-3 md:h-3.5 md:w-3.5 text-white" />
-                <span className="text-white text-xs md:text-sm font-medium">{job.applications_count}</span>
+                <span className="text-white text-[11px] md:text-sm font-medium">{job.applications_count}</span>
                 <span className="text-white text-xs hidden md:inline">Ansökningar</span>
               </div>
               
@@ -1036,8 +1037,8 @@ const JobDetails = () => {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center gap-2 bg-white/5 rounded-lg px-2 py-1 cursor-default">
-                      <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-xs text-white font-medium shrink-0">
+                    <div className="flex items-center gap-2 bg-white/5 rounded-lg px-1.5 md:px-2 py-0.5 md:py-1 cursor-default">
+                      <div className="h-5 w-5 md:h-6 md:w-6 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-[10px] md:text-xs text-white font-medium shrink-0">
                         {employerProfileImageUrl ? (
                           <img 
                             src={employerProfileImageUrl} 
