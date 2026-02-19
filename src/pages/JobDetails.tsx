@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { useTouchCapable } from '@/hooks/useInputCapability';
+import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
@@ -526,6 +527,9 @@ const JobDetails = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isTouchDevice = useTouchCapable();
+  const device = useDevice();
+  // Use mobile candidate view on touch devices OR narrow viewports
+  const useMobileView = isTouchDevice || device === 'mobile';
   
   // Get kanban layout context for dynamic column widths
   const { setStageCount } = useKanbanLayout();
@@ -1011,7 +1015,7 @@ const JobDetails = () => {
               </div>
               
               {/* Välj button for selection mode - desktop only */}
-              {!isTouchDevice && applications.length > 0 && (
+              {!useMobileView && applications.length > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -1059,7 +1063,7 @@ const JobDetails = () => {
         </div>
 
         {/* Touch devices: tab-based candidate list. Desktop: kanban with drag-and-drop */}
-        {isTouchDevice ? (
+        {useMobileView ? (
           <MobileCandidateView
             applications={applications}
             stages={activeStages}
