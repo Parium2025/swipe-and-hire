@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useDragScroll } from '@/hooks/useDragScroll';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -537,6 +538,7 @@ const JobDetails = () => {
   
   // Get kanban layout context for dynamic column widths
   const { setStageCount } = useKanbanLayout();
+  const dragScrollRef = useDragScroll<HTMLDivElement>();
   
   // Use cached data hook
   const { 
@@ -1093,6 +1095,7 @@ const JobDetails = () => {
             }}
           >
              <div 
+               ref={dragScrollRef}
                className="flex gap-3 pb-4 pt-2 overflow-x-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30" 
                style={{ 
                  height: 'calc(100vh - 300px)',
