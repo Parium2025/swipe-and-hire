@@ -429,7 +429,7 @@ const StatusColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-none flex flex-col transition-colors h-full min-w-0" style={{ width: 'max(200px, calc((100% - 3rem) / 5))' }}
+      className="flex-none w-[calc((100%-3rem)/5)] flex flex-col transition-colors h-full min-w-0 shrink-0"
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
