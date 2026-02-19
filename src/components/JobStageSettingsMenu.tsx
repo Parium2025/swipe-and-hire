@@ -4,11 +4,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-  DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +30,7 @@ import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle } from 'luc
 import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS, getJobStageIconByName } from '@/hooks/useJobStageSettings';
-import { useIsMobile } from '@/hooks/use-mobile';
+
 
 interface JobStageSettingsMenuProps {
   jobId: string;
@@ -59,7 +55,7 @@ export function JobStageSettingsMenu({
 }: JobStageSettingsMenuProps) {
   const { stageSettings, updateStage, deleteStage } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
-  const isMobile = useIsMobile();
+  
   
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [colorDialogOpen, setColorDialogOpen] = useState(false);
@@ -167,82 +163,27 @@ export function JobStageSettingsMenu({
             Byt namn
           </DropdownMenuItem>
           
-          {/* Color picker: dialog on mobile, submenu on desktop */}
-          {isMobile ? (
-            <DropdownMenuItem 
-              onSelect={() => { setTimeout(() => setColorDialogOpen(true), 100); }}
-              className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
-            >
-              <Palette className="h-3 w-3 mr-1.5 flex-shrink-0" />
-              <span className="flex-1">Välj färg</span>
-              <div 
-                className="w-4 h-4 rounded-full border border-white/30 ml-1.5 flex-shrink-0"
-                style={{ backgroundColor: `${displayColor}99` }}
-              />
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
-                <Palette className="h-3 w-3 mr-1.5 flex-shrink-0" />
-                <span className="flex-1">Välj färg</span>
-                <div 
-                  className="w-4 h-4 rounded-full border border-white/30 ml-1.5 flex-shrink-0"
-                  style={{ backgroundColor: `${displayColor}99` }}
-                />
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent 
-                  className="p-2 bg-card-parium border-white/20"
-                  sideOffset={4}
-                >
-                  <HexColorPicker 
-                    color={displayColor} 
-                    onChange={handleColorChange}
-                  />
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-          )}
+          {/* Color picker - always opens as dialog */}
+          <DropdownMenuItem 
+            onSelect={() => { setTimeout(() => setColorDialogOpen(true), 100); }}
+            className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+          >
+            <Palette className="h-3 w-3 mr-1.5 flex-shrink-0" />
+            <span className="flex-1">Välj färg</span>
+            <div 
+              className="w-4 h-4 rounded-full border border-white/30 ml-1.5 flex-shrink-0"
+              style={{ backgroundColor: `${displayColor}99` }}
+            />
+          </DropdownMenuItem>
           
-          {/* Icon picker: dialog on mobile, submenu on desktop */}
-          {isMobile ? (
-            <DropdownMenuItem 
-              onSelect={() => { setTimeout(() => setIconDialogOpen(true), 100); }}
-              className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
-            >
-              <Image className="h-3 w-3 mr-1.5 flex-shrink-0" />
-              Välj ikon
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
-                <Image className="h-3 w-3 mr-1.5 flex-shrink-0" />
-                Välj ikon
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent 
-                  className="bg-card-parium border-white/20 w-48"
-                >
-                  <div className="grid grid-cols-5 gap-0.5 p-1.5">
-                    {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
-                      <button
-                        key={name}
-                        onClick={() => handleIconChange(name)}
-                        className={`w-8 h-8 rounded-md flex items-center justify-center transition-all duration-100 touch-manipulation active:scale-90 ${
-                          settings?.iconName === name 
-                            ? 'bg-white/30 text-white ring-1 ring-white/40' 
-                            : 'md:hover:bg-white/20 active:bg-white/15 text-white/80'
-                        }`}
-                        title={label}
-                      >
-                        <Icon className="h-3.5 w-3.5" />
-                      </button>
-                    ))}
-                  </div>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-          )}
+          {/* Icon picker - always opens as dialog */}
+          <DropdownMenuItem 
+            onSelect={() => { setTimeout(() => setIconDialogOpen(true), 100); }}
+            className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+          >
+            <Image className="h-3 w-3 mr-1.5 flex-shrink-0" />
+            Välj ikon
+          </DropdownMenuItem>
           
           <DropdownMenuSeparator className="bg-white/10 my-0.5" />
           
