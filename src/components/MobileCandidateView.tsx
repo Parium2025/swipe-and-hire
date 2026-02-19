@@ -285,7 +285,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
         })}
 
         {/* Add new stage button */}
-        {stages.length < 8 && (
+        {stages.length < 5 && (
           <CreateJobStageDialog
             jobId={jobId}
             currentStageCount={stages.length}
