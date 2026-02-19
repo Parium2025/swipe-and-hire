@@ -235,7 +235,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
         onPointerDown={dragScroll.onPointerDown}
         onPointerMove={dragScroll.onPointerMove}
         onPointerUp={dragScroll.onPointerUp}
-        className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 cursor-grab active:cursor-grabbing select-none"
+        className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 cursor-grab active:cursor-grabbing select-none will-change-scroll [-webkit-overflow-scrolling:touch] overscroll-x-contain"
       >
         {stages.map(stage => {
           const cfg = stageSettings[stage];
