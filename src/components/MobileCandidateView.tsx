@@ -251,39 +251,36 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           const targetStageLabel = stageSettings[targetStageKey]?.label;
 
           return (
-            <div key={stage} className="flex items-center gap-0 shrink-0">
-              <button
-                onClick={() => setActiveTab(stage)}
-                className={`flex items-center gap-1.5 pl-3 pr-1.5 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-150 active:scale-95 min-h-touch ${
-                  isActive
-                    ? 'bg-white/15 text-white ring-1 ring-inset ring-white/30'
-                    : 'bg-white/5 text-white/60 ring-1 ring-inset ring-white/10'
-                }`}
+            <button
+              key={stage}
+              onClick={() => setActiveTab(stage)}
+              className={`flex items-center gap-1.5 px-2.5 py-2 rounded-md text-xs font-medium whitespace-nowrap transition-all duration-150 active:scale-95 min-h-touch shrink-0 ring-1 ring-inset backdrop-blur-sm ${
+                isActive
+                  ? 'ring-white/30'
+                  : 'ring-white/10'
+              }`}
+              style={{ backgroundColor: isActive ? `${cfg.color}33` : 'rgba(255,255,255,0.05)' }}
+            >
+              <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
+              {cfg.label}
+              <span
+                className="text-[10px] px-1.5 py-0.5 rounded-full text-white"
+                style={{ backgroundColor: `${cfg.color}66` }}
               >
-                <Icon className="h-3.5 w-3.5" style={{ color: isActive ? cfg.color : undefined }} />
-                {cfg.label}
-                <span
-                  className="text-[10px] px-1.5 py-0.5 rounded-full"
-                  style={{
-                    backgroundColor: isActive ? `${cfg.color}33` : 'rgba(255,255,255,0.1)',
-                    color: isActive ? cfg.color : undefined,
-                  }}
-                >
-                  {count}
-                </span>
-                {/* Stage settings menu (3-dot) */}
-                <span onClick={e => e.stopPropagation()}>
-                  <JobStageSettingsMenu
-                    jobId={jobId}
-                    stageKey={stage}
-                    candidateCount={count}
-                    totalStageCount={stages.length}
-                    targetStageKey={targetStageKey}
-                    targetStageLabel={targetStageLabel}
-                  />
-                </span>
-              </button>
-            </div>
+                {count}
+              </span>
+              {/* Stage settings menu (3-dot) */}
+              <span onClick={e => e.stopPropagation()}>
+                <JobStageSettingsMenu
+                  jobId={jobId}
+                  stageKey={stage}
+                  candidateCount={count}
+                  totalStageCount={stages.length}
+                  targetStageKey={targetStageKey}
+                  targetStageLabel={targetStageLabel}
+                />
+              </span>
+            </button>
           );
         })}
 
@@ -293,7 +290,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
             jobId={jobId}
             currentStageCount={stages.length}
             trigger={
-              <button className="flex items-center gap-1 px-3 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-white/5 text-white/50 ring-1 ring-inset ring-white/10 active:scale-95 transition-all min-h-touch shrink-0">
+              <button className="flex items-center gap-1 px-2.5 py-2 rounded-md text-xs font-medium whitespace-nowrap bg-white/5 text-white/50 ring-1 ring-inset ring-white/10 active:scale-95 transition-all min-h-touch shrink-0 backdrop-blur-sm">
                 <Plus className="h-3.5 w-3.5" />
                 Nytt steg
               </button>
