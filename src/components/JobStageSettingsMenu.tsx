@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,7 +34,6 @@ import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle } from 'luc
 import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS, getJobStageIconByName } from '@/hooks/useJobStageSettings';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface JobStageSettingsMenuProps {
   jobId: string;
@@ -61,8 +59,6 @@ export function JobStageSettingsMenu({
   const { stageSettings, updateStage, deleteStage } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
   
-  const isMobile = useIsMobile();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [colorDialogOpen, setColorDialogOpen] = useState(false);
   const [iconDialogOpen, setIconDialogOpen] = useState(false);
@@ -144,122 +140,46 @@ export function JobStageSettingsMenu({
 
   return (
     <>
-      {/* Mobile: simple button that opens drawer */}
-      {isMobile ? (
-        <button 
-          className="p-0.5 rounded hover:bg-white/20 transition-colors text-white/70 hover:text-white"
-          onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
-        >
-          <MoreVertical className="h-3.5 w-3.5" />
-        </button>
-      ) : (
-        /* Desktop: dropdown menu with hover submenus */
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="p-0.5 rounded hover:bg-white/20 transition-colors text-white/70 hover:text-white">
-              <MoreVertical className="h-3.5 w-3.5" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 border-white/20">
-            <DropdownMenuItem onClick={handleOpenRenameDialog} className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
-              <Pencil className="h-4 w-4 mr-2" /> Byt namn
+      {/* Single DropdownMenu — works on both touch and mouse */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button 
+            className="p-0.5 rounded hover:bg-white/20 transition-colors text-white/70 hover:text-white"
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            <MoreVertical className="h-3.5 w-3.5" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48 border-white/20 bg-card-parium z-[60]">
+          <DropdownMenuItem onClick={handleOpenRenameDialog} className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
+            <Pencil className="h-4 w-4 mr-2" /> Byt namn
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setColorDialogOpen(true)} className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
+            <Palette className="h-4 w-4 mr-2" />
+            <span className="flex-1">Välj färg</span>
+            <div className="w-5 h-5 rounded-full border border-white/30 ml-2 shrink-0" style={{ backgroundColor: `${displayColor}99` }} />
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIconDialogOpen(true)} className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
+            <Image className="h-4 w-4 mr-2" /> Välj ikon
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-white/10" />
+          {canDelete ? (
+            <DropdownMenuItem onClick={handleDeleteClick} className={`cursor-pointer ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}>
+              <Trash2 className="h-4 w-4 mr-2" /> Ta bort steg
+              {candidateCount > 0 && <span className="ml-auto text-xs text-white/40">({candidateCount})</span>}
             </DropdownMenuItem>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
-                <Palette className="h-4 w-4 mr-2" />
-                <span className="flex-1">Välj färg</span>
-                <div className="w-5 h-5 rounded-full border border-white/30 ml-2" style={{ backgroundColor: `${displayColor}99` }} />
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent className="p-3 bg-card-parium border-white/20" sideOffset={8}>
-                  <HexColorPicker color={displayColor} onChange={handleColorChange} />
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
-                <Image className="h-4 w-4 mr-2" /> Välj ikon
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent className="bg-card-parium border-white/20 w-56">
-                  <div className="grid grid-cols-5 gap-1 p-2">
-                    {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
-                      <button key={name} onClick={() => handleIconChange(name)} className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${settings?.iconName === name ? 'bg-white/30 text-white' : 'hover:bg-white/20 text-white'}`} title={label}>
-                        <Icon className="h-4 w-4" />
-                      </button>
-                    ))}
-                  </div>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-            <DropdownMenuSeparator className="bg-white/10" />
-            {canDelete ? (
-              <DropdownMenuItem onClick={handleDeleteClick} className={`cursor-pointer ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}>
-                <Trash2 className="h-4 w-4 mr-2" /> Ta bort steg
-                {candidateCount > 0 && <span className="ml-auto text-xs text-white/40">({candidateCount})</span>}
-              </DropdownMenuItem>
-            ) : (
-              <div className="px-2 py-1.5">
-                <div className="flex items-center gap-2 text-sm text-white/40"><Trash2 className="h-4 w-4" /> Ta bort steg</div>
-                <p className="text-xs text-white mt-1 ml-6">Det måste alltid finnas minst ett steg.</p>
-              </div>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-
-      {/* Mobile: Bottom sheet menu */}
-      {isMobile && (
-        <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
-          <DrawerContent className="bg-card-parium border-white/20 px-4 pb-8 touch-action-manipulation">
-            <DrawerHeader className="px-0">
-              <DrawerTitle className="text-white text-base">{settings?.label || 'Steg'}</DrawerTitle>
-            </DrawerHeader>
-            <div className="flex flex-col gap-2" onPointerDown={(e) => e.stopPropagation()}>
-              <button
-                type="button"
-                onPointerUp={() => { setMenuOpen(false); setTimeout(() => handleOpenRenameDialog(), 200); }}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white active:bg-white/10 transition-colors min-h-touch touch-action-manipulation"
-              >
-                <Pencil className="h-5 w-5 text-white/70" />
-                <span className="text-sm font-medium">Byt namn</span>
-              </button>
-              <button
-                type="button"
-                onPointerUp={() => { setMenuOpen(false); setTimeout(() => setColorDialogOpen(true), 200); }}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white active:bg-white/10 transition-colors min-h-touch touch-action-manipulation"
-              >
-                <Palette className="h-5 w-5 text-white/70" />
-                <span className="text-sm font-medium flex-1 text-left">Välj färg</span>
-                <div className="w-6 h-6 rounded-full border border-white/30" style={{ backgroundColor: `${displayColor}99` }} />
-              </button>
-              <button
-                type="button"
-                onPointerUp={() => { setMenuOpen(false); setTimeout(() => setIconDialogOpen(true), 200); }}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white active:bg-white/10 transition-colors min-h-touch touch-action-manipulation"
-              >
-                <Image className="h-5 w-5 text-white/70" />
-                <span className="text-sm font-medium">Välj ikon</span>
-              </button>
-              {canDelete && (
-                <button
-                  type="button"
-                  onPointerUp={() => { setMenuOpen(false); setTimeout(() => handleDeleteClick(), 200); }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-red-500/10 text-red-400 active:bg-red-500/20 transition-colors min-h-touch mt-2 touch-action-manipulation"
-                >
-                  <Trash2 className="h-5 w-5" />
-                  <span className="text-sm font-medium">Ta bort steg</span>
-                  {candidateCount > 0 && <span className="ml-auto text-xs text-white/40">({candidateCount})</span>}
-                </button>
-              )}
+          ) : (
+            <div className="px-2 py-1.5">
+              <div className="flex items-center gap-2 text-sm text-white/40"><Trash2 className="h-4 w-4" /> Ta bort steg</div>
+              <p className="text-xs text-white mt-1 ml-6">Det måste alltid finnas minst ett steg.</p>
             </div>
-          </DrawerContent>
-        </Drawer>
-      )}
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      {/* Color picker dialog (mobile) */}
+      {/* Color picker dialog */}
       <Dialog open={colorDialogOpen} onOpenChange={setColorDialogOpen}>
-        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-xs">
+        <DialogContentNoFocus className="bg-card-parium border-white/20 w-[calc(100vw-2rem)] max-w-xs">
           <DialogHeader>
             <DialogTitle className="text-white">Välj färg</DialogTitle>
           </DialogHeader>
@@ -274,9 +194,9 @@ export function JobStageSettingsMenu({
         </DialogContentNoFocus>
       </Dialog>
 
-      {/* Icon picker dialog (mobile) */}
+      {/* Icon picker dialog */}
       <Dialog open={iconDialogOpen} onOpenChange={setIconDialogOpen}>
-        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-xs">
+        <DialogContentNoFocus className="bg-card-parium border-white/20 w-[calc(100vw-2rem)] max-w-xs">
           <DialogHeader>
             <DialogTitle className="text-white">Välj ikon</DialogTitle>
           </DialogHeader>
@@ -299,7 +219,7 @@ export function JobStageSettingsMenu({
 
       {/* Rename dialog */}
       <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-md">
+        <DialogContentNoFocus className="bg-card-parium border-white/20 w-[calc(100vw-2rem)] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">Byt namn på steg</DialogTitle>
           </DialogHeader>
