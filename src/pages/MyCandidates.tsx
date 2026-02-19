@@ -380,7 +380,7 @@ const StageColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-none w-[calc((100%-3rem)/5)] flex flex-col transition-colors h-full min-w-0"
+      className="flex-none flex flex-col transition-colors h-full min-w-0" style={{ width: 'max(200px, calc((100% - 3rem) / 5))' }}
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -1408,10 +1408,9 @@ const MyCandidates = () => {
           }}
         >
           <div 
-            className={`flex gap-3 pb-4 pt-2 w-full ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} 
+            className={`flex gap-3 pb-4 pt-2 w-full overflow-x-auto no-scrollbar ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} 
             style={{ 
               height: 'calc(100vh - 300px)',
-              overflowX: 'hidden',
               overflowY: 'hidden',
             }}
           >
@@ -1446,8 +1445,8 @@ const MyCandidates = () => {
               );
             })}
             {/* Nytt steg button - inline with columns, only show if less than max stages */}
-            {!isViewingColleague && activeStageOrder.length < 5 && activeStageFilter === 'all' && (
-              <div className="flex-none w-[calc((100%-3rem)/5)] flex items-start pt-1">
+            {!isViewingColleague && activeStageOrder.length < 8 && activeStageFilter === 'all' && (
+              <div className="flex-none flex items-start pt-1" style={{ width: 'max(200px, calc((100% - 3rem) / 5))' }}>
                 <CreateStageDialog 
                   currentStageCount={activeStageOrder.length}
                   trigger={
