@@ -933,25 +933,25 @@ const JobDetails = () => {
   return (
      <div className="space-y-3 md:space-y-4 responsive-container-wide py-3 md:py-4 pb-safe min-h-screen animate-fade-in">
         {/* Job Title and Stats - Compact */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg px-2.5 py-1.5 md:p-4">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4">
           {/* Title + close */}
-          <div className="flex items-center justify-between gap-1.5">
+          <div className="flex items-center justify-between gap-2">
             <TruncatedText 
               text={job.title}
-              className="text-[13px] md:text-lg font-bold text-white truncate block flex-1 min-w-0"
+              className="text-lg font-bold text-white truncate block flex-1 min-w-0"
             />
             <button
               onClick={() => navigate(-1)}
-              className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none"
             >
-              <X className="h-3.5 w-3.5 md:h-5 md:w-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Location + status + expiry — single row */}
-          <div className="flex flex-wrap items-center gap-1 md:gap-2 mt-0.5 md:mt-1.5 text-[10px] md:text-sm">
-            <div className="flex items-center gap-0.5 text-white">
-              <MapPin className="h-2.5 w-2.5 md:h-3.5 md:w-3.5" />
+          <div className="flex flex-wrap items-center gap-2 mt-1.5 text-sm">
+            <div className="flex items-center gap-1 text-white">
+              <MapPin className="h-3.5 w-3.5" />
               {job.location}
             </div>
             {(() => {
@@ -965,7 +965,7 @@ const JobDetails = () => {
               
               return (
                 <Badge
-                  className={`text-[10px] md:text-xs whitespace-nowrap cursor-pointer transition-colors border ${statusColor}`}
+                  className={`text-xs whitespace-nowrap cursor-pointer transition-colors border ${statusColor}`}
                   onClick={async () => {
                     try {
                       const { error } = await supabase
@@ -992,7 +992,7 @@ const JobDetails = () => {
               );
             })()}
             {job.expires_at && (
-              <span className="text-white text-[11px] md:text-xs">
+              <span className="text-white text-xs">
                 {new Date(job.expires_at) < new Date() 
                   ? `Gick ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
                   : `Går ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
@@ -1002,16 +1002,16 @@ const JobDetails = () => {
           </div>
 
           {/* Stats row */}
-          <div className="flex items-center gap-1 md:gap-3 mt-1 md:mt-3">
-            <div className="flex items-center gap-1 md:gap-3 flex-1">
-              <div className="bg-white/5 rounded px-1.5 md:px-3 py-0.5 md:py-1.5 flex items-center gap-0.5 md:gap-2">
-                <Eye className="h-2.5 w-2.5 md:h-3.5 md:w-3.5 text-white" />
-                <span className="text-white text-[10px] md:text-sm font-medium">{job.views_count}</span>
+          <div className="flex items-center gap-3 mt-3">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                <Eye className="h-3.5 w-3.5 text-white" />
+                <span className="text-white text-sm font-medium">{job.views_count}</span>
                 <span className="text-white text-xs hidden md:inline">Visningar</span>
               </div>
-              <div className="bg-white/5 rounded px-1.5 md:px-3 py-0.5 md:py-1.5 flex items-center gap-0.5 md:gap-2">
-                <Users className="h-2.5 w-2.5 md:h-3.5 md:w-3.5 text-white" />
-                <span className="text-white text-[10px] md:text-sm font-medium">{job.applications_count}</span>
+              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                <Users className="h-3.5 w-3.5 text-white" />
+                <span className="text-white text-sm font-medium">{job.applications_count}</span>
                 <span className="text-white text-xs hidden md:inline">Ansökningar</span>
               </div>
               
