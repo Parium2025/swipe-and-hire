@@ -429,7 +429,7 @@ const StatusColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-none w-[calc((100%-3rem)/5)] flex flex-col transition-colors h-full min-w-0 shrink-0"
+      className="flex-none w-[calc((100%-3rem)/5)] flex flex-col transition-colors h-full min-w-0"
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -1089,10 +1089,11 @@ const JobDetails = () => {
             }}
           >
             <div 
-              className="flex gap-3 pb-4 pt-2 w-full overflow-x-auto no-scrollbar" 
+              className={`flex gap-3 pb-4 pt-2 w-full ${activeStages.length > 5 ? 'overflow-x-auto no-scrollbar' : ''}`}
               style={{ 
                 height: 'calc(100vh - 300px)',
                 overflowY: 'hidden',
+                overflowX: activeStages.length > 5 ? 'auto' : 'hidden',
               }}
             >
               {activeStages.map((status) => {
