@@ -145,7 +145,8 @@ export function JobStageSettingsMenu({
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
-          align="end" 
+          align="center" 
+          sideOffset={8}
           className="w-40 border-white/20 py-1"
         >
           <DropdownMenuItem 
