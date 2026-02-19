@@ -933,16 +933,16 @@ const JobDetails = () => {
   return (
      <div className="space-y-4 responsive-container-wide py-4 pb-safe min-h-screen animate-fade-in">
         {/* Job Title and Stats - Compact */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-2.5 md:p-4">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
               <TruncatedText 
                 text={job.title}
-                className="text-lg font-bold text-white mb-1.5 two-line-ellipsis block"
+                className="text-base md:text-lg font-bold text-white mb-1 md:mb-1.5 two-line-ellipsis block"
               />
-              <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm">
+              <div className="flex flex-wrap items-center gap-1.5 md:gap-2 text-xs md:text-sm">
                 <div className="flex items-center gap-1 text-white">
-                  <MapPin className="h-3.5 w-3.5" />
+                  <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5" />
                   {job.location}
                 </div>
                 {(() => {
@@ -1000,17 +1000,17 @@ const JobDetails = () => {
             </button>
           </div>
 
-          <div className="flex items-center gap-3 mt-3">
+          <div className="flex items-center gap-2 md:gap-3 mt-2 md:mt-3">
             {/* Stats */}
-            <div className="flex items-center gap-3 flex-1">
-              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <Eye className="h-3.5 w-3.5 text-white" />
-                <span className="text-white text-sm font-medium">{job.views_count}</span>
+            <div className="flex items-center gap-2 md:gap-3 flex-1">
+              <div className="bg-white/5 rounded-lg px-2 md:px-3 py-1 md:py-1.5 flex items-center gap-1.5 md:gap-2">
+                <Eye className="h-3 w-3 md:h-3.5 md:w-3.5 text-white" />
+                <span className="text-white text-xs md:text-sm font-medium">{job.views_count}</span>
                 <span className="text-white text-xs hidden md:inline">Visningar</span>
               </div>
-              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <Users className="h-3.5 w-3.5 text-white" />
-                <span className="text-white text-sm font-medium">{job.applications_count}</span>
+              <div className="bg-white/5 rounded-lg px-2 md:px-3 py-1 md:py-1.5 flex items-center gap-1.5 md:gap-2">
+                <Users className="h-3 w-3 md:h-3.5 md:w-3.5 text-white" />
+                <span className="text-white text-xs md:text-sm font-medium">{job.applications_count}</span>
                 <span className="text-white text-xs hidden md:inline">Ansökningar</span>
               </div>
               
