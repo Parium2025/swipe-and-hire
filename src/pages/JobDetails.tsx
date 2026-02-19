@@ -429,8 +429,13 @@ const StatusColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-none flex flex-col transition-colors h-full min-w-[200px]"
-      style={{ width: 'calc((100% - 3rem) / ' + Math.min(totalStageCount, 5) + ')' }}
+      className="flex-none flex flex-col transition-colors h-full"
+      style={{ 
+        width: totalStageCount <= 5 
+          ? 'calc((100% - ' + (totalStageCount - 1) * 12 + 'px) / ' + totalStageCount + ')' 
+          : '220px',
+        minWidth: '200px',
+      }}
     >
       <div 
         className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
@@ -1090,7 +1095,7 @@ const JobDetails = () => {
             }}
           >
             <div 
-              className="flex gap-3 pb-4 pt-2 w-full overflow-x-auto no-scrollbar" 
+              className="flex gap-3 pb-4 pt-2 w-full overflow-x-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30" 
               style={{ 
                 height: 'calc(100vh - 300px)',
                 overflowY: 'hidden',
