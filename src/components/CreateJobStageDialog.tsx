@@ -8,7 +8,7 @@ import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS } from '@/hooks/useJobStageSettings';
 
-const MAX_STAGES = 5;
+const MAX_STAGES = 8;
 
 interface CreateJobStageDialogProps {
   jobId: string;
