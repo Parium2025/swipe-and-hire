@@ -254,12 +254,12 @@ export const MobileCandidateView = memo(function MobileCandidateView({
             <button
               key={stage}
               onClick={() => setActiveTab(stage)}
-              className={`flex items-center gap-1.5 px-2.5 py-2 rounded-md text-xs font-medium whitespace-nowrap transition-all duration-150 active:scale-95 min-h-touch shrink-0 ring-1 ring-inset backdrop-blur-sm ${
+              className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 min-h-touch shrink-0 ring-1 ring-inset backdrop-blur-sm ${
                 isActive
-                  ? 'ring-white/30'
-                  : 'ring-white/10'
+                  ? 'ring-white/40 shadow-lg'
+                  : 'ring-white/20 opacity-80'
               }`}
-              style={{ backgroundColor: isActive ? `${cfg.color}33` : 'rgba(255,255,255,0.05)' }}
+              style={{ backgroundColor: `${cfg.color}33` }}
             >
               <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
               {cfg.label}
