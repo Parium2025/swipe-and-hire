@@ -60,8 +60,6 @@ export function JobStageSettingsMenu({
   const settings = stageSettings[stageKey];
   
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
-  const [colorDialogOpen, setColorDialogOpen] = useState(false);
-  const [iconDialogOpen, setIconDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [newLabel, setNewLabel] = useState(settings?.label || '');
@@ -140,86 +138,105 @@ export function JobStageSettingsMenu({
 
   return (
     <>
-      {/* Single DropdownMenu — works on both touch and mouse */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button 
-            className="p-0.5 rounded hover:bg-white/20 transition-colors text-white/70 hover:text-white"
-            onMouseDown={(e) => e.preventDefault()}
-          >
+          <button className="p-0.5 rounded hover:bg-white/20 transition-colors text-white/70 hover:text-white">
             <MoreVertical className="h-3.5 w-3.5" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48 border-white/20 bg-card-parium z-[60]">
-          <DropdownMenuItem onClick={handleOpenRenameDialog} className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
-            <Pencil className="h-4 w-4 mr-2" /> Byt namn
+        <DropdownMenuContent 
+          align="end" 
+          className="w-48 border-white/20"
+        >
+          <DropdownMenuItem 
+            onClick={handleOpenRenameDialog}
+            className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer"
+          >
+            <Pencil className="h-4 w-4 mr-2" />
+            Byt namn
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setColorDialogOpen(true)} className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
-            <Palette className="h-4 w-4 mr-2" />
-            <span className="flex-1">Välj färg</span>
-            <div className="w-5 h-5 rounded-full border border-white/30 ml-2 shrink-0" style={{ backgroundColor: `${displayColor}99` }} />
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIconDialogOpen(true)} className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
-            <Image className="h-4 w-4 mr-2" /> Välj ikon
-          </DropdownMenuItem>
+          
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
+              <Palette className="h-4 w-4 mr-2" />
+              <span className="flex-1">Välj färg</span>
+              <div 
+                className="w-5 h-5 rounded-full border border-white/30 ml-2"
+                style={{ backgroundColor: `${displayColor}99` }}
+              />
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent 
+                className="p-3 bg-card-parium border-white/20"
+                sideOffset={8}
+              >
+                <HexColorPicker 
+                  color={displayColor} 
+                  onChange={handleColorChange}
+                />
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+          
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
+              <Image className="h-4 w-4 mr-2" />
+              Välj ikon
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent 
+                className="bg-card-parium border-white/20 w-56"
+              >
+                <div className="grid grid-cols-5 gap-1 p-2">
+                  {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
+                    <button
+                      key={name}
+                      onClick={() => handleIconChange(name)}
+                      className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
+                        settings?.iconName === name 
+                          ? 'bg-white/30 text-white' 
+                          : 'hover:bg-white/20 text-white'
+                      }`}
+                      title={label}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </button>
+                  ))}
+                </div>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+          
           <DropdownMenuSeparator className="bg-white/10" />
+          
           {canDelete ? (
-            <DropdownMenuItem onClick={handleDeleteClick} className={`cursor-pointer ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}>
-              <Trash2 className="h-4 w-4 mr-2" /> Ta bort steg
-              {candidateCount > 0 && <span className="ml-auto text-xs text-white/40">({candidateCount})</span>}
+            <DropdownMenuItem 
+              onClick={handleDeleteClick}
+              className={`cursor-pointer ${hasCandidates ? 'text-orange-400 focus:text-orange-400' : 'text-red-400 focus:text-red-400'}`}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Ta bort steg
+              {candidateCount > 0 && (
+                <span className="ml-auto text-xs text-white/40">({candidateCount})</span>
+              )}
             </DropdownMenuItem>
           ) : (
             <div className="px-2 py-1.5">
-              <div className="flex items-center gap-2 text-sm text-white/40"><Trash2 className="h-4 w-4" /> Ta bort steg</div>
-              <p className="text-xs text-white mt-1 ml-6">Det måste alltid finnas minst ett steg.</p>
+              <div className="flex items-center gap-2 text-sm text-white/40">
+                <Trash2 className="h-4 w-4" />
+                Ta bort steg
+              </div>
+              <p className="text-xs text-white mt-1 ml-6">
+                Det måste alltid finnas minst ett steg för att organisera kandidater.
+              </p>
             </div>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Color picker dialog */}
-      <Dialog open={colorDialogOpen} onOpenChange={setColorDialogOpen}>
-        <DialogContentNoFocus className="bg-card-parium border-white/20 w-[calc(100vw-2rem)] max-w-xs">
-          <DialogHeader>
-            <DialogTitle className="text-white">Välj färg</DialogTitle>
-          </DialogHeader>
-          <div className="flex justify-center py-4">
-            <HexColorPicker color={displayColor} onChange={handleColorChange} />
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setColorDialogOpen(false)} className="w-full bg-primary hover:bg-primary/90 text-white min-h-touch">
-              Klar
-            </Button>
-          </DialogFooter>
-        </DialogContentNoFocus>
-      </Dialog>
-
-      {/* Icon picker dialog */}
-      <Dialog open={iconDialogOpen} onOpenChange={setIconDialogOpen}>
-        <DialogContentNoFocus className="bg-card-parium border-white/20 w-[calc(100vw-2rem)] max-w-xs">
-          <DialogHeader>
-            <DialogTitle className="text-white">Välj ikon</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-5 gap-2 p-4">
-            {JOB_STAGE_ICONS.map(({ name, Icon, label }) => (
-              <button
-                key={name}
-                onClick={() => { handleIconChange(name); setIconDialogOpen(false); }}
-                className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors min-h-touch ${
-                  settings?.iconName === name ? 'bg-white/30 text-white ring-2 ring-white/50' : 'bg-white/10 text-white active:bg-white/20'
-                }`}
-                title={label}
-              >
-                <Icon className="h-5 w-5" />
-              </button>
-            ))}
-          </div>
-        </DialogContentNoFocus>
-      </Dialog>
-
       {/* Rename dialog */}
       <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-        <DialogContentNoFocus className="bg-card-parium border-white/20 w-[calc(100vw-2rem)] max-w-md">
+        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">Byt namn på steg</DialogTitle>
           </DialogHeader>
