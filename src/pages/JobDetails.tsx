@@ -1089,11 +1089,11 @@ const JobDetails = () => {
             }}
           >
             <div 
-              className={`flex gap-3 pb-4 pt-2 w-full ${activeStages.length > 5 ? 'overflow-x-auto no-scrollbar' : ''}`}
+              className="flex gap-3 pb-4 pt-2 w-full" 
               style={{ 
                 height: 'calc(100vh - 300px)',
+                overflowX: 'hidden',
                 overflowY: 'hidden',
-                overflowX: activeStages.length > 5 ? 'auto' : 'hidden',
               }}
             >
               {activeStages.map((status) => {
@@ -1116,7 +1116,7 @@ const JobDetails = () => {
                   />
                 );
               })}
-              {activeStages.length < 8 && (
+              {activeStages.length < 5 && (
                 <div className="flex-shrink-0 flex items-start pt-1">
                   <CreateJobStageDialog 
                     jobId={jobId || ''}

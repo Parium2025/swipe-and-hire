@@ -1408,11 +1408,11 @@ const MyCandidates = () => {
           }}
         >
           <div 
-            className={`flex gap-3 pb-4 pt-2 w-full ${stagesToDisplay.length > 5 ? 'overflow-x-auto no-scrollbar' : ''} ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} 
+            className={`flex gap-3 pb-4 pt-2 w-full ${activeStageFilter !== 'all' ? 'justify-center' : ''}`} 
             style={{ 
               height: 'calc(100vh - 300px)',
+              overflowX: 'hidden',
               overflowY: 'hidden',
-              overflowX: stagesToDisplay.length > 5 ? 'auto' : 'hidden',
             }}
           >
             {stagesToDisplay.map((stage, index) => {
@@ -1446,7 +1446,7 @@ const MyCandidates = () => {
               );
             })}
             {/* Nytt steg button - inline with columns, only show if less than max stages */}
-            {!isViewingColleague && activeStageOrder.length < 8 && activeStageFilter === 'all' && (
+            {!isViewingColleague && activeStageOrder.length < 5 && activeStageFilter === 'all' && (
               <div className="flex-none w-[calc((100%-3rem)/5)] flex items-start pt-1">
                 <CreateStageDialog 
                   currentStageCount={activeStageOrder.length}
