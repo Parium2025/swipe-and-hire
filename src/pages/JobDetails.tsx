@@ -429,12 +429,12 @@ const StatusColumn = ({
   return (
     <div 
       ref={setNodeRef}
-      className="flex-none flex flex-col transition-colors h-full"
+      className="flex-shrink-0 flex flex-col transition-colors h-full"
       style={{ 
         width: totalStageCount <= 5 
-          ? 'calc((100% - ' + (totalStageCount - 1) * 12 + 'px) / ' + totalStageCount + ')' 
+          ? 'calc((100% - ' + ((totalStageCount - 1) * 12 + 100) + 'px) / ' + totalStageCount + ')' 
           : '220px',
-        minWidth: '200px',
+        minWidth: '180px',
       }}
     >
       <div 
