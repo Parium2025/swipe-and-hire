@@ -209,47 +209,53 @@ export function JobStageSettingsMenu({
       )}
 
       {/* Mobile: Bottom sheet menu */}
-      <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
-        <DrawerContent className="bg-card-parium border-white/20 px-4 pb-8">
-          <DrawerHeader className="px-0">
-            <DrawerTitle className="text-white text-base">{settings?.label || 'Steg'}</DrawerTitle>
-          </DrawerHeader>
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={() => { setMenuOpen(false); setTimeout(() => handleOpenRenameDialog(), 150); }}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white active:bg-white/10 transition-colors min-h-touch"
-            >
-              <Pencil className="h-5 w-5 text-white/70" />
-              <span className="text-sm font-medium">Byt namn</span>
-            </button>
-            <button
-              onClick={() => { setMenuOpen(false); setTimeout(() => setColorDialogOpen(true), 150); }}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white active:bg-white/10 transition-colors min-h-touch"
-            >
-              <Palette className="h-5 w-5 text-white/70" />
-              <span className="text-sm font-medium flex-1 text-left">Välj färg</span>
-              <div className="w-6 h-6 rounded-full border border-white/30" style={{ backgroundColor: `${displayColor}99` }} />
-            </button>
-            <button
-              onClick={() => { setMenuOpen(false); setTimeout(() => setIconDialogOpen(true), 150); }}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white active:bg-white/10 transition-colors min-h-touch"
-            >
-              <Image className="h-5 w-5 text-white/70" />
-              <span className="text-sm font-medium">Välj ikon</span>
-            </button>
-            {canDelete && (
+      {isMobile && (
+        <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
+          <DrawerContent className="bg-card-parium border-white/20 px-4 pb-8 touch-action-manipulation">
+            <DrawerHeader className="px-0">
+              <DrawerTitle className="text-white text-base">{settings?.label || 'Steg'}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex flex-col gap-2" onPointerDown={(e) => e.stopPropagation()}>
               <button
-                onClick={() => { setMenuOpen(false); setTimeout(() => handleDeleteClick(), 150); }}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-red-500/10 text-red-400 active:bg-red-500/20 transition-colors min-h-touch mt-2"
+                type="button"
+                onPointerUp={() => { setMenuOpen(false); setTimeout(() => handleOpenRenameDialog(), 200); }}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white active:bg-white/10 transition-colors min-h-touch touch-action-manipulation"
               >
-                <Trash2 className="h-5 w-5" />
-                <span className="text-sm font-medium">Ta bort steg</span>
-                {candidateCount > 0 && <span className="ml-auto text-xs text-white/40">({candidateCount})</span>}
+                <Pencil className="h-5 w-5 text-white/70" />
+                <span className="text-sm font-medium">Byt namn</span>
               </button>
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
+              <button
+                type="button"
+                onPointerUp={() => { setMenuOpen(false); setTimeout(() => setColorDialogOpen(true), 200); }}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white active:bg-white/10 transition-colors min-h-touch touch-action-manipulation"
+              >
+                <Palette className="h-5 w-5 text-white/70" />
+                <span className="text-sm font-medium flex-1 text-left">Välj färg</span>
+                <div className="w-6 h-6 rounded-full border border-white/30" style={{ backgroundColor: `${displayColor}99` }} />
+              </button>
+              <button
+                type="button"
+                onPointerUp={() => { setMenuOpen(false); setTimeout(() => setIconDialogOpen(true), 200); }}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white active:bg-white/10 transition-colors min-h-touch touch-action-manipulation"
+              >
+                <Image className="h-5 w-5 text-white/70" />
+                <span className="text-sm font-medium">Välj ikon</span>
+              </button>
+              {canDelete && (
+                <button
+                  type="button"
+                  onPointerUp={() => { setMenuOpen(false); setTimeout(() => handleDeleteClick(), 200); }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-red-500/10 text-red-400 active:bg-red-500/20 transition-colors min-h-touch mt-2 touch-action-manipulation"
+                >
+                  <Trash2 className="h-5 w-5" />
+                  <span className="text-sm font-medium">Ta bort steg</span>
+                  {candidateCount > 0 && <span className="ml-auto text-xs text-white/40">({candidateCount})</span>}
+                </button>
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
 
       {/* Color picker dialog (mobile) */}
       <Dialog open={colorDialogOpen} onOpenChange={setColorDialogOpen}>
