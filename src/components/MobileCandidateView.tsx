@@ -270,7 +270,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                 {count}
               </span>
               {/* Stage settings menu (3-dot) */}
-              <span onClick={e => e.stopPropagation()}>
+              <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()} onTouchStart={e => e.stopPropagation()}>
                 <JobStageSettingsMenu
                   jobId={jobId}
                   stageKey={stage}
