@@ -1065,6 +1065,7 @@ const JobDetails = () => {
         {/* Touch devices: tab-based candidate list. Desktop: kanban with drag-and-drop */}
         {useMobileView ? (
           <MobileCandidateView
+            jobId={jobId || ''}
             applications={applications}
             stages={activeStages}
             stageSettings={stageSettings}
