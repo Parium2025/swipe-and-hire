@@ -141,7 +141,7 @@ export function JobStageSettingsMenu({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button 
-            className="p-1 rounded-full md:hover:bg-white/20 active:bg-white/15 transition-colors text-white/70 active:text-white touch-manipulation"
+            className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 active:bg-white/15 transition-colors text-white/70 active:text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
             onMouseDown={(e) => e.preventDefault()}
           >
             <MoreVertical className="h-4 w-4" />
