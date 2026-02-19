@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { 
@@ -71,27 +72,11 @@ interface DbJobStageSetting {
   order_index: number;
 }
 
-const JOB_STAGE_CACHE_KEY = 'parium_job_stages_';
-
-function readStageCache(jobId: string): DbJobStageSetting[] | null {
-  try {
-    const raw = localStorage.getItem(JOB_STAGE_CACHE_KEY + jobId);
-    if (!raw) return null;
-    return JSON.parse(raw).data;
-  } catch { return null; }
-}
-
-function writeStageCache(jobId: string, data: DbJobStageSetting[]): void {
-  try {
-    localStorage.setItem(JOB_STAGE_CACHE_KEY + jobId, JSON.stringify({ data, timestamp: Date.now() }));
-  } catch { /* storage full */ }
-}
-
 export function useJobStageSettings(jobId: string | undefined) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Fetch stage settings for this job
+  // Fetch stage settings for this job - always fresh from DB
   const { data: dbSettings = [], isLoading } = useQuery({
     queryKey: ['job-stage-settings', jobId],
     queryFn: async () => {
@@ -103,19 +88,10 @@ export function useJobStageSettings(jobId: string | undefined) {
         .order('order_index');
       
       if (error) throw error;
-      const result = (data || []) as DbJobStageSetting[];
-      writeStageCache(jobId, result);
-      return result;
+      return (data || []) as DbJobStageSetting[];
     },
     enabled: !!user && !!jobId,
-    initialData: () => {
-      if (!jobId) return undefined;
-      return readStageCache(jobId) ?? undefined;
-    },
-    initialDataUpdatedAt: () => {
-      if (!jobId) return undefined;
-      return readStageCache(jobId) ? Date.now() - 60000 : undefined;
-    },
+    staleTime: 30_000,
   });
 
   // Merge DB settings with defaults
@@ -282,6 +258,31 @@ export function useJobStageSettings(jobId: string | undefined) {
       queryClient.invalidateQueries({ queryKey: ['job-stage-settings', jobId] });
     },
   });
+
+  // Realtime subscription for stage settings changes (cross-device sync)
+  useEffect(() => {
+    if (!jobId || !user) return;
+
+    const channel = supabase
+      .channel(`job-stage-settings-${jobId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_stage_settings',
+          filter: `job_id=eq.${jobId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['job-stage-settings', jobId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [jobId, user, queryClient]);
 
   return {
     stageSettings,
