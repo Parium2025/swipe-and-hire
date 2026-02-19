@@ -431,10 +431,8 @@ const StatusColumn = ({
       ref={setNodeRef}
       className="flex-shrink-0 flex flex-col transition-colors h-full"
       style={{ 
-        width: totalStageCount <= 5 
-          ? 'calc((100% - ' + ((totalStageCount - 1) * 12 + 100) + 'px) / ' + totalStageCount + ')' 
-          : '220px',
-        minWidth: '180px',
+        width: '220px',
+        minWidth: '200px',
       }}
     >
       <div 
