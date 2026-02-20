@@ -1211,10 +1211,10 @@ const JobDetails = () => {
 
         {/* Floating Action Bar for Selection Mode */}
         {isSelectionMode && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 duration-300 px-4 w-full max-w-sm md:max-w-none md:w-auto">
-            <div className="flex items-center gap-2 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl w-full md:w-auto">
-              <span className="text-white text-xs md:text-sm font-medium whitespace-nowrap">
-                {selectedApplicationIds.size} av {allVisibleApplicationIds.length} valda
+          <div className="fixed bottom-6 left-0 right-0 z-50 animate-in slide-in-from-bottom-4 duration-300 px-4 flex justify-center">
+            <div className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
+              <span className="text-white text-xs font-medium whitespace-nowrap flex-shrink-0">
+                {selectedApplicationIds.size}/{allVisibleApplicationIds.length} valda
               </span>
               <div className="w-px h-4 bg-white/20 flex-shrink-0" />
               
@@ -1223,12 +1223,12 @@ const JobDetails = () => {
                 variant="ghost"
                 size="sm"
                 onClick={toggleAllVisible}
-                className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 md:px-3 h-8 text-xs md:text-sm"
+                className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 h-8 text-xs whitespace-nowrap flex-shrink-0"
               >
                 {allVisibleSelected ? (
-                  <Square className="h-3.5 w-3.5 mr-1 md:mr-1.5" />
+                  <Square className="h-3.5 w-3.5 mr-1" />
                 ) : (
-                  <CheckSquare className="h-3.5 w-3.5 mr-1 md:mr-1.5" />
+                  <CheckSquare className="h-3.5 w-3.5 mr-1" />
                 )}
                 {allVisibleSelected ? 'Avmarkera' : 'Välj alla'}
               </Button>
@@ -1243,9 +1243,9 @@ const JobDetails = () => {
                     size="sm"
                     disabled={selectedApplicationIds.size === 0}
                     aria-disabled={selectedApplicationIds.size === 0}
-                    className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 md:px-3 h-8 text-xs md:text-sm"
+                    className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 h-8 text-xs whitespace-nowrap flex-shrink-0"
                   >
-                    <ArrowDown className="h-3.5 w-3.5 mr-1 md:mr-1.5" />
+                    <ArrowDown className="h-3.5 w-3.5 mr-1" />
                     Flytta till
                   </Button>
                 </DropdownMenuTrigger>
