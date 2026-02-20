@@ -333,8 +333,11 @@ export const MobileCandidateView = memo(function MobileCandidateView({
         )}
       </div>
 
-      {/* Candidate list */}
-      <div className="flex flex-col gap-2 relative">
+      {/* Candidate list — internally scrollable so action bar stays visible */}
+      <div 
+        className="flex flex-col gap-2 relative overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
+        style={{ maxHeight: 'calc(100dvh - 340px)' }}
+      >
         {currentApps.length === 0 ? (
           <div className="text-center py-12 text-sm text-white">
             Inga kandidater i detta steg
