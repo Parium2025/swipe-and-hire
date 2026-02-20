@@ -1009,15 +1009,15 @@ const JobDetails = () => {
 
           {/* Stats row */}
           <div className="flex items-center justify-between gap-2 mt-3">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center justify-center gap-2 flex-1">
-                <Eye className="h-4 w-4 text-white flex-shrink-0" />
-                <span className="text-white text-sm font-medium">{job.views_count}</span>
+            <div className="grid grid-cols-4 gap-2 flex-1 min-w-0">
+              <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5">
+                <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                <span className="text-white text-xs font-medium">{job.views_count}</span>
                 <span className="text-white text-xs hidden md:inline">Visningar</span>
               </div>
-              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center justify-center gap-2 flex-1">
-                <Users className="h-4 w-4 text-white flex-shrink-0" />
-                <span className="text-white text-sm font-medium">{job.applications_count}</span>
+              <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5">
+                <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                <span className="text-white text-xs font-medium">{job.applications_count}</span>
                 <span className="text-white text-xs hidden md:inline">Ansökningar</span>
               </div>
               
@@ -1025,14 +1025,14 @@ const JobDetails = () => {
               <button
                 onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
                 onMouseDown={(e) => e.preventDefault()}
-                className={`bg-white/5 rounded-lg px-3 py-1.5 flex items-center justify-center gap-2 flex-1 outline-none focus:outline-none transition-all duration-200 ${applications.length > 0 ? 'md:hover:bg-white/10' : 'opacity-40 cursor-default'}`}
+                className={`bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ${applications.length > 0 ? 'md:hover:bg-white/10' : 'opacity-40 cursor-default'}`}
               >
-                <CheckSquare className="h-4 w-4 text-white flex-shrink-0" />
-                <span className="text-white text-sm font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
+                <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
               </button>
               
               {/* QR Code button */}
-              <div className="flex-1 flex justify-center">
+              <div className="flex justify-center items-center">
                 <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
               </div>
             </div>
