@@ -99,6 +99,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
   const location = useLocation();
   const { shouldCollapseSidebar, stageCount } = useKanbanLayout();
   const device = useDevice();
+  const mainScrollRef = useRef<HTMLElement>(null);
   
   // Desktop uses top nav, mobile/tablet uses sidebar
   const isDesktop = device === 'desktop';
@@ -124,6 +125,14 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
     }
   }, [isKanbanPage, shouldCollapseSidebar]);
   
+  // Scroll to top on route change — window.scrollTo doesn't work since
+  // content scrolls inside our internal <main> container, not window.
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [location.pathname]);
+
   // Track user activity for "last seen" feature
   useActivityTracker();
   
@@ -535,7 +544,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
             <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s', animationDelay: '-1.0s', willChange: 'opacity' }}></div>
           </div>
           
-           <main className="flex-1 min-h-0 overflow-y-auto p-3 relative z-10" style={{ willChange: 'scroll-position', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+           <main ref={mainScrollRef} className="flex-1 min-h-0 overflow-y-auto p-3 relative z-10" style={{ willChange: 'scroll-position', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
             {children}
           </main>
           
@@ -610,7 +619,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
             <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-secondary/60 rounded-full animate-pulse" style={{ animationDuration: '2.5s', animationDelay: '-1.3s', animationFillMode: 'backwards', willChange: 'opacity' }}></div>
           </div>
           
-          <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 pb-8" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+          <main ref={mainScrollRef} className="flex-1 overflow-x-hidden overflow-y-auto p-3 pb-8" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
             {children}
           </main>
           
