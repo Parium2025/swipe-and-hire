@@ -1007,60 +1007,55 @@ const JobDetails = () => {
             )}
           </div>
 
-          {/* Stats row */}
-          <div className="flex items-center justify-between gap-2 mt-3">
-            <div className="grid grid-cols-4 gap-2 flex-1 min-w-0">
-              <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5">
-                <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">{job.views_count}</span>
-                <span className="text-white text-xs hidden md:inline">Visningar</span>
-              </div>
-              <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5">
-                <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">{job.applications_count}</span>
-                <span className="text-white text-xs hidden md:inline">Ansökningar</span>
-              </div>
-              
-              {/* Välj button for selection mode */}
-              <button
-                onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
-                onMouseDown={(e) => e.preventDefault()}
-                className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ring-1 ${
-                  isSelectionMode 
-                    ? 'bg-white/10 ring-white md:hover:bg-white/15' 
-                    : applications.length > 0 
-                      ? 'bg-white/5 ring-white/30 md:hover:bg-white/10 md:hover:ring-white/50' 
-                      : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
-                }`}
-              >
-                <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium hidden md:inline">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
-              </button>
-              
-              {/* QR Code button */}
-              <div className="flex justify-center items-center">
-                <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
-              </div>
+          {/* Stats row — 5-column grid, all pills identical size */}
+          <div className="grid grid-cols-5 gap-2 mt-3">
+            {/* Visningar */}
+            <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5">
+              <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
+              <span className="text-white text-xs font-medium">{job.views_count}</span>
+              <span className="text-white text-xs hidden md:inline">Visningar</span>
             </div>
-            
-            {/* Recruiter */}
-            {job.employer_profile && (
+
+            {/* Ansökningar */}
+            <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5">
+              <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
+              <span className="text-white text-xs font-medium">{job.applications_count}</span>
+              <span className="text-white text-xs hidden md:inline">Ansökningar</span>
+            </div>
+
+            {/* Välj button */}
+            <button
+              onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
+              onMouseDown={(e) => e.preventDefault()}
+              className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ring-1 ${
+                isSelectionMode 
+                  ? 'bg-white/10 ring-white md:hover:bg-white/15' 
+                  : applications.length > 0 
+                    ? 'bg-white/5 ring-white/30 md:hover:bg-white/10 md:hover:ring-white/50' 
+                    : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
+              }`}
+            >
+              <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
+              <span className="text-white text-xs font-medium hidden md:inline">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
+            </button>
+
+            {/* QR Code */}
+            <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
+
+            {/* Recruiter avatar */}
+            {job.employer_profile ? (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center gap-2 bg-white/5 rounded-lg px-1.5 md:px-2 py-0.5 md:py-1 cursor-default flex-shrink-0">
-                      <div className="h-5 w-5 md:h-6 md:w-6 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-[10px] md:text-xs text-white font-medium shrink-0">
+                    <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 cursor-default">
+                      <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-[10px] text-white font-medium shrink-0">
                         {employerProfileImageUrl ? (
-                          <img 
-                            src={employerProfileImageUrl} 
-                            alt="" 
-                            className="h-full w-full object-cover"
-                          />
+                          <img src={employerProfileImageUrl} alt="" className="h-full w-full object-cover" />
                         ) : (
                           `${job.employer_profile.first_name?.[0] || ''}${job.employer_profile.last_name?.[0] || ''}`
                         )}
                       </div>
-                      <span className="text-white text-xs hidden md:inline truncate max-w-[100px]">
+                      <span className="text-white text-xs hidden md:inline truncate max-w-[80px]">
                         {job.employer_profile.first_name} {job.employer_profile.last_name}
                       </span>
                     </div>
@@ -1070,6 +1065,8 @@ const JobDetails = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+            ) : (
+              <div className="bg-white/5 rounded-lg px-2 py-1.5" />
             )}
           </div>
         </div>

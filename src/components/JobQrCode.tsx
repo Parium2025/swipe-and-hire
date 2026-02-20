@@ -75,15 +75,13 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="sm"
+      <button
         onClick={() => setOpen(true)}
-        className="text-white hover:bg-white/10 gap-1.5"
+        className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 md:hover:bg-white/10 transition-all duration-200 outline-none focus:outline-none w-full h-full"
       >
-        <QrCode className="h-4 w-4" />
-        <span className="hidden sm:inline">QR-kod</span>
-      </Button>
+        <QrCode className="h-3.5 w-3.5 text-white flex-shrink-0" />
+        <span className="text-white text-xs hidden md:inline">QR-kod</span>
+      </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-[340px] bg-slate-900/95 backdrop-blur-xl border border-white/20 text-white">
