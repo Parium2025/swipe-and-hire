@@ -277,11 +277,22 @@ export function useSessionManager(
       }
     };
 
+    // 🌐 Network reconnect: re-register when device comes back online (e.g. subway/tunnel)
+    const handleOnline = () => {
+      console.log('🌐 Network reconnected — refreshing session');
+      consecutiveNetworkFailsRef.current = 0;
+      registerSession(true).then(() => {
+        checkSessionValidity();
+      });
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
 
     return () => {
       clearTimeout(validityStartDelay);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
         heartbeatIntervalRef.current = null;
