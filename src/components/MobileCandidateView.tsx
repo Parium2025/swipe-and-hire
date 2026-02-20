@@ -288,7 +288,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               tabIndex={0}
               onClick={() => setActiveTab(stage)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-              className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 min-h-touch shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer ${
                 isActive
                   ? 'ring-white/40 shadow-lg'
                   : 'ring-white/20'
@@ -324,7 +324,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
             jobId={jobId}
             currentStageCount={stages.length}
             trigger={
-              <button className="flex items-center gap-1 px-2.5 py-2 rounded-md text-xs font-medium whitespace-nowrap bg-white/5 text-white/50 ring-1 ring-inset ring-white/10 active:scale-95 transition-all min-h-touch shrink-0 backdrop-blur-sm">
+              <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap bg-white/5 text-white/50 ring-1 ring-inset ring-white/10 active:scale-95 transition-all shrink-0 backdrop-blur-sm">
                 <Plus className="h-3.5 w-3.5" />
                 Nytt steg
               </button>
