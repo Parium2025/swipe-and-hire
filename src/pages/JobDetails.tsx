@@ -1028,7 +1028,7 @@ const JobDetails = () => {
                 className={`bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ${applications.length > 0 ? 'md:hover:bg-white/10' : 'opacity-40 cursor-default'}`}
               >
                 <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
+                <span className="text-white text-xs font-medium hidden md:inline">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
               </button>
               
               {/* QR Code button */}
