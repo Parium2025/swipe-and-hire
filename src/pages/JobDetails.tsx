@@ -1008,15 +1008,14 @@ const JobDetails = () => {
           </div>
 
           {/* Stats row */}
-          <div className="flex items-center gap-2 mt-3 flex-wrap">
-            {/* Left: stats + actions */}
-            <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
-              <div className="bg-white/5 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-3 mt-3">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
                 <Eye className="h-3.5 w-3.5 text-white" />
                 <span className="text-white text-sm font-medium">{job.views_count}</span>
                 <span className="text-white text-xs hidden md:inline">Visningar</span>
               </div>
-              <div className="bg-white/5 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 shrink-0">
+              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
                 <Users className="h-3.5 w-3.5 text-white" />
                 <span className="text-white text-sm font-medium">{job.applications_count}</span>
                 <span className="text-white text-xs hidden md:inline">Ansökningar</span>
@@ -1027,48 +1026,44 @@ const JobDetails = () => {
                 <button
                   onClick={() => isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)}
                   onMouseDown={(e) => e.preventDefault()}
-                  className="bg-white/5 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 md:hover:bg-white/10 transition-all duration-200 shrink-0 outline-none focus:outline-none"
+                  className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-1.5 md:hover:bg-white/10 transition-all duration-200 flex-shrink-0 outline-none focus:outline-none"
                 >
                   <CheckSquare className="h-3.5 w-3.5 text-white" />
                   <span className="text-white text-xs">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
                 </button>
               )}
               
-              {/* QR Code button — desktop only */}
-              <div className="hidden md:block shrink-0">
-                <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
-              </div>
+              {/* QR Code button */}
+              <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
             </div>
             
-            {/* Recruiter — desktop only */}
+            {/* Recruiter */}
             {job.employer_profile && (
-              <div className="hidden md:block shrink-0">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-2 bg-white/5 rounded-lg px-2 py-1 cursor-default">
-                        <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-xs text-white font-medium shrink-0">
-                          {employerProfileImageUrl ? (
-                            <img 
-                              src={employerProfileImageUrl} 
-                              alt="" 
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            `${job.employer_profile.first_name?.[0] || ''}${job.employer_profile.last_name?.[0] || ''}`
-                          )}
-                        </div>
-                        <span className="text-white text-xs truncate max-w-[100px]">
-                          {job.employer_profile.first_name} {job.employer_profile.last_name}
-                        </span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2 bg-white/5 rounded-lg px-1.5 md:px-2 py-0.5 md:py-1 cursor-default">
+                      <div className="h-5 w-5 md:h-6 md:w-6 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-[10px] md:text-xs text-white font-medium shrink-0">
+                        {employerProfileImageUrl ? (
+                          <img 
+                            src={employerProfileImageUrl} 
+                            alt="" 
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          `${job.employer_profile.first_name?.[0] || ''}${job.employer_profile.last_name?.[0] || ''}`
+                        )}
                       </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Rekryterare: {job.employer_profile.first_name} {job.employer_profile.last_name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
+                      <span className="text-white text-xs hidden md:inline truncate max-w-[100px]">
+                        {job.employer_profile.first_name} {job.employer_profile.last_name}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Rekryterare: {job.employer_profile.first_name} {job.employer_profile.last_name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
         </div>
