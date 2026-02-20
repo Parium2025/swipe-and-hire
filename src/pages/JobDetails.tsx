@@ -1027,7 +1027,9 @@ const JobDetails = () => {
                 onMouseDown={(e) => e.preventDefault()}
                 className={`bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ${applications.length > 0 ? 'md:hover:bg-white/10' : 'opacity-40 cursor-default'}`}
               >
-                <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                <div className={`rounded-sm p-0.5 ring-1 transition-all duration-200 ${isSelectionMode ? 'ring-white bg-white/10' : 'ring-white/40'}`}>
+                  <CheckSquare className="h-3 w-3 text-white flex-shrink-0" />
+                </div>
                 <span className="text-white text-xs font-medium hidden md:inline">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
               </button>
               
