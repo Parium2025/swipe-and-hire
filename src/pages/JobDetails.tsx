@@ -939,7 +939,7 @@ const JobDetails = () => {
   return (
      <div className="space-y-3 md:space-y-4 responsive-container-wide py-3 md:py-4 pb-safe min-h-screen animate-fade-in">
         {/* Job Title and Stats - Compact */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4 relative z-30">
           {/* Title + close */}
           <div className="flex items-center justify-between gap-2">
             <TruncatedText 
@@ -948,7 +948,8 @@ const JobDetails = () => {
             />
             <button
               onClick={() => navigate(-1)}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none"
+              onPointerDown={(e) => e.stopPropagation()}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none touch-manipulation active:scale-95"
             >
               <X className="h-5 w-5" />
             </button>
