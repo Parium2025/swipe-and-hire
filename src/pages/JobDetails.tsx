@@ -1007,27 +1007,27 @@ const JobDetails = () => {
             )}
           </div>
 
-          {/* Stats row — 5-column grid, all pills identical size */}
-          <div className="grid grid-cols-5 gap-2 mt-3">
+          {/* Stats row — 5-column grid, all pills identical size, fluid scaling */}
+          <div className="grid grid-cols-5 gap-1.5 mt-3 min-w-0">
             {/* Visningar */}
-            <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5">
+            <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
               <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
-              <span className="text-white text-xs font-medium">{job.views_count}</span>
-              <span className="text-white text-xs hidden md:inline">Visningar</span>
+              <span className="text-white text-xs font-medium truncate">{job.views_count}</span>
+              <span className="text-white text-xs hidden md:inline truncate">Visn.</span>
             </div>
 
             {/* Ansökningar */}
-            <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5">
+            <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
               <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
-              <span className="text-white text-xs font-medium">{job.applications_count}</span>
-              <span className="text-white text-xs hidden md:inline">Ansökningar</span>
+              <span className="text-white text-xs font-medium truncate">{job.applications_count}</span>
+              <span className="text-white text-xs hidden md:inline truncate">Ans.</span>
             </div>
 
             {/* Välj button */}
             <button
               onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
               onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ring-1 ${
+              className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
                 isSelectionMode 
                   ? 'bg-white/10 ring-white md:hover:bg-white/15' 
                   : applications.length > 0 
@@ -1047,7 +1047,7 @@ const JobDetails = () => {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 cursor-default">
+                    <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 cursor-default min-w-0 overflow-hidden">
                       <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-[10px] text-white font-medium shrink-0">
                         {employerProfileImageUrl ? (
                           <img src={employerProfileImageUrl} alt="" className="h-full w-full object-cover" />
@@ -1055,8 +1055,8 @@ const JobDetails = () => {
                           `${job.employer_profile.first_name?.[0] || ''}${job.employer_profile.last_name?.[0] || ''}`
                         )}
                       </div>
-                      <span className="text-white text-xs hidden md:inline truncate max-w-[80px]">
-                        {job.employer_profile.first_name} {job.employer_profile.last_name}
+                      <span className="text-white text-xs hidden md:inline truncate max-w-[60px]">
+                        {job.employer_profile.first_name}
                       </span>
                     </div>
                   </TooltipTrigger>
@@ -1066,8 +1066,9 @@ const JobDetails = () => {
                 </Tooltip>
               </TooltipProvider>
             ) : (
-              <div className="bg-white/5 rounded-lg px-2 py-1.5" />
+              <div className="bg-white/5 rounded-lg px-2 py-1.5 min-w-0" />
             )}
+
           </div>
         </div>
 
