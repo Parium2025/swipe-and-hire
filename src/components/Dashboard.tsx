@@ -168,17 +168,20 @@ const Dashboard = memo(() => {
       )}
 
       {/* Mobile: Title + Tabs without card wrapper */}
-      <div className="md:hidden text-center space-y-3">
-        <h3 className="text-sm text-white font-medium">
+      <div className="md:hidden flex flex-col items-center space-y-3">
+        <h3 className="text-sm text-white font-medium text-center">
           {activeTab === 'active' ? 'Aktiva jobb' : 'Utgångna jobb'} av {profile?.company_name || 'ditt företag'}
         </h3>
-        <JobStatusTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          activeCount={activeJobs.length}
-          expiredCount={expiredJobs.length}
-        />
+        <div className="flex justify-center">
+          <JobStatusTabs
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            activeCount={activeJobs.length}
+            expiredCount={expiredJobs.length}
+          />
+        </div>
       </div>
+
 
       {/* Desktop: Card-wrapped table */}
       <Card className="hidden md:block bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg">
