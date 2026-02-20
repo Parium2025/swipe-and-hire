@@ -7,7 +7,8 @@ import type { JobApplication } from '@/hooks/useJobDetailsData';
 import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { formatCompactTime } from '@/lib/date';
-import { Star, ArrowDown, Sparkles, ChevronRight, Plus } from 'lucide-react';
+import { Star, ArrowDown, Sparkles, ChevronRight, Plus, Square, CheckSquare } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,9 @@ interface CandidateRowProps {
   stageSettings: Record<string, { label: string; color: string; iconName: string; isCustom: boolean }>;
   criteriaCount: number;
   onMarkAsViewed?: (id: string) => void;
+  isSelectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }
 
 const CandidateRow = memo(function CandidateRow({
@@ -46,6 +50,9 @@ const CandidateRow = memo(function CandidateRow({
   stageSettings,
   criteriaCount,
   onMarkAsViewed,
+  isSelectionMode,
+  isSelected,
+  onToggleSelect,
 }: CandidateRowProps) {
   const isUnread = !app.viewed_at;
   const appliedTime = formatCompactTime(app.applied_at);
@@ -54,6 +61,10 @@ const CandidateRow = memo(function CandidateRow({
   const needsEvaluation = criteriaCount > 0 && !hasResults;
 
   const handleTap = () => {
+    if (isSelectionMode && onToggleSelect) {
+      onToggleSelect();
+      return;
+    }
     if (isUnread && onMarkAsViewed) onMarkAsViewed(app.id);
     onOpen();
   };
@@ -62,15 +73,25 @@ const CandidateRow = memo(function CandidateRow({
 
   return (
     <div
-      className="bg-white/5 ring-1 ring-inset ring-white/10 rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] active:bg-white/[0.08] transition-all duration-150 min-h-touch relative"
+      className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-all duration-150 min-h-touch relative
+        ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:bg-white/[0.08]'}
+        ${isSelectionMode ? 'cursor-pointer' : ''}`}
       onClick={handleTap}
     >
-      {/* Unread dot */}
-      {isUnread && (
+      {/* Checkbox in selection mode, otherwise unread dot */}
+      {isSelectionMode ? (
+        <div className="flex-shrink-0" onClick={e => e.stopPropagation()}>
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => onToggleSelect?.()}
+            className="h-5 w-5 border-2 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
+          />
+        </div>
+      ) : isUnread ? (
         <div className="absolute left-1 top-1/2 -translate-y-1/2">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
         </div>
-      )}
+      ) : null}
 
       {/* Avatar */}
       <div className="h-10 w-10 flex-shrink-0 [&>*:first-child]:h-10 [&>*:first-child]:w-10 [&_.h-10]:h-10 [&_.w-10]:w-10">
@@ -125,38 +146,40 @@ const CandidateRow = memo(function CandidateRow({
         )}
       </div>
 
-      {/* Move stage dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            onClick={e => e.stopPropagation()}
-            className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:bg-white/15 transition-colors flex-shrink-0"
-            aria-label="Flytta kandidat"
-          >
-            <ChevronRight className="h-4 w-4 text-white/60" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[160px]">
-          {moveTargets.map(stage => {
-            const cfg = stageSettings[stage];
-            if (!cfg) return null;
-            const Icon = getJobStageIconByName(cfg.iconName);
-            return (
-              <DropdownMenuItem
-                key={stage}
-                onClick={e => {
-                  e.stopPropagation();
-                  onMoveToStage(app.id, stage);
-                }}
-                className="gap-2"
-              >
-                <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
-                {cfg.label}
-              </DropdownMenuItem>
-            );
-          })}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {/* Move stage dropdown — hidden in selection mode */}
+      {!isSelectionMode && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              onClick={e => e.stopPropagation()}
+              className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:bg-white/15 transition-colors flex-shrink-0"
+              aria-label="Flytta kandidat"
+            >
+              <ChevronRight className="h-4 w-4 text-white/60" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[160px]">
+            {moveTargets.map(stage => {
+              const cfg = stageSettings[stage];
+              if (!cfg) return null;
+              const Icon = getJobStageIconByName(cfg.iconName);
+              return (
+                <DropdownMenuItem
+                  key={stage}
+                  onClick={e => {
+                    e.stopPropagation();
+                    onMoveToStage(app.id, stage);
+                  }}
+                  className="gap-2"
+                >
+                  <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
+                  {cfg.label}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 });
@@ -201,6 +224,9 @@ interface MobileCandidateViewProps {
   onOpenProfile: (app: JobApplication) => void;
   onMoveToStage: (appId: string, stage: string) => void;
   onMarkAsViewed: (id: string) => void;
+  isSelectionMode?: boolean;
+  selectedApplicationIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
 }
 
 export const MobileCandidateView = memo(function MobileCandidateView({
@@ -212,6 +238,9 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   onOpenProfile,
   onMoveToStage,
   onMarkAsViewed,
+  isSelectionMode,
+  selectedApplicationIds,
+  onToggleSelect,
 }: MobileCandidateViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
   const dragScroll = useDragScroll();
@@ -319,6 +348,9 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               stageSettings={stageSettings}
               criteriaCount={criteriaCount}
               onMarkAsViewed={onMarkAsViewed}
+              isSelectionMode={isSelectionMode}
+              isSelected={selectedApplicationIds?.has(app.id)}
+              onToggleSelect={() => onToggleSelect?.(app.id)}
             />
           ))
         )}

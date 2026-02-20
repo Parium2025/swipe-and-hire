@@ -1079,6 +1079,13 @@ const JobDetails = () => {
             onOpenProfile={handleOpenProfile}
             onMoveToStage={handleMobileMove}
             onMarkAsViewed={markApplicationAsViewed}
+            isSelectionMode={isSelectionMode}
+            selectedApplicationIds={selectedApplicationIds}
+            onToggleSelect={(id) => setSelectedApplicationIds(prev => {
+              const next = new Set(prev);
+              if (next.has(id)) next.delete(id); else next.add(id);
+              return next;
+            })}
           />
         ) : (
           <DndContext
