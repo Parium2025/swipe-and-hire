@@ -1022,16 +1022,14 @@ const JobDetails = () => {
               </div>
               
               {/* Välj button for selection mode */}
-              {applications.length > 0 && (
-                <button
-                  onClick={() => isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center justify-center gap-1.5 md:hover:bg-white/10 transition-all duration-200 flex-shrink-0 outline-none focus:outline-none flex-1"
-                >
-                  <CheckSquare className="h-3.5 w-3.5 text-white" />
-                  <span className="text-white text-xs">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
-                </button>
-              )}
+              <button
+                onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
+                onMouseDown={(e) => e.preventDefault()}
+                className={`bg-white/5 rounded-lg px-3 py-1.5 flex items-center justify-center gap-2 flex-1 outline-none focus:outline-none transition-all duration-200 ${applications.length > 0 ? 'md:hover:bg-white/10' : 'opacity-40 cursor-default'}`}
+              >
+                <CheckSquare className="h-4 w-4 text-white flex-shrink-0" />
+                <span className="text-white text-sm font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
+              </button>
               
               {/* QR Code button */}
               <div className="flex-1 flex justify-center">
