@@ -1023,15 +1023,14 @@ const JobDetails = () => {
               
               {/* Välj button for selection mode - desktop only */}
               {!useMobileView && applications.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={() => isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)}
-                  className="bg-white/5 border border-white/20 text-white [&_svg]:text-white md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white transition-all duration-200 flex-shrink-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
+                  onMouseDown={(e) => e.preventDefault()}
+                  className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-1.5 md:hover:bg-white/10 transition-all duration-200 flex-shrink-0 outline-none focus:outline-none"
                 >
-                  {isSelectionMode ? null : <CheckSquare className="h-4 w-4 mr-1.5" />}
-                  {isSelectionMode ? 'Avbryt' : 'Välj'}
-                </Button>
+                  <CheckSquare className="h-3.5 w-3.5 text-white" />
+                  <span className="text-white text-xs">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
+                </button>
               )}
               
               {/* QR Code button */}
