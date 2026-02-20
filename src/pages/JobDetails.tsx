@@ -1021,8 +1021,8 @@ const JobDetails = () => {
                 <span className="text-white text-xs hidden md:inline">Ansökningar</span>
               </div>
               
-              {/* Välj button for selection mode - desktop only */}
-              {!useMobileView && applications.length > 0 && (
+              {/* Välj button for selection mode */}
+              {applications.length > 0 && (
                 <button
                   onClick={() => isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)}
                   onMouseDown={(e) => e.preventDefault()}
