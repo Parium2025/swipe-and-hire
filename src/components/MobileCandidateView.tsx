@@ -181,16 +181,20 @@ const CandidateRow = memo(function CandidateRow({
   );
 });
 
-/* ── Drag-scrollable container hook ──────────────────── */
+/* ── Drag-scrollable container hook (desktop only) ───── */
 function useDragScroll() {
   const ref = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
+  const isTouch = useRef(false);
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
+    // Don't intercept touch — let the browser handle native momentum scroll
+    if (e.pointerType === 'touch') return;
     const el = ref.current;
     if (!el) return;
+    isTouch.current = false;
     isDragging.current = true;
     startX.current = e.clientX;
     scrollLeft.current = el.scrollLeft;
@@ -198,12 +202,13 @@ function useDragScroll() {
   }, []);
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDragging.current || !ref.current) return;
+    if (e.pointerType === 'touch' || !isDragging.current || !ref.current) return;
     const dx = e.clientX - startX.current;
     ref.current.scrollLeft = scrollLeft.current - dx;
   }, []);
 
   const onPointerUp = useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === 'touch') return;
     isDragging.current = false;
     ref.current?.releasePointerCapture(e.pointerId);
   }, []);
@@ -255,13 +260,13 @@ export const MobileCandidateView = memo(function MobileCandidateView({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Horizontal scrollable stage tabs with drag-scroll */}
+      {/* Horizontal scrollable stage tabs — native momentum on touch, drag on desktop */}
       <div
         ref={dragScroll.ref}
         onPointerDown={dragScroll.onPointerDown}
         onPointerMove={dragScroll.onPointerMove}
         onPointerUp={dragScroll.onPointerUp}
-        className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 cursor-grab active:cursor-grabbing select-none will-change-scroll [-webkit-overflow-scrolling:touch] overscroll-x-contain"
+        className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain scroll-smooth"
       >
         {stages.map(stage => {
           const cfg = stageSettings[stage];
