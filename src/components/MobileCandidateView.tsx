@@ -78,9 +78,9 @@ const CandidateRow = memo(function CandidateRow({
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
       onClick={handleTap}
     >
-      {/* Unread dot — only shown outside selection mode */}
+      {/* Unread dot — top-left corner */}
       {!isSelectionMode && isUnread && (
-        <div className="absolute left-1 top-1/2 -translate-y-1/2">
+        <div className="absolute left-1.5 top-1.5">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
         </div>
       )}
@@ -103,7 +103,7 @@ const CandidateRow = memo(function CandidateRow({
           {app.first_name} {app.last_name}
         </p>
         <StarRating rating={app.rating} />
-        <div className="flex items-center gap-2 mt-0.5 text-white/60 text-[11px]">
+        <div className="flex items-center gap-2 mt-0.5 text-white text-[11px]">
           {appliedTime && (
             <span>Ansökte för {appliedTime} sedan</span>
           )}
