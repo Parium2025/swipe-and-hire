@@ -2,8 +2,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const SESSION_TOKEN_KEY = 'parium_session_token';
-const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes — must be well under DB cleanup threshold (20 min)
-const VALIDITY_CHECK_INTERVAL_MS = 15 * 1000; // 15 seconds — fast kick detection
+const HEARTBEAT_INTERVAL_MS = 4 * 60 * 1000; // 4 minutes — well under DB cleanup threshold (20 min)
+const VALIDITY_CHECK_INTERVAL_MS = 30 * 1000; // 30 seconds — reduced frequency to avoid false kicks on mobile
 
 /**
  * Generate a unique session token per browser (persisted in localStorage).
@@ -90,10 +90,14 @@ export function useSessionManager(
   const sessionTokenRef = useRef<string | null>(null);
   const registeredRef = useRef(false);
   const alreadyKickedRef = useRef(false); // Prevent double-kick
+  const lastRegisteredAtRef = useRef<number>(0); // Track when we last registered (ms)
+  const consecutiveNetworkFailsRef = useRef(0); // Track network failures to avoid false kicks
 
-  // Register session when user logs in
-  const registerSession = useCallback(async () => {
-    if (!userId || registeredRef.current || isPreviewEnv) return;
+  // Register session when user logs in (or when returning from background)
+  const registerSession = useCallback(async (force = false) => {
+    if (!userId || isPreviewEnv) return;
+    // Skip if already registered, unless forced (e.g. on mobile foreground)
+    if (registeredRef.current && !force) return;
 
     const token = getOrCreateSessionToken();
     sessionTokenRef.current = token;
@@ -112,6 +116,7 @@ export function useSessionManager(
       }
 
       registeredRef.current = true;
+      lastRegisteredAtRef.current = Date.now();
 
       const result = data as Record<string, unknown> | null;
       if (result?.status === 'kicked_oldest') {
@@ -186,16 +191,30 @@ export function useSessionManager(
     const token = sessionTokenRef.current;
     if (!token || !userId || !registeredRef.current || alreadyKickedRef.current) return;
 
+    // Grace period: skip validity check right after registration (mobile wake-up scenario)
+    const timeSinceRegistration = Date.now() - lastRegisteredAtRef.current;
+    if (timeSinceRegistration < 10_000) return; // 10s grace after register
+
     try {
-      const { data: isValid } = await supabase.rpc('is_session_valid', {
+      const { data: isValid, error } = await supabase.rpc('is_session_valid', {
         p_session_token: token,
       });
+
+      // Network error — don't kick, just count failures
+      if (error) {
+        consecutiveNetworkFailsRef.current++;
+        console.warn(`Session check network error (${consecutiveNetworkFailsRef.current}x):`, error.message);
+        return;
+      }
+
+      // Reset network fail counter on success
+      consecutiveNetworkFailsRef.current = 0;
 
       if (isValid === false && !alreadyKickedRef.current) {
         console.log('⚠️ Session missing — attempting re-registration…');
 
         try {
-          const { data, error } = await supabase.rpc('reregister_session', {
+          const { data, error: reRegError } = await supabase.rpc('reregister_session', {
             p_session_token: token,
             p_device_label: getDeviceLabel(),
             p_user_agent: navigator.userAgent.substring(0, 200),
@@ -203,7 +222,7 @@ export function useSessionManager(
 
           const result = data as Record<string, unknown> | null;
 
-          if (error || result?.status === 'rejected') {
+          if (reRegError || result?.status === 'rejected') {
             // 2+ other sessions exist → genuinely kicked
             alreadyKickedRef.current = true;
             registeredRef.current = false;
@@ -213,13 +232,16 @@ export function useSessionManager(
           }
 
           registeredRef.current = true;
+          lastRegisteredAtRef.current = Date.now();
           console.log('✅ Session silently re-registered after cron cleanup');
         } catch {
+          // Network error during re-registration — do NOT kick, retry next cycle
           console.warn('Re-registration network error — will retry');
         }
       }
     } catch {
-      // Network error — skip, try again next interval
+      // Network error — skip, try again next interval (mobile may be briefly offline)
+      consecutiveNetworkFailsRef.current++;
     }
   }, [userId, onKicked]);
 
@@ -236,14 +258,30 @@ export function useSessionManager(
     // Start heartbeat (keeps session alive)
     heartbeatIntervalRef.current = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
 
-    // Start fast validity check (detects kicks within ~15s)
-    // Skip the first 5 seconds to allow registration to complete
+    // Start fast validity check (detects kicks within ~30s)
+    // Skip the first 10 seconds to allow registration to complete
     const validityStartDelay = setTimeout(() => {
       validityCheckIntervalRef.current = setInterval(checkSessionValidity, VALIDITY_CHECK_INTERVAL_MS);
-    }, 5000);
+    }, 10_000);
+
+    // 📱 Mobile background/foreground: re-register immediately when app becomes visible again
+    // This prevents false kicks when iOS/Android suspends the app and heartbeats are missed
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('📱 App foregrounded — checking session health');
+        consecutiveNetworkFailsRef.current = 0; // Reset fail counter on resume
+        // Force re-register to ensure our session is alive after OS suspension
+        registerSession(true).then(() => {
+          checkSessionValidity();
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       clearTimeout(validityStartDelay);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
         heartbeatIntervalRef.current = null;
