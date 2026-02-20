@@ -1,4 +1,4 @@
-import { memo, useState, useMemo, useCallback, useRef } from 'react';
+import { memo, useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
@@ -246,6 +246,10 @@ export const MobileCandidateView = memo(function MobileCandidateView({
 }: MobileCandidateViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
   const dragScroll = useDragScroll();
+  const listRef = useRef<HTMLDivElement>(null);
+  const [scrollIndicator, setScrollIndicator] = useState<number>(0);
+  const [showIndicator, setShowIndicator] = useState(false);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const appsByStage = useMemo(() => {
     const result: Record<string, JobApplication[]> = {};
@@ -257,6 +261,24 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   }, [applications, stages]);
 
   const currentApps = appsByStage[activeTab] || [];
+
+  // Reset indicator when tab changes
+  useEffect(() => {
+    setScrollIndicator(0);
+    setShowIndicator(false);
+    if (listRef.current) listRef.current.scrollTop = 0;
+  }, [activeTab]);
+
+  const handleListScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const cardHeight = 88; // approximate card height + gap
+    const scrolled = Math.floor(el.scrollTop / cardHeight);
+    const visible = Math.min(scrolled + 1, currentApps.length);
+    setScrollIndicator(visible);
+    setShowIndicator(true);
+    clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => setShowIndicator(false), 2000);
+  }, [currentApps.length]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -334,32 +356,49 @@ export const MobileCandidateView = memo(function MobileCandidateView({
       </div>
 
       {/* Candidate list — internally scrollable so action bar stays visible */}
-      <div 
-        className="flex flex-col gap-2 relative overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
-        style={{ maxHeight: 'calc(100dvh - 340px)' }}
-      >
-        {currentApps.length === 0 ? (
-          <div className="text-center py-12 text-sm text-white">
-            Inga kandidater i detta steg
+      <div className="relative">
+        {/* Scroll position indicator — fades in on scroll, fades out after 2s */}
+        {currentApps.length > 6 && (
+          <div
+            className={`absolute top-2 right-2 z-10 pointer-events-none transition-opacity duration-300 ${
+              showIndicator ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <span className="bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full border border-white/10">
+              {scrollIndicator}/{currentApps.length}
+            </span>
           </div>
-        ) : (
-          currentApps.map(app => (
-            <CandidateRow
-              key={app.id}
-              app={app}
-              onOpen={() => onOpenProfile(app)}
-              onMoveToStage={onMoveToStage}
-              stages={stages}
-              stageSettings={stageSettings}
-              criteriaCount={criteriaCount}
-              onMarkAsViewed={onMarkAsViewed}
-              isSelectionMode={isSelectionMode}
-              isSelected={selectedApplicationIds?.has(app.id)}
-              onToggleSelect={() => onToggleSelect?.(app.id)}
-            />
-          ))
         )}
+        <div
+          ref={listRef}
+          onScroll={handleListScroll}
+          className="flex flex-col gap-2 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
+          style={{ maxHeight: 'calc(100dvh - 340px)' }}
+        >
+          {currentApps.length === 0 ? (
+            <div className="text-center py-12 text-sm text-white">
+              Inga kandidater i detta steg
+            </div>
+          ) : (
+            currentApps.map(app => (
+              <CandidateRow
+                key={app.id}
+                app={app}
+                onOpen={() => onOpenProfile(app)}
+                onMoveToStage={onMoveToStage}
+                stages={stages}
+                stageSettings={stageSettings}
+                criteriaCount={criteriaCount}
+                onMarkAsViewed={onMarkAsViewed}
+                isSelectionMode={isSelectionMode}
+                isSelected={selectedApplicationIds?.has(app.id)}
+                onToggleSelect={() => onToggleSelect?.(app.id)}
+              />
+            ))
+          )}
+        </div>
       </div>
+
     </div>
   );
 });
