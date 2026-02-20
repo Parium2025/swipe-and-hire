@@ -84,7 +84,7 @@ const CandidateRow = memo(function CandidateRow({
           <Checkbox
             checked={isSelected}
             onCheckedChange={() => onToggleSelect?.()}
-            className="h-5 w-5 border-2 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
+            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
           />
         </div>
       ) : isUnread ? (

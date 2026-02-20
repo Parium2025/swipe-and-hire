@@ -205,7 +205,7 @@ const ApplicationCardContent = ({
           <Checkbox 
             checked={isSelected}
             onCheckedChange={() => onToggleSelect?.()}
-            className="h-5 w-5 border-2 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white hover:border-white/70"
+            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white hover:border-white/70"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -1011,12 +1011,12 @@ const JobDetails = () => {
           <div className="flex items-center gap-3 mt-3">
             <div className="flex items-center gap-3 flex-1">
               <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <Eye className="h-3.5 w-3.5 text-white" />
+                <Eye className="h-5 w-5 text-white" />
                 <span className="text-white text-sm font-medium">{job.views_count}</span>
                 <span className="text-white text-xs hidden md:inline">Visningar</span>
               </div>
               <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <Users className="h-3.5 w-3.5 text-white" />
+                <Users className="h-5 w-5 text-white" />
                 <span className="text-white text-sm font-medium">{job.applications_count}</span>
                 <span className="text-white text-xs hidden md:inline">Ansökningar</span>
               </div>
