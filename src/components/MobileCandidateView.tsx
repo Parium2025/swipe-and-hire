@@ -7,7 +7,7 @@ import type { JobApplication } from '@/hooks/useJobDetailsData';
 import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { formatCompactTime } from '@/lib/date';
-import { Star, ArrowDown, Sparkles, ChevronRight, Plus, Square, CheckSquare } from 'lucide-react';
+import { Star, Sparkles, ChevronRight, Plus, Square, CheckSquare } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
@@ -105,10 +105,7 @@ const CandidateRow = memo(function CandidateRow({
         <StarRating rating={app.rating} />
         <div className="flex items-center gap-2 mt-0.5 text-white/60 text-[11px]">
           {appliedTime && (
-            <span className="flex items-center gap-0.5">
-              <ArrowDown className="h-2.5 w-2.5" />
-              {appliedTime}
-            </span>
+            <span>Ansökte för {appliedTime} sedan</span>
           )}
           {needsEvaluation && (
             <span className="flex items-center gap-0.5 text-white/40">
