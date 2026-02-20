@@ -78,20 +78,12 @@ const CandidateRow = memo(function CandidateRow({
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
       onClick={handleTap}
     >
-      {/* Checkbox in selection mode, otherwise unread dot */}
-      {isSelectionMode ? (
-        <div className="flex-shrink-0" onClick={e => e.stopPropagation()}>
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={() => onToggleSelect?.()}
-            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
-          />
-        </div>
-      ) : isUnread ? (
+      {/* Unread dot — only shown outside selection mode */}
+      {!isSelectionMode && isUnread && (
         <div className="absolute left-1 top-1/2 -translate-y-1/2">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
         </div>
-      ) : null}
+      )}
 
       {/* Avatar */}
       <div className="h-10 w-10 flex-shrink-0 [&>*:first-child]:h-10 [&>*:first-child]:w-10 [&_.h-10]:h-10 [&_.w-10]:w-10">
@@ -146,8 +138,16 @@ const CandidateRow = memo(function CandidateRow({
         )}
       </div>
 
-      {/* Move stage dropdown — hidden in selection mode */}
-      {!isSelectionMode && (
+      {/* Right side: checkbox in selection mode, otherwise move stage dropdown */}
+      {isSelectionMode ? (
+        <div className="flex-shrink-0" onClick={e => e.stopPropagation()}>
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => onToggleSelect?.()}
+            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
+          />
+        </div>
+      ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button

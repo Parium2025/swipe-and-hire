@@ -1010,13 +1010,13 @@ const JobDetails = () => {
           {/* Stats row */}
           <div className="flex items-center gap-3 mt-3">
             <div className="flex items-center gap-3 flex-1">
-              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <Eye className="h-5 w-5 text-white" />
+              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2 min-w-0">
+                <Eye className="h-4 w-4 text-white flex-shrink-0" />
                 <span className="text-white text-sm font-medium">{job.views_count}</span>
                 <span className="text-white text-xs hidden md:inline">Visningar</span>
               </div>
-              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <Users className="h-5 w-5 text-white" />
+              <div className="bg-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2 min-w-0">
+                <Users className="h-4 w-4 text-white flex-shrink-0" />
                 <span className="text-white text-sm font-medium">{job.applications_count}</span>
                 <span className="text-white text-xs hidden md:inline">Ansökningar</span>
               </div>
