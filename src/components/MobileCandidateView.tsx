@@ -270,7 +270,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           return (
             <div
               key={stage}
-              role="button"
+              data-stage-tab
               tabIndex={0}
               onClick={() => setActiveTab(stage)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
