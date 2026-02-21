@@ -1160,9 +1160,11 @@ All colors MUST be HSL.
     overscroll-behavior-y: none;
   }
   
-  /* Improve touch interaction on all interactive elements */
-  button, a, [role="button"], [onclick] {
+  /* Improve touch interaction on all elements — kill tap highlight globally */
+  *, *::before, *::after {
     -webkit-tap-highlight-color: transparent;
+  }
+  button, a, [role="button"], [onclick] {
     touch-action: manipulation;
   }
 
