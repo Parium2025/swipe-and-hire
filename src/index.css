@@ -1162,7 +1162,7 @@ All colors MUST be HSL.
   
   /* Improve touch interaction on all elements — kill tap highlight globally */
   *, *::before, *::after {
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent !important;
   }
   button, a, [role="button"], [onclick] {
     touch-action: manipulation;
