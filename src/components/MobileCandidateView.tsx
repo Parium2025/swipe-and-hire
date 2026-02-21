@@ -9,6 +9,7 @@ import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { formatCompactTime } from '@/lib/date';
 import { Star, Sparkles, ChevronRight, Plus, Square, CheckSquare } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -369,34 +370,35 @@ export const MobileCandidateView = memo(function MobileCandidateView({
             </span>
           </div>
         )}
-        <div
-          ref={listRef}
-          onScroll={handleListScroll}
-          className="flex flex-col gap-2 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
-          style={{ maxHeight: 'calc(100dvh - 340px)' }}
-        >
-          {currentApps.length === 0 ? (
-            <div className="text-center py-12 text-sm text-white">
-              Inga kandidater i detta steg
-            </div>
-          ) : (
-            currentApps.map(app => (
-              <CandidateRow
-                key={app.id}
-                app={app}
-                onOpen={() => onOpenProfile(app)}
-                onMoveToStage={onMoveToStage}
-                stages={stages}
-                stageSettings={stageSettings}
-                criteriaCount={criteriaCount}
-                onMarkAsViewed={onMarkAsViewed}
-                isSelectionMode={isSelectionMode}
-                isSelected={selectedApplicationIds?.has(app.id)}
-                onToggleSelect={() => onToggleSelect?.(app.id)}
-              />
-            ))
-          )}
-        </div>
+        <ScrollArea className="overscroll-contain" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
+          <div
+            ref={listRef}
+            onScroll={handleListScroll}
+            className="flex flex-col gap-2"
+          >
+            {currentApps.length === 0 ? (
+              <div className="text-center py-12 text-sm text-white">
+                Inga kandidater i detta steg
+              </div>
+            ) : (
+              currentApps.map(app => (
+                <CandidateRow
+                  key={app.id}
+                  app={app}
+                  onOpen={() => onOpenProfile(app)}
+                  onMoveToStage={onMoveToStage}
+                  stages={stages}
+                  stageSettings={stageSettings}
+                  criteriaCount={criteriaCount}
+                  onMarkAsViewed={onMarkAsViewed}
+                  isSelectionMode={isSelectionMode}
+                  isSelected={selectedApplicationIds?.has(app.id)}
+                  onToggleSelect={() => onToggleSelect?.(app.id)}
+                />
+              ))
+            )}
+          </div>
+        </ScrollArea>
       </div>
 
     </div>
