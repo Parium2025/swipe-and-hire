@@ -177,7 +177,9 @@ export default {
 	},
 	plugins: [
 		require("tailwindcss-animate"),
-		function({ addUtilities }: any) {
+		function({ addVariant, addUtilities }: any) {
+			// Pointer-fine variant: targets mouse/trackpad regardless of screen size
+			addVariant('pointer-fine', '@media (pointer: fine)');
 			addUtilities({
 				'.touch-target': {
 					'@apply min-h-[44px] min-w-[44px]': {},
