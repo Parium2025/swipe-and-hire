@@ -947,7 +947,14 @@ const JobDetails = () => {
               className="text-lg font-bold text-white truncate block flex-1 min-w-0"
             />
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => {
+                // After hot-reload, history may be empty — fallback to dashboard
+                if (window.history.state?.idx > 0) {
+                  navigate(-1);
+                } else {
+                  navigate('/');
+                }
+              }}
               onMouseDown={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
