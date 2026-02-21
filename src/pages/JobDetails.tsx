@@ -949,7 +949,8 @@ const JobDetails = () => {
             <button
               onClick={() => navigate(-1)}
               onPointerDown={(e) => e.stopPropagation()}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none touch-manipulation active:scale-95"
+              onPointerUp={(e) => e.stopPropagation()}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none touch-manipulation active:scale-95 relative z-50"
             >
               <X className="h-5 w-5" />
             </button>

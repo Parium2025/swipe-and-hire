@@ -10,6 +10,7 @@ import { formatCompactTime } from '@/lib/date';
 import { Star, Sparkles, ChevronRight, Plus, Square, CheckSquare } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useDragScroll } from '@/hooks/useDragScroll';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -182,41 +183,6 @@ const CandidateRow = memo(function CandidateRow({
   );
 });
 
-/* ── Drag-scrollable container hook (desktop only) ───── */
-function useDragScroll() {
-  const ref = useRef<HTMLDivElement>(null);
-  const isDragging = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
-  const isTouch = useRef(false);
-
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
-    // Don't intercept touch — let the browser handle native momentum scroll
-    if (e.pointerType === 'touch') return;
-    const el = ref.current;
-    if (!el) return;
-    isTouch.current = false;
-    isDragging.current = true;
-    startX.current = e.clientX;
-    scrollLeft.current = el.scrollLeft;
-    el.setPointerCapture(e.pointerId);
-  }, []);
-
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (e.pointerType === 'touch' || !isDragging.current || !ref.current) return;
-    const dx = e.clientX - startX.current;
-    ref.current.scrollLeft = scrollLeft.current - dx;
-  }, []);
-
-  const onPointerUp = useCallback((e: React.PointerEvent) => {
-    if (e.pointerType === 'touch') return;
-    isDragging.current = false;
-    ref.current?.releasePointerCapture(e.pointerId);
-  }, []);
-
-  return { ref, onPointerDown, onPointerMove, onPointerUp };
-}
-
 /* ── Main Mobile Candidate View ──────────────────────── */
 interface MobileCandidateViewProps {
   jobId: string;
@@ -246,7 +212,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   onToggleSelect,
 }: MobileCandidateViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
-  const dragScroll = useDragScroll();
+  const dragScrollRef = useDragScroll<HTMLDivElement>();
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
@@ -285,11 +251,8 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     <div className="flex flex-col gap-3">
       {/* Horizontal scrollable stage tabs — native momentum on touch, drag on desktop */}
       <div
-        ref={dragScroll.ref}
-        onPointerDown={dragScroll.onPointerDown}
-        onPointerMove={dragScroll.onPointerMove}
-        onPointerUp={dragScroll.onPointerUp}
-        className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain scroll-smooth"
+        ref={dragScrollRef}
+        className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
       >
         {stages.map(stage => {
           const cfg = stageSettings[stage];
