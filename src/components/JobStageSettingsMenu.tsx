@@ -145,8 +145,8 @@ export function JobStageSettingsMenu({
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <button 
-            className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 active:bg-white/15 transition-colors text-white/70 active:text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none [outline:none!important] [box-shadow:none!important]"
-            style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent' }}
+            className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 active:bg-white/15 transition-colors text-white/70 active:text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 data-[state=open]:outline-none data-[state=open]:ring-0 data-[state=open]:shadow-none [outline:none!important] [box-shadow:none!important] [&:focus]:shadow-none [&:focus-visible]:shadow-none [&[data-state=open]]:shadow-none"
+            style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
             onMouseDown={(e) => e.preventDefault()}
           >
             <MoreVertical className="h-4 w-4" />
