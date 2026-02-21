@@ -1164,6 +1164,13 @@ All colors MUST be HSL.
   *, *::before, *::after {
     -webkit-tap-highlight-color: transparent !important;
   }
+  /* Kill focus rings on all interactive elements globally */
+  button, a, [role="button"], [onclick],
+  [data-radix-collection-item],
+  [data-state] {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
   button, a, [role="button"], [onclick] {
     touch-action: manipulation;
   }
