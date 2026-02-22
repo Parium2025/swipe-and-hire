@@ -561,6 +561,7 @@ const JobDetails = () => {
   // Selection mode state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<Set<string>>(new Set());
+  const [recruiterTooltipOpen, setRecruiterTooltipOpen] = useState(false);
   
   // Toggle selection of an application
   const toggleApplicationSelection = useCallback((applicationId: string) => {
@@ -1038,10 +1039,13 @@ const JobDetails = () => {
 
               {/* Recruiter avatar */}
               {job.employer_profile ? (
-                <TooltipProvider>
-                  <Tooltip>
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip open={recruiterTooltipOpen} onOpenChange={setRecruiterTooltipOpen}>
                     <TooltipTrigger asChild>
-                      <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 cursor-default min-w-0 overflow-hidden">
+                      <div 
+                        className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 cursor-default min-w-0 overflow-hidden"
+                        onClick={() => setRecruiterTooltipOpen(prev => !prev)}
+                      >
                         <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-[10px] text-white font-medium shrink-0">
                           {employerProfileImageUrl ? (
                             <img src={employerProfileImageUrl} alt="" className="h-full w-full object-cover" />
