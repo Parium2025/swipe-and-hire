@@ -65,6 +65,13 @@ export function AddToColleagueListDialog({
         return;
       }
 
+      // Log activity
+      await supabase.from('candidate_activities').insert({
+        applicant_id: applicantId,
+        user_id: recruiterId,
+        activity_type: 'added_to_pipeline',
+      });
+
       toast.success(isOwnList ? 'Kandidat tillagd i din lista' : 'Kandidat tillagd i kollegans lista');
       onOpenChange(false);
     } catch (error: any) {
