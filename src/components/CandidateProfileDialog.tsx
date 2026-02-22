@@ -842,19 +842,36 @@ export const CandidateProfileDialog = ({
                 {displayApp.employment_status && (
                     <div>
                       <span className="text-sm text-white">Anställningsstatus?</span>
-                      <p className="text-sm text-white">{displayApp.employment_status}</p>
+                      <p className="text-sm text-white">{({
+                        tillsvidareanställning: 'Fast anställning',
+                        visstidsanställning: 'Visstidsanställning',
+                        provanställning: 'Provanställning',
+                        interim: 'Interim anställning',
+                        arbetssokande: 'Arbetssökande',
+                      } as Record<string, string>)[displayApp.employment_status] || displayApp.employment_status}</p>
                     </div>
                   )}
                   {displayApp.work_schedule && (
                     <div>
                       <span className="text-sm text-white">Hur mycket jobbar du idag?</span>
-                      <p className="text-sm text-white">{displayApp.work_schedule}</p>
+                      <p className="text-sm text-white">{({
+                        heltid: 'Heltid',
+                        deltid: 'Deltid',
+                        timanställning: 'Timanställning',
+                      } as Record<string, string>)[displayApp.work_schedule] || displayApp.work_schedule}</p>
                     </div>
                   )}
                   {displayApp.availability && (
                     <div className="sm:col-span-2">
                       <span className="text-sm text-white">När kan du börja nytt jobb?</span>
-                      <p className="text-sm text-white">{displayApp.availability}</p>
+                      <p className="text-sm text-white">{({
+                        omgaende: 'Omgående',
+                        'inom-1-manad': 'Inom 1 månad',
+                        'inom-3-manader': 'Inom 3 månader',
+                        'inom-6-manader': 'Inom 6 månader',
+                        'ej-aktuellt': 'Inte aktuellt just nu',
+                        osaker: 'Osäker',
+                      } as Record<string, string>)[displayApp.availability] || displayApp.availability}</p>
                     </div>
                   )}
                 </div>
