@@ -498,69 +498,100 @@ const JobView = () => {
             {/* Benefits */}
             <JobViewBenefits benefits={job.benefits || []} />
 
-            {/* Application questions */}
-            {jobQuestions.length > 0 && !isJobExpired && (
-              <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06]">
-                <h2 className="text-section-title mb-3">Ansökningsfrågor</h2>
-                <ApplicationQuestionsWizard
-                  questions={jobQuestions as (JobQuestion & { id: string })[]}
-                  answers={answers}
-                  onAnswerChange={handleAnswerChange}
-                  onSubmit={handleApplicationSubmit}
-                  isSubmitting={applying}
-                  canSubmit={canSubmitApplication}
-                  hasAlreadyApplied={hasAlreadyApplied}
-                  contactEmail={job.contact_email}
-                  jobTitle={job.title}
-                />
-              </div>
-            )}
-
-            {/* No questions - direct submit */}
-            {jobQuestions.length === 0 && !isJobExpired && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-4">
-                <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
-                <p className="text-sm text-white">Detta jobb kräver inga extra frågor.</p>
-                
-                {job.contact_email && (
-                  <div className="pt-2">
-                    <p className="text-xs text-white mb-1">Har du frågor?</p>
-                    <a 
-                      href={`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`}
-                      className="text-sm text-white hover:text-white/80 transition-colors underline underline-offset-2"
-                    >
-                      {job.contact_email}
-                    </a>
+            {/* Application section - only for logged in users */}
+            {user ? (
+              <>
+                {/* Application questions */}
+                {jobQuestions.length > 0 && !isJobExpired && (
+                  <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06]">
+                    <h2 className="text-section-title mb-3">Ansökningsfrågor</h2>
+                    <ApplicationQuestionsWizard
+                      questions={jobQuestions as (JobQuestion & { id: string })[]}
+                      answers={answers}
+                      onAnswerChange={handleAnswerChange}
+                      onSubmit={handleApplicationSubmit}
+                      isSubmitting={applying}
+                      canSubmit={canSubmitApplication}
+                      hasAlreadyApplied={hasAlreadyApplied}
+                      contactEmail={job.contact_email}
+                      jobTitle={job.title}
+                    />
                   </div>
                 )}
 
-                <div className="flex justify-center pt-2">
-                  {hasAlreadyApplied ? (
+                {/* No questions - direct submit */}
+                {jobQuestions.length === 0 && !isJobExpired && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-4">
+                    <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
+                    <p className="text-sm text-white">Detta jobb kräver inga extra frågor.</p>
+                    
+                    {job.contact_email && (
+                      <div className="pt-2">
+                        <p className="text-xs text-white mb-1">Har du frågor?</p>
+                        <a 
+                          href={`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`}
+                          className="text-sm text-white hover:text-white/80 transition-colors underline underline-offset-2"
+                        >
+                          {job.contact_email}
+                        </a>
+                      </div>
+                    )}
+
+                    <div className="flex justify-center pt-2">
+                      {hasAlreadyApplied ? (
+                        <Button
+                          variant="glass"
+                          className="px-8 bg-green-500/20 text-green-300 border-green-500/30"
+                          disabled
+                        >
+                          <CheckCircle className="mr-1.5 h-4 w-4" />
+                          Redan sökt
+                        </Button>
+                      ) : (
+                        <Button
+                          variant={canSubmitApplication ? "glassGreen" : "glass"}
+                          onClick={handleApplicationSubmit}
+                          disabled={applying || !canSubmitApplication}
+                          className={`px-8 ${!canSubmitApplication ? 'opacity-50' : ''}`}
+                        >
+                          {applying ? 'Skickar...' : (
+                            <>
+                              <Send className="mr-1.5 h-3.5 w-3.5" />
+                              Skicka ansökan
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Auth CTA for unauthenticated users */
+              !isJobExpired && (
+                <div className="bg-white/[0.06] backdrop-blur-md rounded-xl p-6 text-center space-y-4 border border-white/[0.08]">
+                  <h3 className="text-lg font-semibold text-white">Intresserad?</h3>
+                  <p className="text-sm text-white/70">
+                    Logga in eller skapa ett konto för att söka denna tjänst.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                    <Button
+                      variant="glassGreen"
+                      onClick={() => navigate('/auth', { state: { returnTo: `/job-view/${jobId}` } })}
+                      className="px-8"
+                    >
+                      Logga in
+                    </Button>
                     <Button
                       variant="glass"
-                      className="px-8 bg-green-500/20 text-green-300 border-green-500/30"
-                      disabled
+                      onClick={() => navigate('/auth', { state: { returnTo: `/job-view/${jobId}`, tab: 'register' } })}
+                      className="px-8"
                     >
-                      <CheckCircle className="mr-1.5 h-4 w-4" />
-                      Redan sökt
+                      Skapa konto
                     </Button>
-                  ) : (
-                    <Button
-                      variant={canSubmitApplication ? "glassGreen" : "glass"}
-                      onClick={handleApplicationSubmit}
-                      disabled={applying || !canSubmitApplication}
-                      className={`px-8 ${!canSubmitApplication ? 'opacity-50' : ''}`}
-                    >
-                      {applying ? 'Skickar...' : (
-                        <>
-                          <Send className="mr-1.5 h-3.5 w-3.5" />
-                          Skicka ansökan
-                        </>
-                      )}
-                    </Button>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )
             )}
 
             {/* Footer: published date & countdown */}
