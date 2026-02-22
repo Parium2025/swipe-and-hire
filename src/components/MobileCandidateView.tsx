@@ -107,7 +107,7 @@ const CandidateRow = memo(function CandidateRow({
         <StarRating rating={app.rating} />
         <div className="flex items-center gap-2 mt-0.5 text-white text-[11px]">
           {appliedTime && (
-            <span>Ansökte för {appliedTime} sedan</span>
+            <span>{appliedTime === 'nu' ? 'Ansökte idag' : `Ansökte för ${appliedTime} sedan`}</span>
           )}
           {needsEvaluation && (
             <span className="flex items-center gap-0.5 text-white/40">
