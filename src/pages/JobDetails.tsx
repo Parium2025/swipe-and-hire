@@ -1162,7 +1162,7 @@ const JobDetails = () => {
                   <button
                     onClick={toggleAllVisible}
                     onMouseDown={(e) => e.preventDefault()}
-                    className="flex items-center justify-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] text-white/80 outline-none focus:outline-none transition-all duration-200 rounded-md"
+                    className="flex items-center justify-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
                   >
                     {allVisibleSelected ? <Square className="h-3.5 w-3.5 mr-1" /> : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
                     {allVisibleSelected ? 'Avmarkera' : 'Välj alla'}
@@ -1174,7 +1174,7 @@ const JobDetails = () => {
                         disabled={selectedApplicationIds.size === 0}
                         onMouseDown={(e) => e.preventDefault()}
                         className={`flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 outline-none focus:outline-none transition-all duration-200 rounded-md ${
-                          selectedApplicationIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-white/80'
+                          selectedApplicationIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-white'
                         }`}
                       >
                         <ArrowDown className="h-3.5 w-3.5 mr-1" />
@@ -1344,7 +1344,7 @@ const JobDetails = () => {
               <button
                 onClick={toggleAllVisible}
                 onMouseDown={(e) => e.preventDefault()}
-                className="flex items-center justify-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] text-white/80 md:hover:bg-white/10 md:hover:text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
+                className="flex items-center justify-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] text-white md:hover:bg-white/10 outline-none focus:outline-none transition-all duration-200 rounded-md"
               >
                 {allVisibleSelected ? <Square className="h-3.5 w-3.5 mr-1" /> : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
                 {allVisibleSelected ? 'Avmarkera' : 'Välj alla'}
@@ -1356,7 +1356,7 @@ const JobDetails = () => {
                     disabled={selectedApplicationIds.size === 0}
                     onMouseDown={(e) => e.preventDefault()}
                     className={`flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 outline-none focus:outline-none md:hover:bg-white/10 md:hover:text-white transition-all duration-200 rounded-md ${
-                      selectedApplicationIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-white/80'
+                      selectedApplicationIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-white'
                     }`}
                   >
                     <ArrowDown className="h-3.5 w-3.5 mr-1" />
