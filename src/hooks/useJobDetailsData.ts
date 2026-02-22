@@ -34,6 +34,7 @@ export interface JobApplication {
   rating: number;
   criterionResults?: CriterionResult[];
   last_active_at: string | null;
+  city: string | null;
 }
 
 export interface JobPosting {
@@ -155,13 +156,14 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
     p_employer_id: userId
   });
   
-  const mediaByApplicant = new Map<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }>();
+  const mediaByApplicant = new Map<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; city: string | null }>();
   if (batchMediaData && Array.isArray(batchMediaData)) {
     batchMediaData.forEach((row: any) => {
       mediaByApplicant.set(row.applicant_id, {
         profile_image_url: row.profile_image_url,
         video_url: row.video_url,
         is_profile_video: row.is_profile_video,
+        city: row.city || null,
       });
     });
   }
@@ -179,7 +181,7 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
 
   // Combine all data
   return applicationsData.map((app) => {
-    const media = mediaByApplicant.get(app.applicant_id) || { profile_image_url: null, video_url: null, is_profile_video: false };
+    const media = mediaByApplicant.get(app.applicant_id) || { profile_image_url: null, video_url: null, is_profile_video: false, city: null };
     const evalId = evaluationByApplicant.get(app.applicant_id);
     const criterionResults = evalId ? resultsByEvaluation.get(evalId) || [] : [];
     const activity = activityByApplicant.get(app.applicant_id);
@@ -192,6 +194,7 @@ async function fetchApplications(jobId: string, userId: string): Promise<JobAppl
       rating: ratingsByApplicant.get(app.applicant_id) || 0,
       criterionResults,
       last_active_at: activity?.last_active_at || null,
+      city: media.city || null,
     } as JobApplication;
   });
 }
