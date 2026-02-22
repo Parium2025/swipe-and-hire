@@ -228,12 +228,16 @@ const JobView = () => {
         }).catch(() => {});
       }
     } catch (error: any) {
+      console.error('JobView fetch error:', error);
       toast({
         title: 'Fel',
         description: 'Kunde inte hämta jobbet',
         variant: 'destructive',
       });
-      navigate('/search-jobs');
+      // Only redirect authenticated users — unauthenticated users stay on page
+      if (user) {
+        navigate('/search-jobs');
+      }
       setLoading(false);
     }
   };
