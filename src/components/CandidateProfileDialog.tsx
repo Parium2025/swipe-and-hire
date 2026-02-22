@@ -666,7 +666,7 @@ export const CandidateProfileDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus hideClose className="max-w-[950px] max-h-[85vh] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 w-[100vw] h-[100dvh] md:w-auto md:h-auto md:rounded-lg rounded-none border-0 md:border">
+      <DialogContentNoFocus hideClose className="max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 fixed inset-0 md:inset-auto md:relative w-screen h-[100dvh] md:w-auto md:h-auto md:rounded-lg rounded-none border-0 md:border">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
           <DialogDescription>Visa kandidatens profilinformation och ansökan</DialogDescription>
@@ -703,9 +703,9 @@ export const CandidateProfileDialog = ({
           ))}
         </div>
 
-        <div className="flex h-full md:max-h-[85vh]">
+        <div className="flex flex-1 min-h-0 md:max-h-[85vh]">
           {/* Main content - left side (desktop always, mobile only on profile tab) */}
-          <div className={`flex-1 overflow-y-auto p-4 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`}>
+          <div className={`flex-1 overflow-y-auto overscroll-contain p-4 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`}>
           {/* Header with circular profile image/video */}
           <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
             {/* Circular Profile Image/Video - Larger */}
