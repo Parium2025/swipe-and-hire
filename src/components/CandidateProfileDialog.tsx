@@ -699,7 +699,9 @@ export const CandidateProfileDialog = ({
             aria-label="Stäng"
             className="shrink-0 flex h-10 w-10 items-center justify-center transition-colors"
           >
-            <X className="h-4 w-4 text-white" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10">
+              <X className="h-3.5 w-3.5 text-white" />
+            </div>
           </button>
         </div>
 
@@ -1029,7 +1031,7 @@ export const CandidateProfileDialog = ({
             {variant === 'my-candidates' ? (
               <div className="pt-4 border-t border-white/20 space-y-3">
                 {/* Action buttons row - flex wrap for responsive scaling */}
-                <div className="flex flex-wrap justify-center gap-2">
+                <div className="flex justify-center gap-1.5">
                   <Button
                     onClick={() => setSendMessageOpen(true)}
                     variant="glassPurple"
