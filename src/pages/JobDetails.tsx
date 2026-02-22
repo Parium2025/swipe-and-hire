@@ -39,7 +39,6 @@ import {
   Square,
   Trash2,
   QrCode,
-  Share2
 } from 'lucide-react';
 import JobQrCodeButton from '@/components/JobQrCode';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -1035,7 +1034,7 @@ const JobDetails = () => {
           {/* Stats — two rows on mobile, single row on desktop */}
           <div className="mt-3 space-y-1.5 md:space-y-0">
             {/* Row 1: Visningar, Ansökningar, Rekryterare */}
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-1.5 min-w-0">
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-1.5 min-w-0">
               {/* Visningar */}
               <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
                 <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
@@ -1099,25 +1098,10 @@ const JobDetails = () => {
               <div className="hidden md:block">
                 <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
               </div>
-              <button
-                onClick={async () => {
-                  const shareUrl = `${window.location.origin}/job/${jobId}`;
-                  if (navigator.share) {
-                    try { await navigator.share({ title: job.title, url: shareUrl }); } catch {}
-                  } else {
-                    await navigator.clipboard.writeText(shareUrl);
-                    toast.success('Länk kopierad!');
-                  }
-                }}
-                className="hidden md:flex bg-white/5 rounded-lg px-2 py-1.5 items-center justify-center gap-1 min-w-0 overflow-hidden hover:bg-white/10 transition-colors"
-              >
-                <Share2 className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">Dela</span>
-              </button>
             </div>
 
-            {/* Row 2 (mobile only): Välj, QR, Dela */}
-            <div className="grid grid-cols-3 gap-1.5 min-w-0 md:hidden">
+            {/* Row 2 (mobile only): Välj, QR */}
+            <div className="grid grid-cols-2 gap-1.5 min-w-0 md:hidden">
               <button
                 onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
                 onMouseDown={(e) => e.preventDefault()}
@@ -1134,22 +1118,6 @@ const JobDetails = () => {
               </button>
 
               <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
-
-              <button
-                onClick={async () => {
-                  const shareUrl = `${window.location.origin}/job/${jobId}`;
-                  if (navigator.share) {
-                    try { await navigator.share({ title: job.title, url: shareUrl }); } catch {}
-                  } else {
-                    await navigator.clipboard.writeText(shareUrl);
-                    toast.success('Länk kopierad!');
-                  }
-                }}
-                className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden active:bg-white/10 transition-colors"
-              >
-                <Share2 className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">Dela</span>
-              </button>
             </div>
           </div>
         </div>
