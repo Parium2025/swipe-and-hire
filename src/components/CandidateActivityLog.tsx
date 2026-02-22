@@ -1,7 +1,7 @@
 import { useCandidateActivities, CandidateActivity } from '@/hooks/useCandidateActivities';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Star, StickyNote, Edit3, Activity } from 'lucide-react';
+import { Star, StickyNote, Edit3, Activity, UserPlus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -17,6 +17,8 @@ const getActivityIcon = (type: string) => {
       return StickyNote;
     case 'note_edited':
       return Edit3;
+    case 'added_to_pipeline':
+      return UserPlus;
     default:
       return Activity;
   }
@@ -59,6 +61,13 @@ const getActivityDescription = (activity: CandidateActivity) => {
         <span>
           <span className="font-medium text-white">{name}</span>
           <span className="text-white"> redigerade en anteckning</span>
+        </span>
+      );
+    case 'added_to_pipeline':
+      return (
+        <span>
+          <span className="font-medium text-white">{name}</span>
+          <span className="text-white"> lade till kandidaten i rekryteringsprocessen</span>
         </span>
       );
     default:

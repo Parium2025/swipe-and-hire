@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-export type ActivityType = 'rating_changed' | 'note_added' | 'note_edited';
+export type ActivityType = 'rating_changed' | 'note_added' | 'note_edited' | 'added_to_pipeline';
 
 export interface CandidateActivity {
   id: string;
