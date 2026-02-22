@@ -147,7 +147,6 @@ const JobView = () => {
             )
           `)
           .eq('id', jobId)
-          .eq('is_active', true)
           .is('deleted_at', null)
           .single(),
         supabase
