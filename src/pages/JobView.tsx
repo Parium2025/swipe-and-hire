@@ -67,8 +67,33 @@ const JobView = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { user, isCompanyUser, userRole } = useAuth();
-  const isEmployer = isCompanyUser() || userRole?.role === 'employer';
+  const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || userRole?.role === 'employer');
   const { getPrefetchedJob } = useJobPrefetchCache();
+
+  // Robust employer check: also verify from profiles table directly
+  useEffect(() => {
+    if (!user?.id) {
+      setIsEmployer(false);
+      return;
+    }
+    // Immediate check from auth context
+    if (isCompanyUser() || userRole?.role === 'employer') {
+      setIsEmployer(true);
+      return;
+    }
+    // Fallback: check profiles table directly (handles QR/external link scenarios)
+    const checkRole = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (data?.role === 'employer') {
+        setIsEmployer(true);
+      }
+    };
+    checkRole();
+  }, [user?.id, userRole?.role]);
   
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   
