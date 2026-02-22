@@ -67,7 +67,7 @@ const getActivityDescription = (activity: CandidateActivity) => {
       return (
         <span>
           <span className="font-medium text-white">{name}</span>
-          <span className="text-white"> lade till kandidaten i rekryteringsprocessen</span>
+          <span className="text-white"> lade till kandidaten i sin lista</span>
         </span>
       );
     default:
