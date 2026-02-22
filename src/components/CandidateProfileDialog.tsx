@@ -841,8 +841,8 @@ export const CandidateProfileDialog = ({
                 <div className="grid sm:grid-cols-2 gap-2">
                 {displayApp.employment_status && (
                     <div>
-                      <span className="text-sm text-white">Anställningsstatus?</span>
-                      <p className="text-sm text-white">{({
+                      <span className="text-sm text-white/70">Anställningsstatus?</span>
+                      <p className="text-sm text-white">Svar: {({
                         tillsvidareanställning: 'Fast anställning',
                         visstidsanställning: 'Visstidsanställning',
                         provanställning: 'Provanställning',
@@ -853,8 +853,8 @@ export const CandidateProfileDialog = ({
                   )}
                   {displayApp.work_schedule && (
                     <div>
-                      <span className="text-sm text-white">Hur mycket jobbar du idag?</span>
-                      <p className="text-sm text-white">{({
+                      <span className="text-sm text-white/70">Hur mycket jobbar du idag?</span>
+                      <p className="text-sm text-white">Svar: {({
                         heltid: 'Heltid',
                         deltid: 'Deltid',
                         timanställning: 'Timanställning',
@@ -863,8 +863,8 @@ export const CandidateProfileDialog = ({
                   )}
                   {displayApp.availability && (
                     <div className="sm:col-span-2">
-                      <span className="text-sm text-white">När kan du börja nytt jobb?</span>
-                      <p className="text-sm text-white">{({
+                      <span className="text-sm text-white/70">När kan du börja nytt jobb?</span>
+                      <p className="text-sm text-white">Svar: {({
                         omgaende: 'Omgående',
                         'inom-1-manad': 'Inom 1 månad',
                         'inom-3-manader': 'Inom 3 månader',
@@ -908,11 +908,11 @@ export const CandidateProfileDialog = ({
                         key={questionId}
                         className="border-t border-white/10 pt-2 first:border-t-0 first:pt-0"
                       >
-                        <p className="text-sm text-white">
+                        <p className="text-sm text-white/70">
                           {jobQuestions[questionId]?.text || questionId}
                         </p>
                         <p className="text-sm text-white">
-                          {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
+                          Svar: {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
                         </p>
                       </div>
                     ))}
