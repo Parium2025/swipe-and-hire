@@ -66,7 +66,7 @@ const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; a
 const JobView = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isCompanyUser } = useAuth();
   const { getPrefetchedJob } = useJobPrefetchCache();
   
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
@@ -515,7 +515,7 @@ const JobView = () => {
             )}
 
             {/* Application section for logged in users */}
-            {user && (
+            {user && !isCompanyUser() && (
               <>
                 {/* Application questions */}
                 {jobQuestions.length > 0 && !isJobExpired && (
@@ -582,6 +582,15 @@ const JobView = () => {
                   </div>
                 )}
               </>
+            )}
+
+            {/* Info for employer users - cannot apply */}
+            {user && isCompanyUser() && !isJobExpired && (
+              <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06] text-center space-y-1.5">
+                <p className="text-sm text-[#FFFFFF]">
+                  Du är inloggad som arbetsgivare och kan inte söka jobb. Byt till jobbsökarkontot för att ansöka.
+                </p>
+              </div>
             )}
 
             {/* Auth CTA for unauthenticated users */}
