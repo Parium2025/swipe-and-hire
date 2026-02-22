@@ -303,28 +303,33 @@ export function SelectionCriteriaDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContentNoFocus className="sm:max-w-md bg-card-parium backdrop-blur-xl border-white/[0.06] text-white max-h-[85vh] overflow-hidden flex flex-col p-0">
-        {/* Header — centered */}
+        {/* Header — centered, with description */}
         <div className="px-6 pt-6 pb-3 flex-shrink-0 text-center">
           <DialogHeader>
             <DialogTitle className="text-white text-base tracking-tight font-medium flex items-center justify-center gap-2">
-              <Sparkles className="h-4 w-4 text-white/60" />
+              <Sparkles className="h-4 w-4 text-white" />
               Urvalskriterier
             </DialogTitle>
           </DialogHeader>
+          <p className="text-[12px] text-white/70 mt-2.5 leading-relaxed max-w-[320px] mx-auto">
+            AI bedömer om kandidaten uppfyller kraven utifrån dessa kriterier. 
+            Du kan lägga till upp till 5 stycken. Kontrollera att kriterierna är tydliga 
+            och varken innehåller fel eller diskriminerande krav innan du sparar.
+          </p>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 space-y-2.5 pb-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-4 w-4 animate-spin text-white/30" />
+              <Loader2 className="h-4 w-4 animate-spin text-white" />
             </div>
           ) : (
             <>
-              {/* Info box */}
+              {/* Warning info box */}
               <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5">
-                <p className="text-[11px] text-white/45 leading-relaxed">
-                  AI bedömer kandidater utifrån dina kriterier. Max 5 stycken.
+                <p className="text-[11px] text-white/70 leading-relaxed">
+                  Ibland kan varningsmeddelanden visas för giltiga kriterier, men vi rekommenderar att du granskar varningsmeddelandet först.
                 </p>
               </div>
 
@@ -335,75 +340,82 @@ export function SelectionCriteriaDialog({
                   className="rounded-lg bg-white/[0.04] px-3.5 py-3 space-y-2.5"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-white/30 uppercase tracking-widest font-medium">
+                    <span className="text-[10px] text-white uppercase tracking-widest font-medium">
                       Kriterium {index + 1}
                     </span>
                     <button
                       onClick={() => deleteCriterion(criterion.id)}
-                      className="p-0.5 rounded text-white/20 hover:text-red-400/80 transition-colors"
+                      className="p-0.5 rounded text-white/40 hover:text-red-400/80 transition-colors"
                       aria-label="Ta bort"
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
                   </div>
 
-                  <Input
-                    placeholder="Titel, t.ex. Har B-körkort"
-                    value={drafts[criterion.id]?.title || ''}
-                    onChange={(e) => handleDraftChange(criterion.id, 'title', e.target.value)}
-                    className="h-8 bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/20 text-xs focus:border-white/15 focus:ring-0 rounded-md"
-                  />
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-white uppercase tracking-wider font-medium">Titel</label>
+                    <Input
+                      placeholder="T.ex. Har B-körkort"
+                      value={drafts[criterion.id]?.title || ''}
+                      onChange={(e) => handleDraftChange(criterion.id, 'title', e.target.value)}
+                      className="h-8 bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/30 text-xs focus:border-white/15 focus:ring-0 rounded-md"
+                    />
+                  </div>
 
-                  <Textarea
-                    placeholder="Vad ska AI leta efter..."
-                    value={drafts[criterion.id]?.prompt || ''}
-                    onChange={(e) => handleDraftChange(criterion.id, 'prompt', e.target.value)}
-                    rows={2}
-                    className="resize-none bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/20 text-xs focus:border-white/15 focus:ring-0 rounded-md min-h-[52px]"
-                  />
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-white uppercase tracking-wider font-medium">AI-instruktion</label>
+                    <Textarea
+                      placeholder="Beskriv vad AI ska leta efter i CV eller svar..."
+                      value={drafts[criterion.id]?.prompt || ''}
+                      onChange={(e) => handleDraftChange(criterion.id, 'prompt', e.target.value)}
+                      rows={2}
+                      className="resize-none bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/30 text-xs focus:border-white/15 focus:ring-0 rounded-md min-h-[52px]"
+                    />
+                  </div>
 
                   {validationErrors[criterion.id] && (
-                    <div className="flex items-start gap-1.5 px-2.5 py-1.5 rounded-md bg-amber-500/8">
-                      <AlertTriangle className="h-3 w-3 text-amber-400/70 shrink-0 mt-0.5" />
-                      <p className="text-[10px] text-amber-300/80 leading-relaxed">{validationErrors[criterion.id]}</p>
+                    <div className="flex items-start gap-1.5 px-2.5 py-1.5 rounded-md bg-amber-500/10">
+                      <AlertTriangle className="h-3 w-3 text-amber-400 shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-amber-300 leading-relaxed">{validationErrors[criterion.id]}</p>
                     </div>
                   )}
                 </div>
               ))}
 
-              {/* Add button — small and discrete */}
+              {/* Add button */}
               {canAddMore && (
                 <button
                   onClick={addNewCriterion}
-                  className="w-full py-2 rounded-lg border border-dashed border-white/[0.08] hover:border-white/[0.15] 
-                    text-white/35 hover:text-white/60 flex items-center justify-center gap-1.5 transition-all text-[11px]"
+                  className="w-full py-2 rounded-lg border border-dashed border-white/[0.10] hover:border-white/[0.20] 
+                    text-white/60 hover:text-white flex items-center justify-center gap-1.5 transition-all text-[11px]"
                 >
                   <Plus className="h-3 w-3" />
-                  Lägg till
+                  Lägg till kriterium
                 </button>
               )}
 
               {/* Empty state */}
               {criteria.length === 0 && !isLoading && (
                 <div className="text-center py-8 rounded-lg bg-white/[0.03]">
-                  <Sparkles className="h-4 w-4 text-white/25 mx-auto mb-2" />
-                  <p className="text-xs text-white/50">Inga kriterier ännu</p>
-                  <p className="text-[10px] text-white/30 mt-0.5">Lägg till ovan</p>
+                  <Sparkles className="h-4 w-4 text-white mx-auto mb-2" />
+                  <p className="text-xs text-white">Inga kriterier ännu</p>
+                  <p className="text-[10px] text-white/60 mt-0.5">Lägg till ditt första kriterium ovan</p>
                 </div>
               )}
 
               {/* Tips box */}
               {criteria.length > 0 && (
                 <div className="rounded-lg bg-white/[0.03] px-3.5 py-2.5">
+                  <p className="text-[10px] text-white/60 mb-1.5 font-medium">Bra kriterier är specifika och mätbara:</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {['Har B-körkort', '2+ års erfarenhet'].map(tip => (
-                      <span key={tip} className="inline-flex items-center gap-1 text-[10px] text-white/40 bg-white/[0.05] px-2 py-0.5 rounded-full">
-                        <Check className="h-2 w-2 text-green-400/60" />
+                    {['Har B-körkort', '2+ års erfarenhet', 'Kan jobba helger'].map(tip => (
+                      <span key={tip} className="inline-flex items-center gap-1 text-[10px] text-white/70 bg-white/[0.05] px-2 py-0.5 rounded-full">
+                        <Check className="h-2 w-2 text-green-400" />
                         {tip}
                       </span>
                     ))}
-                    <span className="inline-flex items-center gap-1 text-[10px] text-white/40 bg-white/[0.05] px-2 py-0.5 rounded-full">
-                      <X className="h-2 w-2 text-red-400/60" />
+                    <span className="inline-flex items-center gap-1 text-[10px] text-white/70 bg-white/[0.05] px-2 py-0.5 rounded-full">
+                      <X className="h-2 w-2 text-red-400" />
                       Är trevlig
                     </span>
                   </div>
@@ -413,28 +425,21 @@ export function SelectionCriteriaDialog({
           )}
         </div>
 
-        {/* Footer — compact */}
-        <div className="flex-shrink-0 px-5 py-3 border-t border-white/[0.05] flex items-center justify-between">
-          <button
-            onClick={() => onOpenChange(false)}
-            disabled={isSaving}
-            className="text-[11px] text-white/35 hover:text-white/60 transition-colors disabled:opacity-50"
-          >
-            Avbryt
-          </button>
+        {/* Footer — centered save button, no cancel (X button is enough) */}
+        <div className="flex-shrink-0 px-5 py-3 border-t border-white/[0.05] flex items-center justify-center">
           <button
             onClick={handleSaveAndActivate}
             disabled={isSaving || !hasValidCriteria || Object.keys(validationErrors).length > 0}
-            className="text-[11px] text-white/60 hover:text-white flex items-center gap-1.5 transition-colors disabled:opacity-30"
+            className="text-[12px] text-white hover:text-white/80 flex items-center gap-1.5 transition-colors disabled:opacity-30 font-medium"
           >
             {isSaving ? (
               <>
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 Sparar...
               </>
             ) : (
               <>
-                <Zap className="h-3 w-3" />
+                <Zap className="h-3.5 w-3.5" />
                 Spara & aktivera
               </>
             )}
