@@ -77,6 +77,13 @@ export function ShareCandidateDialog({
 
       if (error) throw error;
 
+      // Log activity
+      await supabase.from('candidate_activities').insert({
+        applicant_id: applicantId,
+        user_id: memberId,
+        activity_type: 'added_to_pipeline',
+      });
+
       setShared(prev => new Set([...prev, memberId]));
       toast.success(`${candidateName} delad med ${memberName}`);
     } catch (error) {
