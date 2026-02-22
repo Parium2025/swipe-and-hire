@@ -664,15 +664,21 @@ const JobDetails = () => {
     updateApplicationLocally(applicationId, { status: newStatus as JobApplication['status'] });
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('job_applications')
         .update({ status: newStatus })
-        .eq('id', applicationId);
+        .eq('id', applicationId)
+        .select('id')
+        .maybeSingle();
 
       if (error) {
         // Refetch on error to restore correct state
         refetch();
         throw error;
+      }
+      if (!data) {
+        refetch();
+        throw new Error('Ingen rad uppdaterades');
       }
     } catch (error: any) {
       toast.error('Fel', { description: error.message });
@@ -807,11 +813,17 @@ const JobDetails = () => {
     updateApplicationLocally(applicationId, { status: newStage as JobApplication['status'] });
     const stageLabel = stageSettings[newStage]?.label || newStage;
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('job_applications')
         .update({ status: newStage })
-        .eq('id', applicationId);
+        .eq('id', applicationId)
+        .select('id')
+        .maybeSingle();
       if (error) throw error;
+      if (!data) {
+        // Update didn't affect any rows (RLS block or wrong ID)
+        throw new Error('Ingen rad uppdaterades');
+      }
       toast.success(`Flyttad till "${stageLabel}"`);
     } catch {
       refetch();
