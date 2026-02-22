@@ -302,123 +302,108 @@ export function SelectionCriteriaDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus className="sm:max-w-lg bg-card-parium backdrop-blur-xl border-white/10 text-white max-h-[85vh] overflow-hidden flex flex-col p-0">
-        {/* Header — clean and minimal */}
-        <div className="px-6 pt-6 pb-4 flex-shrink-0">
+      <DialogContentNoFocus className="sm:max-w-md bg-card-parium backdrop-blur-xl border-white/[0.06] text-white max-h-[85vh] overflow-hidden flex flex-col p-0">
+        {/* Header — centered */}
+        <div className="px-6 pt-6 pb-3 flex-shrink-0 text-center">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2.5 text-lg tracking-tight">
-              <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-white/[0.08]">
-                <Sparkles className="h-4 w-4 text-white" />
-              </div>
-              AI-urvalskriterier
+            <DialogTitle className="text-white text-base tracking-tight font-medium flex items-center justify-center gap-2">
+              <Sparkles className="h-4 w-4 text-white/60" />
+              Urvalskriterier
             </DialogTitle>
           </DialogHeader>
-          <p className="text-[13px] text-white/50 mt-2 leading-relaxed">
-            Definiera vad AI ska utvärdera hos varje kandidat. Max 5 kriterier.
-          </p>
         </div>
 
-        {/* Criteria list */}
-        <div className="flex-1 overflow-y-auto px-6 space-y-3 pb-2">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-5 space-y-2.5 pb-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-5 w-5 animate-spin text-white/40" />
+              <Loader2 className="h-4 w-4 animate-spin text-white/30" />
             </div>
           ) : (
             <>
+              {/* Info box */}
+              <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5">
+                <p className="text-[11px] text-white/45 leading-relaxed">
+                  AI bedömer kandidater utifrån dina kriterier. Max 5 stycken.
+                </p>
+              </div>
+
+              {/* Criteria cards */}
               {criteria.map((criterion, index) => (
                 <div 
                   key={criterion.id}
-                  className="rounded-xl bg-white/[0.04] ring-1 ring-inset ring-white/[0.08] overflow-hidden"
+                  className="rounded-lg bg-white/[0.04] px-3.5 py-3 space-y-2.5"
                 >
-                  {/* Criterion header bar */}
-                  <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.03]">
-                    <span className="text-[11px] text-white/40 uppercase tracking-widest font-medium">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-white/30 uppercase tracking-widest font-medium">
                       Kriterium {index + 1}
                     </span>
                     <button
                       onClick={() => deleteCriterion(criterion.id)}
-                      className="p-1 rounded-md text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-all"
-                      aria-label="Ta bort kriterium"
+                      className="p-0.5 rounded text-white/20 hover:text-red-400/80 transition-colors"
+                      aria-label="Ta bort"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-3 w-3" />
                     </button>
                   </div>
 
-                  <div className="px-4 pb-4 pt-2 space-y-3">
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-medium text-white/60 uppercase tracking-wider">
-                        Titel
-                      </label>
-                      <Input
-                        placeholder="T.ex. Har B-körkort"
-                        value={drafts[criterion.id]?.title || ''}
-                        onChange={(e) => handleDraftChange(criterion.id, 'title', e.target.value)}
-                        className="h-9 bg-white/[0.05] border-white/[0.08] text-white placeholder:text-white/25 text-sm focus:border-white/20 focus:ring-0 transition-colors"
-                      />
-                    </div>
+                  <Input
+                    placeholder="Titel, t.ex. Har B-körkort"
+                    value={drafts[criterion.id]?.title || ''}
+                    onChange={(e) => handleDraftChange(criterion.id, 'title', e.target.value)}
+                    className="h-8 bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/20 text-xs focus:border-white/15 focus:ring-0 rounded-md"
+                  />
 
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-medium text-white/60 uppercase tracking-wider">
-                        AI-instruktion
-                      </label>
-                      <Textarea
-                        placeholder="Beskriv vad AI ska leta efter i CV eller svar..."
-                        value={drafts[criterion.id]?.prompt || ''}
-                        onChange={(e) => handleDraftChange(criterion.id, 'prompt', e.target.value)}
-                        rows={2}
-                        className="resize-none bg-white/[0.05] border-white/[0.08] text-white placeholder:text-white/25 text-sm focus:border-white/20 focus:ring-0 transition-colors"
-                      />
-                    </div>
+                  <Textarea
+                    placeholder="Vad ska AI leta efter..."
+                    value={drafts[criterion.id]?.prompt || ''}
+                    onChange={(e) => handleDraftChange(criterion.id, 'prompt', e.target.value)}
+                    rows={2}
+                    className="resize-none bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/20 text-xs focus:border-white/15 focus:ring-0 rounded-md min-h-[52px]"
+                  />
 
-                    {validationErrors[criterion.id] && (
-                      <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-500/10 ring-1 ring-inset ring-amber-500/20">
-                        <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
-                        <p className="text-[11px] text-amber-300/90">{validationErrors[criterion.id]}</p>
-                      </div>
-                    )}
-                  </div>
+                  {validationErrors[criterion.id] && (
+                    <div className="flex items-start gap-1.5 px-2.5 py-1.5 rounded-md bg-amber-500/8">
+                      <AlertTriangle className="h-3 w-3 text-amber-400/70 shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-amber-300/80 leading-relaxed">{validationErrors[criterion.id]}</p>
+                    </div>
+                  )}
                 </div>
               ))}
 
-              {/* Add criterion button */}
+              {/* Add button — small and discrete */}
               {canAddMore && (
                 <button
                   onClick={addNewCriterion}
-                  className="w-full py-3 rounded-xl border border-dashed border-white/[0.12] hover:border-white/25 
-                    text-white/50 hover:text-white/80 flex items-center justify-center gap-2 transition-all text-sm"
+                  className="w-full py-2 rounded-lg border border-dashed border-white/[0.08] hover:border-white/[0.15] 
+                    text-white/35 hover:text-white/60 flex items-center justify-center gap-1.5 transition-all text-[11px]"
                 >
-                  <Plus className="h-4 w-4" />
-                  Lägg till kriterium
+                  <Plus className="h-3 w-3" />
+                  Lägg till
                 </button>
               )}
 
               {/* Empty state */}
               {criteria.length === 0 && !isLoading && (
-                <div className="text-center py-10">
-                  <div className="flex items-center justify-center h-12 w-12 rounded-2xl bg-white/[0.06] mx-auto mb-3">
-                    <Sparkles className="h-5 w-5 text-white/40" />
-                  </div>
-                  <p className="text-sm text-white/70">Inga kriterier ännu</p>
-                  <p className="text-xs text-white/40 mt-1">
-                    Lägg till ditt första kriterium ovan
-                  </p>
+                <div className="text-center py-8 rounded-lg bg-white/[0.03]">
+                  <Sparkles className="h-4 w-4 text-white/25 mx-auto mb-2" />
+                  <p className="text-xs text-white/50">Inga kriterier ännu</p>
+                  <p className="text-[10px] text-white/30 mt-0.5">Lägg till ovan</p>
                 </div>
               )}
 
-              {/* Tips — compact and subtle */}
+              {/* Tips box */}
               {criteria.length > 0 && (
-                <div className="py-3 px-4 rounded-xl bg-white/[0.03]">
-                  <p className="text-[11px] text-white/40 mb-1.5 font-medium">Exempel på bra kriterier:</p>
+                <div className="rounded-lg bg-white/[0.03] px-3.5 py-2.5">
                   <div className="flex flex-wrap gap-1.5">
-                    {['Har B-körkort', '2+ års erfarenhet', 'Kan jobba helger'].map(tip => (
-                      <span key={tip} className="inline-flex items-center gap-1 text-[11px] text-white/50 bg-white/[0.05] px-2 py-0.5 rounded-full">
-                        <Check className="h-2.5 w-2.5 text-green-400/70" />
+                    {['Har B-körkort', '2+ års erfarenhet'].map(tip => (
+                      <span key={tip} className="inline-flex items-center gap-1 text-[10px] text-white/40 bg-white/[0.05] px-2 py-0.5 rounded-full">
+                        <Check className="h-2 w-2 text-green-400/60" />
                         {tip}
                       </span>
                     ))}
-                    <span className="inline-flex items-center gap-1 text-[11px] text-white/50 bg-white/[0.05] px-2 py-0.5 rounded-full">
-                      <X className="h-2.5 w-2.5 text-red-400/70" />
+                    <span className="inline-flex items-center gap-1 text-[10px] text-white/40 bg-white/[0.05] px-2 py-0.5 rounded-full">
+                      <X className="h-2 w-2 text-red-400/60" />
                       Är trevlig
                     </span>
                   </div>
@@ -428,35 +413,32 @@ export function SelectionCriteriaDialog({
           )}
         </div>
 
-        {/* Footer — single primary action */}
-        <div className="flex-shrink-0 px-6 py-4 border-t border-white/[0.06] flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
+        {/* Footer — compact */}
+        <div className="flex-shrink-0 px-5 py-3 border-t border-white/[0.05] flex items-center justify-between">
+          <button
             onClick={() => onOpenChange(false)}
             disabled={isSaving}
-            className="text-white/50 hover:text-white hover:bg-white/[0.06] text-sm"
+            className="text-[11px] text-white/35 hover:text-white/60 transition-colors disabled:opacity-50"
           >
             Avbryt
-          </Button>
-          <Button
+          </button>
+          <button
             onClick={handleSaveAndActivate}
-            size="sm"
             disabled={isSaving || !hasValidCriteria || Object.keys(validationErrors).length > 0}
-            className="bg-white/[0.12] hover:bg-white/[0.18] text-white border border-white/[0.1] text-sm px-5 transition-all"
+            className="text-[11px] text-white/60 hover:text-white flex items-center gap-1.5 transition-colors disabled:opacity-30"
           >
             {isSaving ? (
               <>
-                <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                <Loader2 className="h-3 w-3 animate-spin" />
                 Sparar...
               </>
             ) : (
               <>
-                <Zap className="h-3.5 w-3.5 mr-2" />
+                <Zap className="h-3 w-3" />
                 Spara & aktivera
               </>
             )}
-          </Button>
+          </button>
         </div>
       </DialogContentNoFocus>
     </Dialog>
