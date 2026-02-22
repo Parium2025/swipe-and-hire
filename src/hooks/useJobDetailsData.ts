@@ -242,9 +242,9 @@ export function useJobDetailsData(jobId: string | undefined) {
       return result;
     },
     enabled: !!jobId && !!user,
-    staleTime: Infinity,
+    staleTime: 5 * 60 * 1000, // 5 min – allows refetch on mount when stale
     gcTime: Infinity,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     initialData: () => {
       if (!jobId) return undefined;
@@ -252,7 +252,8 @@ export function useJobDetailsData(jobId: string | undefined) {
     },
     initialDataUpdatedAt: () => {
       if (!jobId) return undefined;
-      return readJobDetailCache(jobId) ? Date.now() - 60000 : undefined;
+      // Mark cached data as 6 min old so it's always stale on first mount → triggers background refetch
+      return readJobDetailCache(jobId) ? Date.now() - 6 * 60 * 1000 : undefined;
     },
   });
 
@@ -265,9 +266,9 @@ export function useJobDetailsData(jobId: string | undefined) {
       return result;
     },
     enabled: !!jobId && !!user,
-    staleTime: Infinity,
+    staleTime: 5 * 60 * 1000,
     gcTime: Infinity,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     initialData: () => {
       if (!jobId) return undefined;
@@ -275,7 +276,7 @@ export function useJobDetailsData(jobId: string | undefined) {
     },
     initialDataUpdatedAt: () => {
       if (!jobId) return undefined;
-      return readJobAppsCache(jobId) ? Date.now() - 60000 : undefined;
+      return readJobAppsCache(jobId) ? Date.now() - 6 * 60 * 1000 : undefined;
     },
   });
 
