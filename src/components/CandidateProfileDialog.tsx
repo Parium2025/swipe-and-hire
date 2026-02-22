@@ -1036,7 +1036,7 @@ export const CandidateProfileDialog = ({
               </h3>
               {displayApp.bio ? (
                 <p className="text-sm text-white whitespace-pre-wrap leading-relaxed">
-                  {displayApp.bio}
+                  {displayApp.first_name} {displayApp.last_name} skrev: {displayApp.bio}
                 </p>
               ) : (
                 <p className="text-sm text-white/50 italic">Ingen presentation angiven</p>
