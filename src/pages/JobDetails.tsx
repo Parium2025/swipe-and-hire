@@ -1163,6 +1163,7 @@ const JobDetails = () => {
                     variant="ghost"
                     size="sm"
                     onClick={toggleAllVisible}
+                    onMouseDown={(e) => e.preventDefault()}
                     className="text-white/80 [&_svg]:text-white/80 border border-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] justify-center"
                   >
                     {allVisibleSelected ? <Square className="h-3.5 w-3.5 mr-1" /> : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
@@ -1176,6 +1177,8 @@ const JobDetails = () => {
                         size="sm"
                         disabled={selectedApplicationIds.size === 0}
                         aria-disabled={selectedApplicationIds.size === 0}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onFocus={(e) => e.currentTarget.blur()}
                         className="text-white/80 [&_svg]:text-white/80 border border-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 h-8 text-xs whitespace-nowrap flex-shrink-0"
                       >
                         <ArrowDown className="h-3.5 w-3.5 mr-1" />
@@ -1346,6 +1349,7 @@ const JobDetails = () => {
                 variant="ghost"
                 size="sm"
                 onClick={toggleAllVisible}
+                onMouseDown={(e) => e.preventDefault()}
                 className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] justify-center"
               >
                 {allVisibleSelected ? <Square className="h-3.5 w-3.5 mr-1" /> : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
@@ -1359,6 +1363,8 @@ const JobDetails = () => {
                     size="sm"
                     disabled={selectedApplicationIds.size === 0}
                     aria-disabled={selectedApplicationIds.size === 0}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onFocus={(e) => e.currentTarget.blur()}
                     className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 h-8 text-xs whitespace-nowrap flex-shrink-0"
                   >
                     <ArrowDown className="h-3.5 w-3.5 mr-1" />
