@@ -344,7 +344,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                 Inga kandidater i detta steg
               </div>
             ) : (
-              currentApps.map(app => (
+              currentApps.map((app, idx) => (
                 <CandidateRow
                   key={app.id}
                   app={app}
@@ -360,6 +360,8 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                 />
               ))
             )}
+            {/* Extra padding when selection bar is visible so last items aren't hidden behind it */}
+            {isSelectionMode && currentApps.length > 0 && <div className="h-16" />}
           </div>
         </ScrollArea>
       </div>
