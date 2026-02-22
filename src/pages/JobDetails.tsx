@@ -1096,18 +1096,18 @@ const JobDetails = () => {
               <button
                 onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
                 onMouseDown={(e) => e.preventDefault()}
-                className={`hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
+                className={`hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
                   isSelectionMode 
-                    ? 'bg-white/10 ring-white hover:bg-white/15' 
+                    ? 'bg-white/10 ring-1 ring-white hover:bg-white/15' 
                     : applications.length > 0 
-                      ? 'bg-white/5 ring-white/30 hover:bg-white/10 hover:ring-white/50' 
-                      : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
+                      ? 'bg-white/5 hover:bg-white/10' 
+                      : 'bg-white/5 opacity-40 cursor-default'
                 }`}
               >
                 <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
                 <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
               </button>
-              <div className="hidden md:block">
+              <div className="hidden md:flex min-w-0">
                 <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
               </div>
             </div>
