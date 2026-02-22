@@ -562,6 +562,19 @@ const JobDetails = () => {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<Set<string>>(new Set());
   const [recruiterTooltipOpen, setRecruiterTooltipOpen] = useState(false);
+  const recruiterTooltipRef = useRef<HTMLDivElement>(null);
+
+  // Close recruiter tooltip on outside tap (touch devices)
+  useEffect(() => {
+    if (!recruiterTooltipOpen) return;
+    const handler = (e: PointerEvent) => {
+      if (recruiterTooltipRef.current && !recruiterTooltipRef.current.contains(e.target as Node)) {
+        setRecruiterTooltipOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', handler, true);
+    return () => document.removeEventListener('pointerdown', handler, true);
+  }, [recruiterTooltipOpen]);
   
   // Toggle selection of an application
   const toggleApplicationSelection = useCallback((applicationId: string) => {
@@ -1043,6 +1056,7 @@ const JobDetails = () => {
                   <Tooltip open={recruiterTooltipOpen} onOpenChange={setRecruiterTooltipOpen}>
                     <TooltipTrigger asChild>
                       <div 
+                        ref={recruiterTooltipRef}
                         className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 cursor-default min-w-0 overflow-hidden"
                         onClick={() => setRecruiterTooltipOpen(prev => !prev)}
                       >
