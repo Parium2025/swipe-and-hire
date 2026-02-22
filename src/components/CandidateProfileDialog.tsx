@@ -1031,43 +1031,39 @@ export const CandidateProfileDialog = ({
             {variant === 'my-candidates' ? (
               <div className="pt-4 border-t border-white/20 space-y-3">
                 {/* Action buttons row - flex wrap for responsive scaling */}
-                <div className="flex justify-center gap-1.5">
+                <div className="flex justify-center gap-1">
                   <Button
                     onClick={() => setSendMessageOpen(true)}
                     variant="glassPurple"
-                    size="sm"
-                    className="min-w-0 flex-shrink"
+                    className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm"
                   >
-                    <MessageSquare className="h-3.5 w-3.5 mr-1 shrink-0" />
+                    <MessageSquare className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
                     <span className="truncate">Meddelande</span>
                   </Button>
                   <Button
                     onClick={() => setBookInterviewOpen(true)}
                     variant="glassBlue"
-                    size="sm"
-                    className="min-w-0 flex-shrink"
+                    className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm"
                   >
-                    <CalendarPlus className="h-3.5 w-3.5 mr-1 shrink-0" />
+                    <CalendarPlus className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
                     <span className="truncate">Boka möte</span>
                   </Button>
                   {hasTeam && (
                     <Button
                       onClick={() => setShareDialogOpen(true)}
                       variant="glassAmber"
-                      size="sm"
-                      className="min-w-0 flex-shrink"
+                      className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm"
                     >
-                      <Users className="h-3.5 w-3.5 mr-1 shrink-0" />
+                      <Users className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
                       <span className="truncate">Dela</span>
                     </Button>
                   )}
                   <Button
                     onClick={() => setRemoveConfirmOpen(true)}
                     variant="glassRed"
-                    size="sm"
-                    className="min-w-0 flex-shrink"
+                    className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm"
                   >
-                    <UserMinus className="h-3.5 w-3.5 mr-1 shrink-0" />
+                    <UserMinus className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
                     <span className="truncate">Ta bort</span>
                   </Button>
                 </div>
