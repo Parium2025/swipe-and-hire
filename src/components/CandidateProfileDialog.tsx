@@ -1264,7 +1264,7 @@ export const CandidateProfileDialog = ({
                                 >
                                   <div className="flex items-center gap-1.5 mb-1">
                                     <span className="text-[10px] font-medium text-white">
-                                      {note.author_name || 'Okänd'}
+                                      {note.author_name || 'Okänd'} skrev:
                                     </span>
                                   </div>
                                   
@@ -1391,7 +1391,7 @@ export const CandidateProfileDialog = ({
                           {dateNotes.map((note) => (
                             <div key={note.id} className="bg-white/5 rounded-lg p-2.5 group relative">
                               <div className="flex items-center gap-1.5 mb-1">
-                                <span className="text-[10px] font-medium text-white">{note.author_name || 'Okänd'}</span>
+                                <span className="text-[10px] font-medium text-white">{note.author_name || 'Okänd'} skrev:</span>
                               </div>
                               <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">{note.note}</p>
                               <p className="text-[10px] text-white mt-1">
