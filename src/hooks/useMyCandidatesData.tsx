@@ -670,12 +670,6 @@ export function useMyCandidatesData(searchQuery: string = '') {
         throw error;
       }
 
-      // Log activity
-      await supabase.from('candidate_activities').insert({
-        applicant_id: applicantId,
-        user_id: user.id,
-        activity_type: 'added_to_pipeline',
-      });
 
       return data;
     },
@@ -760,15 +754,6 @@ export function useMyCandidatesData(searchQuery: string = '') {
 
       if (error) throw error;
 
-      // Log activities for each new candidate
-      if (data && data.length > 0) {
-        const activityInserts = data.map((c: any) => ({
-          applicant_id: c.applicant_id,
-          user_id: user.id,
-          activity_type: 'added_to_pipeline',
-        }));
-        await supabase.from('candidate_activities').insert(activityInserts);
-      }
 
       return { inserted: data?.length || 0, alreadyExisted: existingIds.size };
     },
