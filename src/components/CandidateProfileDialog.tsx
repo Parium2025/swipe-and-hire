@@ -157,6 +157,7 @@ export const CandidateProfileDialog = ({
   const { hasTeam } = useTeamMembers();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'comments'>('activity');
+  const [mobileTab, setMobileTab] = useState<'profile' | 'activity' | 'comments'>('profile');
   const [notes, setNotes] = useState<CandidateNote[]>([]);
   // Auto-save note draft to localStorage (unique per candidate)
   const [newNote, setNewNote, clearNoteDraft] = useFieldDraft(
@@ -207,6 +208,7 @@ export const CandidateProfileDialog = ({
     if (open && application) {
       setSelectedJobId(application.job_id);
       previousRating.current = candidateRating;
+      setMobileTab('profile');
     }
   }, [open, application?.applicant_id]);
 
@@ -664,21 +666,52 @@ export const CandidateProfileDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus hideClose className="max-w-[950px] max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0">
+      <DialogContentNoFocus hideClose className="max-w-[950px] max-h-[85vh] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 w-[100vw] h-[100dvh] md:w-auto md:h-auto md:rounded-lg rounded-none border-0 md:border">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
           <DialogDescription>Visa kandidatens profilinformation och ansökan</DialogDescription>
         </DialogHeader>
         
-        <div className="flex h-full max-h-[85vh]">
-          {/* Main content - left side */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        {/* Mobile tabs header */}
+        <div className="md:hidden flex border-b border-white/20 relative">
+          <button
+            onClick={() => onOpenChange(false)}
+            aria-label="Stäng"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-colors"
+          >
+            <X className="h-4 w-4 text-white" />
+          </button>
+          {[
+            { key: 'profile' as const, label: 'Profil', icon: User },
+            { key: 'activity' as const, label: 'Aktivitet', icon: Activity },
+            { key: 'comments' as const, label: 'Anteckningar', icon: StickyNote },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setMobileTab(tab.key)}
+              className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
+                mobileTab === tab.key
+                  ? 'text-white border-b-2 border-white'
+                  : 'text-white/50'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <tab.icon className="h-3.5 w-3.5" />
+                {tab.label}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex h-full md:max-h-[85vh]">
+          {/* Main content - left side (desktop always, mobile only on profile tab) */}
+          <div className={`flex-1 overflow-y-auto p-4 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`}>
           {/* Header with circular profile image/video */}
-          <div className="flex flex-col items-center text-center space-y-4">
+          <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
             {/* Circular Profile Image/Video - Larger */}
             <div className="relative">
               {isProfileVideo && videoUrl ? (
-                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
+                <div className="w-24 h-24 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
                   <ProfileVideo
                     videoUrl={videoUrl}
                     coverImageUrl={profileImageUrl || undefined}
@@ -689,13 +722,13 @@ export const CandidateProfileDialog = ({
                   />
                 </div>
               ) : (
-                <Avatar className="w-40 h-40 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
+                <Avatar className="w-24 h-24 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
                   <AvatarImage 
                     src={profileImageUrl || ''} 
                     alt={`${displayApp.first_name} ${displayApp.last_name}`}
                     className="object-cover"
                   />
-                  <AvatarFallback className="bg-white/10 text-white text-4xl md:text-5xl font-semibold" delayMs={200}>
+                  <AvatarFallback className="bg-white/10 text-white text-2xl md:text-5xl font-semibold" delayMs={200}>
                     {initials}
                   </AvatarFallback>
                 </Avatar>
@@ -704,7 +737,7 @@ export const CandidateProfileDialog = ({
             
             {/* Name, Rating and Job Selector */}
             <div className="w-full max-w-sm">
-              <h2 className="text-2xl font-semibold text-white">
+              <h2 className="text-lg md:text-2xl font-semibold text-white">
                 {displayApp.first_name} {displayApp.last_name}
               </h2>
               
@@ -1118,8 +1151,8 @@ export const CandidateProfileDialog = ({
             )}
           </div>
 
-          {/* Activity Sidebar - right side */}
-          <div className="w-80 border-l border-white/20 bg-white/5 flex flex-col overflow-hidden relative">
+          {/* Activity Sidebar - desktop only */}
+          <div className="hidden md:flex w-80 border-l border-white/20 bg-white/5 flex-col overflow-hidden relative">
             {/* Tabs + close */}
             <div className="relative flex border-b border-white/20 pr-10">
               <button
@@ -1295,6 +1328,77 @@ export const CandidateProfileDialog = ({
               )}
             </div>
           </div>
+
+          {/* Mobile Activity/Comments tab content */}
+          {mobileTab === 'activity' && (
+            <div className="md:hidden flex-1 overflow-y-auto p-4">
+              <CandidateActivityLog applicantId={application?.applicant_id || null} />
+            </div>
+          )}
+          {mobileTab === 'comments' && (
+            <div className="md:hidden flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="space-y-2">
+                <Textarea
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  placeholder="Skriv en anteckning..."
+                  className="w-full min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none text-xs"
+                />
+                <Button
+                  onClick={saveNote}
+                  disabled={!newNote.trim() || savingNote}
+                  size="sm"
+                  className="w-full rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs"
+                >
+                  <Send className="h-3 w-3 mr-1.5" />
+                  Lägg till
+                </Button>
+              </div>
+              {loadingNotes ? (
+                <div className="space-y-2 py-2">
+                  {Array.from({ length: 2 }).map((_, i) => (
+                    <div key={i} className="p-2 rounded bg-white/5">
+                      <Skeleton className="h-3 w-full bg-white/10 mb-1" />
+                      <Skeleton className="h-3 w-2/3 bg-white/10" />
+                    </div>
+                  ))}
+                </div>
+              ) : notes.length === 0 ? (
+                <p className="text-xs text-white text-center py-4">Inga anteckningar ännu</p>
+              ) : (
+                <div className="space-y-3">
+                  {(() => {
+                    const groupedNotes = notes.reduce((groups, note) => {
+                      const date = new Date(note.created_at).toLocaleDateString('sv-SE', {
+                        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+                      });
+                      if (!groups[date]) groups[date] = [];
+                      groups[date].push(note);
+                      return groups;
+                    }, {} as Record<string, typeof notes>);
+                    return Object.entries(groupedNotes).map(([date, dateNotes]) => (
+                      <div key={date}>
+                        <p className="text-xs text-white mb-2 capitalize">{date}</p>
+                        <div className="space-y-2">
+                          {dateNotes.map((note) => (
+                            <div key={note.id} className="bg-white/5 rounded-lg p-2.5 group relative">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <span className="text-[10px] font-medium text-white">{note.author_name || 'Okänd'}</span>
+                              </div>
+                              <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">{note.note}</p>
+                              <p className="text-[10px] text-white mt-1">
+                                {new Date(note.created_at).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </DialogContentNoFocus>
     </Dialog>
