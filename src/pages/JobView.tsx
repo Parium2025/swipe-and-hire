@@ -508,8 +508,8 @@ const JobView = () => {
             {!user && jobQuestions.length > 0 && !isJobExpired && (
               <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06] text-center space-y-1.5">
                 <h2 className="text-sm font-semibold text-[#FFFFFF]">Ansökningsfrågor ({jobQuestions.length} st)</h2>
-                <p className="text-xs text-[#FFFFFF]/70">
-                  Det här är frågor du kommer att behöva besvara när du har ett konto.
+                <p className="text-xs text-[#FFFFFF]">
+                  Det här är frågor du kommer att behöva besvara om du vill söka jobbet.
                 </p>
               </div>
             )}
