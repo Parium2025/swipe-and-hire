@@ -673,14 +673,7 @@ export const CandidateProfileDialog = ({
         </DialogHeader>
         
         {/* Mobile tabs header */}
-        <div className="md:hidden flex shrink-0 border-b border-white/20 relative">
-          <button
-            onClick={() => onOpenChange(false)}
-            aria-label="Stäng"
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-colors"
-          >
-            <X className="h-4 w-4 text-white" />
-          </button>
+        <div className="md:hidden flex shrink-0 border-b border-white/20">
           {[
             { key: 'profile' as const, label: 'Profil', icon: User },
             { key: 'activity' as const, label: 'Aktivitet', icon: Activity },
@@ -689,18 +682,25 @@ export const CandidateProfileDialog = ({
             <button
               key={tab.key}
               onClick={() => setMobileTab(tab.key)}
-              className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
+              className={`flex-1 px-2 py-2.5 text-xs font-medium transition-colors min-w-0 ${
                 mobileTab === tab.key
                   ? 'text-white border-b-2 border-white'
                   : 'text-white/50'
               }`}
             >
-              <div className="flex items-center justify-center gap-1.5">
-                <tab.icon className="h-3.5 w-3.5" />
-                {tab.label}
+              <div className="flex items-center justify-center gap-1 truncate">
+                <tab.icon className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{tab.label}</span>
               </div>
             </button>
           ))}
+          <button
+            onClick={() => onOpenChange(false)}
+            aria-label="Stäng"
+            className="shrink-0 flex h-10 w-10 items-center justify-center transition-colors"
+          >
+            <X className="h-4 w-4 text-white" />
+          </button>
         </div>
 
         <div className="flex flex-1 min-h-0 md:max-h-[85vh]">
@@ -1028,53 +1028,46 @@ export const CandidateProfileDialog = ({
             {/* Actions - show stage navigation + book meeting for my-candidates, only Book meeting for all-candidates */}
             {variant === 'my-candidates' ? (
               <div className="pt-4 border-t border-white/20 space-y-3">
-                {/* Action buttons row - grid layout for perfect center alignment */}
-                <div className="grid grid-cols-3 gap-2">
-                  {/* Left column - Meddelande */}
-                  <div className="flex justify-end">
+                {/* Action buttons row - flex wrap for responsive scaling */}
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Button
+                    onClick={() => setSendMessageOpen(true)}
+                    variant="glassPurple"
+                    size="sm"
+                    className="min-w-0 flex-shrink"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5 mr-1 shrink-0" />
+                    <span className="truncate">Meddelande</span>
+                  </Button>
+                  <Button
+                    onClick={() => setBookInterviewOpen(true)}
+                    variant="glassBlue"
+                    size="sm"
+                    className="min-w-0 flex-shrink"
+                  >
+                    <CalendarPlus className="h-3.5 w-3.5 mr-1 shrink-0" />
+                    <span className="truncate">Boka möte</span>
+                  </Button>
+                  {hasTeam && (
                     <Button
-                      onClick={() => setSendMessageOpen(true)}
-                      variant="glassPurple"
-                      size="default"
+                      onClick={() => setShareDialogOpen(true)}
+                      variant="glassAmber"
+                      size="sm"
+                      className="min-w-0 flex-shrink"
                     >
-                      <MessageSquare className="h-4 w-4 mr-1.5" />
-                      Meddelande
+                      <Users className="h-3.5 w-3.5 mr-1 shrink-0" />
+                      <span className="truncate">Dela</span>
                     </Button>
-                  </div>
-                  
-                  {/* Center column - Boka möte (perfectly centered) */}
-                  <div className="flex justify-center">
-                    <Button
-                      onClick={() => setBookInterviewOpen(true)}
-                      variant="glassBlue"
-                      size="default"
-                    >
-                      <CalendarPlus className="h-4 w-4 mr-1.5" />
-                      Boka möte
-                    </Button>
-                  </div>
-                  
-                  {/* Right column - Dela + Ta bort */}
-                  <div className="flex justify-start gap-2">
-                    {hasTeam && (
-                      <Button
-                        onClick={() => setShareDialogOpen(true)}
-                        variant="glassAmber"
-                        size="default"
-                      >
-                        <Users className="h-4 w-4 mr-1.5" />
-                        Dela
-                      </Button>
-                    )}
-                    <Button
-                      onClick={() => setRemoveConfirmOpen(true)}
-                      variant="glassRed"
-                      size="default"
-                    >
-                      <UserMinus className="h-4 w-4 mr-1.5" />
-                      Ta bort
-                    </Button>
-                  </div>
+                  )}
+                  <Button
+                    onClick={() => setRemoveConfirmOpen(true)}
+                    variant="glassRed"
+                    size="sm"
+                    className="min-w-0 flex-shrink"
+                  >
+                    <UserMinus className="h-3.5 w-3.5 mr-1 shrink-0" />
+                    <span className="truncate">Ta bort</span>
+                  </Button>
                 </div>
 
                 {/* Stage navigation buttons */}
