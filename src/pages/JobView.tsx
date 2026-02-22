@@ -385,8 +385,8 @@ const JobView = () => {
     <div ref={contentRef} className="h-[100dvh] overflow-y-auto animate-fade-in">
        <div className="jobview-container py-4">
         {/* Combined header */}
-        <div className="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
-          {user ? (
+        <div className={`flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg ${user ? 'justify-between' : 'justify-center gap-3'}`}>
+          {user && (
             <Button
               type="button"
               onClick={handleBack}
@@ -396,7 +396,7 @@ const JobView = () => {
               <ArrowLeft className="mr-1 h-3.5 w-3.5" />
               Tillbaka
             </Button>
-          ) : <div />}
+          )}
           
           <div className="flex items-center gap-2">
             <button
