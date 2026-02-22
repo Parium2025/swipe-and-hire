@@ -193,6 +193,7 @@ interface MobileCandidateViewProps {
   onOpenProfile: (app: JobApplication) => void;
   onMoveToStage: (appId: string, stage: string) => void;
   onMarkAsViewed: (id: string) => void;
+  onOpenCriteriaDialog?: () => void;
   isSelectionMode?: boolean;
   selectedApplicationIds?: Set<string>;
   onToggleSelect?: (id: string) => void;
@@ -208,6 +209,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   onOpenProfile,
   onMoveToStage,
   onMarkAsViewed,
+  onOpenCriteriaDialog,
   isSelectionMode,
   selectedApplicationIds,
   onToggleSelect,
@@ -320,6 +322,22 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           />
         )}
       </div>
+
+      {/* AI Urvalskriterier button — visible when on Inkorg tab */}
+      {activeTab === 'pending' && onOpenCriteriaDialog && (
+        <button
+          onClick={onOpenCriteriaDialog}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-white/5 ring-1 ring-inset ring-white/10 active:scale-[0.97] transition-all backdrop-blur-sm w-full justify-center min-h-touch"
+        >
+          <Sparkles className="h-4 w-4 text-primary" />
+          Urvalskriterier
+          {criteriaCount > 0 && (
+            <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+              {criteriaCount} aktiva
+            </span>
+          )}
+        </button>
+      )}
 
       {/* Candidate list — internally scrollable so action bar stays visible */}
       <div className="relative">

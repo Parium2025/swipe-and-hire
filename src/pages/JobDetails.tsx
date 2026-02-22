@@ -1145,6 +1145,7 @@ const JobDetails = () => {
             onOpenProfile={handleOpenProfile}
             onMoveToStage={handleMobileMove}
             onMarkAsViewed={markApplicationAsViewed}
+            onOpenCriteriaDialog={() => setCriteriaDialogOpen(true)}
             isSelectionMode={isSelectionMode}
             selectedApplicationIds={selectedApplicationIds}
             onToggleSelect={(id) => setSelectedApplicationIds(prev => {
