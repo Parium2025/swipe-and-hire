@@ -1140,6 +1140,57 @@ const JobDetails = () => {
               if (next.has(id)) next.delete(id); else next.add(id);
               return next;
             })}
+            renderActionBar={isSelectionMode ? (
+              <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mt-2">
+                <div className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
+                  <span className="text-white text-xs font-medium whitespace-nowrap flex-shrink-0">
+                    {selectedApplicationIds.size}/{allVisibleApplicationIds.length} valda
+                  </span>
+                  <div className="w-px h-4 bg-white/20 flex-shrink-0" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleAllVisible}
+                    className="text-white/80 [&_svg]:text-white/80 border border-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] justify-center"
+                  >
+                    {allVisibleSelected ? <Square className="h-3.5 w-3.5 mr-1" /> : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
+                    {allVisibleSelected ? 'Avmarkera' : 'Välj alla'}
+                  </Button>
+                  <div className="w-px h-4 bg-white/20 flex-shrink-0" />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={selectedApplicationIds.size === 0}
+                        aria-disabled={selectedApplicationIds.size === 0}
+                        className="text-white/80 [&_svg]:text-white/80 border border-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 h-8 text-xs whitespace-nowrap flex-shrink-0"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5 mr-1" />
+                        Flytta till
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
+                      {activeStages.map(stage => {
+                        const settings = stageSettings[stage];
+                        const Icon = getJobStageIconByName(settings?.iconName || 'inbox');
+                        return (
+                          <DropdownMenuItem 
+                            key={stage}
+                            onClick={() => bulkMoveToStage(stage)}
+                            className="text-white hover:text-white cursor-pointer"
+                          >
+                            <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: settings?.color || '#0EA5E9' }} />
+                            <Icon className="h-4 w-4 mr-2 text-white/70" />
+                            <span className="truncate">{settings?.label || stage}</span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            ) : undefined}
           />
         ) : (
           <DndContext
@@ -1270,33 +1321,24 @@ const JobDetails = () => {
           />
         )}
 
-        {/* Floating Action Bar for Selection Mode */}
+        {/* Floating Action Bar for Selection Mode — desktop only (mobile uses inline bar in MobileCandidateView) */}
         {isSelectionMode && (
-          <div className="fixed bottom-6 left-0 right-0 z-50 animate-in slide-in-from-bottom-4 duration-300 px-4 flex justify-center">
+          <div className="hidden md:flex fixed bottom-6 left-0 right-0 z-50 animate-in slide-in-from-bottom-4 duration-300 px-4 justify-center">
             <div className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
               <span className="text-white text-xs font-medium whitespace-nowrap flex-shrink-0">
                 {selectedApplicationIds.size}/{allVisibleApplicationIds.length} valda
               </span>
               <div className="w-px h-4 bg-white/20 flex-shrink-0" />
-              
-              {/* Select All / Deselect All toggle */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggleAllVisible}
                 className="text-white/80 [&_svg]:text-white/80 border border-transparent md:hover:bg-white/10 md:hover:text-white md:hover:[&_svg]:text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus-visible:border-transparent !outline-none !shadow-none focus:!outline-none focus-visible:!outline-none focus:!shadow-none focus-visible:!shadow-none focus:!ring-0 focus-visible:!ring-0 transition-all duration-200 px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] justify-center"
               >
-                {allVisibleSelected ? (
-                  <Square className="h-3.5 w-3.5 mr-1" />
-                ) : (
-                  <CheckSquare className="h-3.5 w-3.5 mr-1" />
-                )}
+                {allVisibleSelected ? <Square className="h-3.5 w-3.5 mr-1" /> : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
                 {allVisibleSelected ? 'Avmarkera' : 'Välj alla'}
               </Button>
-
               <div className="w-px h-4 bg-white/20 flex-shrink-0" />
-
-              {/* Move to stage dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

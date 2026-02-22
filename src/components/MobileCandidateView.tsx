@@ -196,6 +196,7 @@ interface MobileCandidateViewProps {
   isSelectionMode?: boolean;
   selectedApplicationIds?: Set<string>;
   onToggleSelect?: (id: string) => void;
+  renderActionBar?: React.ReactNode;
 }
 
 export const MobileCandidateView = memo(function MobileCandidateView({
@@ -210,6 +211,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   isSelectionMode,
   selectedApplicationIds,
   onToggleSelect,
+  renderActionBar,
 }: MobileCandidateViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
   const dragScrollRef = useDragScroll<HTMLDivElement>();
@@ -360,12 +362,13 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                 />
               ))
             )}
-            {/* Extra padding when selection bar is visible so last items aren't hidden behind it */}
-            {isSelectionMode && currentApps.length > 0 && <div className="h-16" />}
+            {isSelectionMode && currentApps.length > 0 && <div className="h-2" />}
           </div>
         </ScrollArea>
       </div>
 
+      {/* Inline action bar for selection mode */}
+      {renderActionBar}
     </div>
   );
 });
