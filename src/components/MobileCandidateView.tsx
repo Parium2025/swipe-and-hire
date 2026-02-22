@@ -329,10 +329,10 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           onClick={onOpenCriteriaDialog}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-white/5 ring-1 ring-inset ring-white/10 active:scale-[0.97] transition-all backdrop-blur-sm w-full justify-center min-h-touch"
         >
-          <Sparkles className="h-4 w-4 text-primary" />
+          <Sparkles className="h-4 w-4 text-white" />
           Urvalskriterier
           {criteriaCount > 0 && (
-            <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] bg-white/10 text-white px-1.5 py-0.5 rounded-full">
               {criteriaCount} aktiva
             </span>
           )}
