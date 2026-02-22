@@ -333,13 +333,16 @@ export function useJobDetailsData(jobId: string | undefined) {
     };
   }, [jobId, user, queryClient]);
 
-  // Helper to update application locally
+  // Helper to update application locally (both React Query cache AND localStorage)
   const updateApplicationLocally = (applicationId: string, updates: Partial<JobApplication>) => {
     queryClient.setQueryData(['job-applications', jobId], (old: JobApplication[] | undefined) => {
       if (!old) return old;
-      return old.map(app => 
+      const updated = old.map(app => 
         app.id === applicationId ? { ...app, ...updates } : app
       );
+      // Sync to localStorage so page refresh shows correct data
+      if (jobId) writeJobAppsCache(jobId, updated);
+      return updated;
     });
   };
 
