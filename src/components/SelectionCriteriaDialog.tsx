@@ -311,7 +311,7 @@ export function SelectionCriteriaDialog({
               Urvalskriterier
             </DialogTitle>
           </DialogHeader>
-          <p className="text-[12px] text-white/70 mt-2.5 leading-relaxed max-w-[320px] mx-auto">
+          <p className="text-[12px] text-white mt-2.5 leading-relaxed max-w-[320px] mx-auto">
             AI bedömer om kandidaten uppfyller kraven utifrån dessa kriterier. 
             Du kan lägga till upp till 5 stycken. Kontrollera att kriterierna är tydliga 
             och varken innehåller fel eller diskriminerande krav innan du sparar.
@@ -328,7 +328,7 @@ export function SelectionCriteriaDialog({
             <>
               {/* Warning info box */}
               <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5">
-                <p className="text-[11px] text-white/70 leading-relaxed">
+                <p className="text-[11px] text-white leading-relaxed">
                   Ibland kan varningsmeddelanden visas för giltiga kriterier, men vi rekommenderar att du granskar varningsmeddelandet först.
                 </p>
               </div>
@@ -345,7 +345,7 @@ export function SelectionCriteriaDialog({
                     </span>
                     <button
                       onClick={() => deleteCriterion(criterion.id)}
-                      className="p-0.5 rounded text-white/40 hover:text-red-400/80 transition-colors"
+                      className="p-0.5 rounded text-white hover:text-red-400/80 transition-colors"
                       aria-label="Ta bort"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -358,7 +358,7 @@ export function SelectionCriteriaDialog({
                       placeholder="T.ex. Har B-körkort"
                       value={drafts[criterion.id]?.title || ''}
                       onChange={(e) => handleDraftChange(criterion.id, 'title', e.target.value)}
-                      className="h-8 bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/30 text-xs focus:border-white/15 focus:ring-0 rounded-md"
+                      className="h-8 bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/50 text-xs focus:border-white/15 focus:ring-0 rounded-md"
                     />
                   </div>
 
@@ -369,7 +369,7 @@ export function SelectionCriteriaDialog({
                       value={drafts[criterion.id]?.prompt || ''}
                       onChange={(e) => handleDraftChange(criterion.id, 'prompt', e.target.value)}
                       rows={2}
-                      className="resize-none bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/30 text-xs focus:border-white/15 focus:ring-0 rounded-md min-h-[52px]"
+                      className="resize-none bg-white/[0.05] border-white/[0.06] text-white placeholder:text-white/50 text-xs focus:border-white/15 focus:ring-0 rounded-md min-h-[52px]"
                     />
                   </div>
 
@@ -387,7 +387,7 @@ export function SelectionCriteriaDialog({
                 <button
                   onClick={addNewCriterion}
                   className="w-full py-2 rounded-lg border border-dashed border-white/[0.10] hover:border-white/[0.20] 
-                    text-white/60 hover:text-white flex items-center justify-center gap-1.5 transition-all text-[11px]"
+                    text-white hover:text-white/80 flex items-center justify-center gap-1.5 transition-all text-[11px]"
                 >
                   <Plus className="h-3 w-3" />
                   Lägg till kriterium
@@ -399,22 +399,22 @@ export function SelectionCriteriaDialog({
                 <div className="text-center py-8 rounded-lg bg-white/[0.03]">
                   <Sparkles className="h-4 w-4 text-white mx-auto mb-2" />
                   <p className="text-xs text-white">Inga kriterier ännu</p>
-                  <p className="text-[10px] text-white/60 mt-0.5">Lägg till ditt första kriterium ovan</p>
+                  <p className="text-[10px] text-white mt-0.5">Lägg till ditt första kriterium ovan</p>
                 </div>
               )}
 
               {/* Tips box */}
               {criteria.length > 0 && (
                 <div className="rounded-lg bg-white/[0.03] px-3.5 py-2.5">
-                  <p className="text-[10px] text-white/60 mb-1.5 font-medium">Bra kriterier är specifika och mätbara:</p>
+                  <p className="text-[10px] text-white mb-1.5 font-medium">Bra kriterier är specifika och mätbara:</p>
                   <div className="flex flex-wrap gap-1.5">
                     {['Har B-körkort', '2+ års erfarenhet', 'Kan jobba helger'].map(tip => (
-                      <span key={tip} className="inline-flex items-center gap-1 text-[10px] text-white/70 bg-white/[0.05] px-2 py-0.5 rounded-full">
+                      <span key={tip} className="inline-flex items-center gap-1 text-[10px] text-white bg-white/[0.05] px-2 py-0.5 rounded-full">
                         <Check className="h-2 w-2 text-green-400" />
                         {tip}
                       </span>
                     ))}
-                    <span className="inline-flex items-center gap-1 text-[10px] text-white/70 bg-white/[0.05] px-2 py-0.5 rounded-full">
+                    <span className="inline-flex items-center gap-1 text-[10px] text-white bg-white/[0.05] px-2 py-0.5 rounded-full">
                       <X className="h-2 w-2 text-red-400" />
                       Är trevlig
                     </span>
