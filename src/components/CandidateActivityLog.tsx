@@ -147,8 +147,8 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
   if (activities.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <Activity className="h-8 w-8 text-white/30 mb-2" />
-        <p className="text-sm text-white">Ingen aktivitet ännu</p>
+        <Activity className="h-8 w-8 text-[#FFFFFF] mb-2" />
+        <p className="text-sm text-[#FFFFFF]">Ingen aktivitet ännu</p>
       </div>
     );
   }
