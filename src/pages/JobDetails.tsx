@@ -1302,6 +1302,7 @@ const JobDetails = () => {
             profile_image_url: selectedApplication.profile_image_url,
             video_url: selectedApplication.video_url,
             is_profile_video: selectedApplication.is_profile_video,
+            city: (selectedApplication as any).city || null,
           } as ApplicationData : null}
           open={dialogOpen}
           onOpenChange={(open) => {

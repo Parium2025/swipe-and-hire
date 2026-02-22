@@ -32,6 +32,7 @@ export interface ApplicationData {
   viewed_at?: string | null;
   last_active_at?: string | null;
   rating?: number | null;
+  city?: string | null;
 }
 
 const PAGE_SIZE = 25;
