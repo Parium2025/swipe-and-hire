@@ -507,9 +507,9 @@ const JobView = () => {
             {/* Questions info for unauthenticated users */}
             {!user && jobQuestions.length > 0 && !isJobExpired && (
               <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06] text-center space-y-1.5">
-                <h2 className="text-sm font-semibold text-[#FFFFFF]">Ansökningsfrågor ({jobQuestions.length} st)</h2>
+                <h2 className="text-sm font-semibold text-[#FFFFFF]">{jobQuestions.length === 1 ? 'Ansökningsfråga' : 'Ansökningsfrågor'} ({jobQuestions.length} st)</h2>
                 <p className="text-xs text-[#FFFFFF]">
-                  För att vi ska kunna behandla din ansökan vidare behöver du besvara följande frågor. Observera att detta endast kan göras i samband med att du skapar ett konto.
+                  För att vi ska kunna behandla din ansökan vidare behöver du besvara följande {jobQuestions.length === 1 ? 'fråga' : 'frågor'}. Observera att detta endast kan göras i samband med att du skapar ett konto.
                 </p>
               </div>
             )}
