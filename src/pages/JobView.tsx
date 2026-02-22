@@ -590,7 +590,7 @@ const JobView = () => {
                     </Button>
                     <Button
                       variant="glass"
-                      onClick={() => navigate('/auth', { state: { returnTo: `/job-view/${jobId}`, tab: 'register' } })}
+                      onClick={() => navigate('/auth', { state: { returnTo: `/job-view/${jobId}`, mode: 'register' } })}
                       className="px-8"
                     >
                       Skapa konto
