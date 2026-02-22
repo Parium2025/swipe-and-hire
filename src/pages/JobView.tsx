@@ -66,7 +66,8 @@ const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; a
 const JobView = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const { user, isCompanyUser } = useAuth();
+  const { user, isCompanyUser, userRole } = useAuth();
+  const isEmployer = isCompanyUser() || userRole?.role === 'employer';
   const { getPrefetchedJob } = useJobPrefetchCache();
   
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
@@ -264,6 +265,16 @@ const JobView = () => {
   const { isOnline, showOfflineToast } = useOnline();
 
   const handleApplicationSubmit = async () => {
+    // Block employers from applying
+    if (isEmployer) {
+      toast({
+        title: 'Inte tillåtet',
+        description: 'Du är inloggad som arbetsgivare och kan inte söka jobb.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!isOnline) {
       showOfflineToast();
       return;
@@ -284,6 +295,26 @@ const JobView = () => {
 
     try {
       setApplying(true);
+
+      // Double-check role from database to prevent race conditions
+      if (user?.id) {
+        const { data: roleCheck } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .maybeSingle();
+        
+        if (roleCheck?.role === 'employer') {
+          toast({
+            title: 'Inte tillåtet',
+            description: 'Du är inloggad som arbetsgivare och kan inte söka jobb.',
+            variant: 'destructive',
+          });
+          setApplying(false);
+          return;
+        }
+      }
       
       const { data: profile } = await supabase
         .from('profiles')
@@ -515,7 +546,7 @@ const JobView = () => {
             )}
 
             {/* Application section for logged in users */}
-            {user && !isCompanyUser() && (
+            {user && !isEmployer && (
               <>
                 {/* Application questions */}
                 {jobQuestions.length > 0 && !isJobExpired && (
@@ -585,7 +616,7 @@ const JobView = () => {
             )}
 
             {/* Info for employer users - cannot apply */}
-            {user && isCompanyUser() && !isJobExpired && (
+            {user && isEmployer && !isJobExpired && (
               <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06] text-center space-y-1.5">
                 <p className="text-sm text-[#FFFFFF]">
                   Du är inloggad som arbetsgivare och kan inte söka jobb. Byt till jobbsökarkontot för att ansöka.
