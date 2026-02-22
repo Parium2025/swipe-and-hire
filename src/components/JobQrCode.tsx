@@ -2,7 +2,7 @@ import { memo, useEffect, useRef, useState, useCallback } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { QrCode, Download, Copy, Check } from 'lucide-react';
+import { QrCode, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface JobQrCodeProps {
@@ -12,7 +12,6 @@ interface JobQrCodeProps {
 
 function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
   const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [qrReady, setQrReady] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const qrInstanceRef = useRef<QRCodeStyling | null>(null);
@@ -80,16 +79,6 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
     }
   };
 
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(jobUrl);
-      setCopied(true);
-      toast.success('Länk kopierad');
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error('Kunde inte kopiera länken');
-    }
-  };
 
   return (
     <div className="min-w-0 flex">
@@ -105,7 +94,7 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
         <DialogContent className="max-w-[340px] bg-slate-900/95 backdrop-blur-xl border border-white/20 text-white">
           <DialogHeader>
             <DialogTitle className="text-white text-center">Dela jobbannons</DialogTitle>
-            <DialogDescription className="text-white/60 text-center text-sm">
+            <DialogDescription className="text-white text-center text-sm">
               Skanna QR-koden för att öppna annonsen
             </DialogDescription>
           </DialogHeader>
@@ -121,30 +110,19 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
             </div>
 
             {/* Job title */}
-            <p className="text-sm font-medium text-white/80 text-center line-clamp-2 px-4">
+            <p className="text-sm font-medium text-white text-center line-clamp-2 px-4">
               {jobTitle}
             </p>
 
-            {/* Action buttons */}
-            <div className="flex gap-2 w-full">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyLink}
-                className="flex-1 border-white/20 text-white hover:bg-white/10 hover:text-white gap-1.5"
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? 'Kopierad' : 'Kopiera länk'}
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleDownload}
-                className="flex-1 bg-white/15 hover:bg-white/25 text-white gap-1.5"
-              >
-                <Download className="h-4 w-4" />
-                Ladda ner
-              </Button>
-            </div>
+            {/* Download button */}
+            <Button
+              size="sm"
+              onClick={handleDownload}
+              className="w-full bg-white/15 hover:bg-white/25 text-white gap-1.5"
+            >
+              <Download className="h-4 w-4" />
+              Ladda ner QR-kod
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
