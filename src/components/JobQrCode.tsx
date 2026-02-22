@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState, useCallback } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,34 +13,37 @@ interface JobQrCodeProps {
 function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [qrReady, setQrReady] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
-  const qrInstanceRef = useRef<any>(null);
+  const qrInstanceRef = useRef<QRCodeStyling | null>(null);
 
   const jobUrl = `${window.location.origin}/job/${jobId}`;
 
-  useEffect(() => {
-    if (!open || !qrRef.current) return;
+  const initQr = useCallback(() => {
+    if (!qrRef.current) return;
 
-    // Clear previous
+    // Clear previous content
     qrRef.current.innerHTML = '';
+    setQrReady(false);
 
     const qrCode = new QRCodeStyling({
-      width: 260,
-      height: 260,
+      width: 220,
+      height: 220,
+      type: 'svg',
       data: jobUrl,
       dotsOptions: {
-        color: '#ffffff',
+        color: '#0f172a',
         type: 'rounded',
       },
       backgroundOptions: {
-        color: 'transparent',
+        color: '#ffffff',
       },
       cornersSquareOptions: {
-        color: '#ffffff',
+        color: '#0f172a',
         type: 'extra-rounded',
       },
       cornersDotOptions: {
-        color: '#ffffff',
+        color: '#0f172a',
         type: 'dot',
       },
       qrOptions: {
@@ -50,7 +53,22 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
 
     qrCode.append(qrRef.current);
     qrInstanceRef.current = qrCode;
-  }, [open, jobUrl]);
+
+    // Mark as ready after a short delay to ensure SVG is rendered
+    setTimeout(() => setQrReady(true), 100);
+  }, [jobUrl]);
+
+  useEffect(() => {
+    if (!open) {
+      setQrReady(false);
+      return;
+    }
+    // Use rAF + timeout to ensure DOM is ready
+    const raf = requestAnimationFrame(() => {
+      setTimeout(initQr, 50);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [open, initQr]);
 
   const handleDownload = () => {
     if (qrInstanceRef.current) {
@@ -94,8 +112,12 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
           
           <div className="flex flex-col items-center gap-4 py-4">
             {/* QR Code container */}
-            <div className="bg-white/10 rounded-2xl p-6 ring-1 ring-white/20">
-              <div ref={qrRef} className="flex items-center justify-center" />
+            <div className="bg-white rounded-2xl p-4 shadow-lg">
+              <div 
+                ref={qrRef} 
+                className="flex items-center justify-center min-h-[220px] min-w-[220px]"
+                style={{ opacity: qrReady ? 1 : 0, transition: 'opacity 0.2s ease-in' }}
+              />
             </div>
 
             {/* Job title */}
@@ -131,4 +153,3 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
 }
 
 export default memo(JobQrCodeButton);
-
