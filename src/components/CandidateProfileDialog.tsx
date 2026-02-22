@@ -666,14 +666,14 @@ export const CandidateProfileDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus hideClose className="max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 fixed inset-0 md:inset-auto md:relative w-screen h-[100dvh] md:w-auto md:h-auto md:rounded-lg rounded-none border-0 md:border">
+      <DialogContentNoFocus hideClose className="max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 !inset-0 !translate-x-0 !translate-y-0 md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] md:!inset-auto w-screen h-[100dvh] md:w-auto md:h-auto md:rounded-lg rounded-none border-0 md:border flex flex-col">
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
           <DialogDescription>Visa kandidatens profilinformation och ansökan</DialogDescription>
         </DialogHeader>
         
         {/* Mobile tabs header */}
-        <div className="md:hidden flex border-b border-white/20 relative">
+        <div className="md:hidden flex shrink-0 border-b border-white/20 relative">
           <button
             onClick={() => onOpenChange(false)}
             aria-label="Stäng"
