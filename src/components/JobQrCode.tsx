@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { QrCode, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { TruncatedText } from '@/components/TruncatedText';
 
 interface JobQrCodeProps {
   jobId: string;
@@ -110,9 +111,10 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
             </div>
 
             {/* Job title */}
-            <p className="text-sm font-medium text-white text-center line-clamp-2 px-4">
-              {jobTitle}
-            </p>
+            <TruncatedText 
+              text={jobTitle} 
+              className="text-sm font-medium text-white text-center line-clamp-2 px-4"
+            />
 
             {/* Download button */}
             <Button
