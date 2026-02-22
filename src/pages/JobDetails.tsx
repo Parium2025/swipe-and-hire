@@ -937,7 +937,7 @@ const JobDetails = () => {
   }
 
   return (
-     <div className="space-y-3 md:space-y-4 responsive-container-wide py-3 md:py-4 pb-safe min-h-screen animate-fade-in">
+     <div className="space-y-3 md:space-y-4 w-full md:responsive-container-wide px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in">
         {/* Job Title and Stats - Compact */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4 relative z-30">
           {/* Title + close */}
