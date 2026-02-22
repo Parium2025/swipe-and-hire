@@ -158,7 +158,7 @@ const JobView = () => {
     }
   }, [jobId]);
 
-  const fetchJob = async () => {
+  const fetchJob = async (retryCount = 0) => {
     try {
       const [jobResult, questionsResult, applicationResult] = await Promise.all([
         supabase
@@ -174,7 +174,7 @@ const JobView = () => {
           `)
           .eq('id', jobId)
           .is('deleted_at', null)
-          .single(),
+          .maybeSingle(),
         supabase
           .from('job_questions')
           .select('*')
@@ -190,8 +190,25 @@ const JobView = () => {
           : Promise.resolve({ data: null }),
       ]);
 
-      if (jobResult.error) throw jobResult.error;
+      if (jobResult.error) {
+        // If auth-related error, retry once after a short delay
+        if (retryCount < 2 && (jobResult.error.message?.includes('JWT') || jobResult.error.code === 'PGRST301')) {
+          console.log('JobView: Auth not ready, retrying in 1s...');
+          setTimeout(() => fetchJob(retryCount + 1), 1000);
+          return;
+        }
+        throw jobResult.error;
+      }
+
       const data = jobResult.data;
+
+      // Job not found (deleted or doesn't exist)
+      if (!data) {
+        setJob(null);
+        setLoading(false);
+        hasLoadedOnce.current = true;
+        return;
+      }
 
       const questions = (!questionsResult.error && questionsResult.data) ? questionsResult.data as JobQuestion[] : [];
       const applied = !!applicationResult.data;
@@ -254,15 +271,17 @@ const JobView = () => {
       }
     } catch (error: any) {
       console.error('JobView fetch error:', error);
+      // Retry once on network/auth errors
+      if (retryCount < 2) {
+        console.log(`JobView: Retrying fetch (attempt ${retryCount + 1})...`);
+        setTimeout(() => fetchJob(retryCount + 1), 1500);
+        return;
+      }
       toast({
         title: 'Fel',
-        description: 'Kunde inte hämta jobbet',
+        description: 'Kunde inte hämta jobbet. Försök ladda om sidan.',
         variant: 'destructive',
       });
-      // Only redirect authenticated users — unauthenticated users stay on page
-      if (user) {
-        navigate('/search-jobs');
-      }
       setLoading(false);
     }
   };
@@ -415,14 +434,20 @@ const JobView = () => {
     }
   };
 
-  if (loading && !hasLoadedOnce.current) {
+  if (loading || (!job && !hasLoadedOnce.current)) {
     return null;
   }
 
-  if (!job) {
+  if (!job && hasLoadedOnce.current) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-white">Jobbet hittades inte</div>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-6">
+        <div className="text-white text-lg font-medium">Jobbet hittades inte</div>
+        <p className="text-white/60 text-sm text-center max-w-sm">
+          Jobbet kan ha tagits bort eller så är länken felaktig.
+        </p>
+        <Button variant="glass" onClick={() => navigate('/search-jobs', { replace: true })}>
+          Sök andra jobb
+        </Button>
       </div>
     );
   }
