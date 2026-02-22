@@ -819,10 +819,7 @@ export const CandidateProfileDialog = ({
                 {displayApp.location && (
                   <div className="flex items-center gap-2">
                     <MapPin className="h-3.5 w-3.5 text-white shrink-0" />
-                    <span className="text-sm text-white">
-                      {displayApp.location}
-                      {displayApp.city && displayApp.city !== displayApp.location ? `, ${displayApp.city}` : ''}
-                    </span>
+                    <span className="text-sm text-white">{displayApp.location}</span>
                   </div>
                 )}
                 {displayApp.age && (
