@@ -60,6 +60,7 @@ export function JobStageSettingsMenu({
   const settings = stageSettings[stageKey];
   const isMobile = useIsMobile();
   
+  const [menuOpen, setMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [colorDialogOpen, setColorDialogOpen] = useState(false);
   const [iconDialogOpen, setIconDialogOpen] = useState(false);
@@ -142,12 +143,18 @@ export function JobStageSettingsMenu({
 
   return (
     <>
-      <DropdownMenu modal={false}>
+      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <button 
             className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white/70 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
             style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
             onMouseDown={(e) => e.preventDefault()}
+            onFocus={(e) => {
+              // When dropdown closes, Radix returns focus to trigger — blur immediately to prevent visual circle
+              if (!menuOpen) {
+                e.currentTarget.blur();
+              }
+            }}
           >
             <MoreVertical className="h-4 w-4" />
           </button>
