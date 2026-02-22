@@ -20,6 +20,8 @@ interface ApplicationQuestionsWizardProps {
   hasAlreadyApplied: boolean;
   contactEmail?: string;
   jobTitle?: string;
+  /** Preview mode: allows navigation but disables inputs and hides submit */
+  previewMode?: boolean;
 }
 
 export function ApplicationQuestionsWizard({
@@ -32,11 +34,12 @@ export function ApplicationQuestionsWizard({
   hasAlreadyApplied,
   contactEmail,
   jobTitle,
+  previewMode = false,
 }: ApplicationQuestionsWizardProps) {
   // If already applied, start directly on the review step
-  const [currentStep, setCurrentStep] = useState(hasAlreadyApplied ? questions.length : 0);
+  const [currentStep, setCurrentStep] = useState(hasAlreadyApplied && !previewMode ? questions.length : 0);
   const [navigatedBack, setNavigatedBack] = useState(false);
-  const totalSteps = questions.length + 1;
+  const totalSteps = previewMode ? questions.length : questions.length + 1;
   
   const isLastQuestion = currentStep === questions.length - 1;
   const isSubmitStep = currentStep === questions.length;
@@ -68,7 +71,7 @@ export function ApplicationQuestionsWizard({
 
   const renderQuestionInput = (question: JobQuestion) => {
     const answer = answers[question.id];
-    const isLocked = hasAlreadyApplied;
+    const isLocked = hasAlreadyApplied || previewMode;
 
     switch (question.question_type) {
       case 'text':
@@ -422,12 +425,12 @@ export function ApplicationQuestionsWizard({
         <button
           type="button"
           onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onClick={(e) => { e.currentTarget.blur(); hasAlreadyApplied ? setCurrentStep(questions.length) : handlePrev(); }}
-          disabled={currentStep === 0 && !hasAlreadyApplied}
-          className={
-            backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none' +
-            (hasAlreadyApplied && buttonIsSubmitStep ? ' hidden' : ' inline-flex items-center justify-center')
+           onMouseUp={handleMouseUp}
+           onClick={(e) => { e.currentTarget.blur(); (hasAlreadyApplied && !previewMode) ? setCurrentStep(questions.length) : handlePrev(); }}
+           disabled={currentStep === 0 && !(hasAlreadyApplied && !previewMode)}
+           className={
+             backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none' +
+             ((hasAlreadyApplied && !previewMode) && buttonIsSubmitStep ? ' hidden' : ' inline-flex items-center justify-center')
           }
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />
@@ -443,7 +446,7 @@ export function ApplicationQuestionsWizard({
           disabled={currentQuestion?.is_required && !isCurrentAnswered}
           className={
             nextButtonClasses + ' disabled:opacity-50 disabled:pointer-events-none' +
-            (isSubmitStep || hasAlreadyApplied || (currentQuestion?.question_type === 'yes_no' && !(navigatedBack && isCurrentAnswered)) ? ' hidden' : ' inline-flex items-center justify-center')
+            (isSubmitStep || (hasAlreadyApplied && !previewMode) || (currentQuestion?.question_type === 'yes_no' && !(navigatedBack && isCurrentAnswered)) ? ' hidden' : ' inline-flex items-center justify-center')
           }
         >
           {isLastQuestion ? 'Granska' : 'Nästa'}
@@ -456,7 +459,7 @@ export function ApplicationQuestionsWizard({
           disabled
           className={
             'rounded-full bg-green-600/30 text-green-300 px-6 py-2 text-sm cursor-default focus:outline-none focus:ring-0 focus-visible:ring-0' +
-            (buttonIsSubmitStep && hasAlreadyApplied ? ' inline-flex items-center justify-center' : ' hidden')
+            (buttonIsSubmitStep && hasAlreadyApplied && !previewMode ? ' inline-flex items-center justify-center' : ' hidden')
           }
         >
           <CheckCircle className="mr-1.5 h-4 w-4" />
@@ -472,7 +475,7 @@ export function ApplicationQuestionsWizard({
           disabled={isSubmitting || !canSubmit}
           className={
             submitButtonClasses + ' disabled:pointer-events-none' +
-            (isSubmitStep && !hasAlreadyApplied ? ' inline-flex items-center justify-center' : ' hidden')
+            (isSubmitStep && !hasAlreadyApplied && !previewMode ? ' inline-flex items-center justify-center' : ' hidden')
           }
         >
           {isSubmitting ? (
