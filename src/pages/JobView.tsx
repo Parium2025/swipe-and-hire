@@ -386,15 +386,17 @@ const JobView = () => {
        <div className="jobview-container py-4">
         {/* Combined header */}
         <div className="flex items-center justify-between mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
-          <Button
-            type="button"
-            onClick={handleBack}
-            variant="glass"
-            className="h-7 px-2.5 text-xs"
-          >
-            <ArrowLeft className="mr-1 h-3.5 w-3.5" />
-            Tillbaka
-          </Button>
+          {user ? (
+            <Button
+              type="button"
+              onClick={handleBack}
+              variant="glass"
+              className="h-7 px-2.5 text-xs"
+            >
+              <ArrowLeft className="mr-1 h-3.5 w-3.5" />
+              Tillbaka
+            </Button>
+          ) : <div />}
           
           <div className="flex items-center gap-2">
             <button
@@ -574,8 +576,8 @@ const JobView = () => {
               /* Auth CTA for unauthenticated users */
               !isJobExpired && (
                 <div className="bg-white/[0.06] backdrop-blur-md rounded-xl p-6 text-center space-y-4 border border-white/[0.08]">
-                  <h3 className="text-lg font-semibold text-white">Intresserad?</h3>
-                  <p className="text-sm text-white/70">
+                  <h3 className="text-lg font-semibold text-[#FFFFFF]">Intresserad?</h3>
+                  <p className="text-sm text-[#FFFFFF]">
                     Logga in eller skapa ett konto för att söka denna tjänst.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
