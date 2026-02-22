@@ -955,11 +955,10 @@ const JobDetails = () => {
         {/* Job Title and Stats - Compact */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4 relative z-30">
           {/* Title + close */}
-          <div className="flex items-center justify-between gap-2">
-            <TruncatedText 
-              text={job.title}
-              className="text-lg font-bold text-white truncate block flex-1 min-w-0"
-            />
+          <div className="flex items-start justify-between gap-2">
+            <h1 className="text-lg font-bold text-white flex-1 min-w-0 line-clamp-2">
+              {job.title}
+            </h1>
             <button
               onClick={() => {
                 // After hot-reload, history may be empty — fallback to dashboard
