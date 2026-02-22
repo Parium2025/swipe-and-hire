@@ -504,8 +504,26 @@ const JobView = () => {
             {/* Benefits */}
             <JobViewBenefits benefits={job.benefits || []} />
 
-            {/* Application section - only for logged in users */}
-            {user ? (
+            {/* Application questions preview for unauthenticated users */}
+            {!user && jobQuestions.length > 0 && !isJobExpired && (
+              <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06] opacity-60 pointer-events-none select-none">
+                <h2 className="text-section-title mb-3">Ansökningsfrågor</h2>
+                <ApplicationQuestionsWizard
+                  questions={jobQuestions as (JobQuestion & { id: string })[]}
+                  answers={{}}
+                  onAnswerChange={() => {}}
+                  onSubmit={() => {}}
+                  isSubmitting={false}
+                  canSubmit={false}
+                  hasAlreadyApplied={false}
+                  contactEmail={job.contact_email}
+                  jobTitle={job.title}
+                />
+              </div>
+            )}
+
+            {/* Application section for logged in users */}
+            {user && (
               <>
                 {/* Application questions */}
                 {jobQuestions.length > 0 && !isJobExpired && (
@@ -572,32 +590,32 @@ const JobView = () => {
                   </div>
                 )}
               </>
-            ) : (
-              /* Auth CTA for unauthenticated users */
-              !isJobExpired && (
-                <div className="bg-white/[0.06] backdrop-blur-md rounded-xl p-6 text-center space-y-4 border border-white/[0.08]">
-                  <h3 className="text-lg font-semibold text-[#FFFFFF]">Intresserad?</h3>
-                  <p className="text-sm text-[#FFFFFF]">
-                    Logga in eller skapa ett konto för att söka denna tjänst.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                    <Button
-                      variant="glassGreen"
-                      onClick={() => navigate('/auth', { state: { returnTo: `/job-view/${jobId}` } })}
-                      className="px-8"
-                    >
-                      Logga in
-                    </Button>
-                    <Button
-                      variant="glass"
-                      onClick={() => navigate('/auth', { state: { returnTo: `/job-view/${jobId}`, mode: 'register' } })}
-                      className="px-8"
-                    >
-                      Skapa konto
-                    </Button>
-                  </div>
+            )}
+
+            {/* Auth CTA for unauthenticated users */}
+            {!user && !isJobExpired && (
+              <div className="bg-white/[0.06] backdrop-blur-md rounded-xl p-6 text-center space-y-4 border border-white/[0.08]">
+                <h3 className="text-lg font-semibold text-[#FFFFFF]">Intresserad?</h3>
+                <p className="text-sm text-[#FFFFFF]">
+                  Logga in eller skapa ett konto för att söka denna tjänst.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                  <Button
+                    variant="glassGreen"
+                    onClick={() => navigate('/auth', { state: { returnTo: `/job-view/${jobId}` } })}
+                    className="px-8"
+                  >
+                    Logga in
+                  </Button>
+                  <Button
+                    variant="glass"
+                    onClick={() => navigate('/auth', { state: { returnTo: `/job-view/${jobId}`, mode: 'register' } })}
+                    className="px-8"
+                  >
+                    Skapa konto
+                  </Button>
                 </div>
-              )
+              </div>
             )}
 
             {/* Footer: published date & countdown */}
