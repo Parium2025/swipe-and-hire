@@ -979,7 +979,7 @@ export const CandidateProfileDialog = ({
                         <span className="ml-2 text-sm text-white/50">Genererar sammanfattning...</span>
                       </div>
                     ) : (
-                      <p className="text-sm text-white/50">
+                      <p className="text-sm text-white text-center">
                         Kandidaten har inte laddat upp något CV
                       </p>
                     )}
@@ -1039,7 +1039,7 @@ export const CandidateProfileDialog = ({
                   {displayApp.bio}
                 </p>
               ) : (
-                <p className="text-sm text-white/50 italic">Ingen presentation angiven</p>
+                <p className="text-sm text-white italic text-center">Ingen presentation angiven</p>
               )}
             </div>
           </div>
