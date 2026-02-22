@@ -995,11 +995,6 @@ const JobDetails = () => {
             <div className="flex items-center gap-1 text-white">
               <MapPin className="h-3.5 w-3.5" />
               {job.location}
-              {(() => {
-                const j = job as any;
-                const city = j.workplace_municipality || j.workplace_county || j.workplace_city;
-                return city && city !== job.location ? `, ${city}` : '';
-              })()}
             </div>
             {(() => {
               const isExpired = job.expires_at && new Date(job.expires_at) < new Date();
