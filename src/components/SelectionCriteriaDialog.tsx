@@ -396,24 +396,6 @@ export function SelectionCriteriaDialog({
               )}
 
 
-              {/* Tips box */}
-              {criteria.length > 0 && (
-                <div className="rounded-lg bg-white/[0.03] px-3.5 py-2.5">
-                  <p className="text-[10px] text-white mb-1.5 font-medium">Bra kriterier är specifika och mätbara:</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Har B-körkort', '2+ års erfarenhet', 'Kan jobba helger'].map(tip => (
-                      <span key={tip} className="inline-flex items-center gap-1 text-xs text-white bg-white/[0.05] px-2 py-0.5 rounded-full">
-                        <Check className="h-2.5 w-2.5 text-green-400" />
-                        {tip}
-                      </span>
-                    ))}
-                    <span className="inline-flex items-center gap-1 text-xs text-white bg-white/[0.05] px-2 py-0.5 rounded-full">
-                      <X className="h-2.5 w-2.5 text-red-400" />
-                      Är trevlig
-                    </span>
-                  </div>
-                </div>
-              )}
             </>
           )}
         </div>
