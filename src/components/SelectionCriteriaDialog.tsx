@@ -319,6 +319,9 @@ export function SelectionCriteriaDialog({
             <p className="text-xs text-white leading-relaxed mt-1.5">
               Se till att kriterierna är tydligt formulerade och inte innehåller felaktiga eller diskriminerande krav innan du sparar.
             </p>
+            <p className="text-xs text-white leading-relaxed mt-1.5">
+              Om ett varningsmeddelande visas betyder det inte automatiskt att kriteriet är fel, men vi rekommenderar att du läser igenom och säkerställer att allt stämmer innan du går vidare.
+            </p>
           </div>
         </div>
 
@@ -330,12 +333,6 @@ export function SelectionCriteriaDialog({
             </div>
           ) : (
             <>
-              {/* Warning info box */}
-              <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5">
-                <p className="text-xs text-white leading-relaxed">
-                  Om ett varningsmeddelande visas betyder det inte automatiskt att kriteriet är fel, men vi rekommenderar att du läser igenom och säkerställer att allt stämmer innan du går vidare.
-                </p>
-              </div>
 
               {/* Criteria cards */}
               {criteria.map((criterion, index) => (
