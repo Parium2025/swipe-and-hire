@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,7 +84,7 @@ export function SelectionCriteriaDialog({
   // Inline editing state
   const [drafts, setDrafts] = useState<Record<string, { title: string; prompt: string }>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-
+  const autoSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   useEffect(() => {
     if (open && jobId) {
       fetchCriteria();
@@ -147,6 +147,30 @@ export function SelectionCriteriaDialog({
     return true;
   };
 
+  // Auto-save a single criterion to DB
+  const autoSaveCriterion = useCallback(async (id: string, title: string, prompt: string) => {
+    if (!title.trim() && !prompt.trim()) return; // Don't save completely empty
+    try {
+      await supabase
+        .from('job_criteria')
+        .update({
+          title: title.trim(),
+          prompt: prompt.trim(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+    } catch (err) {
+      console.error('Auto-save failed:', err);
+    }
+  }, []);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(autoSaveTimers.current).forEach(clearTimeout);
+    };
+  }, []);
+
   const handleDraftChange = (id: string, field: 'title' | 'prompt', value: string) => {
     setDrafts(prev => ({
       ...prev,
@@ -155,6 +179,14 @@ export function SelectionCriteriaDialog({
     
     const draft = { ...drafts[id], [field]: value };
     validateInput(id, draft.title, draft.prompt);
+
+    // Debounced auto-save (800ms)
+    if (autoSaveTimers.current[id]) {
+      clearTimeout(autoSaveTimers.current[id]);
+    }
+    autoSaveTimers.current[id] = setTimeout(() => {
+      autoSaveCriterion(id, draft.title, draft.prompt);
+    }, 800);
   };
 
   const addNewCriterion = async () => {
