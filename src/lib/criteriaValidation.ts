@@ -3,17 +3,60 @@ import { supabase } from '@/integrations/supabase/client';
 // Client-side quick check — lightweight heuristic only
 // Real discrimination detection is done by AI on the backend
 const OBVIOUS_DISCRIMINATION_PATTERNS = [
-  { pattern: /\betnicitet\b|\bras\b|\bhudfärg\b/i, category: 'Etnisk diskriminering' },
-  { pattern: /\bsexuell läggning\b|\bhomosexuell\b|\bheterosexuell\b|\bbisexuell\b/i, category: 'Diskriminering pga sexuell läggning' },
-  { pattern: /\bgraviditet\b|\bgravid\b/i, category: 'Diskriminering pga graviditet' },
-  { pattern: /\bbög\b|\bbögig\b|\bbögar\b|\bflata\b|\bflator\b|\btransa?\b/i, category: 'Kränkande språk' },
-  { pattern: /\bhora\b|\bhoror\b|\bslampa\b|\bslampor\b|\bfitta\b|\bkäring\b/i, category: 'Kränkande språk' },
-  { pattern: /\bdum\b|\bdumma\b|\btaskig\b|\btaskiga\b|\bidiot\b|\bidioter\b|\bkorkad\b|\bpucko\b/i, category: 'Kränkande språk' },
-  { pattern: /\bsvenne\b|\bblansen\b|\bneger\b|\bnegrer\b|\bsvartskalle\b|\bblatte\b|\bblattar\b/i, category: 'Rasistiskt språk' },
-  { pattern: /\bmån\b|\bmåste vara man\b|\bvara kvinna\b|\bvara man\b|\benbart män\b|\benbart kvinnor\b|\binga män\b|\binga kvinnor\b/i, category: 'Könsdiskriminering' },
-  { pattern: /\bhandikappad\b|\bhandikapp\b|\bfunktionshinder\b/i, category: 'Diskriminering pga funktionsnedsättning' },
-  { pattern: /\bmuslim\b|\bkristen\b|\bjude\b|\bjudar\b|\breligion\b/i, category: 'Diskriminering pga religion' },
-  { pattern: /\bålder\b|\bför gammal\b|\bför ung\b|\bmax \d+ år\b|\bung\b|\bunga\b|\bgammal\b|\bgamla\b/i, category: 'Åldersdiskriminering' },
+  // === SWEDISH — Ethnicity / Race ===
+  { pattern: /\betnicitet\b|\bras\b|\bhudfärg\b|\binvandrare?\b|\butlänning\b|\butlänningar\b|\binvandrar\w*/i, category: 'Etnisk diskriminering' },
+  { pattern: /\bsvenne\b|\bblansen\b|\bneger\b|\bnegrer\b|\bsvartskalle\b|\bblatte\b|\bblattar\b|\bzigenare?\b|\bromer\b/i, category: 'Rasistiskt språk' },
+  { pattern: /\bapor?\b|\babor?\b|\bbabbe?\b|\bkanake?\b/i, category: 'Rasistiskt språk' },
+
+  // === SWEDISH — Gender / Sexuality ===
+  { pattern: /\bsexuell läggning\b|\bhomosexuell\b|\bheterosexuell\b|\bbisexuell\b|\btranssexuell\b/i, category: 'Diskriminering pga sexuell läggning' },
+  { pattern: /\bbög\b|\bbögig\b|\bbögar\b|\bflata\b|\bflator\b|\btransa?\b|\btrans\b/i, category: 'Kränkande språk' },
+  { pattern: /\bmåste vara man\b|\bvara kvinna\b|\bvara man\b|\benbart män\b|\benbart kvinnor\b|\binga män\b|\binga kvinnor\b|\bkön\b/i, category: 'Könsdiskriminering' },
+
+  // === SWEDISH — Pregnancy ===
+  { pattern: /\bgraviditet\b|\bgravid\b|\bbarnledig\b|\bföräldraledig\b|\bmammaled\w*\b|\bpappaledig\b/i, category: 'Diskriminering pga graviditet/föräldraskap' },
+
+  // === SWEDISH — Age ===
+  { pattern: /\bålder\b|\bför gammal\b|\bför ung\b|\bmax \d+ år\b|\bung\b|\bunga\b|\bgammal\b|\bgamla\b|\bpensionär\b|\btonåring\b/i, category: 'Åldersdiskriminering' },
+
+  // === SWEDISH — Disability ===
+  { pattern: /\bhandikappad\b|\bhandikapp\b|\bfunktionshinder\b|\bfunktionsnedsättning\b|\binvalid\b|\bcp-skadad\b/i, category: 'Diskriminering pga funktionsnedsättning' },
+
+  // === SWEDISH — Religion ===
+  { pattern: /\bmuslim\b|\bkristen\b|\bjude\b|\bjudar\b|\breligion\b|\bateist\b|\bhijab\b|\bslöja\b|\bmoské\b|\bkyrka\b|\bsynagoga\b/i, category: 'Diskriminering pga religion' },
+
+  // === SWEDISH — Insults / Offensive ===
+  { pattern: /\bhora\b|\bhoror\b|\bslampa\b|\bslampor\b|\bfitta\b|\bkäring\b|\bkärring\b|\bluder\b/i, category: 'Kränkande språk' },
+  { pattern: /\bdum\b|\bdumma\b|\btaskig\b|\btaskiga\b|\bidiot\b|\bidioter\b|\bkorkad\b|\bpucko\b|\btönt\b|\bfånig\b|\bfåniga\b/i, category: 'Kränkande språk' },
+  { pattern: /\bjävel\b|\bjävla\b|\bfan\b|\bskit\b|\bskitunge\b|\bhorunge\b|\bkukhuvud\b|\bknull\b/i, category: 'Kränkande språk' },
+  { pattern: /\bcp\b|\bmongo\b|\bmongoloida?\b|\befter\w*bliven\b|\bmentalt sjuk\b/i, category: 'Kränkande språk' },
+
+  // === ENGLISH — Race / Ethnicity ===
+  { pattern: /\bnigg(?:er|a|as|ers)\b|\bcoon\b|\bspic\b|\bwetback\b|\bgook\b|\bchink\b|\bjap\b|\bkike\b|\bwop\b/i, category: 'Racist language' },
+  { pattern: /\bethnicity\b|\brace\b|\bskin color\b|\bskin colour\b|\bforeigner\b|\bimmigrant\b|\balien\b/i, category: 'Ethnic discrimination' },
+  { pattern: /\bwhite only\b|\bblacks? only\b|\bno blacks\b|\bno whites\b|\bno asians\b|\bno mexicans\b/i, category: 'Racist language' },
+
+  // === ENGLISH — Gender / Sexuality ===
+  { pattern: /\bfagg?ot\b|\bdyke\b|\btranny\b|\bshemale\b|\bqueer\b/i, category: 'Offensive language' },
+  { pattern: /\bsexual orientation\b|\bhomosexual\b|\bheterosexual\b|\bbisexual\b|\btransgender\b/i, category: 'Sexual orientation discrimination' },
+  { pattern: /\bmales? only\b|\bfemales? only\b|\bno women\b|\bno men\b|\bmen only\b|\bwomen only\b|\bgender\b/i, category: 'Gender discrimination' },
+
+  // === ENGLISH — Pregnancy ===
+  { pattern: /\bpregnant\b|\bpregnancy\b|\bmaternity\b|\bpaternity leave\b/i, category: 'Pregnancy discrimination' },
+
+  // === ENGLISH — Age ===
+  { pattern: /\byoung\b|\byoung only\b|\bold\b|\btoo old\b|\btoo young\b|\bage limit\b|\bmax age\b|\bmin age\b|\bmillennial\b|\bboomer\b/i, category: 'Age discrimination' },
+
+  // === ENGLISH — Disability ===
+  { pattern: /\bdisabled\b|\bdisability\b|\bcripple\b|\bhandicapped\b|\bretard\b|\bretarded\b|\bmentally ill\b/i, category: 'Disability discrimination' },
+
+  // === ENGLISH — Religion ===
+  { pattern: /\breligion\b|\bmuslim\b|\bchristian\b|\bjewish\b|\batheist\b|\bhijab\b|\bmosque\b|\bchurch\b|\bsynagogue\b/i, category: 'Religious discrimination' },
+
+  // === ENGLISH — Insults / Offensive ===
+  { pattern: /\bbitch\b|\bwhore\b|\bslut\b|\bcunt\b|\bdick\b|\basshole\b|\bbastard\b|\bfuck\b|\bfucking\b|\bshit\b|\bdamn\b/i, category: 'Offensive language' },
+  { pattern: /\bstupid\b|\bidiot\b|\bmoron\b|\bdumb\b|\bimbecile\b|\bcretin\b|\bincompetent\b|\buseless\b|\bpathetic\b/i, category: 'Offensive language' },
+  { pattern: /\bugly\b|\bfat\b|\bskinny\b|\bobese\b|\banorexic\b/i, category: 'Offensive language' },
 ];
 
 // Common filler/nonsense words that aren't real criteria
