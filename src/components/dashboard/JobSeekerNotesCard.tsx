@@ -83,6 +83,39 @@ export const JobSeekerNotesCard = memo(() => {
     }
   }, [noteData, cacheKey, user?.id]);
 
+  // Realtime sync — listen for changes from other devices
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`jobseeker-notes-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'jobseeker_notes',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          // Only apply if we don't have local unsaved edits
+          if (!hasLocalEditsRef.current) {
+            const newContent = (payload.new as any)?.content ?? '';
+            setContent(newContent);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(cacheKey, newContent);
+            }
+          }
+          // Also invalidate the query so noteData stays fresh
+          queryClient.invalidateQueries({ queryKey: ['jobseeker-notes', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, cacheKey, queryClient]);
+
   const handleChange = useCallback(
     (next: string) => {
       hasLocalEditsRef.current = true;
