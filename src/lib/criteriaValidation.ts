@@ -8,20 +8,31 @@ const OBVIOUS_DISCRIMINATION_PATTERNS = [
   { pattern: /\bgraviditet\b|\bgravid\b/i, category: 'Diskriminering pga graviditet' },
 ];
 
+// Common filler/nonsense words that aren't real criteria
+const FILLER_WORDS = new Set([
+  'hej', 'hå', 'ja', 'nej', 'test', 'asdf', 'qwerty', 'abc', 'xyz',
+  'foo', 'bar', 'baz', 'blah', 'bla', 'lol', 'haha', 'ok', 'okej',
+  'hmm', 'aha', 'öhh', 'ehh', 'aaa', 'bbb', 'ccc', 'ddd',
+  'hallå', 'tja', 'tjo', 'hey', 'yo', 'yep', 'nope', 'nä',
+]);
+
 /**
  * Check if text is gibberish or meaningless input.
- * Catches repeated characters, random key mashing, too-short text, etc.
+ * Catches repeated characters, random key mashing, filler words, too-short text, etc.
  */
 export function checkInputQuality(text: string): { isValid: boolean; reason?: string } {
   const trimmed = text.trim();
   
+  // Empty is ok (handled elsewhere as required field)
+  if (trimmed.length === 0) return { isValid: true };
+
   // Must be at least 3 characters
-  if (trimmed.length > 0 && trimmed.length < 3) {
+  if (trimmed.length < 3) {
     return { isValid: false, reason: 'Texten är för kort — skriv ett tydligt kriterium.' };
   }
 
   // Check for repeated single character (e.g. "jjjjjj", "aaaa")
-  if (trimmed.length >= 3 && /^(.)\1+$/i.test(trimmed)) {
+  if (/^(.)\1+$/i.test(trimmed)) {
     return { isValid: false, reason: 'Texten verkar inte vara ett riktigt kriterium.' };
   }
 
@@ -39,6 +50,26 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
         return { isValid: false, reason: 'Texten verkar inte vara ett riktigt kriterium.' };
       }
     }
+  }
+
+  // Check if ALL words are filler/nonsense words
+  const words = trimmed.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+  if (words.length > 0 && words.every(w => FILLER_WORDS.has(w))) {
+    return { isValid: false, reason: 'Skriv ett tydligt och specifikt urvalskriterium.' };
+  }
+
+  // Check if it's the same word repeated (e.g. "ja ja ja", "test test test")
+  if (words.length >= 2) {
+    const uniqueWords = new Set(words.map(w => w.toLowerCase()));
+    if (uniqueWords.size === 1) {
+      return { isValid: false, reason: 'Texten verkar inte vara ett riktigt kriterium.' };
+    }
+  }
+
+  // Too short to be a meaningful criterion (less than 5 chars after trim, but 3+ chars)
+  // "Har X" = 5 chars is about the minimum for something meaningful
+  if (trimmed.length < 5) {
+    return { isValid: false, reason: 'Kriteriet är för kort — beskriv tydligare vad du söker.' };
   }
 
   return { isValid: true };
