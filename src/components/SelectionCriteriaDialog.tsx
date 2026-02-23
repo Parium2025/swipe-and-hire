@@ -395,14 +395,6 @@ export function SelectionCriteriaDialog({
                 </button>
               )}
 
-              {/* Empty state */}
-              {criteria.length === 0 && !isLoading && (
-                <div className="text-center py-8 rounded-lg bg-white/[0.03]">
-                  <Sparkles className="h-4 w-4 text-white mx-auto mb-2" />
-                  <p className="text-xs text-white">Inga kriterier ännu</p>
-                  <p className="text-xs text-white mt-0.5">Lägg till ditt första kriterium ovan</p>
-                </div>
-              )}
 
               {/* Tips box */}
               {criteria.length > 0 && (
@@ -426,26 +418,28 @@ export function SelectionCriteriaDialog({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex-shrink-0 px-5 py-3 border-t border-white/[0.05] flex items-center justify-center">
-          <button
-            onClick={handleSaveAndActivate}
-            disabled={isSaving || !hasValidCriteria || Object.keys(validationErrors).length > 0}
-            className="text-xs text-white hover:text-white/80 flex items-center gap-1.5 transition-colors disabled:opacity-30 font-medium"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Sparar...
-              </>
-            ) : (
-              <>
-                <Zap className="h-3.5 w-3.5" />
-                Spara & aktivera
-              </>
-            )}
-          </button>
-        </div>
+        {/* Footer — only show when there are criteria */}
+        {criteria.length > 0 && (
+          <div className="flex-shrink-0 px-5 py-3 border-t border-white/[0.05] flex items-center justify-center">
+            <button
+              onClick={handleSaveAndActivate}
+              disabled={isSaving || !hasValidCriteria || Object.keys(validationErrors).length > 0}
+              className="text-xs text-white hover:text-white/80 flex items-center gap-1.5 transition-colors disabled:opacity-30 font-medium"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Sparar...
+                </>
+              ) : (
+                <>
+                  <Zap className="h-3.5 w-3.5" />
+                  Spara & aktivera
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </DialogContentNoFocus>
     </Dialog>
   );
