@@ -254,15 +254,13 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
     }
   }
 
-  // Too short to be a meaningful criterion
-  if (trimmed.length < 5) {
+  // Too short to be a meaningful criterion (single short word like "ab")
+  if (trimmed.length < 3) {
     return { isValid: false, reason: 'Skriv ett tydligt kriterium.' };
   }
 
-  // Minimum word count — a real AI instruction needs at least 2 words
-  if (words.length < 2) {
-    return { isValid: false, reason: 'Beskriv tydligare vad AI:n ska leta efter.' };
-  }
+  // Single word is OK if it's a real word (not gibberish, not filler)
+  // AI will interpret it broadly — e.g. "körkort" → check all driving licenses
 
   return { isValid: true };
 }
