@@ -312,9 +312,11 @@ export function SelectionCriteriaDialog({
             </DialogTitle>
           </DialogHeader>
           <p className="text-xs text-white mt-2 leading-relaxed max-w-[340px] mx-auto">
-            AI bedömer om kandidaten uppfyller kraven utifrån dessa kriterier. 
-            Du kan lägga till upp till 5 stycken. Kontrollera att kriterierna är tydliga 
-            och varken innehåller fel eller diskriminerande krav innan du sparar.
+            AI analyserar kandidaternas ansökningar och visar hur väl de matchar de kriterier du har valt. 
+            Du kan lägga till upp till fem kriterier för att tydliggöra vad som är viktigt för rollen.
+          </p>
+          <p className="text-xs text-white mt-1.5 leading-relaxed max-w-[340px] mx-auto">
+            Se till att kriterierna är tydligt formulerade och inte innehåller felaktiga eller diskriminerande krav innan du sparar.
           </p>
         </div>
 
@@ -329,7 +331,7 @@ export function SelectionCriteriaDialog({
               {/* Warning info box */}
               <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5">
                 <p className="text-xs text-white leading-relaxed">
-                  Ibland kan varningsmeddelanden visas för giltiga kriterier, men vi rekommenderar att du granskar varningsmeddelandet först.
+                  Om ett varningsmeddelande visas betyder det inte automatiskt att kriteriet är fel, men vi rekommenderar att du läser igenom och säkerställer att allt stämmer innan du går vidare.
                 </p>
               </div>
 
