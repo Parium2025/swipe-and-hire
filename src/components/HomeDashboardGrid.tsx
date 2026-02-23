@@ -33,6 +33,7 @@ import type { Editor } from '@tiptap/react';
 import { useHrNews, HrNewsItem } from '@/hooks/useHrNews';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotesSync } from '@/hooks/useNotesSync';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { isJobExpiredCheck } from '@/lib/date';
@@ -542,9 +543,13 @@ StatsCard.displayName = 'StatsCard';
 
 // Notes Card (Purple - Bottom Left)
 const NotesCard = memo(() => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const hasLocalEditsRef = useRef(false);
+  const { content, isSaving, saveFailed, lastSaved, handleChange } = useNotesSync({
+    table: 'employer_notes',
+    ownerColumn: 'employer_id',
+    cachePrefix: 'employer_notes_cache',
+    queryKey: 'employer-notes',
+  });
+
   const [notesEditor, setNotesEditor] = useState<Editor | null>(null);
   const [expandedEditor, setExpandedEditor] = useState<Editor | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -553,130 +558,10 @@ const NotesCard = memo(() => {
   const expandedThumbRef = useRef<HTMLDivElement>(null);
   const expandedRafRef = useRef<number>(0);
 
-  const cacheKey = user?.id ? `employer_notes_cache_${user.id}` : 'employer_notes_cache';
-
-  const [content, setContent] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    if (user?.id) {
-      return localStorage.getItem(`employer_notes_cache_${user.id}`) || '';
-    }
-    return localStorage.getItem('employer_notes_cache') || '';
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-
-  // When user becomes available, load their specific cache (but don't clobber active typing)
-  useEffect(() => {
-    if (typeof window === 'undefined' || !user?.id) return;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached !== null && !hasLocalEditsRef.current) {
-      setContent(cached);
-    }
-  }, [cacheKey, user?.id]);
-
-  // Cross-tab "realtime" feel via localStorage events
-  useEffect(() => {
-    if (typeof window === 'undefined' || !user?.id) return;
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === cacheKey && typeof e.newValue === 'string') {
-        if (!hasLocalEditsRef.current) {
-          setContent(e.newValue);
-        }
-      }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, [cacheKey, user?.id]);
-
-  // Fetch existing note (don't block editor rendering)
-  const { data: noteData, isFetched } = useQuery({
-    queryKey: ['employer-notes', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('employer_notes')
-        .select('*')
-        .eq('employer_id', user!.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-    staleTime: 30000,
-  });
-
-  // Sync server value into cache (and editor) once it arrives
-  useEffect(() => {
-    if (typeof window === 'undefined' || !user?.id) return;
-    if (!noteData) return;
-
-    const serverContent = typeof noteData.content === 'string' ? noteData.content : '';
-    localStorage.setItem(cacheKey, serverContent);
-
-    if (!hasLocalEditsRef.current) {
-      setContent(serverContent);
-    }
-  }, [noteData, cacheKey, user?.id]);
-
-  // Realtime sync — listen for changes from other devices
-  useEffect(() => {
-    if (!user?.id) return;
-    const channel = supabase
-      .channel(`employer-notes-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'employer_notes',
-          filter: `employer_id=eq.${user.id}`,
-        },
-        (payload) => {
-          if (!hasLocalEditsRef.current) {
-            const newContent = (payload.new as any)?.content ?? '';
-            setContent(newContent);
-            if (typeof window !== 'undefined') {
-              localStorage.setItem(cacheKey, newContent);
-            }
-          }
-          queryClient.invalidateQueries({ queryKey: ['employer-notes', user.id] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id, cacheKey, queryClient]);
-
-  const handleChange = useCallback(
-    (next: string) => {
-      hasLocalEditsRef.current = true;
-      setContent(next);
-
-      // Update cache immediately so other tabs can reflect changes instantly
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(cacheKey, next);
-      }
-    },
-    [cacheKey]
-  );
-
-  const handleEditorReady = useCallback((editor: Editor) => {
-    setNotesEditor(editor);
-  }, []);
-
-  const handleExpandedEditorReady = useCallback((editor: Editor) => {
-    setExpandedEditor(editor);
-  }, []);
-
-  const handleExpand = useCallback(() => {
-    setIsExpanded(true);
-  }, []);
-
-  const handleCloseExpanded = useCallback(() => {
-    setIsExpanded(false);
-  }, []);
+  const handleEditorReady = useCallback((editor: Editor) => { setNotesEditor(editor); }, []);
+  const handleExpandedEditorReady = useCallback((editor: Editor) => { setExpandedEditor(editor); }, []);
+  const handleExpand = useCallback(() => { setIsExpanded(true); }, []);
+  const handleCloseExpanded = useCallback(() => { setIsExpanded(false); }, []);
 
   // Expanded scrollbar tracking
   const updateExpandedScrollbar = useCallback(() => {
@@ -747,64 +632,18 @@ const NotesCard = memo(() => {
 
   // Calculate character and word count
   const textStats = useMemo(() => {
-    // Strip HTML tags to get plain text
     const plainText = content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
     const charCount = plainText.length;
     const wordCount = plainText.trim() ? plainText.trim().split(/\s+/).length : 0;
     return { charCount, wordCount };
   }, [content]);
 
-  // Auto-save with debounce (wait until we know if note exists to avoid duplicates)
-  useEffect(() => {
-    if (!user?.id || !isFetched) return;
-
-    const serverContent = typeof noteData?.content === 'string' ? noteData.content : '';
-    if (content === serverContent) return;
-
-    const timer = setTimeout(async () => {
-      // Check if online before saving
-      if (!navigator.onLine) {
-        console.log('Offline - skipping note save');
-        return;
-      }
-
-      setIsSaving(true);
-      try {
-        let saveError;
-        if (noteData?.id) {
-          const { error } = await supabase
-            .from('employer_notes')
-            .update({ content })
-            .eq('id', noteData.id);
-          saveError = error;
-        } else {
-          const { error } = await supabase
-            .from('employer_notes')
-            .insert({ employer_id: user.id, content });
-          saveError = error;
-        }
-        if (saveError) {
-          console.error('❌ Employer note save failed:', saveError.message, saveError);
-          return;
-        }
-        hasLocalEditsRef.current = false;
-        setLastSaved(new Date());
-        console.log('✅ Employer note saved to database');
-        queryClient.invalidateQueries({ queryKey: ['employer-notes', user.id] });
-      } catch (err) {
-        console.error('Failed to save note:', err);
-      } finally {
-        setIsSaving(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [content, user?.id, isFetched, noteData, queryClient]);
-
   const saveIndicator = (
     <span className="text-[11px] text-white font-medium">
       {isSaving ? (
         <span className="animate-pulse">Sparar...</span>
+      ) : saveFailed ? (
+        <span className="text-red-300">Kunde inte spara ✗</span>
       ) : lastSaved ? (
         'Sparat ✓'
       ) : null}
