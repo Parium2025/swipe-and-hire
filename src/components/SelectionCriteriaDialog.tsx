@@ -387,10 +387,10 @@ export function SelectionCriteriaDialog({
               {canAddMore && (
                 <button
                   onClick={addNewCriterion}
-                  className="w-full py-2 rounded-lg border border-dashed border-white/[0.10] hover:border-white/[0.20] 
-                    text-white hover:text-white/80 flex items-center justify-center gap-1.5 transition-all text-xs"
+                  className="w-auto mx-auto py-2 px-6 rounded-lg border border-solid border-white/[0.15] hover:border-white/[0.30] 
+                    text-white hover:text-white flex items-center justify-center gap-1.5 transition-all text-xs"
                 >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus className="h-3.5 w-3.5 text-white" />
                   Lägg till kriterium
                 </button>
               )}
