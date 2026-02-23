@@ -87,8 +87,9 @@ serve(async (req) => {
     // Get CV URL - prioritize override, then application, then profile
     const finalCvUrl = cv_url_override || application?.cv_url || profile?.cv_url;
 
-    let contentType = '';
+let contentType = '';
     let userContent: string | any[] | null = null;
+    let rawExtractedText: string | null = null; // Store raw text for evaluate-candidate
 
     if (finalCvUrl) {
       console.log('CV URL found:', finalCvUrl);
@@ -167,6 +168,7 @@ serve(async (req) => {
                 }
                 
                 console.log(`PDF text extracted successfully: ${extractedText.length} chars`);
+                rawExtractedText = extractedText; // Save full raw text
                 // Truncate if too long (AI has token limits)
                 const maxChars = 15000;
                 userContent = extractedText.length > maxChars 
@@ -221,6 +223,7 @@ serve(async (req) => {
               // Text-based documents (DOCX, TXT, etc.)
               console.log('Text document detected, extracting content...');
               userContent = await docResponse.text();
+              rawExtractedText = typeof userContent === 'string' ? userContent : null;
               console.log(`Text content length: ${typeof userContent === 'string' ? userContent.length : 0} chars`);
             }
           }
@@ -426,6 +429,7 @@ VIKTIGT:
           document_type: documentType,
           summary_text: summaryText,
           key_points: [docPoint, ...normalizedPoints],
+          raw_text: rawExtractedText,
           analyzed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }, {
@@ -450,6 +454,7 @@ VIKTIGT:
           application_id: application?.id || application_id,
           summary_text: summaryText,
           key_points: [docPoint, ...normalizedPoints],
+          raw_text: rawExtractedText,
           generated_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }, {
