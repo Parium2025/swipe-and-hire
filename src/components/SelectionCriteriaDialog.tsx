@@ -97,22 +97,17 @@ export function SelectionCriteriaDialog({
   };
 
   const validateInput = (id: string, title: string, prompt: string) => {
-    // Quality check — catches gibberish, repeated chars, too-short text
-    const titleQuality = checkInputQuality(title);
-    if (!titleQuality.isValid) {
-      setValidationErrors(prev => ({ ...prev, [id]: titleQuality.reason! }));
-      return false;
-    }
-    const promptQuality = checkInputQuality(prompt);
-    if (!promptQuality.isValid) {
-      setValidationErrors(prev => ({ ...prev, [id]: promptQuality.reason! }));
-      return false;
-    }
-
-    // Discrimination check
+    // Title: only check discrimination (it's just a label, not AI input)
     const titleCheck = checkForDiscrimination(title);
     if (titleCheck.isDiscriminatory) {
       setValidationErrors(prev => ({ ...prev, [id]: titleCheck.reason! }));
+      return false;
+    }
+
+    // Prompt (AI-instruktion): full quality + discrimination check
+    const promptQuality = checkInputQuality(prompt);
+    if (!promptQuality.isValid) {
+      setValidationErrors(prev => ({ ...prev, [id]: promptQuality.reason! }));
       return false;
     }
     const promptCheck = checkForDiscrimination(prompt);

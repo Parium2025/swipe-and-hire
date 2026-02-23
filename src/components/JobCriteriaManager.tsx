@@ -81,7 +81,19 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
     }
   };
 
-  const validateInput = (value: string) => {
+  const validateTitle = (value: string) => {
+    // Title is just a label — only check discrimination, not quality
+    const check = checkForDiscrimination(value);
+    if (check.isDiscriminatory) {
+      setValidationError(check.reason || 'Diskriminerande kriterium');
+      return false;
+    }
+    setValidationError(null);
+    return true;
+  };
+
+  const validatePrompt = (value: string) => {
+    // Prompt is the AI input — full quality + discrimination check
     const quality = checkInputQuality(value);
     if (!quality.isValid) {
       setValidationError(quality.reason || 'Ogiltigt kriterium');
@@ -98,12 +110,12 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
 
   const handlePromptChange = (value: string) => {
     setPrompt(value);
-    validateInput(value);
+    validatePrompt(value);
   };
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
-    validateInput(value);
+    validateTitle(value);
   };
 
   const openNewCriterionDialog = () => {
@@ -128,8 +140,8 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
       return;
     }
 
-    if (!validateInput(title) || !validateInput(prompt)) {
-      toast.error('Kriteriet innehåller diskriminerande innehåll');
+    if (!validateTitle(title) || !validatePrompt(prompt)) {
+      toast.error('Korrigera fälten innan du sparar');
       return;
     }
     
