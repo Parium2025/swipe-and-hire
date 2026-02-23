@@ -17,6 +17,26 @@ const FILLER_WORDS = new Set([
 ]);
 
 /**
+ * Check if a single word looks like gibberish (not a real word).
+ * Real Swedish/English words have a mix of consonants and vowels.
+ * Words like "ghgygttfdhf" have extremely low vowel ratios.
+ */
+function isGibberishWord(word: string): boolean {
+  if (word.length <= 2) return false; // Too short to judge
+  
+  const vowels = word.match(/[aeiouåäöy]/gi) || [];
+  const vowelRatio = vowels.length / word.length;
+  
+  // Real words typically have 25-70% vowels. Below 15% in 4+ char word = gibberish
+  if (word.length >= 4 && vowelRatio < 0.15) return true;
+  
+  // Check for 4+ consecutive consonants (rare in real words, common in gibberish)
+  if (/[^aeiouåäöy\s]{4,}/i.test(word)) return true;
+  
+  return false;
+}
+
+/**
  * Check if text is gibberish or meaningless input.
  * Catches repeated characters, random key mashing, filler words, too-short text, etc.
  */
@@ -66,8 +86,22 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
     }
   }
 
-  // Too short to be a meaningful criterion (less than 5 chars after trim, but 3+ chars)
-  // "Har X" = 5 chars is about the minimum for something meaningful
+  // Check if majority of words are gibberish (e.g. "har ghgygttfdhf h")
+  if (words.length >= 2) {
+    const gibberishCount = words.filter(w => isGibberishWord(w)).length;
+    const gibberishRatio = gibberishCount / words.length;
+    // If more than half the words are gibberish, flag it
+    if (gibberishRatio > 0.5) {
+      return { isValid: false, reason: 'AI-instruktionen verkar inte vara meningsfull — formulera ett tydligt krav.' };
+    }
+  }
+  
+  // Single gibberish word that's long enough to judge
+  if (words.length === 1 && words[0].length >= 5 && isGibberishWord(words[0])) {
+    return { isValid: false, reason: 'Texten verkar inte vara meningsfull.' };
+  }
+
+  // Too short to be a meaningful criterion (less than 5 chars after trim)
   if (trimmed.length < 5) {
     return { isValid: false, reason: 'Kriteriet är för kort — beskriv tydligare vad du söker.' };
   }
