@@ -43,25 +43,7 @@ interface JobCriteriaManagerProps {
   onCriteriaChange?: () => void;
 }
 
-// Client-side quick check — lightweight heuristic only
-// Real discrimination detection is done by AI on the backend
-const OBVIOUS_DISCRIMINATION_PATTERNS = [
-  { pattern: /\betnicitet\b|\bras\b|\bhudfärg\b/i, category: 'Etnisk diskriminering' },
-  { pattern: /\bsexuell läggning\b|\bhomosexuell\b|\bheterosexuell\b|\bbisexuell\b/i, category: 'Diskriminering pga sexuell läggning' },
-  { pattern: /\bgraviditet\b|\bgravid\b/i, category: 'Diskriminering pga graviditet' },
-];
-
-function checkForDiscrimination(text: string): { isDiscriminatory: boolean; reason?: string } {
-  for (const { pattern, category } of OBVIOUS_DISCRIMINATION_PATTERNS) {
-    if (pattern.test(text)) {
-      return {
-        isDiscriminatory: true,
-        reason: `${category} är inte tillåtet enligt diskrimineringslagen. Kriterier ska baseras på kompetens och kvalifikationer.`,
-      };
-    }
-  }
-  return { isDiscriminatory: false };
-}
+import { checkForDiscrimination, checkDiscriminationWithAI } from '@/lib/criteriaValidation';
 
 export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManagerProps) {
   const { user } = useAuth();
@@ -153,6 +135,14 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
 
     setIsSaving(true);
     try {
+      // AI-powered discrimination check before saving
+      const aiCheck = await checkDiscriminationWithAI(title.trim(), prompt.trim());
+      if (aiCheck.isDiscriminatory) {
+        setValidationError(aiCheck.reason || 'AI flaggade detta som potentiellt diskriminerande.');
+        toast.error('AI flaggade kriteriet — granska innan du sparar');
+        setIsSaving(false);
+        return;
+      }
       if (editingCriterion) {
         // Update existing
         const { error } = await supabase

@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { useEvaluateAllCandidates } from '@/hooks/useCriteriaResults';
+import { checkForDiscrimination, checkDiscriminationWithAI } from '@/lib/criteriaValidation';
 
 interface JobCriterion {
   id: string;
@@ -42,26 +43,6 @@ interface SelectionCriteriaDialogProps {
   jobId: string;
   onActivate?: (criteriaCount: number) => void;
   candidates?: { applicant_id: string; application_id?: string }[];
-}
-
-// Client-side quick check — lightweight heuristic only
-// Real discrimination detection is done by AI on the backend
-const OBVIOUS_DISCRIMINATION_PATTERNS = [
-  { pattern: /\betnicitet\b|\bras\b|\bhudfärg\b/i, category: 'Etnisk diskriminering' },
-  { pattern: /\bsexuell läggning\b|\bhomosexuell\b|\bheterosexuell\b|\bbisexuell\b/i, category: 'Diskriminering pga sexuell läggning' },
-  { pattern: /\bgraviditet\b|\bgravid\b/i, category: 'Diskriminering pga graviditet' },
-];
-
-function checkForDiscrimination(text: string): { isDiscriminatory: boolean; reason?: string } {
-  for (const { pattern, category } of OBVIOUS_DISCRIMINATION_PATTERNS) {
-    if (pattern.test(text)) {
-      return {
-        isDiscriminatory: true,
-        reason: `${category} — kriterier ska baseras på kompetens.`,
-      };
-    }
-  }
-  return { isDiscriminatory: false };
 }
 
 export function SelectionCriteriaDialog({ 
@@ -278,7 +259,34 @@ export function SelectionCriteriaDialog({
       return;
     }
 
+    // AI-powered discrimination check on all criteria before saving
     setIsSaving(true);
+    try {
+      const aiChecks = await Promise.all(
+        validCriteria.map(c => checkDiscriminationWithAI(c.title, c.prompt))
+      );
+
+      let aiBlocked = false;
+      aiChecks.forEach((check, i) => {
+        if (check.isDiscriminatory) {
+          aiBlocked = true;
+          setValidationErrors(prev => ({
+            ...prev,
+            [validCriteria[i].id]: check.reason || 'AI flaggade detta som potentiellt diskriminerande.',
+          }));
+        }
+      });
+
+      if (aiBlocked) {
+        toast.error('AI flaggade ett eller flera kriterier som potentiellt diskriminerande. Granska och justera.');
+        setIsSaving(false);
+        return;
+      }
+    } catch {
+      // Non-blocking: if AI check fails, allow save
+      console.warn('AI discrimination pre-check failed, proceeding with save');
+    }
+
     try {
       // Batch update all valid criteria at once
       await Promise.all(
