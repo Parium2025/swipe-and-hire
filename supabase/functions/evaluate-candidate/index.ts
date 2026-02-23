@@ -507,7 +507,7 @@ function buildJobContext(job: any, criteria: any[], questions: any[]): string {
 
   if (criteria?.length > 0) {
     context += '\n--- Urvalskriterier att utvärdera ---\n';
-    for (const c of criteria) context += `- ${c.title}: ${c.prompt}\n`;
+    for (const c of criteria) context += `- [criterion_id: ${c.id}] ${c.title}: ${c.prompt}\n`;
   }
 
   return context;
@@ -652,9 +652,28 @@ VIKTIGT:
           : toolCall.function.arguments;
         
         const validIds = new Set(criteria.map(c => c.id));
-        const validResults = (parsed.criteria_results || []).filter(
-          (r: any) => validIds.has(r.criterion_id) && ['match', 'no_match'].includes(r.result)
-        );
+        const rawResults = parsed.criteria_results || [];
+        
+        console.log(`AI returned ${rawResults.length} raw results, valid criterion IDs: ${[...validIds].join(', ')}`);
+        
+        // Try to match by criterion_id first, then fallback to matching by title
+        const validResults: any[] = [];
+        for (const r of rawResults) {
+          if (validIds.has(r.criterion_id) && ['match', 'no_match'].includes(r.result)) {
+            validResults.push(r);
+          } else {
+            // Fallback: match by title if criterion_id doesn't match
+            const matchedCriterion = criteria.find(
+              (c: any) => c.title.toLowerCase() === (r.title || '').toLowerCase()
+            );
+            if (matchedCriterion && ['match', 'no_match'].includes(r.result)) {
+              console.log(`Matched criterion by title "${r.title}" → ${matchedCriterion.id}`);
+              validResults.push({ ...r, criterion_id: matchedCriterion.id });
+            } else {
+              console.log(`Discarded AI result: criterion_id=${r.criterion_id}, title=${r.title}, result=${r.result}`);
+            }
+          }
+        }
 
         return { criteria_results: validResults };
       } catch (parseError) {

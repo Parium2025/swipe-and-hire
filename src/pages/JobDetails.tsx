@@ -1310,8 +1310,7 @@ const JobDetails = () => {
               applicant_id: app.applicant_id, 
               application_id: app.id 
             }))}
-            onActivate={(count) => {
-              toast.success(`${count} urvalskriterier aktiverade`, { description: 'AI börjar utvärdera kandidater' });
+            onActivate={() => {
               refetch();
             }}
           />
