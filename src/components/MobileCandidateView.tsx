@@ -109,12 +109,7 @@ const CandidateRow = memo(function CandidateRow({
           {appliedTime && (
             <span>{appliedTime === 'nu' ? 'Ansökte idag' : `Ansökte för ${appliedTime} sedan`}</span>
           )}
-          {needsEvaluation && (
-            <span className="flex items-center gap-0.5 text-white/40">
-              <Sparkles className="h-2.5 w-2.5" />
-              Väntar på AI
-            </span>
-          )}
+          {/* AI results appear silently when ready — no "waiting" indicator */}
         </div>
         {/* Criterion badges */}
         {hasResults && (

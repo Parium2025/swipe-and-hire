@@ -284,24 +284,7 @@ const ApplicationCardContent = ({
         </div>
       )}
       
-      {/* Show "Not evaluated" indicator when criteria exist but no results */}
-      {needsEvaluation && (
-        <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-white/5">
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-white/5 text-white/50 cursor-default">
-                  <Sparkles className="h-2.5 w-2.5" />
-                  Väntar på AI...
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs max-w-[200px]">
-                <p>AI-utvärdering startar automatiskt. Uppdatera sidan om det tar lång tid.</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      )}
+      {/* "Väntar på AI" indicator removed — results appear silently when ready */}
     </div>
   );
 };
