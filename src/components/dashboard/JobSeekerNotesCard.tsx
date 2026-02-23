@@ -214,13 +214,21 @@ export const JobSeekerNotesCard = memo(() => {
       if (!navigator.onLine) { console.log('Offline - skipping note save'); return; }
       setIsSaving(true);
       try {
+        let saveError;
         if (noteData?.id) {
-          await supabase.from('jobseeker_notes').update({ content }).eq('id', noteData.id);
+          const { error } = await supabase.from('jobseeker_notes').update({ content }).eq('id', noteData.id);
+          saveError = error;
         } else {
-          await supabase.from('jobseeker_notes').insert({ user_id: user.id, content });
+          const { error } = await supabase.from('jobseeker_notes').insert({ user_id: user.id, content });
+          saveError = error;
+        }
+        if (saveError) {
+          console.error('❌ Note save failed:', saveError.message, saveError);
+          return;
         }
         hasLocalEditsRef.current = false;
         setLastSaved(new Date());
+        console.log('✅ Note saved to database');
         queryClient.invalidateQueries({ queryKey: ['jobseeker-notes', user.id] });
       } catch (err) {
         console.error('Failed to save note:', err);
