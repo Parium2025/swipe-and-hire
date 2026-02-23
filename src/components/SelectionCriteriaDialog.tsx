@@ -44,19 +44,16 @@ interface SelectionCriteriaDialogProps {
   candidates?: { applicant_id: string; application_id?: string }[];
 }
 
-// Discrimination keywords to check
-const DISCRIMINATION_PATTERNS = [
-  { pattern: /\bålder\b|\bår gammal\b|\bunder \d+\b|\böver \d+\b|\bung\b|\bgammal\b|\bpensionär\b|\bsenior\b/i, category: 'Åldersdiskriminering' },
-  { pattern: /\bkön\b|\bman\b|\bkvinna\b|\bmanlig\b|\bkvinnlig\b|\btjej\b|\bkille\b/i, category: 'Könsdiskriminering' },
-  { pattern: /\betnicitet\b|\bras\b|\bhudfärg\b|\binvandrare\b|\butländsk\b/i, category: 'Etnisk diskriminering' },
-  { pattern: /\breligion\b|\bmuslim\b|\bkristen\b|\bjude\b|\bhindu\b|\bbuddhist\b/i, category: 'Religiös diskriminering' },
-  { pattern: /\bfunktionsnedsättning\b|\bhandikapp\b|\bfunktionshinder\b|\brullstol\b/i, category: 'Diskriminering pga funktionsnedsättning' },
-  { pattern: /\bsexuell läggning\b|\bhomosexuell\b|\bheterosexuell\b|\bbisexuell\b|\bgay\b|\blesbisk\b/i, category: 'Diskriminering pga sexuell läggning' },
-  { pattern: /\bgraviditet\b|\bgravid\b|\bföräldraledig\b/i, category: 'Diskriminering pga graviditet' },
+// Client-side quick check — lightweight heuristic only
+// Real discrimination detection is done by AI on the backend
+const OBVIOUS_DISCRIMINATION_PATTERNS = [
+  { pattern: /\betnicitet\b|\bras\b|\bhudfärg\b/i, category: 'Etnisk diskriminering' },
+  { pattern: /\bsexuell läggning\b|\bhomosexuell\b|\bheterosexuell\b|\bbisexuell\b/i, category: 'Diskriminering pga sexuell läggning' },
+  { pattern: /\bgraviditet\b|\bgravid\b/i, category: 'Diskriminering pga graviditet' },
 ];
 
 function checkForDiscrimination(text: string): { isDiscriminatory: boolean; reason?: string } {
-  for (const { pattern, category } of DISCRIMINATION_PATTERNS) {
+  for (const { pattern, category } of OBVIOUS_DISCRIMINATION_PATTERNS) {
     if (pattern.test(text)) {
       return {
         isDiscriminatory: true,
@@ -283,17 +280,20 @@ export function SelectionCriteriaDialog({
 
     setIsSaving(true);
     try {
-      for (const c of validCriteria) {
-        await supabase
-          .from('job_criteria')
-          .update({
-            title: c.title,
-            prompt: c.prompt,
-            is_active: true,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', c.id);
-      }
+      // Batch update all valid criteria at once
+      await Promise.all(
+        validCriteria.map(c =>
+          supabase
+            .from('job_criteria')
+            .update({
+              title: c.title,
+              prompt: c.prompt,
+              is_active: true,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', c.id)
+        )
+      );
 
       const emptyIds = criteria
         .filter(c => {
