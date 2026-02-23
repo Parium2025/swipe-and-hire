@@ -311,13 +311,15 @@ export function SelectionCriteriaDialog({
               Urvalskriterier
             </DialogTitle>
           </DialogHeader>
-          <p className="text-xs text-white mt-2 leading-relaxed max-w-[340px] mx-auto">
-            AI analyserar kandidaternas ansökningar och visar hur väl de matchar de kriterier du har valt. 
-            Du kan lägga till upp till fem kriterier för att tydliggöra vad som är viktigt för rollen.
-          </p>
-          <p className="text-xs text-white mt-1.5 leading-relaxed max-w-[340px] mx-auto">
-            Se till att kriterierna är tydligt formulerade och inte innehåller felaktiga eller diskriminerande krav innan du sparar.
-          </p>
+          <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5 mt-3 mx-0 text-left">
+            <p className="text-xs text-white leading-relaxed">
+              AI analyserar kandidaternas ansökningar och visar hur väl de matchar de kriterier du har valt. 
+              Du kan lägga till upp till fem kriterier för att tydliggöra vad som är viktigt för rollen.
+            </p>
+            <p className="text-xs text-white leading-relaxed mt-1.5">
+              Se till att kriterierna är tydligt formulerade och inte innehåller felaktiga eller diskriminerande krav innan du sparar.
+            </p>
+          </div>
         </div>
 
         {/* Content */}
