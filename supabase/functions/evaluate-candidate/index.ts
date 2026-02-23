@@ -3,50 +3,13 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
-
-// Discrimination keywords to check for in criteria
-const DISCRIMINATION_KEYWORDS = {
-  age: ['ålder', 'år gammal', 'under 30', 'över 40', 'ung', 'gammal', 'pensionär', 'senior'],
-  gender: ['kön', 'man', 'kvinna', 'manlig', 'kvinnlig', 'tjej', 'kille', 'herre', 'dam'],
-  ethnicity: ['etnicitet', 'ras', 'hudfärg', 'svensk', 'invandrare', 'utländsk', 'bakgrund'],
-  religion: ['religion', 'muslim', 'kristen', 'jude', 'hindu', 'buddhist', 'troende'],
-  disability: ['funktionsnedsättning', 'handikapp', 'funktionshinder', 'rullstol'],
-  sexual_orientation: ['sexuell läggning', 'homosexuell', 'heterosexuell', 'bisexuell', 'gay', 'lesbisk'],
-  pregnancy: ['graviditet', 'gravid', 'föräldraledig', 'mamma', 'pappa', 'barn'],
-};
-
-function checkForDiscrimination(prompt: string): { isDiscriminatory: boolean; reason?: string } {
-  const lowerPrompt = prompt.toLowerCase();
-  
-  for (const [category, keywords] of Object.entries(DISCRIMINATION_KEYWORDS)) {
-    for (const keyword of keywords) {
-      if (lowerPrompt.includes(keyword)) {
-        const categoryNames: Record<string, string> = {
-          age: 'Åldersdiskriminering',
-          gender: 'Könsdiskriminering',
-          ethnicity: 'Etnisk diskriminering',
-          religion: 'Religiös diskriminering',
-          disability: 'Diskriminering av funktionsnedsättning',
-          sexual_orientation: 'Diskriminering av sexuell läggning',
-          pregnancy: 'Diskriminering relaterad till graviditet/föräldraskap',
-        };
-        return {
-          isDiscriminatory: true,
-          reason: `${categoryNames[category]} är inte tillåtet enligt diskrimineringslagen. Kriterier ska baseras på kompetens och kvalifikationer.`,
-        };
-      }
-    }
-  }
-  
-  return { isDiscriminatory: false };
-}
 
 interface CriterionResult {
   criterion_id: string;
   title: string;
-  result: 'match' | 'no_match' | 'no_data';
+  result: 'match' | 'no_match';
   confidence: number;
   reasoning: string;
   source: string;
@@ -54,13 +17,44 @@ interface CriterionResult {
 
 interface EvaluationResponse {
   criteria_results: CriterionResult[];
-  summary: {
-    text: string;
-    key_points: Array<{
-      text: string;
-      type: 'positive' | 'negative' | 'neutral';
-    }>;
-  };
+}
+
+// Retry with exponential backoff
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3,
+  baseDelayMs = 1000
+): Promise<Response> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      // Don't retry on client errors (except 429)
+      if (response.ok || (response.status >= 400 && response.status < 500 && response.status !== 429)) {
+        return response;
+      }
+      
+      // Retry on 429 (rate limit) and 5xx (server errors)
+      if (attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt) + Math.random() * 500;
+        console.log(`Attempt ${attempt + 1} failed (${response.status}), retrying in ${Math.round(delay)}ms...`);
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      
+      return response; // Return last failed response
+    } catch (error) {
+      if (attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt) + Math.random() * 500;
+        console.log(`Attempt ${attempt + 1} network error, retrying in ${Math.round(delay)}ms...`);
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error('fetchWithRetry: exhausted retries');
 }
 
 serve(async (req) => {
@@ -75,16 +69,36 @@ serve(async (req) => {
     const application_id = body.application_id || body.applicationId;
     const action = body.action;
     
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Action: validate_criterion - Check if a criterion is discriminatory
+    // Action: validate_criterion - Use AI to check for discrimination
     if (action === 'validate_criterion') {
-      const { prompt } = await req.json();
-      const check = checkForDiscrimination(prompt);
-      return new Response(JSON.stringify(check), {
+      const { prompt, title } = body;
+      if (!prompt && !title) {
+        return new Response(
+          JSON.stringify({ isDiscriminatory: false }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+      if (!LOVABLE_API_KEY) {
+        // Fallback: allow if no AI key
+        return new Response(
+          JSON.stringify({ isDiscriminatory: false }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const discriminationCheck = await checkDiscriminationWithAI(
+        LOVABLE_API_KEY,
+        title || '',
+        prompt || ''
+      );
+      
+      return new Response(JSON.stringify(discriminationCheck), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -99,70 +113,42 @@ serve(async (req) => {
 
     console.log(`Evaluating candidate ${applicant_id} for job ${job_id}`);
 
-    // Fetch job details
-    const { data: job, error: jobError } = await supabase
-      .from('job_postings')
-      .select('*')
-      .eq('id', job_id)
-      .single();
+    // Fetch all data in parallel
+    const [jobResult, criteriaResult, questionsResult, applicationResult, profileResult, cvSummaryResult, profileCvResult] = await Promise.all([
+      supabase.from('job_postings').select('*').eq('id', job_id).single(),
+      supabase.from('job_criteria').select('*').eq('job_id', job_id).eq('is_active', true).order('order_index'),
+      supabase.from('job_questions').select('*').eq('job_id', job_id).order('order_index'),
+      supabase.from('job_applications').select('*').eq('job_id', job_id).eq('applicant_id', applicant_id).single(),
+      supabase.from('profiles').select('*').eq('user_id', applicant_id).single(),
+      // Fetch existing CV summary for this job+applicant
+      supabase.from('candidate_summaries').select('*').eq('job_id', job_id).eq('applicant_id', applicant_id).single(),
+      // Also check profile-level CV summary
+      supabase.from('profile_cv_summaries').select('*').eq('user_id', applicant_id).single(),
+    ]);
 
-    if (jobError || !job) {
-      console.error('Job not found:', jobError);
+    const job = jobResult.data;
+    if (jobResult.error || !job) {
+      console.error('Job not found:', jobResult.error);
       return new Response(
         JSON.stringify({ error: 'Job not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Fetch criteria for this job
-    const { data: criteria, error: criteriaError } = await supabase
-      .from('job_criteria')
-      .select('*')
-      .eq('job_id', job_id)
-      .eq('is_active', true)
-      .order('order_index');
+    const criteria = criteriaResult.data || [];
+    const questions = questionsResult.data || [];
+    const application = applicationResult.data;
+    const profile = profileResult.data;
+    const cvSummary = cvSummaryResult.data;
+    const profileCv = profileCvResult.data;
 
-    if (criteriaError) {
-      console.error('Error fetching criteria:', criteriaError);
+    // If no criteria, nothing to evaluate
+    if (criteria.length === 0) {
+      return new Response(
+        JSON.stringify({ success: true, criteria_results: [], message: 'No active criteria to evaluate' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
-
-    // Fetch job questions
-    const { data: questions, error: questionsError } = await supabase
-      .from('job_questions')
-      .select('*')
-      .eq('job_id', job_id)
-      .order('order_index');
-
-    if (questionsError) {
-      console.error('Error fetching questions:', questionsError);
-    }
-
-    // Fetch application details
-    const { data: application, error: applicationError } = await supabase
-      .from('job_applications')
-      .select('*')
-      .eq('job_id', job_id)
-      .eq('applicant_id', applicant_id)
-      .single();
-
-    if (applicationError) {
-      console.error('Error fetching application:', applicationError);
-    }
-
-    // Fetch applicant profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', applicant_id)
-      .single();
-
-    if (profileError) {
-      console.error('Error fetching profile:', profileError);
-    }
-
-    // Build context for AI
-    const candidateContext = buildCandidateContext(application, profile, questions);
-    const jobContext = buildJobContext(job, criteria || [], questions || []);
 
     // Create or update evaluation record
     const { data: evaluation, error: evalError } = await supabase
@@ -187,25 +173,27 @@ serve(async (req) => {
       );
     }
 
-    // Call Lovable AI for evaluation
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY not configured');
       return new Response(
         JSON.stringify({ error: 'AI service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const aiResponse = await callLovableAI(LOVABLE_API_KEY, jobContext, candidateContext, criteria || []);
+    // Build rich context including CV summary
+    const candidateContext = buildCandidateContext(application, profile, questions, cvSummary, profileCv);
+    const jobContext = buildJobContext(job, criteria, questions);
+
+    // Call AI with tool calling for structured output
+    const aiResponse = await callLovableAI(LOVABLE_API_KEY, jobContext, candidateContext, criteria);
 
     if (!aiResponse) {
-      // Update evaluation as failed
       await supabase
         .from('candidate_evaluations')
         .update({
           status: 'failed',
-          error_message: 'AI evaluation failed',
+          error_message: 'AI evaluation failed after retries',
           updated_at: new Date().toISOString(),
         })
         .eq('id', evaluation.id);
@@ -216,28 +204,27 @@ serve(async (req) => {
       );
     }
 
-    // Save criterion results
+    // Batch upsert criterion results
     if (aiResponse.criteria_results && aiResponse.criteria_results.length > 0) {
-      for (const result of aiResponse.criteria_results) {
-        await supabase
-          .from('criterion_results')
-          .upsert({
-            evaluation_id: evaluation.id,
-            criterion_id: result.criterion_id,
-            result: result.result,
-            confidence: result.confidence,
-            reasoning: result.reasoning,
-            source: result.source,
-          }, {
-            onConflict: 'evaluation_id,criterion_id',
-          });
+      const resultsToUpsert = aiResponse.criteria_results.map(result => ({
+        evaluation_id: evaluation.id,
+        criterion_id: result.criterion_id,
+        result: result.result,
+        confidence: result.confidence,
+        reasoning: result.reasoning,
+        source: result.source,
+      }));
+
+      const { error: upsertError } = await supabase
+        .from('criterion_results')
+        .upsert(resultsToUpsert, { onConflict: 'evaluation_id,criterion_id' });
+
+      if (upsertError) {
+        console.error('Error batch upserting results:', upsertError);
       }
     }
 
-    // NOTE: Summary is NOT saved here - CV summary is handled by generate-cv-summary
-    // This function ONLY handles criteria evaluation results
-
-    // Update evaluation as completed
+    // Mark evaluation as completed
     await supabase
       .from('candidate_evaluations')
       .update({
@@ -247,14 +234,13 @@ serve(async (req) => {
       })
       .eq('id', evaluation.id);
 
-    console.log(`Evaluation completed for candidate ${applicant_id}`);
+    console.log(`Evaluation completed for candidate ${applicant_id} — ${aiResponse.criteria_results.length} criteria evaluated`);
 
     return new Response(
       JSON.stringify({
         success: true,
         evaluation_id: evaluation.id,
         criteria_results: aiResponse.criteria_results,
-        summary: aiResponse.summary,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -268,7 +254,92 @@ serve(async (req) => {
   }
 });
 
-function buildCandidateContext(application: any, profile: any, questions: any[]): string {
+// ─── AI-powered discrimination check ────────────────────────────
+
+async function checkDiscriminationWithAI(
+  apiKey: string,
+  title: string,
+  prompt: string
+): Promise<{ isDiscriminatory: boolean; reason?: string }> {
+  try {
+    const response = await fetchWithRetry(
+      'https://ai.gateway.lovable.dev/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-lite',
+          messages: [
+            {
+              role: 'system',
+              content: `Du är en juridisk expert på svensk diskrimineringslag (2008:567).
+Avgör om ett urvalskriterium för rekrytering strider mot diskrimineringslagen.
+
+DISKRIMINERINGSGRUNDER (förbjudna):
+1. Kön
+2. Könsöverskridande identitet eller uttryck
+3. Etnisk tillhörighet
+4. Religion eller annan trosuppfattning
+5. Funktionsnedsättning
+6. Sexuell läggning
+7. Ålder
+
+TILLÅTET:
+- Krav på erfarenhet, utbildning, certifikat, språkkunskaper (om yrkesrelevant)
+- Krav på körkort, arbetstider, fysisk kapacitet (om sakligt motiverat för tjänsten)
+- "Bakgrund inom X" (yrkesmässig bakgrund) — INTE diskriminerande
+
+Svara ENDAST med JSON:
+{ "isDiscriminatory": true/false, "reason": "förklaring om diskriminerande, annars null" }`,
+            },
+            {
+              role: 'user',
+              content: `Kriterietitel: ${title}\nKriterieinstruktion: ${prompt}`,
+            },
+          ],
+          temperature: 0.1,
+        }),
+      },
+      2, // max 2 retries for validation (fast response needed)
+      500
+    );
+
+    if (!response.ok) {
+      console.error('Discrimination check AI error:', response.status);
+      return { isDiscriminatory: false }; // Allow on AI failure
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) return { isDiscriminatory: false };
+
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        isDiscriminatory: parsed.isDiscriminatory === true,
+        reason: parsed.reason || undefined,
+      };
+    }
+    return { isDiscriminatory: false };
+  } catch (err) {
+    console.error('Discrimination check error:', err);
+    return { isDiscriminatory: false }; // Fail open
+  }
+}
+
+// ─── Context builders ────────────────────────────────────────────
+
+function buildCandidateContext(
+  application: any,
+  profile: any,
+  questions: any[],
+  cvSummary: any,
+  profileCv: any
+): string {
   let context = '=== KANDIDATINFORMATION ===\n\n';
 
   // Profile info
@@ -295,25 +366,45 @@ function buildCandidateContext(application: any, profile: any, questions: any[])
     if (application.availability) context += `Tillgänglighet: ${application.availability}\n`;
     if (application.work_schedule) context += `Önskade arbetstider: ${application.work_schedule}\n`;
     
-    // Custom answers
+    // Custom answers to job questions
     if (application.custom_answers && typeof application.custom_answers === 'object') {
       context += '\n--- Svar på jobbfrågor ---\n';
       for (const [questionId, answer] of Object.entries(application.custom_answers)) {
         const question = questions?.find((q: any) => q.id === questionId);
         if (question) {
-          context += `Fråga: ${question.question_text}\n`;
-          context += `Svar: ${answer}\n\n`;
+          context += `Fråga: ${question.question_text}\nSvar: ${answer}\n\n`;
         }
       }
     }
     context += '\n';
   }
 
-  // CV info (if available as text)
-  if (application?.cv_url) {
-    context += '--- CV ---\n';
-    context += `CV finns uppladdad: ${application.cv_url}\n`;
-    context += '(CV-text är inte tillgänglig för analys i denna version)\n\n';
+  // CV Summary — the critical missing piece!
+  const summary = cvSummary || profileCv;
+  if (summary) {
+    context += '--- CV-analys ---\n';
+    
+    if (summary.is_valid_cv === false) {
+      context += `Dokumentstatus: Inget giltigt CV laddat upp (${summary.document_type || 'okänt dokument'})\n`;
+      context += 'OBS: Kandidaten har inte laddat upp ett giltigt CV. Basera bedömning på övrig tillgänglig information.\n';
+    } else {
+      if (summary.summary_text) {
+        context += `Sammanfattning: ${summary.summary_text}\n`;
+      }
+      
+      if (summary.key_points && Array.isArray(summary.key_points)) {
+        context += 'Nyckelkompetenser:\n';
+        for (const point of summary.key_points) {
+          const text = typeof point === 'string' ? point : point?.text;
+          if (text && !text.startsWith('Dokumenttyp:')) {
+            context += `  • ${text}\n`;
+          }
+        }
+      }
+    }
+    context += '\n';
+  } else {
+    context += '--- CV-analys ---\nInget CV har analyserats för denna kandidat.\n\n';
   }
 
   return context;
@@ -331,7 +422,7 @@ function buildJobContext(job: any, criteria: any[], questions: any[]): string {
   if (job.location) context += `Plats: ${job.location}\n`;
   
   if (questions && questions.length > 0) {
-    context += '\n--- Jobbfrågor som ställs ---\n';
+    context += '\n--- Jobbfrågor ---\n';
     for (const q of questions) {
       context += `- ${q.question_text}\n`;
     }
@@ -347,6 +438,8 @@ function buildJobContext(job: any, criteria: any[], questions: any[]): string {
   return context;
 }
 
+// ─── AI evaluation with tool calling ─────────────────────────────
+
 async function callLovableAI(
   apiKey: string,
   jobContext: string,
@@ -354,111 +447,131 @@ async function callLovableAI(
   criteria: any[]
 ): Promise<EvaluationResponse | null> {
   try {
-    // IMPORTANT: Summary and criteria evaluation are SEPARATE
-    // Summary = independent CV/profile analysis (like Teamtailor Co-pilot)
-    // Criteria = yes/no matching for quick filtering on Kanban cards
-    
-    // This function ONLY evaluates criteria - CV summary is handled separately by generate-cv-summary
-    const systemPrompt = `Du är en professionell rekryteringsassistent som ENDAST utvärderar urvalskriterier.
-
-DIN ENDA UPPGIFT: Utvärdera varje urvalskriterium och ge resultat:
-- "match" (✅) = konkret bevis hittades att kandidaten uppfyller kriteriet
-- "no_match" (❌) = bevis för motsatsen eller tydligt saknas
-
-VIKTIGT: Om du inte hittar information för ett kriterium, sätt result till "no_match" (inte "no_data").
-
-SVAR FORMAT (giltig JSON):
-{
-  "criteria_results": [
-    {
-      "criterion_id": "uuid",
-      "title": "Kriteriets titel", 
-      "result": "match" | "no_match",
-      "confidence": 0.0-1.0,
-      "reasoning": "Kort förklaring på svenska",
-      "source": "profile" | "application" | "answer" | "cv"
-    }
-  ]
-}
-
-REGLER:
-- Svara ENDAST med JSON
-- Utvärdera ENDAST de kriterier som anges
-- Var strikt - om information saknas = no_match
-- Skriv korta resonemang (max 1 mening)`;
-
-    const userPrompt = `${jobContext}\n\n${candidateContext}\n\nUtvärdera urvalskriterierna nedan. Svara ENDAST med JSON.`;
-
-    // Add criteria info for the response (if any exist)
-    const criteriaInfo = criteria.map(c => ({
+    const criteriaSchema = criteria.map(c => ({
       criterion_id: c.id,
       title: c.title,
       prompt: c.prompt,
     }));
 
-    // If no criteria, return early - nothing to evaluate
-    if (criteria.length === 0) {
-      return { criteria_results: [] };
-    }
+    const systemPrompt = `Du är en professionell rekryteringsassistent som utvärderar kandidater mot specifika urvalskriterier.
 
-    const criteriaSection = `\n\nKriterier att utvärdera:\n${JSON.stringify(criteriaInfo, null, 2)}`;
+DIN UPPGIFT: Utvärdera VARJE kriterium baserat på ALL tillgänglig information om kandidaten (profil, ansökan, jobbfrågesvar, CV-analys).
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+BEDÖMNINGSREGLER:
+- "match" = Konkret bevis hittades att kandidaten uppfyller kriteriet
+- "no_match" = Bevis saknas, motsägs, eller otillräcklig information
+- Confidence 0.0–1.0 (1.0 = 100% säker)
+- Source: var informationen hittades ("cv", "application", "profile", "answer", "multiple")
+- Reasoning: En kort mening på svenska som förklarar bedömningen
+
+VIKTIGT:
+- Var strikt men rättvis — saknad information = no_match med låg confidence
+- Om CV saknas, basera dig på övrig information men notera det i reasoning
+- Utvärdera VARJE kriterium separat
+- Skriv reasoning kort och konkret (max 1 mening)`;
+
+    const userPrompt = `${jobContext}\n\n${candidateContext}\n\nUtvärdera kandidaten mot varje urvalskriterium.`;
+
+    // Use tool calling for guaranteed structured output
+    const response = await fetchWithRetry(
+      'https://ai.gateway.lovable.dev/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          tools: [
+            {
+              type: 'function',
+              function: {
+                name: 'submit_evaluation',
+                description: 'Submit the evaluation results for all criteria',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    criteria_results: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          criterion_id: { type: 'string', description: 'The UUID of the criterion being evaluated' },
+                          title: { type: 'string', description: 'The title of the criterion' },
+                          result: { type: 'string', enum: ['match', 'no_match'], description: 'Whether the candidate matches this criterion' },
+                          confidence: { type: 'number', description: 'Confidence level 0.0 to 1.0' },
+                          reasoning: { type: 'string', description: 'Short explanation in Swedish (max 1 sentence)' },
+                          source: { type: 'string', enum: ['cv', 'application', 'profile', 'answer', 'multiple'], description: 'Where the evidence was found' },
+                        },
+                        required: ['criterion_id', 'title', 'result', 'confidence', 'reasoning', 'source'],
+                        additionalProperties: false,
+                      },
+                    },
+                  },
+                  required: ['criteria_results'],
+                  additionalProperties: false,
+                },
+              },
+            },
+          ],
+          tool_choice: { type: 'function', function: { name: 'submit_evaluation' } },
+          temperature: 0.2,
+        }),
       },
-      body: JSON.stringify({
-        model: 'openai/gpt-5',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { 
-            role: 'user', 
-            content: userPrompt + criteriaSection
-          },
-        ],
-        temperature: 0.3, // Lower temperature for more consistent results
-      }),
-    });
+      3, // 3 retries
+      1000
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Lovable AI error:', response.status, errorText);
-      
-      if (response.status === 429) {
-        console.error('Rate limit exceeded');
-      }
-      if (response.status === 402) {
-        console.error('Payment required');
-      }
-      
+      console.error('AI error:', response.status, errorText);
       return null;
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    
+    // Extract from tool call
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (toolCall?.function?.arguments) {
+      try {
+        const parsed = typeof toolCall.function.arguments === 'string'
+          ? JSON.parse(toolCall.function.arguments)
+          : toolCall.function.arguments;
+        
+        // Validate that all criterion IDs exist
+        const validIds = new Set(criteria.map(c => c.id));
+        const validResults = (parsed.criteria_results || []).filter(
+          (r: any) => validIds.has(r.criterion_id) && ['match', 'no_match'].includes(r.result)
+        );
 
-    if (!content) {
-      console.error('No content in AI response');
-      return null;
-    }
-
-    // Parse the JSON response
-    try {
-      // Try to extract JSON from the response (in case there's extra text)
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+        return { criteria_results: validResults };
+      } catch (parseError) {
+        console.error('Failed to parse tool call arguments:', parseError);
       }
-      return JSON.parse(content);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', content);
-      return null;
     }
 
+    // Fallback: try regular content (in case model didn't use tool calling)
+    const content = data.choices?.[0]?.message?.content;
+    if (content) {
+      try {
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return { criteria_results: parsed.criteria_results || [] };
+        }
+      } catch {
+        console.error('Failed to parse fallback content');
+      }
+    }
+
+    return null;
   } catch (error) {
-    console.error('Error calling Lovable AI:', error);
+    console.error('Error calling AI:', error);
     return null;
   }
 }
