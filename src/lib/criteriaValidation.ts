@@ -6,6 +6,13 @@ const OBVIOUS_DISCRIMINATION_PATTERNS = [
   { pattern: /\betnicitet\b|\bras\b|\bhudfärg\b/i, category: 'Etnisk diskriminering' },
   { pattern: /\bsexuell läggning\b|\bhomosexuell\b|\bheterosexuell\b|\bbisexuell\b/i, category: 'Diskriminering pga sexuell läggning' },
   { pattern: /\bgraviditet\b|\bgravid\b/i, category: 'Diskriminering pga graviditet' },
+  { pattern: /\bbög\b|\bbögig\b|\bbögar\b|\bflata\b|\bflator\b/i, category: 'Kränkande språk' },
+  { pattern: /\bhora\b|\bhoror\b|\bslampa\b|\bslampor\b/i, category: 'Kränkande språk' },
+  { pattern: /\bsvenne\b|\bblansen\b|\bneger\b|\bnegrer\b|\bsvartskalle\b/i, category: 'Rasistiskt språk' },
+  { pattern: /\bmån\b|\bmåste vara man\b|\bvara kvinna\b|\bvara man\b|\benbart män\b|\benbart kvinnor\b|\binga män\b|\binga kvinnor\b/i, category: 'Könsdiskriminering' },
+  { pattern: /\bhandikappad\b|\bhandikapp\b|\bfunktionshinder\b/i, category: 'Diskriminering pga funktionsnedsättning' },
+  { pattern: /\bmuslim\b|\bkristen\b|\bjude\b|\bjudar\b|\breligion\b/i, category: 'Diskriminering pga religion' },
+  { pattern: /\bålder\b|\bför gammal\b|\bför ung\b|\bmax \d+ år\b/i, category: 'Åldersdiskriminering' },
 ];
 
 // Common filler/nonsense words that aren't real criteria
@@ -67,17 +74,17 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
 
   // Must be at least 3 characters
   if (trimmed.length < 3) {
-    return { isValid: false, reason: 'Texten är för kort — skriv ett tydligt kriterium.' };
+    return { isValid: false, reason: 'Skriv ett tydligt kriterium.' };
   }
 
   // Check for repeated single character (e.g. "jjjjjj", "aaaa")
   if (/^(.)\1+$/i.test(trimmed)) {
-    return { isValid: false, reason: 'Texten verkar inte vara ett riktigt kriterium.' };
+    return { isValid: false, reason: 'Skriv ett riktigt kriterium.' };
   }
 
   // Check for random character spam — no vowels in 5+ chars
   if (trimmed.length >= 5 && !/[aeiouåäöy\s]/i.test(trimmed)) {
-    return { isValid: false, reason: 'Texten verkar inte vara meningsfull.' };
+    return { isValid: false, reason: 'Skriv ett meningsfullt kriterium.' };
   }
 
   // Check if it's just the same short pattern repeated (e.g. "abab", "jkjkjk")
@@ -86,7 +93,7 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
       const pattern = trimmed.slice(0, len);
       const repeated = pattern.repeat(Math.ceil(trimmed.length / len)).slice(0, trimmed.length);
       if (repeated.toLowerCase() === trimmed.toLowerCase()) {
-        return { isValid: false, reason: 'Texten verkar inte vara ett riktigt kriterium.' };
+        return { isValid: false, reason: 'Skriv ett riktigt kriterium.' };
       }
     }
   }
@@ -95,14 +102,14 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
 
   // Check if ALL words are filler/nonsense words
   if (words.length > 0 && words.every(w => FILLER_WORDS.has(w))) {
-    return { isValid: false, reason: 'Skriv ett tydligt och specifikt urvalskriterium.' };
+    return { isValid: false, reason: 'Skriv ett tydligt urvalskriterium.' };
   }
 
   // Check if it's the same word repeated
   if (words.length >= 2) {
     const uniqueWords = new Set(words);
     if (uniqueWords.size === 1) {
-      return { isValid: false, reason: 'Texten verkar inte vara ett riktigt kriterium.' };
+      return { isValid: false, reason: 'Skriv ett riktigt kriterium.' };
     }
   }
 
@@ -111,18 +118,18 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
   if (words.length >= 1) {
     const gibberishWords = words.filter(w => w.length >= 3 && isGibberishWord(w));
     if (gibberishWords.length > 0) {
-      return { isValid: false, reason: 'AI-instruktionen innehåller oläsbara ord — formulera ett tydligt krav.' };
+      return { isValid: false, reason: 'Formulera ett tydligt krav utan oläsbara ord.' };
     }
   }
 
   // Too short to be a meaningful criterion
   if (trimmed.length < 5) {
-    return { isValid: false, reason: 'Kriteriet är för kort — beskriv tydligare vad du söker.' };
+    return { isValid: false, reason: 'Skriv ett tydligt kriterium.' };
   }
 
   // Minimum word count — a real AI instruction needs at least 2 words
   if (words.length < 2) {
-    return { isValid: false, reason: 'Beskriv mer detaljerat vad AI:n ska leta efter.' };
+    return { isValid: false, reason: 'Beskriv tydligare vad AI:n ska leta efter.' };
   }
 
   return { isValid: true };
