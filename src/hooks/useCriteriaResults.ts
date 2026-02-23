@@ -228,7 +228,7 @@ export function useEvaluateAllCandidates() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['criteria-results'] });
       queryClient.invalidateQueries({ queryKey: ['candidate-summaries'] });
-      toast.success('Utvärdering klar för alla kandidater');
+      queryClient.invalidateQueries({ queryKey: ['job-applications'] });
     },
     onError: (error) => {
       console.error('Batch evaluation error:', error);
