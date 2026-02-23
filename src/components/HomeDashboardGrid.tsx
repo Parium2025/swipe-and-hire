@@ -1030,7 +1030,7 @@ const InterviewsCard = memo(() => {
         </div>
         
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {upcomingInterviews.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <Calendar className="h-8 w-8 text-white mb-2" />
