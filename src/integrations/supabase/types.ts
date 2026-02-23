@@ -193,6 +193,7 @@ export type Database = {
           id: string
           job_id: string
           key_points: Json | null
+          raw_text: string | null
           summary_text: string
           updated_at: string
         }
@@ -204,6 +205,7 @@ export type Database = {
           id?: string
           job_id: string
           key_points?: Json | null
+          raw_text?: string | null
           summary_text: string
           updated_at?: string
         }
@@ -215,6 +217,7 @@ export type Database = {
           id?: string
           job_id?: string
           key_points?: Json | null
+          raw_text?: string | null
           summary_text?: string
           updated_at?: string
         }
@@ -388,6 +391,67 @@ export type Database = {
           },
           {
             foreignKeyName: "conversations_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      criterion_feedback: {
+        Row: {
+          ai_result: string
+          applicant_id: string
+          corrected_result: string
+          created_at: string
+          criterion_id: string
+          evaluation_id: string
+          id: string
+          job_id: string
+          recruiter_id: string
+          recruiter_note: string | null
+        }
+        Insert: {
+          ai_result: string
+          applicant_id: string
+          corrected_result: string
+          created_at?: string
+          criterion_id: string
+          evaluation_id: string
+          id?: string
+          job_id: string
+          recruiter_id: string
+          recruiter_note?: string | null
+        }
+        Update: {
+          ai_result?: string
+          applicant_id?: string
+          corrected_result?: string
+          created_at?: string
+          criterion_id?: string
+          evaluation_id?: string
+          id?: string
+          job_id?: string
+          recruiter_id?: string
+          recruiter_note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "criterion_feedback_criterion_id_fkey"
+            columns: ["criterion_id"]
+            isOneToOne: false
+            referencedRelation: "job_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "criterion_feedback_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_evaluations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "criterion_feedback_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "job_postings"
@@ -1632,6 +1696,7 @@ export type Database = {
           id: string
           is_valid_cv: boolean
           key_points: Json | null
+          raw_text: string | null
           summary_text: string | null
           updated_at: string
           user_id: string
@@ -1644,6 +1709,7 @@ export type Database = {
           id?: string
           is_valid_cv?: boolean
           key_points?: Json | null
+          raw_text?: string | null
           summary_text?: string | null
           updated_at?: string
           user_id: string
@@ -1656,6 +1722,7 @@ export type Database = {
           id?: string
           is_valid_cv?: boolean
           key_points?: Json | null
+          raw_text?: string | null
           summary_text?: string | null
           updated_at?: string
           user_id?: string
