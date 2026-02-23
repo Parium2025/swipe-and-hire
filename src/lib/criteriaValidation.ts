@@ -3,60 +3,148 @@ import { supabase } from '@/integrations/supabase/client';
 // Client-side quick check — lightweight heuristic only
 // Real discrimination detection is done by AI on the backend
 const OBVIOUS_DISCRIMINATION_PATTERNS = [
-  // === SWEDISH — Ethnicity / Race ===
-  { pattern: /\betnicitet\b|\bras\b|\bhudfärg\b|\binvandrare?\b|\butlänning\b|\butlänningar\b|\binvandrar\w*/i, category: 'Etnisk diskriminering' },
-  { pattern: /\bsvenne\b|\bblansen\b|\bneger\b|\bnegrer\b|\bsvartskalle\b|\bblatte\b|\bblattar\b|\bzigenare?\b|\bromer\b/i, category: 'Rasistiskt språk' },
-  { pattern: /\bapor?\b|\babor?\b|\bbabbe?\b|\bkanake?\b/i, category: 'Rasistiskt språk' },
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  SWEDISH                                                 ║
+  // ╚══════════════════════════════════════════════════════════╝
 
-  // === SWEDISH — Gender / Sexuality ===
-  { pattern: /\bsexuell läggning\b|\bhomosexuell\b|\bheterosexuell\b|\bbisexuell\b|\btranssexuell\b/i, category: 'Diskriminering pga sexuell läggning' },
-  { pattern: /\bbög\b|\bbögig\b|\bbögar\b|\bflata\b|\bflator\b|\btransa?\b|\btrans\b/i, category: 'Kränkande språk' },
-  { pattern: /\bmåste vara man\b|\bvara kvinna\b|\bvara man\b|\benbart män\b|\benbart kvinnor\b|\binga män\b|\binga kvinnor\b|\bkön\b/i, category: 'Könsdiskriminering' },
+  // --- Ethnicity / Race / Nationality ---
+  { pattern: /\betnicitet\b|\bras\b|\bhudfärg\b|\bhudfärgen\b|\brasism\b|\brasist\b/i, category: 'Etnisk diskriminering' },
+  { pattern: /\binvandrare?\b|\butlänning\b|\butlänningar\b|\binvandrar\w*|\bflykting\w*|\basylsökande\b/i, category: 'Etnisk diskriminering' },
+  { pattern: /\bsvensk bakgrund\b|\butländsk bakgrund\b|\bsvensk härkomst\b|\butländsk härkomst\b/i, category: 'Etnisk diskriminering' },
+  { pattern: /\bsvenne\b|\bsvennar\b|\bblansen\b|\bneger\b|\bnegrer\b|\bnegress\b/i, category: 'Rasistiskt språk' },
+  { pattern: /\bsvartskalle\b|\bsvartskallar\b|\bblatte\b|\bblattar\b|\bzigenare?\b|\bromer\b/i, category: 'Rasistiskt språk' },
+  { pattern: /\bkanake?\b|\bkanaker\b|\bbabbe?\b|\bbabbar\b|\babor?\b|\bapor?\b/i, category: 'Rasistiskt språk' },
+  { pattern: /\bfittstansen?\b|\bsandneger\b|\bkamelfösare?\b|\bturk\b|\bturkar\b|\bpolack\b|\bpolackar\b/i, category: 'Rasistiskt språk' },
+  { pattern: /\bkines\b|\bkineser\b|\bgulingar?\b|\bfinne\b|\bfinnar\b|\bfinnjävel\b/i, category: 'Rasistiskt språk' },
+  { pattern: /\bvitaskal\b|\bvitfigur\b|\bfärgling\b|\bsvart\b(?=\s*(person|människa|folk))/i, category: 'Rasistiskt språk' },
 
-  // === SWEDISH — Pregnancy ===
-  { pattern: /\bgraviditet\b|\bgravid\b|\bbarnledig\b|\bföräldraledig\b|\bmammaled\w*\b|\bpappaledig\b/i, category: 'Diskriminering pga graviditet/föräldraskap' },
+  // --- Gender / Sexuality ---
+  { pattern: /\bsexuell läggning\b|\bhomosexuell\b|\bheterosexuell\b|\bbisexuell\b|\btranssexuell\b|\basexuell\b/i, category: 'Diskriminering pga sexuell läggning' },
+  { pattern: /\bbög\b|\bbögig\b|\bbögar\b|\bbögarna\b|\bflata\b|\bflator\b|\bflatorna\b/i, category: 'Kränkande språk' },
+  { pattern: /\btransa?\b|\btransor\b|\btrans\b|\bkönsidentitet\b|\bickebinär\b|\bnon-?binär\b/i, category: 'Kränkande språk' },
+  { pattern: /\blesb\w*\b|\bgay\b|\bqueer\b|\bhbtq\w*\b/i, category: 'Diskriminering pga sexuell läggning' },
+  { pattern: /\bmåste vara man\b|\bvara kvinna\b|\bvara man\b|\benbart män\b|\benbart kvinnor\b/i, category: 'Könsdiskriminering' },
+  { pattern: /\binga män\b|\binga kvinnor\b|\bkön\b|\bkönet\b|\bkönstillhörighet\b/i, category: 'Könsdiskriminering' },
+  { pattern: /\bmanlig\b|\bkvinnlig\b|\bmanligt\b|\bkvinnligt\b/i, category: 'Könsdiskriminering' },
 
-  // === SWEDISH — Age ===
-  { pattern: /\bålder\b|\bför gammal\b|\bför ung\b|\bmax \d+ år\b|\bung\b|\bunga\b|\bgammal\b|\bgamla\b|\bpensionär\b|\btonåring\b/i, category: 'Åldersdiskriminering' },
+  // --- Pregnancy / Parenthood ---
+  { pattern: /\bgraviditet\b|\bgravid\b|\bbarnledig\b|\bföräldraledig\b|\bföräldraledighet\b/i, category: 'Diskriminering pga graviditet/föräldraskap' },
+  { pattern: /\bmammaled\w*\b|\bpappaledig\b|\bpappaledighet\b|\bvab\b|\bsmåbarnsförälder\b/i, category: 'Diskriminering pga graviditet/föräldraskap' },
+  { pattern: /\bbarnfri\b|\binga barn\b|\bhar barn\b|\bplanerar barn\b/i, category: 'Diskriminering pga föräldraskap' },
 
-  // === SWEDISH — Disability ===
-  { pattern: /\bhandikappad\b|\bhandikapp\b|\bfunktionshinder\b|\bfunktionsnedsättning\b|\binvalid\b|\bcp-skadad\b/i, category: 'Diskriminering pga funktionsnedsättning' },
+  // --- Age ---
+  { pattern: /\bålder\b|\båldern\b|\båldersgräns\b|\bfödelseår\b|\bfödd\b/i, category: 'Åldersdiskriminering' },
+  { pattern: /\bför gammal\b|\bför ung\b|\bmax \d+ år\b|\bmin \d+ år\b/i, category: 'Åldersdiskriminering' },
+  { pattern: /\bung\b|\bunga\b|\bgammal\b|\bgamla\b|\bpensionär\b|\bpensionärer\b|\btonåring\b|\btonåringar\b/i, category: 'Åldersdiskriminering' },
+  { pattern: /\bmedelålders\b|\bsenior\b|\bjunior\b(?!\s*(utvecklare|designer|konsult))/i, category: 'Åldersdiskriminering' },
+  { pattern: /\bnyexaminerad\b|\bnyutexaminerad\b/i, category: 'Åldersdiskriminering' },
 
-  // === SWEDISH — Religion ===
-  { pattern: /\bmuslim\b|\bkristen\b|\bjude\b|\bjudar\b|\breligion\b|\bateist\b|\bhijab\b|\bslöja\b|\bmoské\b|\bkyrka\b|\bsynagoga\b/i, category: 'Diskriminering pga religion' },
+  // --- Disability ---
+  { pattern: /\bhandikappad\b|\bhandikappade\b|\bhandikapp\b|\bfunktionshinder\b|\bfunktionsnedsättning\b/i, category: 'Diskriminering pga funktionsnedsättning' },
+  { pattern: /\binvalid\b|\binvalider\b|\bcp-skadad\b|\brullstol\b|\brullstolsburen\b/i, category: 'Diskriminering pga funktionsnedsättning' },
+  { pattern: /\bblind\b|\bdöv\b|\bstum\b|\bhörselskadad\b|\bsynskadad\b|\brörelsehindrad\b/i, category: 'Diskriminering pga funktionsnedsättning' },
 
-  // === SWEDISH — Insults / Offensive ===
-  { pattern: /\bhora\b|\bhoror\b|\bslampa\b|\bslampor\b|\bfitta\b|\bkäring\b|\bkärring\b|\bluder\b/i, category: 'Kränkande språk' },
-  { pattern: /\bdum\b|\bdumma\b|\btaskig\b|\btaskiga\b|\bidiot\b|\bidioter\b|\bkorkad\b|\bpucko\b|\btönt\b|\bfånig\b|\bfåniga\b/i, category: 'Kränkande språk' },
-  { pattern: /\bjävel\b|\bjävla\b|\bfan\b|\bskit\b|\bskitunge\b|\bhorunge\b|\bkukhuvud\b|\bknull\b/i, category: 'Kränkande språk' },
+  // --- Religion ---
+  { pattern: /\bmuslim\b|\bmuslimer\b|\bislam\b|\bkristen\b|\bkristna\b|\bkristendom\b/i, category: 'Diskriminering pga religion' },
+  { pattern: /\bjude\b|\bjudar\b|\bjudendom\b|\bjudisk\b|\bateist\b|\bateister\b/i, category: 'Diskriminering pga religion' },
+  { pattern: /\bhijab\b|\bslöja\b|\bniqab\b|\bburka\b|\bturban\b|\bkippa\b/i, category: 'Diskriminering pga religion' },
+  { pattern: /\bmoské\b|\bkyrka\b|\bsynagoga\b|\btempel\b|\breligiös\b|\breligiösa\b|\btro\b|\btrosuppfattning\b/i, category: 'Diskriminering pga religion' },
+  { pattern: /\bbuddist\b|\bhindu\b|\bsikh\b|\bmormon\b|\bjehovas?\b/i, category: 'Diskriminering pga religion' },
+
+  // --- Swedish Insults / Offensive (extensive) ---
+  { pattern: /\bhora\b|\bhoror\b|\bhoran\b|\bhororna\b|\bslampa\b|\bslampor\b|\bslampan\b/i, category: 'Kränkande språk' },
+  { pattern: /\bfitta\b|\bfittan\b|\bfittor\b|\bkäring\b|\bkärring\b|\bkärringar\b|\bluder\b|\bludder\b/i, category: 'Kränkande språk' },
+  { pattern: /\bkuk\b|\bkuken\b|\bkukhuvud\b|\bpitt\b|\bröv\b|\bröven\b|\brövar\b|\brövhål\b/i, category: 'Kränkande språk' },
+  { pattern: /\bdum\b|\bdumma\b|\bdumme\b|\bdummerjöns\b|\bdumbom\b/i, category: 'Kränkande språk' },
+  { pattern: /\btaskig\b|\btaskiga\b|\btaskigt\b|\bidiot\b|\bidioter\b|\bidioten\b|\bidiotisk\b/i, category: 'Kränkande språk' },
+  { pattern: /\bkorkad\b|\bkorkade\b|\bpucko\b|\btönt\b|\btöntar\b|\btöntig\b/i, category: 'Kränkande språk' },
+  { pattern: /\bfånig\b|\bfåniga\b|\bfåne\b|\bfånar\b|\blåtsas\b/i, category: 'Kränkande språk' },
+  { pattern: /\bjävel\b|\bjävla\b|\bjävlar\b|\bjävligt\b|\bfan\b|\bfasen\b|\bsatan\b/i, category: 'Kränkande språk' },
+  { pattern: /\bskit\b|\bskitunge\b|\bskitstövel\b|\bskithög\b|\bskitsnack\b/i, category: 'Kränkande språk' },
+  { pattern: /\bhorunge\b|\bhorsyster\b|\bjävlafitta\b|\bjävlaskit\b/i, category: 'Kränkande språk' },
+  { pattern: /\bknull\b|\bknulla\b|\bknullad\b|\brunka\b|\brunkar\b/i, category: 'Kränkande språk' },
   { pattern: /\bcp\b|\bmongo\b|\bmongoloida?\b|\befter\w*bliven\b|\bmentalt sjuk\b/i, category: 'Kränkande språk' },
+  { pattern: /\bpsykfall\b|\bpsyko\b|\bgalenskap\b|\bsinnessjuk\b|\btokig\b|\btokiga\b/i, category: 'Kränkande språk' },
+  { pattern: /\bluffare?\b|\blögnare?\b|\bbedragare?\b|\bparasit\b|\bparasiter\b/i, category: 'Kränkande språk' },
+  { pattern: /\bful\b|\bfula\b|\bfult\b|\btjock\b|\btjocka\b|\btjockt\b|\bfet\b|\bfeta\b|\bfett\b/i, category: 'Kränkande språk' },
+  { pattern: /\bsmal\b|\bsmala\b|\bmager\b|\bmagra\b|\banorektisk\b|\bövervik\w*\b/i, category: 'Kränkande språk' },
+  { pattern: /\bvärdelös\b|\bvärdelösa\b|\bonödig\b|\bonödiga\b|\binkompetent\b|\binkompetenta\b/i, category: 'Kränkande språk' },
+  { pattern: /\bäcklig\b|\bäckliga\b|\bäckel\b|\bvidrigt?\b|\bmotbjudande\b/i, category: 'Kränkande språk' },
+  { pattern: /\bhatad\b|\bhatade\b|\bhata\b|\bhatar\b|\bavsky\b|\bförakt\b/i, category: 'Kränkande språk' },
+  { pattern: /\blat\b|\blata\b|\blatsas\b|\bslö\b|\bslöa\b|\bdålig\b|\bdåliga\b/i, category: 'Kränkande språk' },
 
-  // === ENGLISH — Race / Ethnicity ===
-  { pattern: /\bnigg(?:er|a|as|ers)\b|\bcoon\b|\bspic\b|\bwetback\b|\bgook\b|\bchink\b|\bjap\b|\bkike\b|\bwop\b/i, category: 'Racist language' },
-  { pattern: /\bethnicity\b|\brace\b|\bskin color\b|\bskin colour\b|\bforeigner\b|\bimmigrant\b|\balien\b/i, category: 'Ethnic discrimination' },
-  { pattern: /\bwhite only\b|\bblacks? only\b|\bno blacks\b|\bno whites\b|\bno asians\b|\bno mexicans\b/i, category: 'Racist language' },
+  // --- Swedish — Appearance / Body ---
+  { pattern: /\butseende\b|\butseendet\b|\bsnygg\b|\bsnygga\b|\battraktiv\b|\battraktiva\b/i, category: 'Diskriminering pga utseende' },
+  { pattern: /\bvacker\b|\bvackra\b|\bsöt\b|\bsöta\b|\bläcker\b|\bläckra\b/i, category: 'Diskriminering pga utseende' },
 
-  // === ENGLISH — Gender / Sexuality ===
-  { pattern: /\bfagg?ot\b|\bdyke\b|\btranny\b|\bshemale\b|\bqueer\b/i, category: 'Offensive language' },
+  // --- Swedish — Political views ---
+  { pattern: /\bpolitisk\b|\bpolitiska\b|\bpolitisk tillhörighet\b|\bpartitillhörighet\b/i, category: 'Diskriminering pga politisk åsikt' },
+  { pattern: /\bsocialist\b|\bkommunist\b|\bnazist\b|\bfascist\b|\bhögerextrem\b|\bvänsterextrem\b/i, category: 'Diskriminering pga politisk åsikt' },
+
+  // --- Swedish — Marital / Family status ---
+  { pattern: /\bcivil ?stånd\b|\bogift\b|\bgift\b|\bskild\b|\bfrånskild\b|\bänka\b|\bänkling\b|\bsambo\b|\bensamstående\b/i, category: 'Diskriminering pga civilstånd' },
+
+  // ╔══════════════════════════════════════════════════════════╗
+  // ║  ENGLISH                                                 ║
+  // ╚══════════════════════════════════════════════════════════╝
+
+  // --- Race / Ethnicity ---
+  { pattern: /\bnigg(?:er|a|as|ers|let)\b|\bcoon\b|\bcoons\b|\bspic\b|\bspics\b|\bwetback\b|\bwetbacks\b/i, category: 'Racist language' },
+  { pattern: /\bgook\b|\bgooks\b|\bchink\b|\bchinks\b|\bjap\b|\bjaps\b|\bkike\b|\bkikes\b|\bwop\b|\bwops\b/i, category: 'Racist language' },
+  { pattern: /\bdarkie\b|\bsandnigg\w*\b|\btowelhead\b|\braghead\b|\bcamel ?jockey\b/i, category: 'Racist language' },
+  { pattern: /\bredskin\b|\bpaki\b|\bpakis\b|\bjungle ?bunny\b|\bporchmonkey\b/i, category: 'Racist language' },
+  { pattern: /\bethnicity\b|\brace\b|\bracial\b|\bskin color\b|\bskin colour\b|\bnationality\b/i, category: 'Ethnic discrimination' },
+  { pattern: /\bforeigner\b|\bforeigners\b|\bimmigrant\b|\bimmigrants\b|\balien\b|\baliens\b|\billegal\b/i, category: 'Ethnic discrimination' },
+  { pattern: /\bwhite only\b|\bblacks? only\b|\bno blacks\b|\bno whites\b|\bno asians\b|\bno mexicans\b|\bno arabs\b/i, category: 'Racist language' },
+  { pattern: /\bwhite suprema\w*\b|\bwhite power\b|\baryan\b|\bnazi\b|\bnazis\b|\bneonazi\b/i, category: 'Racist language' },
+
+  // --- Gender / Sexuality ---
+  { pattern: /\bfagg?ot\b|\bfagg?ots\b|\bdyke\b|\bdykes\b|\btranny\b|\btrannies\b|\bshemale\b/i, category: 'Offensive language' },
   { pattern: /\bsexual orientation\b|\bhomosexual\b|\bheterosexual\b|\bbisexual\b|\btransgender\b/i, category: 'Sexual orientation discrimination' },
-  { pattern: /\bmales? only\b|\bfemales? only\b|\bno women\b|\bno men\b|\bmen only\b|\bwomen only\b|\bgender\b/i, category: 'Gender discrimination' },
+  { pattern: /\bmales? only\b|\bfemales? only\b|\bno women\b|\bno men\b|\bmen only\b|\bwomen only\b/i, category: 'Gender discrimination' },
+  { pattern: /\bgender\b|\bgender identity\b|\bsex\b(?=\s*(only|required|preferred))/i, category: 'Gender discrimination' },
+  { pattern: /\blesbian\b|\blesbians\b|\bgay\b|\bgays\b|\bqueer\b|\bqueers\b|\blgbt\w*\b/i, category: 'Sexual orientation discrimination' },
 
-  // === ENGLISH — Pregnancy ===
-  { pattern: /\bpregnant\b|\bpregnancy\b|\bmaternity\b|\bpaternity leave\b/i, category: 'Pregnancy discrimination' },
+  // --- Pregnancy ---
+  { pattern: /\bpregnant\b|\bpregnancy\b|\bmaternity\b|\bpaternity leave\b|\bchild-?free\b|\bchildless\b/i, category: 'Pregnancy discrimination' },
 
-  // === ENGLISH — Age ===
-  { pattern: /\byoung\b|\byoung only\b|\bold\b|\btoo old\b|\btoo young\b|\bage limit\b|\bmax age\b|\bmin age\b|\bmillennial\b|\bboomer\b/i, category: 'Age discrimination' },
+  // --- Age ---
+  { pattern: /\byoung\b|\byoung only\b|\bold\b|\btoo old\b|\btoo young\b|\bage limit\b|\bmax age\b|\bmin age\b/i, category: 'Age discrimination' },
+  { pattern: /\bmillennial\b|\bmillennials\b|\bboomer\b|\bboomers\b|\bgen ?z\b|\belderly\b/i, category: 'Age discrimination' },
 
-  // === ENGLISH — Disability ===
-  { pattern: /\bdisabled\b|\bdisability\b|\bcripple\b|\bhandicapped\b|\bretard\b|\bretarded\b|\bmentally ill\b/i, category: 'Disability discrimination' },
+  // --- Disability ---
+  { pattern: /\bdisabled\b|\bdisability\b|\bcripple\b|\bcrippled\b|\bhandicapped\b/i, category: 'Disability discrimination' },
+  { pattern: /\bretard\b|\bretarded\b|\bretards\b|\bmentally ill\b|\bmental illness\b|\binsane\b|\bcrazy\b|\blunatic\b/i, category: 'Disability discrimination' },
+  { pattern: /\bdeaf\b|\bblind\b|\bmute\b|\bwheelchair\b/i, category: 'Disability discrimination' },
 
-  // === ENGLISH — Religion ===
-  { pattern: /\breligion\b|\bmuslim\b|\bchristian\b|\bjewish\b|\batheist\b|\bhijab\b|\bmosque\b|\bchurch\b|\bsynagogue\b/i, category: 'Religious discrimination' },
+  // --- Religion ---
+  { pattern: /\breligion\b|\breligious\b|\bmuslim\b|\bmuslims\b|\bchristian\b|\bchristians\b/i, category: 'Religious discrimination' },
+  { pattern: /\bjewish\b|\bjews\b|\batheist\b|\batheists\b|\bhijab\b|\bmosque\b|\bchurch\b|\bsynagogue\b/i, category: 'Religious discrimination' },
+  { pattern: /\bbuddhist\b|\bhindu\b|\bsikh\b|\bmormon\b|\bjehovah\b|\bscientolog\w*\b/i, category: 'Religious discrimination' },
 
-  // === ENGLISH — Insults / Offensive ===
-  { pattern: /\bbitch\b|\bwhore\b|\bslut\b|\bcunt\b|\bdick\b|\basshole\b|\bbastard\b|\bfuck\b|\bfucking\b|\bshit\b|\bdamn\b/i, category: 'Offensive language' },
-  { pattern: /\bstupid\b|\bidiot\b|\bmoron\b|\bdumb\b|\bimbecile\b|\bcretin\b|\bincompetent\b|\buseless\b|\bpathetic\b/i, category: 'Offensive language' },
-  { pattern: /\bugly\b|\bfat\b|\bskinny\b|\bobese\b|\banorexic\b/i, category: 'Offensive language' },
+  // --- English Insults / Offensive (extensive) ---
+  { pattern: /\bbitch\b|\bbitches\b|\bwhore\b|\bwhores\b|\bslut\b|\bsluts\b|\bcunt\b|\bcunts\b/i, category: 'Offensive language' },
+  { pattern: /\bdick\b|\bdicks\b|\bdickhead\b|\basshole\b|\bassholes\b|\bbastard\b|\bbastards\b/i, category: 'Offensive language' },
+  { pattern: /\bfuck\b|\bfucking\b|\bfucked\b|\bfucker\b|\bfuckers\b|\bmotherfuck\w*\b/i, category: 'Offensive language' },
+  { pattern: /\bshit\b|\bshitty\b|\bshithead\b|\bbullshit\b|\bhorseshit\b|\bdamn\b|\bdamned\b/i, category: 'Offensive language' },
+  { pattern: /\bstupid\b|\bidiot\b|\bidiots\b|\bidiotic\b|\bmoron\b|\bmorons\b|\bmoronic\b/i, category: 'Offensive language' },
+  { pattern: /\bdumb\b|\bdumbass\b|\bimbecile\b|\bcretin\b|\bincompetent\b|\buseless\b|\bpathetic\b/i, category: 'Offensive language' },
+  { pattern: /\bugly\b|\bfat\b|\bfatty\b|\bskinny\b|\bobese\b|\banorexic\b|\boverweight\b|\bunattractive\b/i, category: 'Offensive language' },
+  { pattern: /\bloser\b|\blosers\b|\bworthless\b|\btrash\b|\bgarbage\b|\bscum\b|\bscumbag\b/i, category: 'Offensive language' },
+  { pattern: /\blazy\b|\bstupidity\b|\bignorant\b|\bignorance\b|\bdisgust\w*\b/i, category: 'Offensive language' },
+  { pattern: /\bhate\b|\bhated\b|\bhater\b|\bhaters\b|\bhateful\b|\bdespise\b/i, category: 'Offensive language' },
+  { pattern: /\bpussy\b|\bpussies\b|\bwanker\b|\bwankers\b|\btosser\b|\btossers\b|\btwat\b|\btwats\b/i, category: 'Offensive language' },
+  { pattern: /\bprick\b|\bpricks\b|\bbollocks\b|\bknob\b|\bknobhead\b|\bbellend\b/i, category: 'Offensive language' },
+
+  // --- English — Appearance / Body ---
+  { pattern: /\battractiveness\b|\bappearance\b|\blooks\b|\bhot\b(?=\s*(only|required|preferred))/i, category: 'Appearance discrimination' },
+  { pattern: /\bbeautiful\b|\bhandsome\b|\bpretty\b|\bgood.?looking\b/i, category: 'Appearance discrimination' },
+
+  // --- English — Marital / Family status ---
+  { pattern: /\bmarital status\b|\bmarried\b|\bsingle\b|\bdivorced\b|\bwidow\b|\bwidower\b/i, category: 'Marital status discrimination' },
+
+  // --- English — Political views ---
+  { pattern: /\bpolitical\b|\bpolitical views\b|\brepublican\b|\bdemocrat\b|\bconservative\b|\bliberal\b/i, category: 'Political discrimination' },
 ];
 
 // Common filler/nonsense words that aren't real criteria
