@@ -317,15 +317,14 @@ export function SelectionCriteriaDialog({
           .in('id', emptyIds);
       }
 
-      toast.success(`${validCriteria.length} kriterier sparade`);
-      
-      if (candidates.length > 0) {
-        toast.info('AI börjar utvärdera kandidater...');
-        evaluateAllCandidates.mutate({ jobId, candidates });
-      }
-      
+      // Close dialog immediately — results appear via realtime
       onActivate?.(validCriteria.length);
       onOpenChange(false);
+      
+      // Start evaluation silently in background
+      if (candidates.length > 0) {
+        evaluateAllCandidates.mutate({ jobId, candidates });
+      }
     } catch (error) {
       console.error('Error saving criteria:', error);
       toast.error('Kunde inte spara kriterier');
