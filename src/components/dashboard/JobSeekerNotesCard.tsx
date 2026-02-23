@@ -4,18 +4,18 @@ import { FileText, X, Maximize2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
 import type { Editor } from '@tiptap/react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNotesSync } from '@/hooks/useNotesSync';
 import { GRADIENTS } from './dashboardConstants';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
-type NoteData = { id: string; user_id: string; content: string | null; created_at: string; updated_at: string } | null;
-
 export const JobSeekerNotesCard = memo(() => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const hasLocalEditsRef = useRef(false);
+  const { content, isSaving, saveFailed, lastSaved, handleChange } = useNotesSync({
+    table: 'jobseeker_notes',
+    ownerColumn: 'user_id',
+    cachePrefix: 'jobseeker_notes_cache',
+    queryKey: 'jobseeker-notes',
+  });
+
   const [notesEditor, setNotesEditor] = useState<Editor | null>(null);
   const [expandedEditor, setExpandedEditor] = useState<Editor | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -23,109 +23,6 @@ export const JobSeekerNotesCard = memo(() => {
   const expandedTrackRef = useRef<HTMLDivElement>(null);
   const expandedThumbRef = useRef<HTMLDivElement>(null);
   const expandedRafRef = useRef<number>(0);
-
-  const cacheKey = user?.id ? `jobseeker_notes_cache_${user.id}` : 'jobseeker_notes_cache';
-
-  const [content, setContent] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    if (user?.id) {
-      return localStorage.getItem(`jobseeker_notes_cache_${user.id}`) || '';
-    }
-    return localStorage.getItem('jobseeker_notes_cache') || '';
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-
-  // When user becomes available, load their specific cache
-  useEffect(() => {
-    if (typeof window === 'undefined' || !user?.id) return;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached !== null && !hasLocalEditsRef.current) {
-      setContent(cached);
-    }
-  }, [cacheKey, user?.id]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !user?.id) return;
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === cacheKey && typeof e.newValue === 'string') {
-        if (!hasLocalEditsRef.current) {
-          setContent(e.newValue);
-        }
-      }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, [cacheKey, user?.id]);
-
-  const { data: noteData, isFetched } = useQuery<NoteData>({
-    queryKey: ['jobseeker-notes', user?.id],
-    queryFn: async (): Promise<NoteData> => {
-      const { data, error } = await supabase
-        .from('jobseeker_notes')
-        .select('id, user_id, content, created_at, updated_at')
-        .eq('user_id', user!.id)
-        .maybeSingle();
-      if (error) throw error;
-      return data as NoteData;
-    },
-    enabled: !!user?.id,
-    staleTime: 30000,
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !user?.id) return;
-    if (!noteData) return;
-    const serverContent = noteData.content ?? '';
-    localStorage.setItem(cacheKey, serverContent);
-    if (!hasLocalEditsRef.current) {
-      setContent(serverContent);
-    }
-  }, [noteData, cacheKey, user?.id]);
-
-  // Realtime sync — listen for changes from other devices
-  useEffect(() => {
-    if (!user?.id) return;
-    const channel = supabase
-      .channel(`jobseeker-notes-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'jobseeker_notes',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          // Only apply if we don't have local unsaved edits
-          if (!hasLocalEditsRef.current) {
-            const newContent = (payload.new as any)?.content ?? '';
-            setContent(newContent);
-            if (typeof window !== 'undefined') {
-              localStorage.setItem(cacheKey, newContent);
-            }
-          }
-          // Also invalidate the query so noteData stays fresh
-          queryClient.invalidateQueries({ queryKey: ['jobseeker-notes', user.id] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id, cacheKey, queryClient]);
-
-  const handleChange = useCallback(
-    (next: string) => {
-      hasLocalEditsRef.current = true;
-      setContent(next);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(cacheKey, next);
-      }
-    },
-    [cacheKey]
-  );
 
   const handleEditorReady = useCallback((editor: Editor) => { setNotesEditor(editor); }, []);
   const handleExpandedEditorReady = useCallback((editor: Editor) => { setExpandedEditor(editor); }, []);
@@ -150,7 +47,6 @@ export const JobSeekerNotesCard = memo(() => {
     thumb.style.height = `${thumbH}%`;
   }, []);
 
-  // Attach scroll listener — retry until element is mounted
   useEffect(() => {
     if (!isExpanded) return;
     let attempts = 0;
@@ -182,7 +78,6 @@ export const JobSeekerNotesCard = memo(() => {
     };
   }, [isExpanded, updateExpandedScrollbar]);
 
-  // Update scrollbar when content changes in expanded mode
   useEffect(() => {
     if (isExpanded) {
       updateExpandedScrollbar();
@@ -205,45 +100,12 @@ export const JobSeekerNotesCard = memo(() => {
     return { charCount, wordCount };
   }, [content]);
 
-  useEffect(() => {
-    if (!user?.id || !isFetched) return;
-    const serverContent = noteData?.content ?? '';
-    if (content === serverContent) return;
-
-    const timer = setTimeout(async () => {
-      if (!navigator.onLine) { console.log('Offline - skipping note save'); return; }
-      setIsSaving(true);
-      try {
-        let saveError;
-        if (noteData?.id) {
-          const { error } = await supabase.from('jobseeker_notes').update({ content }).eq('id', noteData.id);
-          saveError = error;
-        } else {
-          const { error } = await supabase.from('jobseeker_notes').insert({ user_id: user.id, content });
-          saveError = error;
-        }
-        if (saveError) {
-          console.error('❌ Note save failed:', saveError.message, saveError);
-          return;
-        }
-        hasLocalEditsRef.current = false;
-        setLastSaved(new Date());
-        console.log('✅ Note saved to database');
-        queryClient.invalidateQueries({ queryKey: ['jobseeker-notes', user.id] });
-      } catch (err) {
-        console.error('Failed to save note:', err);
-      } finally {
-        setIsSaving(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [content, user?.id, isFetched, noteData, queryClient]);
-
   const saveIndicator = (
     <span className="text-[11px] text-white font-medium">
       {isSaving ? (
         <span className="animate-pulse">Sparar...</span>
+      ) : saveFailed ? (
+        <span className="text-red-300">Kunde inte spara ✗</span>
       ) : lastSaved ? (
         'Sparat ✓'
       ) : null}
