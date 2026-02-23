@@ -602,13 +602,13 @@ const NotesCard = memo(() => {
       return data;
     },
     enabled: !!user?.id,
-    staleTime: Infinity,
+    staleTime: 30000,
   });
 
   // Sync server value into cache (and editor) once it arrives
   useEffect(() => {
     if (typeof window === 'undefined' || !user?.id) return;
-    if (!noteData) return; // keep local draft if no row exists yet
+    if (!noteData) return;
 
     const serverContent = typeof noteData.content === 'string' ? noteData.content : '';
     localStorage.setItem(cacheKey, serverContent);
@@ -617,6 +617,37 @@ const NotesCard = memo(() => {
       setContent(serverContent);
     }
   }, [noteData, cacheKey, user?.id]);
+
+  // Realtime sync — listen for changes from other devices
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`employer-notes-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'employer_notes',
+          filter: `employer_id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (!hasLocalEditsRef.current) {
+            const newContent = (payload.new as any)?.content ?? '';
+            setContent(newContent);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(cacheKey, newContent);
+            }
+          }
+          queryClient.invalidateQueries({ queryKey: ['employer-notes', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, cacheKey, queryClient]);
 
   const handleChange = useCallback(
     (next: string) => {
@@ -739,19 +770,26 @@ const NotesCard = memo(() => {
 
       setIsSaving(true);
       try {
+        let saveError;
         if (noteData?.id) {
-          await supabase
+          const { error } = await supabase
             .from('employer_notes')
             .update({ content })
             .eq('id', noteData.id);
+          saveError = error;
         } else {
-          await supabase
+          const { error } = await supabase
             .from('employer_notes')
             .insert({ employer_id: user.id, content });
+          saveError = error;
         }
-
+        if (saveError) {
+          console.error('❌ Employer note save failed:', saveError.message, saveError);
+          return;
+        }
         hasLocalEditsRef.current = false;
         setLastSaved(new Date());
+        console.log('✅ Employer note saved to database');
         queryClient.invalidateQueries({ queryKey: ['employer-notes', user.id] });
       } catch (err) {
         console.error('Failed to save note:', err);
