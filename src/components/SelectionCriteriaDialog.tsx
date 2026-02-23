@@ -430,7 +430,7 @@ export function SelectionCriteriaDialog({
             <button
               onClick={handleSaveAndActivate}
               disabled={isSaving || !hasValidCriteria || Object.keys(validationErrors).length > 0}
-              className="text-xs text-white hover:text-white/80 flex items-center gap-1.5 transition-colors disabled:opacity-30 font-medium"
+              className="py-2 px-6 rounded-lg border border-solid border-white/[0.15] hover:border-white/[0.30] text-xs text-white hover:text-white flex items-center gap-1.5 transition-all disabled:opacity-30 font-medium"
             >
               {isSaving ? (
                 <>
