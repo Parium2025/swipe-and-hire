@@ -6,13 +6,14 @@ const OBVIOUS_DISCRIMINATION_PATTERNS = [
   { pattern: /\betnicitet\b|\bras\b|\bhudfärg\b/i, category: 'Etnisk diskriminering' },
   { pattern: /\bsexuell läggning\b|\bhomosexuell\b|\bheterosexuell\b|\bbisexuell\b/i, category: 'Diskriminering pga sexuell läggning' },
   { pattern: /\bgraviditet\b|\bgravid\b/i, category: 'Diskriminering pga graviditet' },
-  { pattern: /\bbög\b|\bbögig\b|\bbögar\b|\bflata\b|\bflator\b/i, category: 'Kränkande språk' },
-  { pattern: /\bhora\b|\bhoror\b|\bslampa\b|\bslampor\b/i, category: 'Kränkande språk' },
-  { pattern: /\bsvenne\b|\bblansen\b|\bneger\b|\bnegrer\b|\bsvartskalle\b/i, category: 'Rasistiskt språk' },
+  { pattern: /\bbög\b|\bbögig\b|\bbögar\b|\bflata\b|\bflator\b|\btransa?\b/i, category: 'Kränkande språk' },
+  { pattern: /\bhora\b|\bhoror\b|\bslampa\b|\bslampor\b|\bfitta\b|\bkäring\b/i, category: 'Kränkande språk' },
+  { pattern: /\bdum\b|\bdumma\b|\btaskig\b|\btaskiga\b|\bidiot\b|\bidioter\b|\bkorkad\b|\bpucko\b/i, category: 'Kränkande språk' },
+  { pattern: /\bsvenne\b|\bblansen\b|\bneger\b|\bnegrer\b|\bsvartskalle\b|\bblatte\b|\bblattar\b/i, category: 'Rasistiskt språk' },
   { pattern: /\bmån\b|\bmåste vara man\b|\bvara kvinna\b|\bvara man\b|\benbart män\b|\benbart kvinnor\b|\binga män\b|\binga kvinnor\b/i, category: 'Könsdiskriminering' },
   { pattern: /\bhandikappad\b|\bhandikapp\b|\bfunktionshinder\b/i, category: 'Diskriminering pga funktionsnedsättning' },
   { pattern: /\bmuslim\b|\bkristen\b|\bjude\b|\bjudar\b|\breligion\b/i, category: 'Diskriminering pga religion' },
-  { pattern: /\bålder\b|\bför gammal\b|\bför ung\b|\bmax \d+ år\b/i, category: 'Åldersdiskriminering' },
+  { pattern: /\bålder\b|\bför gammal\b|\bför ung\b|\bmax \d+ år\b|\bung\b|\bunga\b|\bgammal\b|\bgamla\b/i, category: 'Åldersdiskriminering' },
 ];
 
 // Common filler/nonsense words that aren't real criteria

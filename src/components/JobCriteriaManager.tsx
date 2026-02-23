@@ -93,15 +93,16 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
   };
 
   const validatePrompt = (value: string) => {
-    // Prompt is the AI input — full quality + discrimination check
-    const quality = checkInputQuality(value);
-    if (!quality.isValid) {
-      setValidationError(quality.reason || 'Ogiltigt kriterium');
-      return false;
-    }
+    // Discrimination check FIRST — catches even single offensive words immediately
     const check = checkForDiscrimination(value);
     if (check.isDiscriminatory) {
       setValidationError(check.reason || 'Diskriminerande kriterium');
+      return false;
+    }
+    // Then quality check
+    const quality = checkInputQuality(value);
+    if (!quality.isValid) {
+      setValidationError(quality.reason || 'Ogiltigt kriterium');
       return false;
     }
     setValidationError(null);
