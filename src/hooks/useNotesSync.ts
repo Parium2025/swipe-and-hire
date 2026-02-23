@@ -200,6 +200,28 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => clearTimeout(timer);
   }, [content, user?.id, isFetched, noteData, queryClient, queryKey, saveToDb]);
 
+  // Retry queued save when coming back online
+  useEffect(() => {
+    if (!user?.id) return;
+    const handleOnline = async () => {
+      if (!hasLocalEditsRef.current) return;
+      console.log(`🔄 Back online — retrying ${table} save`);
+      setIsSaving(true);
+      const success = await saveToDb(contentRef.current);
+      if (success) {
+        hasLocalEditsRef.current = false;
+        setSaveFailed(false);
+        setLastSaved(new Date());
+        queryClient.invalidateQueries({ queryKey: [queryKey, user.id] });
+      } else {
+        setSaveFailed(true);
+      }
+      setIsSaving(false);
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [user?.id, saveToDb, queryClient, queryKey, table]);
+
   // beforeunload — flush unsaved changes immediately when closing tab
   useEffect(() => {
     if (!user?.id) return;
