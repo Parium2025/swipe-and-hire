@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { useEvaluateAllCandidates } from '@/hooks/useCriteriaResults';
-import { checkForDiscrimination, checkDiscriminationWithAI } from '@/lib/criteriaValidation';
+import { checkForDiscrimination, checkDiscriminationWithAI, checkInputQuality } from '@/lib/criteriaValidation';
 
 interface JobCriterion {
   id: string;
@@ -97,23 +97,27 @@ export function SelectionCriteriaDialog({
   };
 
   const validateInput = (id: string, title: string, prompt: string) => {
+    // Quality check — catches gibberish, repeated chars, too-short text
+    const titleQuality = checkInputQuality(title);
+    if (!titleQuality.isValid) {
+      setValidationErrors(prev => ({ ...prev, [id]: titleQuality.reason! }));
+      return false;
+    }
+    const promptQuality = checkInputQuality(prompt);
+    if (!promptQuality.isValid) {
+      setValidationErrors(prev => ({ ...prev, [id]: promptQuality.reason! }));
+      return false;
+    }
+
+    // Discrimination check
     const titleCheck = checkForDiscrimination(title);
-    const promptCheck = checkForDiscrimination(prompt);
-    
     if (titleCheck.isDiscriminatory) {
       setValidationErrors(prev => ({ ...prev, [id]: titleCheck.reason! }));
       return false;
     }
+    const promptCheck = checkForDiscrimination(prompt);
     if (promptCheck.isDiscriminatory) {
       setValidationErrors(prev => ({ ...prev, [id]: promptCheck.reason! }));
-      return false;
-    }
-    
-    if (prompt.length > 0 && prompt.length < 10 && !/[aeiouåäö]/i.test(prompt)) {
-      setValidationErrors(prev => ({ 
-        ...prev, 
-        [id]: 'Kriteriet verkar inte vara ett tydligt krav.' 
-      }));
       return false;
     }
     

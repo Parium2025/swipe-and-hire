@@ -9,6 +9,42 @@ const OBVIOUS_DISCRIMINATION_PATTERNS = [
 ];
 
 /**
+ * Check if text is gibberish or meaningless input.
+ * Catches repeated characters, random key mashing, too-short text, etc.
+ */
+export function checkInputQuality(text: string): { isValid: boolean; reason?: string } {
+  const trimmed = text.trim();
+  
+  // Must be at least 3 characters
+  if (trimmed.length > 0 && trimmed.length < 3) {
+    return { isValid: false, reason: 'Texten är för kort — skriv ett tydligt kriterium.' };
+  }
+
+  // Check for repeated single character (e.g. "jjjjjj", "aaaa")
+  if (trimmed.length >= 3 && /^(.)\1+$/i.test(trimmed)) {
+    return { isValid: false, reason: 'Texten verkar inte vara ett riktigt kriterium.' };
+  }
+
+  // Check for random character spam — no vowels in 5+ chars (e.g. "jkjkjk", "qwrtp")
+  if (trimmed.length >= 5 && !/[aeiouåäöy\s]/i.test(trimmed)) {
+    return { isValid: false, reason: 'Texten verkar inte vara meningsfull.' };
+  }
+
+  // Check if it's just the same short pattern repeated (e.g. "abab", "jkjkjk")
+  if (trimmed.length >= 4) {
+    for (let len = 1; len <= 3; len++) {
+      const pattern = trimmed.slice(0, len);
+      const repeated = pattern.repeat(Math.ceil(trimmed.length / len)).slice(0, trimmed.length);
+      if (repeated.toLowerCase() === trimmed.toLowerCase()) {
+        return { isValid: false, reason: 'Texten verkar inte vara ett riktigt kriterium.' };
+      }
+    }
+  }
+
+  return { isValid: true };
+}
+
+/**
  * Fast client-side check for obvious discrimination patterns.
  * Catches only the most blatant cases — backend AI handles nuanced detection.
  */

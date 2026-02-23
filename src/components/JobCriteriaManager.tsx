@@ -43,7 +43,7 @@ interface JobCriteriaManagerProps {
   onCriteriaChange?: () => void;
 }
 
-import { checkForDiscrimination, checkDiscriminationWithAI } from '@/lib/criteriaValidation';
+import { checkForDiscrimination, checkDiscriminationWithAI, checkInputQuality } from '@/lib/criteriaValidation';
 
 export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManagerProps) {
   const { user } = useAuth();
@@ -82,6 +82,11 @@ export function JobCriteriaManager({ jobId, onCriteriaChange }: JobCriteriaManag
   };
 
   const validateInput = (value: string) => {
+    const quality = checkInputQuality(value);
+    if (!quality.isValid) {
+      setValidationError(quality.reason || 'Ogiltigt kriterium');
+      return false;
+    }
     const check = checkForDiscrimination(value);
     if (check.isDiscriminatory) {
       setValidationError(check.reason || 'Diskriminerande kriterium');
