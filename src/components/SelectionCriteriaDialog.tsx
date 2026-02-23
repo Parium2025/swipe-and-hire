@@ -104,15 +104,16 @@ export function SelectionCriteriaDialog({
       return false;
     }
 
-    // Prompt (AI-instruktion): full quality + discrimination check
-    const promptQuality = checkInputQuality(prompt);
-    if (!promptQuality.isValid) {
-      setValidationErrors(prev => ({ ...prev, [id]: promptQuality.reason! }));
-      return false;
-    }
+    // Prompt (AI-instruktion): discrimination FIRST (catches even single offensive words)
     const promptCheck = checkForDiscrimination(prompt);
     if (promptCheck.isDiscriminatory) {
       setValidationErrors(prev => ({ ...prev, [id]: promptCheck.reason! }));
+      return false;
+    }
+    // Then quality check
+    const promptQuality = checkInputQuality(prompt);
+    if (!promptQuality.isValid) {
+      setValidationErrors(prev => ({ ...prev, [id]: promptQuality.reason! }));
       return false;
     }
     
