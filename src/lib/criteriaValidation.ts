@@ -16,29 +16,48 @@ const FILLER_WORDS = new Set([
   'hallå', 'tja', 'tjo', 'hey', 'yo', 'yep', 'nope', 'nä',
 ]);
 
+// Small set of common Swedish words that ARE real (to avoid false positives)
+const COMMON_SWEDISH_WORDS = new Set([
+  'har', 'kan', 'ska', 'bör', 'med', 'och', 'att', 'för', 'den', 'det',
+  'ett', 'som', 'var', 'vid', 'till', 'från', 'eller', 'inte', 'över',
+  'under', 'mellan', 'inom', 'samt', 'utan', 'efter', 'genom', 'hos',
+  'mot', 'per', 'vid', 'minst', 'års', 'erfarenhet', 'kunskap',
+  'körkort', 'arbeta', 'jobba', 'arbete', 'jobb', 'svenska', 'engelska',
+  'skriftligt', 'muntligt', 'god', 'goda', 'bra', 'stark', 'starka',
+  'relevant', 'dokumenterad', 'kompetens', 'utbildning', 'behörighet',
+  'certifiering', 'truckkort', 'hygienpass', 'legitimation',
+]);
+
 /**
  * Check if a single word looks like gibberish (not a real word).
- * Real Swedish/English words have a mix of consonants and vowels.
- * Words like "ghgygttfdhf" have extremely low vowel ratios.
+ * Uses vowel ratio, consonant clusters, and a known-word allowlist.
  */
 function isGibberishWord(word: string): boolean {
   if (word.length <= 2) return false; // Too short to judge
   
+  // If it's a known common word, it's not gibberish
+  if (COMMON_SWEDISH_WORDS.has(word.toLowerCase())) return false;
+  
   const vowels = word.match(/[aeiouåäöy]/gi) || [];
   const vowelRatio = vowels.length / word.length;
   
-  // Real words typically have 25-70% vowels. Below 15% in 4+ char word = gibberish
-  if (word.length >= 4 && vowelRatio < 0.15) return true;
+  // Real words typically have 25-70% vowels. Below 20% in 3+ char word = suspicious
+  if (word.length >= 3 && vowelRatio < 0.2) return true;
   
-  // Check for 4+ consecutive consonants (rare in real words, common in gibberish)
-  if (/[^aeiouåäöy\s]{4,}/i.test(word)) return true;
+  // Check for 3+ consecutive consonants (uncommon in Swedish, very common in gibberish)
+  // Exception: common Swedish clusters like "str", "skr", "spr"
+  const stripped = word.toLowerCase().replace(/^(str|skr|spr|sch)/, '');
+  if (/[^aeiouåäöy]{3,}/i.test(stripped)) return true;
+  
+  // Check for unlikely character sequences (double+ uncommon consonants)
+  if (/([qwxz]){1,}|([^aeiouåäöy])\2{2,}/i.test(word)) return true;
   
   return false;
 }
 
 /**
  * Check if text is gibberish or meaningless input.
- * Catches repeated characters, random key mashing, filler words, too-short text, etc.
+ * Multi-layered: pattern checks → word-level gibberish detection → filler word detection.
  */
 export function checkInputQuality(text: string): { isValid: boolean; reason?: string } {
   const trimmed = text.trim();
@@ -56,7 +75,7 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
     return { isValid: false, reason: 'Texten verkar inte vara ett riktigt kriterium.' };
   }
 
-  // Check for random character spam — no vowels in 5+ chars (e.g. "jkjkjk", "qwrtp")
+  // Check for random character spam — no vowels in 5+ chars
   if (trimmed.length >= 5 && !/[aeiouåäöy\s]/i.test(trimmed)) {
     return { isValid: false, reason: 'Texten verkar inte vara meningsfull.' };
   }
@@ -72,38 +91,38 @@ export function checkInputQuality(text: string): { isValid: boolean; reason?: st
     }
   }
 
-  // Check if ALL words are filler/nonsense words
   const words = trimmed.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+
+  // Check if ALL words are filler/nonsense words
   if (words.length > 0 && words.every(w => FILLER_WORDS.has(w))) {
     return { isValid: false, reason: 'Skriv ett tydligt och specifikt urvalskriterium.' };
   }
 
-  // Check if it's the same word repeated (e.g. "ja ja ja", "test test test")
+  // Check if it's the same word repeated
   if (words.length >= 2) {
-    const uniqueWords = new Set(words.map(w => w.toLowerCase()));
+    const uniqueWords = new Set(words);
     if (uniqueWords.size === 1) {
       return { isValid: false, reason: 'Texten verkar inte vara ett riktigt kriterium.' };
     }
   }
 
-  // Check if majority of words are gibberish (e.g. "har ghgygttfdhf h")
-  if (words.length >= 2) {
-    const gibberishCount = words.filter(w => isGibberishWord(w)).length;
-    const gibberishRatio = gibberishCount / words.length;
-    // If more than half the words are gibberish, flag it
-    if (gibberishRatio > 0.5) {
-      return { isValid: false, reason: 'AI-instruktionen verkar inte vara meningsfull — formulera ett tydligt krav.' };
+  // Word-level gibberish detection — ANY gibberish word flags the input
+  // (one real word + gibberish = still not a valid criterion)
+  if (words.length >= 1) {
+    const gibberishWords = words.filter(w => w.length >= 3 && isGibberishWord(w));
+    if (gibberishWords.length > 0) {
+      return { isValid: false, reason: 'AI-instruktionen innehåller oläsbara ord — formulera ett tydligt krav.' };
     }
   }
-  
-  // Single gibberish word that's long enough to judge
-  if (words.length === 1 && words[0].length >= 5 && isGibberishWord(words[0])) {
-    return { isValid: false, reason: 'Texten verkar inte vara meningsfull.' };
-  }
 
-  // Too short to be a meaningful criterion (less than 5 chars after trim)
+  // Too short to be a meaningful criterion
   if (trimmed.length < 5) {
     return { isValid: false, reason: 'Kriteriet är för kort — beskriv tydligare vad du söker.' };
+  }
+
+  // Minimum word count — a real AI instruction needs at least 2 words
+  if (words.length < 2) {
+    return { isValid: false, reason: 'Beskriv mer detaljerat vad AI:n ska leta efter.' };
   }
 
   return { isValid: true };
