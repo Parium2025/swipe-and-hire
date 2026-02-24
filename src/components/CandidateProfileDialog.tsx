@@ -1115,7 +1115,7 @@ export const CandidateProfileDialog = ({
                   {displayApp.bio}
                 </p>
               ) : (
-                <p className="text-sm text-white text-center">Ingen presentation angiven</p>
+                <p className="text-sm text-white">Ingen presentation angiven</p>
               )}
             </div>
           </div>
