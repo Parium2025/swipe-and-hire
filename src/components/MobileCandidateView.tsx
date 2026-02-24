@@ -7,7 +7,7 @@ import type { JobApplication } from '@/hooks/useJobDetailsData';
 import { JobStageSettingsMenu } from '@/components/JobStageSettingsMenu';
 import { CreateJobStageDialog } from '@/components/CreateJobStageDialog';
 import { formatCompactTime } from '@/lib/date';
-import { Star, Sparkles, ChevronRight, Plus, Square, CheckSquare } from 'lucide-react';
+import { Star, Sparkles, ChevronRight, Plus, Square, CheckSquare, Check, X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDragScroll } from '@/hooks/useDragScroll';
@@ -125,6 +125,11 @@ const CandidateRow = memo(function CandidateRow({
                     : 'bg-white/10 text-white/50'
                 }`}
               >
+                {cr.result === 'match' ? (
+                  <Check className="h-2.5 w-2.5 flex-shrink-0" />
+                ) : (
+                  <X className="h-2.5 w-2.5 flex-shrink-0" />
+                )}
                 {cr.title}
               </span>
             ))}
