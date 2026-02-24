@@ -761,10 +761,10 @@ export const CandidateProfileDialog = ({
           <button
             onClick={() => onOpenChange(false)}
             aria-label="Stäng"
-            className="shrink-0 flex h-10 w-10 items-center justify-center transition-colors"
+            className="shrink-0 flex h-10 w-10 items-center justify-center transition-colors touch-manipulation"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10">
-              <X className="h-3.5 w-3.5 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+              <X className="h-5 w-5 text-white" />
             </div>
           </button>
         </div>
