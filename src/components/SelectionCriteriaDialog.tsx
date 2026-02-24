@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -56,6 +57,7 @@ export function SelectionCriteriaDialog({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const evaluateAllCandidates = useEvaluateAllCandidates();
+  const queryClient = useQueryClient();
   
   // Inline editing state
   const [drafts, setDrafts] = useState<Record<string, { title: string; prompt: string }>>({});
@@ -138,7 +140,6 @@ export function SelectionCriteriaDialog({
         .update({
           title: title.trim(),
           prompt: prompt.trim(),
-          is_active: false,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
@@ -225,6 +226,8 @@ export function SelectionCriteriaDialog({
         delete next[id];
         return next;
       });
+      // Invalidate cache so counter updates
+      queryClient.invalidateQueries({ queryKey: ['job-criteria', jobId] });
     } catch (error) {
       console.error('Error deleting criterion:', error);
       toast.error('Kunde inte ta bort kriterium');
@@ -322,6 +325,9 @@ export function SelectionCriteriaDialog({
           .in('id', emptyIds);
       }
 
+      // Invalidate criteria cache so counter updates instantly
+      await queryClient.invalidateQueries({ queryKey: ['job-criteria', jobId] });
+      
       // Close dialog immediately — results appear via realtime
       onActivate?.(validCriteria.length);
       onOpenChange(false);
