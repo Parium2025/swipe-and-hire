@@ -1282,7 +1282,7 @@ export const CandidateProfileDialog = ({
               ) : (
                 <div className="space-y-3">
                   {/* Add new note */}
-                  <div className="space-y-2">
+                   <div className="space-y-3">
                     <Textarea
                       value={newNote}
                       onChange={(e) => setNewNote(e.target.value)}
@@ -1293,7 +1293,7 @@ export const CandidateProfileDialog = ({
                       onClick={saveNote}
                       disabled={!newNote.trim() || savingNote}
                       size="sm"
-                      className="w-full rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs"
+                      className="w-auto rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs px-4"
                     >
                       <Send className="h-3 w-3 mr-1.5" />
                       Lägg till
@@ -1421,7 +1421,7 @@ export const CandidateProfileDialog = ({
           )}
           {mobileTab === 'comments' && (
             <div className="md:hidden flex-1 overflow-y-auto p-4 space-y-3">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Textarea
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
@@ -1432,7 +1432,7 @@ export const CandidateProfileDialog = ({
                   onClick={saveNote}
                   disabled={!newNote.trim() || savingNote}
                   size="sm"
-                  className="w-full rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs"
+                  className="w-auto rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs px-4"
                 >
                   <Send className="h-3 w-3 mr-1.5" />
                   Lägg till
