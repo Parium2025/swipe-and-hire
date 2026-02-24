@@ -95,23 +95,26 @@ export function SelectionCriteriaDialog({
   };
 
   const validateInput = (id: string, title: string, prompt: string) => {
+    const unifiedValidationMessage = 'Titeln och AI-instruktionen är otydliga och har ingen tydlig koppling till tjänstens faktiska krav. Att använda detta som urvalsgrund kan innebära en risk för indirekt diskriminering, särskilt om det påverkar kandidater utifrån skyddade diskrimineringsgrunder.';
+
     // Title: only check discrimination (it's just a label, not AI input)
     const titleCheck = checkForDiscrimination(title);
     if (titleCheck.isDiscriminatory) {
-      setValidationErrors(prev => ({ ...prev, [id]: titleCheck.reason! }));
+      setValidationErrors(prev => ({ ...prev, [id]: unifiedValidationMessage }));
       return false;
     }
 
     // Prompt (AI-instruktion): discrimination FIRST (catches even single offensive words)
     const promptCheck = checkForDiscrimination(prompt);
     if (promptCheck.isDiscriminatory) {
-      setValidationErrors(prev => ({ ...prev, [id]: promptCheck.reason! }));
+      setValidationErrors(prev => ({ ...prev, [id]: unifiedValidationMessage }));
       return false;
     }
+
     // Then quality check
     const promptQuality = checkInputQuality(prompt);
     if (!promptQuality.isValid) {
-      setValidationErrors(prev => ({ ...prev, [id]: promptQuality.reason! }));
+      setValidationErrors(prev => ({ ...prev, [id]: unifiedValidationMessage }));
       return false;
     }
     
@@ -270,7 +273,7 @@ export function SelectionCriteriaDialog({
           aiBlocked = true;
           setValidationErrors(prev => ({
             ...prev,
-            [validCriteria[i].id]: check.reason || 'AI flaggade detta som potentiellt diskriminerande.',
+            [validCriteria[i].id]: 'Titeln och AI-instruktionen är otydliga och har ingen tydlig koppling till tjänstens faktiska krav. Att använda detta som urvalsgrund kan innebära en risk för indirekt diskriminering, särskilt om det påverkar kandidater utifrån skyddade diskrimineringsgrunder.',
           }));
         }
       });
