@@ -178,6 +178,10 @@ export const CandidateProfileDialog = ({
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const previousRating = useRef<number | undefined>(undefined);
   
+  // In-memory caches for notes and questions to avoid re-fetching on re-open
+  const notesCache = useRef<Map<string, CandidateNote[]>>(new Map());
+  const questionsCache = useRef<Map<string, Record<string, { text: string; order: number }>>>(new Map());
+  
   // AI Summary state with in-memory cache to avoid re-fetching on re-open
   const summaryCache = useRef<Map<string, {
     summary_text: string;
@@ -500,6 +504,15 @@ export const CandidateProfileDialog = ({
 
   const fetchJobQuestions = async () => {
     if (!activeApplication?.job_id) return;
+    
+    // Check cache first
+    const qCacheKey = activeApplication.job_id;
+    const cachedQ = questionsCache.current.get(qCacheKey);
+    if (cachedQ) {
+      setJobQuestions(cachedQ);
+      return;
+    }
+    
     try {
       const { data, error } = await supabase
         .from('job_questions')
@@ -513,14 +526,26 @@ export const CandidateProfileDialog = ({
       data?.forEach(q => {
         questionsMap[q.id] = { text: q.question_text, order: q.order_index };
       });
+      questionsCache.current.set(qCacheKey, questionsMap);
       setJobQuestions(questionsMap);
     } catch (error) {
       console.error('Error fetching job questions:', error);
     }
   };
 
-  const fetchNotes = async () => {
+  const fetchNotes = async (forceRefresh = false) => {
     if (!application || !user) return;
+    
+    // Check cache first (unless force refresh after save/edit/delete)
+    const notesCacheKey = application.applicant_id;
+    if (!forceRefresh) {
+      const cachedNotes = notesCache.current.get(notesCacheKey);
+      if (cachedNotes) {
+        setNotes(cachedNotes);
+        return;
+      }
+    }
+    
     setLoadingNotes(true);
     try {
       // Fetch notes with author profile info
@@ -549,6 +574,7 @@ export const CandidateProfileDialog = ({
           : 'Okänd',
       }));
       
+      notesCache.current.set(notesCacheKey, notesWithAuthor);
       setNotes(notesWithAuthor);
     } catch (error) {
       console.error('Error fetching notes:', error);
@@ -590,7 +616,7 @@ export const CandidateProfileDialog = ({
       toast.success('Anteckning sparad');
       setNewNote('');
       clearNoteDraft(); // Rensa sparad draft efter lyckad sparning
-      fetchNotes();
+      fetchNotes(true);
     } catch (error) {
       console.error('Error saving note:', error);
       toast.error('Kunde inte spara anteckning');
@@ -620,7 +646,9 @@ export const CandidateProfileDialog = ({
       await deleteNoteActivities.mutateAsync({ applicantId: application.applicant_id });
       
       toast.success('Anteckning borttagen');
-      setNotes(notes.filter(n => n.id !== noteId));
+      const updatedNotes = notes.filter(n => n.id !== noteId);
+      notesCache.current.set(application.applicant_id, updatedNotes);
+      setNotes(updatedNotes);
       setDeletingNoteId(null);
     } catch (error) {
       console.error('Error deleting note:', error);
@@ -664,7 +692,7 @@ export const CandidateProfileDialog = ({
       toast.success('Anteckning uppdaterad');
       setEditingNoteId(null);
       setEditingNoteText('');
-      fetchNotes();
+      fetchNotes(true);
     } catch (error) {
       console.error('Error updating note:', error);
       toast.error('Kunde inte uppdatera anteckning');
