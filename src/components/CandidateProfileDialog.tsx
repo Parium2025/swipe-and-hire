@@ -264,14 +264,28 @@ export const CandidateProfileDialog = ({
   const fetchAiSummary = async () => {
     if (!activeApplication?.applicant_id) return;
     
-    // Check in-memory cache first
-    const cacheKey = `${activeApplication.applicant_id}_${activeApplication.job_id || 'no-job'}`;
+    // Check in-memory cache first (cache key includes CV URL for auto-invalidation)
+    const cvCacheKey = activeApplication.cv_url || '__no-cv__';
+    const cacheKey = `${activeApplication.applicant_id}_${activeApplication.job_id || 'no-job'}_${cvCacheKey}`;
     const cached = summaryCache.current.get(cacheKey);
     if (cached) {
       setAiSummary(cached);
       return { shouldAutoGenerate: false };
     }
-    
+
+    // If no CV exists, cache and reuse a stable fallback state
+    if (!activeApplication.cv_url) {
+      const noCvSummary = {
+        summary_text: 'Kandidaten har inte laddat upp något CV',
+        key_points: null,
+        document_type: null,
+        is_valid_cv: false,
+      };
+      summaryCache.current.set(cacheKey, noCvSummary);
+      setAiSummary(noCvSummary);
+      return { shouldAutoGenerate: false };
+    }
+
     setLoadingSummary(true);
 
     try {
@@ -417,7 +431,7 @@ export const CandidateProfileDialog = ({
           document_type: data.document_type || data.summary.document_type || null,
           is_valid_cv: data.is_valid_cv,
         };
-        const genCacheKey = `${activeApplication?.applicant_id}_${activeApplication?.job_id || 'no-job'}`;
+        const genCacheKey = `${activeApplication?.applicant_id}_${activeApplication?.job_id || 'no-job'}_${activeApplication?.cv_url || '__no-cv__'}`;
         summaryCache.current.set(genCacheKey, genResult);
         setAiSummary(genResult);
       }
