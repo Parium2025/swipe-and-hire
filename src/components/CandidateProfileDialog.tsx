@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, UserMinus, AlertTriangle } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, AlertTriangle } from 'lucide-react';
 import { ShareCandidateDialog } from '@/components/ShareCandidateDialog';
 import { SendMessageDialog } from '@/components/SendMessageDialog';
 import type { StageSettings } from '@/hooks/useStageSettings';
@@ -1156,7 +1156,7 @@ export const CandidateProfileDialog = ({
                     variant="glassRed"
                     className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm"
                   >
-                    <UserMinus className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
+                    <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
                     <span className="truncate">Ta bort</span>
                   </Button>
                 </div>
