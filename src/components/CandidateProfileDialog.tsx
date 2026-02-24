@@ -1052,8 +1052,20 @@ export const CandidateProfileDialog = ({
               </div>
             )}
 
-            {/* Not a CV indicator */}
-            {aiSummary?.is_valid_cv === false && (
+            {/* No CV uploaded indicator */}
+            {aiSummary?.is_valid_cv === false && !activeApplication?.cv_url && (
+              <div className="bg-muted/50 border border-border rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Kandidaten har inte laddat upp något CV
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Not a valid CV indicator (uploaded something that isn't a CV) */}
+            {aiSummary?.is_valid_cv === false && activeApplication?.cv_url && (
               <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-orange-400" />
