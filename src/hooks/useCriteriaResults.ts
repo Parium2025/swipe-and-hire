@@ -121,7 +121,7 @@ export function useCriteriaResultsForCandidates(candidates: { applicant_id: stri
     if (!user || pairs.length === 0 || jobIds.length === 0) return;
 
     const channel = supabase
-      .channel('criteria-realtime')
+      .channel(`criteria-rt-${jobIds.sort().join('-').slice(0, 50)}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'candidate_evaluations' },
