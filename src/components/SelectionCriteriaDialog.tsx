@@ -94,27 +94,30 @@ export function SelectionCriteriaDialog({
     }
   };
 
-  const validateInput = (id: string, title: string, prompt: string) => {
-    const unifiedValidationMessage = 'Titeln och AI-instruktionen är otydliga och har ingen tydlig koppling till tjänstens faktiska krav. Att använda detta som urvalsgrund kan innebära en risk för indirekt diskriminering, särskilt om det påverkar kandidater utifrån skyddade diskrimineringsgrunder.';
+  const buildValidationMessage = (title: string, prompt: string) => {
+    const displayTitle = title.trim() || 'Fyll i vad personen har skrivit i titeln';
+    const displayPrompt = prompt.trim() || 'Fyll i vad personen har skrivit i titeln';
+    return `Titeln "${displayTitle}" och AI-instruktionen "${displayPrompt}" är otydliga och kan innebära en risk för indirekt diskriminering, särskilt om det påverkar kandidater utifrån skyddade diskrimineringsgrunder.`;
+  };
 
-    // Title: only check discrimination (it's just a label, not AI input)
+  const validateInput = (id: string, title: string, prompt: string) => {
+    const msg = buildValidationMessage(title, prompt);
+
     const titleCheck = checkForDiscrimination(title);
     if (titleCheck.isDiscriminatory) {
-      setValidationErrors(prev => ({ ...prev, [id]: unifiedValidationMessage }));
+      setValidationErrors(prev => ({ ...prev, [id]: msg }));
       return false;
     }
 
-    // Prompt (AI-instruktion): discrimination FIRST (catches even single offensive words)
     const promptCheck = checkForDiscrimination(prompt);
     if (promptCheck.isDiscriminatory) {
-      setValidationErrors(prev => ({ ...prev, [id]: unifiedValidationMessage }));
+      setValidationErrors(prev => ({ ...prev, [id]: msg }));
       return false;
     }
 
-    // Then quality check
     const promptQuality = checkInputQuality(prompt);
     if (!promptQuality.isValid) {
-      setValidationErrors(prev => ({ ...prev, [id]: unifiedValidationMessage }));
+      setValidationErrors(prev => ({ ...prev, [id]: msg }));
       return false;
     }
     
@@ -273,7 +276,7 @@ export function SelectionCriteriaDialog({
           aiBlocked = true;
           setValidationErrors(prev => ({
             ...prev,
-            [validCriteria[i].id]: 'Titeln och AI-instruktionen är otydliga och har ingen tydlig koppling till tjänstens faktiska krav. Att använda detta som urvalsgrund kan innebära en risk för indirekt diskriminering, särskilt om det påverkar kandidater utifrån skyddade diskrimineringsgrunder.',
+            [validCriteria[i].id]: buildValidationMessage(validCriteria[i].title, validCriteria[i].prompt),
           }));
         }
       });
