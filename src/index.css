@@ -6,6 +6,8 @@ html {
   scrollbar-gutter: stable both-edges; 
   overflow-x: hidden !important;
   max-width: 100vw !important;
+  /* Fluid base font-size: scales continuously from 14px (320px) → 16px (768px) → 18px (1440px+) */
+  font-size: clamp(0.875rem, 0.8rem + 0.25vw, 1.125rem);
   /* Smooth scrolling för hela sidan */
   scroll-behavior: smooth;
   /* iOS momentum scrolling */
