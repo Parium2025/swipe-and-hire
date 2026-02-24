@@ -178,7 +178,13 @@ export const CandidateProfileDialog = ({
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const previousRating = useRef<number | undefined>(undefined);
   
-  // AI Summary state
+  // AI Summary state with in-memory cache to avoid re-fetching on re-open
+  const summaryCache = useRef<Map<string, {
+    summary_text: string;
+    key_points: { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
+    document_type?: string | null;
+    is_valid_cv?: boolean;
+  }>>(new Map());
   const [aiSummary, setAiSummary] = useState<{
     summary_text: string;
     key_points: { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
@@ -257,6 +263,15 @@ export const CandidateProfileDialog = ({
   // Fetch AI summary for this candidate/job combination
   const fetchAiSummary = async () => {
     if (!activeApplication?.applicant_id) return;
+    
+    // Check in-memory cache first
+    const cacheKey = `${activeApplication.applicant_id}_${activeApplication.job_id || 'no-job'}`;
+    const cached = summaryCache.current.get(cacheKey);
+    if (cached) {
+      setAiSummary(cached);
+      return { shouldAutoGenerate: false };
+    }
+    
     setLoadingSummary(true);
 
     try {
@@ -294,12 +309,14 @@ export const CandidateProfileDialog = ({
           // Check if the proactive summary matches current CV
           const currentCvUrl = activeApplication.cv_url || null;
           if (!currentCvUrl || profileSummary.cv_url === currentCvUrl) {
-            setAiSummary({
+            const summaryData = {
               summary_text: profileSummary.summary_text || '',
               key_points: (profileSummary.key_points as any[] | null) || [],
               document_type: profileSummary.document_type,
               is_valid_cv: profileSummary.is_valid_cv,
-            });
+            };
+            summaryCache.current.set(cacheKey, summaryData);
+            setAiSummary(summaryData);
             return { shouldAutoGenerate: false };
           }
         }
@@ -338,12 +355,14 @@ export const CandidateProfileDialog = ({
         if (match) documentType = match[1];
       }
 
-      setAiSummary({
+      const summaryResult = {
         summary_text: data.summary_text,
         key_points: keyPoints as any,
         document_type: documentType,
         is_valid_cv: isValidCv,
-      });
+      };
+      summaryCache.current.set(cacheKey, summaryResult);
+      setAiSummary(summaryResult);
 
       return { shouldAutoGenerate: false };
     } catch (error) {
@@ -392,12 +411,15 @@ export const CandidateProfileDialog = ({
       }
 
       if (data?.summary) {
-        setAiSummary({
+        const genResult = {
           summary_text: data.summary.summary_text,
           key_points: data.summary.key_points,
           document_type: data.document_type || data.summary.document_type || null,
           is_valid_cv: data.is_valid_cv,
-        });
+        };
+        const genCacheKey = `${activeApplication?.applicant_id}_${activeApplication?.job_id || 'no-job'}`;
+        summaryCache.current.set(genCacheKey, genResult);
+        setAiSummary(genResult);
       }
     } catch (error) {
       console.error('Error generating CV summary:', error);
