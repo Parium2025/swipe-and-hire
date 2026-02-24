@@ -348,18 +348,20 @@ export function SelectionCriteriaDialog({
               Urvalskriterier
             </DialogTitle>
           </DialogHeader>
-          <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5 mt-3 mx-0 text-left">
-            <p className="text-sm text-white leading-relaxed">
-              AI analyserar kandidaternas ansökningar och visar hur väl de matchar de kriterier du har valt. 
-              Du kan lägga till upp till fem kriterier för att tydliggöra vad som är viktigt för rollen.
-            </p>
-            <p className="text-sm text-white leading-relaxed mt-1.5">
-              Se till att kriterierna är tydligt formulerade och inte innehåller felaktiga eller diskriminerande krav innan du sparar.
-            </p>
-            <p className="text-sm text-white leading-relaxed mt-1.5">
-              Om ett varningsmeddelande visas betyder det inte automatiskt att kriteriet är fel, men vi rekommenderar att du läser igenom och säkerställer att allt stämmer innan du går vidare.
-            </p>
-          </div>
+          {criteria.length === 0 && !isLoading && (
+            <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5 mt-3 mx-0 text-left">
+              <p className="text-sm text-white leading-relaxed">
+                AI analyserar kandidaternas ansökningar och visar hur väl de matchar de kriterier du har valt. 
+                Du kan lägga till upp till fem kriterier för att tydliggöra vad som är viktigt för rollen.
+              </p>
+              <p className="text-sm text-white leading-relaxed mt-1.5">
+                Se till att kriterierna är tydligt formulerade och inte innehåller felaktiga eller diskriminerande krav innan du sparar.
+              </p>
+              <p className="text-sm text-white leading-relaxed mt-1.5">
+                Om ett varningsmeddelande visas betyder det inte automatiskt att kriteriet är fel, men vi rekommenderar att du läser igenom och säkerställer att allt stämmer innan du går vidare.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Content */}
