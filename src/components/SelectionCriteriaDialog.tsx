@@ -184,7 +184,7 @@ export function SelectionCriteriaDialog({
           title: '',
           prompt: '',
           order_index: criteria.length,
-          is_active: true,
+          is_active: false,
         })
         .select()
         .single();
