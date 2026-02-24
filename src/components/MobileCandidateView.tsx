@@ -114,25 +114,29 @@ const CandidateRow = memo(function CandidateRow({
         {/* Criterion badges */}
         {hasResults && (
           <div className="flex flex-wrap gap-1 mt-1">
-            {criterionResults.map(cr => (
-              <span
-                key={cr.criterion_id}
-                className={`inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${
-                  cr.result === 'match'
-                    ? 'bg-green-500/20 text-green-300'
-                    : cr.result === 'no_match'
-                    ? 'bg-red-500/20 text-red-300'
-                    : 'bg-white/10 text-white/50'
-                }`}
-              >
-                {cr.result === 'match' ? (
-                  <Check className="h-2.5 w-2.5 flex-shrink-0" />
-                ) : (
-                  <X className="h-2.5 w-2.5 flex-shrink-0" />
-                )}
-                {cr.title}
-              </span>
-            ))}
+            {criterionResults.map(cr => {
+              const isMatch = cr.result === 'match';
+              const isNoMatch = cr.result === 'no_match';
+              return (
+                <span
+                  key={cr.criterion_id}
+                  className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] ring-1 ring-inset ${
+                    isMatch
+                      ? 'bg-green-500/20 ring-green-500/30'
+                      : isNoMatch
+                      ? 'bg-red-500/20 ring-red-500/30'
+                      : 'bg-yellow-500/20 ring-yellow-500/30'
+                  }`}
+                >
+                  {isMatch ? (
+                    <Check className={`h-2.5 w-2.5 flex-shrink-0 ${isMatch ? 'text-green-400' : ''}`} />
+                  ) : (
+                    <X className={`h-2.5 w-2.5 flex-shrink-0 ${isNoMatch ? 'text-red-400' : 'text-yellow-400'}`} />
+                  )}
+                  <span className="text-white/80 truncate max-w-[50px]">{cr.title}</span>
+                </span>
+              );
+            })}
           </div>
         )}
       </div>
