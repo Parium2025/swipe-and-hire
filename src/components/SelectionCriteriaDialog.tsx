@@ -65,6 +65,7 @@ export function SelectionCriteriaDialog({
   const autoSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   useEffect(() => {
     if (open && jobId) {
+      setValidationErrors({});
       fetchCriteria();
     }
   }, [open, jobId]);
@@ -88,6 +89,13 @@ export function SelectionCriteriaDialog({
         newDrafts[c.id] = { title: c.title, prompt: c.prompt };
       });
       setDrafts(newDrafts);
+      
+      // Validate existing criteria on load
+      loadedCriteria.forEach(c => {
+        if (c.title.trim() || c.prompt.trim()) {
+          validateInput(c.id, c.title, c.prompt);
+        }
+      });
     } catch (error) {
       console.error('Error fetching criteria:', error);
       toast.error('Kunde inte hämta urvalskriterier');
