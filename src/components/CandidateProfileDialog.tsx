@@ -737,7 +737,7 @@ export const CandidateProfileDialog = ({
         </DialogHeader>
         
         {/* Mobile tabs header */}
-        <div className="md:hidden flex shrink-0 border-b border-white/20">
+        <div className="md:hidden flex shrink-0 items-center border-b border-white/20">
           {[
             { key: 'profile' as const, label: 'Profil', icon: User },
             { key: 'activity' as const, label: 'Aktivitet', icon: Activity },
@@ -746,32 +746,32 @@ export const CandidateProfileDialog = ({
             <button
               key={tab.key}
               onClick={() => setMobileTab(tab.key)}
-              className={`flex-1 px-2 py-2.5 text-xs font-medium transition-colors min-w-0 ${
+              className={`flex-1 px-1.5 py-2 text-sm font-medium transition-colors min-w-0 ${
                 mobileTab === tab.key
                   ? 'text-white border-b-2 border-white'
                   : 'text-white/50'
               }`}
             >
-              <div className="flex items-center justify-center gap-1 truncate">
-                <tab.icon className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{tab.label}</span>
+              <div className="flex items-center justify-center gap-1.5 truncate">
+                <tab.icon className="h-4 w-4 shrink-0" />
+                <span className="truncate leading-none">{tab.label}</span>
               </div>
             </button>
           ))}
           <button
             onClick={() => onOpenChange(false)}
             aria-label="Stäng"
-            className="shrink-0 flex h-10 w-10 items-center justify-center transition-colors touch-manipulation"
+            className="shrink-0 flex h-11 w-11 items-center justify-center transition-colors touch-manipulation"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-              <X className="h-5 w-5 text-white" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
+              <X className="h-6 w-6 text-white" />
             </div>
           </button>
         </div>
 
         <div className="flex flex-1 min-h-0 md:max-h-[85vh]">
           {/* Main content - left side (desktop always, mobile only on profile tab) */}
-          <div className={`flex-1 overflow-y-auto overscroll-contain p-4 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`}>
+          <div className={`flex-1 overflow-y-auto overscroll-contain p-4 pt-2 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`}>
           {/* Header with circular profile image/video */}
           <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
             {/* Circular Profile Image/Video - Larger */}
