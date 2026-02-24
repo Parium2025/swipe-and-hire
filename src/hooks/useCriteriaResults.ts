@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { useEffect } from 'react';
 
 export interface CriterionResult {
   id: string;
@@ -27,6 +28,7 @@ export interface CandidateCriteriaResults {
 // Hook to fetch criteria results for multiple candidates (for Kanban cards)
 export function useCriteriaResultsForCandidates(candidates: { applicant_id: string; job_id: string | null }[]) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   // Get unique job_id + applicant_id pairs
   const pairs = candidates
@@ -35,7 +37,7 @@ export function useCriteriaResultsForCandidates(candidates: { applicant_id: stri
   
   const jobIds = [...new Set(pairs.map(p => p.job_id))];
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['criteria-results', pairs.map(p => `${p.job_id}-${p.applicant_id}`).join(',')],
     queryFn: async () => {
       if (pairs.length === 0) return {};
@@ -111,8 +113,40 @@ export function useCriteriaResultsForCandidates(candidates: { applicant_id: stri
       return resultMap;
     },
     enabled: !!user && pairs.length > 0,
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 30 * 1000,
   });
+
+  // Realtime: auto-refresh when evaluations complete or results change
+  useEffect(() => {
+    if (!user || pairs.length === 0 || jobIds.length === 0) return;
+
+    const channel = supabase
+      .channel('criteria-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'candidate_evaluations' },
+        (payload: any) => {
+          // Only invalidate if it's for one of our jobs
+          if (payload.new?.job_id && jobIds.includes(payload.new.job_id)) {
+            queryClient.invalidateQueries({ queryKey: ['criteria-results'] });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'criterion_results' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['criteria-results'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, jobIds.join(','), queryClient]);
+
+  return query;
 }
 
 // Hook to fetch criteria for a specific job
