@@ -138,6 +138,7 @@ export function SelectionCriteriaDialog({
         .update({
           title: title.trim(),
           prompt: prompt.trim(),
+          is_active: false,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
