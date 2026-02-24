@@ -1289,15 +1289,17 @@ export const CandidateProfileDialog = ({
                       placeholder="Skriv en anteckning..."
                       className="w-full min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none text-xs"
                     />
-                    <Button
-                      onClick={saveNote}
-                      disabled={!newNote.trim() || savingNote}
-                      size="sm"
-                      className="w-auto rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs px-4"
-                    >
-                      <Send className="h-3 w-3 mr-1.5" />
-                      Lägg till
-                    </Button>
+                    <div className="flex justify-center">
+                      <Button
+                        onClick={saveNote}
+                        disabled={!newNote.trim() || savingNote}
+                        size="sm"
+                        className="w-auto rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs px-4"
+                      >
+                        <Send className="h-3 w-3 mr-1.5" />
+                        Lägg till
+                      </Button>
+                    </div>
                   </div>
 
                   {loadingNotes ? (
@@ -1428,15 +1430,17 @@ export const CandidateProfileDialog = ({
                   placeholder="Skriv en anteckning..."
                   className="w-full min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none text-xs"
                 />
-                <Button
-                  onClick={saveNote}
-                  disabled={!newNote.trim() || savingNote}
-                  size="sm"
-                  className="w-auto rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs px-4"
-                >
-                  <Send className="h-3 w-3 mr-1.5" />
-                  Lägg till
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    onClick={saveNote}
+                    disabled={!newNote.trim() || savingNote}
+                    size="sm"
+                    className="w-auto rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs px-4"
+                  >
+                    <Send className="h-3 w-3 mr-1.5" />
+                    Lägg till
+                  </Button>
+                </div>
               </div>
               {loadingNotes ? (
                 <div className="space-y-2 py-2">
