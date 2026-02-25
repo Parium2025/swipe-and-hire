@@ -1237,13 +1237,13 @@ export const CandidateProfileDialog = ({
 
     {/* CV Dialog — fullscreen on mobile, centered on desktop */}
     <Dialog open={cvOpen} onOpenChange={setCvOpen}>
-      <DialogContentNoFocus className="max-w-4xl overflow-hidden bg-transparent border-none shadow-none p-2 md:p-8 w-screen h-[100dvh] md:w-auto md:h-auto md:max-h-[90vh] !top-0 !left-0 !right-0 !bottom-0 !translate-x-0 !translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] rounded-none md:rounded-lg">
+      <DialogContentNoFocus hideClose className="max-w-4xl overflow-hidden bg-transparent border-none shadow-none p-2 md:p-8 w-screen h-[100dvh] md:w-auto md:h-auto md:max-h-[90vh] !top-0 !left-0 !right-0 !bottom-0 !translate-x-0 !translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] rounded-none md:rounded-lg">
         <DialogHeader className="mb-2 md:mb-4 flex flex-row items-center justify-between">
           <DialogTitle className="text-white text-lg md:text-2xl">CV</DialogTitle>
           <button
             type="button"
             onClick={() => setCvOpen(false)}
-            className="md:hidden flex h-8 w-8 items-center justify-center rounded-full bg-white/10 touch-manipulation"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 touch-manipulation"
             aria-label="Stäng"
           >
             <X className="h-5 w-5 text-white" />
