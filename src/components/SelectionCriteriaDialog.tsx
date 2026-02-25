@@ -17,12 +17,19 @@ import {
   Loader2,
   Zap
 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Dialog,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import { useEvaluateAllCandidates } from '@/hooks/useCriteriaResults';
 import { checkForDiscrimination, checkDiscriminationWithAI, checkInputQuality } from '@/lib/criteriaValidation';
 
@@ -52,6 +59,7 @@ export function SelectionCriteriaDialog({
   onActivate,
   candidates = []
 }: SelectionCriteriaDialogProps) {
+  const isMobile = useIsMobile();
   const { user } = useAuth();
   const { isOnline, showOfflineToast } = useOnline();
   const [criteria, setCriteria] = useState<JobCriterion[]>([]);
@@ -359,18 +367,26 @@ export function SelectionCriteriaDialog({
     return d?.title.trim() && d?.prompt.trim();
   });
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus className="sm:max-w-sm md:max-w-md lg:max-w-lg bg-card-parium backdrop-blur-xl border-white/[0.06] text-white max-h-[85vh] overflow-hidden flex flex-col p-0">
-        {/* Header — centered */}
-        <div className="px-5 pt-5 pb-2 flex-shrink-0 text-center">
+  const dialogContent = (
+    <>
+      {/* Header — centered */}
+      <div className="px-5 pt-5 pb-2 flex-shrink-0 text-center">
+        {isMobile ? (
+          <DrawerHeader className="p-0">
+            <DrawerTitle className="text-white text-base tracking-tight font-medium flex items-center justify-center gap-2">
+              <Sparkles className="h-4.5 w-4.5 text-white" />
+              Urvalskriterier
+            </DrawerTitle>
+          </DrawerHeader>
+        ) : (
           <DialogHeader>
             <DialogTitle className="text-white text-base tracking-tight font-medium flex items-center justify-center gap-2">
               <Sparkles className="h-4.5 w-4.5 text-white" />
               Urvalskriterier
             </DialogTitle>
           </DialogHeader>
-          {criteria.length === 0 && !isLoading && (
+        )}
+        {criteria.length === 0 && !isLoading && (
             <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5 mt-3 mx-0 text-left">
               <p className="text-sm text-white leading-relaxed">
                 Titeln och AI-instruktionen är otydliga och har ingen tydlig koppling till tjänstens faktiska krav. Att använda detta som urvalsgrund kan innebära en risk för indirekt diskriminering, särskilt om det påverkar kandidater utifrån skyddade diskrimineringsgrunder.
@@ -515,6 +531,23 @@ export function SelectionCriteriaDialog({
             </button>
           </div>
         )}
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="bg-card-parium backdrop-blur-xl border-white/[0.06] text-white max-h-[85vh] overflow-hidden flex flex-col p-0">
+          {dialogContent}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContentNoFocus className="sm:max-w-sm md:max-w-md lg:max-w-lg bg-card-parium backdrop-blur-xl border-white/[0.06] text-white max-h-[85vh] overflow-hidden flex flex-col p-0">
+        {dialogContent}
       </DialogContentNoFocus>
     </Dialog>
   );
