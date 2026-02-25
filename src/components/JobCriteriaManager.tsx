@@ -407,27 +407,30 @@ export function CriterionIconBadge({ result, title }: CriterionIconBadgeProps) {
   const config = {
     match: { 
       icon: Check, 
-      iconColor: 'text-green-500',
-      label: title,
+      iconColor: 'text-green-400',
+      bg: 'bg-green-500/20',
+      border: 'ring-green-500/30',
     },
     no_match: { 
       icon: X, 
-      iconColor: 'text-red-500',
-      label: title,
+      iconColor: 'text-red-400',
+      bg: 'bg-red-500/20',
+      border: 'ring-red-500/30',
     },
     no_data: { 
       icon: X, 
-      iconColor: 'text-red-500',
-      label: title,
+      iconColor: 'text-red-400',
+      bg: 'bg-red-500/20',
+      border: 'ring-red-500/30',
     },
   };
   
-  const { icon: Icon, iconColor, label } = config[result];
+  const { icon: Icon, iconColor, bg, border } = config[result];
 
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] text-white/80">
+    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${bg} ring-1 ring-inset ${border}`}>
       <Icon className={`h-3 w-3 ${iconColor} flex-shrink-0`} />
-      <span className="truncate">{label}</span>
+      <span className="text-white/80 truncate max-w-[60px]">{title}</span>
     </span>
   );
 }
