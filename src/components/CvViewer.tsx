@@ -19,7 +19,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   const device = useDevice();
   const isMobile = device === 'mobile';
   
-  // Same scale for all devices to maintain consistent rendering
   const initialScale = 0.9;
   
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
@@ -35,6 +34,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+
+  const isZoomed = zoomLevel > 1;
 
   const isStoragePath = useMemo(() => !/^https?:\/\//i.test(src), [src]);
 
@@ -60,7 +61,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     return () => { mounted = false; };
   }, [src, isStoragePath, fileName]);
 
-  // Load and render PDF with pdfjs directly (render once, zoom is CSS transform only)
+  // Load and render PDF
   useEffect(() => {
     if (!resolvedUrl) return;
     let cancelled = false;
@@ -71,13 +72,11 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         if (cancelled) return;
         setNumPages(pdf.numPages);
 
-        // Clear previous canvases
         const container = containerRef.current;
         if (!container) { setLoading(false); return; }
         container.innerHTML = '';
         canvasRefs.current.clear();
 
-        // Use 4x resolution for maximum clarity at 100% zoom
         const outputScale = 4;
 
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -109,7 +108,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         }
         setLoading(false);
         
-        // Ensure default zoom at 100% and scroll to top after rendering
         setZoomLevel(1.0);
         if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollTop = 0;
@@ -132,19 +130,15 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
 
     const handleScroll = () => {
       const canvases = scrollContainer.querySelectorAll('canvas');
-      
       let currentVisiblePage = 1;
       let maxVisibleArea = 0;
 
       canvases.forEach((canvas, index) => {
         const rect = canvas.getBoundingClientRect();
         const containerRect = scrollContainer.getBoundingClientRect();
-        
-        // Calculate visible area of this canvas
         const visibleTop = Math.max(rect.top, containerRect.top);
         const visibleBottom = Math.min(rect.bottom, containerRect.bottom);
         const visibleArea = Math.max(0, visibleBottom - visibleTop);
-        
         if (visibleArea > maxVisibleArea) {
           maxVisibleArea = visibleArea;
           currentVisiblePage = index + 1;
@@ -154,9 +148,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
       setCurrentPage(currentVisiblePage);
     };
 
-    scrollContainer.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
-    
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, [numPages]);
 
@@ -167,18 +160,19 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     }
   };
 
-  // Reset pan when zoom changes and scroll to top
+  // Reset pan when zoom resets
   useEffect(() => {
     if (zoomLevel === 1) {
       setPanPosition({ x: 0, y: 0 });
     }
-    // Always scroll to top when zoom changes
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
   }, [zoomLevel]);
+
+  // Mouse panning (desktop only, when zoomed)
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (zoomLevel > 1) {
+    if (isZoomed) {
       setIsPanning(true);
       setStartPanPosition({
         x: e.clientX - panPosition.x,
@@ -188,7 +182,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isPanning && zoomLevel > 1) {
+    if (isPanning && isZoomed) {
       setPanPosition({
         x: e.clientX - startPanPosition.x,
         y: e.clientY - startPanPosition.y
@@ -200,9 +194,10 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     setIsPanning(false);
   };
 
-  // Handle touch panning
+  // Touch panning — ONLY when zoomed in, otherwise let native scroll work
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (zoomLevel > 1 && e.touches.length === 1) {
+    if (!isZoomed) return; // Let native scroll handle it
+    if (e.touches.length === 1) {
       setIsPanning(true);
       setStartPanPosition({
         x: e.touches[0].clientX - panPosition.x,
@@ -212,7 +207,10 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (isPanning && zoomLevel > 1 && e.touches.length === 1) {
+    if (!isZoomed || !isPanning) return; // Let native scroll handle it
+    if (e.touches.length === 1) {
+      // Only prevent default when actually panning (zoomed in)
+      e.preventDefault();
       setPanPosition({
         x: e.touches[0].clientX - startPanPosition.x,
         y: e.touches[0].clientY - startPanPosition.y
@@ -224,13 +222,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     setIsPanning(false);
   };
 
-  // Reset pan when zoom changes
-  useEffect(() => {
-    if (zoomLevel === 1) {
-      setPanPosition({ x: 0, y: 0 });
-    }
-  }, [zoomLevel]);
-
   const handleReset = () => {
     setZoomLevel(1.0);
     setPanPosition({ x: 0, y: 0 });
@@ -240,12 +231,13 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   };
 
   return (
-    <div className="w-full flex flex-col gap-3">
+    <div className="w-full flex flex-col gap-2 md:gap-3">
+      {/* Zoom controls */}
       <div className="flex items-center gap-1 flex-wrap">
         <button
           type="button"
           onClick={() => setZoomLevel(z => Math.max(0.5, z - 0.5))} 
-          className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center`}
+          className={`${isMobile ? 'h-8 w-8' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center touch-manipulation`}
         >
           -
         </button>
@@ -255,14 +247,14 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         <button
           type="button"
           onClick={() => setZoomLevel(z => Math.min(3.0, z + 0.5))} 
-          className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center`}
+          className={`${isMobile ? 'h-8 w-8' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center touch-manipulation`}
         >
           +
         </button>
         <button
           type="button"
           onClick={handleReset} 
-          className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center`}
+          className={`${isMobile ? 'h-8 w-8' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center touch-manipulation`}
         >
           <RotateCcw className="h-3 w-3" />
         </button>
@@ -271,7 +263,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
             <a href={resolvedUrl} download={fileName}>
               <button
                 type="button"
-                className={`${isMobile ? 'text-[11px] px-2 h-7' : 'text-[10px] px-2 h-6'} rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75`}
+                className={`${isMobile ? 'text-[11px] px-2 h-8' : 'text-[10px] px-2 h-6'} rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 touch-manipulation`}
               >
                 Ladda ner
               </button>
@@ -280,11 +272,16 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         </div>
       </div>
 
+      {/* PDF content */}
       <div className="flex gap-2 w-full" style={{ height }}>
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-auto rounded-lg relative"
-          style={{ cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default' }}
+          className="flex-1 overflow-auto rounded-lg relative -webkit-overflow-scrolling-touch"
+          style={{ 
+            cursor: isZoomed ? (isPanning ? 'grabbing' : 'grab') : 'default',
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+          }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -300,11 +297,13 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
             <>
               <div 
                 ref={containerRef} 
-                className={isMobile ? "p-2 min-h-[220px]" : "p-4 min-h-[220px]"}
+                className={isMobile ? "p-1 min-h-[220px]" : "p-4 min-h-[220px]"}
                 style={{
                   transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
                   transformOrigin: 'top center',
-                  transition: isPanning ? 'none' : 'transform 0.2s ease-out'
+                  transition: isPanning ? 'none' : 'transform 0.2s ease-out',
+                  // On mobile at 1x zoom, don't block touch events on the container
+                  touchAction: isZoomed ? 'none' : 'auto',
                 }}
               />
               {loading && (
@@ -345,4 +344,3 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     </div>
   );
 }
-
