@@ -85,8 +85,18 @@ interface CandidateNote {
   author_name?: string;
 }
 
+// Module-level caches – survive dialog open/close cycles
+const moduleNotesCache = new Map<string, CandidateNote[]>();
+const moduleQuestionsCache = new Map<string, Record<string, { text: string; order: number }>>();
+const moduleSummaryCache = new Map<string, {
+  summary_text: string;
+  key_points: { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
+  document_type?: string | null;
+  is_valid_cv?: boolean;
+}>();
+
 // Interactive Star Rating component
-const InteractiveStarRating = ({ 
+const InteractiveStarRating = ({
   rating = 0, 
   maxStars = 5, 
   onChange 
@@ -178,17 +188,11 @@ export const CandidateProfileDialog = ({
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const previousRating = useRef<number | undefined>(undefined);
   
-  // In-memory caches for notes and questions to avoid re-fetching on re-open
-  const notesCache = useRef<Map<string, CandidateNote[]>>(new Map());
-  const questionsCache = useRef<Map<string, Record<string, { text: string; order: number }>>>(new Map());
+  // Use module-level caches (persist across dialog open/close)
+  const notesCache = moduleNotesCache;
+  const questionsCache = moduleQuestionsCache;
+  const summaryCache = moduleSummaryCache;
   
-  // AI Summary state with in-memory cache to avoid re-fetching on re-open
-  const summaryCache = useRef<Map<string, {
-    summary_text: string;
-    key_points: { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
-    document_type?: string | null;
-    is_valid_cv?: boolean;
-  }>>(new Map());
   const [aiSummary, setAiSummary] = useState<{
     summary_text: string;
     key_points: { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
@@ -271,7 +275,7 @@ export const CandidateProfileDialog = ({
     // Check in-memory cache first (cache key includes CV URL for auto-invalidation)
     const cvCacheKey = activeApplication.cv_url || '__no-cv__';
     const cacheKey = `${activeApplication.applicant_id}_${activeApplication.job_id || 'no-job'}_${cvCacheKey}`;
-    const cached = summaryCache.current.get(cacheKey);
+    const cached = summaryCache.get(cacheKey);
     if (cached) {
       setAiSummary(cached);
       return { shouldAutoGenerate: false };
@@ -285,7 +289,7 @@ export const CandidateProfileDialog = ({
         document_type: null,
         is_valid_cv: false,
       };
-      summaryCache.current.set(cacheKey, noCvSummary);
+      summaryCache.set(cacheKey, noCvSummary);
       setAiSummary(noCvSummary);
       return { shouldAutoGenerate: false };
     }
@@ -333,7 +337,7 @@ export const CandidateProfileDialog = ({
               document_type: profileSummary.document_type,
               is_valid_cv: profileSummary.is_valid_cv,
             };
-            summaryCache.current.set(cacheKey, summaryData);
+            summaryCache.set(cacheKey, summaryData);
             setAiSummary(summaryData);
             return { shouldAutoGenerate: false };
           }
@@ -379,7 +383,7 @@ export const CandidateProfileDialog = ({
         document_type: documentType,
         is_valid_cv: isValidCv,
       };
-      summaryCache.current.set(cacheKey, summaryResult);
+      summaryCache.set(cacheKey, summaryResult);
       setAiSummary(summaryResult);
 
       return { shouldAutoGenerate: false };
@@ -436,7 +440,7 @@ export const CandidateProfileDialog = ({
           is_valid_cv: data.is_valid_cv,
         };
         const genCacheKey = `${activeApplication?.applicant_id}_${activeApplication?.job_id || 'no-job'}_${activeApplication?.cv_url || '__no-cv__'}`;
-        summaryCache.current.set(genCacheKey, genResult);
+        summaryCache.set(genCacheKey, genResult);
         setAiSummary(genResult);
       }
     } catch (error) {
@@ -494,20 +498,14 @@ export const CandidateProfileDialog = ({
     return () => clearInterval(pollInterval);
   }, [open, activeApplication?.id, aiSummary, loadingSummary]);
 
-  // Fetch notes and questions when dialog opens
-  useEffect(() => {
-    if (open && activeApplication && user) {
-      fetchNotes();
-      fetchJobQuestions();
-    }
-  }, [open, activeApplication?.id, user?.id]);
+  // REMOVED: Duplicate useEffect – already handled at line 246
 
   const fetchJobQuestions = async () => {
     if (!activeApplication?.job_id) return;
     
     // Check cache first
     const qCacheKey = activeApplication.job_id;
-    const cachedQ = questionsCache.current.get(qCacheKey);
+    const cachedQ = questionsCache.get(qCacheKey);
     if (cachedQ) {
       setJobQuestions(cachedQ);
       return;
@@ -526,7 +524,7 @@ export const CandidateProfileDialog = ({
       data?.forEach(q => {
         questionsMap[q.id] = { text: q.question_text, order: q.order_index };
       });
-      questionsCache.current.set(qCacheKey, questionsMap);
+      questionsCache.set(qCacheKey, questionsMap);
       setJobQuestions(questionsMap);
     } catch (error) {
       console.error('Error fetching job questions:', error);
@@ -539,7 +537,7 @@ export const CandidateProfileDialog = ({
     // Check cache first (unless force refresh after save/edit/delete)
     const notesCacheKey = application.applicant_id;
     if (!forceRefresh) {
-      const cachedNotes = notesCache.current.get(notesCacheKey);
+      const cachedNotes = notesCache.get(notesCacheKey);
       if (cachedNotes) {
         setNotes(cachedNotes);
         return;
@@ -574,7 +572,7 @@ export const CandidateProfileDialog = ({
           : 'Okänd',
       }));
       
-      notesCache.current.set(notesCacheKey, notesWithAuthor);
+      notesCache.set(notesCacheKey, notesWithAuthor);
       setNotes(notesWithAuthor);
     } catch (error) {
       console.error('Error fetching notes:', error);
@@ -647,7 +645,7 @@ export const CandidateProfileDialog = ({
       
       toast.success('Anteckning borttagen');
       const updatedNotes = notes.filter(n => n.id !== noteId);
-      notesCache.current.set(application.applicant_id, updatedNotes);
+      notesCache.set(application.applicant_id, updatedNotes);
       setNotes(updatedNotes);
       setDeletingNoteId(null);
     } catch (error) {
