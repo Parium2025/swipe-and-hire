@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
@@ -381,8 +382,23 @@ export function SelectionCriteriaDialog({
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 space-y-2.5 pb-3">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-4 w-4 animate-spin text-white" />
+            <div className="space-y-2.5">
+              {[1, 2].map(i => (
+                <div key={i} className="rounded-lg bg-white/[0.04] px-3.5 py-3 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-3 w-20 bg-white/[0.06]" />
+                    <Skeleton className="h-3.5 w-3.5 rounded bg-white/[0.06]" />
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-3 w-10 bg-white/[0.06]" />
+                    <Skeleton className="h-9 w-full rounded-md bg-white/[0.06]" />
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-3 w-24 bg-white/[0.06]" />
+                    <Skeleton className="h-14 w-full rounded-md bg-white/[0.06]" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <>
