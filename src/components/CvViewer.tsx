@@ -29,6 +29,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [startPanPosition, setStartPanPosition] = useState({ x: 0, y: 0 });
+  // Pinch-to-zoom refs (kept outside state for 60fps performance)
+  const pinchRef = useRef({ active: false, startDist: 0, startZoom: 1, midX: 0, midY: 0 });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -194,32 +196,66 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     setIsPanning(false);
   };
 
-  // Touch panning — ONLY when zoomed in, otherwise let native scroll work
+  // Helper: distance between two touches
+  const getTouchDist = (t1: React.Touch, t2: React.Touch) =>
+    Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isZoomed) return; // Let native scroll handle it
+    if (e.touches.length === 2) {
+      // Start pinch-to-zoom
+      e.preventDefault();
+      const dist = getTouchDist(e.touches[0], e.touches[1]);
+      pinchRef.current = {
+        active: true,
+        startDist: dist,
+        startZoom: zoomLevel,
+        midX: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        midY: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+      };
+      setIsPanning(false); // cancel any single-finger pan
+      return;
+    }
+    if (!isZoomed) return; // Let native scroll handle 1-finger at 1x
     if (e.touches.length === 1) {
       setIsPanning(true);
       setStartPanPosition({
         x: e.touches[0].clientX - panPosition.x,
-        y: e.touches[0].clientY - panPosition.y
+        y: e.touches[0].clientY - panPosition.y,
       });
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isZoomed || !isPanning) return; // Let native scroll handle it
+    if (e.touches.length === 2 && pinchRef.current.active) {
+      e.preventDefault();
+      const dist = getTouchDist(e.touches[0], e.touches[1]);
+      const ratio = dist / pinchRef.current.startDist;
+      const newZoom = Math.min(3.0, Math.max(0.5, pinchRef.current.startZoom * ratio));
+      setZoomLevel(newZoom);
+      return;
+    }
+    if (!isZoomed || !isPanning) return;
     if (e.touches.length === 1) {
-      // Only prevent default when actually panning (zoomed in)
       e.preventDefault();
       setPanPosition({
         x: e.touches[0].clientX - startPanPosition.x,
-        y: e.touches[0].clientY - startPanPosition.y
+        y: e.touches[0].clientY - startPanPosition.y,
       });
     }
   };
 
-  const handleTouchEnd = () => {
-    setIsPanning(false);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (pinchRef.current.active && e.touches.length < 2) {
+      pinchRef.current.active = false;
+      // Snap to 1x if close enough for a clean feel
+      if (Math.abs(zoomLevel - 1) < 0.08) {
+        setZoomLevel(1.0);
+        setPanPosition({ x: 0, y: 0 });
+      }
+    }
+    if (e.touches.length === 0) {
+      setIsPanning(false);
+    }
   };
 
   const handleReset = () => {
@@ -301,9 +337,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                 style={{
                   transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
                   transformOrigin: 'top center',
-                  transition: isPanning ? 'none' : 'transform 0.2s ease-out',
-                  // On mobile at 1x zoom, don't block touch events on the container
-                  touchAction: isZoomed ? 'none' : 'auto',
+                  transition: (isPanning || pinchRef.current.active) ? 'none' : 'transform 0.2s ease-out',
+                  touchAction: isZoomed ? 'none' : 'pan-y',
                 }}
               />
               {loading && (
