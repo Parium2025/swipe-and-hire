@@ -92,6 +92,7 @@ export function SelectionCriteriaDialog({
         // Delete empty unsaved rows from DB silently
         supabase.from('job_criteria').delete().in('id', unsavedEmptyIds).then(() => {
           queryClient.invalidateQueries({ queryKey: ['job-criteria', jobId] });
+          queryClient.invalidateQueries({ queryKey: ['job-applications', jobId] });
         });
         // Clean local state
         setCriteria(prev => prev.filter(c => !unsavedEmptyIds.includes(c.id)));
@@ -278,8 +279,9 @@ export function SelectionCriteriaDialog({
         delete next[id];
         return next;
       });
-      // Invalidate cache so counter updates
+      // Invalidate caches so counter + candidate cards update
       queryClient.invalidateQueries({ queryKey: ['job-criteria', jobId] });
+      queryClient.invalidateQueries({ queryKey: ['job-applications', jobId] });
     } catch (error) {
       console.error('Error deleting criterion:', error);
       toast.error('Kunde inte ta bort kriterium');
