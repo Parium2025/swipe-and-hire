@@ -72,19 +72,21 @@ export function SelectionCriteriaDialog({
   const [drafts, setDrafts] = useState<Record<string, { title: string; prompt: string }>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const autoSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-  // Pre-fetch criteria when dialog is about to open so content is ready instantly
   const [hasFetched, setHasFetched] = useState(false);
+
   useEffect(() => {
-    if (open && jobId) {
+    setHasFetched(false);
+  }, [jobId]);
+
+  useEffect(() => {
+    if (!jobId) return;
+    if (open) {
       setValidationErrors({});
-      if (!hasFetched) {
-        fetchCriteria().then(() => setHasFetched(true));
-      }
     }
-    if (!open) {
-      setHasFetched(false);
+    if (!hasFetched) {
+      fetchCriteria().then(() => setHasFetched(true));
     }
-  }, [open, jobId]);
+  }, [open, jobId, hasFetched]);
 
   const fetchCriteria = async () => {
     setIsLoading(true);
@@ -375,7 +377,7 @@ export function SelectionCriteriaDialog({
   });
 
   const dialogContent = (
-    <>
+    <div className="h-full flex flex-col min-h-0">
       {/* Header — centered */}
       <div className="px-5 pt-5 pb-2 flex-shrink-0 text-center">
         {isMobile ? (
@@ -403,7 +405,7 @@ export function SelectionCriteriaDialog({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-5 space-y-2.5 pb-3">
+        <div className="flex-1 min-h-0 overflow-y-auto px-5 space-y-2.5 pb-3">
           {isLoading ? (
             <div className="space-y-2.5">
               {[1, 2].map(i => (
@@ -538,16 +540,14 @@ export function SelectionCriteriaDialog({
             </button>
           </div>
         )}
-    </>
+    </div>
   );
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
-        <DrawerContent className="bg-card-parium backdrop-blur-xl border-white/[0.06] text-white max-h-[85vh] overflow-hidden flex flex-col p-0">
-          <div className="min-h-[280px]">
-            {dialogContent}
-          </div>
+        <DrawerContent className="bg-card-parium backdrop-blur-xl border-white/[0.06] text-white h-[85svh] max-h-[85svh] overflow-hidden flex flex-col p-0">
+          {dialogContent}
         </DrawerContent>
       </Drawer>
     );
