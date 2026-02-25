@@ -23,12 +23,19 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   const device = useDevice();
   const isMobile = device === 'mobile';
   
-  const initialScale = 0.9;
+  // Dynamic scale: on mobile fill the container width, on desktop use 0.9
+  // A4 at 72dpi = 595px. We compute the ideal scale once from the viewport.
+  const pdfScale = useMemo(() => {
+    if (!isMobile) return 0.9;
+    // On mobile, target ~95% of viewport width. A4 width at scale=1 is ~595px.
+    const targetWidth = (typeof window !== 'undefined' ? window.innerWidth : 375) * 0.95;
+    return Math.max(0.5, targetWidth / 595);
+  }, [isMobile]);
   
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [scale] = useState(initialScale);
+  const [scale] = useState(pdfScale);
   // zoomLevel & panPosition are only used for UI display (% label) and
   // button controls. During touch gestures we write directly to the DOM
   // via refs and only sync back to state on gesture end.
@@ -117,7 +124,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           
           const transform = [outputScale, 0, 0, outputScale, 0, 0];
           canvas.style.display = 'block';
-          canvas.style.margin = '0 auto 16px auto';
+          canvas.style.margin = isMobile ? '0 auto 8px auto' : '0 auto 16px auto';
           canvas.style.background = 'white';
           canvas.dataset.pageNumber = i.toString();
           container.appendChild(canvas);
@@ -263,7 +270,20 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         e.preventDefault();
         const d = dist(e.touches[0], e.touches[1]);
         const ratio = d / g.pinchStartDist;
+        const prevZoom = g.zoom;
         g.zoom = clamp(g.pinchStartZoom * ratio, 0.5, 3.0);
+        // Scale pan proportionally so content doesn't drift off-screen
+        if (prevZoom > 0) {
+          const zoomRatio = g.zoom / prevZoom;
+          g.panX *= zoomRatio;
+          g.panY *= zoomRatio;
+        }
+        // When approaching 1x, progressively kill pan offset
+        if (g.zoom <= 1.05) {
+          const t = clamp((g.zoom - 0.5) / 0.5, 0, 1); // 0 at 0.5x, 1 at 1x
+          g.panX *= t;
+          g.panY *= t;
+        }
         // Coalesce to next frame
         cancelAnimationFrame(g.raf);
         g.raf = requestAnimationFrame(applyTransform);
@@ -282,16 +302,25 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
       if (g.pinchActive && e.touches.length < 2) {
         g.pinchActive = false;
         // Snap to 1x if close
-        if (Math.abs(g.zoom - 1) < 0.08) {
+        if (Math.abs(g.zoom - 1) < 0.12) {
           g.zoom = 1;
+          g.panX = 0;
+          g.panY = 0;
+        }
+        // Always reset pan when at or below 1x
+        if (g.zoom <= 1) {
           g.panX = 0;
           g.panY = 0;
         }
         // Restore transition
         if (containerRef.current) {
-          containerRef.current.style.transition = 'transform 0.2s ease-out';
+          containerRef.current.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         }
         applyTransform();
+        // Also reset scroll to top when returning to 1x
+        if (g.zoom <= 1 && scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = 0;
+        }
         // Sync to React state (updates UI labels, isZoomed flag)
         setZoomLevel(g.zoom);
         setPanPosition({ x: g.panX, y: g.panY });
