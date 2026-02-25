@@ -399,9 +399,10 @@ export function SelectionCriteriaDialog({
   };
 
   const canAddMore = criteria.length < 5;
-  const hasValidCriteria = criteria.some(c => {
+  const hasValidCriteria = criteria.length > 0 && criteria.every(c => {
     const d = drafts[c.id];
-    return d?.title.trim() && d?.prompt.trim();
+    // Every criterion must have a title; empty criteria (no title AND no prompt) are also invalid
+    return d?.title.trim();
   });
 
   const dialogContent = (
