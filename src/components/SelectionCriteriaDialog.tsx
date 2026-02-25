@@ -78,6 +78,32 @@ export function SelectionCriteriaDialog({
     setHasFetched(false);
   }, [jobId]);
 
+  // When dialog closes, remove unsaved (empty) criteria from local state
+  useEffect(() => {
+    if (!open && criteria.length > 0) {
+      const unsavedEmptyIds = criteria
+        .filter(c => {
+          const d = drafts[c.id];
+          return !c.is_active && (!d?.title.trim() || !d?.prompt.trim());
+        })
+        .map(c => c.id);
+
+      if (unsavedEmptyIds.length > 0) {
+        // Delete empty unsaved rows from DB silently
+        supabase.from('job_criteria').delete().in('id', unsavedEmptyIds).then(() => {
+          queryClient.invalidateQueries({ queryKey: ['job-criteria', jobId] });
+        });
+        // Clean local state
+        setCriteria(prev => prev.filter(c => !unsavedEmptyIds.includes(c.id)));
+        setDrafts(prev => {
+          const next = { ...prev };
+          unsavedEmptyIds.forEach(id => delete next[id]);
+          return next;
+        });
+      }
+    }
+  }, [open]);
+
   useEffect(() => {
     if (!jobId) return;
     if (open) {
