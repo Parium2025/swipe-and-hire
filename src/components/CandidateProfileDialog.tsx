@@ -2,12 +2,10 @@ import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/componen
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, Clock, ChevronDown, ChevronUp, StickyNote, Send, Trash2, ExternalLink, Star, Activity, Sparkles, Loader2, Pencil, X, Check, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, AlertTriangle } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, ChevronDown, ChevronUp, StickyNote, Trash2, ExternalLink, Star, Activity, Loader2, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, AlertTriangle, X } from 'lucide-react';
 import { ShareCandidateDialog } from '@/components/ShareCandidateDialog';
 import { SendMessageDialog } from '@/components/SendMessageDialog';
 import type { StageSettings } from '@/hooks/useStageSettings';
@@ -16,9 +14,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import ProfileVideo from '@/components/ProfileVideo';
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Textarea } from '@/components/ui/textarea';
 import { CvViewer } from '@/components/CvViewer';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
 import { useCandidateActivities } from '@/hooks/useCandidateActivities';
@@ -32,10 +29,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+  CandidateNotesPanel,
+  CandidateSummarySection,
+  summaryCache,
+  questionsCache,
+  notesCache,
+  getPersistedCacheValue,
+  setPersistedCacheValue,
+  getPersistedNotes,
+  setPersistedNotes,
+  SUMMARY_STORAGE_KEY,
+  QUESTIONS_STORAGE_KEY,
+} from '@/components/candidateProfile';
+import type { CandidateNote, CandidateSummaryCacheValue } from '@/components/candidateProfile';
 
 function useProfileImageUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-image');
@@ -50,23 +56,14 @@ interface CandidateProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStatusUpdate: () => void;
-  /** All applications from the same candidate (for job dropdown) */
   allApplications?: ApplicationData[];
-  /** Current rating for the candidate in my_candidates */
   candidateRating?: number;
-  /** Callback when rating is changed */
   onRatingChange?: (rating: number) => void;
-  /** Variant: 'all-candidates' shows only Book meeting button (sticky), 'my-candidates' shows all buttons */
   variant?: 'all-candidates' | 'my-candidates';
-  /** Current stage of the candidate (for my-candidates variant) */
   currentStage?: string;
-  /** Ordered list of stage keys */
   stageOrder?: string[];
-  /** Stage configuration with labels/colors */
   stageConfig?: Record<string, StageSettings>;
-  /** Callback when stage is changed */
   onStageChange?: (newStage: string) => void;
-  /** Callback when candidate is removed from my candidates list */
   onRemoveFromList?: () => void;
 }
 
@@ -76,82 +73,6 @@ const statusConfig = {
   accepted: { label: 'Accepterad', className: 'bg-green-500/20 text-green-300 border-green-500/30' },
   rejected: { label: 'Avvisad', className: 'bg-red-500/20 text-red-300 border-red-500/30' },
 };
-
-interface CandidateNote {
-  id: string;
-  note: string;
-  created_at: string;
-  employer_id: string;
-  author_name?: string;
-}
-
-type CandidateSummaryCacheValue = {
-  summary_text: string;
-  key_points: { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
-  document_type?: string | null;
-  is_valid_cv?: boolean;
-};
-
-type PersistedCacheEntry<T> = {
-  value: T;
-  cachedAt: number;
-};
-
-const SUMMARY_STORAGE_KEY = 'candidate-profile-summary-cache-v1';
-const QUESTIONS_STORAGE_KEY = 'candidate-profile-questions-cache-v1';
-// No TTL – application data never changes after submission
-const CACHE_MAX_ITEMS = 400;
-
-const isBrowser = () => typeof window !== 'undefined';
-
-const readPersistedCache = <T,>(storageKey: string): Record<string, PersistedCacheEntry<T>> => {
-  if (!isBrowser()) return {};
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
-  }
-};
-
-const writePersistedCache = <T,>(storageKey: string, cache: Record<string, PersistedCacheEntry<T>>) => {
-  if (!isBrowser()) return;
-  try {
-    window.localStorage.setItem(storageKey, JSON.stringify(cache));
-  } catch {
-    // Ignore storage errors silently
-  }
-};
-
-const getPersistedCacheValue = <T,>(storageKey: string, cacheKey: string): T | null => {
-  const cache = readPersistedCache<T>(storageKey);
-  const entry = cache[cacheKey];
-  if (!entry) return null;
-
-  // Permanent cache – data is immutable after application
-
-  return entry.value;
-};
-
-const setPersistedCacheValue = <T,>(storageKey: string, cacheKey: string, value: T) => {
-  const cache = readPersistedCache<T>(storageKey);
-  cache[cacheKey] = { value, cachedAt: Date.now() };
-
-  const pruned = Object.fromEntries(
-    Object.entries(cache)
-      .sort(([, a], [, b]) => b.cachedAt - a.cachedAt)
-      .slice(0, CACHE_MAX_ITEMS)
-  ) as Record<string, PersistedCacheEntry<T>>;
-
-  writePersistedCache(storageKey, pruned);
-};
-
-// Module-level caches – survive dialog open/close cycles
-const moduleNotesCache = new Map<string, CandidateNote[]>();
-const moduleQuestionsCache = new Map<string, Record<string, { text: string; order: number }>>();
-const moduleSummaryCache = new Map<string, CandidateSummaryCacheValue>();
 
 // Interactive Star Rating component
 const InteractiveStarRating = ({
@@ -169,7 +90,6 @@ const InteractiveStarRating = ({
     e.preventDefault();
     e.stopPropagation();
     if (onChange) {
-      // If clicking the same rating, reset to 0
       const newRating = starIndex + 1 === rating ? 0 : starIndex + 1;
       onChange(newRating);
     }
@@ -206,6 +126,30 @@ const InteractiveStarRating = ({
   );
 };
 
+// Employment status / availability label maps
+const employmentStatusLabels: Record<string, string> = {
+  tillsvidareanställning: 'Fast anställning',
+  visstidsanställning: 'Visstidsanställning',
+  provanställning: 'Provanställning',
+  interim: 'Interim anställning',
+  arbetssokande: 'Arbetssökande',
+};
+
+const workScheduleLabels: Record<string, string> = {
+  heltid: 'Heltid',
+  deltid: 'Deltid',
+  timanställning: 'Timanställning',
+};
+
+const availabilityLabels: Record<string, string> = {
+  omgaende: 'Omgående',
+  'inom-1-manad': 'Inom 1 månad',
+  'inom-3-manader': 'Inom 3 månader',
+  'inom-6-manader': 'Inom 6 månader',
+  'ej-aktuellt': 'Inte aktuellt just nu',
+  osaker: 'Osäker',
+};
+
 export const CandidateProfileDialog = ({
   application,
   open,
@@ -227,7 +171,6 @@ export const CandidateProfileDialog = ({
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'comments'>('activity');
   const [mobileTab, setMobileTab] = useState<'profile' | 'activity' | 'comments'>('profile');
   const [notes, setNotes] = useState<CandidateNote[]>([]);
-  // Auto-save note draft to localStorage (unique per candidate)
   const [newNote, setNewNote, clearNoteDraft] = useFieldDraft(
     `candidate-note-${application?.applicant_id || 'unknown'}`
   );
@@ -240,16 +183,10 @@ export const CandidateProfileDialog = ({
   const [sendMessageOpen, setSendMessageOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
-  const [removing, setRemoving] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const previousRating = useRef<number | undefined>(undefined);
-  
-  // Use module-level caches (persist across dialog open/close)
-  const notesCache = moduleNotesCache;
-  const questionsCache = moduleQuestionsCache;
-  const summaryCache = moduleSummaryCache;
   
   const [aiSummary, setAiSummary] = useState<CandidateSummaryCacheValue | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
@@ -282,7 +219,6 @@ export const CandidateProfileDialog = ({
   // Handle rating change with activity logging
   const handleRatingChange = (newRating: number) => {
     if (onRatingChange && application) {
-      // Log the activity
       logActivity.mutate({
         applicantId: application.applicant_id,
         activityType: 'rating_changed',
@@ -295,278 +231,85 @@ export const CandidateProfileDialog = ({
     }
   };
 
-  // Fetch notes and questions when dialog opens or job selection changes
-  useEffect(() => {
-    if (open && activeApplication && user) {
-      fetchNotes();
-      fetchJobQuestions();
-    }
-  }, [open, activeApplication?.id, user?.id]);
+  // ─── Fetch notes ──────────────────────────────────────────────────
 
-  // Helpers: parse stored summary JSON into UI state + meta
-  const extractSummaryMeta = (keyPoints: any[] | null | undefined) => {
-    const docPoint = (keyPoints || []).find(
-      (p: any) => typeof p?.text === 'string' && p.text.startsWith('Dokumenttyp:')
-    );
-
-    const documentType = typeof docPoint?.text === 'string'
-      ? docPoint.text.replace('Dokumenttyp:', '').trim()
-      : null;
-
-    const isValidCv = documentType ? documentType.toLowerCase() === 'cv' : undefined;
-
-    const sourceCvUrl = docPoint?.meta?.source_cv_url as string | undefined;
-
-    return { documentType, isValidCv, sourceCvUrl };
-  };
-
-  // Fetch AI summary for this candidate/job combination
-  const fetchAiSummary = async () => {
-    if (!activeApplication?.applicant_id) return;
+  const fetchNotes = useCallback(async (forceRefresh = false) => {
+    if (!application || !user) return;
     
-    // Check in-memory cache first (cache key includes CV URL for auto-invalidation)
-    const cvCacheKey = activeApplication.cv_url || '__no-cv__';
-    const cacheKey = `${activeApplication.applicant_id}_${activeApplication.job_id || 'no-job'}_${cvCacheKey}`;
-    const cached = summaryCache.get(cacheKey);
-    if (cached) {
-      setAiSummary(cached);
-      return { shouldAutoGenerate: false };
-    }
-
-    const persisted = getPersistedCacheValue<CandidateSummaryCacheValue>(SUMMARY_STORAGE_KEY, cacheKey);
-    if (persisted) {
-      summaryCache.set(cacheKey, persisted);
-      setAiSummary(persisted);
-      return { shouldAutoGenerate: false };
-    }
-
-    // If no CV exists, cache and reuse a stable fallback state
-    if (!activeApplication.cv_url) {
-      const noCvSummary = {
-        summary_text: 'Kandidaten har inte laddat upp något CV',
-        key_points: null,
-        document_type: null,
-        is_valid_cv: false,
-      };
-      summaryCache.set(cacheKey, noCvSummary);
-      setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, noCvSummary);
-      setAiSummary(noCvSummary);
-      return { shouldAutoGenerate: false };
-    }
-
-    setLoadingSummary(true);
-
-    try {
-      // First try job-specific summary
-      let data: { summary_text: string; key_points: any[] | null } | null = null;
-      
-      if (activeApplication?.job_id) {
-        const { data: jobSummary, error } = await supabase
-          .from('candidate_summaries')
-          .select('summary_text, key_points')
-          .eq('job_id', activeApplication.job_id)
-          .eq('applicant_id', activeApplication.applicant_id)
-          .order('generated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (error) throw error;
-        if (jobSummary) {
-          data = {
-            summary_text: jobSummary.summary_text,
-            key_points: (jobSummary.key_points as any[] | null) || null
-          };
-        }
-      }
-
-      // If no job-specific summary, try proactive profile summary as fallback
-      if (!data) {
-        const { data: profileSummary, error: profileError } = await supabase
-          .from('profile_cv_summaries')
-          .select('summary_text, key_points, is_valid_cv, document_type, cv_url')
-          .eq('user_id', activeApplication.applicant_id)
-          .maybeSingle();
-
-        if (!profileError && profileSummary) {
-          // Check if the proactive summary matches current CV
-          const currentCvUrl = activeApplication.cv_url || null;
-          if (!currentCvUrl || profileSummary.cv_url === currentCvUrl) {
-            const summaryData = {
-              summary_text: profileSummary.summary_text || '',
-              key_points: (profileSummary.key_points as any[] | null) || [],
-              document_type: profileSummary.document_type,
-              is_valid_cv: profileSummary.is_valid_cv,
-            };
-            summaryCache.set(cacheKey, summaryData);
-            setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, summaryData);
-            setAiSummary(summaryData);
-            return { shouldAutoGenerate: false };
-          }
-        }
-      }
-
-      // No existing summary - trigger generation
-      if (!data) {
-        setAiSummary(null);
-        return { shouldAutoGenerate: true };
-      }
-
-      const keyPoints = (data.key_points as any[] | null) || null;
-      const meta = extractSummaryMeta(keyPoints);
-
-      // If we have a current CV file but the stored summary is missing meta,
-      // or was generated for a different uploaded document, treat as stale and regenerate.
-      const currentCvUrl = activeApplication.cv_url || null;
-      const isStale = !!currentCvUrl && (!meta.sourceCvUrl || meta.sourceCvUrl !== currentCvUrl);
-
-      if (isStale) {
-        setAiSummary(null);
-        return { shouldAutoGenerate: true };
-      }
-
-      // Determine CV validity:
-      // - Prefer explicit doc type from key points
-      // - Fallback to legacy string check
-      let isValidCv = meta.isValidCv;
-      let documentType = meta.documentType;
-
-      if (typeof isValidCv !== 'boolean') {
-        isValidCv = !data.summary_text.includes('Kan inte läsa av ett CV');
-      }
-      if (!documentType && data.summary_text.includes('Kan inte läsa av ett CV')) {
-        const match = data.summary_text.match(/dokumentet är (.+?)\./);
-        if (match) documentType = match[1];
-      }
-
-      const summaryResult = {
-        summary_text: data.summary_text,
-        key_points: keyPoints as any,
-        document_type: documentType,
-        is_valid_cv: isValidCv,
-      };
-      summaryCache.set(cacheKey, summaryResult);
-      setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, summaryResult);
-      setAiSummary(summaryResult);
-
-      return { shouldAutoGenerate: false };
-    } catch (error) {
-      console.error('Error fetching AI summary:', error);
-      return { shouldAutoGenerate: false };
-    } finally {
-      setLoadingSummary(false);
-    }
-  };
-
-  // Generate AI summary on-demand - based ONLY on the uploaded document
-  const generateAiSummary = async (silent = false) => {
-    if (!activeApplication?.applicant_id) return;
-    
-    // Check if online before generating
-    if (!navigator.onLine) {
-      if (!silent) toast.error('Du måste vara online för att generera sammanfattning');
-      return;
-    }
-    
-    setGeneratingSummary(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-cv-summary', {
-        body: {
-          applicant_id: activeApplication.applicant_id,
-          application_id: activeApplication.id,
-          job_id: activeApplication.job_id,
-          cv_url_override: activeApplication.cv_url,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.error) {
-        if (!silent) toast.error(data.error);
+    const notesCacheKey = application.applicant_id;
+    if (!forceRefresh) {
+      // Check in-memory cache
+      const cachedNotes = notesCache.get(notesCacheKey);
+      if (cachedNotes) {
+        setNotes(cachedNotes);
         return;
       }
-
-      if (!silent) {
-        if (data?.is_valid_cv === false) {
-          toast.message('Dokumentet är inte ett CV');
-        } else {
-          toast.success('Sammanfattning genererad från CV');
-        }
+      // Check localStorage cache
+      const persisted = getPersistedNotes(notesCacheKey);
+      if (persisted) {
+        notesCache.set(notesCacheKey, persisted);
+        setNotes(persisted);
+        // Background refresh to stay current
+        refreshNotesInBackground(notesCacheKey);
+        return;
       }
-
-      if (data?.summary) {
-        const genResult = {
-          summary_text: data.summary.summary_text,
-          key_points: data.summary.key_points,
-          document_type: data.document_type || data.summary.document_type || null,
-          is_valid_cv: data.is_valid_cv,
-        };
-        const genCacheKey = `${activeApplication?.applicant_id}_${activeApplication?.job_id || 'no-job'}_${activeApplication?.cv_url || '__no-cv__'}`;
-        summaryCache.set(genCacheKey, genResult);
-        setPersistedCacheValue(SUMMARY_STORAGE_KEY, genCacheKey, genResult);
-        setAiSummary(genResult);
-      }
-    } catch (error) {
-      console.error('Error generating CV summary:', error);
-      if (!silent) toast.error('Kunde inte generera sammanfattning');
-    } finally {
-      setGeneratingSummary(false);
     }
+    
+    setLoadingNotes(true);
+    try {
+      const fetchedNotes = await fetchNotesFromDb(application.applicant_id);
+      notesCache.set(notesCacheKey, fetchedNotes);
+      setPersistedNotes(notesCacheKey, fetchedNotes);
+      setNotes(fetchedNotes);
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+    } finally {
+      setLoadingNotes(false);
+    }
+  }, [application?.applicant_id, user?.id]);
+
+  const refreshNotesInBackground = useCallback(async (notesCacheKey: string) => {
+    try {
+      const fetchedNotes = await fetchNotesFromDb(notesCacheKey);
+      notesCache.set(notesCacheKey, fetchedNotes);
+      setPersistedNotes(notesCacheKey, fetchedNotes);
+      setNotes(fetchedNotes);
+    } catch {
+      // Silently fail - we already have cached data
+    }
+  }, []);
+
+  const fetchNotesFromDb = async (applicantId: string): Promise<CandidateNote[]> => {
+    const { data, error } = await supabase
+      .from('candidate_notes')
+      .select(`
+        id, 
+        note, 
+        created_at, 
+        employer_id,
+        profiles!candidate_notes_employer_id_fkey(first_name, last_name)
+      `)
+      .eq('applicant_id', applicantId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    
+    return (data || []).map((note: any) => ({
+      id: note.id,
+      note: note.note,
+      created_at: note.created_at,
+      employer_id: note.employer_id,
+      author_name: note.profiles 
+        ? `${note.profiles.first_name || ''} ${note.profiles.last_name || ''}`.trim() || 'Okänd'
+        : 'Okänd',
+    }));
   };
 
-  // Auto-generate summary when dialog opens and no summary exists
-  useEffect(() => {
-    const autoGenerateIfNeeded = async () => {
-      if (!open || !activeApplication || !user) return;
-      
-      // Check if summary already exists
-      const result = await fetchAiSummary();
-      
-      // Auto-generate if no summary and CV exists
-      if (result?.shouldAutoGenerate && activeApplication.cv_url) {
-        generateAiSummary(true); // Silent mode - no toast
-      }
-    };
-    
-    autoGenerateIfNeeded();
-  }, [open, activeApplication?.id, user?.id]);
+  // ─── Fetch job questions ──────────────────────────────────────────
 
-  // Polling: Check for summary updates every 3 seconds if no summary exists
-  useEffect(() => {
-    if (!open || !activeApplication || aiSummary || loadingSummary) return;
-
-    const pollInterval = setInterval(async () => {
-      // Skip polling if offline
-      if (!navigator.onLine || !activeApplication.cv_url) return;
-
-      try {
-        const { data } = await supabase
-          .from('candidate_summaries')
-          .select('summary_text, key_points')
-          .eq('job_id', activeApplication.job_id)
-          .eq('applicant_id', activeApplication.applicant_id)
-          .order('generated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (data) {
-          // Reuse the main fetch parser logic by calling fetchAiSummary (which also handles staleness)
-          await fetchAiSummary();
-        }
-      } catch (error) {
-        console.error('Polling error:', error);
-      }
-    }, 3000);
-
-    return () => clearInterval(pollInterval);
-  }, [open, activeApplication?.id, aiSummary, loadingSummary]);
-
-  // REMOVED: Duplicate useEffect – already handled at line 246
-
-  const fetchJobQuestions = async () => {
+  const fetchJobQuestions = useCallback(async () => {
     if (!activeApplication?.job_id) return;
     
-    // Check cache first
     const qCacheKey = activeApplication.job_id;
     const cachedQ = questionsCache.get(qCacheKey);
     if (cachedQ) {
@@ -603,62 +346,271 @@ export const CandidateProfileDialog = ({
     } catch (error) {
       console.error('Error fetching job questions:', error);
     }
+  }, [activeApplication?.job_id]);
+
+  // ─── AI Summary ───────────────────────────────────────────────────
+
+  const extractSummaryMeta = (keyPoints: any[] | null | undefined) => {
+    const docPoint = (keyPoints || []).find(
+      (p: any) => typeof p?.text === 'string' && p.text.startsWith('Dokumenttyp:')
+    );
+    const documentType = typeof docPoint?.text === 'string'
+      ? docPoint.text.replace('Dokumenttyp:', '').trim()
+      : null;
+    const isValidCv = documentType ? documentType.toLowerCase() === 'cv' : undefined;
+    const sourceCvUrl = docPoint?.meta?.source_cv_url as string | undefined;
+    return { documentType, isValidCv, sourceCvUrl };
   };
 
-  const fetchNotes = async (forceRefresh = false) => {
-    if (!application || !user) return;
+  const fetchAiSummary = useCallback(async () => {
+    if (!activeApplication?.applicant_id) return;
     
-    // Check cache first (unless force refresh after save/edit/delete)
-    const notesCacheKey = application.applicant_id;
-    if (!forceRefresh) {
-      const cachedNotes = notesCache.get(notesCacheKey);
-      if (cachedNotes) {
-        setNotes(cachedNotes);
-        return;
+    const cvCacheKey = activeApplication.cv_url || '__no-cv__';
+    const cacheKey = `${activeApplication.applicant_id}_${activeApplication.job_id || 'no-job'}_${cvCacheKey}`;
+    
+    // Check in-memory cache
+    const cached = summaryCache.get(cacheKey);
+    if (cached) {
+      setAiSummary(cached);
+      return { shouldAutoGenerate: false };
+    }
+
+    // Check localStorage cache
+    const persisted = getPersistedCacheValue<CandidateSummaryCacheValue>(SUMMARY_STORAGE_KEY, cacheKey);
+    if (persisted) {
+      summaryCache.set(cacheKey, persisted);
+      setAiSummary(persisted);
+      return { shouldAutoGenerate: false };
+    }
+
+    // No CV → stable fallback
+    if (!activeApplication.cv_url) {
+      const noCvSummary: CandidateSummaryCacheValue = {
+        summary_text: 'Kandidaten har inte laddat upp något CV',
+        key_points: null,
+        document_type: null,
+        is_valid_cv: false,
+      };
+      summaryCache.set(cacheKey, noCvSummary);
+      setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, noCvSummary);
+      setAiSummary(noCvSummary);
+      return { shouldAutoGenerate: false };
+    }
+
+    setLoadingSummary(true);
+
+    try {
+      let data: { summary_text: string; key_points: any[] | null } | null = null;
+      
+      if (activeApplication?.job_id) {
+        const { data: jobSummary, error } = await supabase
+          .from('candidate_summaries')
+          .select('summary_text, key_points')
+          .eq('job_id', activeApplication.job_id)
+          .eq('applicant_id', activeApplication.applicant_id)
+          .order('generated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (jobSummary) {
+          data = {
+            summary_text: jobSummary.summary_text,
+            key_points: (jobSummary.key_points as any[] | null) || null
+          };
+        }
       }
+
+      // Fallback to proactive profile summary
+      if (!data) {
+        const { data: profileSummary, error: profileError } = await supabase
+          .from('profile_cv_summaries')
+          .select('summary_text, key_points, is_valid_cv, document_type, cv_url')
+          .eq('user_id', activeApplication.applicant_id)
+          .maybeSingle();
+
+        if (!profileError && profileSummary) {
+          const currentCvUrl = activeApplication.cv_url || null;
+          if (!currentCvUrl || profileSummary.cv_url === currentCvUrl) {
+            const summaryData: CandidateSummaryCacheValue = {
+              summary_text: profileSummary.summary_text || '',
+              key_points: (profileSummary.key_points as any[] | null) || [],
+              document_type: profileSummary.document_type,
+              is_valid_cv: profileSummary.is_valid_cv,
+            };
+            summaryCache.set(cacheKey, summaryData);
+            setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, summaryData);
+            setAiSummary(summaryData);
+            return { shouldAutoGenerate: false };
+          }
+        }
+      }
+
+      if (!data) {
+        setAiSummary(null);
+        return { shouldAutoGenerate: true };
+      }
+
+      const keyPoints = (data.key_points as any[] | null) || null;
+      const meta = extractSummaryMeta(keyPoints);
+
+      const currentCvUrl = activeApplication.cv_url || null;
+      const isStale = !!currentCvUrl && (!meta.sourceCvUrl || meta.sourceCvUrl !== currentCvUrl);
+
+      if (isStale) {
+        setAiSummary(null);
+        return { shouldAutoGenerate: true };
+      }
+
+      let isValidCv = meta.isValidCv;
+      let documentType = meta.documentType;
+
+      if (typeof isValidCv !== 'boolean') {
+        isValidCv = !data.summary_text.includes('Kan inte läsa av ett CV');
+      }
+      if (!documentType && data.summary_text.includes('Kan inte läsa av ett CV')) {
+        const match = data.summary_text.match(/dokumentet är (.+?)\./);
+        if (match) documentType = match[1];
+      }
+
+      const summaryResult: CandidateSummaryCacheValue = {
+        summary_text: data.summary_text,
+        key_points: keyPoints as any,
+        document_type: documentType,
+        is_valid_cv: isValidCv,
+      };
+      summaryCache.set(cacheKey, summaryResult);
+      setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, summaryResult);
+      setAiSummary(summaryResult);
+
+      return { shouldAutoGenerate: false };
+    } catch (error) {
+      console.error('Error fetching AI summary:', error);
+      return { shouldAutoGenerate: false };
+    } finally {
+      setLoadingSummary(false);
+    }
+  }, [activeApplication?.applicant_id, activeApplication?.job_id, activeApplication?.cv_url]);
+
+  const generateAiSummary = useCallback(async (silent = false) => {
+    if (!activeApplication?.applicant_id) return;
+    
+    if (!navigator.onLine) {
+      if (!silent) toast.error('Du måste vara online för att generera sammanfattning');
+      return;
     }
     
-    setLoadingNotes(true);
+    setGeneratingSummary(true);
+
     try {
-      // Fetch notes with author profile info
-      const { data, error } = await supabase
-        .from('candidate_notes')
-        .select(`
-          id, 
-          note, 
-          created_at, 
-          employer_id,
-          profiles!candidate_notes_employer_id_fkey(first_name, last_name)
-        `)
-        .eq('applicant_id', application.applicant_id)
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.functions.invoke('generate-cv-summary', {
+        body: {
+          applicant_id: activeApplication.applicant_id,
+          application_id: activeApplication.id,
+          job_id: activeApplication.job_id,
+          cv_url_override: activeApplication.cv_url,
+        },
+      });
 
       if (error) throw error;
-      
-      // Transform data to include author name
-      const notesWithAuthor = (data || []).map((note: any) => ({
-        id: note.id,
-        note: note.note,
-        created_at: note.created_at,
-        employer_id: note.employer_id,
-        author_name: note.profiles 
-          ? `${note.profiles.first_name || ''} ${note.profiles.last_name || ''}`.trim() || 'Okänd'
-          : 'Okänd',
-      }));
-      
-      notesCache.set(notesCacheKey, notesWithAuthor);
-      setNotes(notesWithAuthor);
+
+      if (data?.error) {
+        if (!silent) toast.error(data.error);
+        return;
+      }
+
+      if (!silent) {
+        if (data?.is_valid_cv === false) {
+          toast.message('Dokumentet är inte ett CV');
+        } else {
+          toast.success('Sammanfattning genererad från CV');
+        }
+      }
+
+      if (data?.summary) {
+        const genResult: CandidateSummaryCacheValue = {
+          summary_text: data.summary.summary_text,
+          key_points: data.summary.key_points,
+          document_type: data.document_type || data.summary.document_type || null,
+          is_valid_cv: data.is_valid_cv,
+        };
+        const genCacheKey = `${activeApplication.applicant_id}_${activeApplication.job_id || 'no-job'}_${activeApplication.cv_url || '__no-cv__'}`;
+        summaryCache.set(genCacheKey, genResult);
+        setPersistedCacheValue(SUMMARY_STORAGE_KEY, genCacheKey, genResult);
+        setAiSummary(genResult);
+      }
     } catch (error) {
-      console.error('Error fetching notes:', error);
+      console.error('Error generating CV summary:', error);
+      if (!silent) toast.error('Kunde inte generera sammanfattning');
     } finally {
-      setLoadingNotes(false);
+      setGeneratingSummary(false);
     }
-  };
+  }, [activeApplication?.applicant_id, activeApplication?.id, activeApplication?.job_id, activeApplication?.cv_url]);
+
+  // Fetch notes and questions when dialog opens or job selection changes
+  useEffect(() => {
+    if (open && activeApplication && user) {
+      fetchNotes();
+      fetchJobQuestions();
+    }
+  }, [open, activeApplication?.id, user?.id]);
+
+  // Auto-generate summary when dialog opens
+  useEffect(() => {
+    const autoGenerateIfNeeded = async () => {
+      if (!open || !activeApplication || !user) return;
+      const result = await fetchAiSummary();
+      if (result?.shouldAutoGenerate && activeApplication.cv_url) {
+        generateAiSummary(true);
+      }
+    };
+    autoGenerateIfNeeded();
+  }, [open, activeApplication?.id, user?.id]);
+
+  // Polling with exponential backoff (3s → 6s → 12s → ...) and max 10 attempts
+  useEffect(() => {
+    if (!open || !activeApplication || aiSummary || loadingSummary) return;
+
+    let attempt = 0;
+    const MAX_ATTEMPTS = 10;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
+      if (!navigator.onLine || !activeApplication.cv_url || attempt >= MAX_ATTEMPTS) return;
+      attempt++;
+
+      try {
+        const { data } = await supabase
+          .from('candidate_summaries')
+          .select('summary_text, key_points')
+          .eq('job_id', activeApplication.job_id)
+          .eq('applicant_id', activeApplication.applicant_id)
+          .order('generated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (data) {
+          await fetchAiSummary();
+          return; // Stop polling — found data
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+
+      // Exponential backoff: 3s, 6s, 12s, 24s...
+      const delay = 3000 * Math.pow(2, attempt - 1);
+      timeoutId = setTimeout(poll, delay);
+    };
+
+    timeoutId = setTimeout(poll, 3000);
+
+    return () => clearTimeout(timeoutId);
+  }, [open, activeApplication?.id, aiSummary, loadingSummary]);
+
+  // ─── Note CRUD ────────────────────────────────────────────────────
 
   const saveNote = async () => {
     if (!newNote.trim() || !application || !user) return;
-    
-    // Check if online before saving
     if (!navigator.onLine) {
       toast.error('Du måste vara online för att spara anteckningar');
       return;
@@ -677,17 +629,16 @@ export const CandidateProfileDialog = ({
 
       if (error) throw error;
 
-      // Log activity
       logActivity.mutate({
         applicantId: application.applicant_id,
         activityType: 'note_added',
-        newValue: newNote.trim().substring(0, 100), // Store preview of note
+        newValue: newNote.trim().substring(0, 100),
         metadata: { job_id: application.job_id },
       });
 
       toast.success('Anteckning sparad');
       setNewNote('');
-      clearNoteDraft(); // Rensa sparad draft efter lyckad sparning
+      clearNoteDraft();
       fetchNotes(true);
     } catch (error) {
       console.error('Error saving note:', error);
@@ -699,8 +650,6 @@ export const CandidateProfileDialog = ({
 
   const deleteNote = async (noteId: string) => {
     if (!application) return;
-    
-    // Check if online before deleting
     if (!navigator.onLine) {
       toast.error('Du måste vara online för att ta bort anteckningar');
       return;
@@ -714,22 +663,18 @@ export const CandidateProfileDialog = ({
 
       if (error) throw error;
       
-      // Also delete related note activities
       await deleteNoteActivities.mutateAsync({ applicantId: application.applicant_id });
       
       toast.success('Anteckning borttagen');
       const updatedNotes = notes.filter(n => n.id !== noteId);
       notesCache.set(application.applicant_id, updatedNotes);
+      setPersistedNotes(application.applicant_id, updatedNotes);
       setNotes(updatedNotes);
       setDeletingNoteId(null);
     } catch (error) {
       console.error('Error deleting note:', error);
       toast.error('Kunde inte ta bort anteckning');
     }
-  };
-
-  const confirmDeleteNote = (noteId: string) => {
-    setDeletingNoteId(noteId);
   };
 
   const startEditingNote = (note: CandidateNote) => {
@@ -753,7 +698,6 @@ export const CandidateProfileDialog = ({
 
       if (error) throw error;
 
-      // Log activity
       logActivity.mutate({
         applicantId: application.applicant_id,
         activityType: 'note_edited',
@@ -775,10 +719,8 @@ export const CandidateProfileDialog = ({
   
   if (!application) return null;
 
-  // Use activeApplication for display, but keep application for initial check
   const displayApp = activeApplication || application;
   const initials = `${displayApp.first_name?.[0] || ''}${displayApp.last_name?.[0] || ''}`.toUpperCase();
-  const currentStatus = statusConfig[displayApp.status as keyof typeof statusConfig] || statusConfig.pending;
   const isProfileVideo = displayApp.is_profile_video && displayApp.video_url;
 
   const updateStatus = async (newStatus: string) => {
@@ -798,6 +740,24 @@ export const CandidateProfileDialog = ({
   const customAnswers = displayApp.custom_answers || {};
   const hasCustomAnswers = Object.keys(customAnswers).length > 0;
   const hasMultipleApplications = allApplications && allApplications.length > 1;
+
+  // Shared notes panel props
+  const notesPanelProps = {
+    notes,
+    loadingNotes,
+    newNote,
+    onNewNoteChange: setNewNote,
+    onSaveNote: saveNote,
+    savingNote,
+    currentUserId: user?.id,
+    onStartEditing: startEditingNote,
+    onConfirmDelete: (noteId: string) => setDeletingNoteId(noteId),
+    editingNoteId,
+    editingNoteText,
+    onEditingNoteTextChange: setEditingNoteText,
+    onUpdateNote: updateNote,
+    onCancelEditing: cancelEditingNote,
+  };
 
   return (
     <>
@@ -842,11 +802,10 @@ export const CandidateProfileDialog = ({
         </div>
 
         <div className="flex flex-1 min-h-0 md:max-h-[85vh]">
-          {/* Main content - left side (desktop always, mobile only on profile tab) */}
+          {/* Main content - left side */}
           <div className={`flex-1 overflow-y-auto overscroll-contain p-4 pt-2 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`}>
           {/* Header with circular profile image/video */}
           <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
-            {/* Circular Profile Image/Video - Larger */}
             <div className="relative">
               {isProfileVideo && videoUrl ? (
                 <div className="w-24 h-24 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
@@ -873,13 +832,11 @@ export const CandidateProfileDialog = ({
               )}
             </div>
             
-            {/* Name, Rating and Job Selector */}
             <div className="w-full max-w-sm">
               <h2 className="text-lg md:text-2xl font-semibold text-white">
                 {displayApp.first_name} {displayApp.last_name}
               </h2>
               
-              {/* Star Rating - Interactive */}
               {onRatingChange && (
                 <div className="mt-2">
                   <InteractiveStarRating 
@@ -889,7 +846,6 @@ export const CandidateProfileDialog = ({
                 </div>
               )}
               
-              {/* Job dropdown or single job display */}
               {hasMultipleApplications ? (
                 <div className="mt-2">
                   <Select 
@@ -900,7 +856,7 @@ export const CandidateProfileDialog = ({
                       <SelectValue placeholder="Välj jobbansökan" />
                     </SelectTrigger>
                     <SelectContent className="bg-card-parium border-white/20">
-                      {allApplications.map((app) => (
+                      {allApplications!.map((app) => (
                         <SelectItem 
                           key={app.job_id} 
                           value={app.job_id}
@@ -912,7 +868,7 @@ export const CandidateProfileDialog = ({
                     </SelectContent>
                   </Select>
                   <p className="text-sm text-white mt-1">
-                    ({allApplications.length} jobbansökningar)
+                    ({allApplications!.length} jobbansökningar)
                   </p>
                 </div>
               ) : (
@@ -921,7 +877,7 @@ export const CandidateProfileDialog = ({
             </div>
           </div>
 
-          {/* Info sections - compact version */}
+          {/* Info sections */}
           <div className="grid gap-2.5">
             {/* Information */}
             <div className="bg-white/10 border border-white/20 rounded-lg p-3">
@@ -933,10 +889,7 @@ export const CandidateProfileDialog = ({
                 {displayApp.email && (
                   <div className="flex items-center gap-2">
                     <Mail className="h-3.5 w-3.5 text-white shrink-0" />
-                    <a
-                      href={`mailto:${displayApp.email}`}
-                      className="text-sm text-white hover:text-white/80 transition-colors truncate"
-                    >
+                    <a href={`mailto:${displayApp.email}`} className="text-sm text-white hover:text-white/80 transition-colors truncate">
                       {displayApp.email}
                     </a>
                   </div>
@@ -944,10 +897,7 @@ export const CandidateProfileDialog = ({
                 {displayApp.phone && (
                   <div className="flex items-center gap-2">
                     <Phone className="h-3.5 w-3.5 text-white shrink-0" />
-                    <a
-                      href={`tel:${displayApp.phone}`}
-                      className="text-sm text-white hover:text-white/80 transition-colors"
-                    >
+                    <a href={`tel:${displayApp.phone}`} className="text-sm text-white hover:text-white/80 transition-colors">
                       {displayApp.phone}
                     </a>
                   </div>
@@ -975,39 +925,22 @@ export const CandidateProfileDialog = ({
                   Anställningsinformation
                 </h3>
                 <div className="grid sm:grid-cols-2 gap-2">
-                {displayApp.employment_status && (
+                  {displayApp.employment_status && (
                     <div>
                       <span className="text-sm text-white">Anställningsstatus?</span>
-                      <p className="text-sm text-white">Svar: {({
-                        tillsvidareanställning: 'Fast anställning',
-                        visstidsanställning: 'Visstidsanställning',
-                        provanställning: 'Provanställning',
-                        interim: 'Interim anställning',
-                        arbetssokande: 'Arbetssökande',
-                      } as Record<string, string>)[displayApp.employment_status] || displayApp.employment_status}</p>
+                      <p className="text-sm text-white">Svar: {employmentStatusLabels[displayApp.employment_status] || displayApp.employment_status}</p>
                     </div>
                   )}
                   {displayApp.work_schedule && (
                     <div>
                       <span className="text-sm text-white">Hur mycket jobbar du idag?</span>
-                      <p className="text-sm text-white">Svar: {({
-                        heltid: 'Heltid',
-                        deltid: 'Deltid',
-                        timanställning: 'Timanställning',
-                      } as Record<string, string>)[displayApp.work_schedule] || displayApp.work_schedule}</p>
+                      <p className="text-sm text-white">Svar: {workScheduleLabels[displayApp.work_schedule] || displayApp.work_schedule}</p>
                     </div>
                   )}
                   {displayApp.availability && (
                     <div className="sm:col-span-2">
                       <span className="text-sm text-white">När kan du börja nytt jobb?</span>
-                      <p className="text-sm text-white">Svar: {({
-                        omgaende: 'Omgående',
-                        'inom-1-manad': 'Inom 1 månad',
-                        'inom-3-manader': 'Inom 3 månader',
-                        'inom-6-manader': 'Inom 6 månader',
-                        'ej-aktuellt': 'Inte aktuellt just nu',
-                        osaker: 'Osäker',
-                      } as Record<string, string>)[displayApp.availability] || displayApp.availability}</p>
+                      <p className="text-sm text-white">Svar: {availabilityLabels[displayApp.availability] || displayApp.availability}</p>
                     </div>
                   )}
                 </div>
@@ -1057,96 +990,14 @@ export const CandidateProfileDialog = ({
               </div>
             )}
 
-            {/* AI Summary Section - Only show if it's a valid CV */}
-            {aiSummary?.is_valid_cv !== false && (
-              <div className="bg-white/10 border border-white/20 rounded-lg p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="h-3 w-3" />
-                    Sammanfattning
-                    <span className="text-[9px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
-                      Baserat på CV
-                    </span>
-                  </h3>
-                </div>
-
-                {loadingSummary || generatingSummary ? (
-                  <div className="flex items-center justify-center py-3">
-                    <Loader2 className="h-4 w-4 animate-spin text-white/50" />
-                    <span className="ml-2 text-sm text-white/50">Analyserar CV...</span>
-                  </div>
-                ) : aiSummary ? (
-                  <div>
-                    {/* Key points as bullet list */}
-                    {(() => {
-                      const displayPoints = (aiSummary.key_points || []).filter(
-                        (point: any) => typeof point?.text === 'string' && !point.text.startsWith('Dokumenttyp:')
-                      );
-
-                      if (displayPoints.length > 0) {
-                        return (
-                          <ul className="space-y-1">
-                            {displayPoints.map((point: any, idx: number) => (
-                              <li key={idx} className="flex items-start gap-2 text-sm text-white">
-                                <span
-                                  className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
-                                    point.type === 'negative' ? 'bg-red-400' : 'bg-white'
-                                  }`}
-                                />
-                                <span>{point.text}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        );
-                      }
-
-                      return (
-                        <p className="text-sm text-white leading-relaxed">
-                          {aiSummary.summary_text}
-                        </p>
-                      );
-                    })()}
-                  </div>
-                ) : (
-                  <div className="text-center py-3">
-                    {signedCvUrl ? (
-                      <div className="flex items-center justify-center">
-                        <Loader2 className="h-4 w-4 animate-spin text-white/50" />
-                        <span className="ml-2 text-sm text-white/50">Genererar sammanfattning...</span>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-white text-center">
-                        Kandidaten har inte laddat upp något CV
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* No CV uploaded indicator */}
-            {aiSummary?.is_valid_cv === false && !activeApplication?.cv_url && (
-              <div className="bg-white/10 border border-white/20 rounded-lg p-3">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-white" />
-                  <span className="text-sm text-white">
-                    Kandidaten har inte laddat upp något CV
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Not a valid CV indicator (uploaded something that isn't a CV) */}
-            {aiSummary?.is_valid_cv === false && activeApplication?.cv_url && (
-              <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-orange-400" />
-                  <span className="text-sm text-orange-300">
-                    Dokumentet är {aiSummary.document_type || 'inte ett CV'} – ingen sammanfattning tillgänglig
-                  </span>
-                </div>
-              </div>
-            )}
+            {/* AI Summary */}
+            <CandidateSummarySection
+              aiSummary={aiSummary}
+              loadingSummary={loadingSummary}
+              generatingSummary={generatingSummary}
+              hasCvUrl={!!activeApplication?.cv_url}
+              signedCvUrl={signedCvUrl}
+            />
 
             {/* CV Section */}
             {displayApp.cv_url && (
@@ -1176,7 +1027,7 @@ export const CandidateProfileDialog = ({
               </div>
             )}
 
-            {/* Presentation om kandidaten */}
+            {/* Presentation */}
             <div className="bg-white/10 border border-white/20 rounded-lg p-3">
               <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <User className="h-3 w-3" />
@@ -1192,48 +1043,30 @@ export const CandidateProfileDialog = ({
             </div>
           </div>
 
-            {/* Actions - show stage navigation + book meeting for my-candidates, only Book meeting for all-candidates */}
+            {/* Actions */}
             {variant === 'my-candidates' ? (
               <div className="pt-4 border-t border-white/20 space-y-3">
-                {/* Action buttons row - flex wrap for responsive scaling */}
                 <div className="flex justify-center gap-1">
-                  <Button
-                    onClick={() => setSendMessageOpen(true)}
-                    variant="glassPurple"
-                    className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm"
-                  >
+                  <Button onClick={() => setSendMessageOpen(true)} variant="glassPurple" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
                     <MessageSquare className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
                     <span className="truncate">Meddelande</span>
                   </Button>
-                  <Button
-                    onClick={() => setBookInterviewOpen(true)}
-                    variant="glassBlue"
-                    className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm"
-                  >
+                  <Button onClick={() => setBookInterviewOpen(true)} variant="glassBlue" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
                     <CalendarPlus className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
                     <span className="truncate">Boka möte</span>
                   </Button>
                   {hasTeam && (
-                    <Button
-                      onClick={() => setShareDialogOpen(true)}
-                      variant="glassAmber"
-                      className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm"
-                    >
+                    <Button onClick={() => setShareDialogOpen(true)} variant="glassAmber" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
                       <Users className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
                       <span className="truncate">Dela</span>
                     </Button>
                   )}
-                  <Button
-                    onClick={() => setRemoveConfirmOpen(true)}
-                    variant="glassRed"
-                    className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm"
-                  >
+                  <Button onClick={() => setRemoveConfirmOpen(true)} variant="glassRed" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
                     <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
                     <span className="truncate">Ta bort</span>
                   </Button>
                 </div>
 
-                {/* Stage navigation buttons */}
                 {currentStage && stageOrder && stageConfig && onStageChange && stageOrder.length > 1 && (() => {
                   const currentIndex = stageOrder.indexOf(currentStage);
                   const prevStage = currentIndex > 0 ? stageOrder[currentIndex - 1] : null;
@@ -1243,37 +1076,26 @@ export const CandidateProfileDialog = ({
                   
                   return (
                     <div className="space-y-2">
-                      {/* Section label */}
                       <p className="text-center text-white text-xs font-medium">Flytta kandidat</p>
-                      
                       <div className="flex items-center justify-between gap-2">
-                        {/* Previous stage button */}
                         <button
                           onClick={() => prevStage && onStageChange(prevStage)}
                           disabled={!prevStage}
                           className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
-                            prevStage 
-                              ? 'text-white bg-white/10 hover:bg-white/20' 
-                              : 'opacity-40 text-white/50'
+                            prevStage ? 'text-white bg-white/10 hover:bg-white/20' : 'opacity-40 text-white/50'
                           }`}
                         >
                           <ChevronLeft className="h-4 w-4 flex-shrink-0" />
                           <span className="truncate">Till {(prevLabel || 'föregående').replace('?', '')}</span>
                         </button>
-
-                        {/* Current stage indicator */}
                         <div className="flex-shrink-0 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium whitespace-nowrap">
                           {(stageConfig[currentStage]?.label || currentStage).replace('?', '')}
                         </div>
-
-                        {/* Next stage button */}
                         <button
                           onClick={() => nextStage && onStageChange(nextStage)}
                           disabled={!nextStage}
                           className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
-                            nextStage 
-                              ? 'text-white bg-white/10 hover:bg-white/20' 
-                              : 'opacity-40 text-white/50'
+                            nextStage ? 'text-white bg-white/10 hover:bg-white/20' : 'opacity-40 text-white/50'
                           }`}
                         >
                           <span className="truncate">Till {(nextLabel || 'nästa').replace('?', '')}</span>
@@ -1285,21 +1107,12 @@ export const CandidateProfileDialog = ({
                 })()}
               </div>
             ) : (
-              /* Fixed footer button for all-candidates view */
               <div className="border-t border-white/15 pt-4 mt-4 flex justify-center gap-2">
-                <Button
-                  onClick={() => setSendMessageOpen(true)}
-                  variant="glassPurple"
-                  size="default"
-                >
+                <Button onClick={() => setSendMessageOpen(true)} variant="glassPurple" size="default">
                   <MessageSquare className="h-4 w-4 mr-1.5" />
                   Meddelande
                 </Button>
-                <Button
-                  onClick={() => setBookInterviewOpen(true)}
-                  variant="glassBlue"
-                  size="default"
-                >
+                <Button onClick={() => setBookInterviewOpen(true)} variant="glassBlue" size="default">
                   <CalendarPlus className="h-4 w-4 mr-1.5" />
                   Boka möte
                 </Button>
@@ -1309,14 +1122,11 @@ export const CandidateProfileDialog = ({
 
           {/* Activity Sidebar - desktop only */}
           <div className="hidden md:flex w-80 border-l border-white/20 bg-white/5 flex-col overflow-hidden relative">
-            {/* Tabs + close */}
             <div className="relative flex border-b border-white/20 pr-10">
               <button
                 onClick={() => setSidebarTab('activity')}
                 className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
-                  sidebarTab === 'activity' 
-                    ? 'text-white border-b-2 border-white' 
-                    : 'text-white/50 hover:text-white/70'
+                  sidebarTab === 'activity' ? 'text-white border-b-2 border-white' : 'text-white/50 hover:text-white/70'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5">
@@ -1327,9 +1137,7 @@ export const CandidateProfileDialog = ({
               <button
                 onClick={() => setSidebarTab('comments')}
                 className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
-                  sidebarTab === 'comments' 
-                    ? 'text-white border-b-2 border-white' 
-                    : 'text-white/50 hover:text-white/70'
+                  sidebarTab === 'comments' ? 'text-white border-b-2 border-white' : 'text-white/50 hover:text-white/70'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5">
@@ -1347,142 +1155,11 @@ export const CandidateProfileDialog = ({
               </button>
             </div>
 
-            {/* Tab content */}
             <div className="flex-1 overflow-y-auto p-3">
               {sidebarTab === 'activity' ? (
                 <CandidateActivityLog applicantId={application?.applicant_id || null} />
               ) : (
-                <div className="space-y-3">
-                  {/* Add new note */}
-                   <div className="space-y-3">
-                    <Textarea
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
-                      placeholder="Skriv en anteckning..."
-                      className="w-full min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none text-xs"
-                    />
-                    <div className="flex justify-center">
-                      <Button
-                        onClick={saveNote}
-                        disabled={!newNote.trim() || savingNote}
-                        size="sm"
-                        className="w-auto rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs px-4"
-                      >
-                        <Send className="h-3 w-3 mr-1.5" />
-                        Lägg till
-                      </Button>
-                    </div>
-                  </div>
-
-                  {loadingNotes ? (
-                    <div className="space-y-2 py-2">
-                      {Array.from({ length: 2 }).map((_, i) => (
-                        <div key={i} className="p-2 rounded bg-white/5">
-                          <Skeleton className="h-3 w-full bg-white/10 mb-1" />
-                          <Skeleton className="h-3 w-2/3 bg-white/10" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : notes.length === 0 ? (
-                    <p className="text-xs text-white text-center py-4">Inga anteckningar ännu</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {(() => {
-                        // Group notes by date
-                        const groupedNotes = notes.reduce((groups, note) => {
-                          const date = new Date(note.created_at).toLocaleDateString('sv-SE', {
-                            weekday: 'long',
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                          });
-                          if (!groups[date]) {
-                            groups[date] = [];
-                          }
-                          groups[date].push(note);
-                          return groups;
-                        }, {} as Record<string, typeof notes>);
-
-                        return Object.entries(groupedNotes).map(([date, dateNotes]) => (
-                          <div key={date}>
-                            <p className="text-xs text-white mb-2 capitalize">{date}</p>
-                            <div className="space-y-2">
-                              {dateNotes.map((note) => (
-                                <div 
-                                  key={note.id}
-                                  className="bg-white/5 rounded-lg p-2.5 group relative"
-                                >
-                                  <div className="flex items-center gap-1.5 mb-1">
-                                    <span className="text-[10px] font-medium text-white">
-                                      {note.author_name || 'Okänd'} skrev:
-                                    </span>
-                                  </div>
-                                  
-                                  {editingNoteId === note.id ? (
-                                    <div className="space-y-2">
-                                      <Textarea
-                                        value={editingNoteText}
-                                        onChange={(e) => setEditingNoteText(e.target.value)}
-                                        className="min-h-[60px] text-xs bg-white/10 border-white/20 text-white resize-none"
-                                        placeholder="Skriv din anteckning..."
-                                      />
-                                      <div className="flex gap-1.5">
-                                        <Button
-                                          size="sm"
-                                          onClick={updateNote}
-                                          disabled={savingNote || !editingNoteText.trim()}
-                                          className="h-6 text-[10px] px-2 bg-green-600 hover:bg-green-700"
-                                        >
-                                          <Check className="h-3 w-3 mr-1" />
-                                          Spara
-                                        </Button>
-                                        <Button
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={cancelEditingNote}
-                                          className="h-6 text-[10px] px-2 text-white/70 hover:text-white hover:bg-white/10"
-                                        >
-                                          <X className="h-3 w-3 mr-1" />
-                                          Avbryt
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <p className="text-xs text-white whitespace-pre-wrap pr-10 leading-relaxed">{note.note}</p>
-                                      <p className="text-[10px] text-white mt-1">
-                                        {new Date(note.created_at).toLocaleTimeString('sv-SE', {
-                                          hour: '2-digit',
-                                          minute: '2-digit'
-                                        })}
-                                      </p>
-                                      {note.employer_id === user?.id && (
-                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
-                                          <button
-                                            onClick={() => startEditingNote(note)}
-                                            className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
-                                          >
-                                            <Pencil className="h-3.5 w-3.5" />
-                                          </button>
-                                          <button
-                                            onClick={() => confirmDeleteNote(note.id)}
-                                            className="p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all duration-300"
-                                          >
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                          </button>
-                                        </div>
-                                      )}
-                                    </>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ));
-                      })()}
-                    </div>
-                  )}
-                </div>
+                <CandidateNotesPanel {...notesPanelProps} />
               )}
             </div>
           </div>
@@ -1494,76 +1171,15 @@ export const CandidateProfileDialog = ({
             </div>
           )}
           {mobileTab === 'comments' && (
-            <div className="md:hidden flex-1 overflow-y-auto p-4 space-y-3">
-              <div className="space-y-3">
-                <Textarea
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  placeholder="Skriv en anteckning..."
-                  className="w-full min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/40 resize-none text-xs"
-                />
-                <div className="flex justify-center">
-                  <Button
-                    onClick={saveNote}
-                    disabled={!newNote.trim() || savingNote}
-                    size="sm"
-                    className="w-auto rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-xs px-4"
-                  >
-                    <Send className="h-3 w-3 mr-1.5" />
-                    Lägg till
-                  </Button>
-                </div>
-              </div>
-              {loadingNotes ? (
-                <div className="space-y-2 py-2">
-                  {Array.from({ length: 2 }).map((_, i) => (
-                    <div key={i} className="p-2 rounded bg-white/5">
-                      <Skeleton className="h-3 w-full bg-white/10 mb-1" />
-                      <Skeleton className="h-3 w-2/3 bg-white/10" />
-                    </div>
-                  ))}
-                </div>
-              ) : notes.length === 0 ? (
-                <p className="text-xs text-white text-center py-4">Inga anteckningar ännu</p>
-              ) : (
-                <div className="space-y-3">
-                  {(() => {
-                    const groupedNotes = notes.reduce((groups, note) => {
-                      const date = new Date(note.created_at).toLocaleDateString('sv-SE', {
-                        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-                      });
-                      if (!groups[date]) groups[date] = [];
-                      groups[date].push(note);
-                      return groups;
-                    }, {} as Record<string, typeof notes>);
-                    return Object.entries(groupedNotes).map(([date, dateNotes]) => (
-                      <div key={date}>
-                        <p className="text-xs text-white mb-2 capitalize">{date}</p>
-                        <div className="space-y-2">
-                          {dateNotes.map((note) => (
-                            <div key={note.id} className="bg-white/5 rounded-lg p-2.5 group relative">
-                              <div className="flex items-center gap-1.5 mb-1">
-                                <span className="text-[10px] font-medium text-white">{note.author_name || 'Okänd'} skrev:</span>
-                              </div>
-                              <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">{note.note}</p>
-                              <p className="text-[10px] text-white mt-1">
-                                {new Date(note.created_at).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ));
-                  })()}
-                </div>
-              )}
+            <div className="md:hidden flex-1 overflow-y-auto p-4">
+              <CandidateNotesPanel {...notesPanelProps} />
             </div>
           )}
         </div>
       </DialogContentNoFocus>
     </Dialog>
 
-    {/* CV Dialog - matching profile page exactly */}
+    {/* CV Dialog */}
     <Dialog open={cvOpen} onOpenChange={setCvOpen}>
       <DialogContentNoFocus className="max-w-4xl max-h-[90vh] overflow-hidden bg-transparent border-none shadow-none p-8">
         <DialogHeader className="mb-4">
@@ -1580,7 +1196,7 @@ export const CandidateProfileDialog = ({
       </DialogContentNoFocus>
     </Dialog>
 
-    {/* Delete note confirmation dialog */}
+    {/* Delete note confirmation */}
     <AlertDialog open={!!deletingNoteId} onOpenChange={(open) => !open && setDeletingNoteId(null)}>
       <AlertDialogContentNoFocus 
         className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
@@ -1656,7 +1272,7 @@ export const CandidateProfileDialog = ({
       />
     )}
 
-    {/* Remove from list confirmation dialog */}
+    {/* Remove from list confirmation */}
     <AlertDialog open={removeConfirmOpen} onOpenChange={setRemoveConfirmOpen}>
       <AlertDialogContentNoFocus 
         className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
