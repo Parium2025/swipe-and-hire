@@ -207,12 +207,22 @@ export const CandidateProfileDialog = ({
   const videoUrl = useVideoUrl(activeApplication?.video_url);
   const signedCvUrl = useMediaUrl(activeApplication?.cv_url, 'cv');
 
-  // Reset selected job and track rating when dialog opens with new application
+  // Reset ALL state when dialog opens with a new candidate
   useEffect(() => {
     if (open && application) {
       setSelectedJobId(application.job_id);
       previousRating.current = candidateRating;
       setMobileTab('profile');
+      // Clear previous candidate's data to prevent flash of wrong data
+      setAiSummary(null);
+      setLoadingSummary(false);
+      setGeneratingSummary(false);
+      setNotes([]);
+      setJobQuestions({});
+      setCvOpen(false);
+      setEditingNoteId(null);
+      setEditingNoteText('');
+      setDeletingNoteId(null);
     }
   }, [open, application?.applicant_id]);
 
@@ -1046,19 +1056,25 @@ export const CandidateProfileDialog = ({
                   <FileText className="h-3 w-3" />
                   CV
                 </h3>
-                <div className="w-full py-2 bg-white/5 border border-white/10 rounded-md flex items-center px-2.5 gap-2">
+                <div className={`w-full py-2 bg-white/5 border border-white/10 rounded-md flex items-center px-2.5 gap-2 ${!signedCvUrl ? 'opacity-50' : ''}`}>
                   <button
                     type="button"
-                    onClick={() => setCvOpen(true)}
-                    className="flex items-center gap-2 text-white transition-colors flex-1"
+                    onClick={() => signedCvUrl && setCvOpen(true)}
+                    disabled={!signedCvUrl}
+                    className="flex items-center gap-2 text-white transition-colors flex-1 disabled:cursor-wait"
                   >
-                    <FileText className="h-3.5 w-3.5 text-white shrink-0" />
-                    <span className="text-sm">Visa CV</span>
+                    {!signedCvUrl ? (
+                      <Loader2 className="h-3.5 w-3.5 text-white shrink-0 animate-spin" />
+                    ) : (
+                      <FileText className="h-3.5 w-3.5 text-white shrink-0" />
+                    )}
+                    <span className="text-sm">{signedCvUrl ? 'Visa CV' : 'Laddar CV...'}</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => setCvOpen(true)}
-                    className="text-white hover:text-white/80 transition-colors"
+                    onClick={() => signedCvUrl && setCvOpen(true)}
+                    disabled={!signedCvUrl}
+                    className="text-white hover:text-white/80 transition-colors disabled:cursor-wait"
                     title="Öppna CV"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
