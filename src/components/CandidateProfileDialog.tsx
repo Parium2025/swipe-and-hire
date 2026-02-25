@@ -99,7 +99,7 @@ type PersistedCacheEntry<T> = {
 
 const SUMMARY_STORAGE_KEY = 'candidate-profile-summary-cache-v1';
 const QUESTIONS_STORAGE_KEY = 'candidate-profile-questions-cache-v1';
-const CACHE_TTL_MS = 1000 * 60 * 60 * 24; // 24h
+// No TTL – application data never changes after submission
 const CACHE_MAX_ITEMS = 400;
 
 const isBrowser = () => typeof window !== 'undefined';
@@ -130,11 +130,7 @@ const getPersistedCacheValue = <T,>(storageKey: string, cacheKey: string): T | n
   const entry = cache[cacheKey];
   if (!entry) return null;
 
-  if (Date.now() - entry.cachedAt > CACHE_TTL_MS) {
-    delete cache[cacheKey];
-    writePersistedCache(storageKey, cache);
-    return null;
-  }
+  // Permanent cache – data is immutable after application
 
   return entry.value;
 };
