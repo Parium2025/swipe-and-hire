@@ -273,7 +273,7 @@ const ApplicationCardContent = ({
 
       {/* Criterion Results - show title + icon like Team Tailor */}
       {hasResults && (
-        <div className="flex flex-col gap-0.5 mt-1.5 pt-1.5 border-t border-white/5">
+        <div className="flex flex-wrap gap-1 mt-1.5 pt-1.5 border-t border-white/5">
           {criterionResults.map((cr) => (
             <CriterionIconBadge
               key={cr.criterion_id}
