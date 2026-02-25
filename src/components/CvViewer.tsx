@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 // @ts-ignore - import worker file as URL string for Vite
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -7,6 +7,10 @@ import { RotateCcw } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl as any;
+
+// ─── Pure math helpers (no React) ───────────────────────────────────
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+const dist = (a: Touch, b: Touch) => Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
 
 interface CvViewerProps {
   src: string; // storage path or absolute URL
@@ -24,18 +28,35 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [scale, setScale] = useState(initialScale);
+  const [scale] = useState(initialScale);
+  // zoomLevel & panPosition are only used for UI display (% label) and
+  // button controls. During touch gestures we write directly to the DOM
+  // via refs and only sync back to state on gesture end.
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState(false);
-  const [startPanPosition, setStartPanPosition] = useState({ x: 0, y: 0 });
-  // Pinch-to-zoom refs (kept outside state for 60fps performance)
-  const pinchRef = useRef({ active: false, startDist: 0, startZoom: 1, midX: 0, midY: 0 });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+
+  // ─── Live gesture state (never triggers re-render) ────────────────
+  const gestureRef = useRef({
+    // current transform values (source of truth during gestures)
+    zoom: 1,
+    panX: 0,
+    panY: 0,
+    // pinch tracking
+    pinchActive: false,
+    pinchStartDist: 0,
+    pinchStartZoom: 1,
+    // pan tracking
+    panActive: false,
+    panStartX: 0,
+    panStartY: 0,
+    // rAF handle for coalescing
+    raf: 0,
+  });
 
   const isZoomed = zoomLevel > 1;
 
@@ -166,105 +187,159 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   useEffect(() => {
     if (zoomLevel === 1) {
       setPanPosition({ x: 0, y: 0 });
+      gestureRef.current.panX = 0;
+      gestureRef.current.panY = 0;
     }
+    gestureRef.current.zoom = zoomLevel;
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
   }, [zoomLevel]);
 
+  // ─── Direct DOM write (no React, no GC, pure 60fps) ──────────────
+  const applyTransform = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const { zoom, panX, panY } = gestureRef.current;
+    el.style.transform = `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`;
+  }, []);
+
   // Mouse panning (desktop only, when zoomed)
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isZoomed) {
-      setIsPanning(true);
-      setStartPanPosition({
-        x: e.clientX - panPosition.x,
-        y: e.clientY - panPosition.y
-      });
+      gestureRef.current.panActive = true;
+      gestureRef.current.panStartX = e.clientX - gestureRef.current.panX;
+      gestureRef.current.panStartY = e.clientY - gestureRef.current.panY;
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isPanning && isZoomed) {
-      setPanPosition({
-        x: e.clientX - startPanPosition.x,
-        y: e.clientY - startPanPosition.y
-      });
+    const g = gestureRef.current;
+    if (g.panActive && isZoomed) {
+      g.panX = e.clientX - g.panStartX;
+      g.panY = e.clientY - g.panStartY;
+      applyTransform();
     }
   };
 
   const handleMouseUp = () => {
-    setIsPanning(false);
-  };
-
-  // Helper: distance between two touches
-  const getTouchDist = (t1: React.Touch, t2: React.Touch) =>
-    Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 2) {
-      // Start pinch-to-zoom
-      e.preventDefault();
-      const dist = getTouchDist(e.touches[0], e.touches[1]);
-      pinchRef.current = {
-        active: true,
-        startDist: dist,
-        startZoom: zoomLevel,
-        midX: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-        midY: (e.touches[0].clientY + e.touches[1].clientY) / 2,
-      };
-      setIsPanning(false); // cancel any single-finger pan
-      return;
-    }
-    if (!isZoomed) return; // Let native scroll handle 1-finger at 1x
-    if (e.touches.length === 1) {
-      setIsPanning(true);
-      setStartPanPosition({
-        x: e.touches[0].clientX - panPosition.x,
-        y: e.touches[0].clientY - panPosition.y,
-      });
+    const g = gestureRef.current;
+    if (g.panActive) {
+      g.panActive = false;
+      setPanPosition({ x: g.panX, y: g.panY });
     }
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 2 && pinchRef.current.active) {
-      e.preventDefault();
-      const dist = getTouchDist(e.touches[0], e.touches[1]);
-      const ratio = dist / pinchRef.current.startDist;
-      const newZoom = Math.min(3.0, Math.max(0.5, pinchRef.current.startZoom * ratio));
-      setZoomLevel(newZoom);
-      return;
-    }
-    if (!isZoomed || !isPanning) return;
-    if (e.touches.length === 1) {
-      e.preventDefault();
-      setPanPosition({
-        x: e.touches[0].clientX - startPanPosition.x,
-        y: e.touches[0].clientY - startPanPosition.y,
-      });
-    }
-  };
+  // ─── Native touch event listeners (passive: false for preventDefault) ──
+  useEffect(() => {
+    const scrollEl = scrollContainerRef.current;
+    if (!scrollEl) return;
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (pinchRef.current.active && e.touches.length < 2) {
-      pinchRef.current.active = false;
-      // Snap to 1x if close enough for a clean feel
-      if (Math.abs(zoomLevel - 1) < 0.08) {
-        setZoomLevel(1.0);
-        setPanPosition({ x: 0, y: 0 });
+    const g = gestureRef.current;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        g.pinchActive = true;
+        g.pinchStartDist = dist(e.touches[0], e.touches[1]);
+        g.pinchStartZoom = g.zoom;
+        g.panActive = false;
+        // Disable transition during gesture
+        if (containerRef.current) containerRef.current.style.transition = 'none';
+        return;
       }
-    }
-    if (e.touches.length === 0) {
-      setIsPanning(false);
-    }
-  };
+      if (g.zoom <= 1) return; // native scroll at 1x
+      if (e.touches.length === 1) {
+        e.preventDefault();
+        g.panActive = true;
+        g.panStartX = e.touches[0].clientX - g.panX;
+        g.panStartY = e.touches[0].clientY - g.panY;
+        if (containerRef.current) containerRef.current.style.transition = 'none';
+      }
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && g.pinchActive) {
+        e.preventDefault();
+        const d = dist(e.touches[0], e.touches[1]);
+        const ratio = d / g.pinchStartDist;
+        g.zoom = clamp(g.pinchStartZoom * ratio, 0.5, 3.0);
+        // Coalesce to next frame
+        cancelAnimationFrame(g.raf);
+        g.raf = requestAnimationFrame(applyTransform);
+        return;
+      }
+      if (g.panActive && e.touches.length === 1) {
+        e.preventDefault();
+        g.panX = e.touches[0].clientX - g.panStartX;
+        g.panY = e.touches[0].clientY - g.panStartY;
+        cancelAnimationFrame(g.raf);
+        g.raf = requestAnimationFrame(applyTransform);
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (g.pinchActive && e.touches.length < 2) {
+        g.pinchActive = false;
+        // Snap to 1x if close
+        if (Math.abs(g.zoom - 1) < 0.08) {
+          g.zoom = 1;
+          g.panX = 0;
+          g.panY = 0;
+        }
+        // Restore transition
+        if (containerRef.current) {
+          containerRef.current.style.transition = 'transform 0.2s ease-out';
+        }
+        applyTransform();
+        // Sync to React state (updates UI labels, isZoomed flag)
+        setZoomLevel(g.zoom);
+        setPanPosition({ x: g.panX, y: g.panY });
+      }
+      if (e.touches.length === 0 && g.panActive) {
+        g.panActive = false;
+        if (containerRef.current) {
+          containerRef.current.style.transition = 'transform 0.2s ease-out';
+        }
+        setPanPosition({ x: g.panX, y: g.panY });
+      }
+    };
+
+    // passive: false is required to call preventDefault on touch events
+    scrollEl.addEventListener('touchstart', onTouchStart, { passive: false });
+    scrollEl.addEventListener('touchmove', onTouchMove, { passive: false });
+    scrollEl.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      scrollEl.removeEventListener('touchstart', onTouchStart);
+      scrollEl.removeEventListener('touchmove', onTouchMove);
+      scrollEl.removeEventListener('touchend', onTouchEnd);
+      cancelAnimationFrame(g.raf);
+    };
+  }, [applyTransform]); // intentionally stable deps
 
   const handleReset = () => {
+    gestureRef.current.zoom = 1;
+    gestureRef.current.panX = 0;
+    gestureRef.current.panY = 0;
     setZoomLevel(1.0);
     setPanPosition({ x: 0, y: 0 });
+    if (containerRef.current) {
+      containerRef.current.style.transition = 'transform 0.2s ease-out';
+      applyTransform();
+    }
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
   };
+
+  // Keep gestureRef in sync when buttons change zoom
+  useEffect(() => {
+    gestureRef.current.zoom = zoomLevel;
+    gestureRef.current.panX = panPosition.x;
+    gestureRef.current.panY = panPosition.y;
+    applyTransform();
+  }, [zoomLevel, panPosition, applyTransform]);
 
   return (
     <div className="w-full flex flex-col gap-2 md:gap-3">
@@ -312,9 +387,9 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
       <div className="flex gap-2 w-full" style={{ height }}>
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-auto rounded-lg relative -webkit-overflow-scrolling-touch"
+          className="flex-1 overflow-auto rounded-lg relative"
           style={{ 
-            cursor: isZoomed ? (isPanning ? 'grabbing' : 'grab') : 'default',
+            cursor: isZoomed ? 'grab' : 'default',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
           }}
@@ -322,9 +397,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
         >
           {error && (
             <div className="h-full flex items-center justify-center p-6 text-sm">{error}</div>
@@ -337,8 +409,9 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                 style={{
                   transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
                   transformOrigin: 'top center',
-                  transition: (isPanning || pinchRef.current.active) ? 'none' : 'transform 0.2s ease-out',
+                  transition: 'transform 0.2s ease-out',
                   touchAction: isZoomed ? 'none' : 'pan-y',
+                  willChange: 'transform',
                 }}
               />
               {loading && (
@@ -379,3 +452,4 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     </div>
   );
 }
+
