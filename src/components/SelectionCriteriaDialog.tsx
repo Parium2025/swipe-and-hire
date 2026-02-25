@@ -546,7 +546,7 @@ export function SelectionCriteriaDialog({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
-        <DrawerContent className="bg-card-parium backdrop-blur-xl border-white/[0.06] text-white h-[85svh] max-h-[85svh] overflow-hidden flex flex-col p-0">
+        <DrawerContent className="bg-card-parium backdrop-blur-xl border-white/[0.06] text-white max-h-[85svh] overflow-hidden flex flex-col p-0">
           {dialogContent}
         </DrawerContent>
       </Drawer>
