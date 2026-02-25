@@ -569,7 +569,7 @@ export const CandidateProfileDialog = ({
 
   // Polling with exponential backoff (3s → 6s → 12s → ...) and max 10 attempts
   useEffect(() => {
-    if (!open || !activeApplication || aiSummary || loadingSummary) return;
+    if (!open || !activeApplication || aiSummary || loadingSummary || generatingSummary) return;
 
     let attempt = 0;
     const MAX_ATTEMPTS = 10;
@@ -605,7 +605,7 @@ export const CandidateProfileDialog = ({
     timeoutId = setTimeout(poll, 3000);
 
     return () => clearTimeout(timeoutId);
-  }, [open, activeApplication?.id, aiSummary, loadingSummary]);
+  }, [open, activeApplication?.id, aiSummary, loadingSummary, generatingSummary]);
 
   // ─── Note CRUD ────────────────────────────────────────────────────
 
@@ -616,7 +616,25 @@ export const CandidateProfileDialog = ({
       return;
     }
     
+    // Optimistic update — show note immediately
+    const optimisticNote: CandidateNote = {
+      id: `temp-${Date.now()}`,
+      note: newNote.trim(),
+      created_at: new Date().toISOString(),
+      employer_id: user.id,
+      author_name: 'Du',
+    };
+    const previousNotes = [...notes];
+    const optimisticNotes = [optimisticNote, ...notes];
+    setNotes(optimisticNotes);
+    notesCache.set(application.applicant_id, optimisticNotes);
+    setPersistedNotes(application.applicant_id, optimisticNotes);
+
+    const noteText = newNote.trim();
+    setNewNote('');
+    clearNoteDraft();
     setSavingNote(true);
+
     try {
       const { error } = await supabase
         .from('candidate_notes')
@@ -624,7 +642,7 @@ export const CandidateProfileDialog = ({
           employer_id: user.id,
           applicant_id: application.applicant_id,
           job_id: application.job_id,
-          note: newNote.trim()
+          note: noteText
         });
 
       if (error) throw error;
@@ -632,17 +650,21 @@ export const CandidateProfileDialog = ({
       logActivity.mutate({
         applicantId: application.applicant_id,
         activityType: 'note_added',
-        newValue: newNote.trim().substring(0, 100),
+        newValue: noteText.substring(0, 100),
         metadata: { job_id: application.job_id },
       });
 
       toast.success('Anteckning sparad');
-      setNewNote('');
-      clearNoteDraft();
+      // Background refresh to get real ID from server
       fetchNotes(true);
     } catch (error) {
       console.error('Error saving note:', error);
       toast.error('Kunde inte spara anteckning');
+      // Rollback optimistic update
+      setNotes(previousNotes);
+      notesCache.set(application.applicant_id, previousNotes);
+      setPersistedNotes(application.applicant_id, previousNotes);
+      setNewNote(noteText);
     } finally {
       setSavingNote(false);
     }
@@ -689,29 +711,47 @@ export const CandidateProfileDialog = ({
 
   const updateNote = async () => {
     if (!editingNoteId || !editingNoteText.trim() || !application) return;
+    
+    // Optimistic update — show edited note immediately
+    const previousNotes = [...notes];
+    const updatedNotes = notes.map(n => 
+      n.id === editingNoteId ? { ...n, note: editingNoteText.trim() } : n
+    );
+    setNotes(updatedNotes);
+    notesCache.set(application.applicant_id, updatedNotes);
+    setPersistedNotes(application.applicant_id, updatedNotes);
+
+    const noteText = editingNoteText.trim();
+    const noteId = editingNoteId;
+    setEditingNoteId(null);
+    setEditingNoteText('');
     setSavingNote(true);
+
     try {
       const { error } = await supabase
         .from('candidate_notes')
-        .update({ note: editingNoteText.trim() })
-        .eq('id', editingNoteId);
+        .update({ note: noteText })
+        .eq('id', noteId);
 
       if (error) throw error;
 
       logActivity.mutate({
         applicantId: application.applicant_id,
         activityType: 'note_edited',
-        newValue: editingNoteText.trim().substring(0, 100),
+        newValue: noteText.substring(0, 100),
         metadata: { job_id: application.job_id },
       });
 
       toast.success('Anteckning uppdaterad');
-      setEditingNoteId(null);
-      setEditingNoteText('');
-      fetchNotes(true);
     } catch (error) {
       console.error('Error updating note:', error);
       toast.error('Kunde inte uppdatera anteckning');
+      // Rollback optimistic update
+      setNotes(previousNotes);
+      notesCache.set(application.applicant_id, previousNotes);
+      setPersistedNotes(application.applicant_id, previousNotes);
+      setEditingNoteId(noteId);
+      setEditingNoteText(noteText);
     } finally {
       setSavingNote(false);
     }
