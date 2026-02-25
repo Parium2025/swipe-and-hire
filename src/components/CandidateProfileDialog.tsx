@@ -841,6 +841,7 @@ export const CandidateProfileDialog = ({
             </button>
           ))}
           <button
+            style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
             onClick={() => onOpenChange(false)}
             aria-label="Stäng"
             className="shrink-0 flex h-11 w-11 items-center justify-center transition-colors touch-manipulation"
@@ -1203,6 +1204,7 @@ export const CandidateProfileDialog = ({
               </button>
 
               <button
+                style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
                 onClick={() => onOpenChange(false)}
                 aria-label="Stäng"
                 className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors touch-manipulation"
