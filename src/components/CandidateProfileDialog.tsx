@@ -85,15 +85,77 @@ interface CandidateNote {
   author_name?: string;
 }
 
-// Module-level caches – survive dialog open/close cycles
-const moduleNotesCache = new Map<string, CandidateNote[]>();
-const moduleQuestionsCache = new Map<string, Record<string, { text: string; order: number }>>();
-const moduleSummaryCache = new Map<string, {
+type CandidateSummaryCacheValue = {
   summary_text: string;
   key_points: { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
   document_type?: string | null;
   is_valid_cv?: boolean;
-}>();
+};
+
+type PersistedCacheEntry<T> = {
+  value: T;
+  cachedAt: number;
+};
+
+const SUMMARY_STORAGE_KEY = 'candidate-profile-summary-cache-v1';
+const QUESTIONS_STORAGE_KEY = 'candidate-profile-questions-cache-v1';
+const CACHE_TTL_MS = 1000 * 60 * 60 * 24; // 24h
+const CACHE_MAX_ITEMS = 400;
+
+const isBrowser = () => typeof window !== 'undefined';
+
+const readPersistedCache = <T,>(storageKey: string): Record<string, PersistedCacheEntry<T>> => {
+  if (!isBrowser()) return {};
+  try {
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+const writePersistedCache = <T,>(storageKey: string, cache: Record<string, PersistedCacheEntry<T>>) => {
+  if (!isBrowser()) return;
+  try {
+    window.localStorage.setItem(storageKey, JSON.stringify(cache));
+  } catch {
+    // Ignore storage errors silently
+  }
+};
+
+const getPersistedCacheValue = <T,>(storageKey: string, cacheKey: string): T | null => {
+  const cache = readPersistedCache<T>(storageKey);
+  const entry = cache[cacheKey];
+  if (!entry) return null;
+
+  if (Date.now() - entry.cachedAt > CACHE_TTL_MS) {
+    delete cache[cacheKey];
+    writePersistedCache(storageKey, cache);
+    return null;
+  }
+
+  return entry.value;
+};
+
+const setPersistedCacheValue = <T,>(storageKey: string, cacheKey: string, value: T) => {
+  const cache = readPersistedCache<T>(storageKey);
+  cache[cacheKey] = { value, cachedAt: Date.now() };
+
+  const pruned = Object.fromEntries(
+    Object.entries(cache)
+      .sort(([, a], [, b]) => b.cachedAt - a.cachedAt)
+      .slice(0, CACHE_MAX_ITEMS)
+  ) as Record<string, PersistedCacheEntry<T>>;
+
+  writePersistedCache(storageKey, pruned);
+};
+
+// Module-level caches – survive dialog open/close cycles
+const moduleNotesCache = new Map<string, CandidateNote[]>();
+const moduleQuestionsCache = new Map<string, Record<string, { text: string; order: number }>>();
+const moduleSummaryCache = new Map<string, CandidateSummaryCacheValue>();
 
 // Interactive Star Rating component
 const InteractiveStarRating = ({
@@ -193,12 +255,7 @@ export const CandidateProfileDialog = ({
   const questionsCache = moduleQuestionsCache;
   const summaryCache = moduleSummaryCache;
   
-  const [aiSummary, setAiSummary] = useState<{
-    summary_text: string;
-    key_points: { text: string; type?: 'positive' | 'negative' | 'neutral' }[] | null;
-    document_type?: string | null;
-    is_valid_cv?: boolean;
-  } | null>(null);
+  const [aiSummary, setAiSummary] = useState<CandidateSummaryCacheValue | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState(false);
 
@@ -242,12 +299,11 @@ export const CandidateProfileDialog = ({
     }
   };
 
-  // Fetch notes, questions, and AI summary when dialog opens or job selection changes
+  // Fetch notes and questions when dialog opens or job selection changes
   useEffect(() => {
     if (open && activeApplication && user) {
       fetchNotes();
       fetchJobQuestions();
-      fetchAiSummary();
     }
   }, [open, activeApplication?.id, user?.id]);
 
@@ -281,6 +337,13 @@ export const CandidateProfileDialog = ({
       return { shouldAutoGenerate: false };
     }
 
+    const persisted = getPersistedCacheValue<CandidateSummaryCacheValue>(SUMMARY_STORAGE_KEY, cacheKey);
+    if (persisted) {
+      summaryCache.set(cacheKey, persisted);
+      setAiSummary(persisted);
+      return { shouldAutoGenerate: false };
+    }
+
     // If no CV exists, cache and reuse a stable fallback state
     if (!activeApplication.cv_url) {
       const noCvSummary = {
@@ -290,6 +353,7 @@ export const CandidateProfileDialog = ({
         is_valid_cv: false,
       };
       summaryCache.set(cacheKey, noCvSummary);
+      setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, noCvSummary);
       setAiSummary(noCvSummary);
       return { shouldAutoGenerate: false };
     }
@@ -338,6 +402,7 @@ export const CandidateProfileDialog = ({
               is_valid_cv: profileSummary.is_valid_cv,
             };
             summaryCache.set(cacheKey, summaryData);
+            setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, summaryData);
             setAiSummary(summaryData);
             return { shouldAutoGenerate: false };
           }
@@ -384,6 +449,7 @@ export const CandidateProfileDialog = ({
         is_valid_cv: isValidCv,
       };
       summaryCache.set(cacheKey, summaryResult);
+      setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, summaryResult);
       setAiSummary(summaryResult);
 
       return { shouldAutoGenerate: false };
@@ -441,6 +507,7 @@ export const CandidateProfileDialog = ({
         };
         const genCacheKey = `${activeApplication?.applicant_id}_${activeApplication?.job_id || 'no-job'}_${activeApplication?.cv_url || '__no-cv__'}`;
         summaryCache.set(genCacheKey, genResult);
+        setPersistedCacheValue(SUMMARY_STORAGE_KEY, genCacheKey, genResult);
         setAiSummary(genResult);
       }
     } catch (error) {
@@ -510,6 +577,16 @@ export const CandidateProfileDialog = ({
       setJobQuestions(cachedQ);
       return;
     }
+
+    const persistedQ = getPersistedCacheValue<Record<string, { text: string; order: number }>>(
+      QUESTIONS_STORAGE_KEY,
+      qCacheKey
+    );
+    if (persistedQ) {
+      questionsCache.set(qCacheKey, persistedQ);
+      setJobQuestions(persistedQ);
+      return;
+    }
     
     try {
       const { data, error } = await supabase
@@ -525,6 +602,7 @@ export const CandidateProfileDialog = ({
         questionsMap[q.id] = { text: q.question_text, order: q.order_index };
       });
       questionsCache.set(qCacheKey, questionsMap);
+      setPersistedCacheValue(QUESTIONS_STORAGE_KEY, qCacheKey, questionsMap);
       setJobQuestions(questionsMap);
     } catch (error) {
       console.error('Error fetching job questions:', error);
