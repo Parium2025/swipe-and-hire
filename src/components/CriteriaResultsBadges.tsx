@@ -70,10 +70,10 @@ function CriterionBadge({ result, title, reasoning }: CriterionBadgeProps) {
 
   const badge = (
     <div
-      className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] ${bg} ring-1 ring-inset ${border}`}
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${bg} ring-1 ring-inset ${border}`}
     >
-      <Icon className={`h-2.5 w-2.5 ${iconColor} flex-shrink-0`} />
-      <span className="text-white/80 truncate max-w-[50px]">{title}</span>
+      <Icon className={`h-3 w-3 ${iconColor} flex-shrink-0`} />
+      <span className="text-white/80 truncate max-w-[60px]">{title}</span>
     </div>
   );
 
