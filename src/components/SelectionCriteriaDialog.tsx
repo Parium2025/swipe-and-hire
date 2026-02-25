@@ -72,10 +72,17 @@ export function SelectionCriteriaDialog({
   const [drafts, setDrafts] = useState<Record<string, { title: string; prompt: string }>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const autoSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  // Pre-fetch criteria when dialog is about to open so content is ready instantly
+  const [hasFetched, setHasFetched] = useState(false);
   useEffect(() => {
     if (open && jobId) {
       setValidationErrors({});
-      fetchCriteria();
+      if (!hasFetched) {
+        fetchCriteria().then(() => setHasFetched(true));
+      }
+    }
+    if (!open) {
+      setHasFetched(false);
     }
   }, [open, jobId]);
 
@@ -536,9 +543,11 @@ export function SelectionCriteriaDialog({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
         <DrawerContent className="bg-card-parium backdrop-blur-xl border-white/[0.06] text-white max-h-[85vh] overflow-hidden flex flex-col p-0">
-          {dialogContent}
+          <div className="min-h-[280px]">
+            {dialogContent}
+          </div>
         </DrawerContent>
       </Drawer>
     );
