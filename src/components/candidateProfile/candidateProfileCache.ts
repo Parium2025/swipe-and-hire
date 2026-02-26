@@ -7,6 +7,7 @@ export interface CandidateNote {
   id: string;
   note: string;
   created_at: string;
+  updated_at: string;
   employer_id: string;
   author_name?: string;
 }
