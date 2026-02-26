@@ -7,6 +7,7 @@ import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 export default function CvTunnel() {
   const [searchParams] = useSearchParams();
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [signedDownloadUrl, setSignedDownloadUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,6 +25,7 @@ export default function CvTunnel() {
       setLoading(true);
       setError(null);
       setBlobUrl(null);
+      setSignedDownloadUrl(null);
       try {
         if (!ref) throw new Error('Ingen CV-referens angavs.');
         const isStoragePath = !/^https?:\/\//i.test(ref);
@@ -31,6 +33,7 @@ export default function CvTunnel() {
           ? await createSignedUrl('job-applications', ref, 86400, fileName)
           : await convertToSignedUrl(ref, 'job-applications', 86400, fileName);
         const finalUrl = signed || ref;
+        setSignedDownloadUrl(finalUrl);
 
         const res = await fetch(finalUrl);
         if (!res.ok) {
@@ -83,7 +86,7 @@ export default function CvTunnel() {
               >
                 <Button variant="secondary">Öppna i ny flik</Button>
               </a>
-              <a href={blobUrl} download={fileName}>
+              <a href={signedDownloadUrl || blobUrl} download={fileName}>
                 <Button variant="default">Ladda ner</Button>
               </a>
             </>
