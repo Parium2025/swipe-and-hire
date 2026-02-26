@@ -110,12 +110,12 @@ export const CandidateNotesPanel = ({
                             className="min-h-[60px] text-xs bg-white/10 border-white/20 text-white resize-none"
                             placeholder="Skriv din anteckning..."
                           />
-                          <div className="flex gap-1.5">
+                          <div className="flex justify-center gap-1.5 pt-1">
                             <Button
                               size="sm"
                               onClick={onUpdateNote}
                               disabled={savingNote || !editingNoteText.trim()}
-                              className="h-6 text-[10px] px-2 bg-green-600 hover:bg-green-700"
+                              className="h-7 text-[10px] px-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/20"
                             >
                               <Check className="h-3 w-3 mr-1" />
                               Spara
@@ -124,7 +124,7 @@ export const CandidateNotesPanel = ({
                               size="sm"
                               variant="ghost"
                               onClick={onCancelEditing}
-                              className="h-6 text-[10px] px-2 text-white/70 hover:text-white hover:bg-white/10"
+                              className="h-7 text-[10px] px-3 rounded-full text-white/70 hover:text-white hover:bg-white/10 border border-white/10"
                             >
                               <X className="h-3 w-3 mr-1" />
                               Avbryt
