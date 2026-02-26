@@ -400,14 +400,33 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         </button>
         <div className="ml-auto flex items-center gap-1">
           {resolvedUrl && (
-            <a href={resolvedUrl} download={fileName}>
-              <button
-                type="button"
-                className={`${isMobile ? 'text-[11px] px-2 h-8' : 'text-[10px] px-2 h-6'} rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 touch-manipulation`}
-              >
-                Ladda ner
-              </button>
-            </a>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const res = await fetch(resolvedUrl);
+                  const blob = await res.blob();
+                  const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+                  const url = URL.createObjectURL(pdfBlob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = fileName;
+                  a.style.display = 'none';
+                  document.body.appendChild(a);
+                  a.click();
+                  setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }, 300);
+                } catch {
+                  // Fallback: open in new tab
+                  window.open(resolvedUrl, '_blank');
+                }
+              }}
+              className={`${isMobile ? 'text-[11px] px-2 h-8' : 'text-[10px] px-2 h-6'} rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 touch-manipulation`}
+            >
+              Ladda ner
+            </button>
           )}
         </div>
       </div>
