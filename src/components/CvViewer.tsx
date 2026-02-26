@@ -407,27 +407,32 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                   const res = await fetch(resolvedUrl);
                   const blob = await res.blob();
                   const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-                  const blobUrl = URL.createObjectURL(pdfBlob);
+                  const safeName = fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`;
+                  const file = new File([pdfBlob], safeName, { type: 'application/pdf' });
 
-                  // iOS Safari: a.click() with blob URL just navigates instead of downloading.
-                  // Open in new tab so Safari shows its native PDF viewer with share/save.
-                  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-                  
-                  if (isIOS) {
-                    window.open(blobUrl, '_blank');
-                  } else {
-                    const a = document.createElement('a');
-                    a.href = blobUrl;
-                    a.download = fileName;
-                    a.style.display = 'none';
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => {
-                      document.body.removeChild(a);
-                      URL.revokeObjectURL(blobUrl);
-                    }, 300);
+                  // Mobile: prefer Web Share API (works on iOS & Android)
+                  if (isMobile && navigator.canShare?.({ files: [file] })) {
+                    try {
+                      await navigator.share({ files: [file], title: safeName });
+                      return;
+                    } catch (shareErr: any) {
+                      // User cancelled share — that's fine, don't fallback
+                      if (shareErr?.name === 'AbortError') return;
+                    }
                   }
+
+                  // Desktop / fallback: programmatic download
+                  const blobUrl = URL.createObjectURL(pdfBlob);
+                  const a = document.createElement('a');
+                  a.href = blobUrl;
+                  a.download = safeName;
+                  a.style.display = 'none';
+                  document.body.appendChild(a);
+                  a.click();
+                  setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                  }, 300);
                 } catch {
                   window.open(resolvedUrl, '_blank');
                 }
