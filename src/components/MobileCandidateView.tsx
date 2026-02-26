@@ -230,7 +230,13 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     const result: Record<string, JobApplication[]> = {};
     stages.forEach(s => (result[s] = []));
     applications.forEach(app => {
-      if (result[app.status]) result[app.status].push(app);
+      if (result[app.status]) {
+        result[app.status].push(app);
+      } else {
+        // Orphaned candidate (stage deleted) — put in first active stage
+        const firstStage = stages[0];
+        if (firstStage) result[firstStage].push(app);
+      }
     });
     return result;
   }, [applications, stages]);
@@ -327,8 +333,8 @@ export const MobileCandidateView = memo(function MobileCandidateView({
         )}
       </div>
 
-      {/* AI Urvalskriterier button — visible when on Inkorg tab */}
-      {activeTab === 'pending' && onOpenCriteriaDialog && (
+      {/* AI Urvalskriterier button — visible when on first tab */}
+      {activeTab === stages[0] && onOpenCriteriaDialog && (
         <button
           onClick={onOpenCriteriaDialog}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-white/5 ring-1 ring-inset ring-white/10 active:scale-[0.97] transition-all backdrop-blur-sm w-full justify-center min-h-touch"
