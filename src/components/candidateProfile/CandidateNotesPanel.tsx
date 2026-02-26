@@ -74,7 +74,7 @@ export const CandidateNotesPanel = ({
           ))}
         </div>
       ) : notes.length === 0 ? (
-        <p className="text-sm text-white/60 text-center py-4">Inga anteckningar ännu</p>
+        <p className="text-sm text-white text-center py-4">Inga anteckningar ännu</p>
       ) : (
         <div className="space-y-3">
           {(() => {
@@ -93,7 +93,7 @@ export const CandidateNotesPanel = ({
 
             return Object.entries(groupedNotes).map(([date, dateNotes]) => (
               <div key={date}>
-                <p className="text-xs text-white/60 mb-2 capitalize">{date}</p>
+                <p className="text-xs text-white mb-2 capitalize">{date}</p>
                 <div className="space-y-2">
                   {dateNotes.map((note) => (
                     <div
@@ -101,7 +101,7 @@ export const CandidateNotesPanel = ({
                       className="bg-white/5 rounded-lg p-2.5 group relative"
                     >
                       <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-xs font-medium text-white/70">
+                        <span className="text-xs font-medium text-white">
                           {note.author_name || 'Okänd'} skrev:
                         </span>
                       </div>
@@ -138,7 +138,7 @@ export const CandidateNotesPanel = ({
                       ) : (
                         <>
                           <p className="text-sm text-white whitespace-pre-wrap pr-10 leading-relaxed break-all">{note.note}</p>
-                          <p className="text-xs text-white/60 mt-1">
+                          <p className="text-xs text-white mt-1">
                             {new Date(note.updated_at || note.created_at).toLocaleTimeString('sv-SE', {
                               hour: '2-digit',
                               minute: '2-digit',

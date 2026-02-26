@@ -36,7 +36,7 @@ const getActivityDescription = (activity: CandidateActivity) => {
           <span>
             <span className="font-medium text-white">{name}</span>
             <span className="text-white"> gav betyg </span>
-            <span className="text-yellow-400">{newRating} ★</span>
+            <span className="text-white">{newRating}</span><span className="text-yellow-400"> ★</span>
           </span>
         );
       }
@@ -148,7 +148,7 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <Activity className="h-8 w-8 text-[#FFFFFF] mb-2" />
-        <p className="text-sm text-white/60">Ingen aktivitet ännu</p>
+        <p className="text-sm text-white">Ingen aktivitet ännu</p>
       </div>
     );
   }
@@ -177,7 +177,7 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
           {index > 0 && (
             <div className="h-px bg-white/20 mb-4" />
           )}
-          <p className="text-xs text-white/60 mb-2 capitalize">{date}</p>
+          <p className="text-xs text-white mb-2 capitalize">{date}</p>
           <div className="space-y-2">
             {dateActivities.map((activity) => {
               const Icon = getActivityIcon(activity.activity_type);
@@ -190,7 +190,7 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
                     <p className="text-sm leading-relaxed">
                       {getActivityDescription(activity)}
                     </p>
-                    <p className="text-xs text-white/60 mt-0.5">
+                    <p className="text-xs text-white mt-0.5">
                       {formatTime(activity.created_at)}
                     </p>
                   </div>
