@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
@@ -8,16 +8,34 @@ export default function CvTunnel() {
   const [searchParams] = useSearchParams();
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [signedDownloadUrl, setSignedDownloadUrl] = useState<string | null>(null);
+  const [blobRef, setBlobRef] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const ref = useMemo(() => {
-    const path = searchParams.get('path'); // storage path (preferred)
-    const url = searchParams.get('url');   // absolute URL fallback
+    const path = searchParams.get('path');
+    const url = searchParams.get('url');
     return path || url || '';
   }, [searchParams]);
 
   const fileName = searchParams.get('name') || 'cv.pdf';
+
+  // Force-download via blob — works on mobile Safari/Chrome
+  const handleDownload = useCallback(() => {
+    const blob = blobRef;
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 200);
+  }, [blobRef, fileName]);
 
   useEffect(() => {
     let revoked: string | null = null;
@@ -49,6 +67,7 @@ export default function CvTunnel() {
         }
         const buf = await res.arrayBuffer();
         const blob = new Blob([buf], { type: 'application/pdf' });
+        setBlobRef(blob);
         const url = URL.createObjectURL(blob);
         revoked = url;
         setBlobUrl(url);
@@ -86,9 +105,7 @@ export default function CvTunnel() {
               >
                 <Button variant="secondary">Öppna i ny flik</Button>
               </a>
-              <a href={signedDownloadUrl || blobUrl} download={fileName}>
-                <Button variant="default">Ladda ner</Button>
-              </a>
+              <Button variant="default" onClick={handleDownload}>Ladda ner</Button>
             </>
           )}
           <Button variant="ghost" onClick={() => window.history.back()}>Stäng</Button>
