@@ -35,50 +35,49 @@ function writeActivityCache(applicantId: string, data: CandidateActivity[]): voi
   } catch { /* storage full */ }
 }
 
+/**
+ * Shared queryFn for candidate activities — used by both the hook and prefetch.
+ */
+async function fetchActivitiesQueryFn(applicantId: string): Promise<CandidateActivity[]> {
+  const { data: activitiesData, error: activitiesError } = await supabase
+    .from('candidate_activities')
+    .select('*')
+    .eq('applicant_id', applicantId)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (activitiesError) throw activitiesError;
+  if (!activitiesData || activitiesData.length === 0) return [];
+
+  const userIds = [...new Set(activitiesData.map(a => a.user_id))];
+
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('user_id, first_name, last_name')
+    .in('user_id', userIds);
+
+  const profileMap = new Map(
+    (profiles || []).map(p => [p.user_id, p])
+  );
+
+  const result = activitiesData.map(activity => ({
+    ...activity,
+    activity_type: activity.activity_type as ActivityType,
+    user_first_name: profileMap.get(activity.user_id)?.first_name || 'Okänd',
+    user_last_name: profileMap.get(activity.user_id)?.last_name || '',
+  })) as CandidateActivity[];
+
+  writeActivityCache(applicantId, result);
+  return result;
+}
+
 export function useCandidateActivities(applicantId: string | null) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: activities = [], isLoading, error } = useQuery({
     queryKey: ['candidate-activities', applicantId],
-    queryFn: async () => {
-      if (!applicantId || !user) return [];
-
-      // Fetch activities
-      const { data: activitiesData, error: activitiesError } = await supabase
-        .from('candidate_activities')
-        .select('*')
-        .eq('applicant_id', applicantId)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (activitiesError) throw activitiesError;
-      if (!activitiesData || activitiesData.length === 0) return [];
-
-      // Get unique user IDs
-      const userIds = [...new Set(activitiesData.map(a => a.user_id))];
-
-      // Fetch user profiles for names
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name')
-        .in('user_id', userIds);
-
-      const profileMap = new Map(
-        (profiles || []).map(p => [p.user_id, p])
-      );
-
-      // Combine data
-      const result = activitiesData.map(activity => ({
-        ...activity,
-        activity_type: activity.activity_type as ActivityType,
-        user_first_name: profileMap.get(activity.user_id)?.first_name || 'Okänd',
-        user_last_name: profileMap.get(activity.user_id)?.last_name || '',
-      })) as CandidateActivity[];
-
-      if (applicantId) writeActivityCache(applicantId, result);
-      return result;
-    },
+    queryFn: () => fetchActivitiesQueryFn(applicantId!),
     enabled: !!applicantId && !!user,
     staleTime: 30 * 1000,
     initialData: () => {
@@ -187,40 +186,13 @@ export function useCandidateActivities(applicantId: string | null) {
 }
 
 /**
- * Prefetch activities for a candidate (call on hover)
+ * Prefetch activities for a candidate (call on hover).
+ * Reuses the same queryFn as the hook — single source of truth.
  */
-export function prefetchCandidateActivities(queryClient: ReturnType<typeof useQueryClient>, applicantId: string, userId: string) {
+export function prefetchCandidateActivities(queryClient: ReturnType<typeof useQueryClient>, applicantId: string, _userId?: string) {
   queryClient.prefetchQuery({
     queryKey: ['candidate-activities', applicantId],
-    queryFn: async () => {
-      const { data: activitiesData, error: activitiesError } = await supabase
-        .from('candidate_activities')
-        .select('*')
-        .eq('applicant_id', applicantId)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (activitiesError) throw activitiesError;
-      if (!activitiesData || activitiesData.length === 0) return [];
-
-      const userIds = [...new Set(activitiesData.map(a => a.user_id))];
-
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name')
-        .in('user_id', userIds);
-
-      const profileMap = new Map(
-        (profiles || []).map(p => [p.user_id, p])
-      );
-
-      return activitiesData.map(activity => ({
-        ...activity,
-        activity_type: activity.activity_type as ActivityType,
-        user_first_name: profileMap.get(activity.user_id)?.first_name || 'Okänd',
-        user_last_name: profileMap.get(activity.user_id)?.last_name || '',
-      })) as CandidateActivity[];
-    },
+    queryFn: () => fetchActivitiesQueryFn(applicantId),
     staleTime: 30 * 1000,
   });
 }

@@ -1,5 +1,6 @@
 export { CandidateNotesPanel } from './CandidateNotesPanel';
 export { CandidateSummarySection } from './CandidateSummarySection';
+export { SectionErrorBoundary } from './SectionErrorBoundary';
 export type { CandidateNote, CandidateSummaryCacheValue } from './candidateProfileCache';
 export {
   summaryCache,
