@@ -20,21 +20,32 @@ export default function CvTunnel() {
 
   const fileName = searchParams.get('name') || 'cv.pdf';
 
-  // Force-download via blob — works on mobile Safari/Chrome
+  // Force-download via blob — iOS opens in new tab (native PDF viewer with share/save),
+  // Android/desktop uses programmatic a.click() download
   const handleDownload = useCallback(() => {
     const blob = blobRef;
     if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 200);
+    const url = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+      // iOS Safari ignores a.download on blob URLs — open in new tab instead
+      // Safari shows its native PDF viewer with share/save button
+      window.open(url, '_blank');
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 200);
+    }
   }, [blobRef, fileName]);
 
   useEffect(() => {

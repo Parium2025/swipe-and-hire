@@ -407,19 +407,28 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                   const res = await fetch(resolvedUrl);
                   const blob = await res.blob();
                   const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-                  const url = URL.createObjectURL(pdfBlob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = fileName;
-                  a.style.display = 'none';
-                  document.body.appendChild(a);
-                  a.click();
-                  setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                  }, 300);
+                  const blobUrl = URL.createObjectURL(pdfBlob);
+
+                  // iOS Safari: a.click() with blob URL just navigates instead of downloading.
+                  // Open in new tab so Safari shows its native PDF viewer with share/save.
+                  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                  
+                  if (isIOS) {
+                    window.open(blobUrl, '_blank');
+                  } else {
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = fileName;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(blobUrl);
+                    }, 300);
+                  }
                 } catch {
-                  // Fallback: open in new tab
                   window.open(resolvedUrl, '_blank');
                 }
               }}
