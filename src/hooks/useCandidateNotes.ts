@@ -44,7 +44,7 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
         profiles!candidate_notes_employer_id_fkey(first_name, last_name)
       `)
       .eq('applicant_id', id)
-      .order('created_at', { ascending: false });
+      .order('updated_at', { ascending: false });
 
     if (error) throw error;
 
@@ -221,9 +221,10 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
     const previous = [...notes];
     const trimmed = editingNoteText.trim();
     const nowISO = new Date().toISOString();
-    persistOptimistic(applicantId, notes.map(n =>
+    const updatedNotes = notes.map(n =>
       n.id === editingNoteId ? { ...n, note: trimmed, updated_at: nowISO } : n
-    ));
+    ).sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+    persistOptimistic(applicantId, updatedNotes);
 
     const noteId = editingNoteId;
     setEditingNoteId(null);
