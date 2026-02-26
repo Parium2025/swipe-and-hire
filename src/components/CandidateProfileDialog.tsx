@@ -32,6 +32,7 @@ import {
 import {
   CandidateNotesPanel,
   CandidateSummarySection,
+  SectionErrorBoundary,
   questionsCache,
   getPersistedCacheValue,
   setPersistedCacheValue,
@@ -552,13 +553,15 @@ export const CandidateProfileDialog = ({
             )}
 
             {/* AI Summary */}
-            <CandidateSummarySection
-              aiSummary={summaryHook.aiSummary}
-              loadingSummary={summaryHook.loadingSummary}
-              generatingSummary={summaryHook.generatingSummary}
-              hasCvUrl={!!activeApplication?.cv_url}
-              signedCvUrl={signedCvUrl}
-            />
+            <SectionErrorBoundary fallbackLabel="AI-sammanfattning">
+              <CandidateSummarySection
+                aiSummary={summaryHook.aiSummary}
+                loadingSummary={summaryHook.loadingSummary}
+                generatingSummary={summaryHook.generatingSummary}
+                hasCvUrl={!!activeApplication?.cv_url}
+                signedCvUrl={signedCvUrl}
+              />
+            </SectionErrorBoundary>
 
             {/* CV Section */}
             {displayApp.cv_url && (
@@ -724,23 +727,29 @@ export const CandidateProfileDialog = ({
             </div>
 
             <div className="flex-1 overflow-y-auto p-3">
-              {sidebarTab === 'activity' ? (
-                <CandidateActivityLog applicantId={application?.applicant_id || null} />
-              ) : (
-                <CandidateNotesPanel {...notesPanelProps} />
-              )}
+              <SectionErrorBoundary fallbackLabel={sidebarTab === 'activity' ? 'Aktivitetslogg' : 'Anteckningar'}>
+                {sidebarTab === 'activity' ? (
+                  <CandidateActivityLog applicantId={application?.applicant_id || null} />
+                ) : (
+                  <CandidateNotesPanel {...notesPanelProps} />
+                )}
+              </SectionErrorBoundary>
             </div>
           </div>
 
           {/* Mobile Activity/Comments tab content */}
           {mobileTab === 'activity' && (
             <div className="md:hidden flex-1 overflow-y-auto p-4">
-              <CandidateActivityLog applicantId={application?.applicant_id || null} />
+              <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
+                <CandidateActivityLog applicantId={application?.applicant_id || null} />
+              </SectionErrorBoundary>
             </div>
           )}
           {mobileTab === 'comments' && (
             <div className="md:hidden flex-1 overflow-y-auto p-4">
-              <CandidateNotesPanel {...notesPanelProps} />
+              <SectionErrorBoundary fallbackLabel="Anteckningar">
+                <CandidateNotesPanel {...notesPanelProps} />
+              </SectionErrorBoundary>
             </div>
           )}
         </div>
