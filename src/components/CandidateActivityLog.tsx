@@ -148,7 +148,7 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <Activity className="h-8 w-8 text-[#FFFFFF] mb-2" />
-        <p className="text-sm text-[#FFFFFF]">Ingen aktivitet ännu</p>
+        <p className="text-sm text-white/60">Ingen aktivitet ännu</p>
       </div>
     );
   }
@@ -177,20 +177,20 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
           {index > 0 && (
             <div className="h-px bg-white/20 mb-4" />
           )}
-          <p className="text-xs text-white mb-2 capitalize">{date}</p>
-          <div className="space-y-3">
+          <p className="text-xs text-white/60 mb-2 capitalize">{date}</p>
+          <div className="space-y-2">
             {dateActivities.map((activity) => {
               const Icon = getActivityIcon(activity.activity_type);
               return (
-                <div key={activity.id} className="flex gap-3">
+                <div key={activity.id} className="flex gap-3 bg-white/5 rounded-lg p-2.5">
                   <div className="flex-shrink-0 h-7 w-7 rounded-full bg-white/10 flex items-center justify-center">
                     <Icon className="h-3.5 w-3.5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs leading-relaxed">
+                    <p className="text-sm leading-relaxed">
                       {getActivityDescription(activity)}
                     </p>
-                    <p className="text-[10px] text-white mt-0.5">
+                    <p className="text-xs text-white/60 mt-0.5">
                       {formatTime(activity.created_at)}
                     </p>
                   </div>
