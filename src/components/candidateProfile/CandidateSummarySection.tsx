@@ -97,7 +97,7 @@ export const CandidateSummarySection = ({
           {signedCvUrl ? (
             <div className="flex items-center justify-center">
               <Loader2 className="h-4 w-4 animate-spin text-white/50" />
-              <span className="ml-2 text-sm text-white/50">Genererar sammanfattning...</span>
+              <span className="ml-2 text-sm text-white/50">Laddar sammanfattning...</span>
             </div>
           ) : (
             <p className="text-sm text-white text-center">

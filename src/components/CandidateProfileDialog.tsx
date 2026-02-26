@@ -177,6 +177,7 @@ export const CandidateProfileDialog = ({
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const previousRating = useRef<number | undefined>(undefined);
+  const lastResetApplicationIdRef = useRef<string | null>(null);
 
   // Determine the active application (selected job or default)
   const activeApplication = useMemo(() => {
@@ -204,19 +205,21 @@ export const CandidateProfileDialog = ({
     open,
   });
 
-  // Reset ALL state when dialog opens with a new candidate
+  // Reset state only when an actual new application is selected (not on X close/reopen)
   useEffect(() => {
-    if (open && application) {
-      setSelectedJobId(application.job_id);
-      previousRating.current = candidateRating;
-      setMobileTab('profile');
-      setCvOpen(false);
-      setJobQuestions({});
-      // Reset extracted hooks
-      notesHook.reset();
-      summaryHook.reset();
-    }
-  }, [open, application?.applicant_id]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!application) return;
+    if (lastResetApplicationIdRef.current === application.id) return;
+
+    lastResetApplicationIdRef.current = application.id;
+    setSelectedJobId(application.job_id);
+    previousRating.current = candidateRating;
+    setMobileTab('profile');
+    setCvOpen(false);
+    setJobQuestions({});
+    // Reset extracted hooks only on application switch
+    notesHook.reset();
+    summaryHook.reset();
+  }, [application?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle rating change with activity logging
   const handleRatingChange = (newRating: number) => {
