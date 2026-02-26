@@ -18,9 +18,10 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { CvViewer } from '@/components/CvViewer';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
-import { useCandidateActivities } from '@/hooks/useCandidateActivities';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useFieldDraft } from '@/hooks/useFormDraft';
+import { useCandidateNotes } from '@/hooks/useCandidateNotes';
+import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import {
   Select,
   SelectContent,
@@ -31,17 +32,11 @@ import {
 import {
   CandidateNotesPanel,
   CandidateSummarySection,
-  summaryCache,
   questionsCache,
-  notesCache,
   getPersistedCacheValue,
   setPersistedCacheValue,
-  getPersistedNotes,
-  setPersistedNotes,
-  SUMMARY_STORAGE_KEY,
   QUESTIONS_STORAGE_KEY,
 } from '@/components/candidateProfile';
-import type { CandidateNote, CandidateSummaryCacheValue } from '@/components/candidateProfile';
 
 function useProfileImageUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-image');
@@ -170,15 +165,9 @@ export const CandidateProfileDialog = ({
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'comments'>('activity');
   const [mobileTab, setMobileTab] = useState<'profile' | 'activity' | 'comments'>('profile');
-  const [notes, setNotes] = useState<CandidateNote[]>([]);
   const [newNote, setNewNote, clearNoteDraft] = useFieldDraft(
     `candidate-note-${application?.applicant_id || 'unknown'}`
   );
-  const [loadingNotes, setLoadingNotes] = useState(false);
-  const [savingNote, setSavingNote] = useState(false);
-  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
-  const [editingNoteText, setEditingNoteText] = useState('');
-  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const [bookInterviewOpen, setBookInterviewOpen] = useState(false);
   const [sendMessageOpen, setSendMessageOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -187,13 +176,6 @@ export const CandidateProfileDialog = ({
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const previousRating = useRef<number | undefined>(undefined);
-  
-  const [aiSummary, setAiSummary] = useState<CandidateSummaryCacheValue | null>(null);
-  const [loadingSummary, setLoadingSummary] = useState(false);
-  const [generatingSummary, setGeneratingSummary] = useState(false);
-
-  // Activity logging
-  const { logActivity, deleteNoteActivities } = useCandidateActivities(application?.applicant_id || null);
 
   // Determine the active application (selected job or default)
   const activeApplication = useMemo(() => {
@@ -207,112 +189,41 @@ export const CandidateProfileDialog = ({
   const videoUrl = useVideoUrl(activeApplication?.video_url);
   const signedCvUrl = useMediaUrl(activeApplication?.cv_url, 'cv');
 
+  // ─── Extracted hooks ──────────────────────────────────────────────
+  const notesHook = useCandidateNotes({
+    applicantId: application?.applicant_id || null,
+    jobId: application?.job_id || null,
+  });
+
+  const summaryHook = useCandidateSummary({
+    applicantId: activeApplication?.applicant_id || null,
+    jobId: activeApplication?.job_id || null,
+    applicationId: activeApplication?.id || null,
+    cvUrl: activeApplication?.cv_url || null,
+    open,
+  });
+
   // Reset ALL state when dialog opens with a new candidate
   useEffect(() => {
     if (open && application) {
       setSelectedJobId(application.job_id);
       previousRating.current = candidateRating;
       setMobileTab('profile');
-      // Clear previous candidate's data to prevent flash of wrong data
-      setAiSummary(null);
-      setLoadingSummary(false);
-      setGeneratingSummary(false);
-      setNotes([]);
-      setJobQuestions({});
       setCvOpen(false);
-      setEditingNoteId(null);
-      setEditingNoteText('');
-      setDeletingNoteId(null);
+      setJobQuestions({});
+      // Reset extracted hooks
+      notesHook.reset();
+      summaryHook.reset();
     }
-  }, [open, application?.applicant_id]);
+  }, [open, application?.applicant_id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle rating change with activity logging
   const handleRatingChange = (newRating: number) => {
     if (onRatingChange && application) {
-      logActivity.mutate({
-        applicantId: application.applicant_id,
-        activityType: 'rating_changed',
-        oldValue: previousRating.current?.toString() || '0',
-        newValue: newRating.toString(),
-        metadata: { job_id: application.job_id },
-      });
+      // Activity is logged inside the notes hook's parent — keep inline here for rating
       previousRating.current = newRating;
       onRatingChange(newRating);
     }
-  };
-
-  // ─── Fetch notes ──────────────────────────────────────────────────
-
-  const fetchNotes = useCallback(async (forceRefresh = false) => {
-    if (!application || !user) return;
-    
-    const notesCacheKey = application.applicant_id;
-    if (!forceRefresh) {
-      // Check in-memory cache
-      const cachedNotes = notesCache.get(notesCacheKey);
-      if (cachedNotes) {
-        setNotes(cachedNotes);
-        return;
-      }
-      // Check localStorage cache
-      const persisted = getPersistedNotes(notesCacheKey);
-      if (persisted) {
-        notesCache.set(notesCacheKey, persisted);
-        setNotes(persisted);
-        // Background refresh to stay current
-        refreshNotesInBackground(notesCacheKey);
-        return;
-      }
-    }
-    
-    setLoadingNotes(true);
-    try {
-      const fetchedNotes = await fetchNotesFromDb(application.applicant_id);
-      notesCache.set(notesCacheKey, fetchedNotes);
-      setPersistedNotes(notesCacheKey, fetchedNotes);
-      setNotes(fetchedNotes);
-    } catch (error) {
-      console.error('Error fetching notes:', error);
-    } finally {
-      setLoadingNotes(false);
-    }
-  }, [application?.applicant_id, user?.id]);
-
-  const refreshNotesInBackground = useCallback(async (notesCacheKey: string) => {
-    try {
-      const fetchedNotes = await fetchNotesFromDb(notesCacheKey);
-      notesCache.set(notesCacheKey, fetchedNotes);
-      setPersistedNotes(notesCacheKey, fetchedNotes);
-      setNotes(fetchedNotes);
-    } catch {
-      // Silently fail - we already have cached data
-    }
-  }, []);
-
-  const fetchNotesFromDb = async (applicantId: string): Promise<CandidateNote[]> => {
-    const { data, error } = await supabase
-      .from('candidate_notes')
-      .select(`
-        id, 
-        note, 
-        created_at, 
-        employer_id,
-        profiles!candidate_notes_employer_id_fkey(first_name, last_name)
-      `)
-      .eq('applicant_id', applicantId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    
-    return (data || []).map((note: any) => ({
-      id: note.id,
-      note: note.note,
-      created_at: note.created_at,
-      employer_id: note.employer_id,
-      author_name: note.profiles 
-        ? `${note.profiles.first_name || ''} ${note.profiles.last_name || ''}`.trim() || 'Okänd'
-        : 'Okänd',
-    }));
   };
 
   // ─── Fetch job questions ──────────────────────────────────────────
@@ -358,414 +269,13 @@ export const CandidateProfileDialog = ({
     }
   }, [activeApplication?.job_id]);
 
-  // ─── AI Summary ───────────────────────────────────────────────────
-
-  const extractSummaryMeta = (keyPoints: any[] | null | undefined) => {
-    const docPoint = (keyPoints || []).find(
-      (p: any) => typeof p?.text === 'string' && p.text.startsWith('Dokumenttyp:')
-    );
-    const documentType = typeof docPoint?.text === 'string'
-      ? docPoint.text.replace('Dokumenttyp:', '').trim()
-      : null;
-    const isValidCv = documentType ? documentType.toLowerCase() === 'cv' : undefined;
-    const sourceCvUrl = docPoint?.meta?.source_cv_url as string | undefined;
-    return { documentType, isValidCv, sourceCvUrl };
-  };
-
-  const fetchAiSummary = useCallback(async () => {
-    if (!activeApplication?.applicant_id) return;
-    
-    const cvCacheKey = activeApplication.cv_url || '__no-cv__';
-    const cacheKey = `${activeApplication.applicant_id}_${activeApplication.job_id || 'no-job'}_${cvCacheKey}`;
-    
-    // Check in-memory cache
-    const cached = summaryCache.get(cacheKey);
-    if (cached) {
-      setAiSummary(cached);
-      return { shouldAutoGenerate: false };
-    }
-
-    // Check localStorage cache
-    const persisted = getPersistedCacheValue<CandidateSummaryCacheValue>(SUMMARY_STORAGE_KEY, cacheKey);
-    if (persisted) {
-      summaryCache.set(cacheKey, persisted);
-      setAiSummary(persisted);
-      return { shouldAutoGenerate: false };
-    }
-
-    // No CV → stable fallback
-    if (!activeApplication.cv_url) {
-      const noCvSummary: CandidateSummaryCacheValue = {
-        summary_text: 'Kandidaten har inte laddat upp något CV',
-        key_points: null,
-        document_type: null,
-        is_valid_cv: false,
-      };
-      summaryCache.set(cacheKey, noCvSummary);
-      setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, noCvSummary);
-      setAiSummary(noCvSummary);
-      return { shouldAutoGenerate: false };
-    }
-
-    setLoadingSummary(true);
-
-    try {
-      let data: { summary_text: string; key_points: any[] | null } | null = null;
-      
-      if (activeApplication?.job_id) {
-        const { data: jobSummary, error } = await supabase
-          .from('candidate_summaries')
-          .select('summary_text, key_points')
-          .eq('job_id', activeApplication.job_id)
-          .eq('applicant_id', activeApplication.applicant_id)
-          .order('generated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (error) throw error;
-        if (jobSummary) {
-          data = {
-            summary_text: jobSummary.summary_text,
-            key_points: (jobSummary.key_points as any[] | null) || null
-          };
-        }
-      }
-
-      // Fallback to proactive profile summary
-      if (!data) {
-        const { data: profileSummary, error: profileError } = await supabase
-          .from('profile_cv_summaries')
-          .select('summary_text, key_points, is_valid_cv, document_type, cv_url')
-          .eq('user_id', activeApplication.applicant_id)
-          .maybeSingle();
-
-        if (!profileError && profileSummary) {
-          const currentCvUrl = activeApplication.cv_url || null;
-          if (!currentCvUrl || profileSummary.cv_url === currentCvUrl) {
-            const summaryData: CandidateSummaryCacheValue = {
-              summary_text: profileSummary.summary_text || '',
-              key_points: (profileSummary.key_points as any[] | null) || [],
-              document_type: profileSummary.document_type,
-              is_valid_cv: profileSummary.is_valid_cv,
-            };
-            summaryCache.set(cacheKey, summaryData);
-            setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, summaryData);
-            setAiSummary(summaryData);
-            return { shouldAutoGenerate: false };
-          }
-        }
-      }
-
-      if (!data) {
-        setAiSummary(null);
-        return { shouldAutoGenerate: true };
-      }
-
-      const keyPoints = (data.key_points as any[] | null) || null;
-      const meta = extractSummaryMeta(keyPoints);
-
-      const currentCvUrl = activeApplication.cv_url || null;
-      const isStale = !!currentCvUrl && (!meta.sourceCvUrl || meta.sourceCvUrl !== currentCvUrl);
-
-      if (isStale) {
-        setAiSummary(null);
-        return { shouldAutoGenerate: true };
-      }
-
-      let isValidCv = meta.isValidCv;
-      let documentType = meta.documentType;
-
-      if (typeof isValidCv !== 'boolean') {
-        isValidCv = !data.summary_text.includes('Kan inte läsa av ett CV');
-      }
-      if (!documentType && data.summary_text.includes('Kan inte läsa av ett CV')) {
-        const match = data.summary_text.match(/dokumentet är (.+?)\./);
-        if (match) documentType = match[1];
-      }
-
-      const summaryResult: CandidateSummaryCacheValue = {
-        summary_text: data.summary_text,
-        key_points: keyPoints as any,
-        document_type: documentType,
-        is_valid_cv: isValidCv,
-      };
-      summaryCache.set(cacheKey, summaryResult);
-      setPersistedCacheValue(SUMMARY_STORAGE_KEY, cacheKey, summaryResult);
-      setAiSummary(summaryResult);
-
-      return { shouldAutoGenerate: false };
-    } catch (error) {
-      console.error('Error fetching AI summary:', error);
-      return { shouldAutoGenerate: false };
-    } finally {
-      setLoadingSummary(false);
-    }
-  }, [activeApplication?.applicant_id, activeApplication?.job_id, activeApplication?.cv_url]);
-
-  const generateAiSummary = useCallback(async (silent = false) => {
-    if (!activeApplication?.applicant_id) return;
-    
-    if (!navigator.onLine) {
-      if (!silent) toast.error('Du måste vara online för att generera sammanfattning');
-      return;
-    }
-    
-    setGeneratingSummary(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-cv-summary', {
-        body: {
-          applicant_id: activeApplication.applicant_id,
-          application_id: activeApplication.id,
-          job_id: activeApplication.job_id,
-          cv_url_override: activeApplication.cv_url,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.error) {
-        if (!silent) toast.error(data.error);
-        return;
-      }
-
-      if (!silent) {
-        if (data?.is_valid_cv === false) {
-          toast.message('Dokumentet är inte ett CV');
-        } else {
-          toast.success('Sammanfattning genererad från CV');
-        }
-      }
-
-      if (data?.summary) {
-        const genResult: CandidateSummaryCacheValue = {
-          summary_text: data.summary.summary_text,
-          key_points: data.summary.key_points,
-          document_type: data.document_type || data.summary.document_type || null,
-          is_valid_cv: data.is_valid_cv,
-        };
-        const genCacheKey = `${activeApplication.applicant_id}_${activeApplication.job_id || 'no-job'}_${activeApplication.cv_url || '__no-cv__'}`;
-        summaryCache.set(genCacheKey, genResult);
-        setPersistedCacheValue(SUMMARY_STORAGE_KEY, genCacheKey, genResult);
-        setAiSummary(genResult);
-      }
-    } catch (error) {
-      console.error('Error generating CV summary:', error);
-      if (!silent) toast.error('Kunde inte generera sammanfattning');
-    } finally {
-      setGeneratingSummary(false);
-    }
-  }, [activeApplication?.applicant_id, activeApplication?.id, activeApplication?.job_id, activeApplication?.cv_url]);
-
   // Fetch notes and questions when dialog opens or job selection changes
   useEffect(() => {
     if (open && activeApplication && user) {
-      fetchNotes();
+      notesHook.fetchNotes();
       fetchJobQuestions();
     }
-  }, [open, activeApplication?.id, user?.id]);
-
-  // Auto-generate summary when dialog opens
-  useEffect(() => {
-    const autoGenerateIfNeeded = async () => {
-      if (!open || !activeApplication || !user) return;
-      const result = await fetchAiSummary();
-      if (result?.shouldAutoGenerate && activeApplication.cv_url) {
-        generateAiSummary(true);
-      }
-    };
-    autoGenerateIfNeeded();
-  }, [open, activeApplication?.id, user?.id]);
-
-  // Polling with exponential backoff (3s → 6s → 12s → ...) and max 10 attempts
-  useEffect(() => {
-    if (!open || !activeApplication || aiSummary || loadingSummary || generatingSummary) return;
-
-    let attempt = 0;
-    const MAX_ATTEMPTS = 10;
-    let timeoutId: ReturnType<typeof setTimeout>;
-
-    const poll = async () => {
-      if (!navigator.onLine || !activeApplication.cv_url || attempt >= MAX_ATTEMPTS) return;
-      attempt++;
-
-      try {
-        const { data } = await supabase
-          .from('candidate_summaries')
-          .select('summary_text, key_points')
-          .eq('job_id', activeApplication.job_id)
-          .eq('applicant_id', activeApplication.applicant_id)
-          .order('generated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (data) {
-          await fetchAiSummary();
-          return; // Stop polling — found data
-        }
-      } catch (error) {
-        console.error('Polling error:', error);
-      }
-
-      // Exponential backoff: 3s, 6s, 12s, 24s...
-      const delay = 3000 * Math.pow(2, attempt - 1);
-      timeoutId = setTimeout(poll, delay);
-    };
-
-    timeoutId = setTimeout(poll, 3000);
-
-    return () => clearTimeout(timeoutId);
-  }, [open, activeApplication?.id, aiSummary, loadingSummary, generatingSummary]);
-
-  // ─── Note CRUD ────────────────────────────────────────────────────
-
-  const saveNote = async () => {
-    if (!newNote.trim() || !application || !user) return;
-    if (!navigator.onLine) {
-      toast.error('Du måste vara online för att spara anteckningar');
-      return;
-    }
-    
-    // Optimistic update — show note immediately
-    const optimisticNote: CandidateNote = {
-      id: `temp-${Date.now()}`,
-      note: newNote.trim(),
-      created_at: new Date().toISOString(),
-      employer_id: user.id,
-      author_name: 'Du',
-    };
-    const previousNotes = [...notes];
-    const optimisticNotes = [optimisticNote, ...notes];
-    setNotes(optimisticNotes);
-    notesCache.set(application.applicant_id, optimisticNotes);
-    setPersistedNotes(application.applicant_id, optimisticNotes);
-
-    const noteText = newNote.trim();
-    setNewNote('');
-    clearNoteDraft();
-    setSavingNote(true);
-
-    try {
-      const { error } = await supabase
-        .from('candidate_notes')
-        .insert({
-          employer_id: user.id,
-          applicant_id: application.applicant_id,
-          job_id: application.job_id,
-          note: noteText
-        });
-
-      if (error) throw error;
-
-      logActivity.mutate({
-        applicantId: application.applicant_id,
-        activityType: 'note_added',
-        newValue: noteText.substring(0, 100),
-        metadata: { job_id: application.job_id },
-      });
-
-      toast.success('Anteckning sparad');
-      // Background refresh to get real ID from server
-      fetchNotes(true);
-    } catch (error) {
-      console.error('Error saving note:', error);
-      toast.error('Kunde inte spara anteckning');
-      // Rollback optimistic update
-      setNotes(previousNotes);
-      notesCache.set(application.applicant_id, previousNotes);
-      setPersistedNotes(application.applicant_id, previousNotes);
-      setNewNote(noteText);
-    } finally {
-      setSavingNote(false);
-    }
-  };
-
-  const deleteNote = async (noteId: string) => {
-    if (!application) return;
-    if (!navigator.onLine) {
-      toast.error('Du måste vara online för att ta bort anteckningar');
-      return;
-    }
-    
-    try {
-      const { error } = await supabase
-        .from('candidate_notes')
-        .delete()
-        .eq('id', noteId);
-
-      if (error) throw error;
-      
-      await deleteNoteActivities.mutateAsync({ applicantId: application.applicant_id });
-      
-      toast.success('Anteckning borttagen');
-      const updatedNotes = notes.filter(n => n.id !== noteId);
-      notesCache.set(application.applicant_id, updatedNotes);
-      setPersistedNotes(application.applicant_id, updatedNotes);
-      setNotes(updatedNotes);
-      setDeletingNoteId(null);
-    } catch (error) {
-      console.error('Error deleting note:', error);
-      toast.error('Kunde inte ta bort anteckning');
-    }
-  };
-
-  const startEditingNote = (note: CandidateNote) => {
-    setEditingNoteId(note.id);
-    setEditingNoteText(note.note);
-  };
-
-  const cancelEditingNote = () => {
-    setEditingNoteId(null);
-    setEditingNoteText('');
-  };
-
-  const updateNote = async () => {
-    if (!editingNoteId || !editingNoteText.trim() || !application) return;
-    
-    // Optimistic update — show edited note immediately
-    const previousNotes = [...notes];
-    const updatedNotes = notes.map(n => 
-      n.id === editingNoteId ? { ...n, note: editingNoteText.trim() } : n
-    );
-    setNotes(updatedNotes);
-    notesCache.set(application.applicant_id, updatedNotes);
-    setPersistedNotes(application.applicant_id, updatedNotes);
-
-    const noteText = editingNoteText.trim();
-    const noteId = editingNoteId;
-    setEditingNoteId(null);
-    setEditingNoteText('');
-    setSavingNote(true);
-
-    try {
-      const { error } = await supabase
-        .from('candidate_notes')
-        .update({ note: noteText })
-        .eq('id', noteId);
-
-      if (error) throw error;
-
-      logActivity.mutate({
-        applicantId: application.applicant_id,
-        activityType: 'note_edited',
-        newValue: noteText.substring(0, 100),
-        metadata: { job_id: application.job_id },
-      });
-
-      toast.success('Anteckning uppdaterad');
-    } catch (error) {
-      console.error('Error updating note:', error);
-      toast.error('Kunde inte uppdatera anteckning');
-      // Rollback optimistic update
-      setNotes(previousNotes);
-      notesCache.set(application.applicant_id, previousNotes);
-      setPersistedNotes(application.applicant_id, previousNotes);
-      setEditingNoteId(noteId);
-      setEditingNoteText(noteText);
-    } finally {
-      setSavingNote(false);
-    }
-  };
+  }, [open, activeApplication?.id, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   
   if (!application) return null;
 
@@ -793,20 +303,20 @@ export const CandidateProfileDialog = ({
 
   // Shared notes panel props
   const notesPanelProps = {
-    notes,
-    loadingNotes,
+    notes: notesHook.notes,
+    loadingNotes: notesHook.loadingNotes,
     newNote,
     onNewNoteChange: setNewNote,
-    onSaveNote: saveNote,
-    savingNote,
+    onSaveNote: () => notesHook.saveNote(newNote, () => { setNewNote(''); clearNoteDraft(); }),
+    savingNote: notesHook.savingNote,
     currentUserId: user?.id,
-    onStartEditing: startEditingNote,
-    onConfirmDelete: (noteId: string) => setDeletingNoteId(noteId),
-    editingNoteId,
-    editingNoteText,
-    onEditingNoteTextChange: setEditingNoteText,
-    onUpdateNote: updateNote,
-    onCancelEditing: cancelEditingNote,
+    onStartEditing: notesHook.startEditing,
+    onConfirmDelete: (noteId: string) => notesHook.setDeletingNoteId(noteId),
+    editingNoteId: notesHook.editingNoteId,
+    editingNoteText: notesHook.editingNoteText,
+    onEditingNoteTextChange: notesHook.setEditingNoteText,
+    onUpdateNote: notesHook.updateNote,
+    onCancelEditing: notesHook.cancelEditing,
   };
 
   return (
@@ -1043,9 +553,9 @@ export const CandidateProfileDialog = ({
 
             {/* AI Summary */}
             <CandidateSummarySection
-              aiSummary={aiSummary}
-              loadingSummary={loadingSummary}
-              generatingSummary={generatingSummary}
+              aiSummary={summaryHook.aiSummary}
+              loadingSummary={summaryHook.loadingSummary}
+              generatingSummary={summaryHook.generatingSummary}
               hasCvUrl={!!activeApplication?.cv_url}
               signedCvUrl={signedCvUrl}
             />
@@ -1263,7 +773,7 @@ export const CandidateProfileDialog = ({
     </Dialog>
 
     {/* Delete note confirmation */}
-    <AlertDialog open={!!deletingNoteId} onOpenChange={(open) => !open && setDeletingNoteId(null)}>
+    <AlertDialog open={!!notesHook.deletingNoteId} onOpenChange={(open) => !open && notesHook.setDeletingNoteId(null)}>
       <AlertDialogContentNoFocus 
         className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
       >
@@ -1282,14 +792,14 @@ export const CandidateProfileDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
           <AlertDialogCancel 
-            onClick={() => setDeletingNoteId(null)}
+            onClick={() => notesHook.setDeletingNoteId(null)}
             style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
             className="flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
           >
             Avbryt
           </AlertDialogCancel>
           <AlertDialogAction 
-            onClick={() => deletingNoteId && deleteNote(deletingNoteId)}
+            onClick={() => notesHook.deletingNoteId && notesHook.deleteNote(notesHook.deletingNoteId)}
             variant="destructiveSoft"
             style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
             className="flex-1 text-sm flex items-center justify-center rounded-full"
@@ -1355,7 +865,7 @@ export const CandidateProfileDialog = ({
           <AlertDialogDescription className="text-white text-sm leading-relaxed">
             Är du säker på att du vill ta bort{' '}
             <span className="font-semibold text-white inline-block max-w-[200px] truncate align-bottom">
-              "{displayApp?.first_name} {displayApp?.last_name}"
+              &quot;{displayApp?.first_name} {displayApp?.last_name}&quot;
             </span>
             ? Denna åtgärd går inte att ångra.
           </AlertDialogDescription>
