@@ -222,18 +222,33 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => window.removeEventListener('online', handleOnline);
   }, [user?.id, saveToDb, queryClient, queryKey, table]);
 
+  // Keep a ref to the latest access token for beforeunload (avoids async in sync handler)
+  const accessTokenRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user?.id) return;
+    const sync = async () => {
+      const { data } = await supabase.auth.getSession();
+      accessTokenRef.current = data.session?.access_token ?? null;
+    };
+    sync();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      accessTokenRef.current = session?.access_token ?? null;
+    });
+    return () => subscription.unsubscribe();
+  }, [user?.id]);
+
   // beforeunload — flush unsaved changes immediately when closing tab
   useEffect(() => {
     if (!user?.id) return;
     const handleBeforeUnload = () => {
       if (!hasLocalEditsRef.current) return;
+      const token = accessTokenRef.current;
+      if (!token) return; // No valid session — localStorage already has the content
       const nd = noteDataRef.current;
       const body = nd?.id
         ? JSON.stringify({ content: contentRef.current })
         : JSON.stringify({ [ownerColumn]: user.id, content: contentRef.current });
 
-      // Use sendBeacon for reliable fire-and-forget on tab close
-      // We save to localStorage as a guaranteed fallback
       const url = nd?.id
         ? `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}?id=eq.${nd.id}`
         : `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}`;
@@ -241,11 +256,10 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       const headers = {
         'Content-Type': 'application/json',
         'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        'Prefer': nd?.id ? 'return=minimal' : 'return=minimal',
+        'Authorization': `Bearer ${token}`,
+        'Prefer': 'return=minimal',
       };
 
-      // sendBeacon only supports POST, so for updates we'll use fetch keepalive
       try {
         if (nd?.id) {
           fetch(url, {
