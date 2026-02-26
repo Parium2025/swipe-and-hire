@@ -3,6 +3,8 @@ import { useDragScroll } from '@/hooks/useDragScroll';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
+import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
@@ -151,6 +153,7 @@ const ApplicationCardContent = ({
   isDragging, 
   onOpenProfile,
   onMarkAsViewed,
+  onPrefetch,
   criteriaCount = 0,
   isSelectionMode,
   isSelected,
@@ -160,6 +163,7 @@ const ApplicationCardContent = ({
   isDragging?: boolean; 
   onOpenProfile?: () => void;
   onMarkAsViewed?: (id: string) => void;
+  onPrefetch?: () => void;
   criteriaCount?: number;
   isSelectionMode?: boolean;
   isSelected?: boolean;
@@ -198,6 +202,7 @@ const ApplicationCardContent = ({
             : 'ring-white/10 hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
         }`}
       onClick={handleClick}
+      onMouseEnter={onPrefetch}
     >
       {/* Selection checkbox */}
       {isSelectionMode && (
@@ -294,6 +299,7 @@ const SortableApplicationCard = ({
   application, 
   onOpenProfile,
   onMarkAsViewed,
+  onPrefetch,
   criteriaCount = 0,
   isSelectionMode,
   isSelected,
@@ -302,6 +308,7 @@ const SortableApplicationCard = ({
   application: JobApplication; 
   onOpenProfile: () => void;
   onMarkAsViewed?: (id: string) => void;
+  onPrefetch?: () => void;
   criteriaCount?: number;
   isSelectionMode?: boolean;
   isSelected?: boolean;
@@ -335,6 +342,7 @@ const SortableApplicationCard = ({
         isDragging={isDragging} 
         onOpenProfile={onOpenProfile}
         onMarkAsViewed={onMarkAsViewed}
+        onPrefetch={onPrefetch}
         criteriaCount={criteriaCount}
         isSelectionMode={isSelectionMode}
         isSelected={isSelected}
@@ -351,6 +359,7 @@ interface StatusColumnProps {
   applications: JobApplication[];
   onOpenProfile: (app: JobApplication) => void;
   onMarkAsViewed: (id: string) => void;
+  onPrefetch?: (app: JobApplication) => void;
   onOpenCriteriaDialog?: () => void;
   stageConfig: {
     label: string;
@@ -372,6 +381,7 @@ const StatusColumn = ({
   applications, 
   onOpenProfile, 
   onMarkAsViewed, 
+  onPrefetch,
   onOpenCriteriaDialog,
   stageConfig,
   totalStageCount,
@@ -482,6 +492,7 @@ const StatusColumn = ({
                 application={app} 
                 onOpenProfile={() => onOpenProfile(app)}
                 onMarkAsViewed={onMarkAsViewed}
+                onPrefetch={() => onPrefetch?.(app)}
                 criteriaCount={criteriaCount}
                 isSelectionMode={isSelectionMode}
                 isSelected={selectedApplicationIds?.has(app.id)}
@@ -514,6 +525,7 @@ const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const isTouchDevice = useTouchCapable();
   const device = useDevice();
   // Use mobile candidate view on touch devices OR narrow viewports
@@ -791,7 +803,12 @@ const JobDetails = () => {
     setDialogOpen(true);
   }, []);
 
-  // Mobile: move candidate to a different stage via dropdown
+  // Prefetch candidate data on hover for instant profile opening
+  const handlePrefetchCandidate = useCallback((app: JobApplication) => {
+    if (!user || !app.applicant_id) return;
+    prefetchCandidateActivities(queryClient, app.applicant_id, user.id);
+  }, [user, queryClient]);
+
   const handleMobileMove = useCallback(async (applicationId: string, newStage: string) => {
     updateApplicationLocally(applicationId, { status: newStage as JobApplication['status'] });
     const stageLabel = stageSettings[newStage]?.label || newStage;
@@ -1219,6 +1236,7 @@ const JobDetails = () => {
                     applications={applicationsByStatus[status] || []}
                     onOpenProfile={handleOpenProfile}
                     onMarkAsViewed={markApplicationAsViewed}
+                    onPrefetch={handlePrefetchCandidate}
                     onOpenCriteriaDialog={status === 'pending' ? () => setCriteriaDialogOpen(true) : undefined}
                     stageConfig={config}
                     totalStageCount={activeStages.length}
