@@ -510,8 +510,11 @@ export function SelectionCriteriaDialog({
               {canAddMore && (
                 <button
                   onClick={addNewCriterion}
-                  className="w-auto mx-auto py-2 px-6 rounded-lg border border-solid border-white/[0.15] hover:border-white/[0.30] 
-                    text-white hover:text-white flex items-center justify-center gap-1.5 transition-all text-xs"
+                  onMouseDown={(e) => e.preventDefault()}
+                  className="w-auto mx-auto py-2 px-6 rounded-lg border border-solid border-white/[0.15] md:hover:border-white/[0.30] 
+                    text-white md:hover:text-white flex items-center justify-center gap-1.5 transition-all text-xs
+                    active:scale-[0.97] active:duration-75 focus:outline-none focus-visible:outline-none
+                    [-webkit-tap-highlight-color:transparent]"
                 >
                   <Plus className="h-4 w-4 text-white" />
                   <span className="text-sm">Lägg till kriterium</span>
