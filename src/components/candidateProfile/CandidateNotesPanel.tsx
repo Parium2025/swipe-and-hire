@@ -141,7 +141,7 @@ export const CandidateNotesPanel = ({
                             })}
                           </p>
                           {note.employer_id === currentUserId && (
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                            <div className="absolute top-2 right-2 flex items-center gap-0.5">
                               <button
                                 onClick={() => onStartEditing(note)}
                                 className="p-1.5 text-white hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
