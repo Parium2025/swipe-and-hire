@@ -315,6 +315,7 @@ export const CandidateProfileDialog = ({
     onConfirmDelete: (noteId: string) => notesHook.setDeletingNoteId(noteId),
     editingNoteId: notesHook.editingNoteId,
     editingNoteText: notesHook.editingNoteText,
+    originalNoteText: notesHook.originalNoteText,
     onEditingNoteTextChange: notesHook.setEditingNoteText,
     onUpdateNote: notesHook.updateNote,
     onCancelEditing: notesHook.cancelEditing,

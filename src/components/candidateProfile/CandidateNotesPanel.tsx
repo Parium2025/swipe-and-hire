@@ -17,6 +17,7 @@ interface CandidateNotesPanelProps {
   onConfirmDelete: (noteId: string) => void;
   editingNoteId: string | null;
   editingNoteText: string;
+  originalNoteText: string;
   onEditingNoteTextChange: (val: string) => void;
   onUpdateNote: () => void;
   onCancelEditing: () => void;
@@ -34,10 +35,12 @@ export const CandidateNotesPanel = ({
   onConfirmDelete,
   editingNoteId,
   editingNoteText,
+  originalNoteText,
   onEditingNoteTextChange,
   onUpdateNote,
   onCancelEditing,
 }: CandidateNotesPanelProps) => {
+  const hasChanged = editingNoteText.trim() !== originalNoteText.trim();
   return (
     <div className="space-y-3">
       {/* Add new note */}
@@ -76,7 +79,8 @@ export const CandidateNotesPanel = ({
         <div className="space-y-3">
           {(() => {
             const groupedNotes = notes.reduce((groups, note) => {
-              const date = new Date(note.created_at).toLocaleDateString('sv-SE', {
+              const displayDate = note.updated_at || note.created_at;
+              const date = new Date(displayDate).toLocaleDateString('sv-SE', {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',
@@ -114,7 +118,7 @@ export const CandidateNotesPanel = ({
                             <Button
                               size="sm"
                               onClick={onUpdateNote}
-                              disabled={savingNote || !editingNoteText.trim()}
+                              disabled={savingNote || !editingNoteText.trim() || !hasChanged}
                               className="h-7 text-[10px] px-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/20"
                             >
                               <Check className="h-3 w-3 mr-1" />
@@ -135,7 +139,7 @@ export const CandidateNotesPanel = ({
                         <>
                           <p className="text-xs text-white whitespace-pre-wrap pr-10 leading-relaxed">{note.note}</p>
                           <p className="text-[10px] text-white mt-1">
-                            {new Date(note.created_at).toLocaleTimeString('sv-SE', {
+                            {new Date(note.updated_at || note.created_at).toLocaleTimeString('sv-SE', {
                               hour: '2-digit',
                               minute: '2-digit',
                             })}

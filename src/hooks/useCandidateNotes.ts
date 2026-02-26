@@ -40,7 +40,7 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
     const { data, error } = await supabase
       .from('candidate_notes')
       .select(`
-        id, note, created_at, employer_id,
+        id, note, created_at, updated_at, employer_id,
         profiles!candidate_notes_employer_id_fkey(first_name, last_name)
       `)
       .eq('applicant_id', id)
@@ -52,6 +52,7 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
       id: note.id,
       note: note.note,
       created_at: note.created_at,
+      updated_at: note.updated_at || note.created_at,
       employer_id: note.employer_id,
       author_name: note.profiles
         ? `${note.profiles.first_name || ''} ${note.profiles.last_name || ''}`.trim() || 'Okänd'
@@ -122,10 +123,12 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
       return;
     }
 
+    const nowISO = new Date().toISOString();
     const optimisticNote: CandidateNote = {
       id: `temp-${Date.now()}`,
       note: noteText.trim(),
-      created_at: new Date().toISOString(),
+      created_at: nowISO,
+      updated_at: nowISO,
       employer_id: user.id,
       author_name: 'Du',
     };
@@ -195,9 +198,12 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
   }, [applicantId, notes, deleteNoteActivities, persistOptimistic, rollback]);
 
   // ─── Edit (optimistic) ─────────────────────────────────────────
+  const [originalNoteText, setOriginalNoteText] = useState('');
+
   const startEditing = useCallback((note: CandidateNote) => {
     setEditingNoteId(note.id);
     setEditingNoteText(note.note);
+    setOriginalNoteText(note.note);
   }, []);
 
   const cancelEditing = useCallback(() => {
@@ -207,11 +213,16 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
 
   const updateNote = useCallback(async () => {
     if (!editingNoteId || !editingNoteText.trim() || !applicantId) return;
+    if (editingNoteText.trim() === originalNoteText.trim()) {
+      cancelEditing();
+      return;
+    }
 
     const previous = [...notes];
     const trimmed = editingNoteText.trim();
+    const nowISO = new Date().toISOString();
     persistOptimistic(applicantId, notes.map(n =>
-      n.id === editingNoteId ? { ...n, note: trimmed } : n
+      n.id === editingNoteId ? { ...n, note: trimmed, updated_at: nowISO } : n
     ));
 
     const noteId = editingNoteId;
@@ -260,6 +271,7 @@ export function useCandidateNotes({ applicantId, jobId }: UseCandidateNotesOptio
     savingNote,
     editingNoteId,
     editingNoteText,
+    originalNoteText,
     deletingNoteId,
     setEditingNoteText,
     setDeletingNoteId,
