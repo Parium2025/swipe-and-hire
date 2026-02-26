@@ -373,6 +373,10 @@ interface StatusColumnProps {
   isSelectionMode?: boolean;
   selectedApplicationIds?: Set<string>;
   onToggleSelect?: (applicationId: string) => void;
+  // Delete stage props
+  targetStageKey?: string;
+  targetStageLabel?: string;
+  onMoveCandidatesAndDelete?: () => Promise<void>;
 }
 
 const StatusColumn = ({ 
@@ -389,6 +393,9 @@ const StatusColumn = ({
   isSelectionMode,
   selectedApplicationIds,
   onToggleSelect,
+  targetStageKey,
+  targetStageLabel,
+  onMoveCandidatesAndDelete,
 }: StatusColumnProps) => {
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -442,8 +449,8 @@ const StatusColumn = ({
           >
             {applications.length}
           </span>
-          {/* AI Criteria button - only show on Inkorg (pending) */}
-          {status === 'pending' && onOpenCriteriaDialog && (
+          {/* AI Criteria button - only show on first stage */}
+          {onOpenCriteriaDialog && (
             <button
               onClick={onOpenCriteriaDialog}
               className="p-1 rounded hover:bg-white/20 transition-colors text-white/70 hover:text-primary"
@@ -458,6 +465,9 @@ const StatusColumn = ({
               stageKey={status}
               candidateCount={applications.length}
               totalStageCount={totalStageCount}
+              targetStageKey={targetStageKey}
+              targetStageLabel={targetStageLabel}
+              onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
               onLiveColorChange={setLiveColor}
             />
           </div>
@@ -740,6 +750,12 @@ const JobDetails = () => {
     applications.forEach(app => {
       if (result[app.status]) {
         result[app.status].push(app);
+      } else {
+        // Orphaned candidate (stage deleted) — put in first active stage
+        const firstStage = activeStages[0];
+        if (firstStage) {
+          result[firstStage].push(app);
+        }
       }
     });
     return result;
@@ -1226,8 +1242,13 @@ const JobDetails = () => {
                  WebkitOverflowScrolling: 'touch',
                }}
             >
-              {activeStages.map((status) => {
+              {activeStages.map((status, stageIndex) => {
                 const config = stageSettings[status] || { label: status, color: '#0EA5E9', iconName: 'inbox', isCustom: false };
+                // Target stage for move-on-delete: next stage, or previous if last
+                const targetIdx = stageIndex < activeStages.length - 1 ? stageIndex + 1 : stageIndex - 1;
+                const targetKey = targetIdx >= 0 ? activeStages[targetIdx] : undefined;
+                const targetLabel = targetKey ? (stageSettings[targetKey]?.label || targetKey) : undefined;
+                
                 return (
                   <StatusColumn 
                     key={status}
@@ -1237,13 +1258,31 @@ const JobDetails = () => {
                     onOpenProfile={handleOpenProfile}
                     onMarkAsViewed={markApplicationAsViewed}
                     onPrefetch={handlePrefetchCandidate}
-                    onOpenCriteriaDialog={status === 'pending' ? () => setCriteriaDialogOpen(true) : undefined}
+                    onOpenCriteriaDialog={stageIndex === 0 ? () => setCriteriaDialogOpen(true) : undefined}
                     stageConfig={config}
                     totalStageCount={activeStages.length}
                     criteriaCount={criteriaCount}
                     isSelectionMode={isSelectionMode}
                     selectedApplicationIds={selectedApplicationIds}
                     onToggleSelect={toggleApplicationSelection}
+                    targetStageKey={targetKey}
+                    targetStageLabel={targetLabel}
+                    onMoveCandidatesAndDelete={targetKey ? async () => {
+                      // Move all candidates from this stage to target stage
+                      const apps = applicationsByStatus[status] || [];
+                      if (apps.length > 0) {
+                        const ids = apps.map(a => a.id);
+                        ids.forEach(id => updateApplicationLocally(id, { status: targetKey as JobApplication['status'] }));
+                        const { error } = await supabase
+                          .from('job_applications')
+                          .update({ status: targetKey })
+                          .in('id', ids);
+                        if (error) {
+                          refetch();
+                          throw error;
+                        }
+                      }
+                    } : undefined}
                   />
                 );
               })}
