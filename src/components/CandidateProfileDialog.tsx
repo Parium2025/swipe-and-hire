@@ -33,6 +33,7 @@ import {
   setPersistedCacheValue,
   QUESTIONS_STORAGE_KEY,
 } from '@/components/candidateProfile';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 
 function useProfileImageUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-image');
@@ -467,33 +468,38 @@ export const CandidateProfileDialog = ({
               
               {showJobSelectorShell ? (
                 <div className="mt-2 relative w-full">
-                  {loadingApplications ? (
-                    <div className="w-full flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white">
-                      <div className="h-4 w-32 rounded bg-white/15 animate-pulse" />
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <div className="h-3 w-10 rounded bg-white/15 animate-pulse" />
-                        <Loader2 className="h-4 w-4 text-white animate-spin" />
-                      </div>
-                    </div>
-                  ) : (
-                  <button
-                    type="button"
-                    onClick={() => hasMultipleApplications && setJobDropdownOpen(prev => !prev)}
-                    className="w-full flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
-                  >
-                    <span className="truncate flex-1 text-left">{displayApp.job_title || 'Okänt jobb'}</span>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-xs text-white">
-                        {`${allApplications!.length} jobb`}
-                      </span>
-                      {hasMultipleApplications ? (
-                        <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
-                      ) : (
-                        <Briefcase className="h-4 w-4 text-white/60" />
-                      )}
-                    </div>
-                  </button>
-                  )}
+                  <TooltipProvider delayDuration={400}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={() => hasMultipleApplications && setJobDropdownOpen(prev => !prev)}
+                          className="w-full flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
+                        >
+                          <span className="truncate flex-1 text-left">{displayApp.job_title || application?.job_title || 'Okänt jobb'}</span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {loadingApplications ? (
+                              <Loader2 className="h-4 w-4 text-white animate-spin" />
+                            ) : (
+                              <>
+                                <span className="text-xs text-white">
+                                  {`${allApplications!.length} jobb`}
+                                </span>
+                                {hasMultipleApplications ? (
+                                  <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
+                                ) : (
+                                  <Briefcase className="h-4 w-4 text-white/60" />
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs">
+                        {displayApp.job_title || application?.job_title || 'Okänt jobb'}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   
                   {hasMultipleApplications && jobDropdownOpen && (
                     <>
