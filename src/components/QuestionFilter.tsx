@@ -330,7 +330,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
           >
             <span className="truncate">{filterLabel}</span>
             {hasFilters && (
-              <span className="text-white/70 text-xs">({value.length})</span>
+              <span className="text-white text-xs">({value.length})</span>
             )}
             <ChevronDown className="h-3 w-3 text-white" />
           </button>
@@ -339,6 +339,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
           align="start" 
           className={dropdownContentClass}
           sideOffset={8}
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <div className="px-2.5 py-1.5 border-b border-white/10">
             <div className="relative">
