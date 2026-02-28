@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { smartSearchCandidates } from '@/lib/smartSearch';
+// smartSearchCandidates is applied inside useApplicationsData — not needed here
 import JobDetails from '@/pages/JobDetails';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
 import CompanyReviews from '@/components/CompanyReviews';
@@ -92,20 +92,13 @@ const CandidatesContent = () => {
   // Safety check to prevent null crash
   const safeApplications = applications || [];
 
-  // Filter applications by question filters AND smart search (client-side)
-  // When typing (searchQuery !== debouncedSearch), apply instant client-side filtering
-  // on already-loaded data for zero-latency feel while DB query is pending
+  // Filter applications by question filters
+  // NOTE: Smart search is already applied inside useApplicationsData (enrichedApplications)
+  // Do NOT apply smartSearchCandidates again here — it would double-filter and drop valid results
   const filteredApplications = useMemo(() => {
     let result = safeApplications;
     
-    // Apply smart search filter (client-side) for:
-    // 1. Instant filtering while debounce is pending (searchQuery !== debouncedSearch)
-    // 2. Additional fuzzy/synonym matching on top of FTS results
-    if (searchQuery && searchQuery.trim().length >= 2) {
-      result = smartSearchCandidates(result, searchQuery);
-    }
-    
-    // Then apply question filters
+    // Only apply question filters (smart search already done in hook)
     if (questionFilters.length === 0) return result;
 
     return result.filter(app => {
@@ -140,7 +133,7 @@ const CandidatesContent = () => {
         );
       });
     });
-  }, [safeApplications, questionFilters, searchQuery]);
+  }, [safeApplications, questionFilters]);
 
   // Stats based on filtered results (already deduplicated by the hook)
   const filteredStats = useMemo(() => ({
