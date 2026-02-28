@@ -57,7 +57,7 @@ export default function Messages() {
 
   // Categorize conversations
   const categorizeConversation = (conv: Conversation): 'candidates' | 'colleagues' => {
-    const otherMembers = conv.members.filter(m => m.user_id !== user?.id);
+    const otherMembers = (conv.members || []).filter(m => m.user_id !== user?.id);
     // If any other member is a job_seeker, it's a candidate conversation.
     // IMPORTANT: if profiles are not readable (RLS) we may not have role info;
     // in that case default to 'candidates' so we never hide real conversations.
@@ -365,7 +365,7 @@ function ConversationItem({
   onClick: () => void;
   category: 'candidates' | 'colleagues';
 }) {
-  const otherMembers = conversation.members.filter(m => m.user_id !== currentUserId);
+  const otherMembers = (conversation.members || []).filter(m => m.user_id !== currentUserId);
   const displayMember = otherMembers[0];
   
   // Use frozen application snapshot if available, otherwise fall back to live profile
