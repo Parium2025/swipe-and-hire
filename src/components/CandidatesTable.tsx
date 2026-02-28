@@ -104,6 +104,86 @@ export function CandidatesTable({
     if (!selectionMode) setSelectedIds(new Set());
   }, [selectionMode]);
 
+  // Sync offline bulk message queue when coming back online
+  useEffect(() => {
+    if (!user) return;
+    const BULK_QUEUE_KEY = 'parium_bulk_message_queue';
+
+    const syncBulkQueue = async () => {
+      const raw = localStorage.getItem(BULK_QUEUE_KEY);
+      if (!raw) return;
+      const items = JSON.parse(raw) as Array<{
+        id: string; sender_id: string; applicant_id: string;
+        job_id: string; application_id: string; content: string;
+        created_at: string; attempts: number;
+      }>;
+      const myItems = items.filter(i => i.sender_id === user.id);
+      if (myItems.length === 0) return;
+
+      let sent = 0;
+      const remaining = items.filter(i => i.sender_id !== user.id);
+
+      for (const item of myItems) {
+        try {
+          // Find or create conversation (simplified — reuses the same logic inline)
+          const { data: memData } = await supabase
+            .from('conversation_members')
+            .select('conversation_id')
+            .eq('user_id', user.id);
+          const myConvIds = (memData || []).map(m => m.conversation_id);
+
+          let convId: string | null = null;
+          if (myConvIds.length > 0) {
+            const { data: convData } = await supabase
+              .from('conversations')
+              .select('id')
+              .eq('candidate_id', item.applicant_id)
+              .in('id', myConvIds)
+              .limit(1);
+            convId = convData?.[0]?.id ?? null;
+          }
+
+          if (!convId) {
+            const newId = crypto.randomUUID();
+            const { error: cErr } = await supabase
+              .from('conversations')
+              .insert({ id: newId, is_group: false, job_id: item.job_id || null, application_id: item.application_id || null, candidate_id: item.applicant_id, created_by: user.id })
+              .select('id')
+              .single();
+            if (cErr?.code === '23503') {
+              await supabase.from('conversations').insert({ id: newId, is_group: false, candidate_id: item.applicant_id, created_by: user.id }).select('id').single();
+            }
+            convId = newId;
+
+            await supabase.from('conversation_members').upsert({ conversation_id: convId, user_id: user.id, is_admin: true }, { onConflict: 'conversation_id,user_id' });
+            const { error: addErr } = await supabase.from('conversation_members').insert({ conversation_id: convId, user_id: item.applicant_id, is_admin: false });
+            if (addErr && addErr.code !== '23505') throw addErr;
+          }
+
+          await supabase.from('conversation_messages').insert({ conversation_id: convId, sender_id: user.id, content: item.content });
+          sent++;
+        } catch (e) {
+          console.error('Failed to sync bulk queued message:', e);
+          if (item.attempts < 3) {
+            remaining.push({ ...item, attempts: item.attempts + 1 });
+          }
+        }
+      }
+
+      localStorage.setItem(BULK_QUEUE_KEY, JSON.stringify(remaining));
+      if (sent > 0) {
+        toast.success(`${sent} köat meddelande${sent !== 1 ? 'n' : ''} skickat`);
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      }
+    };
+
+    const handleOnline = () => { if (navigator.onLine) syncBulkQueue(); };
+    window.addEventListener('online', handleOnline);
+    // Also try on mount
+    if (navigator.onLine) syncBulkQueue();
+    return () => window.removeEventListener('online', handleOnline);
+  }, [user, queryClient]);
+
   // Team candidate info
   const applicationIds = useMemo(() => applications.map(a => a.id), [applications]);
   const { teamCandidates } = useTeamCandidateInfo(applicationIds);
@@ -350,6 +430,8 @@ export function CandidatesTable({
   }, [selectedApplications, addCandidates, onSelectionModeChange, onUpdate]);
 
   const [bulkMessageOpen, setBulkMessageOpen] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number } | null>(null);
+
   const handleBulkSendMessage = useCallback(async (content: string) => {
     if (!user) return;
 
@@ -364,9 +446,31 @@ export function CandidatesTable({
       return;
     }
 
+    // --- Offline queue: save for later sync instead of failing ---
     if (!navigator.onLine) {
-      toast.error('Du är offline. Försök igen när du är online.');
-      return;
+      const BULK_QUEUE_KEY = 'parium_bulk_message_queue';
+      try {
+        const existing = JSON.parse(localStorage.getItem(BULK_QUEUE_KEY) || '[]');
+        const newItems = selectedRecipientApplications.map(app => ({
+          id: `bulk-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          sender_id: user.id,
+          applicant_id: app.applicant_id,
+          job_id: app.job_id,
+          application_id: app.id,
+          content: trimmedContent,
+          created_at: new Date().toISOString(),
+          attempts: 0,
+        }));
+        localStorage.setItem(BULK_QUEUE_KEY, JSON.stringify([...existing, ...newItems]));
+        toast.success(`${newItems.length} meddelande${newItems.length !== 1 ? 'n' : ''} köade – skickas automatiskt när du är online igen`);
+        setSelectedIds(new Set());
+        onSelectionModeChange?.(false);
+        setBulkMessageOpen(false);
+        return;
+      } catch {
+        toast.error('Kunde inte spara meddelanden offline');
+        return;
+      }
     }
 
     const createConversationId = () => {
@@ -406,7 +510,6 @@ export function CandidatesTable({
 
     const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-    // Mottagare bestäms från aktuell markering (unika kandidater, exkl. dig själv)
     const recipients = selectedRecipientApplications;
 
     if (recipients.length === 0) {
@@ -414,11 +517,23 @@ export function CandidatesTable({
       return;
     }
 
+    // --- Hardened conversation lookup: verify membership ---
     const findExistingConversationId = async (candidateId: string): Promise<string | null> => {
+      // Find conversations where this candidate is involved AND where we are a member
+      const { data: myMemberships, error: memErr } = await supabase
+        .from('conversation_members')
+        .select('conversation_id')
+        .eq('user_id', user.id);
+
+      if (memErr || !myMemberships || myMemberships.length === 0) return null;
+
+      const myConvIds = myMemberships.map(m => m.conversation_id);
+
       const { data, error } = await supabase
         .from('conversations')
         .select('id')
         .eq('candidate_id', candidateId)
+        .in('id', myConvIds)
         .order('updated_at', { ascending: false })
         .limit(1);
 
@@ -514,6 +629,9 @@ export function CandidatesTable({
     let successCount = 0;
     const failureReasons: string[] = [];
 
+    // --- Progress tracking ---
+    setBulkProgress({ current: 0, total: recipients.length });
+
     for (const app of recipients) {
       try {
         await sendToCandidate(app);
@@ -523,7 +641,10 @@ export function CandidatesTable({
         failureReasons.push(reason);
         console.error(`Failed to send message to ${app.applicant_id}:`, error);
       }
+      setBulkProgress({ current: successCount + failureReasons.length, total: recipients.length });
     }
+
+    setBulkProgress(null);
 
     if (successCount > 0) {
       toast.success(`Meddelande skickat till ${successCount} kandidat${successCount !== 1 ? 'er' : ''}`);
@@ -934,6 +1055,7 @@ export function CandidatesTable({
           onOpenChange={setBulkMessageOpen}
           count={selectedRecipientCount}
           onSend={handleBulkSendMessage}
+          progress={bulkProgress}
         />
       )}
     </>
