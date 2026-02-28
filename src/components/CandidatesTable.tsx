@@ -541,7 +541,7 @@ export function CandidatesTable({
                               "h-2.5 w-2.5",
                               star <= rating
                                 ? "fill-yellow-400 text-yellow-400"
-                                : "text-white/20"
+                                : "text-white/30"
                             )}
                           />
                         ))}
@@ -553,7 +553,7 @@ export function CandidatesTable({
                       <span className="text-xs text-white truncate">
                         {application.job_title || 'Okänd tjänst'}
                       </span>
-                      <span className="text-[10px] text-white/70 flex-shrink-0">
+                      <span className="text-[10px] text-white flex-shrink-0">
                         {formatTimeAgo(application.applied_at)}
                       </span>
                     </div>
