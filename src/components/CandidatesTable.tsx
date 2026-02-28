@@ -76,6 +76,22 @@ export function CandidatesTable({
   
   // Bulk selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const selectedApplications = useMemo(
+    () => applications.filter((a) => selectedIds.has(a.id)),
+    [applications, selectedIds]
+  );
+  const selectedRecipientApplications = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          selectedApplications
+            .filter((app) => Boolean(app.applicant_id) && app.applicant_id !== user?.id)
+            .map((app) => [app.applicant_id, app])
+        ).values()
+      ),
+    [selectedApplications, user?.id]
+  );
+  const selectedRecipientCount = selectedRecipientApplications.length;
   const allSelected = applications.length > 0 && selectedIds.size === applications.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < applications.length;
 
@@ -298,10 +314,14 @@ export function CandidatesTable({
     }
   }, [allSelected, applications]);
 
-  const toggleSelect = useCallback((id: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
+  const toggleSelect = useCallback((id: string, checked?: boolean) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
+      if (typeof checked === 'boolean') {
+        if (checked) next.add(id);
+        else next.delete(id);
+        return next;
+      }
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
@@ -314,7 +334,7 @@ export function CandidatesTable({
   }, [onSelectionModeChange]);
 
   const handleBulkAddToMyCandidates = useCallback(async () => {
-    const selectedApps = applications.filter(a => selectedIds.has(a.id));
+    const selectedApps = selectedApplications;
     if (selectedApps.length === 0) return;
 
     const candidatesToAdd = selectedApps.map(app => ({
@@ -327,12 +347,16 @@ export function CandidatesTable({
     setSelectedIds(new Set());
     onSelectionModeChange?.(false);
     onUpdate();
-  }, [applications, selectedIds, addCandidates, onSelectionModeChange, onUpdate]);
+  }, [selectedApplications, addCandidates, onSelectionModeChange, onUpdate]);
 
   const [bulkMessageOpen, setBulkMessageOpen] = useState(false);
   const handleBulkSendMessage = useCallback(async (content: string) => {
-    const selectedApps = applications.filter(a => selectedIds.has(a.id));
-    if (selectedApps.length === 0 || !user) return;
+    if (!user) return;
+
+    if (selectedRecipientApplications.length === 0) {
+      toast.error('Inga giltiga kandidater valda');
+      return;
+    }
 
     const trimmedContent = content.trim();
     if (!trimmedContent) {
@@ -382,16 +406,10 @@ export function CandidatesTable({
 
     const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-    // Skicka max ett meddelande per unik kandidat, och hoppa över dig själv
-    const uniqueApps = Array.from(
-      new Map(
-        selectedApps
-          .filter(app => Boolean(app.applicant_id) && app.applicant_id !== user.id)
-          .map(app => [app.applicant_id, app])
-      ).values()
-    );
+    // Mottagare bestäms från aktuell markering (unika kandidater, exkl. dig själv)
+    const recipients = selectedRecipientApplications;
 
-    if (uniqueApps.length === 0) {
+    if (recipients.length === 0) {
       toast.error('Inga giltiga kandidater valda');
       return;
     }
@@ -496,7 +514,7 @@ export function CandidatesTable({
     let successCount = 0;
     const failureReasons: string[] = [];
 
-    for (const app of uniqueApps) {
+    for (const app of recipients) {
       try {
         await sendToCandidate(app);
         successCount++;
@@ -512,7 +530,7 @@ export function CandidatesTable({
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     }
 
-    const failedCount = uniqueApps.length - successCount;
+    const failedCount = recipients.length - successCount;
     if (failedCount > 0) {
       const uniqueReasons = Array.from(new Set(failureReasons));
       toast.error(
@@ -529,7 +547,7 @@ export function CandidatesTable({
       onSelectionModeChange?.(false);
       setBulkMessageOpen(false);
     }
-  }, [applications, selectedIds, user, onSelectionModeChange, queryClient]);
+  }, [selectedRecipientApplications, user, onSelectionModeChange, queryClient]);
 
   // --- Sorting ---
   const handleSort = useCallback((field: SortField) => {
@@ -675,7 +693,13 @@ export function CandidatesTable({
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
-                      onClick={() => setBulkMessageOpen(true)}
+                      onClick={() => {
+                        if (selectedRecipientCount === 0) {
+                          toast.error('Inga giltiga kandidater valda');
+                          return;
+                        }
+                        setBulkMessageOpen(true);
+                      }}
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Skicka meddelande
@@ -764,7 +788,11 @@ export function CandidatesTable({
                   >
                     {selectionMode && (
                       <TableCell onClick={(e) => e.stopPropagation()}>
-                        <Checkbox checked={isSelected} onCheckedChange={() => {}} onClick={(e) => toggleSelect(application.id, e)} />
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) => toggleSelect(application.id, checked === true)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
                       </TableCell>
                     )}
                     <TableCell>
@@ -904,7 +932,7 @@ export function CandidatesTable({
         <BulkMessageDialog
           open={bulkMessageOpen}
           onOpenChange={setBulkMessageOpen}
-          count={selectedIds.size}
+          count={selectedRecipientCount}
           onSend={handleBulkSendMessage}
         />
       )}

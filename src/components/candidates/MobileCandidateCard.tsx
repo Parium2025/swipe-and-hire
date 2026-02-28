@@ -56,7 +56,10 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
         {selectionMode && (
           <Checkbox
             checked={isSelected}
-            onCheckedChange={() => {}}
+            onCheckedChange={(checked) => {
+              const nextChecked = checked === true;
+              if (nextChecked !== isSelected) onToggleSelect();
+            }}
             className="h-4 w-4 flex-shrink-0 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
             onClick={(e) => e.stopPropagation()}
           />
