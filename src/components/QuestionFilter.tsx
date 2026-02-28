@@ -73,7 +73,7 @@ const QuestionItem = ({
         <TooltipTrigger asChild>
           {buttonContent}
         </TooltipTrigger>
-        <TooltipContent side="right" className="max-w-[300px] bg-slate-900 border-white/20 text-white">
+        <TooltipContent side="bottom" align="start" className="max-w-[300px] bg-slate-900 border-white/20 text-white">
           {question.question_text}
         </TooltipContent>
       </Tooltip>
@@ -465,6 +465,12 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             )}
           </div>
 
+          {/* Total question count */}
+          {questions && questions.length > 0 && (
+            <div className="px-2.5 py-1.5 border-t border-white/10 text-xs text-white/70">
+              Totalt {questions.length} {questions.length === 1 ? 'fråga' : 'frågor'}
+            </div>
+          )}
 
           {hasFilters && (
             <div className="p-2 border-t border-white/10">
