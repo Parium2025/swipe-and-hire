@@ -184,6 +184,14 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           </button>
         )}
 
+        {/* Views count badge — top-left when save button is hidden */}
+        {hideSaveButton && (job.views_count ?? 0) > 0 && (
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1 border border-white/15">
+            <Eye className="h-3.5 w-3.5 text-white" />
+            <span className="text-xs font-medium text-white">{job.views_count}</span>
+          </div>
+        )}
+
         {/* Status badge or Applied badge — top-left */}
         {statusBadge && (
           <div className="absolute top-2.5 left-2.5">
