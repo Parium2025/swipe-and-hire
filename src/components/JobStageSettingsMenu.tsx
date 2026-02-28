@@ -30,7 +30,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle } from 'lucide-react';
+import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS, getJobStageIconByName } from '@/hooks/useJobStageSettings';
@@ -44,6 +44,8 @@ interface JobStageSettingsMenuProps {
   targetStageLabel?: string;
   onMoveCandidatesAndDelete?: () => Promise<void>;
   onLiveColorChange?: (color: string | null) => void;
+  /** Index of this stage in the ordered list (0-based) */
+  stageIndex?: number;
 }
 
 export function JobStageSettingsMenu({ 
@@ -55,8 +57,9 @@ export function JobStageSettingsMenu({
   targetStageLabel,
   onMoveCandidatesAndDelete,
   onLiveColorChange,
+  stageIndex = 0,
 }: JobStageSettingsMenuProps) {
-  const { stageSettings, updateStage, deleteStage } = useJobStageSettings(jobId);
+  const { stageSettings, updateStage, deleteStage, reorderStage, orderedStages } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
   const isMobile = useIsMobile();
   
@@ -253,6 +256,35 @@ export function JobStageSettingsMenu({
           
           <DropdownMenuSeparator className="bg-white/10 my-0.5" />
           
+          {/* Move up */}
+          {stageIndex > 0 && (
+            <DropdownMenuItem 
+              onSelect={() => {
+                reorderStage({ stageKey, direction: 'up' });
+                toast.success('Steg flyttat uppåt');
+              }}
+              className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+            >
+              <ArrowUp className="h-3 w-3 mr-1.5 flex-shrink-0" />
+              Flytta uppåt
+            </DropdownMenuItem>
+          )}
+          
+          {/* Move down */}
+          {stageIndex < totalStageCount - 1 && (
+            <DropdownMenuItem 
+              onSelect={() => {
+                reorderStage({ stageKey, direction: 'down' });
+                toast.success('Steg flyttat nedåt');
+              }}
+              className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+            >
+              <ArrowDown className="h-3 w-3 mr-1.5 flex-shrink-0" />
+              Flytta nedåt
+            </DropdownMenuItem>
+          )}
+
+          <DropdownMenuSeparator className="bg-white/10 my-0.5" />
           {canDelete ? (
             <DropdownMenuItem 
               onSelect={() => { setTimeout(handleDeleteClick, 100); }}

@@ -259,6 +259,83 @@ export function useJobStageSettings(jobId: string | undefined) {
     },
   });
 
+  // Reorder stage (move up or down)
+  const reorderStageMutation = useMutation({
+    mutationFn: async ({ stageKey, direction }: { stageKey: string; direction: 'up' | 'down' }) => {
+      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!jobId) throw new Error('No job ID');
+
+      const currentIndex = orderedStages.indexOf(stageKey);
+      if (currentIndex === -1) throw new Error('Stage not found');
+
+      const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      if (targetIndex < 0 || targetIndex >= orderedStages.length) return;
+
+      const targetKey = orderedStages[targetIndex];
+
+      // First ensure all stages are in DB
+      const existingKeys = dbSettings.map(s => s.stage_key);
+      const missingDefaults = DEFAULT_JOB_STAGE_KEYS.filter(key => !existingKeys.includes(key));
+
+      if (missingDefaults.length > 0) {
+        const defaultInserts = missingDefaults.map(key => ({
+          job_id: jobId,
+          stage_key: key,
+          custom_label: DEFAULT_JOB_STAGES[key].label,
+          color: DEFAULT_JOB_STAGES[key].color,
+          icon_name: DEFAULT_JOB_STAGES[key].iconName,
+          is_custom: false,
+          order_index: DEFAULT_JOB_STAGES[key].orderIndex,
+        }));
+        await supabase.from('job_stage_settings').insert(defaultInserts);
+      }
+
+      // Swap order_index values
+      const currentSettings = stageSettings[stageKey];
+      const targetSettings = stageSettings[targetKey];
+
+      await Promise.all([
+        supabase
+          .from('job_stage_settings')
+          .update({ order_index: targetSettings.orderIndex, updated_at: new Date().toISOString() })
+          .eq('job_id', jobId)
+          .eq('stage_key', stageKey),
+        supabase
+          .from('job_stage_settings')
+          .update({ order_index: currentSettings.orderIndex, updated_at: new Date().toISOString() })
+          .eq('job_id', jobId)
+          .eq('stage_key', targetKey),
+      ]);
+    },
+    onMutate: async ({ stageKey, direction }) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['job-stage-settings', jobId] });
+      const prev = queryClient.getQueryData(['job-stage-settings', jobId]);
+
+      queryClient.setQueryData(['job-stage-settings', jobId], (old: DbJobStageSetting[] | undefined) => {
+        if (!old) return old;
+        const currentIdx = orderedStages.indexOf(stageKey);
+        const targetIdx = direction === 'up' ? currentIdx - 1 : currentIdx + 1;
+        if (targetIdx < 0 || targetIdx >= orderedStages.length) return old;
+        const targetKey = orderedStages[targetIdx];
+
+        return old.map(s => {
+          if (s.stage_key === stageKey) return { ...s, order_index: old.find(x => x.stage_key === targetKey)?.order_index ?? s.order_index };
+          if (s.stage_key === targetKey) return { ...s, order_index: old.find(x => x.stage_key === stageKey)?.order_index ?? s.order_index };
+          return s;
+        });
+      });
+
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prev) queryClient.setQueryData(['job-stage-settings', jobId], context.prev);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['job-stage-settings', jobId] });
+    },
+  });
+
   // Realtime subscription for stage settings changes (cross-device sync)
   useEffect(() => {
     if (!jobId || !user) return;
@@ -291,8 +368,10 @@ export function useJobStageSettings(jobId: string | undefined) {
     updateStage: updateStageMutation.mutate,
     createStage: createStageMutation.mutateAsync,
     deleteStage: deleteStageMutation.mutate,
+    reorderStage: reorderStageMutation.mutate,
     isUpdating: updateStageMutation.isPending,
     isCreating: createStageMutation.isPending,
     isDeleting: deleteStageMutation.isPending,
+    isReordering: reorderStageMutation.isPending,
   };
 }
