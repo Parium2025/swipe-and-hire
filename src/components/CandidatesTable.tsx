@@ -550,10 +550,10 @@ export function CandidatesTable({
 
                     {/* Job title + time */}
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-white/60 truncate">
+                      <span className="text-xs text-white truncate">
                         {application.job_title || 'Okänd tjänst'}
                       </span>
-                      <span className="text-[10px] text-white/40 flex-shrink-0">
+                      <span className="text-[10px] text-white/70 flex-shrink-0">
                         {formatTimeAgo(application.applied_at)}
                       </span>
                     </div>
@@ -563,7 +563,7 @@ export function CandidatesTable({
                   <div className="flex items-center gap-1 flex-shrink-0">
                     {!isMyCandidatesLoading && !isAlreadyAdded && !selectionMode && (
                       <button
-                        className="h-8 w-8 flex items-center justify-center rounded-full text-white/50 active:bg-white/10"
+                        className="h-8 w-8 flex items-center justify-center rounded-full text-white active:bg-white/10"
                         onClick={(e) => {
                           e.stopPropagation();
                           if (hasTeam) {
@@ -582,7 +582,7 @@ export function CandidatesTable({
                       </button>
                     )}
                     {!selectionMode && (
-                      <ChevronRight className="h-4 w-4 text-white/30 flex-shrink-0" />
+                      <ChevronRight className="h-4 w-4 text-white flex-shrink-0" />
                     )}
                   </div>
                 </div>
