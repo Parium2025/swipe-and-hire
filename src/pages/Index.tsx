@@ -172,7 +172,7 @@ const CandidatesContent = () => {
                 className="pl-10 bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white transition-colors"
               />
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2 flex-wrap">
               <QuestionFilter 
                 value={questionFilters}
                 onChange={setQuestionFilters}
@@ -180,23 +180,23 @@ const CandidatesContent = () => {
               <button
                 onClick={() => setSelectionMode(prev => !prev)}
                 className={`
-                  flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
                   border whitespace-nowrap
                   ${selectionMode 
-                    ? 'bg-white/15 border-white/30 text-white' 
+                    ? 'bg-white/20 border-white/30 text-white' 
                     : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
                   }
                 `}
               >
                 {selectionMode ? (
                   <>
-                    <X className="h-3.5 w-3.5" />
-                    <span>Avsluta</span>
+                    <X className="h-4 w-4" />
+                    <span>Avsluta urval</span>
                   </>
                 ) : (
                   <>
-                    <CheckSquare className="h-3.5 w-3.5" />
-                    <span>Välj</span>
+                    <CheckSquare className="h-4 w-4" />
+                    <span>Välj kandidater</span>
                   </>
                 )}
               </button>
@@ -240,14 +240,15 @@ const CandidatesContent = () => {
             {(searchQuery.trim() || questionFilters.length > 0) && (
               <Button
                 variant="glass"
+                size="sm"
                 onClick={() => {
                   setSearchQuery('');
                   setQuestionFilters([]);
                 }}
-                className="mt-4"
+                className="mt-3 text-xs"
               >
                 Rensa filter
-                <ArrowRightLeft size={16} />
+                <ArrowRightLeft size={14} />
               </Button>
             )}
           </div>
