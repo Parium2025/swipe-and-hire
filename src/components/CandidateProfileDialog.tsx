@@ -491,7 +491,7 @@ export const CandidateProfileDialog = ({
                           </div>
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom" className="whitespace-nowrap max-w-[90vw]">
+                      <TooltipContent side="bottom" className="max-w-[min(90vw,28rem)] whitespace-normal break-words leading-snug">
                         {displayApp.job_title || application?.job_title || 'Okänt jobb'}
                       </TooltipContent>
                     </Tooltip>
