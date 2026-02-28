@@ -311,7 +311,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
     );
   }
 
-  const filterLabel = 'Frågor';
+  const filterLabel = value.length === 1 ? 'Filtrera på fråga' : 'Filtrera på frågor';
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
