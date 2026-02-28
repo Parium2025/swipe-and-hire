@@ -262,20 +262,20 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
         <PopoverTrigger asChild>
           <button
             className={`
-              flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-              border
+              flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all
+              border whitespace-nowrap
               ${open || hasFilters 
-                ? 'bg-white/20 border-white/30 text-white' 
+                ? 'bg-white/15 border-white/30 text-white' 
                 : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
               }
             `}
           >
-            <Filter className="h-4 w-4" />
-            <span>Filtrera på frågor</span>
+            <Filter className="h-3.5 w-3.5" />
+            <span>Frågor</span>
             {hasFilters && (
-              <span className="text-white text-xs">({value.length})</span>
+              <span className="text-white/70 text-[10px]">({value.length})</span>
             )}
-            <ChevronDown className="h-3 w-3 text-white" />
+            <ChevronDown className="h-3 w-3 text-white/70" />
           </button>
         </PopoverTrigger>
         <PopoverContent 
