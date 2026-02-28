@@ -93,6 +93,8 @@ const statusConfig = {
   rejected: { label: 'Avvisad', className: 'bg-red-500/20 text-red-300 border-red-500/30' },
 };
 
+const CANDIDATE_APPLICATIONS_CACHE_PREFIX = 'candidate_apps_cache_v1_';
+
 export function CandidatesTable({ 
   applications, 
   onUpdate, 
@@ -150,13 +152,100 @@ export function CandidatesTable({
     }))
   );
 
+  const getCandidateApplicationsCacheKey = useCallback(
+    (applicantId: string) => `${CANDIDATE_APPLICATIONS_CACHE_PREFIX}${user?.id || 'anon'}_${applicantId}`,
+    [user?.id]
+  );
+
+  const readCandidateApplicationsCache = useCallback((applicantId: string): ApplicationData[] | null => {
+    if (!applicantId || typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(getCandidateApplicationsCacheKey(applicantId));
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as { items?: ApplicationData[] };
+      if (!parsed || !Array.isArray(parsed.items) || parsed.items.length === 0) return null;
+      return parsed.items;
+    } catch {
+      return null;
+    }
+  }, [getCandidateApplicationsCacheKey]);
+
+  const writeCandidateApplicationsCache = useCallback((applicantId: string, items: ApplicationData[]) => {
+    if (!applicantId || items.length === 0 || typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(
+        getCandidateApplicationsCacheKey(applicantId),
+        JSON.stringify({ items, cachedAt: Date.now() })
+      );
+    } catch {
+      // Ignore storage errors
+    }
+  }, [getCandidateApplicationsCacheKey]);
+
+  const fetchCandidateApplications = useCallback(async (seedApplication: ApplicationData): Promise<ApplicationData[]> => {
+    if (!user || !seedApplication?.applicant_id) return [seedApplication];
+
+    const { data: orgJobs, error: jobsError } = await supabase
+      .from('job_postings')
+      .select('id, title')
+      .eq('employer_id', user.id);
+
+    if (jobsError) throw jobsError;
+    if (!orgJobs || orgJobs.length === 0) return [seedApplication];
+
+    const jobIds = orgJobs.map(j => j.id);
+
+    const { data: apps, error: appError } = await supabase
+      .from('job_applications')
+      .select(`
+        id, job_id, applicant_id, first_name, last_name, email, phone,
+        location, bio, cv_url, age, employment_status, work_schedule,
+        availability, custom_answers, status, applied_at, updated_at,
+        profile_image_snapshot_url, video_snapshot_url,
+        job_postings!inner(title)
+      `)
+      .eq('applicant_id', seedApplication.applicant_id)
+      .in('job_id', jobIds);
+
+    if (appError) throw appError;
+
+    const transformed: ApplicationData[] = (apps || []).map(app => ({
+      id: app.id,
+      job_id: app.job_id,
+      applicant_id: app.applicant_id,
+      first_name: app.first_name,
+      last_name: app.last_name,
+      email: app.email,
+      phone: app.phone,
+      location: app.location,
+      bio: app.bio,
+      cv_url: app.cv_url,
+      age: app.age,
+      employment_status: app.employment_status,
+      work_schedule: app.work_schedule,
+      availability: app.availability,
+      custom_answers: app.custom_answers,
+      status: app.status,
+      applied_at: app.applied_at || '',
+      updated_at: app.updated_at,
+      job_title: (app.job_postings as any)?.title || 'Okänt jobb',
+      profile_image_url: app.profile_image_snapshot_url || seedApplication.profile_image_url,
+      video_url: app.video_snapshot_url || seedApplication.video_url,
+      is_profile_video: seedApplication.is_profile_video,
+    }));
+
+    return transformed.length > 0 ? transformed : [seedApplication];
+  }, [user]);
+
+  const prefetchInFlightRef = useRef<Set<string>>(new Set());
+
   // Prefetch candidate data on hover for instant profile opening
   const handlePrefetchCandidate = useCallback((application: ApplicationData) => {
     if (!user || !application.applicant_id) return;
-    
+
     // Prefetch activities
     prefetchCandidateActivities(queryClient, application.applicant_id, user.id);
-    
+
     // Prefetch persistent notes
     queryClient.prefetchQuery({
       queryKey: ['candidate-notes', application.applicant_id],
@@ -170,7 +259,25 @@ export function CandidatesTable({
       },
       staleTime: Infinity,
     });
-  }, [user, queryClient]);
+
+    // Prefetch all applications for instant job counter and offline fallback
+    if (readCandidateApplicationsCache(application.applicant_id)?.length) return;
+    if (prefetchInFlightRef.current.has(application.applicant_id)) return;
+
+    prefetchInFlightRef.current.add(application.applicant_id);
+    fetchCandidateApplications(application)
+      .then((apps) => {
+        if (apps.length > 0) {
+          writeCandidateApplicationsCache(application.applicant_id, apps);
+        }
+      })
+      .catch(() => {
+        // Ignore prefetch errors; dialog fetch handles retry/fallback
+      })
+      .finally(() => {
+        prefetchInFlightRef.current.delete(application.applicant_id);
+      });
+  }, [user, queryClient, fetchCandidateApplications, readCandidateApplicationsCache, writeCandidateApplicationsCache]);
 
   // Derive selected application from latest list so refetch updates the dialog content
   const selectedApplication = useMemo(() => {
@@ -188,74 +295,39 @@ export function CandidatesTable({
       }
 
       setLoadingAllCandidateApplications(true);
-      setAllCandidateApplications([selectedApplication]);
+
+      const cachedApplications = readCandidateApplicationsCache(selectedApplication.applicant_id);
+      if (cachedApplications?.length) {
+        const hasSelected = cachedApplications.some((app) => app.id === selectedApplication.id);
+        setAllCandidateApplications(
+          hasSelected
+            ? cachedApplications
+            : [selectedApplication, ...cachedApplications.filter((app) => app.id !== selectedApplication.id)]
+        );
+      } else {
+        setAllCandidateApplications([selectedApplication]);
+      }
 
       try {
-        const { data: orgJobs, error: jobsError } = await supabase
-          .from('job_postings')
-          .select('id, title')
-          .eq('employer_id', user.id);
-
-        if (jobsError) throw jobsError;
-        if (!orgJobs || orgJobs.length === 0) {
-          setAllCandidateApplications([selectedApplication]);
-          return;
-        }
-
-        const jobIds = orgJobs.map(j => j.id);
-
-        const { data: apps, error: appError } = await supabase
-          .from('job_applications')
-          .select(`
-            id, job_id, applicant_id, first_name, last_name, email, phone,
-            location, bio, cv_url, age, employment_status, work_schedule,
-            availability, custom_answers, status, applied_at, updated_at,
-            profile_image_snapshot_url, video_snapshot_url,
-            job_postings!inner(title)
-          `)
-          .eq('applicant_id', selectedApplication.applicant_id)
-          .in('job_id', jobIds);
-
-        if (appError) throw appError;
-
-        const transformed: ApplicationData[] = (apps || []).map(app => ({
-          id: app.id,
-          job_id: app.job_id,
-          applicant_id: app.applicant_id,
-          first_name: app.first_name,
-          last_name: app.last_name,
-          email: app.email,
-          phone: app.phone,
-          location: app.location,
-          bio: app.bio,
-          cv_url: app.cv_url,
-          age: app.age,
-          employment_status: app.employment_status,
-          work_schedule: app.work_schedule,
-          availability: app.availability,
-          custom_answers: app.custom_answers,
-          status: app.status,
-          applied_at: app.applied_at || '',
-          updated_at: app.updated_at,
-          job_title: (app.job_postings as any)?.title || 'Okänt jobb',
-          profile_image_url: app.profile_image_snapshot_url || selectedApplication.profile_image_url,
-          video_url: app.video_snapshot_url || selectedApplication.video_url,
-          is_profile_video: selectedApplication.is_profile_video,
-        }));
-
-        setAllCandidateApplications(transformed.length > 0 ? transformed : [selectedApplication]);
+        const freshApplications = await fetchCandidateApplications(selectedApplication);
+        setAllCandidateApplications(freshApplications);
+        writeCandidateApplicationsCache(selectedApplication.applicant_id, freshApplications);
       } catch (error) {
         console.error('Error fetching candidate applications:', error);
-        setAllCandidateApplications([selectedApplication]);
+        if (!cachedApplications?.length) {
+          setAllCandidateApplications([selectedApplication]);
+        }
       } finally {
         setLoadingAllCandidateApplications(false);
       }
     };
 
     fetchAllApplications();
-  }, [selectedApplication?.applicant_id, selectedApplication?.id, user?.id, dialogOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedApplication?.applicant_id, selectedApplication?.id, user?.id, dialogOpen, fetchCandidateApplications, readCandidateApplicationsCache, writeCandidateApplicationsCache]);
 
   const handleRowClick = (application: ApplicationData) => {
+    const cachedApplications = readCandidateApplicationsCache(application.applicant_id);
+    setAllCandidateApplications(cachedApplications?.length ? cachedApplications : [application]);
     setSelectedApplicationId(application.id);
     setDialogOpen(true);
   };
@@ -746,6 +818,7 @@ export function CandidatesTable({
                     style={{ contain: 'layout style paint' }}
                     onClick={() => handleRowClick(application)}
                     onMouseEnter={() => handlePrefetchCandidate(application)}
+                    onTouchStart={() => handlePrefetchCandidate(application)}
                   >
                     {selectionMode && (
                       <TableCell onClick={(e) => e.stopPropagation()}>
@@ -906,7 +979,7 @@ export function CandidatesTable({
           onUpdate();
           handleDialogClose();
         }}
-        allApplications={allCandidateApplications.length > 1 ? allCandidateApplications : undefined}
+        allApplications={allCandidateApplications.length > 0 ? allCandidateApplications : undefined}
         loadingApplications={loadingAllCandidateApplications}
         variant="all-candidates"
       />
