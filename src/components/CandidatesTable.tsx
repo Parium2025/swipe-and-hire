@@ -335,24 +335,79 @@ export function CandidatesTable({
     if (selectedApps.length === 0 || !user) return;
 
     try {
-      const messages = selectedApps.map(app => ({
-        sender_id: user.id,
-        recipient_id: app.applicant_id,
-        content,
-        job_id: app.job_id,
-      }));
+      // Send each message via the proper conversation system
+      // Creates or finds existing conversation per candidate
+      let successCount = 0;
+      for (const app of selectedApps) {
+        try {
+          // Step 1: Find or create conversation with this candidate
+          let conversationId: string | null = null;
+
+          // Look for existing conversation by candidate_id
+          const { data: existing } = await supabase
+            .from('conversations')
+            .select('id')
+            .eq('candidate_id', app.applicant_id)
+            .not('candidate_id', 'is', null)
+            .maybeSingle();
+
+          if (existing) {
+            conversationId = existing.id;
+          } else {
+            // Create new conversation
+            const { data: newConv, error: convError } = await supabase
+              .from('conversations')
+              .insert({
+                is_group: false,
+                job_id: app.job_id,
+                application_id: app.id,
+                candidate_id: app.applicant_id,
+                created_by: user.id,
+              })
+              .select()
+              .single();
+
+            if (convError) throw convError;
+            conversationId = newConv.id;
+
+            // Add both members
+            await supabase.from('conversation_members').insert([
+              { conversation_id: conversationId, user_id: user.id, is_admin: true },
+              { conversation_id: conversationId, user_id: app.applicant_id, is_admin: false },
+            ]);
+          }
+
+          // Step 2: Send the message
+          const { error: msgError } = await supabase
+            .from('conversation_messages')
+            .insert({
+              conversation_id: conversationId,
+              sender_id: user.id,
+              content,
+            });
+
+          if (msgError) throw msgError;
+          successCount++;
+        } catch (e) {
+          console.error(`Failed to send message to ${app.applicant_id}:`, e);
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`Meddelande skickat till ${successCount} kandidat${successCount !== 1 ? 'er' : ''}`);
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      }
+      if (successCount < selectedApps.length) {
+        toast.error(`Kunde inte skicka till ${selectedApps.length - successCount} kandidat${selectedApps.length - successCount !== 1 ? 'er' : ''}`);
+      }
       
-      const { error } = await supabase.from('messages').insert(messages);
-      if (error) throw error;
-      
-      toast.success(`Meddelande skickat till ${selectedApps.length} kandidat${selectedApps.length !== 1 ? 'er' : ''}`);
       setSelectedIds(new Set());
       onSelectionModeChange?.(false);
       setBulkMessageOpen(false);
     } catch {
       toast.error('Kunde inte skicka meddelanden');
     }
-  }, [applications, selectedIds, user, onSelectionModeChange]);
+  }, [applications, selectedIds, user, onSelectionModeChange, queryClient]);
 
   // --- Sorting ---
   const handleSort = useCallback((field: SortField) => {
