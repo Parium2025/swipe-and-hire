@@ -191,15 +191,9 @@ const CandidatesContent = () => {
                   `}
                 >
                   {selectionMode ? (
-                    <>
-                      <X className="h-4 w-4" />
-                      <span>Avsluta urval</span>
-                    </>
+                    <span>Avsluta urval</span>
                   ) : (
-                    <>
-                      <CheckSquare className="h-4 w-4" />
-                      <span>Välj kandidater</span>
-                    </>
+                    <span>Välj kandidater</span>
                   )}
                 </button>
               </div>

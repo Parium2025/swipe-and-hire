@@ -328,7 +328,6 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
               }
             `}
           >
-            <Filter className="h-4 w-4 flex-shrink-0" />
             <span className="truncate">{filterLabel}</span>
             {hasFilters && (
               <span className="text-white/70 text-xs">({value.length})</span>
@@ -467,7 +466,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
 
           {/* Total question count */}
           {questions && questions.length > 0 && (
-            <div className="px-2.5 py-1.5 border-t border-white/10 text-xs text-white/70">
+            <div className="px-2.5 py-1.5 border-t border-white/10 text-xs text-white text-center">
               Totalt {questions.length} {questions.length === 1 ? 'fråga' : 'frågor'}
             </div>
           )}
