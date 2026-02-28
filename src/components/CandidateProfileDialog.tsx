@@ -427,7 +427,7 @@ export const CandidateProfileDialog = ({
               )}
             </div>
             
-            <div className="w-full max-w-sm">
+            <div className="w-full">
               <h2 className="text-lg md:text-2xl font-semibold text-white">
                 {displayApp.first_name} {displayApp.last_name}
               </h2>
@@ -448,7 +448,7 @@ export const CandidateProfileDialog = ({
                     onClick={() => setJobDropdownOpen(prev => !prev)}
                     className="w-full flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
                   >
-                    <span className="truncate">{displayApp.job_title || 'Okänt jobb'}</span>
+                    <span className="truncate flex-1 text-left">{displayApp.job_title || 'Okänt jobb'}</span>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-xs text-white">
                         {allApplications!.length} jobb
@@ -502,7 +502,9 @@ export const CandidateProfileDialog = ({
                   )}
                 </div>
               ) : (
-                <p className="text-white mt-1">{displayApp.job_title}</p>
+                <div className="mt-2 w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2.5">
+                  <p className="text-sm text-white break-words">{displayApp.job_title}</p>
+                </div>
               )}
             </div>
           </div>
@@ -577,7 +579,7 @@ export const CandidateProfileDialog = ({
               </div>
             )}
 
-            {/* Questions & Answers */}
+            {/* Questions & Answers - only show when questions are resolved (not raw UUIDs) */}
             {hasCustomAnswers && (
               <div className="bg-white/10 border border-white/20 rounded-lg overflow-hidden">
                 <button
@@ -596,25 +598,32 @@ export const CandidateProfileDialog = ({
 
                 {questionsExpanded && (
                   <div className="px-3 pb-3 space-y-2">
-                    {Object.entries(customAnswers)
-                      .sort(([idA], [idB]) => {
-                        const orderA = jobQuestions[idA]?.order ?? 999;
-                        const orderB = jobQuestions[idB]?.order ?? 999;
-                        return orderA - orderB;
-                      })
-                      .map(([questionId, answer]) => (
-                      <div
-                        key={questionId}
-                        className="border-t border-white/10 pt-2 first:border-t-0 first:pt-0"
-                      >
-                        <p className="text-sm text-white">
-                          {jobQuestions[questionId]?.text || questionId}
-                        </p>
-                        <p className="text-sm text-white">
-                          Svar: {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
-                        </p>
+                    {Object.keys(jobQuestions).length === 0 ? (
+                      <div className="flex items-center justify-center py-3">
+                        <Loader2 className="h-4 w-4 text-white animate-spin" />
+                        <span className="text-sm text-white ml-2">Laddar frågor...</span>
                       </div>
-                    ))}
+                    ) : (
+                      Object.entries(customAnswers)
+                        .sort(([idA], [idB]) => {
+                          const orderA = jobQuestions[idA]?.order ?? 999;
+                          const orderB = jobQuestions[idB]?.order ?? 999;
+                          return orderA - orderB;
+                        })
+                        .map(([questionId, answer]) => (
+                        <div
+                          key={questionId}
+                          className="border-t border-white/10 pt-2 first:border-t-0 first:pt-0"
+                        >
+                          <p className="text-sm text-white break-words">
+                            {jobQuestions[questionId]?.text || 'Fråga'}
+                          </p>
+                          <p className="text-sm text-white break-words">
+                            Svar: {String(answer) || <span className="opacity-50 italic">Inget svar</span>}
+                          </p>
+                        </div>
+                      ))
+                    )}
                   </div>
                 )}
               </div>
