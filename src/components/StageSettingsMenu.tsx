@@ -254,7 +254,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="stage-label" className="text-white/70">Nytt namn</Label>
+              <Label htmlFor="stage-label" className="text-white">Nytt namn</Label>
               <Input
                 id="stage-label"
                 value={newLabel}
