@@ -181,9 +181,10 @@ const CandidatesContent = () => {
                 onClick={() => setSelectionMode(prev => !prev)}
                 className={`
                   flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                  border
                   ${selectionMode 
-                    ? 'bg-white/20 text-white' 
-                    : 'text-white hover:bg-white/10'
+                    ? 'bg-white/20 border-white/30 text-white' 
+                    : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
                   }
                 `}
               >
