@@ -87,7 +87,6 @@ const CandidatesContent = () => {
     let result = safeApplications;
     
     // Apply smart search filter first (strict client-side filtering)
-    // This ensures gibberish queries show 0 results even if server returns cached data
     if (searchQuery && searchQuery.trim().length >= 2) {
       result = smartSearchCandidates(result, searchQuery);
     }
@@ -98,9 +97,7 @@ const CandidatesContent = () => {
     return result.filter(app => {
       const customAnswers = app.custom_answers || {};
       
-      // All filters must match
       return questionFilters.every(filter => {
-        // Check if any key in custom_answers contains the question text (partial match)
         const matchingKey = Object.keys(customAnswers).find(key => 
           key.toLowerCase().includes(filter.question.toLowerCase()) ||
           filter.question.toLowerCase().includes(key.toLowerCase())
@@ -110,12 +107,10 @@ const CandidatesContent = () => {
 
         const answer = customAnswers[matchingKey];
 
-        // If filter.answers is empty, just check that they answered the question (Alla)
         if (filter.answers.length === 0) {
           return answer !== undefined && answer !== null && answer !== '';
         }
 
-        // Match any of the selected answers (multi-select OR logic)
         const normalizedAnswer = typeof answer === 'string' 
           ? answer.toLowerCase() 
           : typeof answer === 'boolean'
@@ -133,26 +128,14 @@ const CandidatesContent = () => {
     });
   }, [safeApplications, questionFilters, searchQuery]);
 
-  // Deduplicate: show one row per unique person, keeping the most recent application
-  const deduplicatedApplications = useMemo(() => {
-    const byApplicant = new Map<string, typeof filteredApplications[0]>();
-    for (const app of filteredApplications) {
-      const existing = byApplicant.get(app.applicant_id);
-      if (!existing || (app.applied_at && (!existing.applied_at || app.applied_at > existing.applied_at))) {
-        byApplicant.set(app.applicant_id, app);
-      }
-    }
-    return Array.from(byApplicant.values());
-  }, [filteredApplications]);
-
-  // Recalculate stats based on deduplicated results
+  // Stats based on filtered results (already deduplicated by the hook)
   const filteredStats = useMemo(() => ({
-    total: deduplicatedApplications.length,
-    new: deduplicatedApplications.filter(app => app.status === 'pending').length,
-    reviewing: deduplicatedApplications.filter(app => app.status === 'reviewing').length,
-    hired: deduplicatedApplications.filter(app => app.status === 'hired').length,
-    rejected: deduplicatedApplications.filter(app => app.status === 'rejected').length,
-  }), [deduplicatedApplications]);
+    total: filteredApplications.length,
+    new: filteredApplications.filter(app => app.status === 'pending').length,
+    reviewing: filteredApplications.filter(app => app.status === 'reviewing').length,
+    hired: filteredApplications.filter(app => app.status === 'hired').length,
+    rejected: filteredApplications.filter(app => app.status === 'rejected').length,
+  }), [filteredApplications]);
 
   if (isLoading || !showContent) {
     return (
@@ -242,7 +225,7 @@ const CandidatesContent = () => {
               När någon söker till dina jobb så kommer deras ansökning att visas här.
             </p>
           </div>
-        ) : deduplicatedApplications.length === 0 && (questionFilters.length > 0 || searchQuery.trim()) ? (
+        ) : filteredApplications.length === 0 && (questionFilters.length > 0 || searchQuery.trim()) ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 bg-white/5 border border-white/10 rounded-lg">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-3">
               <Search className="h-5 w-5 text-white" />
@@ -269,7 +252,7 @@ const CandidatesContent = () => {
           </div>
         ) : (
           <CandidatesTable 
-            applications={deduplicatedApplications} 
+            applications={filteredApplications} 
             onUpdate={refetch}
             onLoadMore={fetchNextPage}
             hasMore={hasNextPage && questionFilters.length === 0}

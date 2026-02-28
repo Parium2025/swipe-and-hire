@@ -39,7 +39,8 @@ const PAGE_SIZE = 25;
 const MAX_AUTO_PREFETCH_PAGES = 20; // 500 kandidater innan "Vill du fortsätta?"
 const SNAPSHOT_KEY_PREFIX = 'applications_snapshot_';
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
-// No expiry — realtime subscriptions + background refetch keep data fresh
+const SNAPSHOT_TTL_MS = 60 * 60 * 1000; // 1 hour — safety net; realtime keeps data fresh within TTL
+const RATINGS_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 interface SnapshotData {
   items: ApplicationData[];
@@ -52,7 +53,6 @@ interface RatingsCacheData {
 }
 
 // Read cached ratings from localStorage for instant display
-// No expiry - realtime sync keeps this up to date
 const readCachedRatings = (userId: string): Record<string, number> => {
   try {
     const key = RATINGS_CACHE_PREFIX + userId;
@@ -60,6 +60,11 @@ const readCachedRatings = (userId: string): Record<string, number> => {
     if (!raw) return {};
     
     const cache: RatingsCacheData = JSON.parse(raw);
+    // TTL check
+    if (cache.timestamp && Date.now() - cache.timestamp > RATINGS_TTL_MS) {
+      localStorage.removeItem(key);
+      return {};
+    }
     return cache.ratings || {};
   } catch {
     return {};
@@ -90,7 +95,11 @@ const readSnapshot = (userId: string): ApplicationData[] => {
     if (!raw) return [];
 
     const snapshot: SnapshotData = JSON.parse(raw);
-    // No expiry — realtime subscriptions + background refetch keep data fresh
+    // TTL check — invalidate snapshots older than 1 hour as safety net
+    if (snapshot.timestamp && Date.now() - snapshot.timestamp > SNAPSHOT_TTL_MS) {
+      localStorage.removeItem(key);
+      return [];
+    }
 
     // Invalidate snapshot if it contains legacy profile-media URLs (old format).
     // Those URLs are no longer a reliable source of truth; we only store storage paths.
@@ -580,20 +589,30 @@ export const useApplicationsData = (searchQuery: string = '') => {
     if (!searchQuery || !searchQuery.trim()) {
       return applications;
     }
-    
-    // FTS already filtered at database level - fuzzy matching adds typo tolerance
-    // and re-ranks by relevance (best matches first)
     return smartSearchCandidates(applications, searchQuery);
   }, [applications, searchQuery]);
 
+  // Deduplicate: one row per unique person, keeping the most recent application
+  // Moved here from UI layer so all consumers get deduplicated data by default
+  const deduplicatedApplications = useMemo(() => {
+    const byApplicant = new Map<string, ApplicationData>();
+    for (const app of enrichedApplications) {
+      const existing = byApplicant.get(app.applicant_id);
+      if (!existing || (app.applied_at && (!existing.applied_at || app.applied_at > existing.applied_at))) {
+        byApplicant.set(app.applicant_id, app);
+      }
+    }
+    return Array.from(byApplicant.values());
+  }, [enrichedApplications]);
+
   // Memoize stats to prevent unnecessary recalculations
   const stats = useMemo(() => ({
-    total: enrichedApplications.length,
-    new: enrichedApplications.filter(app => app.status === 'pending').length,
-    reviewing: enrichedApplications.filter(app => app.status === 'reviewing').length,
-    hired: enrichedApplications.filter(app => app.status === 'hired').length,
-    rejected: enrichedApplications.filter(app => app.status === 'rejected').length,
-  }), [enrichedApplications]);
+    total: deduplicatedApplications.length,
+    new: deduplicatedApplications.filter(app => app.status === 'pending').length,
+    reviewing: deduplicatedApplications.filter(app => app.status === 'reviewing').length,
+    hired: deduplicatedApplications.filter(app => app.status === 'hired').length,
+    rejected: deduplicatedApplications.filter(app => app.status === 'rejected').length,
+  }), [deduplicatedApplications]);
 
   const invalidateApplications = () => {
     queryClient.invalidateQueries({ queryKey: ['applications'] });
@@ -694,7 +713,8 @@ export const useApplicationsData = (searchQuery: string = '') => {
   });
 
   return {
-    applications: enrichedApplications,
+    applications: deduplicatedApplications,
+    allApplications: enrichedApplications, // non-deduplicated, for consumers that need all
     stats,
     isLoading,
     error,
