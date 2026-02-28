@@ -556,20 +556,32 @@ export const useApplicationsData = (searchQuery: string = '') => {
   }, [user, applicantIdsKey, searchQuery, queryClient]);
 
   // Real-time subscription for job_applications changes
+  // SCOPED to this employer's jobs via a dedicated channel per user to prevent
+  // global broadcasts from triggering refetches for every employer on the platform
+  const jobIdsForRealtime = useMemo(() => {
+    return [...new Set(applications.map(a => a.job_id))].filter(Boolean).sort();
+  }, [applications]);
+
   useEffect(() => {
     if (!user) return;
+    if (jobIdsForRealtime.length === 0) return;
 
+    // Use a unique channel name scoped to this user to avoid collisions
+    const channelName = `applications-rt-${user.id}`;
     const channel = supabase
-      .channel('applications-realtime')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'job_applications'
+          table: 'job_applications',
+          // Filter to only this employer's job IDs — prevents cross-employer noise
+          filter: jobIdsForRealtime.length === 1
+            ? `job_id=eq.${jobIdsForRealtime[0]}`
+            : `job_id=in.(${jobIdsForRealtime.join(',')})`,
         },
-        (payload) => {
-          // Invalidate queries to refetch with updated data
+        () => {
           queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
         }
       )
@@ -578,7 +590,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, queryClient]);
+  }, [user, queryClient, jobIdsForRealtime]);
 
   // Om vi råkar ha en gammal cache (prefetch utan media-fält) → tvinga refetch en gång.
   // Detta eliminerar behovet av manuell refresh för att avatar/video ska dyka upp.
@@ -600,13 +612,21 @@ export const useApplicationsData = (searchQuery: string = '') => {
   }, [applications, user, searchQuery, queryClient]);
 
   // Enrich with additional job metadata if needed (kept for backwards compatibility)
+  // Track which IDs we've already attempted to fetch to prevent infinite loops
+  // (if a job_id doesn't exist in job_postings, we'd otherwise retry forever)
+  const fetchedJobIdsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     if (applications.length === 0) return;
 
     const uniqueJobIds = [...new Set(applications.map(app => app.job_id))];
-    const missingIds = uniqueJobIds.filter(id => !jobTitles[id]);
+    const missingIds = uniqueJobIds.filter(
+      id => !jobTitles[id] && !fetchedJobIdsRef.current.has(id)
+    );
     
     if (missingIds.length === 0) return;
+
+    // Mark as attempted BEFORE fetch to prevent re-entry
+    missingIds.forEach(id => fetchedJobIdsRef.current.add(id));
 
     supabase
       .from('job_postings')
