@@ -444,7 +444,10 @@ const StatusColumn = ({
       >
         <div className="flex items-center gap-1.5 min-w-0">
           <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-          <span className="font-medium text-xs text-white truncate flex-1 min-w-0">{stageConfig.label}</span>
+          <TruncatedText
+            text={stageConfig.label}
+            className="font-medium text-xs text-white truncate flex-1 min-w-0"
+          />
           <span 
             className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}88` }}
