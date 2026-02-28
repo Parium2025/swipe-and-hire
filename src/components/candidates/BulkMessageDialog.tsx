@@ -16,9 +16,12 @@ export function BulkMessageDialog({ open, onOpenChange, count, onSend }: BulkMes
   const handleSend = async () => {
     if (!message.trim()) return;
     setSending(true);
-    await onSend(message.trim());
-    setSending(false);
-    setMessage('');
+    try {
+      await onSend(message.trim());
+      setMessage('');
+    } finally {
+      setSending(false);
+    }
   };
 
   if (!open) return null;

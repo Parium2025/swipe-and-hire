@@ -340,6 +340,11 @@ export function CandidatesTable({
       let successCount = 0;
       for (const app of selectedApps) {
         try {
+          if (app.applicant_id === user.id) {
+            console.warn('Skipping self-message in bulk send', { applicantId: app.applicant_id });
+            continue;
+          }
+
           // Step 1: Find or create conversation with this candidate
           let conversationId: string | null = null;
 
@@ -354,30 +359,32 @@ export function CandidatesTable({
           if (existing) {
             conversationId = existing.id;
           } else {
-            // Create new conversation
-            const { data: newConv, error: convError } = await supabase
+            // Create new conversation without return=representation (avoids RLS select-block)
+            conversationId = crypto.randomUUID();
+            const { error: convError } = await supabase
               .from('conversations')
               .insert({
+                id: conversationId,
                 is_group: false,
                 job_id: app.job_id,
                 application_id: app.id,
                 candidate_id: app.applicant_id,
                 created_by: user.id,
-              })
-              .select()
-              .single();
+              });
 
             if (convError) throw convError;
-            conversationId = newConv.id;
 
             // Add employer first (so is_conversation_admin works for the second insert)
-            await supabase.from('conversation_members').insert(
-              { conversation_id: conversationId, user_id: user.id, is_admin: true },
-            );
+            const { error: addSelfError } = await supabase
+              .from('conversation_members')
+              .insert({ conversation_id: conversationId, user_id: user.id, is_admin: true });
+            if (addSelfError) throw addSelfError;
+
             // Then add candidate
-            await supabase.from('conversation_members').insert(
-              { conversation_id: conversationId, user_id: app.applicant_id, is_admin: false },
-            );
+            const { error: addCandidateError } = await supabase
+              .from('conversation_members')
+              .insert({ conversation_id: conversationId, user_id: app.applicant_id, is_admin: false });
+            if (addCandidateError) throw addCandidateError;
           }
 
           // Step 2: Send the message
