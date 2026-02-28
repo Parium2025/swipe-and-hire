@@ -40,11 +40,9 @@ import {
   CheckSquare,
   Square,
   Trash2,
-  QrCode,
 } from 'lucide-react';
 import JobQrCodeButton from '@/components/JobQrCode';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -986,11 +984,10 @@ const JobDetails = () => {
           <div className="flex items-start justify-between gap-2">
             <TruncatedText 
               text={job.title} 
-              className="text-lg font-bold text-white flex-1 min-w-0 line-clamp-2"
+              className="text-base md:text-lg font-semibold text-white flex-1 min-w-0 line-clamp-2 leading-tight"
             />
             <button
               onClick={() => {
-                // After hot-reload, history may be empty — fallback to dashboard
                 if (window.history.state?.idx > 0) {
                   navigate(-1);
                 } else {
@@ -1059,22 +1056,21 @@ const JobDetails = () => {
             )}
           </div>
 
-          {/* Stats — two rows on mobile, single row on desktop */}
-          <div className="mt-3 space-y-1.5 md:space-y-0">
-            {/* Row 1: Visningar, Ansökningar, Rekryterare */}
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-1.5 min-w-0">
+          {/* Stats — single compact row */}
+          <div className="mt-2.5">
+            <div className="grid grid-cols-5 md:grid-cols-5 gap-1 md:gap-1.5 min-w-0">
               {/* Visningar */}
-              <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
-                <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium truncate">{job.views_count}</span>
-                <span className="text-white text-xs truncate">Visn.</span>
+              <div className="bg-white/5 rounded-lg px-1.5 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
+                <Eye className="h-3.5 w-3.5 text-white/60 flex-shrink-0" />
+                <span className="text-white text-xs font-semibold">{job.views_count}</span>
+                <span className="text-white/50 text-[10px] hidden md:inline">Visn.</span>
               </div>
 
               {/* Ansökningar */}
-              <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
-                <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium truncate">{job.applications_count}</span>
-                <span className="text-white text-xs truncate">Ans.</span>
+              <div className="bg-white/5 rounded-lg px-1.5 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
+                <Users className="h-3.5 w-3.5 text-white/60 flex-shrink-0" />
+                <span className="text-white text-xs font-semibold">{job.applications_count}</span>
+                <span className="text-white/50 text-[10px] hidden md:inline">Ans.</span>
               </div>
 
               {/* Recruiter avatar */}
@@ -1084,7 +1080,7 @@ const JobDetails = () => {
                     <TooltipTrigger asChild>
                       <div 
                         ref={recruiterTooltipRef}
-                        className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 cursor-default min-w-0 overflow-hidden"
+                        className="bg-white/5 rounded-lg px-1.5 py-1.5 flex items-center justify-center gap-1 cursor-default min-w-0 overflow-hidden"
                         onClick={() => setRecruiterTooltipOpen(prev => !prev)}
                       >
                         <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-[10px] text-white font-medium shrink-0">
@@ -1094,7 +1090,7 @@ const JobDetails = () => {
                             `${job.employer_profile.first_name?.[0] || ''}${job.employer_profile.last_name?.[0] || ''}`
                           )}
                         </div>
-                        <span className="text-white text-xs truncate max-w-[60px]">
+                        <span className="text-white text-xs truncate hidden md:inline max-w-[60px]">
                           {job.employer_profile.first_name}
                         </span>
                       </div>
@@ -1105,46 +1101,26 @@ const JobDetails = () => {
                   </Tooltip>
                 </TooltipProvider>
               ) : (
-                <div className="bg-white/5 rounded-lg px-2 py-1.5 min-w-0" />
+                <div className="bg-white/5 rounded-lg px-1.5 py-1.5 min-w-0" />
               )}
 
-              {/* Desktop-only: show row 2 items inline */}
+              {/* Välj */}
               <button
                 onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
                 onMouseDown={(e) => e.preventDefault()}
-                className={`hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
+                className={`rounded-lg px-1.5 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
                   isSelectionMode 
-                    ? 'bg-white/10 ring-1 ring-white hover:bg-white/15' 
+                    ? 'bg-white/10 ring-1 ring-white' 
                     : applications.length > 0 
-                      ? 'bg-white/5 hover:bg-white/10' 
+                      ? 'bg-white/5 md:hover:bg-white/10' 
                       : 'bg-white/5 opacity-40 cursor-default'
                 }`}
               >
                 <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
-              </button>
-              <div className="hidden md:flex min-w-0">
-                <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
-              </div>
-            </div>
-
-            {/* Row 2 (mobile only): Välj, QR */}
-            <div className="grid grid-cols-2 gap-1.5 min-w-0 md:hidden">
-              <button
-                onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
-                onMouseDown={(e) => e.preventDefault()}
-                className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
-                  isSelectionMode 
-                    ? 'bg-white/10 ring-white' 
-                    : applications.length > 0 
-                      ? 'bg-white/5 ring-white/30' 
-                      : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
-                }`}
-              >
-                <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">Välj</span>
+                <span className="text-white text-xs hidden md:inline font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
               </button>
 
+              {/* QR */}
               <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
             </div>
           </div>
