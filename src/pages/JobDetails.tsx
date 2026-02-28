@@ -377,6 +377,7 @@ interface StatusColumnProps {
   targetStageKey?: string;
   targetStageLabel?: string;
   onMoveCandidatesAndDelete?: () => Promise<void>;
+  stageIndex?: number;
 }
 
 const StatusColumn = ({ 
@@ -396,6 +397,7 @@ const StatusColumn = ({
   targetStageKey,
   targetStageLabel,
   onMoveCandidatesAndDelete,
+  stageIndex = 0,
 }: StatusColumnProps) => {
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -469,6 +471,7 @@ const StatusColumn = ({
               targetStageLabel={targetStageLabel}
               onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
               onLiveColorChange={setLiveColor}
+              stageIndex={stageIndex}
             />
           </div>
         </div>
@@ -1261,6 +1264,7 @@ const JobDetails = () => {
                     onOpenCriteriaDialog={stageIndex === 0 ? () => setCriteriaDialogOpen(true) : undefined}
                     stageConfig={config}
                     totalStageCount={activeStages.length}
+                    stageIndex={stageIndex}
                     criteriaCount={criteriaCount}
                     isSelectionMode={isSelectionMode}
                     selectedApplicationIds={selectedApplicationIds}

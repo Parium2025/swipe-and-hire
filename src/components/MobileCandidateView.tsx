@@ -312,6 +312,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   totalStageCount={stages.length}
                   targetStageKey={targetStageKey}
                   targetStageLabel={targetStageLabel}
+                  stageIndex={stageIdx}
                 />
               </span>
             </div>
