@@ -235,25 +235,62 @@ export const useApplicationsData = (searchQuery: string = '') => {
       if (searchQuery && searchQuery.trim()) {
         const searchTerm = searchQuery.trim();
         
-        // Convert search term to tsquery format (prefix matching for partial words)
-        // "Joh" becomes "Joh:*" to match "Johan", "Johansson" etc
-        const tsQueryTerm = searchTerm
-          .split(/\s+/)
-          .filter(Boolean)
-          .map(word => `${word}:*`)
-          .join(' & ');
+        // SANITIZE: Strip tsquery-special characters to prevent syntax errors
+        // Characters like &, |, !, :, *, (, ), ', <, >, \, - break to_tsquery
+        const sanitized = searchTerm.replace(/[&|!:*()'"<>\\\-]/g, '');
         
-        // Use Full-Text Search on the indexed search_vector column
-        // Also search job title/occupation with ILIKE as fallback (they're in a joined table)
-        query = query.or(`search_vector.fts.${tsQueryTerm},job_postings.title.ilike.%${searchTerm}%,job_postings.occupation.ilike.%${searchTerm}%`);
+        if (sanitized.trim()) {
+          // Convert search term to tsquery format (prefix matching for partial words)
+          // "Joh" becomes "Joh:*" to match "Johan", "Johansson" etc
+          const tsQueryTerm = sanitized
+            .split(/\s+/)
+            .filter(Boolean)
+            .map(word => `${word}:*`)
+            .join(' & ');
+          
+          // Use Full-Text Search on the indexed search_vector column
+          // Also search job title/occupation with ILIKE as fallback (they're in a joined table)
+          const safeLike = searchTerm.replace(/%/g, '');
+          query = query.or(`search_vector.fts.${tsQueryTerm},job_postings.title.ilike.%${safeLike}%,job_postings.occupation.ilike.%${safeLike}%`);
+        }
       }
 
-      const { data: baseData, error: baseError } = await query
-        .order('applied_at', { ascending: false })
-        .range(from, to);
+      let baseData: any[] | null = null;
+      let baseError: any = null;
+
+      try {
+        const result = await query
+          .order('applied_at', { ascending: false })
+          .range(from, to);
+        baseData = result.data;
+        baseError = result.error;
+      } catch (networkError) {
+        // OFFLINE FALLBACK: If network fails, use cached snapshot with client-side search
+        if (!navigator.onLine) {
+          const snapshot = readSnapshot(user.id);
+          if (snapshot.length > 0) {
+            console.log('📡 Offline: using cached snapshot for candidate search');
+            const filtered = searchQuery?.trim()
+              ? smartSearchCandidates(snapshot, searchQuery)
+              : snapshot;
+            return { items: filtered.slice(from, from + PAGE_SIZE), hasMore: filtered.length > from + PAGE_SIZE };
+          }
+        }
+        throw networkError;
+      }
 
       if (baseError) {
         console.error('❌ Applications query error:', baseError);
+        // OFFLINE FALLBACK for FTS syntax errors or other DB errors
+        if (!navigator.onLine) {
+          const snapshot = readSnapshot(user.id);
+          if (snapshot.length > 0) {
+            const filtered = searchQuery?.trim()
+              ? smartSearchCandidates(snapshot, searchQuery)
+              : snapshot;
+            return { items: filtered.slice(from, from + PAGE_SIZE), hasMore: filtered.length > from + PAGE_SIZE };
+          }
+        }
         throw baseError;
       }
 

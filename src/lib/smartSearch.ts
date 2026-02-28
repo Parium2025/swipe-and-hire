@@ -282,6 +282,31 @@ function normalizeSwedish(text: string): string {
     .replace(/è/g, 'e');
 }
 
+// Location synonym matching for candidate search
+// Matches city names to their parent regions and vice versa
+// e.g. "Stockholm" matches text containing "Solna", "Nacka", etc.
+function matchLocationSynonym(query: string, text: string): boolean {
+  for (const key of locationSynonymKeys) {
+    const synonyms = jobSearchSynonyms[key];
+    if (!synonyms) continue;
+    
+    const allTerms = [key, ...synonyms.map(s => s.toLowerCase())];
+    // Skip pure numeric terms (postal codes)
+    const nonNumericTerms = allTerms.filter(t => !/^\d+$/.test(t));
+    
+    const queryMatchesGroup = nonNumericTerms.some(t => 
+      t === query || t.startsWith(query) || query.startsWith(t)
+    );
+    
+    if (queryMatchesGroup) {
+      // Check if text contains ANY term from this location group
+      const textNormalized = normalizeSwedish(text);
+      return nonNumericTerms.some(t => textNormalized.includes(normalizeSwedish(t)));
+    }
+  }
+  return false;
+}
+
 // Check if a string fuzzy-matches the query
 // STRICT MODE: Only matches when there's a real similarity
 function fuzzyMatch(text: string, query: string, maxDistance: number = 1): { match: boolean; score: number } {
@@ -312,6 +337,14 @@ function fuzzyMatch(text: string, query: string, maxDistance: number = 1): { mat
       if (word.startsWith(normalizedQuery)) {
         return { match: true, score: 85 };
       }
+    }
+  }
+
+  // Location synonym expansion: "Stockholm" matches "Solna", "Nacka" etc.
+  if (normalizedQuery.length >= 3) {
+    const locationMatch = matchLocationSynonym(normalizedQuery, normalizedText);
+    if (locationMatch) {
+      return { match: true, score: 80 };
     }
   }
   
