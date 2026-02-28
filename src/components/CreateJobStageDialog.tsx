@@ -125,10 +125,9 @@ export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: 
         
         <div className="flex gap-2 pt-2">
           <Button
-            variant="glass"
-            onClick={handleCreate}
             onMouseDown={(e) => e.currentTarget.blur()}
             onMouseUp={(e) => e.currentTarget.blur()}
+            onClick={handleCreate}
             disabled={isCreating || !label.trim()}
             className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 ${
               !isCreating && label.trim() ? 'border border-white/30' : 'border border-transparent'
