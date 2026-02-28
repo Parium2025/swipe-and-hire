@@ -330,10 +330,13 @@ export function CandidatesTable({
 
   // 🔥 BATCH PREFETCH: Warm multi-application cache for ALL visible candidates on mount
   // This ensures "2 jobb" shows instantly even on first click after login
-  const batchPrefetchedRef = useRef(false);
+  // Track by applicant count so new candidates trigger a re-prefetch
+  const batchPrefetchedCountRef = useRef(0);
   useEffect(() => {
-    if (!user || applications.length === 0 || batchPrefetchedRef.current) return;
-    batchPrefetchedRef.current = true;
+    if (!user || applications.length === 0) return;
+    // Only re-run when new candidates appear (not on every render)
+    if (applications.length === batchPrefetchedCountRef.current) return;
+    batchPrefetchedCountRef.current = applications.length;
 
     // Find unique applicant IDs that don't have a cache yet
     const uncachedApplicants = new Map<string, ApplicationData>();
