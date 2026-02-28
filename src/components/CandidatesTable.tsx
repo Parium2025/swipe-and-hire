@@ -109,6 +109,7 @@ export function CandidatesTable({
   const isMobile = deviceType === 'mobile';
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const { isInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading } = useMyCandidatesData();
   const { teamMembers, hasTeam } = useTeamMembers();
   const { user } = useAuth();
@@ -175,6 +176,77 @@ export function CandidatesTable({
     if (!selectedApplicationId) return null;
     return applications.find((a) => a.id === selectedApplicationId) || null;
   }, [applications, selectedApplicationId]);
+
+  // Fetch all applications from the same applicant across this employer's jobs
+  useEffect(() => {
+    const fetchAllApplications = async () => {
+      if (!selectedApplication || !user || !dialogOpen) {
+        setAllCandidateApplications([]);
+        return;
+      }
+
+      try {
+        const { data: orgJobs, error: jobsError } = await supabase
+          .from('job_postings')
+          .select('id, title')
+          .eq('employer_id', user.id);
+
+        if (jobsError) throw jobsError;
+        if (!orgJobs || orgJobs.length === 0) {
+          setAllCandidateApplications([]);
+          return;
+        }
+
+        const jobIds = orgJobs.map(j => j.id);
+
+        const { data: apps, error: appError } = await supabase
+          .from('job_applications')
+          .select(`
+            id, job_id, applicant_id, first_name, last_name, email, phone,
+            location, bio, cv_url, age, employment_status, work_schedule,
+            availability, custom_answers, status, applied_at, updated_at,
+            profile_image_snapshot_url, video_snapshot_url,
+            job_postings!inner(title)
+          `)
+          .eq('applicant_id', selectedApplication.applicant_id)
+          .in('job_id', jobIds);
+
+        if (appError) throw appError;
+
+        const transformed: ApplicationData[] = (apps || []).map(app => ({
+          id: app.id,
+          job_id: app.job_id,
+          applicant_id: app.applicant_id,
+          first_name: app.first_name,
+          last_name: app.last_name,
+          email: app.email,
+          phone: app.phone,
+          location: app.location,
+          bio: app.bio,
+          cv_url: app.cv_url,
+          age: app.age,
+          employment_status: app.employment_status,
+          work_schedule: app.work_schedule,
+          availability: app.availability,
+          custom_answers: app.custom_answers,
+          status: app.status,
+          applied_at: app.applied_at || '',
+          updated_at: app.updated_at,
+          job_title: (app.job_postings as any)?.title || 'Okänt jobb',
+          profile_image_url: app.profile_image_snapshot_url || selectedApplication.profile_image_url,
+          video_url: app.video_snapshot_url || selectedApplication.video_url,
+          is_profile_video: selectedApplication.is_profile_video,
+        }));
+
+        setAllCandidateApplications(transformed);
+      } catch (error) {
+        console.error('Error fetching candidate applications:', error);
+        setAllCandidateApplications([]);
+      }
+    };
+
+    fetchAllApplications();
+  }, [selectedApplication?.applicant_id, user?.id, dialogOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRowClick = (application: ApplicationData) => {
     setSelectedApplicationId(application.id);
@@ -827,6 +899,7 @@ export function CandidatesTable({
           onUpdate();
           handleDialogClose();
         }}
+        allApplications={allCandidateApplications.length > 1 ? allCandidateApplications : undefined}
         variant="all-candidates"
       />
 
