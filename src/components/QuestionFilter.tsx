@@ -91,12 +91,14 @@ export interface QuestionFilterValue {
 interface QuestionFilterProps {
   value: QuestionFilterValue[];
   onChange: (filters: QuestionFilterValue[]) => void;
+  hideChips?: boolean;
+  chipsOnly?: boolean;
 }
 
 // Default options for text/yes-no questions
 const YES_NO_OPTIONS = ['Ja', 'Nej'];
 
-export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
+export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: QuestionFilterProps) => {
   const { data: questions, isLoading } = useOrganizationQuestions();
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -255,6 +257,62 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
   const dropdownContentClass = "min-w-[280px] bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-0";
   const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/15 active:bg-white/15 focus-visible:bg-white/15 focus:outline-none rounded-md px-2.5 py-2 text-sm transition-colors";
 
+  // chipsOnly mode: only render the filter chips
+  if (chipsOnly) {
+    return (
+      <>
+        {value.map((filter) => {
+          const displayText = filter.answers.length === 0 ? 'Alla' : filter.answers.join(', ');
+          const fullText = `${filter.question}: ${displayText}`;
+          const isTruncatedChip = filter.question.length > 15;
+          
+          const chipContent = (
+            <button
+              key={filter.question}
+              className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[200px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
+            >
+              <span className="truncate min-w-0">
+                {filter.question.length > 15 
+                  ? filter.question.slice(0, 15) + '...' 
+                  : filter.question
+                }
+              </span>
+              <span className="flex-shrink-0 text-white">: {displayText}</span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeFilter(filter.question);
+                }}
+                className="ml-0.5 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
+              >
+                <X className="h-3 w-3" />
+              </span>
+            </button>
+          );
+          
+          if (!isTruncatedChip) {
+            return <React.Fragment key={filter.question}>{chipContent}</React.Fragment>;
+          }
+          
+          return (
+            <TooltipProvider key={filter.question} delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {chipContent}
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs bg-slate-900 border-white/20 text-white">
+                  <p>{fullText}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        })}
+      </>
+    );
+  }
+
+  const filterLabel = value.length === 1 ? 'Filtrera på fråga' : 'Filtrera på frågor';
+
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {/* Main filter button - matching nav dropdown triggers */}
@@ -271,7 +329,7 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
             `}
           >
             <Filter className="h-4 w-4" />
-            <span>Filtrera på frågor</span>
+            <span>{filterLabel}</span>
             {hasFilters && (
               <span className="text-white/70 text-xs">({value.length})</span>
             )}
@@ -430,8 +488,8 @@ export const QuestionFilter = ({ value, onChange }: QuestionFilterProps) => {
         </PopoverContent>
       </Popover>
 
-      {/* Active filter badges - matching stage filter style */}
-      {value.map((filter) => {
+      {/* Active filter badges - only when not hideChips */}
+      {!hideChips && value.map((filter) => {
         const displayText = filter.answers.length === 0 ? 'Alla' : filter.answers.join(', ');
         const fullText = `${filter.question}: ${displayText}`;
         const isTruncated = filter.question.length > 15;
