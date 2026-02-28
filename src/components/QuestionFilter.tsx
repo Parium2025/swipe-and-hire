@@ -58,7 +58,7 @@ const QuestionItem = ({
       <div className="flex-1 min-w-0">
         <p ref={textRef} className="text-sm leading-tight truncate text-white">{question.question_text}</p>
         {isSelected && (
-          <p className="text-xs text-white/70 mt-0.5">
+          <p className="text-xs text-white mt-0.5">
             = {allSelected ? 'Alla' : selectedAnswers.join(', ')}
           </p>
         )}
