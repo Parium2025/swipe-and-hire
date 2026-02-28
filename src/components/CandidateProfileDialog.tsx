@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import ProfileVideo from '@/components/ProfileVideo';
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { CvViewer } from '@/components/CvViewer';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
@@ -334,7 +335,17 @@ export const CandidateProfileDialog = ({
         </DialogHeader>
         
         {/* Mobile tabs header */}
-        <div className="md:hidden flex shrink-0 items-center border-b border-white/20">
+        <div className="md:hidden flex shrink-0 items-center border-b border-white/20 relative">
+          {/* Sliding indicator */}
+          <motion.div
+            className="absolute bottom-0 h-0.5 bg-white"
+            initial={false}
+            animate={{
+              left: `calc(${mobileTab === 'profile' ? 0 : mobileTab === 'activity' ? 1 : 2} * ((100% - 44px) / 3))`,
+              width: `calc((100% - 44px) / 3)`,
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 35, mass: 0.8 }}
+          />
           {[
             { key: 'profile' as const, label: 'Profil', icon: User },
             { key: 'activity' as const, label: 'Aktivitet', icon: Activity },
@@ -345,7 +356,7 @@ export const CandidateProfileDialog = ({
               onClick={() => setMobileTab(tab.key)}
               className={`flex-1 px-1.5 py-2 text-sm font-medium transition-colors min-w-0 ${
                 mobileTab === tab.key
-                  ? 'text-white border-b-2 border-white'
+                  ? 'text-white'
                   : 'text-white/50'
               }`}
             >
@@ -697,10 +708,20 @@ export const CandidateProfileDialog = ({
           {/* Activity Sidebar - desktop only */}
           <div className="hidden md:flex w-80 border-l border-white/20 bg-white/5 flex-col overflow-hidden relative">
             <div className="relative flex border-b border-white/20 pr-10">
+              {/* Sliding indicator */}
+              <motion.div
+                className="absolute bottom-0 h-0.5 bg-white"
+                initial={false}
+                animate={{
+                  left: sidebarTab === 'activity' ? '0%' : `calc(50% - 20px)`,
+                  width: `calc(50% - 20px)`,
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 35, mass: 0.8 }}
+              />
               <button
                 onClick={() => setSidebarTab('activity')}
                 className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
-                  sidebarTab === 'activity' ? 'text-white border-b-2 border-white' : 'text-white/50 hover:text-white/70'
+                  sidebarTab === 'activity' ? 'text-white' : 'text-white/50 hover:text-white/70'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5">
@@ -711,7 +732,7 @@ export const CandidateProfileDialog = ({
               <button
                 onClick={() => setSidebarTab('comments')}
                 className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
-                  sidebarTab === 'comments' ? 'text-white border-b-2 border-white' : 'text-white/50 hover:text-white/70'
+                  sidebarTab === 'comments' ? 'text-white' : 'text-white/50 hover:text-white/70'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5">
