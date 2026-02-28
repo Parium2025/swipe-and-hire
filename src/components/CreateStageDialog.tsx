@@ -171,7 +171,7 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
             onClick={() => setOpen(false)}
             onMouseDown={(e) => e.currentTarget.blur()}
             onMouseUp={(e) => e.currentTarget.blur()}
-            className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="bg-white/5 backdrop-blur-sm border border-white/30 text-white px-5 py-2 rounded-md transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
             Avbryt
           </Button>
@@ -180,9 +180,9 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
             onMouseDown={(e) => e.currentTarget.blur()}
             onMouseUp={(e) => e.currentTarget.blur()}
             disabled={!label.trim() || createCustomStage.isPending}
-            className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="bg-white/10 backdrop-blur-sm border border-white/30 text-white px-5 py-2 rounded-md hover:bg-white/15 md:hover:bg-white/15 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
-            Skapa
+            Skapa steg
           </Button>
         </DialogFooter>
       </DialogContentNoFocus>
