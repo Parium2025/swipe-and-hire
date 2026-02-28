@@ -172,34 +172,47 @@ const CandidatesContent = () => {
                 className="pl-10 bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white transition-colors"
               />
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <QuestionFilter 
-                value={questionFilters}
-                onChange={setQuestionFilters}
-              />
-              <button
-                onClick={() => setSelectionMode(prev => !prev)}
-                className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                  border whitespace-nowrap
-                  ${selectionMode 
-                    ? 'bg-white/20 border-white/30 text-white' 
-                    : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
-                  }
-                `}
-              >
-                {selectionMode ? (
-                  <>
-                    <X className="h-4 w-4" />
-                    <span>Avsluta urval</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckSquare className="h-4 w-4" />
-                    <span>Välj kandidater</span>
-                  </>
-                )}
-              </button>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <QuestionFilter 
+                  value={questionFilters}
+                  onChange={setQuestionFilters}
+                  hideChips
+                />
+                <button
+                  onClick={() => setSelectionMode(prev => !prev)}
+                  className={`
+                    flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                    border whitespace-nowrap
+                    ${selectionMode 
+                      ? 'bg-white/20 border-white/30 text-white' 
+                      : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
+                    }
+                  `}
+                >
+                  {selectionMode ? (
+                    <>
+                      <X className="h-4 w-4" />
+                      <span>Avsluta urval</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckSquare className="h-4 w-4" />
+                      <span>Välj kandidater</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              {/* Filter chips below */}
+              {questionFilters.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <QuestionFilter 
+                    value={questionFilters}
+                    onChange={setQuestionFilters}
+                    chipsOnly
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
