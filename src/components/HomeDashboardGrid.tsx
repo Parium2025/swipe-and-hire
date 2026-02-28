@@ -255,13 +255,32 @@ type StatData = {
   link?: string;
 };
 
+// Cache helpers for instant rendering on refresh (employer stats)
+const EMPLOYER_STATS_CACHE_KEY = 'parium-employer-stats';
+
+const readEmployerCachedStats = (): Record<string, number> => {
+  try {
+    const raw = localStorage.getItem(EMPLOYER_STATS_CACHE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+};
+
+const writeEmployerCachedStat = (key: string, value: number) => {
+  try {
+    const current = readEmployerCachedStats();
+    current[key] = value;
+    localStorage.setItem(EMPLOYER_STATS_CACHE_KEY, JSON.stringify(current));
+  } catch {}
+};
+
 // Stats Card (Blue - Top Right) - Carousel version with real-time updates
 const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPaused: (v: boolean) => void }) => {
   const { jobs, isLoading: jobsLoading } = useJobsData({ scope: 'personal' });
   const { user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const queryClient = useQueryClient();
-  
+  const hasMountedRef = useRef(false);
+  const cachedStats = useMemo(() => readEmployerCachedStats(), []);
   // Get active job IDs for queries
   const activeJobIds = useMemo(() => {
     if (!jobs) return [];
@@ -271,7 +290,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
   }, [jobs]);
   
   // Query for new applications (viewed_at IS NULL) on user's jobs
-  const { data: newApplicationsCount = 0, isLoading: applicationsLoading } = useQuery({
+  const { data: newApplicationsCount = cachedStats['new_applications'] ?? 0 } = useQuery({
     queryKey: ['new-applications-count', user?.id, activeJobIds],
     queryFn: async () => {
       if (!user?.id || activeJobIds.length === 0) return 0;
@@ -285,14 +304,16 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
         console.error('Error fetching new applications:', error);
         return 0;
       }
-      return count || 0;
+      const val = count || 0;
+      writeEmployerCachedStat('new_applications', val);
+      return val;
     },
     enabled: !!user?.id && activeJobIds.length > 0,
     staleTime: Infinity,
   });
   
   // Query for saved favorites count on user's active jobs
-  const { data: savedFavoritesCount = 0, isLoading: favoritesLoading } = useQuery({
+  const { data: savedFavoritesCount = cachedStats['saved_favorites'] ?? 0 } = useQuery({
     queryKey: ['saved-favorites-count', user?.id, activeJobIds],
     queryFn: async () => {
       if (!user?.id || activeJobIds.length === 0) return 0;
@@ -305,14 +326,16 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
         console.error('Error fetching saved favorites:', error);
         return 0;
       }
-      return count || 0;
+      const val = count || 0;
+      writeEmployerCachedStat('saved_favorites', val);
+      return val;
     },
     enabled: !!user?.id && activeJobIds.length > 0,
     staleTime: Infinity,
   });
   
   // Query for unread messages count
-  const { data: unreadMessagesCount = 0, isLoading: messagesLoading } = useQuery({
+  const { data: unreadMessagesCount = cachedStats['unread_messages'] ?? 0 } = useQuery({
     queryKey: ['unread-messages-count', user?.id],
     queryFn: async () => {
       if (!user?.id) return 0;
@@ -326,7 +349,9 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
         console.error('Error fetching unread messages:', error);
         return 0;
       }
-      return count || 0;
+      const val = count || 0;
+      writeEmployerCachedStat('unread_messages', val);
+      return val;
     },
     enabled: !!user?.id,
     staleTime: Infinity,
@@ -346,9 +371,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
           schema: 'public',
           table: 'job_applications',
         },
-        (payload) => {
-          console.log('Application change detected:', payload.eventType);
-          // Invalidate the query to trigger refetch
+        () => {
           queryClient.invalidateQueries({ queryKey: ['new-applications-count'] });
         }
       )
@@ -364,8 +387,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
           schema: 'public',
           table: 'saved_jobs',
         },
-        (payload) => {
-          console.log('Saved job change detected:', payload.eventType);
+        () => {
           queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] });
         }
       )
@@ -382,8 +404,7 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
           table: 'messages',
           filter: `recipient_id=eq.${user.id}`,
         },
-        (payload) => {
-          console.log('Message change detected:', payload.eventType);
+        () => {
           queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
         }
       )
@@ -397,20 +418,27 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
     };
   }, [user?.id, queryClient]);
 
-  const isLoading = jobsLoading || applicationsLoading || favoritesLoading || messagesLoading;
+  // Cache active jobs count too
+  const activeJobsCount = activeJobIds.length;
+  useEffect(() => {
+    if (!jobsLoading && activeJobsCount > 0) {
+      writeEmployerCachedStat('active_jobs', activeJobsCount);
+    }
+  }, [activeJobsCount, jobsLoading]);
 
   const navigate = useNavigate();
 
+  // Use cached active jobs count for instant display if jobs haven't loaded yet
+  const displayActiveJobs = jobsLoading ? (cachedStats['active_jobs'] ?? 0) : activeJobsCount;
+
   const statsArray: StatData[] = useMemo(() => {
-    const activeJobsCount = activeJobIds.length;
-    
     return [
-      { icon: Briefcase, label: 'Aktiva annonser', value: activeJobsCount, description: 'Mina aktiva jobbannonser', link: '/my-jobs?sort=active-first' },
+      { icon: Briefcase, label: 'Aktiva annonser', value: displayActiveJobs, description: 'Mina aktiva jobbannonser', link: '/my-jobs?sort=active-first' },
       { icon: UserPlus, label: 'Nya ansökningar', value: newApplicationsCount, description: 'Ansökningar du inte sett ännu', link: '/my-jobs?sort=active-first' },
       { icon: Heart, label: 'Sparade favoriter', value: savedFavoritesCount, description: 'Gånger dina aktiva jobb sparats' },
       { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden', link: '/messages' },
     ];
-  }, [activeJobIds.length, newApplicationsCount, savedFavoritesCount, unreadMessagesCount]);
+  }, [displayActiveJobs, newApplicationsCount, savedFavoritesCount, unreadMessagesCount]);
 
   const goNext = useCallback(() => {
     setCurrentIndex(prev => (prev + 1) % statsArray.length);
@@ -426,17 +454,13 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
   });
 
   // Auto-rotation every 10 seconds, offset by 5s from green card
-  // Green rotates at 10s, 20s, 30s... Blue at 5s, 15s, 25s... = something changes every 5s
-  // When pausing/resuming, both restart fresh which maintains the sync
   useEffect(() => {
     if (isPaused || statsArray.length <= 1) return;
     
     let interval: ReturnType<typeof setInterval>;
     
-    // Start with 5s delay to offset from green card
     const initialDelay = setTimeout(() => {
       setCurrentIndex(prev => (prev + 1) % statsArray.length);
-      // THEN start the 10s interval after first rotation
       interval = setInterval(() => {
         setCurrentIndex(prev => (prev + 1) % statsArray.length);
       }, 10000);
@@ -447,18 +471,6 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
       if (interval) clearInterval(interval);
     };
   }, [isPaused, statsArray.length]);
-
-  if (isLoading) {
-    return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height`}>
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-        <CardContent className="relative p-6 h-full">
-          <Skeleton className="h-10 w-10 rounded-xl bg-white/20 mb-4" />
-          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
-        </CardContent>
-      </Card>
-    );
-  }
 
   const currentStat = statsArray[currentIndex];
   const Icon = currentStat.icon;
@@ -497,11 +509,12 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentIndex}
-              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              initial={hasMountedRef.current ? { opacity: 0, y: 10, scale: 0.98 } : false}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.98 }}
               transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               className="flex flex-col items-center"
+              onAnimationComplete={() => { hasMountedRef.current = true; }}
             >
               <h3 className="text-sm sm:text-base font-semibold text-white leading-snug mb-1">
                 {currentStat.label}
