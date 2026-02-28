@@ -217,13 +217,16 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           className="text-[15px] font-bold text-white leading-snug line-clamp-2 text-center"
         />
 
-        {/* Company + Location — single compact row, centered */}
-        <div className="flex items-center justify-center gap-1.5 text-[13px] text-white">
-          <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
-          <span className="truncate font-medium">{companyName}</span>
-          <span className="text-white/30">·</span>
-          <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-white" />
-          <span className="truncate">{job.location}</span>
+        {/* Company + Location — glass badges, centered */}
+        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
+            <Building2 className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none truncate font-medium">{companyName}</span>
+          </Badge>
+          <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none inline-flex items-center">
+            <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
+            <span className="leading-none truncate">{job.location}</span>
+          </Badge>
         </div>
 
         {/* Tags row — badges restored, centered */}

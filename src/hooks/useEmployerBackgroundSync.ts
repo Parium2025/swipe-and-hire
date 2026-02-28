@@ -4,7 +4,7 @@ import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 
-const JOBS_CACHE_KEY = 'parium_employer_jobs_';
+const JOBS_CACHE_KEY = 'parium_employer_jobs_v2_';
 const INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
 const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_';
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
