@@ -5,7 +5,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplicationData } from '@/hooks/useApplicationsData';
-import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, ChevronDown, ChevronUp, StickyNote, Trash2, ExternalLink, Star, Activity, Loader2, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, AlertTriangle, X } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, User, ChevronDown, ChevronUp, StickyNote, Trash2, ExternalLink, Star, Activity, Loader2, CalendarPlus, ChevronLeft, ChevronRight, MessageSquare, Users, AlertTriangle, X, Check } from 'lucide-react';
 import { ShareCandidateDialog } from '@/components/ShareCandidateDialog';
 import { SendMessageDialog } from '@/components/SendMessageDialog';
 import type { StageSettings } from '@/hooks/useStageSettings';
@@ -23,13 +23,7 @@ import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useFieldDraft } from '@/hooks/useFormDraft';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { formatTimeAgo } from '@/lib/date';
 import {
   CandidateNotesPanel,
   CandidateSummarySection,
@@ -177,6 +171,7 @@ export const CandidateProfileDialog = ({
   const [cvOpen, setCvOpen] = useState(false);
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [jobDropdownOpen, setJobDropdownOpen] = useState(false);
   const previousRating = useRef<number | undefined>(undefined);
   const lastResetApplicationIdRef = useRef<string | null>(null);
 
@@ -216,6 +211,7 @@ export const CandidateProfileDialog = ({
     previousRating.current = candidateRating;
     setMobileTab('profile');
     setCvOpen(false);
+    setJobDropdownOpen(false);
     setJobQuestions({});
     // Reset extracted hooks only on application switch
     notesHook.reset();
@@ -380,7 +376,7 @@ export const CandidateProfileDialog = ({
 
         <div className="flex flex-1 min-h-0 md:max-h-[85vh]">
           {/* Main content - left side */}
-          <div className={`flex-1 overflow-y-auto overscroll-contain p-4 pt-2 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`}>
+          <div className={`flex-1 overflow-y-auto overscroll-contain p-4 pt-2 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
           {/* Header with circular profile image/video */}
           <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
             <div className="relative">
@@ -424,29 +420,58 @@ export const CandidateProfileDialog = ({
               )}
               
               {hasMultipleApplications ? (
-                <div className="mt-2">
-                  <Select 
-                    value={selectedJobId || displayApp.job_id} 
-                    onValueChange={setSelectedJobId}
+                <div className="mt-2 relative w-full">
+                  <button
+                    type="button"
+                    onClick={() => setJobDropdownOpen(prev => !prev)}
+                    className="w-full flex items-center justify-between gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
                   >
-                    <SelectTrigger className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">
-                      <SelectValue placeholder="Välj jobbansökan" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-card-parium border-white/20">
-                      {allApplications!.map((app) => (
-                        <SelectItem 
-                          key={app.job_id} 
-                          value={app.job_id}
-                          className="text-white hover:bg-white/10 focus:bg-white/10"
-                        >
-                          {app.job_title || 'Okänt jobb'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm text-white mt-1">
-                    ({allApplications!.length} jobbansökningar)
-                  </p>
+                    <span className="truncate">{displayApp.job_title || 'Okänt jobb'}</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-xs text-white/60">
+                        {allApplications!.length} jobb
+                      </span>
+                      <ChevronDown className={`h-4 w-4 text-white/60 transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
+                    </div>
+                  </button>
+                  
+                  {jobDropdownOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setJobDropdownOpen(false)} />
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-50 w-[calc(100%+1rem)] max-w-sm rounded-lg border border-white/20 bg-slate-900/95 backdrop-blur-xl shadow-xl overflow-hidden">
+                      <div className="max-h-60 overflow-y-auto overscroll-contain">
+                        {allApplications!.map((app) => {
+                          const isActive = (selectedJobId || displayApp.job_id) === app.job_id;
+                          return (
+                            <button
+                              key={app.job_id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedJobId(app.job_id);
+                                setJobDropdownOpen(false);
+                              }}
+                              className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors min-h-touch ${
+                                isActive ? 'bg-white/15' : 'hover:bg-white/10 active:bg-white/15'
+                              }`}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-white leading-snug break-words">
+                                  {app.job_title || 'Okänt jobb'}
+                                </p>
+                                <p className="text-xs text-white/50 mt-0.5">
+                                  Sökte {formatTimeAgo(app.applied_at)}
+                                </p>
+                              </div>
+                              {isActive && (
+                                <Check className="h-4 w-4 text-white shrink-0 mt-0.5" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    </>
+                  )}
                 </div>
               ) : (
                 <p className="text-white mt-1">{displayApp.job_title}</p>
