@@ -478,24 +478,20 @@ export const CandidateProfileDialog = ({
                         >
                           <span className="truncate flex-1 text-left">{displayApp.job_title || application?.job_title || 'Okänt jobb'}</span>
                           <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-xs text-white">
+                              {allApplications ? `${allApplications.length} jobb` : '1 jobb'}
+                            </span>
                             {loadingApplications ? (
                               <Loader2 className="h-4 w-4 text-white animate-spin" />
+                            ) : hasMultipleApplications ? (
+                              <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
                             ) : (
-                              <>
-                                <span className="text-xs text-white">
-                                  {`${allApplications!.length} jobb`}
-                                </span>
-                                {hasMultipleApplications ? (
-                                  <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
-                                ) : (
-                                  <Briefcase className="h-4 w-4 text-white/60" />
-                                )}
-                              </>
+                              <Briefcase className="h-4 w-4 text-white/60" />
                             )}
                           </div>
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-xs">
+                      <TooltipContent side="bottom" className="whitespace-nowrap max-w-[90vw]">
                         {displayApp.job_title || application?.job_title || 'Okänt jobb'}
                       </TooltipContent>
                     </Tooltip>
