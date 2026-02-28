@@ -1,6 +1,5 @@
 import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { formatTimeAgo } from '@/lib/date';
 import { CandidateProfileDialog } from './CandidateProfileDialog';
@@ -9,7 +8,7 @@ import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare, X, ArrowUpDown, ArrowUp, ArrowDown, XCircle, MessageCircle, ChevronRight, Briefcase } from 'lucide-react';
+import { UserPlus, Clock, Star, Users, Trash2, MoreHorizontal, X, ArrowUpDown, ArrowUp, ArrowDown, XCircle, MessageCircle, ChevronRight } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { Button } from '@/components/ui/button';
@@ -22,55 +21,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
+import { MobileCandidatesList } from '@/components/candidates/MobileCandidatesList';
+import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
+import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
 
 type SortField = 'name' | 'rating' | 'applied_at' | 'last_active_at' | null;
 type SortDirection = 'asc' | 'desc' | null;
-
-// Infinite scroll sentinel component
-function InfiniteScrollSentinel({ 
-  onIntersect, 
-  isLoading 
-}: { 
-  onIntersect?: () => void; 
-  isLoading?: boolean;
-}) {
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!onIntersect) return;
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isLoading) {
-          onIntersect();
-        }
-      },
-      { rootMargin: '200px' } // Load early before reaching bottom
-    );
-
-    const sentinel = sentinelRef.current;
-    if (sentinel) {
-      observer.observe(sentinel);
-    }
-
-    return () => {
-      if (sentinel) {
-        observer.unobserve(sentinel);
-      }
-    };
-  }, [onIntersect, isLoading]);
-
-  return (
-    <div ref={sentinelRef} className="flex justify-center py-4">
-      {isLoading && (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm">Laddar fler kandidater...</span>
-        </div>
-      )}
-    </div>
-  );
-}
 
 interface CandidatesTableProps {
   applications: ApplicationData[];
@@ -80,7 +36,6 @@ interface CandidatesTableProps {
   isLoadingMore?: boolean;
   selectionMode?: boolean;
   onSelectionModeChange?: (mode: boolean) => void;
-  // Nya props för "Vill du fortsätta?" banner
   hasReachedLimit?: boolean;
   onContinueLoading?: () => void;
   loadedCount?: number;
@@ -94,6 +49,7 @@ const statusConfig = {
 };
 
 const CANDIDATE_APPLICATIONS_CACHE_PREFIX = 'candidate_apps_cache_v1_';
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 export function CandidatesTable({ 
   applications, 
@@ -123,26 +79,24 @@ export function CandidatesTable({
   const allSelected = applications.length > 0 && selectedIds.size === applications.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < applications.length;
 
-  // Sorting state - 3-step toggle: null (neutral) → desc → asc → null
+  // Sorting state
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   // Clear selection when selection mode is turned off
   useEffect(() => {
-    if (!selectionMode) {
-      setSelectedIds(new Set());
-    }
+    if (!selectionMode) setSelectedIds(new Set());
   }, [selectionMode]);
 
-  // Team candidate info for colleague indicators
+  // Team candidate info
   const applicationIds = useMemo(() => applications.map(a => a.id), [applications]);
   const { teamCandidates } = useTeamCandidateInfo(applicationIds);
   
-  // State for team selection dialog
+  // Team selection dialog state
   const [teamDialogOpen, setTeamDialogOpen] = useState(false);
   const [selectedApplicationForTeam, setSelectedApplicationForTeam] = useState<ApplicationData | null>(null);
 
-  // Förladda CV-sammanfattningar i bakgrunden
+  // Preload CV summaries
   useCvSummaryPreloader(
     applications.map(app => ({
       applicant_id: app.applicant_id,
@@ -152,6 +106,7 @@ export function CandidatesTable({
     }))
   );
 
+  // --- Candidate applications cache with TTL ---
   const getCandidateApplicationsCacheKey = useCallback(
     (applicantId: string) => `${CANDIDATE_APPLICATIONS_CACHE_PREFIX}${user?.id || 'anon'}_${applicantId}`,
     [user?.id]
@@ -162,8 +117,13 @@ export function CandidatesTable({
     try {
       const raw = localStorage.getItem(getCandidateApplicationsCacheKey(applicantId));
       if (!raw) return null;
-      const parsed = JSON.parse(raw) as { items?: ApplicationData[] };
+      const parsed = JSON.parse(raw) as { items?: ApplicationData[]; cachedAt?: number };
       if (!parsed || !Array.isArray(parsed.items) || parsed.items.length === 0) return null;
+      // TTL check — invalidate stale entries
+      if (parsed.cachedAt && Date.now() - parsed.cachedAt > CACHE_TTL_MS) {
+        localStorage.removeItem(getCandidateApplicationsCacheKey(applicantId));
+        return null;
+      }
       return parsed.items;
     } catch {
       return null;
@@ -239,14 +199,12 @@ export function CandidatesTable({
 
   const prefetchInFlightRef = useRef<Set<string>>(new Set());
 
-  // Prefetch candidate data on hover for instant profile opening
+  // Prefetch candidate data on hover
   const handlePrefetchCandidate = useCallback((application: ApplicationData) => {
     if (!user || !application.applicant_id) return;
 
-    // Prefetch activities
     prefetchCandidateActivities(queryClient, application.applicant_id, user.id);
 
-    // Prefetch persistent notes
     queryClient.prefetchQuery({
       queryKey: ['candidate-notes', application.applicant_id],
       queryFn: async () => {
@@ -260,32 +218,26 @@ export function CandidatesTable({
       staleTime: Infinity,
     });
 
-    // Prefetch all applications for instant job counter and offline fallback
     if (readCandidateApplicationsCache(application.applicant_id)?.length) return;
     if (prefetchInFlightRef.current.has(application.applicant_id)) return;
 
     prefetchInFlightRef.current.add(application.applicant_id);
     fetchCandidateApplications(application)
       .then((apps) => {
-        if (apps.length > 0) {
-          writeCandidateApplicationsCache(application.applicant_id, apps);
-        }
+        if (apps.length > 0) writeCandidateApplicationsCache(application.applicant_id, apps);
       })
-      .catch(() => {
-        // Ignore prefetch errors; dialog fetch handles retry/fallback
-      })
+      .catch(() => {})
       .finally(() => {
         prefetchInFlightRef.current.delete(application.applicant_id);
       });
   }, [user, queryClient, fetchCandidateApplications, readCandidateApplicationsCache, writeCandidateApplicationsCache]);
 
-  // Derive selected application from latest list so refetch updates the dialog content
   const selectedApplication = useMemo(() => {
     if (!selectedApplicationId) return null;
     return applications.find((a) => a.id === selectedApplicationId) || null;
   }, [applications, selectedApplicationId]);
 
-  // Fetch all applications from the same applicant across this employer's jobs
+  // Fetch all applications from the same applicant
   useEffect(() => {
     const fetchAllApplications = async () => {
       if (!selectedApplication || !user || !dialogOpen) {
@@ -325,19 +277,19 @@ export function CandidatesTable({
     fetchAllApplications();
   }, [selectedApplication?.applicant_id, selectedApplication?.id, user?.id, dialogOpen, fetchCandidateApplications, readCandidateApplicationsCache, writeCandidateApplicationsCache]);
 
-  const handleRowClick = (application: ApplicationData) => {
+  const handleRowClick = useCallback((application: ApplicationData) => {
     const cachedApplications = readCandidateApplicationsCache(application.applicant_id);
     setAllCandidateApplications(cachedApplications?.length ? cachedApplications : [application]);
     setSelectedApplicationId(application.id);
     setDialogOpen(true);
-  };
+  }, [readCandidateApplicationsCache]);
 
-  const handleDialogClose = () => {
+  const handleDialogClose = useCallback(() => {
     setDialogOpen(false);
     setTimeout(() => setSelectedApplicationId(null), 300);
-  };
+  }, []);
 
-  // Bulk selection handlers
+  // --- Bulk selection handlers ---
   const toggleSelectAll = useCallback(() => {
     if (allSelected) {
       setSelectedIds(new Set());
@@ -346,15 +298,12 @@ export function CandidatesTable({
     }
   }, [allSelected, applications]);
 
-  const toggleSelect = useCallback((id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const toggleSelect = useCallback((id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setSelectedIds(prev => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }, []);
@@ -364,7 +313,6 @@ export function CandidatesTable({
     onSelectionModeChange?.(false);
   }, [onSelectionModeChange]);
 
-  // Handle bulk add to my candidates
   const handleBulkAddToMyCandidates = useCallback(async () => {
     const selectedApps = applications.filter(a => selectedIds.has(a.id));
     if (selectedApps.length === 0) return;
@@ -381,17 +329,13 @@ export function CandidatesTable({
     onUpdate();
   }, [applications, selectedIds, addCandidates, onSelectionModeChange, onUpdate]);
 
-  // Handle bulk reject
   const handleBulkReject = useCallback(async () => {
     const selectedApps = applications.filter(a => selectedIds.has(a.id));
     if (selectedApps.length === 0) return;
 
     try {
       const updates = selectedApps.map(app =>
-        supabase
-          .from('job_applications')
-          .update({ status: 'rejected' })
-          .eq('id', app.id)
+        supabase.from('job_applications').update({ status: 'rejected' }).eq('id', app.id)
       );
       await Promise.all(updates);
       toast.success(`${selectedApps.length} kandidat${selectedApps.length !== 1 ? 'er' : ''} nekad${selectedApps.length !== 1 ? 'e' : ''}`);
@@ -403,7 +347,6 @@ export function CandidatesTable({
     }
   }, [applications, selectedIds, onSelectionModeChange, onUpdate]);
 
-  // Handle bulk send message
   const [bulkMessageOpen, setBulkMessageOpen] = useState(false);
   const handleBulkSendMessage = useCallback(async (content: string) => {
     const selectedApps = applications.filter(a => selectedIds.has(a.id));
@@ -429,24 +372,19 @@ export function CandidatesTable({
     }
   }, [applications, selectedIds, user, onSelectionModeChange]);
 
-  // Sorting logic - 3-step toggle: neutral → desc → asc → neutral
+  // --- Sorting ---
   const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
-      if (sortDirection === 'desc') {
-        setSortDirection('asc');
-      } else if (sortDirection === 'asc') {
-        setSortField(null);
-        setSortDirection(null);
-      } else {
-        setSortDirection('desc');
-      }
+      if (sortDirection === 'desc') setSortDirection('asc');
+      else if (sortDirection === 'asc') { setSortField(null); setSortDirection(null); }
+      else setSortDirection('desc');
     } else {
       setSortField(field);
       setSortDirection('desc');
     }
   }, [sortField, sortDirection]);
 
-  // Get average rating for an application from team candidates (for colleagues)
+  // --- Team info helpers ---
   const getTeamInfo = useCallback((appId: string) => {
     const info = teamCandidates[appId];
     if (!info || info.length === 0) return null;
@@ -462,84 +400,75 @@ export function CandidatesTable({
     };
   }, [teamCandidates]);
 
-  // Get display rating - prefer direct application rating, fallback to team info
   const getDisplayRating = useCallback((application: ApplicationData) => {
-    // Direct rating from batch fetch (instant)
-    if (application.rating !== undefined && application.rating !== null) {
-      return application.rating;
-    }
-    // Fallback to team info (for colleague ratings)
+    if (application.rating !== undefined && application.rating !== null) return application.rating;
     const teamInfo = getTeamInfo(application.id);
     return teamInfo?.maxRating || 0;
   }, [getTeamInfo]);
 
   // Sort applications
   const sortedApplications = useMemo(() => {
-    // No sorting when neutral (sortField or sortDirection is null)
     if (!sortField || !sortDirection) return applications;
 
     return [...applications].sort((a, b) => {
       let comparison = 0;
-      
       switch (sortField) {
-        case 'name':
+        case 'name': {
           const nameA = `${a.first_name || ''} ${a.last_name || ''}`.toLowerCase();
           const nameB = `${b.first_name || ''} ${b.last_name || ''}`.toLowerCase();
           comparison = nameA.localeCompare(nameB, 'sv');
           break;
+        }
         case 'rating':
-          const ratingA = getDisplayRating(a);
-          const ratingB = getDisplayRating(b);
-          comparison = ratingA - ratingB;
+          comparison = getDisplayRating(a) - getDisplayRating(b);
           break;
         case 'applied_at':
-          const dateA = a.applied_at ? new Date(a.applied_at).getTime() : 0;
-          const dateB = b.applied_at ? new Date(b.applied_at).getTime() : 0;
-          comparison = dateA - dateB;
+          comparison = (a.applied_at ? new Date(a.applied_at).getTime() : 0) - (b.applied_at ? new Date(b.applied_at).getTime() : 0);
           break;
         case 'last_active_at':
-          const activeA = a.last_active_at ? new Date(a.last_active_at).getTime() : 0;
-          const activeB = b.last_active_at ? new Date(b.last_active_at).getTime() : 0;
-          comparison = activeA - activeB;
+          comparison = (a.last_active_at ? new Date(a.last_active_at).getTime() : 0) - (b.last_active_at ? new Date(b.last_active_at).getTime() : 0);
           break;
       }
-
       return sortDirection === 'asc' ? comparison : -comparison;
     });
   }, [applications, sortField, sortDirection, getDisplayRating]);
 
-  // Sort icon helper - shows both arrows when neutral
   const SortIcon = ({ field }: { field: SortField }) => {
-    // Always white, regardless of state
     const base = "h-3.5 w-3.5 ml-1.5 shrink-0 text-white";
-
-    // Neutral state (no sorting or different field): show both arrows
-    if (sortField !== field || sortDirection === null) {
-      return <ArrowUpDown className={base} />;
-    }
-    
-    // Active sorting: show single arrow
-    return sortDirection === 'asc'
-      ? <ArrowUp className={base} />
-      : <ArrowDown className={base} />;
+    if (sortField !== field || sortDirection === null) return <ArrowUpDown className={base} />;
+    return sortDirection === 'asc' ? <ArrowUp className={base} /> : <ArrowDown className={base} />;
   };
 
+  // --- Mobile handlers (stable callbacks for memoized cards) ---
+  const handleMobileToggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleMobileAddCandidate = useCallback((app: ApplicationData) => {
+    addCandidate.mutate({
+      applicationId: app.id,
+      applicantId: app.applicant_id,
+      jobId: app.job_id,
+    });
+  }, [addCandidate]);
+
+  const handleMobileAddToTeam = useCallback((app: ApplicationData) => {
+    setSelectedApplicationForTeam(app);
+    setTeamDialogOpen(true);
+  }, []);
+
+  // --- Empty state ---
   if (applications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
         <div className="bg-white/5 rounded-full p-6 mb-4">
-          <svg
-            className="h-12 w-12 text-muted-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-            />
+          <svg className="h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
         </div>
         <h3 className="text-lg font-semibold text-white mb-2">Inga kandidater än</h3>
@@ -552,7 +481,7 @@ export function CandidatesTable({
 
   return (
     <>
-      {/* Bulk actions bar - only visible when in selection mode */}
+      {/* Bulk actions bar */}
       {selectionMode && (
         <div className="mb-3 px-3 py-2 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-between">
           <span className="text-xs text-white">
@@ -572,13 +501,11 @@ export function CandidatesTable({
                 </button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button
-                      className="h-7 px-2.5 rounded-lg text-white hover:bg-white/10 border border-white/10 text-xs transition-colors"
-                    >
+                    <button className="h-7 px-2.5 rounded-lg text-white hover:bg-white/10 border border-white/10 text-xs transition-colors">
                       Åtgärder
                     </button>
                   </DropdownMenuTrigger>
-                   <DropdownMenuContent align="end" className="bg-[hsl(222,47%,11%)] border-white/10 min-w-[180px]">
+                  <DropdownMenuContent align="end" className="bg-[hsl(222,47%,11%)] border-white/10 min-w-[180px]">
                     <DropdownMenuItem 
                       className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
                       onClick={handleBulkAddToMyCandidates}
@@ -617,139 +544,20 @@ export function CandidatesTable({
 
       {/* Mobile card view */}
       {isMobile ? (
-        <TooltipProvider delayDuration={300}>
-        <div className="space-y-2">
-          {sortedApplications.map((application) => {
-            const status = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
-            const isAlreadyAdded = isInMyCandidates(application.id);
-            const teamInfo = getTeamInfo(application.id);
-            const isSelected = selectedIds.has(application.id);
-            const rating = getDisplayRating(application);
-
-            return (
-              <div
-                key={application.id}
-                className={cn(
-                  "bg-white/5 ring-1 ring-inset ring-white/10 rounded-lg p-3 active:scale-[0.98] transition-all duration-150 cursor-pointer",
-                  isSelected && "ring-white/30 bg-white/[0.08]"
-                )}
-                onClick={() => {
-                  if (selectionMode) {
-                    const next = new Set(selectedIds);
-                    if (next.has(application.id)) next.delete(application.id);
-                    else next.add(application.id);
-                    setSelectedIds(next);
-                  } else {
-                    handleRowClick(application);
-                  }
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  {/* Selection checkbox */}
-                  {selectionMode && (
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => {}}
-                      className="h-4 w-4 flex-shrink-0 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  )}
-
-                  {/* Avatar */}
-                  <div className="flex-shrink-0">
-                    <CandidateAvatar
-                      profileImageUrl={application.profile_image_url}
-                      videoUrl={application.video_url}
-                      isProfileVideo={application.is_profile_video}
-                      firstName={application.first_name}
-                      lastName={application.last_name}
-                      stopPropagation
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-white text-sm truncate">
-                        {application.first_name} {application.last_name}
-                      </span>
-                      {teamInfo && teamInfo.colleagues.length > 0 && (
-                        <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 flex-shrink-0">
-                          <Users className="h-2.5 w-2.5 text-purple-300" />
-                          <span className="text-[9px] text-purple-300 font-medium">
-                            {teamInfo.colleagues.length}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Rating stars */}
-                    {rating > 0 && (
-                      <div className="flex items-center gap-0.5 mt-0.5">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={cn(
-                              "h-2.5 w-2.5",
-                              star <= rating
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-white/30"
-                            )}
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Job title with tooltip */}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-xs text-white truncate mt-0.5 cursor-default">
-                          {application.job_title || 'Okänd tjänst'}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-[280px]">
-                        <p className="text-sm break-words">{application.job_title || 'Okänd tjänst'}</p>
-                      </TooltipContent>
-                    </Tooltip>
-
-                    {/* Time since last activity — crisp white */}
-                    <span className="text-[11px] text-white mt-0.5 block">
-                      {formatTimeAgo(application.applied_at)}
-                    </span>
-                  </div>
-
-                  {/* Right side: add button or chevron */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    {!isMyCandidatesLoading && !isAlreadyAdded && !selectionMode && (
-                      <button
-                        className="h-8 w-8 flex items-center justify-center rounded-full text-white active:bg-white/10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (hasTeam) {
-                            setSelectedApplicationForTeam(application);
-                            setTeamDialogOpen(true);
-                          } else {
-                            addCandidate.mutate({
-                              applicationId: application.id,
-                              applicantId: application.applicant_id,
-                              jobId: application.job_id,
-                            });
-                          }
-                        }}
-                      >
-                        <UserPlus className="h-4 w-4" />
-                      </button>
-                    )}
-                    {!selectionMode && (
-                      <ChevronRight className="h-4 w-4 text-white flex-shrink-0" />
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        </TooltipProvider>
+        <MobileCandidatesList
+          applications={sortedApplications}
+          selectedIds={selectedIds}
+          selectionMode={selectionMode}
+          isMyCandidatesLoading={isMyCandidatesLoading}
+          hasTeam={hasTeam}
+          getDisplayRating={getDisplayRating}
+          getTeamInfo={getTeamInfo}
+          isInMyCandidates={isInMyCandidates}
+          onToggleSelect={handleMobileToggleSelect}
+          onRowClick={handleRowClick}
+          onAddCandidate={handleMobileAddCandidate}
+          onAddToTeam={handleMobileAddToTeam}
+        />
       ) : (
         /* Desktop table view */
         <div className="rounded-lg border border-white/10 bg-white/5 overflow-hidden" style={{ contain: 'layout style' }}>
@@ -761,57 +569,30 @@ export function CandidatesTable({
                     <Checkbox
                       checked={allSelected}
                       ref={(el) => {
-                        if (el) {
-                          (el as any).indeterminate = someSelected;
-                        }
+                        if (el) (el as any).indeterminate = someSelected;
                       }}
                       onCheckedChange={toggleSelectAll}
                     />
                   </TableHead>
                 )}
-                <TableHead 
-                  className="text-white cursor-pointer hover:bg-white/5 select-none"
-                  onClick={() => handleSort('name')}
-                >
-                  <span className="flex items-center">
-                    Kandidat
-                    <SortIcon field="name" />
-                  </span>
+                <TableHead className="text-white cursor-pointer hover:bg-white/5 select-none" onClick={() => handleSort('name')}>
+                  <span className="flex items-center">Kandidat<SortIcon field="name" /></span>
                 </TableHead>
-                <TableHead 
-                  className="text-white cursor-pointer hover:bg-white/5 select-none"
-                  onClick={() => handleSort('rating')}
-                >
-                  <span className="flex items-center">
-                    Betyg
-                    <SortIcon field="rating" />
-                  </span>
+                <TableHead className="text-white cursor-pointer hover:bg-white/5 select-none" onClick={() => handleSort('rating')}>
+                  <span className="flex items-center">Betyg<SortIcon field="rating" /></span>
                 </TableHead>
                 <TableHead className="text-white">Tjänst</TableHead>
-                <TableHead 
-                  className="text-white cursor-pointer hover:bg-white/5 select-none"
-                  onClick={() => handleSort('applied_at')}
-                >
-                  <span className="flex items-center">
-                    Ansökt
-                    <SortIcon field="applied_at" />
-                  </span>
+                <TableHead className="text-white cursor-pointer hover:bg-white/5 select-none" onClick={() => handleSort('applied_at')}>
+                  <span className="flex items-center">Ansökt<SortIcon field="applied_at" /></span>
                 </TableHead>
-                <TableHead 
-                  className="text-white cursor-pointer hover:bg-white/5 select-none whitespace-nowrap"
-                  onClick={() => handleSort('last_active_at')}
-                >
-                  <span className="flex items-center">
-                    Senaste aktivitet
-                    <SortIcon field="last_active_at" />
-                  </span>
+                <TableHead className="text-white cursor-pointer hover:bg-white/5 select-none whitespace-nowrap" onClick={() => handleSort('last_active_at')}>
+                  <span className="flex items-center">Senaste aktivitet<SortIcon field="last_active_at" /></span>
                 </TableHead>
                 <TableHead className="text-white w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sortedApplications.map((application) => {
-                const status = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
                 const isAlreadyAdded = isInMyCandidates(application.id);
                 const teamInfo = getTeamInfo(application.id);
                 const isSelected = selectedIds.has(application.id);
@@ -831,11 +612,7 @@ export function CandidatesTable({
                   >
                     {selectionMode && (
                       <TableCell onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={() => {}}
-                          onClick={(e) => toggleSelect(application.id, e)}
-                        />
+                        <Checkbox checked={isSelected} onCheckedChange={() => {}} onClick={(e) => toggleSelect(application.id, e)} />
                       </TableCell>
                     )}
                     <TableCell>
@@ -850,30 +627,22 @@ export function CandidatesTable({
                         />
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-white">
-                              {application.first_name} {application.last_name}
-                            </span>
+                            <span className="font-medium text-white">{application.first_name} {application.last_name}</span>
                             {teamInfo && teamInfo.colleagues.length > 0 && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30">
                                     <Users className="h-3 w-3 text-purple-300" />
-                                    <span className="text-[10px] text-purple-300 font-medium">
-                                      {teamInfo.colleagues.length}
-                                    </span>
+                                    <span className="text-[10px] text-purple-300 font-medium">{teamInfo.colleagues.length}</span>
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs">
-                                  <p className="text-xs">
-                                    Tillagd av: {teamInfo.colleagues.join(', ')}
-                                  </p>
+                                  <p className="text-xs">Tillagd av: {teamInfo.colleagues.join(', ')}</p>
                                 </TooltipContent>
                               </Tooltip>
                             )}
                           </div>
-                          {application.phone && (
-                            <div className="text-sm text-muted-foreground">{application.phone}</div>
-                          )}
+                          {application.phone && <div className="text-sm text-muted-foreground">{application.phone}</div>}
                         </div>
                       </div>
                     </TableCell>
@@ -882,34 +651,20 @@ export function CandidatesTable({
                         {[1, 2, 3, 4, 5].map((star) => {
                           const rating = getDisplayRating(application);
                           return (
-                            <Star
-                              key={star}
-                              className={cn(
-                                "h-3.5 w-3.5",
-                                star <= rating
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "text-white/20"
-                              )}
-                            />
+                            <Star key={star} className={cn("h-3.5 w-3.5", star <= rating ? "fill-yellow-400 text-yellow-400" : "text-white/20")} />
                           );
                         })}
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {application.job_title || 'Okänd tjänst'}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground whitespace-nowrap">
-                      {formatTimeAgo(application.applied_at)}
-                    </TableCell>
+                    <TableCell className="text-muted-foreground">{application.job_title || 'Okänd tjänst'}</TableCell>
+                    <TableCell className="text-muted-foreground whitespace-nowrap">{formatTimeAgo(application.applied_at)}</TableCell>
                     <TableCell className="text-muted-foreground whitespace-nowrap">
                       {application.last_active_at ? (
                         <span className="flex items-center gap-1.5">
                           <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                           {formatTimeAgo(application.last_active_at)}
                         </span>
-                      ) : (
-                        '-'
-                      )}
+                      ) : '-'}
                     </TableCell>
                     <TableCell>
                       {!isMyCandidatesLoading && !isAlreadyAdded && (
@@ -937,9 +692,7 @@ export function CandidatesTable({
                               <UserPlus className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>
-                            {hasTeam ? 'Lägg till i kandidatlista' : 'Lägg till i Mina kandidater'}
-                          </TooltipContent>
+                          <TooltipContent>{hasTeam ? 'Lägg till i kandidatlista' : 'Lägg till i Mina kandidater'}</TooltipContent>
                         </Tooltip>
                       )}
                     </TableCell>
@@ -951,15 +704,12 @@ export function CandidatesTable({
         </div>
       )}
       
-      {/* Infinite scroll sentinel - endast om vi inte nått gränsen */}
+      {/* Infinite scroll sentinel */}
       {hasMore && !hasReachedLimit && (
-        <InfiniteScrollSentinel 
-          onIntersect={onLoadMore} 
-          isLoading={isLoadingMore} 
-        />
+        <InfiniteScrollSentinel onIntersect={onLoadMore} isLoading={isLoadingMore} />
       )}
 
-      {/* "Vill du fortsätta?" banner efter 500 kandidater */}
+      {/* "Vill du fortsätta?" banner */}
       {hasReachedLimit && hasMore && (
         <div className="flex flex-col items-center justify-center py-8 px-4 bg-gradient-to-b from-background/50 to-background border-t border-border/50">
           <div className="text-center space-y-3 max-w-md">
@@ -969,11 +719,7 @@ export function CandidatesTable({
             <p className="text-muted-foreground/80 text-xs">
               Vill du ladda fler? Du kan också använda sökfältet för att hitta specifika kandidater snabbare.
             </p>
-            <Button
-              variant="outline"
-              onClick={onContinueLoading}
-              className="mt-2"
-            >
+            <Button variant="outline" onClick={onContinueLoading} className="mt-2">
               Ladda fler kandidater
             </Button>
           </div>
@@ -984,23 +730,16 @@ export function CandidatesTable({
         application={selectedApplication}
         open={dialogOpen}
         onOpenChange={handleDialogClose}
-        onStatusUpdate={() => {
-          onUpdate();
-          handleDialogClose();
-        }}
+        onStatusUpdate={() => { onUpdate(); handleDialogClose(); }}
         allApplications={allCandidateApplications.length > 0 ? allCandidateApplications : undefined}
         loadingApplications={loadingAllCandidateApplications}
         variant="all-candidates"
       />
 
-      {/* Team selection dialog */}
       {selectedApplicationForTeam && (
         <AddToColleagueListDialog
           open={teamDialogOpen}
-          onOpenChange={(open) => {
-            setTeamDialogOpen(open);
-            if (!open) setSelectedApplicationForTeam(null);
-          }}
+          onOpenChange={(open) => { setTeamDialogOpen(open); if (!open) setSelectedApplicationForTeam(null); }}
           teamMembers={teamMembers}
           applicationId={selectedApplicationForTeam.id}
           applicantId={selectedApplicationForTeam.applicant_id}
@@ -1009,7 +748,6 @@ export function CandidatesTable({
         />
       )}
 
-      {/* Bulk message dialog */}
       {bulkMessageOpen && (
         <BulkMessageDialog
           open={bulkMessageOpen}
@@ -1019,59 +757,5 @@ export function CandidatesTable({
         />
       )}
     </>
-  );
-};
-
-// Simple inline bulk message dialog
-function BulkMessageDialog({ 
-  open, onOpenChange, count, onSend 
-}: { 
-  open: boolean; 
-  onOpenChange: (v: boolean) => void; 
-  count: number;
-  onSend: (content: string) => Promise<void>;
-}) {
-  const [message, setMessage] = useState('');
-  const [sending, setSending] = useState(false);
-
-  const handleSend = async () => {
-    if (!message.trim()) return;
-    setSending(true);
-    await onSend(message.trim());
-    setSending(false);
-    setMessage('');
-  };
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => onOpenChange(false)}>
-      <div className="bg-slate-900 border border-white/20 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
-        <h3 className="text-lg font-semibold text-white mb-1">Skicka meddelande</h3>
-        <p className="text-sm text-white/60 mb-4">Till {count} kandidat{count !== 1 ? 'er' : ''}</p>
-        <textarea
-          value={message}
-          onChange={e => setMessage(e.target.value)}
-          placeholder="Skriv ditt meddelande..."
-          className="w-full h-32 bg-white/5 border border-white/20 rounded-lg p-3 text-white text-sm resize-none focus:outline-none focus:ring-1 focus:ring-white/30 placeholder:text-white/30"
-          autoFocus
-        />
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            onClick={() => onOpenChange(false)}
-            className="px-4 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 text-sm transition-colors"
-          >
-            Avbryt
-          </button>
-          <button
-            onClick={handleSend}
-            disabled={!message.trim() || sending}
-            className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm hover:bg-white/20 transition-colors disabled:opacity-40"
-          >
-            {sending ? 'Skickar...' : 'Skicka'}
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
