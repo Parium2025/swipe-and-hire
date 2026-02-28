@@ -230,8 +230,8 @@ const EmployerDashboard = memo(() => {
     );
   }
 
-  // Use animate-fade-in only on first real load, not on cached re-navigations
-  const fadeClass = dataWasCached.current ? '' : 'animate-fade-in';
+  // Always fade in on mount — symmetric with dashboard
+  const fadeClass = 'animate-fade-in';
 
   return (
      <div className={`space-y-4 responsive-container-wide ${fadeClass}`}>
