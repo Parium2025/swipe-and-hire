@@ -428,10 +428,10 @@ export const CandidateProfileDialog = ({
                   >
                     <span className="truncate">{displayApp.job_title || 'Okänt jobb'}</span>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-xs text-white/60">
+                      <span className="text-xs text-white">
                         {allApplications!.length} jobb
                       </span>
-                      <ChevronDown className={`h-4 w-4 text-white/60 transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
                     </div>
                   </button>
                   
@@ -458,7 +458,7 @@ export const CandidateProfileDialog = ({
                                 <p className="text-sm text-white leading-snug break-words">
                                   {app.job_title || 'Okänt jobb'}
                                 </p>
-                                <p className="text-xs text-white/50 mt-0.5">
+                                <p className="text-xs text-white mt-0.5">
                                   Sökte {formatTimeAgo(app.applied_at)}
                                 </p>
                               </div>
