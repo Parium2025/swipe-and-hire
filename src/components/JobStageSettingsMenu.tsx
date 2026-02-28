@@ -30,7 +30,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react';
+import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle, MoveVertical } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS, getJobStageIconByName } from '@/hooks/useJobStageSettings';
@@ -59,7 +59,7 @@ export function JobStageSettingsMenu({
   onLiveColorChange,
   stageIndex = 0,
 }: JobStageSettingsMenuProps) {
-  const { stageSettings, updateStage, deleteStage, reorderStage, orderedStages } = useJobStageSettings(jobId);
+  const { stageSettings, updateStage, deleteStage, moveStageToPosition, orderedStages } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
   const isMobile = useIsMobile();
   
@@ -68,6 +68,7 @@ export function JobStageSettingsMenu({
   const [colorDialogOpen, setColorDialogOpen] = useState(false);
   const [iconDialogOpen, setIconDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [newLabel, setNewLabel] = useState(settings?.label || '');
   const [liveColor, setLiveColor] = useState<string | null>(null);
@@ -256,32 +257,57 @@ export function JobStageSettingsMenu({
           
           <DropdownMenuSeparator className="bg-white/10 my-0.5" />
           
-          {/* Move up */}
-          {stageIndex > 0 && (
-            <DropdownMenuItem 
-              onSelect={() => {
-                reorderStage({ stageKey, direction: 'up' });
-                toast.success('Steg flyttat uppåt');
-              }}
-              className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
-            >
-              <ArrowUp className="h-3 w-3 mr-1.5 flex-shrink-0" />
-              Flytta uppåt
-            </DropdownMenuItem>
-          )}
-          
-          {/* Move down */}
-          {stageIndex < totalStageCount - 1 && (
-            <DropdownMenuItem 
-              onSelect={() => {
-                reorderStage({ stageKey, direction: 'down' });
-                toast.success('Steg flyttat nedåt');
-              }}
-              className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
-            >
-              <ArrowDown className="h-3 w-3 mr-1.5 flex-shrink-0" />
-              Flytta nedåt
-            </DropdownMenuItem>
+          {/* Move to position - submenu with all positions */}
+          {orderedStages.length > 1 && (
+            isMobile ? (
+              <DropdownMenuItem 
+                onSelect={() => { setTimeout(() => setMoveDialogOpen(true), 100); }}
+                className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
+              >
+                <MoveVertical className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                Flytta
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 transition-colors duration-100">
+                  <MoveVertical className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                  Flytta
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent 
+                    className="bg-card-parium border-white/20 w-44"
+                    sideOffset={4}
+                  >
+                    {orderedStages.map((key, idx) => {
+                      const s = stageSettings[key];
+                      const isCurrent = key === stageKey;
+                      return (
+                        <DropdownMenuItem
+                          key={key}
+                          disabled={isCurrent}
+                          onSelect={() => {
+                            moveStageToPosition({ stageKey, targetPosition: idx });
+                            toast.success('Steg flyttat');
+                          }}
+                          className={`text-xs py-1.5 px-2 min-h-0 transition-colors duration-100 ${
+                            isCurrent 
+                              ? 'text-white/40 cursor-default' 
+                              : 'text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer'
+                          }`}
+                        >
+                          <div 
+                            className="w-2.5 h-2.5 rounded-full mr-2 flex-shrink-0"
+                            style={{ backgroundColor: s?.color ?? '#0EA5E9' }}
+                          />
+                          <span className="truncate">{s?.label ?? key}</span>
+                          {isCurrent && <span className="ml-auto text-[10px] text-white/30">nuvarande</span>}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+            )
           )}
 
           <DropdownMenuSeparator className="bg-white/10 my-0.5" />
@@ -399,6 +425,47 @@ export function JobStageSettingsMenu({
                 <Icon className="h-5 w-5" />
               </button>
             ))}
+          </div>
+        </DialogContentNoFocus>
+      </Dialog>
+
+      {/* Move position dialog (mobile only) */}
+      <Dialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen}>
+        <DialogContentNoFocus className="bg-card-parium border-white/20 sm:max-w-xs w-[calc(100vw-2rem)]">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <MoveVertical className="h-4 w-4" />
+              Flytta steg
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1 py-2">
+            {orderedStages.map((key, idx) => {
+              const s = stageSettings[key];
+              const isCurrent = key === stageKey;
+              return (
+                <button
+                  key={key}
+                  disabled={isCurrent}
+                  onClick={() => {
+                    moveStageToPosition({ stageKey, targetPosition: idx });
+                    toast.success('Steg flyttat');
+                    setMoveDialogOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all duration-100 touch-manipulation ${
+                    isCurrent 
+                      ? 'text-white/40 bg-white/5 cursor-default' 
+                      : 'text-white active:bg-white/15 active:scale-[0.98]'
+                  }`}
+                >
+                  <div 
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: s?.color ?? '#0EA5E9' }}
+                  />
+                  <span className="truncate">{s?.label ?? key}</span>
+                  {isCurrent && <span className="ml-auto text-[10px] text-white/30">nuvarande</span>}
+                </button>
+              );
+            })}
           </div>
         </DialogContentNoFocus>
       </Dialog>

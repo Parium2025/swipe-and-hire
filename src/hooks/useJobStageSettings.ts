@@ -259,19 +259,15 @@ export function useJobStageSettings(jobId: string | undefined) {
     },
   });
 
-  // Reorder stage (move up or down)
+  // Reorder stage - move to a specific position
   const reorderStageMutation = useMutation({
-    mutationFn: async ({ stageKey, direction }: { stageKey: string; direction: 'up' | 'down' }) => {
+    mutationFn: async ({ stageKey, targetPosition }: { stageKey: string; targetPosition: number }) => {
       if (!navigator.onLine) throw new Error('Du är offline');
       if (!jobId) throw new Error('No job ID');
 
       const currentIndex = orderedStages.indexOf(stageKey);
       if (currentIndex === -1) throw new Error('Stage not found');
-
-      const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-      if (targetIndex < 0 || targetIndex >= orderedStages.length) return;
-
-      const targetKey = orderedStages[targetIndex];
+      if (targetPosition === currentIndex) return;
 
       // First ensure all stages are in DB
       const existingKeys = dbSettings.map(s => s.stage_key);
@@ -290,39 +286,37 @@ export function useJobStageSettings(jobId: string | undefined) {
         await supabase.from('job_stage_settings').insert(defaultInserts);
       }
 
-      // Swap order_index values
-      const currentSettings = stageSettings[stageKey];
-      const targetSettings = stageSettings[targetKey];
+      // Build new order array
+      const newOrder = [...orderedStages];
+      newOrder.splice(currentIndex, 1);
+      newOrder.splice(targetPosition, 0, stageKey);
 
-      await Promise.all([
+      // Update all order_index values
+      const updates = newOrder.map((key, idx) =>
         supabase
           .from('job_stage_settings')
-          .update({ order_index: targetSettings.orderIndex, updated_at: new Date().toISOString() })
+          .update({ order_index: idx, updated_at: new Date().toISOString() })
           .eq('job_id', jobId)
-          .eq('stage_key', stageKey),
-        supabase
-          .from('job_stage_settings')
-          .update({ order_index: currentSettings.orderIndex, updated_at: new Date().toISOString() })
-          .eq('job_id', jobId)
-          .eq('stage_key', targetKey),
-      ]);
+          .eq('stage_key', key)
+      );
+      await Promise.all(updates);
     },
-    onMutate: async ({ stageKey, direction }) => {
-      // Optimistic update
+    onMutate: async ({ stageKey, targetPosition }) => {
       await queryClient.cancelQueries({ queryKey: ['job-stage-settings', jobId] });
       const prev = queryClient.getQueryData(['job-stage-settings', jobId]);
 
       queryClient.setQueryData(['job-stage-settings', jobId], (old: DbJobStageSetting[] | undefined) => {
         if (!old) return old;
         const currentIdx = orderedStages.indexOf(stageKey);
-        const targetIdx = direction === 'up' ? currentIdx - 1 : currentIdx + 1;
-        if (targetIdx < 0 || targetIdx >= orderedStages.length) return old;
-        const targetKey = orderedStages[targetIdx];
+        if (currentIdx === -1) return old;
+
+        const newOrder = [...orderedStages];
+        newOrder.splice(currentIdx, 1);
+        newOrder.splice(targetPosition, 0, stageKey);
 
         return old.map(s => {
-          if (s.stage_key === stageKey) return { ...s, order_index: old.find(x => x.stage_key === targetKey)?.order_index ?? s.order_index };
-          if (s.stage_key === targetKey) return { ...s, order_index: old.find(x => x.stage_key === stageKey)?.order_index ?? s.order_index };
-          return s;
+          const newIdx = newOrder.indexOf(s.stage_key);
+          return newIdx !== -1 ? { ...s, order_index: newIdx } : s;
         });
       });
 
@@ -368,7 +362,7 @@ export function useJobStageSettings(jobId: string | undefined) {
     updateStage: updateStageMutation.mutate,
     createStage: createStageMutation.mutateAsync,
     deleteStage: deleteStageMutation.mutate,
-    reorderStage: reorderStageMutation.mutate,
+    moveStageToPosition: reorderStageMutation.mutate,
     isUpdating: updateStageMutation.isPending,
     isCreating: createStageMutation.isPending,
     isDeleting: deleteStageMutation.isPending,
