@@ -481,9 +481,7 @@ export const CandidateProfileDialog = ({
                             <span className="text-xs text-white">
                               {allApplications ? `${allApplications.length} jobb` : '1 jobb'}
                             </span>
-                            {loadingApplications ? (
-                              <Loader2 className="h-4 w-4 text-white animate-spin" />
-                            ) : hasMultipleApplications ? (
+                            {hasMultipleApplications ? (
                               <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
                             ) : (
                               <Briefcase className="h-4 w-4 text-white/60" />
