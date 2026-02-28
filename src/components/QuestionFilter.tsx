@@ -465,12 +465,6 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             )}
           </div>
 
-          {/* Info about excluded question types */}
-          {unfilteredCount > 0 && (
-            <div className="px-2.5 py-1.5 border-t border-white/10 text-xs text-white">
-              {unfilteredCount} {unfilteredCount === 1 ? 'fråga' : 'frågor'} (fritext/siffror) kan ej filtreras
-            </div>
-          )}
 
           {hasFilters && (
             <div className="p-2 border-t border-white/10">
