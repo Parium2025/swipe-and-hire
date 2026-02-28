@@ -133,14 +133,17 @@ const CandidatesContent = () => {
     });
   }, [safeApplications, questionFilters, searchQuery]);
 
-  // Recalculate stats based on filtered results
-  const filteredStats = useMemo(() => ({
-    total: filteredApplications.length,
-    new: filteredApplications.filter(app => app.status === 'pending').length,
-    reviewing: filteredApplications.filter(app => app.status === 'reviewing').length,
-    hired: filteredApplications.filter(app => app.status === 'hired').length,
-    rejected: filteredApplications.filter(app => app.status === 'rejected').length,
-  }), [filteredApplications]);
+  // Recalculate stats based on filtered results — count unique candidates, not applications
+  const filteredStats = useMemo(() => {
+    const uniqueApplicants = new Set(filteredApplications.map(app => app.applicant_id));
+    return {
+      total: uniqueApplicants.size,
+      new: filteredApplications.filter(app => app.status === 'pending').length,
+      reviewing: filteredApplications.filter(app => app.status === 'reviewing').length,
+      hired: filteredApplications.filter(app => app.status === 'hired').length,
+      rejected: filteredApplications.filter(app => app.status === 'rejected').length,
+    };
+  }, [filteredApplications]);
 
   if (isLoading || !showContent) {
     return (
