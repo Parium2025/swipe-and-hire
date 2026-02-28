@@ -3,37 +3,24 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-interface SavedSearch {
-  id: string;
-  user_id: string;
-  name: string;
-  search_query: string | null;
-  city: string | null;
-  county: string | null;
-  employment_types: string[] | null;
-  category: string | null;
-  salary_min: number | null;
-  salary_max: number | null;
-  last_checked_at: string;
-}
+const BATCH_SIZE = 500;
 
-interface JobPosting {
-  id: string;
+interface NewJobPayload {
+  job_id: string;
   title: string;
   workplace_city: string | null;
+  workplace_municipality?: string | null;
   workplace_county: string | null;
   employment_type: string | null;
   category: string | null;
   salary_min: number | null;
   salary_max: number | null;
-  created_at: string;
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -43,155 +30,149 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log('[check-saved-searches] Starting check for new matching jobs...');
+    const body = await req.json() as NewJobPayload;
+    const { job_id, title, workplace_city, workplace_municipality, workplace_county, employment_type, category, salary_min, salary_max } = body;
 
-    // Get all saved searches
-    const { data: savedSearches, error: searchError } = await supabase
-      .from('saved_searches')
-      .select('*');
-
-    if (searchError) {
-      console.error('[check-saved-searches] Error fetching saved searches:', searchError);
-      throw searchError;
+    if (!job_id) {
+      // Legacy mode: full scan (called by cron)
+      return await fullScan(supabase);
     }
 
-    if (!savedSearches || savedSearches.length === 0) {
-      console.log('[check-saved-searches] No saved searches found');
-      return new Response(JSON.stringify({ message: 'No saved searches to check' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // ──────────────────────────────────────────────
+    // SINGLE-JOB MODE: match one new job against all saved searches in batches
+    // ──────────────────────────────────────────────
+    console.log(`[check-saved-searches] Matching job "${title}" (${job_id}) against saved searches...`);
 
-    console.log(`[check-saved-searches] Found ${savedSearches.length} saved searches`);
+    let offset = 0;
+    let totalMatches = 0;
+    let totalChecked = 0;
 
-    // For each saved search, find new jobs since last check
-    const updates: { searchId: string; userId: string; newCount: number; searchName: string }[] = [];
-
-    for (const search of savedSearches as SavedSearch[]) {
-      // Build query for matching jobs
-      let query = supabase
-        .from('job_postings')
-        .select('id, title, workplace_city, workplace_county, employment_type, category, salary_min, salary_max, created_at')
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .gt('created_at', search.last_checked_at);
-
-      // Apply filters based on saved search criteria
-      if (search.search_query) {
-        // Use ilike for simple text search
-        query = query.or(`title.ilike.%${search.search_query}%,workplace_city.ilike.%${search.search_query}%`);
-      }
-
-      if (search.city) {
-        query = query.or(`workplace_city.ilike.%${search.city}%,workplace_municipality.ilike.%${search.city}%`);
-      }
-
-      if (search.county) {
-        query = query.eq('workplace_county', search.county);
-      }
-
-      if (search.employment_types && search.employment_types.length > 0) {
-        query = query.in('employment_type', search.employment_types);
-      }
-
-      if (search.category) {
-        query = query.eq('category', search.category);
-      }
-
-      // Salary range filter
-      if (search.salary_min) {
-        query = query.or(`salary_max.gte.${search.salary_min},salary_max.is.null`);
-      }
-
-      if (search.salary_max) {
-        query = query.or(`salary_min.lte.${search.salary_max},salary_min.is.null`);
-      }
-
-      const { data: matchingJobs, error: jobError } = await query;
-
-      if (jobError) {
-        console.error(`[check-saved-searches] Error checking jobs for search ${search.id}:`, jobError);
-        continue;
-      }
-
-      const newMatchCount = matchingJobs?.length || 0;
-
-      if (newMatchCount > 0) {
-        console.log(`[check-saved-searches] Found ${newMatchCount} new jobs for search "${search.name}"`);
-        updates.push({
-          searchId: search.id,
-          userId: search.user_id,
-          newCount: newMatchCount,
-          searchName: search.name,
-        });
-      }
-    }
-
-    // Update saved searches with new match counts and send push notifications
-    for (const update of updates) {
-      // Increment new_matches_count
-      const { error: updateError } = await supabase
+    while (true) {
+      const { data: batch, error: batchError } = await supabase
         .from('saved_searches')
-        .update({
-          new_matches_count: supabase.rpc('increment_count', { row_id: update.searchId }),
-          last_checked_at: new Date().toISOString(),
-        })
-        .eq('id', update.searchId);
+        .select('id, user_id, name, search_query, city, county, employment_types, category, salary_min, salary_max')
+        .range(offset, offset + BATCH_SIZE - 1);
 
-      // Fallback: direct update if RPC doesn't exist
-      if (updateError) {
-        // Get current count and increment
-        const { data: current } = await supabase
-          .from('saved_searches')
-          .select('new_matches_count')
-          .eq('id', update.searchId)
-          .single();
-
-        await supabase
-          .from('saved_searches')
-          .update({
-            new_matches_count: (current?.new_matches_count || 0) + update.newCount,
-            last_checked_at: new Date().toISOString(),
-          })
-          .eq('id', update.searchId);
+      if (batchError) {
+        console.error('[check-saved-searches] Batch fetch error:', batchError);
+        break;
       }
 
-      // Send push notification
-      try {
-        await supabase.functions.invoke('send-push-notification', {
-          body: {
-            recipient_id: update.userId,
-            title: '🔔 Nya jobb matchar din sökning!',
-            body: `${update.newCount} nya jobb matchar "${update.searchName}"`,
-            data: {
-              type: 'saved_search_match',
-              search_id: update.searchId,
-              route: '/search-jobs',
-            },
-          },
-        });
-        console.log(`[check-saved-searches] Push sent to user ${update.userId}`);
-      } catch (pushError) {
-        console.error(`[check-saved-searches] Failed to send push:`, pushError);
+      if (!batch || batch.length === 0) break;
+
+      totalChecked += batch.length;
+      const titleLower = (title || '').toLowerCase();
+      const cityLower = (workplace_city || '').toLowerCase();
+      const municipalityLower = (workplace_municipality || '').toLowerCase();
+      const countyValue = workplace_county || '';
+
+      for (const search of batch) {
+        let matches = true;
+
+        // Text search
+        if (search.search_query && search.search_query !== '') {
+          const q = search.search_query.toLowerCase();
+          if (!titleLower.includes(q) && !cityLower.includes(q) && !municipalityLower.includes(q)) {
+            matches = false;
+          }
+        }
+
+        // City filter
+        if (matches && search.city && search.city !== '') {
+          const sc = search.city.toLowerCase();
+          if (!cityLower.includes(sc) && !municipalityLower.includes(sc)) {
+            matches = false;
+          }
+        }
+
+        // County filter
+        if (matches && search.county && search.county !== '') {
+          if (countyValue !== search.county) {
+            matches = false;
+          }
+        }
+
+        // Employment type filter
+        if (matches && search.employment_types && search.employment_types.length > 0) {
+          if (!employment_type || !search.employment_types.includes(employment_type)) {
+            matches = false;
+          }
+        }
+
+        // Category filter
+        if (matches && search.category && search.category !== '') {
+          if (category !== search.category) {
+            matches = false;
+          }
+        }
+
+        // Salary filters
+        if (matches && search.salary_min != null) {
+          if (salary_max != null && salary_max < search.salary_min) {
+            matches = false;
+          }
+        }
+        if (matches && search.salary_max != null) {
+          if (salary_min != null && salary_min > search.salary_max) {
+            matches = false;
+          }
+        }
+
+        if (matches) {
+          totalMatches++;
+
+          // Update match count
+          const { data: current } = await supabase
+            .from('saved_searches')
+            .select('new_matches_count')
+            .eq('id', search.id)
+            .single();
+
+          await supabase
+            .from('saved_searches')
+            .update({
+              new_matches_count: (current?.new_matches_count || 0) + 1,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', search.id);
+
+          // Send push notification (fire-and-forget)
+          try {
+            const notifEnabled = await supabase.rpc('is_notification_enabled', {
+              p_user_id: search.user_id,
+              p_type: 'saved_search_match',
+            });
+
+            if (notifEnabled.data) {
+              await supabase.functions.invoke('send-push-notification', {
+                body: {
+                  recipient_id: search.user_id,
+                  title: '🔔 Nytt jobb matchar din sökning!',
+                  body: `${title} - ${workplace_city || 'Okänd plats'}`,
+                  data: {
+                    type: 'saved_search_match',
+                    job_id,
+                    search_id: search.id,
+                    route: '/job-view/' + job_id,
+                  },
+                },
+              });
+            }
+          } catch (pushErr) {
+            console.warn('[check-saved-searches] Push failed for user', search.user_id, pushErr);
+          }
+        }
       }
+
+      // If we got less than BATCH_SIZE, we've reached the end
+      if (batch.length < BATCH_SIZE) break;
+      offset += BATCH_SIZE;
     }
 
-    // Update last_checked_at for all searches (even those with no matches)
-    const now = new Date().toISOString();
-    await supabase
-      .from('saved_searches')
-      .update({ last_checked_at: now })
-      .lt('last_checked_at', now);
-
-    console.log(`[check-saved-searches] Completed. ${updates.length} searches had new matches.`);
+    console.log(`[check-saved-searches] Done. Checked ${totalChecked} searches, ${totalMatches} matches.`);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        searchesChecked: savedSearches.length,
-        searchesWithNewMatches: updates.length,
-        totalNewJobs: updates.reduce((sum, u) => sum + u.newCount, 0),
-      }),
+      JSON.stringify({ success: true, checked: totalChecked, matches: totalMatches }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
@@ -202,3 +183,84 @@ serve(async (req) => {
     );
   }
 });
+
+/**
+ * Legacy full-scan mode (for cron-based checks)
+ */
+async function fullScan(supabase: any) {
+  console.log('[check-saved-searches] Running full scan (cron mode)...');
+
+  let offset = 0;
+  let totalUpdates = 0;
+
+  while (true) {
+    const { data: searches, error } = await supabase
+      .from('saved_searches')
+      .select('*')
+      .range(offset, offset + BATCH_SIZE - 1);
+
+    if (error || !searches || searches.length === 0) break;
+
+    for (const search of searches) {
+      let query = supabase
+        .from('job_postings')
+        .select('id, title, workplace_city', { count: 'exact', head: true })
+        .eq('is_active', true)
+        .is('deleted_at', null)
+        .gt('created_at', search.last_checked_at);
+
+      if (search.search_query) {
+        query = query.or(`title.ilike.%${search.search_query}%,workplace_city.ilike.%${search.search_query}%`);
+      }
+      if (search.city) {
+        query = query.or(`workplace_city.ilike.%${search.city}%,workplace_municipality.ilike.%${search.city}%`);
+      }
+      if (search.county) {
+        query = query.eq('workplace_county', search.county);
+      }
+      if (search.employment_types?.length > 0) {
+        query = query.in('employment_type', search.employment_types);
+      }
+      if (search.category) {
+        query = query.eq('category', search.category);
+      }
+      if (search.salary_min != null) {
+        query = query.or(`salary_max.gte.${search.salary_min},salary_max.is.null`);
+      }
+      if (search.salary_max != null) {
+        query = query.or(`salary_min.lte.${search.salary_max},salary_min.is.null`);
+      }
+
+      const { count } = await query;
+
+      if (count && count > 0) {
+        totalUpdates++;
+        await supabase
+          .from('saved_searches')
+          .update({
+            new_matches_count: (search.new_matches_count || 0) + count,
+            last_checked_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', search.id);
+      }
+    }
+
+    // Update last_checked_at even for non-matching
+    const ids = searches.map((s: any) => s.id);
+    await supabase
+      .from('saved_searches')
+      .update({ last_checked_at: new Date().toISOString() })
+      .in('id', ids);
+
+    if (searches.length < BATCH_SIZE) break;
+    offset += BATCH_SIZE;
+  }
+
+  console.log(`[check-saved-searches] Full scan done. ${totalUpdates} searches updated.`);
+
+  return new Response(
+    JSON.stringify({ success: true, mode: 'full_scan', updatedSearches: totalUpdates }),
+    { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+  );
+}
