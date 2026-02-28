@@ -10,7 +10,7 @@ import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
 import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare, X, ArrowUpDown, ArrowUp, ArrowDown, XCircle, MessageCircle, ChevronRight, Briefcase } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -617,6 +617,7 @@ export function CandidatesTable({
 
       {/* Mobile card view */}
       {isMobile ? (
+        <TooltipProvider delayDuration={300}>
         <div className="space-y-2">
           {sortedApplications.map((application) => {
             const status = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
@@ -682,32 +683,22 @@ export function CandidatesTable({
                       )}
                     </div>
 
-                    {/* Rating stars */}
-                    {rating > 0 && (
-                      <div className="flex items-center gap-0.5 mt-0.5">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={cn(
-                              "h-2.5 w-2.5",
-                              star <= rating
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-white/30"
-                            )}
-                          />
-                        ))}
-                      </div>
-                    )}
+                    {/* Job title with tooltip */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xs text-white truncate mt-0.5 cursor-default">
+                          {application.job_title || 'Okänd tjänst'}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[280px]">
+                        <p className="text-sm break-words">{application.job_title || 'Okänd tjänst'}</p>
+                      </TooltipContent>
+                    </Tooltip>
 
-                    {/* Job title + time */}
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-white truncate">
-                        {application.job_title || 'Okänd tjänst'}
-                      </span>
-                      <span className="text-[10px] text-white flex-shrink-0">
-                        {formatTimeAgo(application.applied_at)}
-                      </span>
-                    </div>
+                    {/* Time since last activity */}
+                    <span className="text-[11px] text-white/60 mt-0.5 block">
+                      {formatTimeAgo(application.applied_at)}
+                    </span>
                   </div>
 
                   {/* Right side: add button or chevron */}
@@ -741,6 +732,7 @@ export function CandidatesTable({
             );
           })}
         </div>
+        </TooltipProvider>
       ) : (
         /* Desktop table view */
         <div className="rounded-lg border border-white/10 bg-white/5 overflow-hidden" style={{ contain: 'layout style' }}>
