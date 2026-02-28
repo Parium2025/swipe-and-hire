@@ -363,19 +363,30 @@ export function CandidatesTable({
 
         const applicantIds = Array.from(uncachedApplicants.keys());
 
-        // Fetch all applications for all uncached applicants in ONE query
-        const { data: allApps, error: appError } = await supabase
-          .from('job_applications')
-          .select(`
-            id, job_id, applicant_id, first_name, last_name, email, phone,
-            location, bio, cv_url, age, employment_status, work_schedule,
-            availability, custom_answers, status, applied_at, updated_at,
-            profile_image_snapshot_url, video_snapshot_url
-          `)
-          .in('applicant_id', applicantIds)
-          .in('job_id', jobIds);
+        // Chunk applicant IDs to avoid exceeding Supabase's 1000-row default limit
+        // Each applicant may have multiple applications, so we keep chunks small
+        const CHUNK_SIZE = 200;
+        let allApps: any[] = [];
 
-        if (appError || !allApps) return;
+        for (let i = 0; i < applicantIds.length; i += CHUNK_SIZE) {
+          const chunk = applicantIds.slice(i, i + CHUNK_SIZE);
+          const { data: chunkApps, error: appError } = await supabase
+            .from('job_applications')
+            .select(`
+              id, job_id, applicant_id, first_name, last_name, email, phone,
+              location, bio, cv_url, age, employment_status, work_schedule,
+              availability, custom_answers, status, applied_at, updated_at,
+              profile_image_snapshot_url, video_snapshot_url
+            `)
+            .in('applicant_id', chunk)
+            .in('job_id', jobIds)
+            .limit(1000);
+
+          if (appError) return;
+          if (chunkApps) allApps = allApps.concat(chunkApps);
+        }
+
+        if (allApps.length === 0) return;
 
         // Group by applicant_id
         const grouped = new Map<string, typeof allApps>();
