@@ -133,17 +133,26 @@ const CandidatesContent = () => {
     });
   }, [safeApplications, questionFilters, searchQuery]);
 
-  // Recalculate stats based on filtered results — count unique candidates, not applications
-  const filteredStats = useMemo(() => {
-    const uniqueApplicants = new Set(filteredApplications.map(app => app.applicant_id));
-    return {
-      total: uniqueApplicants.size,
-      new: filteredApplications.filter(app => app.status === 'pending').length,
-      reviewing: filteredApplications.filter(app => app.status === 'reviewing').length,
-      hired: filteredApplications.filter(app => app.status === 'hired').length,
-      rejected: filteredApplications.filter(app => app.status === 'rejected').length,
-    };
+  // Deduplicate: show one row per unique person, keeping the most recent application
+  const deduplicatedApplications = useMemo(() => {
+    const byApplicant = new Map<string, typeof filteredApplications[0]>();
+    for (const app of filteredApplications) {
+      const existing = byApplicant.get(app.applicant_id);
+      if (!existing || (app.applied_at && (!existing.applied_at || app.applied_at > existing.applied_at))) {
+        byApplicant.set(app.applicant_id, app);
+      }
+    }
+    return Array.from(byApplicant.values());
   }, [filteredApplications]);
+
+  // Recalculate stats based on deduplicated results
+  const filteredStats = useMemo(() => ({
+    total: deduplicatedApplications.length,
+    new: deduplicatedApplications.filter(app => app.status === 'pending').length,
+    reviewing: deduplicatedApplications.filter(app => app.status === 'reviewing').length,
+    hired: deduplicatedApplications.filter(app => app.status === 'hired').length,
+    rejected: deduplicatedApplications.filter(app => app.status === 'rejected').length,
+  }), [deduplicatedApplications]);
 
   if (isLoading || !showContent) {
     return (
@@ -233,7 +242,7 @@ const CandidatesContent = () => {
               När någon söker till dina jobb så kommer deras ansökning att visas här.
             </p>
           </div>
-        ) : filteredApplications.length === 0 && (questionFilters.length > 0 || searchQuery.trim()) ? (
+        ) : deduplicatedApplications.length === 0 && (questionFilters.length > 0 || searchQuery.trim()) ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 bg-white/5 border border-white/10 rounded-lg">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-3">
               <Search className="h-5 w-5 text-white" />
@@ -260,7 +269,7 @@ const CandidatesContent = () => {
           </div>
         ) : (
           <CandidatesTable 
-            applications={filteredApplications} 
+            applications={deduplicatedApplications} 
             onUpdate={refetch}
             onLoadMore={fetchNextPage}
             hasMore={hasNextPage && questionFilters.length === 0}
