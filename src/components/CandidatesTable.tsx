@@ -334,6 +334,17 @@ export function CandidatesTable({
     const selectedApps = applications.filter(a => selectedIds.has(a.id));
     if (selectedApps.length === 0 || !user) return;
 
+    const trimmedContent = content.trim();
+    if (!trimmedContent) {
+      toast.error('Meddelandet är tomt');
+      return;
+    }
+
+    if (!navigator.onLine) {
+      toast.error('Du är offline. Försök igen när du är online.');
+      return;
+    }
+
     const createConversationId = () => {
       if (typeof crypto !== 'undefined') {
         if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
@@ -349,7 +360,29 @@ export function CandidatesTable({
       throw new Error('Din enhet saknar stöd för säker UUID-generering');
     };
 
-    // Skicka max ett meddelande per unik kandidat
+    const formatError = (error: any) => {
+      const code = error?.code ? `[${error.code}] ` : '';
+      const message = error?.message || 'Okänt fel';
+      const details = error?.details ? ` • ${error.details}` : '';
+      return `${code}${message}${details}`;
+    };
+
+    const isRetryableError = (error: any) => {
+      const code = String(error?.code || '');
+      const message = String(error?.message || '').toLowerCase();
+      return (
+        code === '42501' || // RLS race/permission transient
+        code === '40001' || // serialization failure
+        code === '40P01' || // deadlock
+        message.includes('row-level security') ||
+        message.includes('network') ||
+        message.includes('fetch')
+      );
+    };
+
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Skicka max ett meddelande per unik kandidat, och hoppa över dig själv
     const uniqueApps = Array.from(
       new Map(
         selectedApps
@@ -363,133 +396,138 @@ export function CandidatesTable({
       return;
     }
 
-    try {
-      const applicantIds = uniqueApps.map(app => app.applicant_id);
+    const findExistingConversationId = async (candidateId: string): Promise<string | null> => {
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('candidate_id', candidateId)
+        .order('updated_at', { ascending: false })
+        .limit(1);
 
-      // Hämta konversationer där jag redan är medlem för snabb/robust lookup
-      const existingByCandidate = new Map<string, string>();
-      const { data: myMemberships, error: membershipsError } = await supabase
-        .from('conversation_members')
-        .select('conversation_id')
-        .eq('user_id', user.id);
+      if (error) throw error;
+      return data?.[0]?.id ?? null;
+    };
 
-      if (membershipsError) throw membershipsError;
+    const createConversationForCandidate = async (app: ApplicationData): Promise<string> => {
+      const conversationId = createConversationId();
 
-      const membershipConversationIds = (myMemberships || []).map(m => m.conversation_id);
-      if (membershipConversationIds.length > 0) {
-        const { data: myConversations, error: conversationsError } = await supabase
+      let { data: createdConversation, error: convError } = await supabase
+        .from('conversations')
+        .insert({
+          id: conversationId,
+          is_group: false,
+          job_id: app.job_id,
+          application_id: app.id,
+          candidate_id: app.applicant_id,
+          created_by: user.id,
+        })
+        .select('id')
+        .single();
+
+      // Fallback om referenser är ogiltiga/stale
+      if (convError?.code === '23503') {
+        const retry = await supabase
           .from('conversations')
-          .select('id, candidate_id, updated_at')
-          .in('id', membershipConversationIds)
-          .in('candidate_id', applicantIds)
-          .order('updated_at', { ascending: false });
+          .insert({
+            id: conversationId,
+            is_group: false,
+            job_id: null,
+            application_id: null,
+            candidate_id: app.applicant_id,
+            created_by: user.id,
+          })
+          .select('id')
+          .single();
 
-        if (conversationsError) throw conversationsError;
-
-        (myConversations || []).forEach(conv => {
-          if (conv.candidate_id && !existingByCandidate.has(conv.candidate_id)) {
-            existingByCandidate.set(conv.candidate_id, conv.id);
-          }
-        });
+        createdConversation = retry.data;
+        convError = retry.error;
       }
 
-      let successCount = 0;
-      let firstErrorMessage: string | null = null;
+      if (convError) throw convError;
+      return createdConversation.id;
+    };
 
-      for (const app of uniqueApps) {
-        try {
-          let conversationId = existingByCandidate.get(app.applicant_id) || null;
-
-          if (!conversationId) {
-            conversationId = createConversationId();
-
-            // Försök med full jobbkontext först
-            let { error: convError } = await supabase
-              .from('conversations')
-              .insert({
-                id: conversationId,
-                is_group: false,
-                job_id: app.job_id,
-                application_id: app.id,
-                candidate_id: app.applicant_id,
-                created_by: user.id,
-              });
-
-            // Fallback om referenser är ogiltiga/stale
-            if (convError?.code === '23503') {
-              const retry = await supabase
-                .from('conversations')
-                .insert({
-                  id: conversationId,
-                  is_group: false,
-                  job_id: null,
-                  application_id: null,
-                  candidate_id: app.applicant_id,
-                  created_by: user.id,
-                });
-              convError = retry.error;
-            }
-
-            if (convError) throw convError;
-
-            const { error: addSelfError } = await supabase
-              .from('conversation_members')
-              .upsert(
-                { conversation_id: conversationId, user_id: user.id, is_admin: true },
-                { onConflict: 'conversation_id,user_id' }
-              );
-            if (addSelfError) throw addSelfError;
-
-            const { error: addCandidateError } = await supabase
-              .from('conversation_members')
-              .insert({ conversation_id: conversationId, user_id: app.applicant_id, is_admin: false });
-
-            if (addCandidateError && addCandidateError.code !== '23505') {
-              throw addCandidateError;
-            }
-
-            existingByCandidate.set(app.applicant_id, conversationId);
-          }
-
-          const { error: msgError } = await supabase
-            .from('conversation_messages')
-            .insert({
-              conversation_id: conversationId,
-              sender_id: user.id,
-              content: content.trim(),
-            });
-
-          if (msgError) throw msgError;
-          successCount++;
-        } catch (e: any) {
-          const msg = e?.message || 'Okänt fel';
-          if (!firstErrorMessage) firstErrorMessage = msg;
-          console.error(`Failed to send message to ${app.applicant_id}:`, e);
-        }
-      }
-
-      if (successCount > 0) {
-        toast.success(`Meddelande skickat till ${successCount} kandidat${successCount !== 1 ? 'er' : ''}`);
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      }
-
-      const failedCount = uniqueApps.length - successCount;
-      if (failedCount > 0) {
-        toast.error(
-          `Kunde inte skicka till ${failedCount} kandidat${failedCount !== 1 ? 'er' : ''}`,
-          {
-            description: firstErrorMessage || undefined,
-          }
+    const ensureMemberships = async (conversationId: string, candidateId: string) => {
+      const { error: addSelfError } = await supabase
+        .from('conversation_members')
+        .upsert(
+          { conversation_id: conversationId, user_id: user.id, is_admin: true },
+          { onConflict: 'conversation_id,user_id' }
         );
-      }
+      if (addSelfError) throw addSelfError;
 
+      const { error: addCandidateError } = await supabase
+        .from('conversation_members')
+        .insert({ conversation_id: conversationId, user_id: candidateId, is_admin: false });
+
+      if (addCandidateError && addCandidateError.code !== '23505') {
+        throw addCandidateError;
+      }
+    };
+
+    const sendToCandidate = async (app: ApplicationData, attempt = 1): Promise<void> => {
+      try {
+        let conversationId = await findExistingConversationId(app.applicant_id);
+
+        if (!conversationId) {
+          conversationId = await createConversationForCandidate(app);
+        }
+
+        await ensureMemberships(conversationId, app.applicant_id);
+
+        const { error: msgError } = await supabase
+          .from('conversation_messages')
+          .insert({
+            conversation_id: conversationId,
+            sender_id: user.id,
+            content: trimmedContent,
+          });
+
+        if (msgError) throw msgError;
+      } catch (error) {
+        if (attempt === 1 && isRetryableError(error)) {
+          await sleep(180);
+          return sendToCandidate(app, 2);
+        }
+        throw error;
+      }
+    };
+
+    let successCount = 0;
+    const failureReasons: string[] = [];
+
+    for (const app of uniqueApps) {
+      try {
+        await sendToCandidate(app);
+        successCount++;
+      } catch (error: any) {
+        const reason = formatError(error);
+        failureReasons.push(reason);
+        console.error(`Failed to send message to ${app.applicant_id}:`, error);
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(`Meddelande skickat till ${successCount} kandidat${successCount !== 1 ? 'er' : ''}`);
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    }
+
+    const failedCount = uniqueApps.length - successCount;
+    if (failedCount > 0) {
+      const uniqueReasons = Array.from(new Set(failureReasons));
+      toast.error(
+        `Kunde inte skicka till ${failedCount} kandidat${failedCount !== 1 ? 'er' : ''}`,
+        {
+          description: uniqueReasons[0] || undefined,
+        }
+      );
+    }
+
+    // Behåll val/dialog öppna vid total-fel så användaren kan försöka igen direkt
+    if (successCount > 0) {
       setSelectedIds(new Set());
       onSelectionModeChange?.(false);
       setBulkMessageOpen(false);
-    } catch (error: any) {
-      toast.error('Kunde inte skicka meddelanden', {
-        description: error?.message || undefined,
-      });
     }
   }, [applications, selectedIds, user, onSelectionModeChange, queryClient]);
 
