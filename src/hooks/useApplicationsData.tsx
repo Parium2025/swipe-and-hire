@@ -558,6 +558,10 @@ export const useApplicationsData = (searchQuery: string = '') => {
   // Real-time subscription for job_applications changes
   // SCOPED to this employer's jobs via a dedicated channel per user to prevent
   // global broadcasts from triggering refetches for every employer on the platform
+  // Cap at 50 job IDs for realtime filter — Supabase Realtime rejects overly long
+  // filter strings. If employer has >50 jobs we subscribe without filter (broader
+  // but still scoped by RLS, and the query invalidation is cheap).
+  const MAX_REALTIME_FILTER_IDS = 50;
   const jobIdsForRealtime = useMemo(() => {
     return [...new Set(applications.map(a => a.job_id))].filter(Boolean).sort();
   }, [applications]);
@@ -566,25 +570,27 @@ export const useApplicationsData = (searchQuery: string = '') => {
     if (!user) return;
     if (jobIdsForRealtime.length === 0) return;
 
-    // Use a unique channel name scoped to this user to avoid collisions
     const channelName = `applications-rt-${user.id}`;
+
+    // Build filter config — skip filter entirely if too many IDs to avoid Supabase rejection
+    const filterConfig: any = {
+      event: '*',
+      schema: 'public',
+      table: 'job_applications',
+    };
+
+    if (jobIdsForRealtime.length === 1) {
+      filterConfig.filter = `job_id=eq.${jobIdsForRealtime[0]}`;
+    } else if (jobIdsForRealtime.length <= MAX_REALTIME_FILTER_IDS) {
+      filterConfig.filter = `job_id=in.(${jobIdsForRealtime.join(',')})`;
+    }
+    // else: no filter — listen to all job_applications changes (RLS still protects data)
+
     const channel = supabase
       .channel(channelName)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'job_applications',
-          // Filter to only this employer's job IDs — prevents cross-employer noise
-          filter: jobIdsForRealtime.length === 1
-            ? `job_id=eq.${jobIdsForRealtime[0]}`
-            : `job_id=in.(${jobIdsForRealtime.join(',')})`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
-        }
-      )
+      .on('postgres_changes', filterConfig, () => {
+        queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
+      })
       .subscribe();
 
     return () => {
