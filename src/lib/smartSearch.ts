@@ -282,28 +282,53 @@ function normalizeSwedish(text: string): string {
     .replace(/è/g, 'e');
 }
 
+// Pre-computed reverse lookup: term → set of all sibling terms in its location group
+// This makes location synonym matching O(1) instead of iterating all groups
+const locationTermToGroup: Map<string, Set<string>> = (() => {
+  const map = new Map<string, Set<string>>();
+  for (const key of locationSynonymKeys) {
+    const synonyms = jobSearchSynonyms[key];
+    if (!synonyms) continue;
+    const allTerms = [key, ...synonyms.map(s => s.toLowerCase())];
+    const nonNumeric = allTerms.filter(t => !/^\d+$/.test(t));
+    const normalizedSet = new Set(nonNumeric.map(t => normalizeSwedish(t)));
+    // Map every term (and its normalized form) to the full group
+    for (const term of nonNumeric) {
+      const norm = normalizeSwedish(term);
+      map.set(norm, normalizedSet);
+    }
+  }
+  return map;
+})();
+
 // Location synonym matching for candidate search
 // Matches city names to their parent regions and vice versa
 // e.g. "Stockholm" matches text containing "Solna", "Nacka", etc.
 function matchLocationSynonym(query: string, text: string): boolean {
-  for (const key of locationSynonymKeys) {
-    const synonyms = jobSearchSynonyms[key];
-    if (!synonyms) continue;
-    
-    const allTerms = [key, ...synonyms.map(s => s.toLowerCase())];
-    // Skip pure numeric terms (postal codes)
-    const nonNumericTerms = allTerms.filter(t => !/^\d+$/.test(t));
-    
-    const queryMatchesGroup = nonNumericTerms.some(t => 
-      t === query || t.startsWith(query) || query.startsWith(t)
-    );
-    
-    if (queryMatchesGroup) {
-      // Check if text contains ANY term from this location group
-      const textNormalized = normalizeSwedish(text);
-      return nonNumericTerms.some(t => textNormalized.includes(normalizeSwedish(t)));
+  // Try exact key lookup first (O(1))
+  const normQuery = normalizeSwedish(query);
+  const group = locationTermToGroup.get(normQuery);
+  if (group) {
+    const textNorm = normalizeSwedish(text);
+    for (const term of group) {
+      if (textNorm.includes(term)) return true;
+    }
+    return false;
+  }
+  
+  // Try prefix match for partial typing (e.g. "stock" → Stockholm group)
+  if (normQuery.length >= 3) {
+    for (const [key, grp] of locationTermToGroup) {
+      if (key.startsWith(normQuery) || normQuery.startsWith(key)) {
+        const textNorm = normalizeSwedish(text);
+        for (const term of grp) {
+          if (textNorm.includes(term)) return true;
+        }
+        return false;
+      }
     }
   }
+  
   return false;
 }
 

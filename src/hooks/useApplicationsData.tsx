@@ -237,20 +237,22 @@ export const useApplicationsData = (searchQuery: string = '') => {
         
         // SANITIZE: Strip tsquery-special characters to prevent syntax errors
         // Characters like &, |, !, :, *, (, ), ', <, >, \, - break to_tsquery
-        const sanitized = searchTerm.replace(/[&|!:*()'"<>\\\-]/g, '');
+        // Also strip commas — they break PostgREST .or() parsing
+        const sanitized = searchTerm.replace(/[&|!:*()'"<>\\\-,./;@#$%^{}[\]~`]/g, ' ').replace(/\s+/g, ' ').trim();
         
-        if (sanitized.trim()) {
+        if (sanitized.length >= 2) {
           // Convert search term to tsquery format (prefix matching for partial words)
           // "Joh" becomes "Joh:*" to match "Johan", "Johansson" etc
           const tsQueryTerm = sanitized
             .split(/\s+/)
-            .filter(Boolean)
+            .filter(w => w.length >= 1)
             .map(word => `${word}:*`)
             .join(' & ');
           
           // Use Full-Text Search on the indexed search_vector column
           // Also search job title/occupation with ILIKE as fallback (they're in a joined table)
-          const safeLike = searchTerm.replace(/%/g, '');
+          // Escape ILIKE wildcards (% and _) in the user's term
+          const safeLike = searchTerm.replace(/[%_]/g, '');
           query = query.or(`search_vector.fts.${tsQueryTerm},job_postings.title.ilike.%${safeLike}%,job_postings.occupation.ilike.%${safeLike}%`);
         }
       }
