@@ -53,8 +53,18 @@ import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter
 
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [questionFilters, setQuestionFilters] = useState<QuestionFilterValue[]>([]);
   const [selectionMode, setSelectionMode] = useState(false);
+
+  // Debounce search: 300ms delay before hitting the database
+  // Prevents spamming FTS queries on every keystroke (critical at 500k+ candidates)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const { 
     applications, 
@@ -68,7 +78,7 @@ const CandidatesContent = () => {
     hasReachedLimit,
     continueLoading,
     loadedCount,
-  } = useApplicationsData(searchQuery);
+  } = useApplicationsData(debouncedSearch);
   
   // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
   const [showContent, setShowContent] = useState(false);
@@ -83,10 +93,14 @@ const CandidatesContent = () => {
   const safeApplications = applications || [];
 
   // Filter applications by question filters AND smart search (client-side)
+  // When typing (searchQuery !== debouncedSearch), apply instant client-side filtering
+  // on already-loaded data for zero-latency feel while DB query is pending
   const filteredApplications = useMemo(() => {
     let result = safeApplications;
     
-    // Apply smart search filter first (strict client-side filtering)
+    // Apply smart search filter (client-side) for:
+    // 1. Instant filtering while debounce is pending (searchQuery !== debouncedSearch)
+    // 2. Additional fuzzy/synonym matching on top of FTS results
     if (searchQuery && searchQuery.trim().length >= 2) {
       result = smartSearchCandidates(result, searchQuery);
     }
