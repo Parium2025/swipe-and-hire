@@ -8,7 +8,7 @@ import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus, Clock, Star, Users, Trash2, MoreHorizontal, X, ArrowUpDown, ArrowUp, ArrowDown, XCircle, MessageCircle, ChevronRight } from 'lucide-react';
+import { UserPlus, Clock, Star, Users, Trash2, MoreHorizontal, X, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { Button } from '@/components/ui/button';
@@ -329,24 +329,6 @@ export function CandidatesTable({
     onUpdate();
   }, [applications, selectedIds, addCandidates, onSelectionModeChange, onUpdate]);
 
-  const handleBulkReject = useCallback(async () => {
-    const selectedApps = applications.filter(a => selectedIds.has(a.id));
-    if (selectedApps.length === 0) return;
-
-    try {
-      const updates = selectedApps.map(app =>
-        supabase.from('job_applications').update({ status: 'rejected' }).eq('id', app.id)
-      );
-      await Promise.all(updates);
-      toast.success(`${selectedApps.length} kandidat${selectedApps.length !== 1 ? 'er' : ''} nekad${selectedApps.length !== 1 ? 'e' : ''}`);
-      setSelectedIds(new Set());
-      onSelectionModeChange?.(false);
-      onUpdate();
-    } catch {
-      toast.error('Kunde inte uppdatera status');
-    }
-  }, [applications, selectedIds, onSelectionModeChange, onUpdate]);
-
   const [bulkMessageOpen, setBulkMessageOpen] = useState(false);
   const handleBulkSendMessage = useCallback(async (content: string) => {
     const selectedApps = applications.filter(a => selectedIds.has(a.id));
@@ -520,13 +502,6 @@ export function CandidatesTable({
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Skicka meddelande
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="text-red-400 cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-red-400"
-                      onClick={handleBulkReject}
-                    >
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Neka alla markerade
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
