@@ -123,24 +123,27 @@ export function CreateJobStageDialog({ jobId, trigger, currentStageCount = 0 }: 
           </div>
         </div>
         
-        <div className="flex justify-end gap-2">
+        <div className="flex gap-2 pt-2">
           <Button
-            variant="ghost"
-            onClick={() => setOpen(false)}
-            onMouseDown={(e) => e.currentTarget.blur()}
-            onMouseUp={(e) => e.currentTarget.blur()}
-            className="text-white hover:bg-white/10 transition-colors duration-300 focus:outline-none focus:ring-0"
-          >
-            Avbryt
-          </Button>
-          <Button
+            variant="glass"
             onClick={handleCreate}
             onMouseDown={(e) => e.currentTarget.blur()}
             onMouseUp={(e) => e.currentTarget.blur()}
             disabled={isCreating || !label.trim()}
-            className="bg-primary hover:bg-primary/90 transition-colors duration-300 focus:outline-none focus:ring-0"
+            className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 ${
+              !isCreating && label.trim() ? 'border border-white/30' : 'border border-transparent'
+            }`}
           >
             {isCreating ? 'Skapar...' : 'Skapa steg'}
+          </Button>
+          <Button
+            variant="glass"
+            onClick={() => setOpen(false)}
+            onMouseDown={(e) => e.currentTarget.blur()}
+            onMouseUp={(e) => e.currentTarget.blur()}
+            className="min-h-[44px] rounded-full"
+          >
+            Avbryt
           </Button>
         </div>
       </DialogContentNoFocus>
