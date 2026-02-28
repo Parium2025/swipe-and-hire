@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import ProfileVideo from '@/components/ProfileVideo';
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { CvViewer } from '@/components/CvViewer';
@@ -48,6 +48,7 @@ interface CandidateProfileDialogProps {
   onOpenChange: (open: boolean) => void;
   onStatusUpdate: () => void;
   allApplications?: ApplicationData[];
+  loadingApplications?: boolean;
   candidateRating?: number;
   onRatingChange?: (rating: number) => void;
   variant?: 'all-candidates' | 'my-candidates';
@@ -147,6 +148,7 @@ export const CandidateProfileDialog = ({
   onOpenChange,
   onStatusUpdate,
   allApplications,
+  loadingApplications = false,
   candidateRating,
   onRatingChange,
   variant = 'my-candidates',
@@ -196,6 +198,25 @@ export const CandidateProfileDialog = ({
     return allApplications.find(app => app.job_id === selectedJobId) || application;
   }, [allApplications, selectedJobId, application]);
   
+  useLayoutEffect(() => {
+    const jobId = activeApplication?.job_id;
+    if (!jobId) {
+      setJobQuestions({});
+      return;
+    }
+
+    const cachedQ = questionsCache.get(jobId)
+      || getPersistedCacheValue<Record<string, { text: string; order: number }>>(QUESTIONS_STORAGE_KEY, jobId);
+
+    if (cachedQ) {
+      questionsCache.set(jobId, cachedQ);
+      setJobQuestions(cachedQ);
+      return;
+    }
+
+    setJobQuestions({});
+  }, [activeApplication?.job_id]);
+
   // Get signed URLs for profile media
   const profileImageUrl = useProfileImageUrl(activeApplication?.profile_image_url);
   const videoUrl = useVideoUrl(activeApplication?.video_url);
@@ -203,8 +224,8 @@ export const CandidateProfileDialog = ({
 
   // ─── Extracted hooks ──────────────────────────────────────────────
   const notesHook = useCandidateNotes({
-    applicantId: application?.applicant_id || null,
-    jobId: application?.job_id || null,
+    applicantId: activeApplication?.applicant_id || application?.applicant_id || null,
+    jobId: activeApplication?.job_id || null,
   });
 
   const summaryHook = useCandidateSummary({
@@ -321,8 +342,11 @@ export const CandidateProfileDialog = ({
   };
 
   const customAnswers = displayApp.custom_answers || {};
-  const hasCustomAnswers = Object.keys(customAnswers).length > 0;
-  const hasMultipleApplications = allApplications && allApplications.length > 1;
+  const customAnswerKeys = Object.keys(customAnswers);
+  const hasCustomAnswers = customAnswerKeys.length > 0;
+  const hasMultipleApplications = !!allApplications && allApplications.length > 1;
+  const showJobSelectorShell = loadingApplications || hasMultipleApplications;
+  const hasResolvedQuestions = hasCustomAnswers && customAnswerKeys.every((questionId) => !!jobQuestions[questionId]?.text);
 
   // Shared notes panel props
   const notesPanelProps = {
@@ -441,23 +465,27 @@ export const CandidateProfileDialog = ({
                 </div>
               )}
               
-              {hasMultipleApplications ? (
+              {showJobSelectorShell ? (
                 <div className="mt-2 relative w-full">
                   <button
                     type="button"
-                    onClick={() => setJobDropdownOpen(prev => !prev)}
+                    onClick={() => hasMultipleApplications && setJobDropdownOpen(prev => !prev)}
                     className="w-full flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
                   >
                     <span className="truncate flex-1 text-left">{displayApp.job_title || 'Okänt jobb'}</span>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-xs text-white">
-                        {allApplications!.length} jobb
+                        {hasMultipleApplications ? `${allApplications!.length} jobb` : 'Laddar...'}
                       </span>
-                      <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
+                      {hasMultipleApplications ? (
+                        <ChevronDown className={`h-4 w-4 text-white transition-transform ${jobDropdownOpen ? 'rotate-180' : ''}`} />
+                      ) : (
+                        <Loader2 className="h-4 w-4 text-white animate-spin" />
+                      )}
                     </div>
                   </button>
                   
-                  {jobDropdownOpen && (
+                  {hasMultipleApplications && jobDropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setJobDropdownOpen(false)} />
                       <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-50 w-[calc(100%+1rem)] max-w-sm rounded-lg border border-white/20 bg-slate-900/95 backdrop-blur-xl shadow-xl overflow-hidden">
@@ -470,11 +498,12 @@ export const CandidateProfileDialog = ({
                               type="button"
                               onClick={() => {
                                 const cachedQ = questionsCache.get(app.job_id)
-                                  || getPersistedCacheValue<Record<string, { text: string; order: number }>>(QUESTIONS_STORAGE_KEY, app.job_id);
-                                if (cachedQ) {
+                                  || getPersistedCacheValue<Record<string, { text: string; order: number }>>(QUESTIONS_STORAGE_KEY, app.job_id)
+                                  || {};
+                                if (Object.keys(cachedQ).length > 0) {
                                   questionsCache.set(app.job_id, cachedQ);
-                                  setJobQuestions(cachedQ);
                                 }
+                                setJobQuestions(cachedQ);
                                 setSelectedJobId(app.job_id);
                                 setJobDropdownOpen(false);
                               }}
@@ -587,7 +616,7 @@ export const CandidateProfileDialog = ({
                   className="w-full px-3 py-2 flex items-center justify-between hover:bg-white/5 transition-colors"
                 >
                   <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider">
-                    Frågor ({Object.keys(customAnswers).length})
+                    Frågor ({customAnswerKeys.length})
                   </h3>
                   {questionsExpanded ? (
                     <ChevronUp className="h-3.5 w-3.5 text-white" />
@@ -598,7 +627,7 @@ export const CandidateProfileDialog = ({
 
                 {questionsExpanded && (
                   <div className="px-3 pb-3 space-y-2">
-                    {Object.keys(jobQuestions).length === 0 ? (
+                    {!hasResolvedQuestions ? (
                       <div className="flex items-center justify-center py-3">
                         <Loader2 className="h-4 w-4 text-white animate-spin" />
                         <span className="text-sm text-white ml-2">Laddar frågor...</span>
@@ -616,7 +645,7 @@ export const CandidateProfileDialog = ({
                           className="border-t border-white/10 pt-2 first:border-t-0 first:pt-0"
                         >
                           <p className="text-sm text-white break-words">
-                            {jobQuestions[questionId]?.text || 'Fråga'}
+                            {jobQuestions[questionId].text}
                           </p>
                           <p className="text-sm text-white break-words">
                             Svar: {String(answer) || <span className="opacity-50 italic">Inget svar</span>}

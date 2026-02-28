@@ -110,6 +110,7 @@ export function CandidatesTable({
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
+  const [loadingAllCandidateApplications, setLoadingAllCandidateApplications] = useState(false);
   const { isInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading } = useMyCandidatesData();
   const { teamMembers, hasTeam } = useTeamMembers();
   const { user } = useAuth();
@@ -182,8 +183,12 @@ export function CandidatesTable({
     const fetchAllApplications = async () => {
       if (!selectedApplication || !user || !dialogOpen) {
         setAllCandidateApplications([]);
+        setLoadingAllCandidateApplications(false);
         return;
       }
+
+      setLoadingAllCandidateApplications(true);
+      setAllCandidateApplications([selectedApplication]);
 
       try {
         const { data: orgJobs, error: jobsError } = await supabase
@@ -193,7 +198,7 @@ export function CandidatesTable({
 
         if (jobsError) throw jobsError;
         if (!orgJobs || orgJobs.length === 0) {
-          setAllCandidateApplications([]);
+          setAllCandidateApplications([selectedApplication]);
           return;
         }
 
@@ -238,15 +243,17 @@ export function CandidatesTable({
           is_profile_video: selectedApplication.is_profile_video,
         }));
 
-        setAllCandidateApplications(transformed);
+        setAllCandidateApplications(transformed.length > 0 ? transformed : [selectedApplication]);
       } catch (error) {
         console.error('Error fetching candidate applications:', error);
-        setAllCandidateApplications([]);
+        setAllCandidateApplications([selectedApplication]);
+      } finally {
+        setLoadingAllCandidateApplications(false);
       }
     };
 
     fetchAllApplications();
-  }, [selectedApplication?.applicant_id, user?.id, dialogOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedApplication?.applicant_id, selectedApplication?.id, user?.id, dialogOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRowClick = (application: ApplicationData) => {
     setSelectedApplicationId(application.id);
@@ -900,6 +907,7 @@ export function CandidatesTable({
           handleDialogClose();
         }}
         allApplications={allCandidateApplications.length > 1 ? allCandidateApplications : undefined}
+        loadingApplications={loadingAllCandidateApplications}
         variant="all-candidates"
       />
 
