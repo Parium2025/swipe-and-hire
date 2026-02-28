@@ -169,7 +169,21 @@ export const CandidateProfileDialog = ({
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
-  const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>({});
+  // Initialize questions from cache synchronously to avoid flicker
+  const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>(() => {
+    if (!application?.job_id) return {};
+    const cached = questionsCache.get(application.job_id);
+    if (cached) return cached;
+    const persisted = getPersistedCacheValue<Record<string, { text: string; order: number }>>(
+      QUESTIONS_STORAGE_KEY,
+      application.job_id
+    );
+    if (persisted) {
+      questionsCache.set(application.job_id, persisted);
+      return persisted;
+    }
+    return {};
+  });
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [jobDropdownOpen, setJobDropdownOpen] = useState(false);
   const previousRating = useRef<number | undefined>(undefined);
@@ -212,7 +226,15 @@ export const CandidateProfileDialog = ({
     setMobileTab('profile');
     setCvOpen(false);
     setJobDropdownOpen(false);
-    setJobQuestions({});
+    // Restore questions from cache synchronously to avoid flash
+    const cachedQ = questionsCache.get(application.job_id)
+      || getPersistedCacheValue<Record<string, { text: string; order: number }>>(QUESTIONS_STORAGE_KEY, application.job_id);
+    if (cachedQ) {
+      questionsCache.set(application.job_id, cachedQ);
+      setJobQuestions(cachedQ);
+    } else {
+      setJobQuestions({});
+    }
     // Reset extracted hooks only on application switch
     notesHook.reset();
     summaryHook.reset();
@@ -424,7 +446,7 @@ export const CandidateProfileDialog = ({
                   <button
                     type="button"
                     onClick={() => setJobDropdownOpen(prev => !prev)}
-                    className="w-full flex items-center justify-between gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
+                    className="w-full flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
                   >
                     <span className="truncate">{displayApp.job_title || 'Okänt jobb'}</span>
                     <div className="flex items-center gap-1.5 shrink-0">
@@ -447,6 +469,12 @@ export const CandidateProfileDialog = ({
                               key={app.job_id}
                               type="button"
                               onClick={() => {
+                                const cachedQ = questionsCache.get(app.job_id)
+                                  || getPersistedCacheValue<Record<string, { text: string; order: number }>>(QUESTIONS_STORAGE_KEY, app.job_id);
+                                if (cachedQ) {
+                                  questionsCache.set(app.job_id, cachedQ);
+                                  setJobQuestions(cachedQ);
+                                }
                                 setSelectedJobId(app.job_id);
                                 setJobDropdownOpen(false);
                               }}
