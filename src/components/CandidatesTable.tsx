@@ -9,7 +9,7 @@ import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog } from './AddToColleagueListDialog';
-import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare, X, ArrowUpDown, ArrowUp, ArrowDown, XCircle, MessageCircle } from 'lucide-react';
+import { UserPlus, Clock, Loader2, Star, Users, Trash2, MoreHorizontal, CheckSquare, X, ArrowUpDown, ArrowUp, ArrowDown, XCircle, MessageCircle, ChevronRight, Briefcase } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useDevice } from '@/hooks/use-device';
 
 type SortField = 'name' | 'rating' | 'applied_at' | 'last_active_at' | null;
 type SortDirection = 'asc' | 'desc' | null;
@@ -104,6 +105,8 @@ export function CandidatesTable({
   onContinueLoading,
   loadedCount = 0,
 }: CandidatesTableProps) {
+  const deviceType = useDevice();
+  const isMobile = deviceType === 'mobile';
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { isInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading } = useMyCandidatesData();
@@ -461,206 +464,331 @@ export function CandidatesTable({
         </div>
       )}
 
-      <div className="rounded-lg border border-white/10 bg-white/5 overflow-hidden" style={{ contain: 'layout style' }}>
-        <Table>
-          <TableHeader>
-            <TableRow className="border-white/10">
-              {selectionMode && (
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={allSelected}
-                    ref={(el) => {
-                      if (el) {
-                        (el as any).indeterminate = someSelected;
-                      }
-                    }}
-                    onCheckedChange={toggleSelectAll}
-                  />
-                </TableHead>
-              )}
-              <TableHead 
-                className="text-white cursor-pointer hover:bg-white/5 select-none"
-                onClick={() => handleSort('name')}
+      {/* Mobile card view */}
+      {isMobile ? (
+        <div className="space-y-2">
+          {sortedApplications.map((application) => {
+            const status = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
+            const isAlreadyAdded = isInMyCandidates(application.id);
+            const teamInfo = getTeamInfo(application.id);
+            const isSelected = selectedIds.has(application.id);
+            const rating = getDisplayRating(application);
+
+            return (
+              <div
+                key={application.id}
+                className={cn(
+                  "bg-white/5 ring-1 ring-inset ring-white/10 rounded-lg p-3 active:scale-[0.98] transition-all duration-150 cursor-pointer",
+                  isSelected && "ring-white/30 bg-white/[0.08]"
+                )}
+                onClick={() => {
+                  if (selectionMode) {
+                    const next = new Set(selectedIds);
+                    if (next.has(application.id)) next.delete(application.id);
+                    else next.add(application.id);
+                    setSelectedIds(next);
+                  } else {
+                    handleRowClick(application);
+                  }
+                }}
               >
-                <span className="flex items-center">
-                  Kandidat
-                  <SortIcon field="name" />
-                </span>
-              </TableHead>
-              <TableHead 
-                className="text-white cursor-pointer hover:bg-white/5 select-none"
-                onClick={() => handleSort('rating')}
-              >
-                <span className="flex items-center">
-                  Betyg
-                  <SortIcon field="rating" />
-                </span>
-              </TableHead>
-              <TableHead className="text-white">Tjänst</TableHead>
-              <TableHead 
-                className="text-white cursor-pointer hover:bg-white/5 select-none"
-                onClick={() => handleSort('applied_at')}
-              >
-                <span className="flex items-center">
-                  Ansökt
-                  <SortIcon field="applied_at" />
-                </span>
-              </TableHead>
-              <TableHead 
-                className="text-white cursor-pointer hover:bg-white/5 select-none whitespace-nowrap"
-                onClick={() => handleSort('last_active_at')}
-              >
-                <span className="flex items-center">
-                  Senaste aktivitet
-                  <SortIcon field="last_active_at" />
-                </span>
-              </TableHead>
-              <TableHead className="text-white w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedApplications.map((application) => {
-              const status = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
-              const isAlreadyAdded = isInMyCandidates(application.id);
-              const teamInfo = getTeamInfo(application.id);
-              const isSelected = selectedIds.has(application.id);
-              
-              return (
-                <TableRow
-                  key={application.id}
-                  className={cn(
-                    "group border-white/10 cursor-pointer transition-[background-color] duration-150",
-                    !selectionMode && "hover:bg-white/5 active:bg-white/10",
-                    isSelected && "bg-white/10"
-                  )}
-                  style={{ contain: 'layout style paint' }}
-                  onClick={() => handleRowClick(application)}
-                  onMouseEnter={() => handlePrefetchCandidate(application)}
-                >
+                <div className="flex items-center gap-3">
+                  {/* Selection checkbox */}
                   {selectionMode && (
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => {}}
-                        onClick={(e) => toggleSelect(application.id, e)}
-                      />
-                    </TableCell>
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => {}}
+                      className="h-4 w-4 flex-shrink-0 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   )}
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <CandidateAvatar
-                        profileImageUrl={application.profile_image_url}
-                        videoUrl={application.video_url}
-                        isProfileVideo={application.is_profile_video}
-                        firstName={application.first_name}
-                        lastName={application.last_name}
-                        stopPropagation
-                      />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-white">
-                            {application.first_name} {application.last_name}
+
+                  {/* Avatar */}
+                  <div className="flex-shrink-0">
+                    <CandidateAvatar
+                      profileImageUrl={application.profile_image_url}
+                      videoUrl={application.video_url}
+                      isProfileVideo={application.is_profile_video}
+                      firstName={application.first_name}
+                      lastName={application.last_name}
+                      stopPropagation
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-white text-sm truncate">
+                        {application.first_name} {application.last_name}
+                      </span>
+                      {teamInfo && teamInfo.colleagues.length > 0 && (
+                        <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 flex-shrink-0">
+                          <Users className="h-2.5 w-2.5 text-purple-300" />
+                          <span className="text-[9px] text-purple-300 font-medium">
+                            {teamInfo.colleagues.length}
                           </span>
-                          {/* Colleague indicator */}
-                          {teamInfo && teamInfo.colleagues.length > 0 && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30">
-                                  <Users className="h-3 w-3 text-purple-300" />
-                                  <span className="text-[10px] text-purple-300 font-medium">
-                                    {teamInfo.colleagues.length}
-                                  </span>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-xs">
-                                <p className="text-xs">
-                                  Tillagd av: {teamInfo.colleagues.join(', ')}
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
                         </div>
-                        {application.phone && (
-                          <div className="text-sm text-muted-foreground">{application.phone}</div>
-                        )}
-                      </div>
+                      )}
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-0.5">
-                      {[1, 2, 3, 4, 5].map((star) => {
-                        const rating = getDisplayRating(application);
-                        return (
+
+                    {/* Rating stars */}
+                    {rating > 0 && (
+                      <div className="flex items-center gap-0.5 mt-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
                             className={cn(
-                              "h-3.5 w-3.5",
+                              "h-2.5 w-2.5",
                               star <= rating
                                 ? "fill-yellow-400 text-yellow-400"
                                 : "text-white/20"
                             )}
                           />
-                        );
-                      })}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {application.job_title || 'Okänd tjänst'}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground whitespace-nowrap">
-                    {formatTimeAgo(application.applied_at)}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground whitespace-nowrap">
-                    {application.last_active_at ? (
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5 flex-shrink-0" />
-                        {formatTimeAgo(application.last_active_at)}
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Job title + time */}
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-white/60 truncate">
+                        {application.job_title || 'Okänd tjänst'}
                       </span>
-                    ) : (
-                      '-'
+                      <span className="text-[10px] text-white/40 flex-shrink-0">
+                        {formatTimeAgo(application.applied_at)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right side: add button or chevron */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {!isMyCandidatesLoading && !isAlreadyAdded && !selectionMode && (
+                      <button
+                        className="h-8 w-8 flex items-center justify-center rounded-full text-white/50 active:bg-white/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (hasTeam) {
+                            setSelectedApplicationForTeam(application);
+                            setTeamDialogOpen(true);
+                          } else {
+                            addCandidate.mutate({
+                              applicationId: application.id,
+                              applicantId: application.applicant_id,
+                              jobId: application.job_id,
+                            });
+                          }
+                        }}
+                      >
+                        <UserPlus className="h-4 w-4" />
+                      </button>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    {/* Dölj knappen under laddning för att undvika flicker */}
-                    {!isMyCandidatesLoading && !isAlreadyAdded && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-white/10"
-                            disabled={addCandidate.isPending}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // If user has team members, show selection dialog
-                              if (hasTeam) {
-                                setSelectedApplicationForTeam(application);
-                                setTeamDialogOpen(true);
-                              } else {
-                                // No team, add directly to own list
-                                addCandidate.mutate({
-                                  applicationId: application.id,
-                                  applicantId: application.applicant_id,
-                                  jobId: application.job_id,
-                                });
-                              }
-                            }}
-                          >
-                            <UserPlus className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {hasTeam ? 'Lägg till i kandidatlista' : 'Lägg till i Mina kandidater'}
-                        </TooltipContent>
-                      </Tooltip>
+                    {!selectionMode && (
+                      <ChevronRight className="h-4 w-4 text-white/30 flex-shrink-0" />
                     )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        /* Desktop table view */
+        <div className="rounded-lg border border-white/10 bg-white/5 overflow-hidden" style={{ contain: 'layout style' }}>
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/10">
+                {selectionMode && (
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={allSelected}
+                      ref={(el) => {
+                        if (el) {
+                          (el as any).indeterminate = someSelected;
+                        }
+                      }}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  </TableHead>
+                )}
+                <TableHead 
+                  className="text-white cursor-pointer hover:bg-white/5 select-none"
+                  onClick={() => handleSort('name')}
+                >
+                  <span className="flex items-center">
+                    Kandidat
+                    <SortIcon field="name" />
+                  </span>
+                </TableHead>
+                <TableHead 
+                  className="text-white cursor-pointer hover:bg-white/5 select-none"
+                  onClick={() => handleSort('rating')}
+                >
+                  <span className="flex items-center">
+                    Betyg
+                    <SortIcon field="rating" />
+                  </span>
+                </TableHead>
+                <TableHead className="text-white">Tjänst</TableHead>
+                <TableHead 
+                  className="text-white cursor-pointer hover:bg-white/5 select-none"
+                  onClick={() => handleSort('applied_at')}
+                >
+                  <span className="flex items-center">
+                    Ansökt
+                    <SortIcon field="applied_at" />
+                  </span>
+                </TableHead>
+                <TableHead 
+                  className="text-white cursor-pointer hover:bg-white/5 select-none whitespace-nowrap"
+                  onClick={() => handleSort('last_active_at')}
+                >
+                  <span className="flex items-center">
+                    Senaste aktivitet
+                    <SortIcon field="last_active_at" />
+                  </span>
+                </TableHead>
+                <TableHead className="text-white w-12"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedApplications.map((application) => {
+                const status = statusConfig[application.status as keyof typeof statusConfig] || statusConfig.pending;
+                const isAlreadyAdded = isInMyCandidates(application.id);
+                const teamInfo = getTeamInfo(application.id);
+                const isSelected = selectedIds.has(application.id);
+                
+                return (
+                  <TableRow
+                    key={application.id}
+                    className={cn(
+                      "group border-white/10 cursor-pointer transition-[background-color] duration-150",
+                      !selectionMode && "hover:bg-white/5 active:bg-white/10",
+                      isSelected && "bg-white/10"
+                    )}
+                    style={{ contain: 'layout style paint' }}
+                    onClick={() => handleRowClick(application)}
+                    onMouseEnter={() => handlePrefetchCandidate(application)}
+                  >
+                    {selectionMode && (
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() => {}}
+                          onClick={(e) => toggleSelect(application.id, e)}
+                        />
+                      </TableCell>
+                    )}
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <CandidateAvatar
+                          profileImageUrl={application.profile_image_url}
+                          videoUrl={application.video_url}
+                          isProfileVideo={application.is_profile_video}
+                          firstName={application.first_name}
+                          lastName={application.last_name}
+                          stopPropagation
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-white">
+                              {application.first_name} {application.last_name}
+                            </span>
+                            {teamInfo && teamInfo.colleagues.length > 0 && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30">
+                                    <Users className="h-3 w-3 text-purple-300" />
+                                    <span className="text-[10px] text-purple-300 font-medium">
+                                      {teamInfo.colleagues.length}
+                                    </span>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs">
+                                  <p className="text-xs">
+                                    Tillagd av: {teamInfo.colleagues.join(', ')}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
+                          {application.phone && (
+                            <div className="text-sm text-muted-foreground">{application.phone}</div>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => {
+                          const rating = getDisplayRating(application);
+                          return (
+                            <Star
+                              key={star}
+                              className={cn(
+                                "h-3.5 w-3.5",
+                                star <= rating
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-white/20"
+                              )}
+                            />
+                          );
+                        })}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {application.job_title || 'Okänd tjänst'}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground whitespace-nowrap">
+                      {formatTimeAgo(application.applied_at)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground whitespace-nowrap">
+                      {application.last_active_at ? (
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+                          {formatTimeAgo(application.last_active_at)}
+                        </span>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {!isMyCandidatesLoading && !isAlreadyAdded && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-white/10"
+                              disabled={addCandidate.isPending}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (hasTeam) {
+                                  setSelectedApplicationForTeam(application);
+                                  setTeamDialogOpen(true);
+                                } else {
+                                  addCandidate.mutate({
+                                    applicationId: application.id,
+                                    applicantId: application.applicant_id,
+                                    jobId: application.job_id,
+                                  });
+                                }
+                              }}
+                            >
+                              <UserPlus className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {hasTeam ? 'Lägg till i kandidatlista' : 'Lägg till i Mina kandidater'}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
       
       {/* Infinite scroll sentinel - endast om vi inte nått gränsen */}
       {hasMore && !hasReachedLimit && (
