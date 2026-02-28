@@ -30,6 +30,7 @@ interface ReadOnlyMobileJobCardProps {
     employer_profile?: {
       first_name: string;
       last_name: string;
+      company_name: string | null;
     };
   };
   hasApplied?: boolean;
@@ -115,7 +116,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       .catch(() => setDisplayUrl(resolvedUrl));
   }, [resolvedUrl]);
 
-  const companyName = job.company_name || job.profiles?.company_name || 'Okänt företag';
+  const companyName = job.company_name || job.employer_profile?.company_name || job.profiles?.company_name || 'Okänt företag';
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
@@ -213,11 +214,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
         {/* Title */}
         <TruncatedText
           text={job.title}
-          className="text-[15px] font-bold text-white leading-snug line-clamp-2"
+          className="text-[15px] font-bold text-white leading-snug line-clamp-2 text-center"
         />
 
-        {/* Company + Location — single compact row */}
-        <div className="flex items-center gap-1.5 text-[13px] text-white">
+        {/* Company + Location — single compact row, centered */}
+        <div className="flex items-center justify-center gap-1.5 text-[13px] text-white">
           <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-white" />
           <span className="truncate font-medium">{companyName}</span>
           <span className="text-white/30">·</span>
@@ -225,8 +226,8 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           <span className="truncate">{job.location}</span>
         </div>
 
-        {/* Tags row — badges restored */}
-        <div className="flex items-center gap-1.5 flex-wrap">
+        {/* Tags row — badges restored, centered */}
+        <div className="flex items-center justify-center gap-1.5 flex-wrap">
           {job.employment_type && (
             <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-none">
               {getEmploymentTypeLabel(job.employment_type)}
