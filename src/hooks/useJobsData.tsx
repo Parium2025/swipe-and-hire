@@ -53,7 +53,7 @@ interface UseJobsDataOptions {
 }
 
 // 🔥 localStorage cache for employer jobs - instant-load
-const EMPLOYER_JOBS_CACHE_KEY = 'parium_employer_jobs_';
+const EMPLOYER_JOBS_CACHE_KEY = 'parium_employer_jobs_v2_';
 
 interface CachedJobs {
   jobs: JobPosting[];
