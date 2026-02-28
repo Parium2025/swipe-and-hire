@@ -2410,6 +2410,10 @@ export type Database = {
         Returns: Json
       }
       remove_session: { Args: { p_session_token: string }; Returns: undefined }
+      reorder_job_stages: {
+        Args: { p_job_id: string; p_stage_keys: string[] }
+        Returns: undefined
+      }
       reregister_session: {
         Args: {
           p_device_label: string

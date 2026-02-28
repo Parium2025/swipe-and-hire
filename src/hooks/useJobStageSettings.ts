@@ -133,7 +133,7 @@ export function useJobStageSettings(jobId: string | undefined) {
       stageKey: string; 
       updates: Partial<{ label: string; color: string; iconName: string }> 
     }) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!navigator.onLine) throw new Error('Du är offline – försök igen när du har anslutning');
       if (!jobId) throw new Error('No job ID');
 
       const existing = dbSettings.find(s => s.stage_key === stageKey);
@@ -151,7 +151,7 @@ export function useJobStageSettings(jobId: string | undefined) {
         
         if (error) throw error;
       } else {
-        // Create new setting
+        // Create new setting (first customisation of a default stage)
         const defaultSetting = DEFAULT_JOB_STAGES[stageKey] || {
           label: stageKey,
           color: '#0EA5E9',
@@ -177,6 +177,12 @@ export function useJobStageSettings(jobId: string | undefined) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['job-stage-settings', jobId] });
     },
+    onError: (err: Error) => {
+      // Color changes are silent (debounced), but label/icon show toast
+      if (err.message.includes('offline')) {
+        // Import not needed — consumers show toast themselves
+      }
+    },
   });
 
   // Create new stage
@@ -190,19 +196,20 @@ export function useJobStageSettings(jobId: string | undefined) {
       color: string; 
       iconName: string; 
     }) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!navigator.onLine) throw new Error('Du är offline – försök igen när du har anslutning');
       if (!jobId) throw new Error('No job ID');
 
       // Generate unique stage key
       const stageKey = `custom_${Date.now()}`;
-      const newOrderIndex = Object.keys(stageSettings).length;
+      const newOrderIndex = orderedStages.length;
 
-      // Ensure existing stages are persisted to DB before adding custom one
+      // Ensure existing default stages are persisted to DB before adding custom one
+      // (only stages currently shown but not yet in DB — NOT deleted stages)
       const existingKeys = dbSettings.map(s => s.stage_key);
-      const currentStageKeys = orderedStages.filter(key => !existingKeys.includes(key));
+      const unpersisted = orderedStages.filter(key => !existingKeys.includes(key));
 
-      if (currentStageKeys.length > 0) {
-        const inserts = currentStageKeys.map(key => {
+      if (unpersisted.length > 0) {
+        const inserts = unpersisted.map(key => {
           const setting = stageSettings[key];
           return {
             job_id: jobId,
@@ -211,7 +218,7 @@ export function useJobStageSettings(jobId: string | undefined) {
             color: setting?.color || DEFAULT_JOB_STAGES[key]?.color || '#0EA5E9',
             icon_name: setting?.iconName || DEFAULT_JOB_STAGES[key]?.iconName || 'inbox',
             is_custom: !DEFAULT_JOB_STAGE_KEYS.includes(key as any),
-            order_index: setting?.orderIndex ?? Object.keys(stageSettings).length,
+            order_index: setting?.orderIndex ?? orderedStages.length,
           };
         });
 
@@ -243,10 +250,10 @@ export function useJobStageSettings(jobId: string | undefined) {
     },
   });
 
-  // Delete stage
+  // Delete stage (with optimistic update)
   const deleteStageMutation = useMutation({
     mutationFn: async (stageKey: string) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!navigator.onLine) throw new Error('Du är offline – försök igen när du har anslutning');
       if (!jobId) throw new Error('No job ID');
 
       const { error } = await supabase
@@ -257,15 +264,29 @@ export function useJobStageSettings(jobId: string | undefined) {
       
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async (stageKey: string) => {
+      await queryClient.cancelQueries({ queryKey: ['job-stage-settings', jobId] });
+      const prev = queryClient.getQueryData(['job-stage-settings', jobId]);
+
+      queryClient.setQueryData(['job-stage-settings', jobId], (old: DbJobStageSetting[] | undefined) => {
+        if (!old) return old;
+        return old.filter(s => s.stage_key !== stageKey);
+      });
+
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prev) queryClient.setQueryData(['job-stage-settings', jobId], context.prev);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['job-stage-settings', jobId] });
     },
   });
 
-  // Reorder stage - move to a specific position
+  // Reorder stage - move to a specific position (atomic DB function)
   const reorderStageMutation = useMutation({
     mutationFn: async ({ stageKey, targetPosition }: { stageKey: string; targetPosition: number }) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!navigator.onLine) throw new Error('Du är offline – försök igen när du har anslutning');
       if (!jobId) throw new Error('No job ID');
 
       const currentIndex = orderedStages.indexOf(stageKey);
@@ -277,15 +298,12 @@ export function useJobStageSettings(jobId: string | undefined) {
       newOrder.splice(currentIndex, 1);
       newOrder.splice(targetPosition, 0, stageKey);
 
-      // Update all order_index values
-      const updates = newOrder.map((key, idx) =>
-        supabase
-          .from('job_stage_settings')
-          .update({ order_index: idx, updated_at: new Date().toISOString() })
-          .eq('job_id', jobId)
-          .eq('stage_key', key)
-      );
-      await Promise.all(updates);
+      // Single atomic RPC call instead of N separate updates
+      const { error } = await supabase.rpc('reorder_job_stages', {
+        p_job_id: jobId,
+        p_stage_keys: newOrder,
+      });
+      if (error) throw error;
     },
     onMutate: async ({ stageKey, targetPosition }) => {
       await queryClient.cancelQueries({ queryKey: ['job-stage-settings', jobId] });
