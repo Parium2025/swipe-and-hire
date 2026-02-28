@@ -328,6 +328,103 @@ export function CandidatesTable({
       });
   }, [user, queryClient, fetchCandidateApplications, readCandidateApplicationsCache, writeCandidateApplicationsCache]);
 
+  // 🔥 BATCH PREFETCH: Warm multi-application cache for ALL visible candidates on mount
+  // This ensures "2 jobb" shows instantly even on first click after login
+  const batchPrefetchedRef = useRef(false);
+  useEffect(() => {
+    if (!user || applications.length === 0 || batchPrefetchedRef.current) return;
+    batchPrefetchedRef.current = true;
+
+    // Find unique applicant IDs that don't have a cache yet
+    const uncachedApplicants = new Map<string, ApplicationData>();
+    for (const app of applications) {
+      if (!app.applicant_id) continue;
+      if (uncachedApplicants.has(app.applicant_id)) continue;
+      if (readCandidateApplicationsCache(app.applicant_id)?.length) continue;
+      uncachedApplicants.set(app.applicant_id, app);
+    }
+
+    if (uncachedApplicants.size === 0) return;
+
+    // Batch fetch: get ALL job_ids once, then query all applications for uncached applicants
+    const doBatchPrefetch = async () => {
+      try {
+        const { data: orgJobs, error: jobsError } = await supabase
+          .from('job_postings')
+          .select('id, title')
+          .eq('employer_id', user.id);
+
+        if (jobsError || !orgJobs?.length) return;
+        const jobIds = orgJobs.map(j => j.id);
+        const jobTitleMap = new Map(orgJobs.map(j => [j.id, j.title]));
+
+        const applicantIds = Array.from(uncachedApplicants.keys());
+
+        // Fetch all applications for all uncached applicants in ONE query
+        const { data: allApps, error: appError } = await supabase
+          .from('job_applications')
+          .select(`
+            id, job_id, applicant_id, first_name, last_name, email, phone,
+            location, bio, cv_url, age, employment_status, work_schedule,
+            availability, custom_answers, status, applied_at, updated_at,
+            profile_image_snapshot_url, video_snapshot_url
+          `)
+          .in('applicant_id', applicantIds)
+          .in('job_id', jobIds);
+
+        if (appError || !allApps) return;
+
+        // Group by applicant_id
+        const grouped = new Map<string, typeof allApps>();
+        for (const app of allApps) {
+          const existing = grouped.get(app.applicant_id) || [];
+          existing.push(app);
+          grouped.set(app.applicant_id, existing);
+        }
+
+        // Write cache for each applicant
+        for (const [applicantId, apps] of grouped) {
+          const seed = uncachedApplicants.get(applicantId);
+          const transformed: ApplicationData[] = apps.map(app => ({
+            id: app.id,
+            job_id: app.job_id,
+            applicant_id: app.applicant_id,
+            first_name: app.first_name,
+            last_name: app.last_name,
+            email: app.email,
+            phone: app.phone,
+            location: app.location,
+            bio: app.bio,
+            cv_url: app.cv_url,
+            age: app.age,
+            employment_status: app.employment_status,
+            work_schedule: app.work_schedule,
+            availability: app.availability,
+            custom_answers: app.custom_answers,
+            status: app.status,
+            applied_at: app.applied_at || '',
+            updated_at: app.updated_at,
+            job_title: jobTitleMap.get(app.job_id) || 'Okänt jobb',
+            profile_image_url: app.profile_image_snapshot_url || seed?.profile_image_url,
+            video_url: app.video_snapshot_url || seed?.video_url,
+            is_profile_video: seed?.is_profile_video,
+          }));
+          if (transformed.length > 0) {
+            writeCandidateApplicationsCache(applicantId, transformed);
+          }
+        }
+
+        console.log('[BatchPrefetch] Warmed cache for', grouped.size, 'candidates');
+      } catch (err) {
+        console.error('[BatchPrefetch] Error:', err);
+      }
+    };
+
+    // Run with slight delay to not block initial render
+    const timer = setTimeout(doBatchPrefetch, 500);
+    return () => clearTimeout(timer);
+  }, [user, applications, readCandidateApplicationsCache, writeCandidateApplicationsCache]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const selectedApplication = useMemo(() => {
     if (!selectedApplicationId) return null;
     return applications.find((a) => a.id === selectedApplicationId) || null;

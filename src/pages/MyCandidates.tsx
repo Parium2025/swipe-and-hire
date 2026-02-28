@@ -802,6 +802,30 @@ const MyCandidates = () => {
     return [activeStageFilter];
   }, [activeStageFilter, activeStageOrder]);
 
+  // Shared cache keys with CandidatesTable
+  const CANDIDATE_APPS_PREFIX = 'candidate_apps_cache_v1_';
+  const CACHE_TTL_MS = 30 * 60 * 1000;
+
+  const readAppsCache = useCallback((applicantId: string): ApplicationData[] | null => {
+    try {
+      const raw = localStorage.getItem(`${CANDIDATE_APPS_PREFIX}${user?.id || 'anon'}_${applicantId}`);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed?.items?.length) return null;
+      if (parsed.cachedAt && Date.now() - parsed.cachedAt > CACHE_TTL_MS) return null;
+      return parsed.items;
+    } catch { return null; }
+  }, [user?.id]);
+
+  const writeAppsCache = useCallback((applicantId: string, items: ApplicationData[]) => {
+    try {
+      localStorage.setItem(
+        `${CANDIDATE_APPS_PREFIX}${user?.id || 'anon'}_${applicantId}`,
+        JSON.stringify({ items, cachedAt: Date.now() })
+      );
+    } catch {}
+  }, [user?.id]);
+
   // Fetch all applications for the selected candidate when dialog opens
   useEffect(() => {
     const fetchAllApplications = async () => {
@@ -811,6 +835,13 @@ const MyCandidates = () => {
       }
 
       setLoadingApplications(true);
+
+      // 🔥 Serve from cache instantly while fetching fresh data
+      const cached = readAppsCache(selectedCandidate.applicant_id);
+      if (cached?.length) {
+        setAllCandidateApplications(cached);
+      }
+
       try {
         const { data: orgJobs, error: jobsError } = await supabase
           .from('job_postings')
@@ -879,16 +910,22 @@ const MyCandidates = () => {
         }));
 
         setAllCandidateApplications(transformedApps);
+        // 🔥 Write to shared cache
+        if (transformedApps.length > 0) {
+          writeAppsCache(selectedCandidate.applicant_id, transformedApps);
+        }
       } catch (error) {
         console.error('Error fetching candidate applications:', error);
-        setAllCandidateApplications([]);
+        if (!cached?.length) {
+          setAllCandidateApplications([]);
+        }
       } finally {
         setLoadingApplications(false);
       }
     };
 
     fetchAllApplications();
-  }, [selectedCandidate?.applicant_id, user?.id, dialogOpen]);
+  }, [selectedCandidate?.applicant_id, user?.id, dialogOpen, readAppsCache, writeAppsCache]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
