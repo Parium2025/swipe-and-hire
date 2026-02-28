@@ -683,6 +683,23 @@ export function CandidatesTable({
                       )}
                     </div>
 
+                    {/* Rating stars */}
+                    {rating > 0 && (
+                      <div className="flex items-center gap-0.5 mt-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={cn(
+                              "h-2.5 w-2.5",
+                              star <= rating
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-white/30"
+                            )}
+                          />
+                        ))}
+                      </div>
+                    )}
+
                     {/* Job title with tooltip */}
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -695,8 +712,8 @@ export function CandidatesTable({
                       </TooltipContent>
                     </Tooltip>
 
-                    {/* Time since last activity */}
-                    <span className="text-[11px] text-white/60 mt-0.5 block">
+                    {/* Time since last activity — crisp white */}
+                    <span className="text-[11px] text-white mt-0.5 block">
                       {formatTimeAgo(application.applied_at)}
                     </span>
                   </div>
