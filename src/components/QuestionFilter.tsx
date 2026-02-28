@@ -321,15 +321,15 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
           <button
             className={`
               flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-              border
+              border whitespace-nowrap min-w-0 flex-shrink-0
               ${open || hasFilters 
                 ? 'bg-white/20 border-white/30 text-white' 
                 : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
               }
             `}
           >
-            <Filter className="h-4 w-4" />
-            <span>{filterLabel}</span>
+            <Filter className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">{filterLabel}</span>
             {hasFilters && (
               <span className="text-white/70 text-xs">({value.length})</span>
             )}
