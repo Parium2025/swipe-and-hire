@@ -1,4 +1,5 @@
 import { memo, useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
@@ -288,7 +289,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               tabIndex={0}
               onClick={() => setActiveTab(stage)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] ${
                 isActive
                   ? 'ring-white/40 shadow-lg'
                   : 'ring-white/20'
@@ -296,7 +297,20 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               style={{ backgroundColor: `${cfg.color}55` }}
             >
               <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-              {cfg.label}
+              {cfg.label.length > 15 ? (
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="truncate cursor-default">{cfg.label}</span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" sideOffset={6}>
+                      <p className="text-sm">{cfg.label}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <span className="truncate">{cfg.label}</span>
+              )}
               <span
                 className="text-[10px] h-5 w-5 flex items-center justify-center rounded-full text-white"
                 style={{ backgroundColor: `${cfg.color}88` }}
