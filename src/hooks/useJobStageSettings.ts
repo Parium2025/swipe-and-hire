@@ -197,24 +197,27 @@ export function useJobStageSettings(jobId: string | undefined) {
       const stageKey = `custom_${Date.now()}`;
       const newOrderIndex = Object.keys(stageSettings).length;
 
-      // First, ensure all default stages exist in DB if not already
+      // Ensure existing stages are persisted to DB before adding custom one
       const existingKeys = dbSettings.map(s => s.stage_key);
-      const missingDefaults = DEFAULT_JOB_STAGE_KEYS.filter(key => !existingKeys.includes(key));
+      const currentStageKeys = orderedStages.filter(key => !existingKeys.includes(key));
 
-      if (missingDefaults.length > 0) {
-        const defaultInserts = missingDefaults.map((key, index) => ({
-          job_id: jobId,
-          stage_key: key,
-          custom_label: DEFAULT_JOB_STAGES[key].label,
-          color: DEFAULT_JOB_STAGES[key].color,
-          icon_name: DEFAULT_JOB_STAGES[key].iconName,
-          is_custom: false,
-          order_index: DEFAULT_JOB_STAGES[key].orderIndex,
-        }));
+      if (currentStageKeys.length > 0) {
+        const inserts = currentStageKeys.map(key => {
+          const setting = stageSettings[key];
+          return {
+            job_id: jobId,
+            stage_key: key,
+            custom_label: setting?.label || DEFAULT_JOB_STAGES[key]?.label || key,
+            color: setting?.color || DEFAULT_JOB_STAGES[key]?.color || '#0EA5E9',
+            icon_name: setting?.iconName || DEFAULT_JOB_STAGES[key]?.iconName || 'inbox',
+            is_custom: !DEFAULT_JOB_STAGE_KEYS.includes(key as any),
+            order_index: setting?.orderIndex ?? Object.keys(stageSettings).length,
+          };
+        });
 
         const { error: defaultError } = await supabase
           .from('job_stage_settings')
-          .insert(defaultInserts);
+          .insert(inserts);
         
         if (defaultError) throw defaultError;
       }
@@ -268,23 +271,6 @@ export function useJobStageSettings(jobId: string | undefined) {
       const currentIndex = orderedStages.indexOf(stageKey);
       if (currentIndex === -1) throw new Error('Stage not found');
       if (targetPosition === currentIndex) return;
-
-      // First ensure all stages are in DB
-      const existingKeys = dbSettings.map(s => s.stage_key);
-      const missingDefaults = DEFAULT_JOB_STAGE_KEYS.filter(key => !existingKeys.includes(key));
-
-      if (missingDefaults.length > 0) {
-        const defaultInserts = missingDefaults.map(key => ({
-          job_id: jobId,
-          stage_key: key,
-          custom_label: DEFAULT_JOB_STAGES[key].label,
-          color: DEFAULT_JOB_STAGES[key].color,
-          icon_name: DEFAULT_JOB_STAGES[key].iconName,
-          is_custom: false,
-          order_index: DEFAULT_JOB_STAGES[key].orderIndex,
-        }));
-        await supabase.from('job_stage_settings').insert(defaultInserts);
-      }
 
       // Build new order array
       const newOrder = [...orderedStages];
