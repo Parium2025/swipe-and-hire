@@ -370,11 +370,14 @@ export function CandidatesTable({
             if (convError) throw convError;
             conversationId = newConv.id;
 
-            // Add both members
-            await supabase.from('conversation_members').insert([
+            // Add employer first (so is_conversation_admin works for the second insert)
+            await supabase.from('conversation_members').insert(
               { conversation_id: conversationId, user_id: user.id, is_admin: true },
+            );
+            // Then add candidate
+            await supabase.from('conversation_members').insert(
               { conversation_id: conversationId, user_id: app.applicant_id, is_admin: false },
-            ]);
+            );
           }
 
           // Step 2: Send the message
