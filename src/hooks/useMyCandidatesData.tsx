@@ -3,6 +3,8 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/useCandidateOperationQueue';
+import { getIsOnline } from '@/lib/connectivityManager';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
@@ -89,6 +91,9 @@ function writeMyCandidatesCache(userId: string, items: MyCandidateData[]): void 
 export function useMyCandidatesData(searchQuery: string = '') {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // 🔥 Auto-sync queued candidate operations when connectivity returns
+  useCandidateOperationQueue(user?.id);
   const [isDragging, setIsDragging] = useState(false);
 
   // Check for cached data BEFORE query runs (only for non-search queries)
@@ -614,7 +619,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
   // Add candidate to my list
   const addCandidate = useMutation({
     mutationFn: async ({ applicationId, applicantId, jobId }: { applicationId: string; applicantId: string; jobId?: string }) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!getIsOnline()) throw new Error('Du är offline – anslut och försök igen');
       if (!user) throw new Error('Not authenticated');
 
       // Add to the first available stage (avoids adding to deleted stages)
@@ -685,7 +690,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
   // Add multiple candidates at once (bulk action)
   const addCandidates = useMutation({
     mutationFn: async (candidates: Array<{ applicationId: string; applicantId: string; jobId?: string }>) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
+      if (!getIsOnline()) throw new Error('Du är offline – anslut och försök igen');
       if (!user) throw new Error('Not authenticated');
 
       // First, check which candidates already exist in my_candidates
@@ -770,11 +775,9 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
   });
 
-  // Move candidate to different stage
+  // Move candidate to different stage (with retry queue fallback)
   const moveCandidate = useMutation({
     mutationFn: async ({ id, stage }: { id: string; stage: CandidateStage }) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
-
       const { data, error } = await supabase
         .from('my_candidates')
         .update({ stage })
@@ -809,21 +812,30 @@ export function useMyCandidatesData(searchQuery: string = '') {
       return { previousCandidates };
     },
     onError: (err, variables, context) => {
-      queryClient.setQueryData(['my-candidates', user?.id], context?.previousCandidates);
-      toast.error('Kunde inte flytta kandidaten');
+      // Don't rollback optimistic update — enqueue for retry instead
+      if (user) {
+        const candidate = candidates.find(c => c.id === variables.id);
+        enqueueCandidateOperation({
+          type: 'stage_move',
+          candidateId: variables.id,
+          recruiterId: user.id,
+          payload: { stage: variables.stage },
+          candidateName: candidate ? `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim() : undefined,
+        });
+        toast.info('Flytten köad – synkas automatiskt', { duration: 3000 });
+      } else {
+        queryClient.setQueryData(['my-candidates', user?.id], context?.previousCandidates);
+        toast.error('Kunde inte flytta kandidaten');
+      }
     },
     onSettled: () => {
-      // Only reset dragging state - don't invalidate to avoid flicker
-      // The realtime subscription will sync when needed
       setIsDragging(false);
     },
   });
 
-  // Remove candidate from my list
+  // Remove candidate from my list (with retry queue fallback)
   const removeCandidate = useMutation({
     mutationFn: async (id: string) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
-
       const { error } = await supabase
         .from('my_candidates')
         .delete()
@@ -831,20 +843,49 @@ export function useMyCandidatesData(searchQuery: string = '') {
 
       if (error) throw error;
     },
+    onMutate: async (id: string) => {
+      // Optimistic removal
+      await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
+      const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
+
+      queryClient.setQueryData(['my-candidates', user?.id], (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.filter((c: MyCandidateData) => c.id !== id),
+          })),
+        };
+      });
+
+      return { previousCandidates };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
       toast.success('Kandidat borttagen från din lista');
     },
-    onError: () => {
-      toast.error('Kunde inte ta bort kandidaten');
+    onError: (err, id, context) => {
+      if (user) {
+        const candidate = (context?.previousCandidates as any)?.pages?.flatMap((p: any) => p.items)?.find((c: MyCandidateData) => c.id === id);
+        enqueueCandidateOperation({
+          type: 'remove',
+          candidateId: id,
+          recruiterId: user.id,
+          payload: {},
+          candidateName: candidate ? `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim() : undefined,
+        });
+        toast.info('Borttagning köad – synkas automatiskt', { duration: 3000 });
+      } else {
+        queryClient.setQueryData(['my-candidates', user?.id], context?.previousCandidates);
+        toast.error('Kunde inte ta bort kandidaten');
+      }
     },
   });
 
-  // Update notes - also saves to persistent candidate_notes table
+  // Update notes - also saves to persistent candidate_notes table (with retry queue fallback)
   const updateNotes = useMutation({
     mutationFn: async ({ id, notes, applicantId }: { id: string; notes: string; applicantId?: string }) => {
-      if (!navigator.onLine) throw new Error('Du är offline');
-
       // Update my_candidates notes
       const { data, error } = await supabase
         .from('my_candidates')
@@ -858,30 +899,27 @@ export function useMyCandidatesData(searchQuery: string = '') {
       // Also save to persistent candidate_notes table (upsert by employer_id + applicant_id)
       const targetApplicantId = applicantId || data?.applicant_id;
       if (targetApplicantId && user) {
-        // First check if a note exists for this employer/applicant combo
         const { data: existingNote } = await supabase
           .from('candidate_notes')
           .select('id')
           .eq('employer_id', user.id)
           .eq('applicant_id', targetApplicantId)
-          .is('job_id', null) // Global note (not job-specific)
+          .is('job_id', null)
           .maybeSingle();
 
         if (existingNote) {
-          // Update existing note
           await supabase
             .from('candidate_notes')
             .update({ note: notes })
             .eq('id', existingNote.id);
         } else if (notes.trim()) {
-          // Create new note only if not empty
           await supabase
             .from('candidate_notes')
             .insert({
               employer_id: user.id,
               applicant_id: targetApplicantId,
               note: notes,
-              job_id: null, // Global note
+              job_id: null,
             });
         }
       }
@@ -892,20 +930,25 @@ export function useMyCandidatesData(searchQuery: string = '') {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
     },
-    onError: () => {
-      toast.error('Kunde inte uppdatera anteckningar');
+    onError: (err, variables) => {
+      if (user) {
+        enqueueCandidateOperation({
+          type: 'notes_update',
+          candidateId: variables.id,
+          applicantId: variables.applicantId,
+          recruiterId: user.id,
+          payload: { notes: variables.notes },
+        });
+        // Silent — notes feel "saved" via optimistic update
+      } else {
+        toast.error('Kunde inte uppdatera anteckningar');
+      }
     },
   });
 
-  // Update rating - also saves to persistent candidate_ratings table
-  // AND updates localStorage cache for instant sync with /candidates
+  // Update rating - also saves to persistent candidate_ratings table (with retry queue fallback)
   const updateRating = useMutation({
     mutationFn: async ({ id, rating, applicantId }: { id: string; rating: number; applicantId?: string }) => {
-      // Check if online first
-      if (!navigator.onLine) {
-        throw new Error('Du är offline');
-      }
-
       // Update my_candidates rating
       const { data, error } = await supabase
         .from('my_candidates')
@@ -929,8 +972,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
             onConflict: 'recruiter_id,applicant_id',
           });
         
-        // CRITICAL: Update localStorage ratings cache for instant sync with /candidates
-        // This eliminates the "millisecond delay" when switching between views
+        // Update localStorage ratings cache for instant sync with /candidates
         try {
           const cacheKey = `ratings_cache_${user.id}`;
           const raw = localStorage.getItem(cacheKey);
@@ -982,8 +1024,20 @@ export function useMyCandidatesData(searchQuery: string = '') {
       return { previousCandidates };
     },
     onError: (err, variables, context) => {
-      queryClient.setQueryData(['my-candidates', user?.id], context?.previousCandidates);
-      toast.error('Kunde inte uppdatera betyg');
+      // Don't rollback — keep optimistic update and enqueue for retry
+      if (user) {
+        enqueueCandidateOperation({
+          type: 'rating_update',
+          candidateId: variables.id,
+          applicantId: variables.applicantId,
+          recruiterId: user.id,
+          payload: { rating: variables.rating },
+        });
+        // Silent — rating feels "saved" via optimistic update
+      } else {
+        queryClient.setQueryData(['my-candidates', user?.id], context?.previousCandidates);
+        toast.error('Kunde inte uppdatera betyg');
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
