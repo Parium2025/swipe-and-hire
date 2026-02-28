@@ -265,22 +265,28 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
               />
             </div>
           </div>
-          <DialogFooter className="flex justify-between gap-2">
+          <div className="flex gap-2 pt-2">
             <Button
-              variant="outline"
-              onClick={() => setRenameDialogOpen(false)}
-              className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            >
-              Avbryt
-            </Button>
-            <Button
+              onMouseDown={(e) => e.currentTarget.blur()}
+              onMouseUp={(e) => e.currentTarget.blur()}
               onClick={handleRename}
               disabled={!newLabel.trim() || updateStageSetting.isPending}
-              className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 ${
+                newLabel.trim() && !updateStageSetting.isPending ? 'border border-white/30' : 'border border-transparent'
+              }`}
             >
               Spara
             </Button>
-          </DialogFooter>
+            <Button
+              variant="glass"
+              onClick={() => setRenameDialogOpen(false)}
+              onMouseDown={(e) => e.currentTarget.blur()}
+              onMouseUp={(e) => e.currentTarget.blur()}
+              className="min-h-[44px] rounded-full"
+            >
+              Avbryt
+            </Button>
+          </div>
         </DialogContentNoFocus>
       </Dialog>
 
