@@ -159,7 +159,7 @@ export function JobStageSettingsMenu({
               }
             }}
           >
-            <MoreVertical className="h-3.5 w-3.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+            <MoreVertical className="h-4.5 w-4.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 

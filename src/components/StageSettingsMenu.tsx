@@ -155,8 +155,8 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-1 rounded hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100">
-            <MoreVertical className="h-4 w-4 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+          <button className="p-1 rounded hover:bg-white/20 active:bg-white/25 transition-colors">
+            <MoreVertical className="h-4.5 w-4.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 border-white/20">
