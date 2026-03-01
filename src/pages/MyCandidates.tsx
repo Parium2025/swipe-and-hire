@@ -969,10 +969,26 @@ const MyCandidates = () => {
         }}
         onRemoveFromList={() => {
           if (selectedCandidate) {
-            setCandidateToRemove(selectedCandidate);
+            const candidateToDelete = selectedCandidate;
             setDialogOpen(false);
-            setTimeout(() => {
-              confirmRemoveCandidate();
+            setTimeout(async () => {
+              // Direct delete instead of relying on stale state
+              if (isViewingColleague) {
+                await removeCandidateFromColleagueList(candidateToDelete.id);
+                return;
+              }
+              setCandidates(prev => prev.filter(c => c.id !== candidateToDelete.id));
+              try {
+                const { error } = await supabase
+                  .from('my_candidates')
+                  .delete()
+                  .eq('id', candidateToDelete.id);
+                if (error) throw error;
+                toast.success('Kandidat borttagen från din lista');
+              } catch {
+                fetchCandidates();
+                toast.error('Kunde inte ta bort kandidaten');
+              }
             }, 100);
           }
         }}
