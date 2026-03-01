@@ -718,6 +718,8 @@ const MyCandidates = () => {
           isSelectionMode={isSelectionMode}
           selectedCandidateIds={selectedCandidateIds}
           onToggleSelect={toggleCandidateSelection}
+          onPrefetch={handlePrefetchCandidate}
+          onMarkAsViewed={markApplicationAsViewed}
         />
       ) : (
         <DndContext
