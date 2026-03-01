@@ -457,18 +457,18 @@ export const CandidateProfileDialog = ({
               <button
                 onClick={onNavigatePrev}
                 disabled={!onNavigatePrev}
-                className="flex items-center justify-center h-7 w-7 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-white/50"
+                className="flex items-center justify-center h-7 w-7 rounded-full text-white hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-default disabled:hover:bg-transparent"
                 aria-label="Föregående kandidat"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              <span className="text-xs text-white/50 font-medium tabular-nums">
+              <span className="text-xs text-white font-medium tabular-nums">
                 {(candidateIndex ?? 0) + 1} av {candidateTotal}
               </span>
               <button
                 onClick={onNavigateNext}
                 disabled={!onNavigateNext}
-                className="flex items-center justify-center h-7 w-7 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-white/50"
+                className="flex items-center justify-center h-7 w-7 rounded-full text-white hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-default disabled:hover:bg-transparent"
                 aria-label="Nästa kandidat"
               >
                 <ChevronRight className="h-4 w-4" />
