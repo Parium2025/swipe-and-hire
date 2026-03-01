@@ -491,13 +491,18 @@ export function useMyCandidatesData(searchQuery: string = '') {
     };
   }, [user, queryClient, isDragging]);
 
-  // Real-time subscription for activity updates (profiles.last_active_at and job_applications)
+  // 🔥 Stable ref for applicant IDs — prevents realtime channels from
+  // re-subscribing every time the candidate list changes.
+  const applicantIdsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
-    if (!user || candidates.length === 0) return;
+    applicantIdsRef.current = new Set(candidates.map(c => c.applicant_id));
+  }, [candidates]);
 
-    const applicantIds = [...new Set(candidates.map(c => c.applicant_id))];
+  // Real-time subscription for activity updates (profiles.last_active_at and job_applications)
+  // Dependencies are intentionally limited to user/queryClient to keep the channel stable.
+  useEffect(() => {
+    if (!user) return;
 
-    // Listen for profile updates (last_active_at changes)
     const profilesChannel = supabase
       .channel('candidate-activity-profiles')
       .on(
@@ -509,9 +514,8 @@ export function useMyCandidatesData(searchQuery: string = '') {
         },
         (payload: any) => {
           const updatedUserId = payload.new?.user_id;
-          if (updatedUserId && applicantIds.includes(updatedUserId)) {
+          if (updatedUserId && applicantIdsRef.current.has(updatedUserId)) {
             const newLastActiveAt = payload.new?.last_active_at;
-            // Update the specific candidate's last_active_at in cache (paginated structure)
             queryClient.setQueryData(
               queryKey,
               (old: any) => {
@@ -534,7 +538,6 @@ export function useMyCandidatesData(searchQuery: string = '') {
       )
       .subscribe();
 
-    // Listen for new job applications (latest_application_at changes)
     const applicationsChannel = supabase
       .channel('candidate-activity-applications')
       .on(
@@ -547,8 +550,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
         (payload: any) => {
           const applicantId = payload.new?.applicant_id;
           const appliedAt = payload.new?.applied_at;
-          if (applicantId && applicantIds.includes(applicantId) && appliedAt) {
-            // Update the specific candidate's latest_application_at in cache (paginated structure)
+          if (applicantId && applicantIdsRef.current.has(applicantId) && appliedAt) {
             queryClient.setQueryData(
               queryKey,
               (old: any) => {
@@ -575,9 +577,10 @@ export function useMyCandidatesData(searchQuery: string = '') {
       supabase.removeChannel(profilesChannel);
       supabase.removeChannel(applicationsChannel);
     };
-  }, [user, candidates, queryClient]);
+  }, [user, queryClient]);
 
-  // Real-time subscription for persistent ratings (candidate_ratings table)
+  // Real-time subscription for persistent ratings AND notes
+  // Combined into a single effect to reduce channel overhead.
   useEffect(() => {
     if (!user) return;
 
@@ -591,21 +594,29 @@ export function useMyCandidatesData(searchQuery: string = '') {
           table: 'candidate_ratings',
         },
         (payload: any) => {
-          // Invalidate queries when ratings change (from any team member)
-          queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          const next = payload?.new as { applicant_id?: string; rating?: number; recruiter_id?: string } | undefined;
+          // In-place cache update for own ratings to avoid full refetch
+          if (next?.applicant_id && next?.recruiter_id === user.id && typeof next.rating === 'number') {
+            queryClient.setQueryData(queryKey, (old: any) => {
+              if (!old?.pages) return old;
+              return {
+                ...old,
+                pages: old.pages.map((page: any) => ({
+                  ...page,
+                  items: page.items.map((c: MyCandidateData) =>
+                    c.applicant_id === next.applicant_id ? { ...c, rating: next.rating! } : c
+                  ),
+                })),
+              };
+            });
+          } else {
+            // Team member rating change — invalidate
+            queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          }
           queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
         }
       )
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(ratingsChannel);
-    };
-  }, [user, queryClient]);
-
-  // Real-time subscription for persistent notes (candidate_notes table)
-  useEffect(() => {
-    if (!user) return;
 
     const notesChannel = supabase
       .channel('candidate-notes-sync')
@@ -617,14 +628,31 @@ export function useMyCandidatesData(searchQuery: string = '') {
           table: 'candidate_notes',
         },
         (payload: any) => {
-          // Invalidate queries when notes change (from any team member)
-          queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          const next = payload?.new as { applicant_id?: string; note?: string; employer_id?: string } | undefined;
+          // In-place cache update for own notes
+          if (next?.applicant_id && next?.employer_id === user.id && typeof next.note === 'string') {
+            queryClient.setQueryData(queryKey, (old: any) => {
+              if (!old?.pages) return old;
+              return {
+                ...old,
+                pages: old.pages.map((page: any) => ({
+                  ...page,
+                  items: page.items.map((c: MyCandidateData) =>
+                    c.applicant_id === next.applicant_id ? { ...c, notes: next.note! } : c
+                  ),
+                })),
+              };
+            });
+          } else {
+            queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          }
           queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
         }
       )
       .subscribe();
 
     return () => {
+      supabase.removeChannel(ratingsChannel);
       supabase.removeChannel(notesChannel);
     };
   }, [user, queryClient]);

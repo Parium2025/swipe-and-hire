@@ -136,6 +136,7 @@ const MyCandidates = () => {
     removeCandidate: hookRemoveCandidate,
     updateNotes: hookUpdateNotes,
     updateRating: hookUpdateRating,
+    markAsViewed: hookMarkAsViewed,
   } = useMyCandidatesData(debouncedSearchQuery);
 
   // Helper: optimistically update candidates in the React Query cache
@@ -434,31 +435,13 @@ const MyCandidates = () => {
     setOverId(resolveOverStage(overRawId));
   };
 
-  // Move candidate - OPTIMISTIC UPDATE
+  // Move candidate - delegates to hook mutation (includes retry queue + optimistic update)
   const updateCandidateStage = async (candidateId: string, newStage: CandidateStage) => {
     if (isViewingColleague) {
       await moveCandidateInColleagueList(candidateId, newStage);
       return;
     }
-    
-    const previousData = queryClient.getQueryData(['my-candidates', user?.id, debouncedSearchQuery]);
-    updateCandidatesCache(items =>
-      items.map(c => c.id === candidateId ? { ...c, stage: newStage } : c)
-    );
-
-    try {
-      const { error } = await supabase
-        .from('my_candidates')
-        .update({ stage: newStage, updated_at: new Date().toISOString() })
-        .eq('id', candidateId);
-
-      if (error) {
-        queryClient.setQueryData(['my-candidates', user?.id, debouncedSearchQuery], previousData);
-        throw error;
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Kunde inte flytta kandidaten');
-    }
+    hookMoveCandidate.mutate({ id: candidateId, stage: newStage });
   };
 
   const handleMoveCandidatesAndDelete = useCallback(async (fromStage: string, toStage: string) => {
@@ -542,63 +525,27 @@ const MyCandidates = () => {
         return;
       }
       
-      updateCandidatesCache(items => items.filter(c => c.id !== idToRemove));
       setCandidateToRemove(null);
-      try {
-        const { error } = await supabase
-          .from('my_candidates')
-          .delete()
-          .eq('id', idToRemove);
-          
-        if (error) throw error;
-        toast.success('Kandidat borttagen från din lista');
-      } catch (error) {
-        fetchCandidates();
-        toast.error('Kunde inte ta bort kandidaten');
-      }
+      hookRemoveCandidate.mutate(idToRemove);
     }
   };
 
-  // Update rating - optimistic via query cache
+  // Update rating - delegates to hook mutation (includes retry queue + optimistic update)
   const updateCandidateRating = async (candidateId: string, newRating: number) => {
-    updateCandidatesCache(items =>
-      items.map(c => c.id === candidateId ? { ...c, rating: newRating } : c)
-    );
+    const candidate = displayedCandidates.find(c => c.id === candidateId);
     if (selectedCandidate?.id === candidateId) {
       setSelectedCandidate(prev => prev ? { ...prev, rating: newRating } : null);
     }
-
-    try {
-      const { error } = await supabase
-        .from('my_candidates')
-        .update({ rating: newRating })
-        .eq('id', candidateId);
-        
-      if (error) throw error;
-    } catch (error) {
-      fetchCandidates();
-      toast.error('Kunde inte uppdatera betyg');
-    }
+    hookUpdateRating.mutate({
+      id: candidateId,
+      rating: newRating,
+      applicantId: candidate?.applicant_id,
+    });
   };
 
-  // Mark as viewed - optimistic via query cache
+  // Mark as viewed - delegates to hook mutation
   const markApplicationAsViewed = async (applicationId: string) => {
-    updateCandidatesCache(items =>
-      items.map(c => c.application_id === applicationId
-        ? { ...c, viewed_at: new Date().toISOString() }
-        : c
-      )
-    );
-
-    try {
-      await supabase
-        .from('job_applications')
-        .update({ viewed_at: new Date().toISOString() })
-        .eq('id', applicationId)
-        .is('viewed_at', null);
-    } catch (error) {
-      console.error('Error marking as viewed:', error);
-    }
+    hookMarkAsViewed.mutate(applicationId);
   };
 
   const handleOpenProfile = (candidate: MyCandidateData) => {
@@ -1000,24 +947,12 @@ const MyCandidates = () => {
           if (selectedCandidate) {
             const candidateToDelete = selectedCandidate;
             setDialogOpen(false);
-            setTimeout(async () => {
-              // Direct delete instead of relying on stale state
+            setTimeout(() => {
               if (isViewingColleague) {
-                await removeCandidateFromColleagueList(candidateToDelete.id);
+                removeCandidateFromColleagueList(candidateToDelete.id);
                 return;
               }
-              updateCandidatesCache(items => items.filter(c => c.id !== candidateToDelete.id));
-              try {
-                const { error } = await supabase
-                  .from('my_candidates')
-                  .delete()
-                  .eq('id', candidateToDelete.id);
-                if (error) throw error;
-                toast.success('Kandidat borttagen från din lista');
-              } catch {
-                fetchCandidates();
-                toast.error('Kunde inte ta bort kandidaten');
-              }
+              hookRemoveCandidate.mutate(candidateToDelete.id);
             }, 100);
           }
         }}
