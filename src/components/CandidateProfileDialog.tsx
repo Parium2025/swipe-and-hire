@@ -60,6 +60,8 @@ interface CandidateProfileDialogProps {
   onRemoveFromList?: () => void;
   onNavigatePrev?: () => void;
   onNavigateNext?: () => void;
+  candidateIndex?: number;
+  candidateTotal?: number;
 }
 
 const statusConfig = {
@@ -162,6 +164,8 @@ export const CandidateProfileDialog = ({
   onRemoveFromList,
   onNavigatePrev,
   onNavigateNext,
+  candidateIndex,
+  candidateTotal,
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const { hasTeam } = useTeamMembers();
@@ -446,6 +450,32 @@ export const CandidateProfileDialog = ({
         <div className="flex flex-1 min-h-0 md:max-h-[85vh]">
           {/* Main content - left side */}
           <div className={`flex-1 overflow-y-auto overscroll-contain p-4 pt-2 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
+          
+          {/* Candidate navigation bar — TeamTailor-style */}
+          {(onNavigatePrev || onNavigateNext) && candidateTotal != null && candidateTotal > 1 && (
+            <div className="flex items-center justify-center gap-3 py-1">
+              <button
+                onClick={onNavigatePrev}
+                disabled={!onNavigatePrev}
+                className="flex items-center justify-center h-7 w-7 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-white/50"
+                aria-label="Föregående kandidat"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="text-xs text-white/50 font-medium tabular-nums">
+                {(candidateIndex ?? 0) + 1} av {candidateTotal}
+              </span>
+              <button
+                onClick={onNavigateNext}
+                disabled={!onNavigateNext}
+                className="flex items-center justify-center h-7 w-7 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-white/50"
+                aria-label="Nästa kandidat"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
           {/* Header with circular profile image/video */}
           <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
             <div className="relative">
@@ -475,29 +505,9 @@ export const CandidateProfileDialog = ({
             </div>
             
             <div className="w-full">
-              <div className="flex items-center gap-1.5">
-                {onNavigatePrev && (
-                  <button
-                    onClick={onNavigatePrev}
-                    className="shrink-0 flex items-center justify-center h-7 w-7 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-all"
-                    aria-label="Föregående kandidat"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                )}
-                <h2 className="text-lg md:text-2xl font-semibold text-white truncate">
-                  {displayApp.first_name} {displayApp.last_name}
-                </h2>
-                {onNavigateNext && (
-                  <button
-                    onClick={onNavigateNext}
-                    className="shrink-0 flex items-center justify-center h-7 w-7 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-all"
-                    aria-label="Nästa kandidat"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
+              <h2 className="text-lg md:text-2xl font-semibold text-white text-center">
+                {displayApp.first_name} {displayApp.last_name}
+              </h2>
               
               {onRatingChange && (
                 <div className="mt-2">

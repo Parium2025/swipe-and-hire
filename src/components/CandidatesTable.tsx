@@ -1195,6 +1195,8 @@ export function CandidatesTable({
         variant="all-candidates"
         onNavigatePrev={handleNavigatePrev}
         onNavigateNext={handleNavigateNext}
+        candidateIndex={selectedApplicationId ? sortedApplications.findIndex(a => a.id === selectedApplicationId) : undefined}
+        candidateTotal={sortedApplications.length}
       />
 
       {isTouchDevice && (
