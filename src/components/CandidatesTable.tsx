@@ -892,8 +892,8 @@ export function CandidatesTable({
     <>
       {/* Bulk actions bar */}
       {selectionMode && (
-        <div className="mb-3 px-3 py-2 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-between">
-          <span className="text-xs text-white">
+        <div className="mb-3 px-3 py-2 rounded-lg bg-white/[0.08] border border-white/15 flex items-center justify-between">
+          <span className="text-xs text-[#FFFFFF] font-medium">
             {selectedIds.size > 0 
               ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
               : 'Välj kandidater'
@@ -903,20 +903,20 @@ export function CandidatesTable({
             {selectedIds.size > 0 && (
               <>
                 <button
-                  className="h-7 px-2.5 rounded-lg text-white hover:bg-white/10 border border-white/10 text-xs transition-colors"
+                  className="h-7 px-2.5 rounded-lg text-[#FFFFFF] hover:bg-white/10 border border-white/15 text-xs font-medium transition-colors"
                   onClick={() => setSelectedIds(new Set())}
                 >
                   Avmarkera
                 </button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="h-7 px-2.5 rounded-lg text-white hover:bg-white/10 border border-white/10 text-xs transition-colors">
+                    <button className="h-7 px-2.5 rounded-lg text-[#FFFFFF] hover:bg-white/10 border border-white/15 text-xs font-medium transition-colors">
                       Åtgärder
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-[hsl(222,47%,11%)] border-white/10 min-w-[180px]">
                     <DropdownMenuItem 
-                      className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                      className="text-[#FFFFFF] cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-[#FFFFFF]"
                       onClick={handleBulkAddToMyCandidates}
                       disabled={addCandidates.isPending}
                     >
@@ -924,7 +924,7 @@ export function CandidatesTable({
                       {addCandidates.isPending ? 'Lägger till...' : 'Lägg till i Mina kandidater'}
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="text-white cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                      className="text-[#FFFFFF] cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-[#FFFFFF]"
                       onClick={() => {
                         if (selectedRecipientCount === 0) {
                           toast.error('Inga giltiga kandidater valda');
@@ -941,7 +941,7 @@ export function CandidatesTable({
               </>
             )}
             <button
-              className="flex h-7 w-7 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-[#FFFFFF] bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
               onClick={clearSelection}
             >
               <X className="h-3.5 w-3.5" />
