@@ -1,4 +1,5 @@
 import { useState, memo, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, Activity, StickyNote, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -273,7 +274,7 @@ export const CandidateSlide = memo(function CandidateSlide({
             )}
 
             {/* CV fullscreen overlay — matches desktop CandidateProfileDialog */}
-            {cvOpen && signedCvUrl && (
+            {cvOpen && signedCvUrl && createPortal(
               <div className="fixed inset-0 z-[9999] bg-black/90 flex flex-col">
                 <div className="flex items-center justify-between px-4 py-3">
                   <h3 className="text-white text-lg font-semibold">CV</h3>
@@ -294,7 +295,8 @@ export const CandidateSlide = memo(function CandidateSlide({
                     onClose={() => setCvOpen(false)}
                   />
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
 
             {/* Bio / Presentation */}
