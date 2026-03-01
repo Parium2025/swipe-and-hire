@@ -103,6 +103,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
   const {
     data,
     isLoading: queryLoading,
+    isFetching,
     error,
     refetch,
     fetchNextPage,
@@ -1114,11 +1115,15 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
   });
 
+  // True while background-refetching with stale cache — hides add-button to prevent flicker
+  const isMyCandidatesSettling = isFetching && !queryLoading;
+
   return {
     candidates,
     candidatesByStage,
     stats,
     isLoading,
+    isMyCandidatesSettling,
     error,
     refetch,
     fetchNextPage,
