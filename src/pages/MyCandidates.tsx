@@ -72,9 +72,13 @@ import { CandidateCompareDialog } from '@/components/CandidateCompareDialog';
 // ── Extracted components ─────────────────────────────
 import { CandidateCardContent } from '@/components/candidates/KanbanCandidateCard';
 import { StageColumn } from '@/components/candidates/StageColumn';
+import { MobileMyCandidatesView } from '@/components/candidates/MobileMyCandidatesView';
+import { useDevice } from '@/hooks/use-device';
 
 const MyCandidates = () => {
   const { user } = useAuth();
+  const device = useDevice();
+  const useMobileView = device === 'mobile';
   const { stageConfig, stageOrder, deleteStage } = useStageSettings();
   const { setStageCount } = useKanbanLayout();
   
@@ -756,8 +760,8 @@ const MyCandidates = () => {
             </Button>
           </div>
 
-          {/* Stage filters */}
-          <div className="flex flex-wrap justify-center gap-2">
+          {/* Stage filters — hidden on mobile (tabs handle stage selection) */}
+          <div className={`flex-wrap justify-center gap-2 ${useMobileView ? 'hidden' : 'flex'}`}>
             <button
               onClick={() => setActiveStageFilter('all')}
               className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
@@ -852,6 +856,19 @@ const MyCandidates = () => {
             </p>
           </CardContent>
         </Card>
+      ) : useMobileView ? (
+        <MobileMyCandidatesView
+          candidates={displayedCandidates}
+          stages={activeStageOrder}
+          stageConfig={activeStageConfig}
+          onOpenProfile={handleOpenProfile}
+          onMoveToStage={(id, stage) => updateCandidateStage(id, stage)}
+          onMoveCandidatesAndDelete={handleMoveCandidatesAndDelete}
+          isReadOnly={isViewingColleague}
+          isSelectionMode={isSelectionMode}
+          selectedCandidateIds={selectedCandidateIds}
+          onToggleSelect={toggleCandidateSelection}
+        />
       ) : (
         <DndContext
           sensors={sensors}
