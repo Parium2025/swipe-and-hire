@@ -599,15 +599,20 @@ const MyCandidates = () => {
               )}
             </div>
             
-            <Button
-              variant="glass"
-              size="sm"
-              onClick={() => isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)}
-              className="h-8 px-3 text-xs"
+            <button
+              onClick={() => displayedCandidates.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
+              onMouseDown={(e) => e.preventDefault()}
+              className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
+                isSelectionMode 
+                  ? 'bg-white/10 ring-white' 
+                  : displayedCandidates.length > 0 
+                    ? 'bg-white/5 ring-white/30' 
+                    : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
+              }`}
             >
-              {isSelectionMode ? null : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
-              {isSelectionMode ? 'Avbryt' : 'Välj'}
-            </Button>
+              <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
+              <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
+            </button>
           </div>
 
           {/* Stage filters — hidden on mobile (tabs handle stage selection) */}
