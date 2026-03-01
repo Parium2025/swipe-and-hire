@@ -41,6 +41,7 @@ interface CandidatesTableProps {
   hasReachedLimit?: boolean;
   onContinueLoading?: () => void;
   loadedCount?: number;
+  onRatingUpdate?: (applicantId: string, rating: number) => void;
 }
 
 const statusConfig = {
@@ -64,6 +65,7 @@ export function CandidatesTable({
   hasReachedLimit = false,
   onContinueLoading,
   loadedCount = 0,
+  onRatingUpdate,
 }: CandidatesTableProps) {
   const deviceType = useDevice();
   const isMobile = deviceType === 'mobile';
@@ -1197,6 +1199,8 @@ export function CandidatesTable({
         onNavigateNext={handleNavigateNext}
         candidateIndex={selectedApplicationId ? sortedApplications.findIndex(a => a.id === selectedApplicationId) : undefined}
         candidateTotal={sortedApplications.length}
+        candidateRating={selectedApplication ? getDisplayRating(selectedApplication) : undefined}
+        onRatingChange={onRatingUpdate && selectedApplication ? (rating) => onRatingUpdate(selectedApplication.applicant_id, rating) : undefined}
       />
 
       {isTouchDevice && (

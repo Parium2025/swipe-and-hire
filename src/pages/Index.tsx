@@ -78,6 +78,7 @@ const CandidatesContent = () => {
     hasReachedLimit,
     continueLoading,
     loadedCount,
+    updateRating,
   } = useApplicationsData(debouncedSearch);
   
   // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
@@ -278,6 +279,7 @@ const CandidatesContent = () => {
             hasReachedLimit={hasReachedLimit}
             onContinueLoading={continueLoading}
             loadedCount={loadedCount}
+            onRatingUpdate={(applicantId, rating) => updateRating.mutate({ applicantId, rating })}
           />
         )}
       </div>
