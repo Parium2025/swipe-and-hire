@@ -27,7 +27,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-type JobStatusTab = 'active' | 'expired';
+type JobStatusTab = 'active' | 'expired' | 'draft';
 
 const Dashboard = memo(() => {
   // Dashboard shows organization-wide data (all colleagues' published jobs)

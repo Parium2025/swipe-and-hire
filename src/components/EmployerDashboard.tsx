@@ -1,4 +1,4 @@
-import { useState, memo, useMemo, useRef, useEffect } from 'react';
+import { useState, memo, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,6 +42,9 @@ import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
+import { JobStatusTabs } from '@/components/ui/job-status-tabs';
+
+type JobStatusTab = 'active' | 'expired' | 'draft';
 
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
@@ -84,6 +87,9 @@ const EmployerDashboard = memo(() => {
     filteredAndSortedJobs,
   } = useJobFiltering(jobs);
   
+  // Tab state for switching between active, expired, and draft jobs
+  const [activeTab, setActiveTab] = useState<JobStatusTab>('active');
+  
   // Pagination state for mobile
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -93,11 +99,28 @@ const EmployerDashboard = memo(() => {
   // Check if there are any drafts
   const hasDrafts = useMemo(() => jobs.some(job => !job.is_active), [jobs]);
   
-  const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / pageSize));
+  // Filter jobs by active tab BEFORE pagination
+  const tabFilteredJobs = useMemo(() => {
+    switch (activeTab) {
+      case 'active':
+        return filteredAndSortedJobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
+      case 'expired':
+        return filteredAndSortedJobs.filter(j => isJobExpiredCheck(j.created_at, j.expires_at));
+      case 'draft':
+        return filteredAndSortedJobs.filter(j => !j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
+      default:
+        return filteredAndSortedJobs;
+    }
+  }, [filteredAndSortedJobs, activeTab]);
+  
+  // Reset page when tab changes
+  useEffect(() => { setPage(1); }, [activeTab]);
+  
+  const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
   const pageJobs = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return filteredAndSortedJobs.slice(start, start + pageSize);
-  }, [filteredAndSortedJobs, page]);
+    return tabFilteredJobs.slice(start, start + pageSize);
+  }, [tabFilteredJobs, page]);
   
   // Scroll to top when page changes (but not on initial mount)
   useEffect(() => {
@@ -250,14 +273,24 @@ const EmployerDashboard = memo(() => {
         hasDrafts={hasDrafts}
       />
 
+      {/* Status tabs: Aktiva / Utgångna / Utkast */}
+      <JobStatusTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        activeCount={activeJobs.length}
+        expiredCount={expiredJobsCount}
+        draftCount={draftJobsCount}
+        showDrafts
+      />
+
       {/* Result indicator */}
       {searchTerm && (
         <div className="text-sm text-white mb-4">
-          {filteredAndSortedJobs.length === 0 ? (
+          {tabFilteredJobs.length === 0 ? (
             <span>Inga annonser matchar din sökning</span>
           ) : (
             <span>
-              Visar {filteredAndSortedJobs.length} av {jobs.length} annonser
+              Visar {tabFilteredJobs.length} av {jobs.length} annonser
             </span>
           )}
         </div>

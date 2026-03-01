@@ -143,25 +143,6 @@ export const JobSearchBar = ({
             >
               {sortLabels['title-desc']}
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/20" />
-            <DropdownMenuItem 
-              onClick={() => onSortChange('active-first')}
-              className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
-            >
-              {sortLabels['active-first']}
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => onSortChange('expired-first')}
-              className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
-            >
-              {sortLabels['expired-first']}
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => onSortChange('draft-first')}
-              className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
-            >
-              {sortLabels['draft-first']}
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -201,10 +182,6 @@ export const JobSearchBar = ({
                 <DropdownMenuItem onClick={() => onSortChange('oldest')} className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer">{sortLabels.oldest}</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onSortChange('title-asc')} className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer">{sortLabels['title-asc']}</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onSortChange('title-desc')} className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer">{sortLabels['title-desc']}</DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-white/20" />
-                <DropdownMenuItem onClick={() => onSortChange('active-first')} className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer">{sortLabels['active-first']}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onSortChange('expired-first')} className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer">{sortLabels['expired-first']}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onSortChange('draft-first')} className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer">{sortLabels['draft-first']}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
