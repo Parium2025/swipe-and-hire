@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
+import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { Button } from '@/components/ui/button';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
@@ -568,6 +569,14 @@ const JobDetails = () => {
   const [myCandidatesMap, setMyCandidatesMap] = useState<Map<string, string>>(new Map());
   const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
   
+  // Swipe viewer state (touch devices)
+  const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
+  const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
+  const [swipeStageApps, setSwipeStageApps] = useState<JobApplication[]>([]);
+  
+  // Track which stage the selected candidate belongs to (for desktop arrow nav)
+  const [selectedStage, setSelectedStage] = useState<string | null>(null);
+  
   // Selection mode state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<Set<string>>(new Set());
@@ -821,8 +830,103 @@ const JobDetails = () => {
   };
 
   const handleOpenProfile = useCallback((app: JobApplication) => {
-    setSelectedApplication(app);
-    setDialogOpen(true);
+    // Determine which stage this candidate belongs to
+    const stage = app.status;
+    const stageApps = applicationsByStatus[stage] || [];
+
+    if (isTouchDevice) {
+      // Touch: open TikTok-style swipe viewer scoped to this stage
+      const idx = stageApps.findIndex(a => a.id === app.id);
+      setSwipeStageApps(stageApps);
+      setSwipeInitialIndex(idx >= 0 ? idx : 0);
+      setSwipeViewerOpen(true);
+    } else {
+      // Desktop: open dialog with arrow navigation
+      setSelectedApplication(app);
+      setSelectedStage(stage);
+      setDialogOpen(true);
+    }
+  }, [isTouchDevice, applicationsByStatus]);
+
+  // Convert JobApplication to ApplicationData for swipe viewer
+  const swipeApplicationsAsData = useMemo(() => {
+    return swipeStageApps.map(app => ({
+      id: app.id,
+      job_id: jobId || '',
+      applicant_id: app.applicant_id,
+      first_name: app.first_name,
+      last_name: app.last_name,
+      email: app.email,
+      phone: app.phone,
+      location: app.location,
+      bio: app.bio,
+      cv_url: app.cv_url,
+      age: app.age,
+      employment_status: app.employment_status,
+      work_schedule: null,
+      availability: app.availability,
+      custom_answers: app.custom_answers,
+      status: app.status,
+      applied_at: app.applied_at,
+      updated_at: app.applied_at,
+      job_title: job?.title || '',
+      profile_image_url: app.profile_image_url,
+      video_url: app.video_url,
+      is_profile_video: app.is_profile_video,
+      viewed_at: app.viewed_at,
+      last_active_at: app.last_active_at,
+      city: app.city,
+      rating: app.rating,
+    } as ApplicationData));
+  }, [swipeStageApps, jobId, job?.title]);
+
+  // Handle opening full profile from swipe viewer
+  const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
+    setSwipeViewerOpen(false);
+    const original = applications.find(a => a.id === application.id);
+    if (original) {
+      setSelectedApplication(original);
+      setSelectedStage(original.status);
+      setDialogOpen(true);
+    }
+  }, [applications]);
+
+  // Desktop arrow navigation scoped to the current stage
+  const handleNavigatePrev = useMemo(() => {
+    if (!selectedApplication || !selectedStage) return undefined;
+    const stageApps = applicationsByStatus[selectedStage] || [];
+    const idx = stageApps.findIndex(a => a.id === selectedApplication.id);
+    if (idx <= 0) return undefined;
+    return () => {
+      setSelectedApplication(stageApps[idx - 1]);
+    };
+  }, [selectedApplication, selectedStage, applicationsByStatus]);
+
+  const handleNavigateNext = useMemo(() => {
+    if (!selectedApplication || !selectedStage) return undefined;
+    const stageApps = applicationsByStatus[selectedStage] || [];
+    const idx = stageApps.findIndex(a => a.id === selectedApplication.id);
+    if (idx < 0 || idx >= stageApps.length - 1) return undefined;
+    return () => {
+      setSelectedApplication(stageApps[idx + 1]);
+    };
+  }, [selectedApplication, selectedStage, applicationsByStatus]);
+
+  // Candidate index/total for navigation counter
+  const candidateNavIndex = useMemo(() => {
+    if (!selectedApplication || !selectedStage) return undefined;
+    const stageApps = applicationsByStatus[selectedStage] || [];
+    return stageApps.findIndex(a => a.id === selectedApplication.id);
+  }, [selectedApplication, selectedStage, applicationsByStatus]);
+
+  const candidateNavTotal = useMemo(() => {
+    if (!selectedStage) return undefined;
+    return (applicationsByStatus[selectedStage] || []).length;
+  }, [selectedStage, applicationsByStatus]);
+
+  // Rating helper for swipe viewer
+  const getDisplayRating = useCallback((app: ApplicationData) => {
+    return app.rating || 0;
   }, []);
 
   // Prefetch candidate data on hover for instant profile opening
@@ -1359,7 +1463,10 @@ const JobDetails = () => {
           onOpenChange={(open) => {
             setDialogOpen(open);
             if (!open) {
-              setTimeout(() => setSelectedApplication(null), 300);
+              setTimeout(() => {
+                setSelectedApplication(null);
+                setSelectedStage(null);
+              }, 300);
             }
           }}
           onStatusUpdate={() => {
@@ -1371,7 +1478,23 @@ const JobDetails = () => {
               updateCandidateRating(selectedApplication.applicant_id, rating);
             }
           }}
+          onNavigatePrev={handleNavigatePrev}
+          onNavigateNext={handleNavigateNext}
+          candidateIndex={candidateNavIndex}
+          candidateTotal={candidateNavTotal}
         />
+
+        {/* TikTok-style Swipe Viewer for touch devices */}
+        {isTouchDevice && (
+          <CandidateSwipeViewer
+            applications={swipeApplicationsAsData}
+            initialIndex={swipeInitialIndex}
+            open={swipeViewerOpen}
+            onClose={() => setSwipeViewerOpen(false)}
+            onOpenFullProfile={handleSwipeOpenFullProfile}
+            getDisplayRating={getDisplayRating}
+          />
+        )}
 
         {/* Selection Criteria Dialog */}
         {jobId && (
