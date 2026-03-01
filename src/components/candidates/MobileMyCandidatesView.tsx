@@ -267,16 +267,14 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
               >
                 <Icon className="h-3 w-3 text-white flex-shrink-0" />
                 {cfg.label.length > 10 ? (
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="truncate cursor-default min-w-0">{cfg.label}</span>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
-                        <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="truncate cursor-default min-w-0">{cfg.label}</span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
+                      <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 ) : (
                   <span className="truncate min-w-0">{cfg.label}</span>
                 )}
@@ -307,8 +305,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
           {!isReadOnly && stages.length < 8 && (
             <CreateStageDialog
               trigger={
-                <button className="flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium whitespace-nowrap bg-white/5 text-white ring-1 ring-inset ring-white/10 active:scale-95 transition-all shrink-0 backdrop-blur-sm">
-                  <Plus className="h-3 w-3" />
+                <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap bg-white/5 text-white ring-1 ring-inset ring-white/10 active:scale-95 transition-all shrink-0 backdrop-blur-sm">
+                  <Plus className="h-3.5 w-3.5" />
                   Nytt steg
                 </button>
               }
