@@ -1,6 +1,6 @@
 import { useState, memo, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, Activity, StickyNote } from 'lucide-react';
+import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, Activity, StickyNote, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import ProfileVideo from '@/components/ProfileVideo';
@@ -11,7 +11,7 @@ import { SectionErrorBoundary } from '@/components/candidateProfile';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
 import { CandidateNotesPanel } from '@/components/candidateProfile/CandidateNotesPanel';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
-// CV opening handled inline with storageUtils for new-tab behavior
+import { CvViewer } from '@/components/CvViewer';
 import { toast } from 'sonner';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
@@ -78,6 +78,7 @@ export const CandidateSlide = memo(function CandidateSlide({
   const isProfileVideo = application.is_profile_video;
   const initials = `${(application.first_name?.[0] || '').toUpperCase()}${(application.last_name?.[0] || '').toUpperCase()}`;
   const [bioExpanded, setBioExpanded] = useState(false);
+  const [cvOpen, setCvOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('profil');
 
   // AI summary hook — only actively polls when visible
@@ -112,40 +113,13 @@ export const CandidateSlide = memo(function CandidateSlide({
     notesHook.startEditing(note);
   }, [notesHook.startEditing]);
 
-  const handleOpenCv = useCallback(async () => {
-    if (!application.cv_url) return;
-    try {
-      const { createSignedUrl, convertToSignedUrl } = await import('@/utils/storageUtils');
-      const firstName = application.first_name || '';
-      const lastName = application.last_name || '';
-      const fileName = `${firstName}-${lastName}-CV.pdf`.replace(/\s+/g, '-');
-      const isStoragePath = !/^https?:\/\//i.test(application.cv_url);
-      let finalUrl: string | null = null;
-      if (isStoragePath) {
-        finalUrl = await createSignedUrl('job-applications', application.cv_url, 86400, fileName);
-      } else {
-        finalUrl = await convertToSignedUrl(application.cv_url, 'job-applications', 86400, fileName);
-      }
-      if (!finalUrl) {
-        toast.error('Kunde inte öppna CV');
-        return;
-      }
-      // Always open in new tab from swipe viewer to preserve swipe state
-      const popup = window.open(finalUrl, '_blank', 'noopener,noreferrer');
-      if (!popup) {
-        // Fallback: navigate to cv-tunnel in new tab
-        const params = new URLSearchParams();
-        if (isStoragePath) params.set('path', application.cv_url);
-        else params.set('url', application.cv_url);
-        params.set('name', fileName);
-        window.open(`/cv-tunnel?${params.toString()}`, '_blank');
-      }
-      toast.info('CV öppnas i ny flik');
-    } catch (err) {
-      console.error('Error opening CV from swipe:', err);
-      toast.error('Kunde inte öppna CV');
+  const handleOpenCv = useCallback(() => {
+    if (!application.cv_url || !signedCvUrl) {
+      toast.error('CV kunde inte laddas');
+      return;
     }
-  }, [application.cv_url, application.first_name, application.last_name]);
+    setCvOpen(true);
+  }, [application.cv_url, signedCvUrl]);
 
   const hasEmploymentInfo = application.employment_status || application.availability || application.work_schedule;
 
@@ -281,7 +255,7 @@ export const CandidateSlide = memo(function CandidateSlide({
               </SectionErrorBoundary>
             </div>
 
-            {/* CV — opens directly */}
+            {/* CV — inline viewer like desktop */}
             {application.cv_url && (
               <SectionCard className="w-full">
                 <SectionLabel icon={FileText}>CV</SectionLabel>
@@ -296,6 +270,31 @@ export const CandidateSlide = memo(function CandidateSlide({
                   <ChevronRight className="h-3.5 w-3.5 text-white" />
                 </button>
               </SectionCard>
+            )}
+
+            {/* CV fullscreen overlay — matches desktop CandidateProfileDialog */}
+            {cvOpen && signedCvUrl && (
+              <div className="fixed inset-0 z-[9999] bg-black/90 flex flex-col">
+                <div className="flex items-center justify-between px-4 py-3">
+                  <h3 className="text-white text-lg font-semibold">CV</h3>
+                  <button
+                    type="button"
+                    onClick={() => setCvOpen(false)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 touch-manipulation"
+                    aria-label="Stäng"
+                  >
+                    <X className="h-5 w-5 text-white" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-auto px-2 pb-4">
+                  <CvViewer
+                    src={signedCvUrl}
+                    fileName="cv.pdf"
+                    height="calc(100dvh - 80px)"
+                    onClose={() => setCvOpen(false)}
+                  />
+                </div>
+              </div>
             )}
 
             {/* Bio / Presentation */}
