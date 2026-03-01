@@ -76,7 +76,7 @@ export function CandidatesTable({
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const [loadingAllCandidateApplications, setLoadingAllCandidateApplications] = useState(false);
-  const { isInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading } = useMyCandidatesData();
+  const { isInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading, isMyCandidatesSettling } = useMyCandidatesData();
   const { teamMembers, hasTeam } = useTeamMembers();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -1005,7 +1005,7 @@ export function CandidatesTable({
           applications={sortedApplications}
           selectedIds={selectedIds}
           selectionMode={selectionMode}
-          isMyCandidatesLoading={isMyCandidatesLoading}
+          isMyCandidatesLoading={isMyCandidatesLoading || isMyCandidatesSettling}
           hasTeam={hasTeam}
           getDisplayRating={getDisplayRating}
           getTeamInfo={getTeamInfo}
@@ -1128,7 +1128,7 @@ export function CandidatesTable({
                       ) : '-'}
                     </TableCell>
                     <TableCell>
-                      {!isMyCandidatesLoading && !isAlreadyAdded && (
+                      {!isMyCandidatesLoading && !isMyCandidatesSettling && !isAlreadyAdded && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
