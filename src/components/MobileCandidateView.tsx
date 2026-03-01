@@ -263,6 +263,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   }, [currentApps.length]);
 
   return (
+    <TooltipProvider delayDuration={200}>
     <div className="flex flex-col gap-3">
       {/* Horizontal scrollable stage tabs — native momentum on touch, drag on desktop */}
       <div
@@ -297,17 +298,15 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               style={{ backgroundColor: `${cfg.color}55` }}
             >
               <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-              {cfg.label.length > 10 ? (
-                <TooltipProvider delayDuration={200}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="truncate cursor-default min-w-0">{cfg.label}</span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
-                      <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              {cfg.label.length >= 10 ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="truncate cursor-default min-w-0">{cfg.label}</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
+                    <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
+                  </TooltipContent>
+                </Tooltip>
               ) : (
                 <span className="truncate min-w-0">{cfg.label}</span>
               )}
@@ -413,5 +412,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
       {/* Inline action bar for selection mode */}
       {renderActionBar}
     </div>
+    </TooltipProvider>
   );
 });
