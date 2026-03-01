@@ -279,7 +279,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   <span className="truncate min-w-0">{cfg.label}</span>
                 )}
                 <span
-                  className="text-[9px] h-4 w-4 flex items-center justify-center rounded-full text-white flex-shrink-0"
+                  className="text-[9px] leading-none h-4 w-4 flex items-center justify-center rounded-full text-white flex-shrink-0 text-center"
                   style={{ backgroundColor: `${cfg.color}88` }}
                 >
                   {count}
