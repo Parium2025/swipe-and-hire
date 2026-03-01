@@ -11,7 +11,7 @@ import { SectionErrorBoundary } from '@/components/candidateProfile';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
 import { CandidateNotesPanel } from '@/components/candidateProfile/CandidateNotesPanel';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
-import { openCvFile } from '@/utils/cvUtils';
+// CV opening handled inline with storageUtils for new-tab behavior
 import { toast } from 'sonner';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
@@ -112,17 +112,39 @@ export const CandidateSlide = memo(function CandidateSlide({
     notesHook.startEditing(note);
   }, [notesHook.startEditing]);
 
-  const handleOpenCv = useCallback(() => {
+  const handleOpenCv = useCallback(async () => {
     if (!application.cv_url) return;
-    const firstName = application.first_name || '';
-    const lastName = application.last_name || '';
-    const fileName = `${firstName}-${lastName}-CV.pdf`.replace(/\s+/g, '-');
-    openCvFile({
-      cvUrl: application.cv_url,
-      fileName,
-      onSuccess: (msg) => msg && toast.info(msg),
-      onError: (err) => toast.error('Kunde inte öppna CV'),
-    });
+    try {
+      const { createSignedUrl, convertToSignedUrl } = await import('@/utils/storageUtils');
+      const firstName = application.first_name || '';
+      const lastName = application.last_name || '';
+      const fileName = `${firstName}-${lastName}-CV.pdf`.replace(/\s+/g, '-');
+      const isStoragePath = !/^https?:\/\//i.test(application.cv_url);
+      let finalUrl: string | null = null;
+      if (isStoragePath) {
+        finalUrl = await createSignedUrl('job-applications', application.cv_url, 86400, fileName);
+      } else {
+        finalUrl = await convertToSignedUrl(application.cv_url, 'job-applications', 86400, fileName);
+      }
+      if (!finalUrl) {
+        toast.error('Kunde inte öppna CV');
+        return;
+      }
+      // Always open in new tab from swipe viewer to preserve swipe state
+      const popup = window.open(finalUrl, '_blank', 'noopener,noreferrer');
+      if (!popup) {
+        // Fallback: navigate to cv-tunnel in new tab
+        const params = new URLSearchParams();
+        if (isStoragePath) params.set('path', application.cv_url);
+        else params.set('url', application.cv_url);
+        params.set('name', fileName);
+        window.open(`/cv-tunnel?${params.toString()}`, '_blank');
+      }
+      toast.info('CV öppnas i ny flik');
+    } catch (err) {
+      console.error('Error opening CV from swipe:', err);
+      toast.error('Kunde inte öppna CV');
+    }
   }, [application.cv_url, application.first_name, application.last_name]);
 
   const hasEmploymentInfo = application.employment_status || application.availability || application.work_schedule;
