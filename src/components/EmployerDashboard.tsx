@@ -187,21 +187,21 @@ const EmployerDashboard = memo(() => {
   };
 
   // Count active jobs for stats - exclude expired jobs from "Aktiva annonser" count
-  // "Mina annonser" shows all jobs (including drafts)
+  // A job is "expired" if its expires_at has passed, regardless of is_active flag
   const activeJobs = useMemo(() => 
     jobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at)), 
     [jobs]
   );
   
-  // Count expired jobs
+  // Count expired jobs — expires_at passed, regardless of is_active
   const expiredJobsCount = useMemo(() => 
-    jobs.filter(j => j.is_active && isJobExpiredCheck(j.created_at, j.expires_at)).length, 
+    jobs.filter(j => isJobExpiredCheck(j.created_at, j.expires_at)).length, 
     [jobs]
   );
   
-  // Count draft jobs
+  // Count draft jobs — is_active=false AND not expired (true drafts, never published or not yet expired)
   const draftJobsCount = useMemo(() => 
-    jobs.filter(j => !j.is_active).length, 
+    jobs.filter(j => !j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at)).length, 
     [jobs]
   );
   
@@ -333,8 +333,8 @@ const EmployerDashboard = memo(() => {
                     </TableRow>
                   ) : (
                     pageJobs.map((job) => {
-                      const isExpired = job.is_active && isJobExpiredCheck(job.created_at, job.expires_at);
-                      const isDraft = !job.is_active;
+                      const isExpired = isJobExpiredCheck(job.created_at, job.expires_at);
+                      const isDraft = !job.is_active && !isExpired;
                       
                       return (
                       <TableRow 
@@ -528,8 +528,8 @@ const EmployerDashboard = memo(() => {
                     <div className="grid grid-cols-1 gap-4 pb-24">
                       {pageJobs.map((job) => {
                         const jobPosting = job as JobPosting;
-                        const isDraft = !job.is_active;
-                        const isExpired = job.is_active && isJobExpiredCheck(job.created_at, jobPosting.expires_at);
+                        const isExpired = isJobExpiredCheck(job.created_at, jobPosting.expires_at);
+                        const isDraft = !job.is_active && !isExpired;
                         return (
                           <ReadOnlyMobileJobCard
                             key={job.id}
