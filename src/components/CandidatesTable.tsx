@@ -24,6 +24,7 @@ import { useDevice } from '@/hooks/use-device';
 import { MobileCandidatesList } from '@/components/candidates/MobileCandidatesList';
 import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
 import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
+import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 
 type SortField = 'name' | 'rating' | 'applied_at' | 'last_active_at' | null;
 type SortDirection = 'asc' | 'desc' | null;
@@ -67,6 +68,8 @@ export function CandidatesTable({
   const isMobile = deviceType === 'mobile';
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
+  const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const [loadingAllCandidateApplications, setLoadingAllCandidateApplications] = useState(false);
   const { isInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading } = useMyCandidatesData();
@@ -485,6 +488,23 @@ export function CandidatesTable({
   }, [selectedApplication?.applicant_id, selectedApplication?.id, user?.id, dialogOpen, fetchCandidateApplications, readCandidateApplicationsCache, writeCandidateApplicationsCache]);
 
   const handleRowClick = useCallback((application: ApplicationData) => {
+    // On mobile touch: open TikTok-style swipe viewer
+    if (isMobile) {
+      const idx = applications.findIndex(a => a.id === application.id);
+      setSwipeInitialIndex(idx >= 0 ? idx : 0);
+      setSwipeViewerOpen(true);
+      return;
+    }
+    // Desktop: open dialog as before
+    const cachedApplications = readCandidateApplicationsCache(application.applicant_id);
+    setAllCandidateApplications(cachedApplications?.length ? cachedApplications : [application]);
+    setSelectedApplicationId(application.id);
+    setDialogOpen(true);
+  }, [isMobile, applications, readCandidateApplicationsCache]);
+
+  // Handle opening full profile from swipe viewer
+  const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
+    setSwipeViewerOpen(false);
     const cachedApplications = readCandidateApplicationsCache(application.applicant_id);
     setAllCandidateApplications(cachedApplications?.length ? cachedApplications : [application]);
     setSelectedApplicationId(application.id);
@@ -1147,6 +1167,17 @@ export function CandidatesTable({
         loadingApplications={loadingAllCandidateApplications}
         variant="all-candidates"
       />
+
+      {isMobile && (
+        <CandidateSwipeViewer
+          applications={sortedApplications}
+          initialIndex={swipeInitialIndex}
+          open={swipeViewerOpen}
+          onClose={() => setSwipeViewerOpen(false)}
+          onOpenFullProfile={handleSwipeOpenFullProfile}
+          getDisplayRating={getDisplayRating}
+        />
+      )}
 
       {selectedApplicationForTeam && (
         <AddToColleagueListDialog
