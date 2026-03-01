@@ -150,7 +150,7 @@ export function JobStageSettingsMenu({
       <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <button 
-            className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
+            className="p-0.5 rounded-md md:hover:bg-white/20 transition-colors text-white touch-manipulation flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
             style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
             onMouseDown={(e) => e.preventDefault()}
             onFocus={(e) => {
@@ -160,7 +160,7 @@ export function JobStageSettingsMenu({
               }
             }}
           >
-            <MoreVertical className="h-4 w-4" />
+            <MoreVertical className="h-3 w-3" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
