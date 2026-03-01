@@ -266,7 +266,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 style={{ backgroundColor: `${cfg.color}55` }}
               >
                 <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                {cfg.label.length > 12 ? (
+                {cfg.label.length > 10 ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="truncate cursor-default min-w-0">{cfg.label}</span>
