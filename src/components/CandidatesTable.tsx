@@ -21,6 +21,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import { MobileCandidatesList } from '@/components/candidates/MobileCandidatesList';
 import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
 import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
@@ -66,6 +67,7 @@ export function CandidatesTable({
 }: CandidatesTableProps) {
   const deviceType = useDevice();
   const isMobile = deviceType === 'mobile';
+  const isTouchDevice = useTouchCapable();
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
@@ -488,8 +490,8 @@ export function CandidatesTable({
   }, [selectedApplication?.applicant_id, selectedApplication?.id, user?.id, dialogOpen, fetchCandidateApplications, readCandidateApplicationsCache, writeCandidateApplicationsCache]);
 
   const handleRowClick = useCallback((application: ApplicationData) => {
-    // On mobile touch: open TikTok-style swipe viewer
-    if (isMobile) {
+    // On touch devices: open TikTok-style swipe viewer
+    if (isTouchDevice) {
       const idx = applications.findIndex(a => a.id === application.id);
       setSwipeInitialIndex(idx >= 0 ? idx : 0);
       setSwipeViewerOpen(true);
@@ -1168,7 +1170,7 @@ export function CandidatesTable({
         variant="all-candidates"
       />
 
-      {isMobile && (
+      {isTouchDevice && (
         <CandidateSwipeViewer
           applications={sortedApplications}
           initialIndex={swipeInitialIndex}
