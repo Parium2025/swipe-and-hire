@@ -16,6 +16,8 @@ import { useColleagueStageSettings } from '@/hooks/useColleagueStageSettings';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMyCandidateApplications } from '@/hooks/useMyCandidateApplications';
+import { useSelectionMode } from '@/hooks/useSelectionMode';
+import { useBulkCandidateOps } from '@/hooks/useBulkCandidateOps';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -139,25 +141,7 @@ const MyCandidates = () => {
     markAsViewed: hookMarkAsViewed,
   } = useMyCandidatesData(debouncedSearchQuery);
 
-  // Helper: optimistically update candidates in the React Query cache
-  const updateCandidatesCache = useCallback(
-    (updater: (items: MyCandidateData[]) => MyCandidateData[]) => {
-      queryClient.setQueryData(
-        ['my-candidates', user?.id, debouncedSearchQuery],
-        (old: any) => {
-          if (!old?.pages) return old;
-          return {
-            ...old,
-            pages: old.pages.map((page: any) => ({
-              ...page,
-              items: updater(page.items),
-            })),
-          };
-        }
-      );
-    },
-    [queryClient, user?.id, debouncedSearchQuery]
-  );
+  // updateCandidatesCache is now provided by useBulkCandidateOps hook
 
   // Minimum delay for smooth fade-in
   const [showContent, setShowContent] = useState(false);
@@ -196,119 +180,9 @@ const MyCandidates = () => {
   // Filter state
   const [activeStageFilter, setActiveStageFilter] = useState<string | 'all'>('all');
   
-  // Selection mode state
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedCandidateIds, setSelectedCandidateIds] = useState<Set<string>>(new Set());
+  // Bulk action confirmation dialogs
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [showCompareDialog, setShowCompareDialog] = useState(false);
-  
-  // Toggle selection of a candidate
-  const toggleCandidateSelection = useCallback((candidateId: string) => {
-    setSelectedCandidateIds(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(candidateId)) {
-        newSet.delete(candidateId);
-      } else {
-        newSet.add(candidateId);
-      }
-      return newSet;
-    });
-  }, []);
-  
-  // Exit selection mode
-  const exitSelectionMode = useCallback(() => {
-    setIsSelectionMode(false);
-    setSelectedCandidateIds(new Set());
-  }, []);
-  
-  // Handle ESC key to exit selection mode
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isSelectionMode) {
-        exitSelectionMode();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSelectionMode, exitSelectionMode]);
-  
-  // Get selected candidates data
-  const selectedCandidates = useMemo(() => {
-    return displayedCandidates.filter(c => selectedCandidateIds.has(c.id));
-  }, [displayedCandidates, selectedCandidateIds]);
-  
-  // Bulk move selected candidates to a new stage
-  const bulkMoveToStage = async (targetStage: CandidateStage) => {
-    const idsToMove = Array.from(selectedCandidateIds);
-    const count = idsToMove.length;
-    const targetLabel = activeStageConfig[targetStage]?.label || targetStage;
-    const stageColor = activeStageConfig[targetStage]?.color || '#22c55e';
-    
-    if (isViewingColleague) {
-      for (const id of idsToMove) {
-        await moveCandidateInColleagueList(id, targetStage);
-      }
-      exitSelectionMode();
-      toast.success(`${count} kandidater flyttade till "${targetLabel}"`, {
-        icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
-      });
-      return;
-    }
-    
-    // Optimistic update via query cache
-    updateCandidatesCache(items =>
-      items.map(c => selectedCandidateIds.has(c.id) ? { ...c, stage: targetStage } : c)
-    );
-    exitSelectionMode();
-    
-    try {
-      const { error } = await supabase
-        .from('my_candidates')
-        .update({ stage: targetStage, updated_at: new Date().toISOString() })
-        .in('id', idsToMove);
-        
-      if (error) throw error;
-      toast.success(`${count} kandidater flyttade till "${targetLabel}"`, {
-        icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
-      });
-    } catch (error) {
-      fetchCandidates();
-      toast.error('Kunde inte flytta kandidaterna');
-    }
-  };
-  
-  // Bulk delete selected candidates
-  const confirmBulkDelete = async () => {
-    const idsToDelete = Array.from(selectedCandidateIds);
-    
-    if (isViewingColleague) {
-      for (const id of idsToDelete) {
-        await removeCandidateFromColleagueList(id);
-      }
-      exitSelectionMode();
-      setShowBulkDeleteConfirm(false);
-      toast.success(`${idsToDelete.length} kandidater borttagna`);
-      return;
-    }
-    
-    // Optimistic remove via query cache
-    updateCandidatesCache(items => items.filter(c => !selectedCandidateIds.has(c.id)));
-    exitSelectionMode();
-    setShowBulkDeleteConfirm(false);
-    
-    try {
-      const { error } = await supabase
-        .from('my_candidates')
-        .delete()
-        .in('id', idsToDelete);
-        
-      if (error) throw error;
-      toast.success(`${idsToDelete.length} kandidater borttagna från din lista`);
-    } catch (error) {
-      fetchCandidates();
-      toast.error('Kunde inte ta bort kandidaterna');
-    }
-  };
   
   // Fetch colleague's candidates when switching
   useEffect(() => {
@@ -379,22 +253,39 @@ const MyCandidates = () => {
     });
     return ids;
   }, [filteredCandidatesByStage]);
-  
-  const allVisibleSelected = useMemo(() => {
-    return (
-      allVisibleCandidateIds.length > 0 &&
-      allVisibleCandidateIds.every((id) => selectedCandidateIds.has(id))
-    );
-  }, [allVisibleCandidateIds, selectedCandidateIds]);
 
-  const toggleAllVisible = useCallback(() => {
-    setSelectedCandidateIds((prev) => {
-      const allSelected =
-        allVisibleCandidateIds.length > 0 &&
-        allVisibleCandidateIds.every((id) => prev.has(id));
-      return allSelected ? new Set() : new Set(allVisibleCandidateIds);
-    });
-  }, [allVisibleCandidateIds]);
+  // Selection mode (extracted hook)
+  const {
+    isSelectionMode,
+    setIsSelectionMode,
+    selectedCandidateIds,
+    toggleCandidateSelection,
+    exitSelectionMode,
+    allVisibleSelected,
+    toggleAllVisible,
+  } = useSelectionMode(allVisibleCandidateIds);
+
+  // Get selected candidates data
+  const selectedCandidates = useMemo(() => {
+    return displayedCandidates.filter(c => selectedCandidateIds.has(c.id));
+  }, [displayedCandidates, selectedCandidateIds]);
+
+  // Bulk operations (extracted hook — with retry queue)
+  const { bulkMoveToStage, bulkDelete, updateCandidatesCache } = useBulkCandidateOps({
+    debouncedSearchQuery,
+    stageConfig: activeStageConfig,
+    isViewingColleague,
+    moveCandidateInColleagueList,
+    removeCandidateFromColleagueList,
+    exitSelectionMode,
+    selectedCandidateIds,
+    displayedCandidates,
+  });
+
+  const confirmBulkDelete = async () => {
+    setShowBulkDeleteConfirm(false);
+    await bulkDelete();
+  };
 
   const stagesToDisplay = useMemo(() => {
     if (activeStageFilter === 'all') return activeStageOrder;
