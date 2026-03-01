@@ -52,12 +52,14 @@ const Dashboard = memo(() => {
   const [activeTab, setActiveTab] = useState<JobStatusTab>('active');
 
   // Separate active and expired jobs
+  // A job is "expired" if its expires_at date has passed, regardless of is_active flag
+  // (is_active may have been set to false by a cron job after expiry)
   const activeJobs = useMemo(() => allJobs.filter(job => 
     job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)
   ), [allJobs]);
 
   const expiredJobs = useMemo(() => allJobs.filter(job => 
-    job.is_active && isJobExpiredCheck(job.created_at, job.expires_at)
+    isJobExpiredCheck(job.created_at, job.expires_at)
   ), [allJobs]);
 
   // Current jobs based on selected tab

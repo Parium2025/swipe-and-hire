@@ -53,7 +53,7 @@ interface UseJobsDataOptions {
 }
 
 // 🔥 localStorage cache for employer jobs - instant-load
-const EMPLOYER_JOBS_CACHE_KEY = 'parium_employer_jobs_v2_';
+const EMPLOYER_JOBS_CACHE_KEY = 'parium_employer_jobs_v3_';
 
 interface CachedJobs {
   jobs: JobPosting[];
@@ -258,6 +258,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
 
   // Memoize stats to prevent unnecessary recalculations
   // Only count truly active jobs (is_active AND not expired) for dashboard stats
+  // A job is "expired" if expires_at has passed, regardless of is_active flag
   const activeJobsList = useMemo(() => 
     jobs.filter(job => job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)), 
     [jobs]
