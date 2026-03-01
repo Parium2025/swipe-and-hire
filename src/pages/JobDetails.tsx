@@ -829,9 +829,22 @@ const JobDetails = () => {
     }
   };
 
+  const resolveStageForApplication = useCallback((app: JobApplication): string => {
+    const directStage = app.status;
+    if ((applicationsByStatus[directStage] || []).some((candidate) => candidate.id === app.id)) {
+      return directStage;
+    }
+
+    const containingStage = activeStages.find((stageKey) =>
+      (applicationsByStatus[stageKey] || []).some((candidate) => candidate.id === app.id)
+    );
+
+    return containingStage || directStage;
+  }, [applicationsByStatus, activeStages]);
+
   const handleOpenProfile = useCallback((app: JobApplication) => {
-    // Determine which stage this candidate belongs to
-    const stage = app.status;
+    // Resolve visual stage so navigation always matches what user clicked
+    const stage = resolveStageForApplication(app);
     const stageApps = applicationsByStatus[stage] || [];
 
     if (isTouchDevice) {
@@ -841,12 +854,12 @@ const JobDetails = () => {
       setSwipeInitialIndex(idx >= 0 ? idx : 0);
       setSwipeViewerOpen(true);
     } else {
-      // Desktop: open dialog with arrow navigation
+      // Desktop/mouse: open dialog with arrow navigation
       setSelectedApplication(app);
       setSelectedStage(stage);
       setDialogOpen(true);
     }
-  }, [isTouchDevice, applicationsByStatus]);
+  }, [isTouchDevice, applicationsByStatus, resolveStageForApplication]);
 
   // Convert JobApplication to ApplicationData for swipe viewer
   const swipeApplicationsAsData = useMemo(() => {
@@ -885,44 +898,59 @@ const JobDetails = () => {
     setSwipeViewerOpen(false);
     const original = applications.find(a => a.id === application.id);
     if (original) {
+      const resolvedStage = resolveStageForApplication(original);
       setSelectedApplication(original);
-      setSelectedStage(original.status);
+      setSelectedStage(resolvedStage);
       setDialogOpen(true);
     }
-  }, [applications]);
+  }, [applications, resolveStageForApplication]);
 
-  // Desktop arrow navigation scoped to the current stage
+  const currentNavigationStage = useMemo(() => {
+    if (!selectedApplication) return undefined;
+
+    if (
+      selectedStage &&
+      (applicationsByStatus[selectedStage] || []).some((app) => app.id === selectedApplication.id)
+    ) {
+      return selectedStage;
+    }
+
+    return resolveStageForApplication(selectedApplication);
+  }, [selectedApplication, selectedStage, applicationsByStatus, resolveStageForApplication]);
+
+  // Desktop arrow navigation scoped to the current visual stage
   const handleNavigatePrev = useMemo(() => {
-    if (!selectedApplication || !selectedStage) return undefined;
-    const stageApps = applicationsByStatus[selectedStage] || [];
+    if (!selectedApplication || !currentNavigationStage) return undefined;
+    const stageApps = applicationsByStatus[currentNavigationStage] || [];
     const idx = stageApps.findIndex(a => a.id === selectedApplication.id);
     if (idx <= 0) return undefined;
     return () => {
       setSelectedApplication(stageApps[idx - 1]);
     };
-  }, [selectedApplication, selectedStage, applicationsByStatus]);
+  }, [selectedApplication, currentNavigationStage, applicationsByStatus]);
 
   const handleNavigateNext = useMemo(() => {
-    if (!selectedApplication || !selectedStage) return undefined;
-    const stageApps = applicationsByStatus[selectedStage] || [];
+    if (!selectedApplication || !currentNavigationStage) return undefined;
+    const stageApps = applicationsByStatus[currentNavigationStage] || [];
     const idx = stageApps.findIndex(a => a.id === selectedApplication.id);
     if (idx < 0 || idx >= stageApps.length - 1) return undefined;
     return () => {
       setSelectedApplication(stageApps[idx + 1]);
     };
-  }, [selectedApplication, selectedStage, applicationsByStatus]);
+  }, [selectedApplication, currentNavigationStage, applicationsByStatus]);
 
   // Candidate index/total for navigation counter
   const candidateNavIndex = useMemo(() => {
-    if (!selectedApplication || !selectedStage) return undefined;
-    const stageApps = applicationsByStatus[selectedStage] || [];
-    return stageApps.findIndex(a => a.id === selectedApplication.id);
-  }, [selectedApplication, selectedStage, applicationsByStatus]);
+    if (!selectedApplication || !currentNavigationStage) return undefined;
+    const stageApps = applicationsByStatus[currentNavigationStage] || [];
+    const idx = stageApps.findIndex(a => a.id === selectedApplication.id);
+    return idx >= 0 ? idx : 0;
+  }, [selectedApplication, currentNavigationStage, applicationsByStatus]);
 
   const candidateNavTotal = useMemo(() => {
-    if (!selectedStage) return undefined;
-    return (applicationsByStatus[selectedStage] || []).length;
-  }, [selectedStage, applicationsByStatus]);
+    if (!currentNavigationStage) return undefined;
+    return (applicationsByStatus[currentNavigationStage] || []).length;
+  }, [currentNavigationStage, applicationsByStatus]);
 
   // Rating helper for swipe viewer
   const getDisplayRating = useCallback((app: ApplicationData) => {
