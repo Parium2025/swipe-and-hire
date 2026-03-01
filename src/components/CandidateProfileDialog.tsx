@@ -452,7 +452,7 @@ export const CandidateProfileDialog = ({
           <div className={`flex-1 overflow-y-auto overscroll-contain p-4 pt-2 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
           
           {/* Candidate navigation bar — TeamTailor-style */}
-          {(onNavigatePrev || onNavigateNext) && candidateTotal != null && candidateTotal > 1 && (
+          {candidateTotal != null && candidateTotal >= 1 && (
             <div className="flex items-center justify-center gap-3 py-1">
               <button
                 onClick={onNavigatePrev}
