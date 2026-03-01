@@ -1,5 +1,6 @@
 import { memo, useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedText } from '@/components/TruncatedText';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
@@ -266,18 +267,11 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 style={{ backgroundColor: `${cfg.color}55` }}
               >
                 <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-              {cfg.label.length >= 10 ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="truncate cursor-default min-w-0">{cfg.label}</span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
-                      <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <span className="truncate min-w-0">{cfg.label}</span>
-                )}
+                <TruncatedText
+                  text={cfg.label}
+                  className="truncate min-w-0 text-xs font-medium text-white"
+                  tooltipSide="bottom"
+                />
                 <span
                   className="text-[10px] h-5 w-5 flex items-center justify-center rounded-full text-white flex-shrink-0"
                   style={{ backgroundColor: `${cfg.color}88` }}
