@@ -58,6 +58,8 @@ interface CandidateProfileDialogProps {
   stageConfig?: Record<string, StageSettings>;
   onStageChange?: (newStage: string) => void;
   onRemoveFromList?: () => void;
+  onNavigatePrev?: () => void;
+  onNavigateNext?: () => void;
 }
 
 const statusConfig = {
@@ -158,6 +160,8 @@ export const CandidateProfileDialog = ({
   stageConfig,
   onStageChange,
   onRemoveFromList,
+  onNavigatePrev,
+  onNavigateNext,
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const { hasTeam } = useTeamMembers();
@@ -322,6 +326,24 @@ export const CandidateProfileDialog = ({
     }
   }, [open, activeApplication?.id, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   
+  // Keyboard navigation: arrow keys to switch candidates
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) return;
+      if (e.key === 'ArrowLeft' && onNavigatePrev) {
+        e.preventDefault();
+        onNavigatePrev();
+      } else if (e.key === 'ArrowRight' && onNavigateNext) {
+        e.preventDefault();
+        onNavigateNext();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [open, onNavigatePrev, onNavigateNext]);
+
   if (!application) return null;
 
   const displayApp = activeApplication || application;
@@ -880,6 +902,26 @@ export const CandidateProfileDialog = ({
           )}
         </div>
       </DialogContentNoFocus>
+
+      {/* Lightbox-style side navigation arrows — mouse users only */}
+      {onNavigatePrev && (
+        <button
+          onClick={onNavigatePrev}
+          className="fixed left-2 md:left-4 top-1/2 -translate-y-1/2 z-[60] hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-inset ring-white/20 text-white/70 md:hover:bg-white/20 md:hover:text-white transition-all duration-200 backdrop-blur-sm"
+          aria-label="Föregående kandidat"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+      )}
+      {onNavigateNext && (
+        <button
+          onClick={onNavigateNext}
+          className="fixed right-2 md:right-4 top-1/2 -translate-y-1/2 z-[60] hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-inset ring-white/20 text-white/70 md:hover:bg-white/20 md:hover:text-white transition-all duration-200 backdrop-blur-sm"
+          aria-label="Nästa kandidat"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      )}
     </Dialog>
 
     {/* CV Dialog — fullscreen on mobile, centered on desktop */}

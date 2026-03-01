@@ -864,6 +864,31 @@ export function CandidatesTable({
     });
   }, [applications, sortField, sortDirection, getDisplayRating]);
 
+  // Navigate to prev/next candidate in the sorted list (lightbox-style arrows)
+  const handleNavigatePrev = useMemo(() => {
+    if (!selectedApplicationId) return undefined;
+    const idx = sortedApplications.findIndex(a => a.id === selectedApplicationId);
+    if (idx <= 0) return undefined;
+    return () => {
+      const prevApp = sortedApplications[idx - 1];
+      const cached = readCandidateApplicationsCache(prevApp.applicant_id);
+      setAllCandidateApplications(cached?.length ? cached : [prevApp]);
+      setSelectedApplicationId(prevApp.id);
+    };
+  }, [selectedApplicationId, sortedApplications, readCandidateApplicationsCache]);
+
+  const handleNavigateNext = useMemo(() => {
+    if (!selectedApplicationId) return undefined;
+    const idx = sortedApplications.findIndex(a => a.id === selectedApplicationId);
+    if (idx < 0 || idx >= sortedApplications.length - 1) return undefined;
+    return () => {
+      const nextApp = sortedApplications[idx + 1];
+      const cached = readCandidateApplicationsCache(nextApp.applicant_id);
+      setAllCandidateApplications(cached?.length ? cached : [nextApp]);
+      setSelectedApplicationId(nextApp.id);
+    };
+  }, [selectedApplicationId, sortedApplications, readCandidateApplicationsCache]);
+
   const SortIcon = ({ field }: { field: SortField }) => {
     const base = "h-3.5 w-3.5 ml-1.5 shrink-0 text-white";
     if (sortField !== field || sortDirection === null) return <ArrowUpDown className={base} />;
@@ -1168,6 +1193,8 @@ export function CandidatesTable({
         allApplications={allCandidateApplications.length > 0 ? allCandidateApplications : undefined}
         loadingApplications={loadingAllCandidateApplications}
         variant="all-candidates"
+        onNavigatePrev={handleNavigatePrev}
+        onNavigateNext={handleNavigateNext}
       />
 
       {isTouchDevice && (
