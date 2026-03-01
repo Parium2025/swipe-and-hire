@@ -289,7 +289,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               tabIndex={0}
               onClick={() => setActiveTab(stage)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[220px] min-w-[120px] ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] ${
                 isActive
                   ? 'ring-white/40 shadow-lg'
                   : 'ring-white/20'
