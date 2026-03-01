@@ -8,8 +8,9 @@ const JOBS_CACHE_KEY = 'parium_employer_jobs_v3_';
 const INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
 const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_';
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
-const ORG_QUESTIONS_CACHE_KEY = 'parium_org_questions_';
 // Ingen CACHE_MAX_AGE eller PERIODIC_REFRESH - vi förlitar oss på realtime subscriptions
+// Minsta tid tabben måste varit dold innan vi gör en full refetch vid återkomst
+const TAB_HIDDEN_THRESHOLD_MS = 30_000;
 
 /**
  * 🚀 EMPLOYER BACKGROUND SYNC ENGINE
@@ -164,8 +165,11 @@ export const useEmployerBackgroundSync = () => {
         items,
         timestamp: Date.now(),
       }));
+      
+      // Synka React Query-cachen (saknades tidigare)
+      queryClient.setQueryData(['my-candidates', userId], items);
     }
-  }, []);
+  }, [queryClient]);
 
   // 💬 Preload konversationer (alltid hämta färsk data - realtime synkar)
   const preloadConversations = useCallback(async (userId: string) => {
@@ -277,17 +281,32 @@ export const useEmployerBackgroundSync = () => {
     
     scheduleInitialPreload();
 
-    // Lyssna på tab-focus - MED DEBOUNCE på touch
+    // Lyssna på tab-focus - SMART: bara refetch om tabben var dold tillräckligt länge
+    // Korta frånvaror (<30s) hanteras av Realtime-subscriptions automatiskt
+    let hiddenAt = 0;
     let visibilityTimeout: NodeJS.Timeout | null = null;
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // På touch/svagt internet: vänta 2 sekunder innan sync
+      if (document.visibilityState === 'hidden') {
+        hiddenAt = Date.now();
+        return;
+      }
+
+      // Tab synlig igen – kolla hur länge den var dold
+      if (document.visibilityState === 'visible' && hiddenAt > 0) {
+        const hiddenDuration = Date.now() - hiddenAt;
+        hiddenAt = 0;
+
+        // Kort frånvaro → realtime har redan hanterat det, skippa full refetch
+        if (hiddenDuration < TAB_HIDDEN_THRESHOLD_MS) {
+          return;
+        }
+
+        // Lång frånvaro → full refetch (WebSocket kan ha tappats)
         const delay = isTouchDevice || isSlowConnection() ? 2000 : 0;
         
         if (visibilityTimeout) clearTimeout(visibilityTimeout);
         visibilityTimeout = setTimeout(() => {
           hasPreloadedRef.current = false;
-          // Använd requestIdleCallback för att inte blocka UI
           if ('requestIdleCallback' in window) {
             (window as any).requestIdleCallback(() => preloadAllData(true), { timeout: 5000 });
           } else {
@@ -297,40 +316,11 @@ export const useEmployerBackgroundSync = () => {
       }
     };
 
-    // På touch: INGEN omedelbar preload vid första interaktion (blockar touch response)
-    // Desktop: behåll beteendet
-    let firstInteractionHandled = false;
-    const handleFirstInteraction = () => {
-      if (firstInteractionHandled || isTouchDevice) return; // Skip på touch
-      firstInteractionHandled = true;
-      
-      // Defer till idle
-      if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(() => preloadAllData(), { timeout: 2000 });
-      } else {
-        setTimeout(() => preloadAllData(), 500);
-      }
-      
-      document.removeEventListener('mousemove', handleFirstInteraction);
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('keydown', handleFirstInteraction);
-    };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Endast desktop-interaktioner
-    if (!isTouchDevice) {
-      document.addEventListener('mousemove', handleFirstInteraction, { once: true });
-      document.addEventListener('click', handleFirstInteraction, { once: true });
-      document.addEventListener('keydown', handleFirstInteraction, { once: true });
-    }
 
     return () => {
       if (visibilityTimeout) clearTimeout(visibilityTimeout);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('mousemove', handleFirstInteraction);
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('keydown', handleFirstInteraction);
     };
   }, [user, isEmployer, preloadAllData]);
 
