@@ -106,11 +106,11 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const handleSaveNote = useCallback(() => {
     notesHook.saveNote(newNote, () => setNewNote(''));
-  }, [newNote, notesHook]);
+  }, [newNote, notesHook.saveNote]);
 
   const handleStartEditing = useCallback((note: any) => {
     notesHook.startEditing(note);
-  }, [notesHook]);
+  }, [notesHook.startEditing]);
 
   const handleOpenCv = useCallback(() => {
     if (!application.cv_url) return;
@@ -312,30 +312,34 @@ export const CandidateSlide = memo(function CandidateSlide({
         {/* ── AKTIVITET TAB ── */}
         {activeTab === 'aktivitet' && (
           <div className="w-full">
-            <CandidateActivityLog applicantId={application.applicant_id} />
+            <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
+              <CandidateActivityLog applicantId={application.applicant_id} />
+            </SectionErrorBoundary>
           </div>
         )}
 
         {/* ── ANTECKNINGAR TAB ── */}
         {activeTab === 'anteckningar' && (
           <div className="w-full">
-            <CandidateNotesPanel
-              notes={notesHook.notes}
-              loadingNotes={notesHook.loadingNotes}
-              newNote={newNote}
-              onNewNoteChange={setNewNote}
-              onSaveNote={handleSaveNote}
-              savingNote={notesHook.savingNote}
-              currentUserId={user?.id}
-              onStartEditing={handleStartEditing}
-              onConfirmDelete={notesHook.deleteNote}
-              editingNoteId={notesHook.editingNoteId}
-              editingNoteText={notesHook.editingNoteText}
-              originalNoteText={notesHook.originalNoteText}
-              onEditingNoteTextChange={notesHook.setEditingNoteText}
-              onUpdateNote={notesHook.updateNote}
-              onCancelEditing={notesHook.cancelEditing}
-            />
+            <SectionErrorBoundary fallbackLabel="Anteckningar">
+              <CandidateNotesPanel
+                notes={notesHook.notes}
+                loadingNotes={notesHook.loadingNotes}
+                newNote={newNote}
+                onNewNoteChange={setNewNote}
+                onSaveNote={handleSaveNote}
+                savingNote={notesHook.savingNote}
+                currentUserId={user?.id}
+                onStartEditing={handleStartEditing}
+                onConfirmDelete={notesHook.deleteNote}
+                editingNoteId={notesHook.editingNoteId}
+                editingNoteText={notesHook.editingNoteText}
+                originalNoteText={notesHook.originalNoteText}
+                onEditingNoteTextChange={notesHook.setEditingNoteText}
+                onUpdateNote={notesHook.updateNote}
+                onCancelEditing={notesHook.cancelEditing}
+              />
+            </SectionErrorBoundary>
           </div>
         )}
 
