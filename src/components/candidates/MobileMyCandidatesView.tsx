@@ -296,6 +296,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       targetStageKey={targetStageKey}
                       targetStageLabel={targetStageLabel}
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
+                      useJobDetailsTriggerStyle
                     />
                   </span>
                 )}
