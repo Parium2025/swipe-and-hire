@@ -1,4 +1,5 @@
 import { useState, memo, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, Activity, StickyNote, X } from 'lucide-react';
@@ -128,8 +129,18 @@ export const CandidateSlide = memo(function CandidateSlide({
     <div className="w-full flex flex-col items-center px-6 py-8">
       <div className="w-full max-w-sm flex flex-col items-center gap-5">
 
-        {/* ── Tabs ── */}
-        <div className="w-full flex items-center bg-white/[0.06] ring-1 ring-inset ring-white/10 rounded-full p-1">
+        {/* ── Tabs — sliding indicator matching desktop dialog ── */}
+        <div className="w-full flex items-center border-b border-white/20 relative">
+          {/* Sliding white indicator */}
+          <motion.div
+            className="absolute bottom-0 h-0.5 bg-white"
+            initial={false}
+            animate={{
+              left: `calc(${TABS.findIndex(t => t.key === activeTab)} * (100% / 3))`,
+              width: `calc(100% / 3)`,
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 35, mass: 0.8 }}
+          />
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
@@ -137,14 +148,14 @@ export const CandidateSlide = memo(function CandidateSlide({
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-xs font-medium transition-all duration-200 ${
-                  isActive
-                    ? 'bg-white/15 text-white'
-                    : 'text-white/50'
+                className={`flex-1 px-1.5 py-2.5 text-sm font-medium transition-colors min-w-0 ${
+                  isActive ? 'text-white' : 'text-white/50'
                 }`}
               >
-                <Icon className="h-3.5 w-3.5" />
-                {tab.label}
+                <div className="flex items-center justify-center gap-1.5 truncate">
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate leading-none">{tab.label}</span>
+                </div>
               </button>
             );
           })}
