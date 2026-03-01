@@ -109,6 +109,13 @@ export function useMyCandidateApplications(
           })
         );
 
+        // Sort newest first (most recent application at top)
+        transformed.sort((a, b) => {
+          const dateA = a.applied_at ? new Date(a.applied_at).getTime() : 0;
+          const dateB = b.applied_at ? new Date(b.applied_at).getTime() : 0;
+          return dateB - dateA;
+        });
+
         if (!cancelled) {
           setAllApplications(transformed);
           if (transformed.length > 0) writeCache(applicantId, transformed);
