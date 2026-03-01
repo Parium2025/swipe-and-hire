@@ -113,7 +113,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
       {/* Info */}
       <div className="flex-1 min-w-0 pr-4">
-        <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors">
+        <p className="text-white font-medium text-sm truncate">
           {candidate.first_name} {candidate.last_name}
         </p>
         <StarRating rating={candidate.rating} />
