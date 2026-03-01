@@ -92,6 +92,9 @@ export function useMyCandidatesData(searchQuery: string = '') {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Stable query key for optimistic updates (must match useInfiniteQuery key exactly)
+  const queryKey = useMemo(() => ['my-candidates', user?.id, searchQuery] as const, [user?.id, searchQuery]);
+
   // 🔥 Auto-sync queued candidate operations when connectivity returns
   useCandidateOperationQueue(user?.id);
   const [isDragging, setIsDragging] = useState(false);
@@ -419,9 +422,18 @@ export function useMyCandidatesData(searchQuery: string = '') {
   // 🔥 Only show loading if we don't have cached data
   const isLoading = queryLoading && !hasCachedData;
 
-  // Flatten all pages into single array
+  // Flatten all pages into single array, deduplicated by applicant_id (one row per person)
   const candidates = useMemo(() => {
-    return data?.pages.flatMap(page => page.items) || [];
+    const raw = data?.pages.flatMap(page => page.items) || [];
+    const seen = new Map<string, MyCandidateData>();
+    for (const c of raw) {
+      const existing = seen.get(c.applicant_id);
+      // Keep the most recently updated entry per person
+      if (!existing || c.updated_at > existing.updated_at) {
+        seen.set(c.applicant_id, c);
+      }
+    }
+    return Array.from(seen.values());
   }, [data]);
 
   // Real-time subscription for my_candidates changes (all users for team sync)
@@ -449,7 +461,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
             // Only update if it's the current user's candidate
             if (next.recruiter_id === user.id && next.stage) {
               queryClient.setQueryData(
-                ['my-candidates', user.id],
+                queryKey,
                 (old: any) => {
                   if (!old?.pages) return old;
                   return {
@@ -501,7 +513,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
             const newLastActiveAt = payload.new?.last_active_at;
             // Update the specific candidate's last_active_at in cache (paginated structure)
             queryClient.setQueryData(
-              ['my-candidates', user.id],
+              queryKey,
               (old: any) => {
                 if (!old?.pages) return old;
                 return {
@@ -538,7 +550,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           if (applicantId && applicantIds.includes(applicantId) && appliedAt) {
             // Update the specific candidate's latest_application_at in cache (paginated structure)
             queryClient.setQueryData(
-              ['my-candidates', user.id],
+              queryKey,
               (old: any) => {
                 if (!old?.pages) return old;
                 return {
@@ -794,10 +806,10 @@ export function useMyCandidatesData(searchQuery: string = '') {
       setIsDragging(true);
 
       // Optimistic update - MUST be synchronous to feel instant (paginated structure)
-      void queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
-      const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
+      void queryClient.cancelQueries({ queryKey });
+      const previousCandidates = queryClient.getQueryData(queryKey);
 
-      queryClient.setQueryData(['my-candidates', user?.id], (old: any) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
@@ -825,7 +837,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
         });
         toast.info('Flytten köad – synkas automatiskt', { duration: 3000 });
       } else {
-        queryClient.setQueryData(['my-candidates', user?.id], context?.previousCandidates);
+        queryClient.setQueryData(queryKey, context?.previousCandidates);
         toast.error('Kunde inte flytta kandidaten');
       }
     },
@@ -846,10 +858,10 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
     onMutate: async (id: string) => {
       // Optimistic removal
-      await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
-      const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
+      await queryClient.cancelQueries({ queryKey });
+      const previousCandidates = queryClient.getQueryData(queryKey);
 
-      queryClient.setQueryData(['my-candidates', user?.id], (old: any) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
@@ -878,7 +890,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
         });
         toast.info('Borttagning köad – synkas automatiskt', { duration: 3000 });
       } else {
-        queryClient.setQueryData(['my-candidates', user?.id], context?.previousCandidates);
+        queryClient.setQueryData(queryKey, context?.previousCandidates);
         toast.error('Kunde inte ta bort kandidaten');
       }
     },
@@ -990,10 +1002,10 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
     onMutate: async ({ id, rating, applicantId }) => {
       // Optimistic update (paginated structure)
-      await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
-      const previousCandidates = queryClient.getQueryData(['my-candidates', user?.id]);
+      await queryClient.cancelQueries({ queryKey });
+      const previousCandidates = queryClient.getQueryData(queryKey);
       
-      queryClient.setQueryData(['my-candidates', user?.id], (old: any) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
@@ -1036,7 +1048,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
         });
         // Silent — rating feels "saved" via optimistic update
       } else {
-        queryClient.setQueryData(['my-candidates', user?.id], context?.previousCandidates);
+        queryClient.setQueryData(queryKey, context?.previousCandidates);
         toast.error('Kunde inte uppdatera betyg');
       }
     },
@@ -1047,32 +1059,31 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
   });
 
-  // Group candidates by stage
+  // Group candidates by stage (dynamic — supports custom stages)
   const candidatesByStage = useMemo(() => {
-    const grouped: Record<CandidateStage, MyCandidateData[]> = {
-      to_contact: [],
-      interview: [],
-      offer: [],
-      hired: [],
-    };
+    const grouped: Record<string, MyCandidateData[]> = {};
 
     candidates.forEach(candidate => {
-      if (grouped[candidate.stage]) {
-        grouped[candidate.stage].push(candidate);
+      if (!grouped[candidate.stage]) {
+        grouped[candidate.stage] = [];
       }
+      grouped[candidate.stage].push(candidate);
     });
 
     return grouped;
   }, [candidates]);
 
-  // Stats
-  const stats = useMemo(() => ({
-    total: candidates.length,
-    to_contact: candidatesByStage.to_contact.length,
-    interview: candidatesByStage.interview.length,
-    offer: candidatesByStage.offer.length,
-    hired: candidatesByStage.hired.length,
-  }), [candidates, candidatesByStage]);
+  // Stats (dynamic — supports custom stages)
+  const stats = useMemo(() => {
+    const stageStats: Record<string, number> = {};
+    Object.entries(candidatesByStage).forEach(([stage, items]) => {
+      stageStats[stage] = items.length;
+    });
+    return {
+      total: candidates.length,
+      ...stageStats,
+    };
+  }, [candidates, candidatesByStage]);
 
   // Check if an application is already in my candidates
   const isInMyCandidates = useCallback((applicationId: string) => {
@@ -1092,9 +1103,9 @@ export function useMyCandidatesData(searchQuery: string = '') {
     },
     onMutate: async (applicationId) => {
       // Optimistic update (paginated structure)
-      await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
+      await queryClient.cancelQueries({ queryKey });
       
-      queryClient.setQueryData(['my-candidates', user?.id], (old: any) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,

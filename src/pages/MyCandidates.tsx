@@ -77,6 +77,7 @@ import { useDevice } from '@/hooks/use-device';
 
 const MyCandidates = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const device = useDevice();
   const useMobileView = device === 'mobile';
   const { stageConfig, stageOrder, deleteStage } = useStageSettings();
@@ -128,24 +129,35 @@ const MyCandidates = () => {
   
   // Use the hook with debounced search for FTS
   const {
-    candidates: hookCandidates,
-    isLoading: hookLoading,
+    candidates,
+    isLoading,
     refetch: refetchCandidates,
     moveCandidate: hookMoveCandidate,
     removeCandidate: hookRemoveCandidate,
     updateNotes: hookUpdateNotes,
     updateRating: hookUpdateRating,
   } = useMyCandidatesData(debouncedSearchQuery);
-  
-  // Sync candidates from hook to local state (needed for optimistic updates)
-  const [candidates, setCandidates] = useState<MyCandidateData[]>(() => hookCandidates);
-  const [isLoading, setIsLoading] = useState(() => hookLoading);
-  
-  useEffect(() => {
-    setCandidates(hookCandidates);
-    setIsLoading(hookLoading);
-  }, [hookCandidates, hookLoading]);
-  
+
+  // Helper: optimistically update candidates in the React Query cache
+  const updateCandidatesCache = useCallback(
+    (updater: (items: MyCandidateData[]) => MyCandidateData[]) => {
+      queryClient.setQueryData(
+        ['my-candidates', user?.id, debouncedSearchQuery],
+        (old: any) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              items: updater(page.items),
+            })),
+          };
+        }
+      );
+    },
+    [queryClient, user?.id, debouncedSearchQuery]
+  );
+
   // Minimum delay for smooth fade-in
   const [showContent, setShowContent] = useState(false);
   useEffect(() => {
@@ -155,18 +167,9 @@ const MyCandidates = () => {
     }
   }, [isLoading]);
   
-  // Active candidates to display — deduplicated by applicant_id (one row per person)
+  // Active candidates to display (hook already deduplicates by applicant_id)
   const displayedCandidates = useMemo(() => {
-    const raw = isViewingColleague ? colleagueCandidates : candidates;
-    const seen = new Map<string, MyCandidateData>();
-    for (const c of raw) {
-      const existing = seen.get(c.applicant_id);
-      // Keep the most recently updated entry per person
-      if (!existing || c.updated_at > existing.updated_at) {
-        seen.set(c.applicant_id, c);
-      }
-    }
-    return Array.from(seen.values());
+    return isViewingColleague ? colleagueCandidates : candidates;
   }, [isViewingColleague, colleagueCandidates, candidates]);
   
   const [selectedCandidate, setSelectedCandidate] = useState<MyCandidateData | null>(null);
@@ -251,10 +254,10 @@ const MyCandidates = () => {
       return;
     }
     
-    // Optimistic update
-    setCandidates(prev => prev.map(c => 
-      selectedCandidateIds.has(c.id) ? { ...c, stage: targetStage } : c
-    ));
+    // Optimistic update via query cache
+    updateCandidatesCache(items =>
+      items.map(c => selectedCandidateIds.has(c.id) ? { ...c, stage: targetStage } : c)
+    );
     exitSelectionMode();
     
     try {
@@ -287,8 +290,8 @@ const MyCandidates = () => {
       return;
     }
     
-    // Optimistic remove
-    setCandidates(prev => prev.filter(c => !selectedCandidateIds.has(c.id)));
+    // Optimistic remove via query cache
+    updateCandidatesCache(items => items.filter(c => !selectedCandidateIds.has(c.id)));
     exitSelectionMode();
     setShowBulkDeleteConfirm(false);
     
@@ -438,10 +441,10 @@ const MyCandidates = () => {
       return;
     }
     
-    const previousCandidates = [...candidates];
-    setCandidates(prev => prev.map(c => 
-      c.id === candidateId ? { ...c, stage: newStage } : c
-    ));
+    const previousData = queryClient.getQueryData(['my-candidates', user?.id, debouncedSearchQuery]);
+    updateCandidatesCache(items =>
+      items.map(c => c.id === candidateId ? { ...c, stage: newStage } : c)
+    );
 
     try {
       const { error } = await supabase
@@ -450,7 +453,7 @@ const MyCandidates = () => {
         .eq('id', candidateId);
 
       if (error) {
-        setCandidates(previousCandidates);
+        queryClient.setQueryData(['my-candidates', user?.id, debouncedSearchQuery], previousData);
         throw error;
       }
     } catch (error: any) {
@@ -464,10 +467,10 @@ const MyCandidates = () => {
     const candidatesToMove = candidates.filter(c => c.stage === fromStage);
     
     if (candidatesToMove.length > 0) {
-      const previousCandidates = [...candidates];
-      setCandidates(prev => prev.map(c => 
-        c.stage === fromStage ? { ...c, stage: toStage } : c
-      ));
+      const previousData = queryClient.getQueryData(['my-candidates', user?.id, debouncedSearchQuery]);
+      updateCandidatesCache(items =>
+        items.map(c => c.stage === fromStage ? { ...c, stage: toStage } : c)
+      );
 
       try {
         const candidateIds = candidatesToMove.map(c => c.id);
@@ -477,7 +480,7 @@ const MyCandidates = () => {
           .in('id', candidateIds);
 
         if (error) {
-          setCandidates(previousCandidates);
+          queryClient.setQueryData(['my-candidates', user?.id, debouncedSearchQuery], previousData);
           throw error;
         }
       } catch (error: any) {
@@ -487,7 +490,7 @@ const MyCandidates = () => {
     }
 
     await deleteStage.mutateAsync(fromStage);
-  }, [user, candidates, deleteStage]);
+  }, [user, candidates, deleteStage, queryClient, debouncedSearchQuery, updateCandidatesCache]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -539,9 +542,8 @@ const MyCandidates = () => {
         return;
       }
       
-      setCandidates(prev => prev.filter(c => c.id !== idToRemove));
+      updateCandidatesCache(items => items.filter(c => c.id !== idToRemove));
       setCandidateToRemove(null);
-      
       try {
         const { error } = await supabase
           .from('my_candidates')
@@ -557,11 +559,11 @@ const MyCandidates = () => {
     }
   };
 
-  // Update rating - optimistic
+  // Update rating - optimistic via query cache
   const updateCandidateRating = async (candidateId: string, newRating: number) => {
-    setCandidates(prev => prev.map(c => 
-      c.id === candidateId ? { ...c, rating: newRating } : c
-    ));
+    updateCandidatesCache(items =>
+      items.map(c => c.id === candidateId ? { ...c, rating: newRating } : c)
+    );
     if (selectedCandidate?.id === candidateId) {
       setSelectedCandidate(prev => prev ? { ...prev, rating: newRating } : null);
     }
@@ -579,13 +581,14 @@ const MyCandidates = () => {
     }
   };
 
-  // Mark as viewed - optimistic
+  // Mark as viewed - optimistic via query cache
   const markApplicationAsViewed = async (applicationId: string) => {
-    setCandidates(prev => prev.map(c => 
-      c.application_id === applicationId 
-        ? { ...c, viewed_at: new Date().toISOString() } 
+    updateCandidatesCache(items =>
+      items.map(c => c.application_id === applicationId
+        ? { ...c, viewed_at: new Date().toISOString() }
         : c
-    ));
+      )
+    );
 
     try {
       await supabase
@@ -608,9 +611,7 @@ const MyCandidates = () => {
     }
   };
 
-  // Query client for prefetching
-  const queryClient = useQueryClient();
-  
+  // Prefetching
   const handlePrefetchCandidate = useCallback((candidate: MyCandidateData) => {
     if (!user || !candidate.applicant_id) return;
     
@@ -1005,7 +1006,7 @@ const MyCandidates = () => {
                 await removeCandidateFromColleagueList(candidateToDelete.id);
                 return;
               }
-              setCandidates(prev => prev.filter(c => c.id !== candidateToDelete.id));
+              updateCandidatesCache(items => items.filter(c => c.id !== candidateToDelete.id));
               try {
                 const { error } = await supabase
                   .from('my_candidates')
