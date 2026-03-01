@@ -220,18 +220,18 @@ const CandidateSlide = memo(function CandidateSlide({
           </SectionCard>
         )}
 
-        {/* Action buttons — purple & blue */}
+        {/* Action buttons — glass purple & blue */}
         <div className="w-full flex items-center gap-3">
           <button
             onClick={onOpenFullProfile}
-            className="flex-1 py-3 rounded-full bg-[hsl(260,60%,45%)] text-white text-sm font-medium active:scale-[0.97] transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-900/30"
+            className="flex-1 py-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center gap-2"
           >
             <MessageSquare className="h-4 w-4" />
             Meddelande
           </button>
           <button
             onClick={onOpenFullProfile}
-            className="flex-1 py-3 rounded-full bg-[hsl(210,80%,45%)] text-white text-sm font-medium active:scale-[0.97] transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/30"
+            className="flex-1 py-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center gap-2"
           >
             <CalendarPlus className="h-4 w-4" />
             Boka möte
@@ -242,9 +242,9 @@ const CandidateSlide = memo(function CandidateSlide({
         {!isLast && (
           <div className="w-full pt-6 pb-2">
             <div className="w-full h-px bg-white/10" />
-            <div className="flex flex-col items-center gap-1 pt-4 opacity-60">
+            <div className="flex flex-col items-center gap-1 pt-4">
               <ChevronDown className="h-4 w-4 text-white fill-white animate-bounce" />
-              <span className="text-[10px] text-white">Nästa kandidat</span>
+              <span className="text-[10px] text-white font-medium">Nästa kandidat</span>
             </div>
           </div>
         )}
@@ -331,14 +331,14 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           </button>
         </div>
 
-        {/* Dot indicator */}
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col gap-1.5">
-          {applications.slice(Math.max(0, currentIndex - 3), Math.min(applications.length, currentIndex + 4)).map((_, i) => {
-            const realIdx = Math.max(0, currentIndex - 3) + i;
-            return (
-              <div key={realIdx} className={`rounded-full transition-all duration-200 ${realIdx === currentIndex ? 'w-2 h-2 bg-white' : 'w-1.5 h-1.5 bg-white/30'}`} />
-            );
-          })}
+        {/* Dot indicator — vertically centered, aligned on center axis */}
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5">
+          {applications.map((_, idx) => (
+            <div
+              key={idx}
+              className={`rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-2 h-2 bg-white' : 'w-1.5 h-1.5 bg-white/30'}`}
+            />
+          ))}
         </div>
 
         {/* Continuous scroll container */}
