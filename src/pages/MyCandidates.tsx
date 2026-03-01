@@ -155,8 +155,19 @@ const MyCandidates = () => {
     }
   }, [isLoading]);
   
-  // Active candidates to display
-  const displayedCandidates = isViewingColleague ? colleagueCandidates : candidates;
+  // Active candidates to display — deduplicated by applicant_id (one row per person)
+  const displayedCandidates = useMemo(() => {
+    const raw = isViewingColleague ? colleagueCandidates : candidates;
+    const seen = new Map<string, MyCandidateData>();
+    for (const c of raw) {
+      const existing = seen.get(c.applicant_id);
+      // Keep the most recently updated entry per person
+      if (!existing || c.updated_at > existing.updated_at) {
+        seen.set(c.applicant_id, c);
+      }
+    }
+    return Array.from(seen.values());
+  }, [isViewingColleague, colleagueCandidates, candidates]);
   
   const [selectedCandidate, setSelectedCandidate] = useState<MyCandidateData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
