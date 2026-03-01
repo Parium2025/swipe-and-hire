@@ -579,41 +579,40 @@ const MyCandidates = () => {
         {/* Search and Stage Filters */}
         {stats.total > 0 && (
           <div className="space-y-3">
-            {/* Search input and Select button */}
+            {/* Search input with Välj button inside — identical to JobDetails */}
             <div className="flex items-center gap-2 max-w-lg mx-auto">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
-              <Input
-                placeholder="Sök på namn, jobb eller anteckningar..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
+                <Input
+                  placeholder="Sök på namn, jobb elle..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={() => displayedCandidates.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
+                onMouseDown={(e) => e.preventDefault()}
+                className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden shrink-0 ${
+                  isSelectionMode 
+                    ? 'bg-white/10 ring-white' 
+                    : displayedCandidates.length > 0 
+                      ? 'bg-white/5 ring-white/30' 
+                      : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
+                }`}
+              >
+                <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
+              </button>
             </div>
-            
-            <button
-              onClick={() => displayedCandidates.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
-              onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
-                isSelectionMode 
-                  ? 'bg-white/10 ring-white' 
-                  : displayedCandidates.length > 0 
-                    ? 'bg-white/5 ring-white/30' 
-                    : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
-              }`}
-            >
-              <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-              <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
-            </button>
-          </div>
 
           {/* Stage filters — hidden on mobile (tabs handle stage selection) */}
           <div className={`flex-wrap justify-center gap-2 ${useMobileView ? 'hidden' : 'flex'}`}>
