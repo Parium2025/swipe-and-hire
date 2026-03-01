@@ -1,5 +1,5 @@
 import { useState, memo, useMemo, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,6 +48,7 @@ type JobStatusTab = 'active' | 'expired' | 'draft';
 
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { jobs, stats, isLoading: loading, invalidateJobs } = useJobsData();
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -87,8 +88,20 @@ const EmployerDashboard = memo(() => {
     filteredAndSortedJobs,
   } = useJobFiltering(jobs);
   
-  // Tab state for switching between active, expired, and draft jobs
-  const [activeTab, setActiveTab] = useState<JobStatusTab>('active');
+  // Tab state synkad med URL (?tab=active|expired|draft)
+  const tabParam = searchParams.get('tab') as JobStatusTab | null;
+  const activeTab: JobStatusTab = tabParam === 'expired' || tabParam === 'draft' ? tabParam : 'active';
+  const setActiveTab = useCallback((tab: JobStatusTab) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (tab === 'active') {
+        next.delete('tab');
+      } else {
+        next.set('tab', tab);
+      }
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
   
   // Pagination state for mobile
   const [page, setPage] = useState(1);
