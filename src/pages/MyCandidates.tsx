@@ -4,7 +4,6 @@ import { useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -16,6 +15,7 @@ import { useColleagueCandidates } from '@/hooks/useColleagueCandidates';
 import { useColleagueStageSettings } from '@/hooks/useColleagueStageSettings';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
 import { useQueryClient } from '@tanstack/react-query';
+import { useMyCandidateApplications } from '@/hooks/useMyCandidateApplications';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,17 +28,10 @@ import {
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { 
   Trash2, 
-  Phone, 
-  Calendar, 
   UserCheck,
-  Gift,
-  PartyPopper,
   Search,
   X,
-  Star,
   ArrowDown,
-  Clock,
-  Play,
   Plus,
   Users,
   ChevronDown,
@@ -47,7 +40,6 @@ import {
   CheckSquare,
   Square
 } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
@@ -58,9 +50,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatDistanceToNow } from 'date-fns';
-import { sv } from 'date-fns/locale';
-import { formatCompactTime } from '@/lib/date';
 import {
   DndContext,
   DragOverlay,
@@ -71,411 +60,18 @@ import {
   DragStartEvent,
   DragEndEvent,
   DragOverEvent,
-  useDroppable,
   MeasuringStrategy,
 } from '@dnd-kit/core';
-import {
-  useSortable,
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
-import { useStageSettings, getIconByName, DEFAULT_STAGE_KEYS, CandidateStage } from '@/hooks/useStageSettings';
-import { StageSettingsMenu } from '@/components/StageSettingsMenu';
+import { useStageSettings, getIconByName, CandidateStage } from '@/hooks/useStageSettings';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
 import { smartSearchCandidates } from '@/lib/smartSearch';
 import { CandidateCompareDialog } from '@/components/CandidateCompareDialog';
 
-
-interface CandidateCardProps {
-  candidate: MyCandidateData;
-  onRemove: () => void;
-  onOpenProfile: () => void;
-  onPrefetch?: () => void;
-  isDragging?: boolean;
-  isSelectionMode?: boolean;
-  isSelected?: boolean;
-  onToggleSelect?: () => void;
-}
-
-// Star rating component - read-only for cards
-const StarRating = ({ 
-  rating = 0, 
-  maxStars = 5, 
-}: { 
-  rating?: number; 
-  maxStars?: number; 
-}) => {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: maxStars }).map((_, i) => (
-        <Star 
-          key={i}
-          className={`h-2.5 w-2.5 ${
-            i < rating 
-              ? 'text-yellow-400 fill-yellow-400' 
-              : 'text-white/30'
-          }`}
-        />
-      ))}
-    </div>
-  );
-};
-
-// Wrapper component for CandidateAvatar with inline video playback
-const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => {
-  const hasVideo = candidate.is_profile_video && candidate.video_url;
-  
-  return (
-    <div 
-      className="h-8 w-8 flex-shrink-0 [&>*:first-child]:h-8 [&>*:first-child]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
-      onClick={hasVideo ? (e) => {
-        // Prevent opening profile dialog when clicking on video - let ProfileVideo handle playback
-        e.stopPropagation();
-      } : undefined}
-    >
-      <CandidateAvatar
-        profileImageUrl={candidate.profile_image_url}
-        videoUrl={candidate.video_url}
-        isProfileVideo={candidate.is_profile_video}
-        firstName={candidate.first_name}
-        lastName={candidate.last_name}
-        stopPropagation={!!hasVideo}
-      />
-    </div>
-  );
-};
-
-const CandidateCardContent = ({ 
-  candidate, 
-  onRemove, 
-  onOpenProfile,
-  onPrefetch,
-  isDragging,
-  isSelectionMode,
-  isSelected,
-  onToggleSelect,
-}: CandidateCardProps) => {
-  const initials = `${candidate.first_name?.[0] || ''}${candidate.last_name?.[0] || ''}`.toUpperCase() || '?';
-  const isUnread = !candidate.viewed_at;
-  const latestApplicationTime = formatCompactTime(candidate.latest_application_at);
-  const lastActiveTime = formatCompactTime(candidate.last_active_at);
-  
-  const handleClick = () => {
-    if (isSelectionMode && onToggleSelect) {
-      onToggleSelect();
-    } else {
-      onOpenProfile();
-    }
-  };
-  
-  return (
-    <div 
-      className={`bg-white/5 ring-1 ring-inset rounded-md px-2 py-1.5 group relative
-        transition-all duration-200 ease-out
-        ${isSelectionMode ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
-        ${isSelected 
-          ? 'ring-1 ring-white/30 bg-white/[0.08]' 
-          : isDragging 
-            ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
-            : 'ring-white/10 hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
-        }`}
-      onClick={handleClick}
-      onMouseEnter={onPrefetch}
-    >
-      {/* Selection checkbox - shows in selection mode */}
-      {isSelectionMode && (
-        <div className="absolute left-1 top-1 z-10">
-          <Checkbox 
-            checked={isSelected}
-            onCheckedChange={() => onToggleSelect?.()}
-            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white hover:border-white/70"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
-      
-      {/* Unread indicator dot - shows if application hasn't been viewed */}
-      {isUnread && !isSelectionMode && (
-        <div className="absolute right-1.5 top-1.5">
-          <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
-        </div>
-      )}
-      
-      <div className={`flex items-center gap-2 ${isSelectionMode ? 'ml-5' : ''}`}>
-        <SmallCandidateAvatar candidate={candidate} />
-        
-        <div className="flex-1 min-w-0 pr-4">
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors cursor-default">
-                  {candidate.first_name} {candidate.last_name}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs">
-                <p>{candidate.first_name} {candidate.last_name}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <StarRating rating={candidate.rating} />
-          {(latestApplicationTime || lastActiveTime) && (
-            <div className="flex items-center gap-1.5 mt-0.5 max-w-full text-white text-[9px] leading-none">
-              {latestApplicationTime && (
-                <TooltipProvider delayDuration={300}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="inline-flex items-center gap-1 cursor-default whitespace-nowrap">
-                        <ArrowDown className="h-2.5 w-2.5 shrink-0 text-white" strokeWidth={3} />
-                        {latestApplicationTime}
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs">
-                      <p>Senaste ansökan i organisationen</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              {lastActiveTime && (
-                <TooltipProvider delayDuration={300}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="inline-flex items-center gap-1 cursor-default whitespace-nowrap">
-                        <Clock className="h-2.5 w-2.5 shrink-0 text-white" strokeWidth={3} />
-                        {lastActiveTime}
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs">
-                      <p>Senast aktiv i appen</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-
-      {/* Remove button - shows on hover with smooth animation (hidden in selection mode) */}
-      {!isSelectionMode && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="absolute right-1 top-1 p-1 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-full
-            opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100"
-        >
-          <Trash2 className="h-3 w-3" />
-        </button>
-      )}
-    </div>
-  );
-};
-
-// Sortable wrapper for the card - entire card is draggable (disabled in selection mode)
-const SortableCandidateCard = (props: CandidateCardProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ 
-    id: props.candidate.id,
-    disabled: props.isSelectionMode, // Disable drag in selection mode
-  });
-
-  const style = {
-    transform: transform ? CSS.Transform.toString(transform) : undefined,
-    transition: isDragging ? undefined : transition, // No transition while dragging to avoid flicker
-    opacity: isDragging ? 0 : 1, // Fully hide while dragging (DragOverlay shows the visual)
-  };
-
-  // In selection mode, don't apply drag listeners
-  const dragProps = props.isSelectionMode ? {} : { ...attributes, ...listeners };
-
-  return (
-    <div ref={setNodeRef} style={style} {...dragProps}>
-      <CandidateCardContent 
-        {...props} 
-        isDragging={isDragging}
-      />
-    </div>
-  );
-};
-
-interface StageColumnProps {
-  stage: CandidateStage;
-  candidates: MyCandidateData[];
-  onMoveCandidate: (id: string, stage: CandidateStage) => void;
-  onRemoveCandidate: (candidate: MyCandidateData) => void;
-  onOpenProfile: (candidate: MyCandidateData) => void;
-  onPrefetch?: (candidate: MyCandidateData) => void;
-  stageSettings: { label: string; color: string; iconName: string };
-  isReadOnly?: boolean;
-  totalStageCount: number;
-  targetStageKey: string; // Stage to move candidates to when deleting
-  targetStageLabel: string;
-  onMoveCandidatesAndDelete: (fromStage: string, toStage: string) => Promise<void>;
-  // Selection mode props
-  isSelectionMode?: boolean;
-  selectedCandidateIds?: Set<string>;
-  onToggleSelect?: (candidateId: string) => void;
-  
-}
-
-const StageColumn = ({ 
-  stage, 
-  candidates, 
-  onMoveCandidate, 
-  onRemoveCandidate, 
-  onOpenProfile,
-  onPrefetch,
-  stageSettings, 
-  isReadOnly, 
-  totalStageCount, 
-  targetStageKey, 
-  targetStageLabel, 
-  onMoveCandidatesAndDelete,
-  isSelectionMode,
-  selectedCandidateIds,
-  onToggleSelect,
-  
-}: Omit<StageColumnProps, 'isOver'>) => {
-  const Icon = getIconByName(stageSettings.iconName);
-  const [liveColor, setLiveColor] = useState<string | null>(null);
-  const [canScrollDown, setCanScrollDown] = useState(false);
-  const [canScrollUp, setCanScrollUp] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  // Use useDroppable's own isOver for accurate column-level detection
-  const { setNodeRef, isOver } = useDroppable({
-    id: stage,
-    disabled: isReadOnly,
-  });
-
-  // Use live color while dragging, fall back to saved color
-  const displayColor = liveColor ?? stageSettings.color;
-
-  // Check scroll position to show/hide indicators
-  const checkScroll = useCallback(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    
-    const hasScrollableContent = el.scrollHeight > el.clientHeight;
-    const isAtTop = el.scrollTop <= 5;
-    const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
-    
-    setCanScrollUp(hasScrollableContent && !isAtTop);
-    setCanScrollDown(hasScrollableContent && !isAtBottom);
-  }, []);
-
-  // Check scroll on mount and when candidates change
-  useEffect(() => {
-    checkScroll();
-  }, [candidates.length, checkScroll]);
-
-  return (
-    <div 
-      ref={setNodeRef}
-      className="flex-none w-[calc((100%-3rem)/5)] flex flex-col transition-colors h-full min-w-0"
-    >
-      <div 
-        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
-        style={{ backgroundColor: `${displayColor}33` }}
-      >
-        <div className="flex items-center gap-1.5 min-w-0">
-          <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="font-medium text-xs text-white truncate cursor-default flex-1 min-w-0">{stageSettings.label}</span>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs">
-                <p>{stageSettings.label}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <span 
-            className="text-white text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full flex-shrink-0"
-            style={{ backgroundColor: `${displayColor}66` }}
-          >
-            {candidates.length}
-          </span>
-          {/* Only show settings menu for own list */}
-          {!isReadOnly && (
-            <div className="ml-auto">
-              <StageSettingsMenu 
-                stageKey={stage} 
-                candidateCount={candidates.length}
-                totalStageCount={totalStageCount}
-                targetStageKey={targetStageKey}
-                targetStageLabel={targetStageLabel}
-                onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
-                onLiveColorChange={setLiveColor}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Content area - with background container like Teamtailor but Parium style */}
-      <div className="relative flex-1 min-h-0 bg-white/5 rounded-lg ring-1 ring-inset ring-white/10 backdrop-blur-sm">
-        {/* Scroll up indicator */}
-        {canScrollUp && (
-          <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-white/5 to-transparent z-10 pointer-events-none rounded-t-lg" />
-        )}
-        
-        <div 
-          ref={scrollContainerRef}
-          onScroll={checkScroll}
-          className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
-        >
-          {/* Drop indicator at top */}
-          {isOver && (
-            <div className="mb-2 flex items-center justify-center">
-              <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
-                Släpp här
-              </div>
-            </div>
-          )}
-
-          <SortableContext items={candidates.map(c => c.id)} strategy={verticalListSortingStrategy}>
-            {candidates.map(candidate => (
-              <SortableCandidateCard
-                key={candidate.id}
-                candidate={candidate}
-                onRemove={() => onRemoveCandidate(candidate)}
-                onOpenProfile={() => onOpenProfile(candidate)}
-                onPrefetch={onPrefetch ? () => onPrefetch(candidate) : undefined}
-                isSelectionMode={isSelectionMode}
-                isSelected={selectedCandidateIds?.has(candidate.id)}
-                onToggleSelect={() => onToggleSelect?.(candidate.id)}
-              />
-            ))}
-          </SortableContext>
-
-          {candidates.length === 0 && !isOver && (
-            <div className="text-center py-8 text-xs text-white">
-              Inga kandidater i detta steg
-            </div>
-          )}
-        </div>
-
-        {/* Scroll down indicator */}
-        {canScrollDown && (
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/5 to-transparent z-10 pointer-events-none rounded-b-lg flex items-end justify-center pb-1">
-            <div className="animate-bounce">
-              <ChevronDown className="h-3.5 w-3.5 text-white/60" />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+// ── Extracted components ─────────────────────────────
+import { CandidateCardContent } from '@/components/candidates/KanbanCandidateCard';
+import { StageColumn } from '@/components/candidates/StageColumn';
 
 const MyCandidates = () => {
   const { user } = useAuth();
@@ -538,17 +134,15 @@ const MyCandidates = () => {
   } = useMyCandidatesData(debouncedSearchQuery);
   
   // Sync candidates from hook to local state (needed for optimistic updates)
-  // Initialize with hook values to prevent initial flicker
   const [candidates, setCandidates] = useState<MyCandidateData[]>(() => hookCandidates);
   const [isLoading, setIsLoading] = useState(() => hookLoading);
   
-  // Sync candidates from hook when they change
   useEffect(() => {
     setCandidates(hookCandidates);
     setIsLoading(hookLoading);
   }, [hookCandidates, hookLoading]);
   
-  // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
+  // Minimum delay for smooth fade-in
   const [showContent, setShowContent] = useState(false);
   useEffect(() => {
     if (!isLoading) {
@@ -564,9 +158,21 @@ const MyCandidates = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
-  const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
-  const [loadingApplications, setLoadingApplications] = useState(false);
   const [candidateToRemove, setCandidateToRemove] = useState<MyCandidateData | null>(null);
+  
+  // ── Centralized application fetching ─────────────────
+  const candidateFallback = useMemo(() => selectedCandidate ? {
+    profile_image_url: selectedCandidate.profile_image_url,
+    video_url: selectedCandidate.video_url,
+    is_profile_video: selectedCandidate.is_profile_video,
+  } : undefined, [selectedCandidate?.profile_image_url, selectedCandidate?.video_url, selectedCandidate?.is_profile_video]);
+
+  const { allApplications: allCandidateApplications, loading: loadingApplications } =
+    useMyCandidateApplications(
+      selectedCandidate?.applicant_id || null,
+      dialogOpen,
+      candidateFallback
+    );
   
   // Filter state
   const [activeStageFilter, setActiveStageFilter] = useState<string | 'all'>('all');
@@ -603,7 +209,6 @@ const MyCandidates = () => {
         exitSelectionMode();
       }
     };
-    
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isSelectionMode, exitSelectionMode]);
@@ -618,11 +223,9 @@ const MyCandidates = () => {
     const idsToMove = Array.from(selectedCandidateIds);
     const count = idsToMove.length;
     const targetLabel = activeStageConfig[targetStage]?.label || targetStage;
-    
     const stageColor = activeStageConfig[targetStage]?.color || '#22c55e';
     
     if (isViewingColleague) {
-      // Move in colleague's list
       for (const id of idsToMove) {
         await moveCandidateInColleagueList(id, targetStage);
       }
@@ -660,7 +263,6 @@ const MyCandidates = () => {
     const idsToDelete = Array.from(selectedCandidateIds);
     
     if (isViewingColleague) {
-      // Remove from colleague's list one by one
       for (const id of idsToDelete) {
         await removeCandidateFromColleagueList(id);
       }
@@ -684,13 +286,10 @@ const MyCandidates = () => {
       if (error) throw error;
       toast.success(`${idsToDelete.length} kandidater borttagna från din lista`);
     } catch (error) {
-      // Refetch on error
       fetchCandidates();
       toast.error('Kunde inte ta bort kandidaterna');
     }
   };
-  
-  
   
   // Fetch colleague's candidates when switching
   useEffect(() => {
@@ -699,29 +298,23 @@ const MyCandidates = () => {
     }
   }, [viewingColleagueId, fetchColleagueCandidates]);
 
-  // fetchCandidates is now handled by useMyCandidatesData hook
-  // Just create a reference for compatibility
   const fetchCandidates = refetchCandidates;
 
-  // Förladda CV-sammanfattningar i bakgrunden
+  // Preload CV summaries
   useCvSummaryPreloader(displayedCandidates);
 
-  // Group candidates by stage (computed from local state) - dynamic for custom stages
+  // Group candidates by stage
   const candidatesByStage = useMemo(() => {
     const grouped: Record<string, MyCandidateData[]> = {};
-    
-    // Initialize with all known stages from active stage order
     activeStageOrder.forEach(stageKey => {
       grouped[stageKey] = [];
     });
-
     displayedCandidates.forEach(candidate => {
       if (!grouped[candidate.stage]) {
         grouped[candidate.stage] = [];
       }
       grouped[candidate.stage].push(candidate);
     });
-
     return grouped;
   }, [displayedCandidates, activeStageOrder]);
 
@@ -738,8 +331,6 @@ const MyCandidates = () => {
   }, [displayedCandidates, candidatesByStage, activeStageOrder]);
 
   // Filter candidates based on search query and stage filter
-  // FTS already filters at database level (debouncedSearchQuery), so we only use smartSearch
-  // for instant local filtering while typing (before debounce triggers)
   const filteredCandidatesByStage = useMemo(() => {
     const query = searchQuery.trim();
     const debouncedQuery = debouncedSearchQuery.trim();
@@ -747,12 +338,7 @@ const MyCandidates = () => {
     const filterCandidates = (stageKey: string) => {
       const stageCandidates = candidatesByStage[stageKey] || [];
       if (!query) return stageCandidates;
-      
-      // If FTS has already filtered with same query, no need for local filtering
       if (query === debouncedQuery) return stageCandidates;
-      
-      // Use smart search for instant local filtering while user types
-      // This gives responsive feedback before FTS kicks in (300ms debounce)
       return smartSearchCandidates(stageCandidates, query);
     };
 
@@ -763,12 +349,10 @@ const MyCandidates = () => {
     return filtered;
   }, [candidatesByStage, searchQuery, debouncedSearchQuery, activeStageOrder]);
 
-  // Get total filtered count
   const filteredTotal = useMemo(() => {
     return Object.values(filteredCandidatesByStage).reduce((sum, arr) => sum + arr.length, 0);
   }, [filteredCandidatesByStage]);
 
-  // Get all visible/filtered candidate IDs (for select all)
   const allVisibleCandidateIds = useMemo(() => {
     const ids: string[] = [];
     Object.values(filteredCandidatesByStage).forEach(candidates => {
@@ -777,7 +361,6 @@ const MyCandidates = () => {
     return ids;
   }, [filteredCandidatesByStage]);
   
-  // Check if all visible candidates are selected
   const allVisibleSelected = useMemo(() => {
     return (
       allVisibleCandidateIds.length > 0 &&
@@ -785,158 +368,27 @@ const MyCandidates = () => {
     );
   }, [allVisibleCandidateIds, selectedCandidateIds]);
 
-  // Toggle select all visible candidates (keeps the same button mounted to avoid focus flicker)
   const toggleAllVisible = useCallback(() => {
     setSelectedCandidateIds((prev) => {
       const allSelected =
         allVisibleCandidateIds.length > 0 &&
         allVisibleCandidateIds.every((id) => prev.has(id));
-
       return allSelected ? new Set() : new Set(allVisibleCandidateIds);
     });
   }, [allVisibleCandidateIds]);
 
-  // Stages to display based on filter
   const stagesToDisplay = useMemo(() => {
     if (activeStageFilter === 'all') return activeStageOrder;
     return [activeStageFilter];
   }, [activeStageFilter, activeStageOrder]);
 
-  // Shared cache keys with CandidatesTable
-  const CANDIDATE_APPS_PREFIX = 'candidate_apps_cache_v1_';
-  const CACHE_TTL_MS = 30 * 60 * 1000;
-
-  const readAppsCache = useCallback((applicantId: string): ApplicationData[] | null => {
-    try {
-      const raw = localStorage.getItem(`${CANDIDATE_APPS_PREFIX}${user?.id || 'anon'}_${applicantId}`);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed?.items?.length) return null;
-      if (parsed.cachedAt && Date.now() - parsed.cachedAt > CACHE_TTL_MS) return null;
-      return parsed.items;
-    } catch { return null; }
-  }, [user?.id]);
-
-  const writeAppsCache = useCallback((applicantId: string, items: ApplicationData[]) => {
-    try {
-      localStorage.setItem(
-        `${CANDIDATE_APPS_PREFIX}${user?.id || 'anon'}_${applicantId}`,
-        JSON.stringify({ items, cachedAt: Date.now() })
-      );
-    } catch {}
-  }, [user?.id]);
-
-  // Fetch all applications for the selected candidate when dialog opens
-  useEffect(() => {
-    const fetchAllApplications = async () => {
-      if (!selectedCandidate || !user || !dialogOpen) {
-        setAllCandidateApplications([]);
-        return;
-      }
-
-      setLoadingApplications(true);
-
-      // 🔥 Serve from cache instantly while fetching fresh data
-      const cached = readAppsCache(selectedCandidate.applicant_id);
-      if (cached?.length) {
-        setAllCandidateApplications(cached);
-      }
-
-      try {
-        const { data: orgJobs, error: jobsError } = await supabase
-          .from('job_postings')
-          .select('id, title, employer_id')
-          .eq('employer_id', user.id);
-
-        if (jobsError) throw jobsError;
-        if (!orgJobs || orgJobs.length === 0) {
-          setAllCandidateApplications([]);
-          return;
-        }
-
-        const jobIds = orgJobs.map(j => j.id);
-
-        const { data: applications, error: appError } = await supabase
-          .from('job_applications')
-          .select(`
-            id,
-            job_id,
-            applicant_id,
-            first_name,
-            last_name,
-            email,
-            phone,
-            location,
-            bio,
-            cv_url,
-            age,
-            employment_status,
-            work_schedule,
-            availability,
-            custom_answers,
-            status,
-            applied_at,
-            updated_at,
-            job_postings!inner(title)
-          `)
-          .eq('applicant_id', selectedCandidate.applicant_id)
-          .in('job_id', jobIds);
-
-        if (appError) throw appError;
-
-        const transformedApps: ApplicationData[] = (applications || []).map(app => ({
-          id: app.id,
-          job_id: app.job_id,
-          applicant_id: app.applicant_id,
-          first_name: app.first_name,
-          last_name: app.last_name,
-          email: app.email,
-          phone: app.phone,
-          location: app.location,
-          bio: app.bio,
-          cv_url: app.cv_url,
-          age: app.age,
-          employment_status: app.employment_status,
-          work_schedule: app.work_schedule,
-          availability: app.availability,
-          custom_answers: app.custom_answers,
-          status: app.status,
-          applied_at: app.applied_at || '',
-          updated_at: app.updated_at,
-          job_title: (app.job_postings as any)?.title || 'Okänt jobb',
-          profile_image_url: selectedCandidate.profile_image_url,
-          video_url: selectedCandidate.video_url,
-          is_profile_video: selectedCandidate.is_profile_video,
-        }));
-
-        setAllCandidateApplications(transformedApps);
-        // 🔥 Write to shared cache
-        if (transformedApps.length > 0) {
-          writeAppsCache(selectedCandidate.applicant_id, transformedApps);
-        }
-      } catch (error) {
-        console.error('Error fetching candidate applications:', error);
-        if (!cached?.length) {
-          setAllCandidateApplications([]);
-        }
-      } finally {
-        setLoadingApplications(false);
-      }
-    };
-
-    fetchAllApplications();
-  }, [selectedCandidate?.applicant_id, user?.id, dialogOpen, readAppsCache, writeAppsCache]);
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
+      activationConstraint: { distance: 8 },
     }),
     useSensor(KeyboardSensor)
   );
 
-  // Custom collision detection - stable column selection based on pointer X-position
   const collisionDetectionStrategy = useMemo(
     () => columnXCollisionDetection(stagesToDisplay),
     [stagesToDisplay]
@@ -947,19 +399,11 @@ const MyCandidates = () => {
     return displayedCandidates.find(c => c.id === activeId) || null;
   }, [activeId, displayedCandidates]);
 
-  // Resolve which stage we're hovering over (works for both column and card hovers)
   const resolveOverStage = (overRawId?: string): string | null => {
     if (!overRawId) return null;
-
-    if (activeStageOrder.includes(overRawId)) {
-      return overRawId;
-    }
-
+    if (activeStageOrder.includes(overRawId)) return overRawId;
     const overCandidate = displayedCandidates.find((c) => c.id === overRawId);
-    if (overCandidate && activeStageOrder.includes(overCandidate.stage)) {
-      return overCandidate.stage;
-    }
-
+    if (overCandidate && activeStageOrder.includes(overCandidate.stage)) return overCandidate.stage;
     return null;
   };
 
@@ -969,34 +413,28 @@ const MyCandidates = () => {
 
   const handleDragOver = (event: DragOverEvent) => {
     const overRawId = event.over?.id as string | undefined;
-    const stage = resolveOverStage(overRawId);
-    setOverId(stage);
+    setOverId(resolveOverStage(overRawId));
   };
 
-  // Move candidate - OPTIMISTIC UPDATE like JobDetails
+  // Move candidate - OPTIMISTIC UPDATE
   const updateCandidateStage = async (candidateId: string, newStage: CandidateStage) => {
     if (isViewingColleague) {
-      // Use colleague mutation
       await moveCandidateInColleagueList(candidateId, newStage);
       return;
     }
     
-    // Optimistic update - move card immediately
     const previousCandidates = [...candidates];
     setCandidates(prev => prev.map(c => 
-      c.id === candidateId 
-        ? { ...c, stage: newStage } 
-        : c
+      c.id === candidateId ? { ...c, stage: newStage } : c
     ));
 
     try {
       const { error } = await supabase
         .from('my_candidates')
-        .update({ stage: newStage })
+        .update({ stage: newStage, updated_at: new Date().toISOString() })
         .eq('id', candidateId);
 
       if (error) {
-        // Revert on error
         setCandidates(previousCandidates);
         throw error;
       }
@@ -1005,24 +443,18 @@ const MyCandidates = () => {
     }
   };
 
-  // Move all candidates from one stage to another and delete the stage
   const handleMoveCandidatesAndDelete = useCallback(async (fromStage: string, toStage: string) => {
     if (!user) return;
     
-    // Get all candidate IDs in the source stage
     const candidatesToMove = candidates.filter(c => c.stage === fromStage);
     
     if (candidatesToMove.length > 0) {
-      // Optimistic update - move all candidates immediately
       const previousCandidates = [...candidates];
       setCandidates(prev => prev.map(c => 
-        c.stage === fromStage 
-          ? { ...c, stage: toStage } 
-          : c
+        c.stage === fromStage ? { ...c, stage: toStage } : c
       ));
 
       try {
-        // Update all candidates in database
         const candidateIds = candidatesToMove.map(c => c.id);
         const { error } = await supabase
           .from('my_candidates')
@@ -1030,7 +462,6 @@ const MyCandidates = () => {
           .in('id', candidateIds);
 
         if (error) {
-          // Revert on error
           setCandidates(previousCandidates);
           throw error;
         }
@@ -1040,7 +471,6 @@ const MyCandidates = () => {
       }
     }
 
-    // Now delete the stage
     await deleteStage.mutateAsync(fromStage);
   }, [user, candidates, deleteStage]);
 
@@ -1065,9 +495,7 @@ const MyCandidates = () => {
 
     const candidate = displayedCandidates.find(c => c.id === candidateId);
     if (candidate && candidate.stage !== targetStage) {
-      // Update stage FIRST (optimistic update)
       updateCandidateStage(candidateId, targetStage);
-      // Clear drag state after a frame to ensure optimistic update is rendered
       requestAnimationFrame(() => {
         setActiveId(null);
         setOverId(null);
@@ -1096,7 +524,6 @@ const MyCandidates = () => {
         return;
       }
       
-      // Optimistic remove
       setCandidates(prev => prev.filter(c => c.id !== idToRemove));
       setCandidateToRemove(null);
       
@@ -1109,7 +536,6 @@ const MyCandidates = () => {
         if (error) throw error;
         toast.success('Kandidat borttagen från din lista');
       } catch (error) {
-        // Refetch on error
         fetchCandidates();
         toast.error('Kunde inte ta bort kandidaten');
       }
@@ -1161,7 +587,6 @@ const MyCandidates = () => {
     setSelectedCandidate(candidate);
     setDialogOpen(true);
     
-    // Mark as viewed if not already
     if (!candidate.viewed_at) {
       markApplicationAsViewed(candidate.application_id);
       setSelectedCandidate(prev => prev ? { ...prev, viewed_at: new Date().toISOString() } : null);
@@ -1171,14 +596,11 @@ const MyCandidates = () => {
   // Query client for prefetching
   const queryClient = useQueryClient();
   
-  // Prefetch candidate data on hover for instant profile opening
   const handlePrefetchCandidate = useCallback((candidate: MyCandidateData) => {
     if (!user || !candidate.applicant_id) return;
     
-    // Prefetch activities
     prefetchCandidateActivities(queryClient, candidate.applicant_id, user.id);
     
-    // Prefetch persistent notes
     queryClient.prefetchQuery({
       queryKey: ['candidate-notes', candidate.applicant_id],
       queryFn: async () => {
@@ -1323,7 +745,6 @@ const MyCandidates = () => {
               )}
             </div>
             
-            {/* Select mode toggle button (single button to prevent focus flicker) */}
             <Button
               variant="glass"
               size="sm"
@@ -1453,42 +874,41 @@ const MyCandidates = () => {
             }}
           >
             {stagesToDisplay.map((stage, index) => {
-              // Calculate target stage for moving candidates when deleting this stage
-              // If this is the first stage, move to second stage; otherwise move to first stage
-              const stageIndex = activeStageOrder.indexOf(stage);
-              const targetIndex = stageIndex === 0 ? 1 : 0;
-              const targetKey = activeStageOrder[targetIndex] || activeStageOrder[0];
-              const targetLabel = activeStageConfig[targetKey]?.label || 'Nästa steg';
+              const targetIndex = index === 0 ? 1 : 0;
+              const targetStage = stagesToDisplay[targetIndex] || stagesToDisplay[0];
+              const settings = activeStageConfig[stage];
               
               return (
                 <StageColumn
                   key={stage}
                   stage={stage}
                   candidates={filteredCandidatesByStage[stage] || []}
-                  onMoveCandidate={handleMoveCandidate}
                   onRemoveCandidate={handleRemoveCandidate}
                   onOpenProfile={handleOpenProfile}
                   onPrefetch={handlePrefetchCandidate}
-                  stageSettings={activeStageConfig[stage] || { label: stage, color: '#6366F1', iconName: 'flag' }}
+                  stageSettings={{
+                    label: settings?.label || stage,
+                    color: settings?.color || '#6366F1',
+                    iconName: settings?.iconName || 'flag',
+                  }}
                   isReadOnly={isViewingColleague}
                   totalStageCount={activeStageOrder.length}
-                  targetStageKey={targetKey}
-                  targetStageLabel={targetLabel}
+                  targetStageKey={targetStage}
+                  targetStageLabel={activeStageConfig[targetStage]?.label || targetStage}
                   onMoveCandidatesAndDelete={handleMoveCandidatesAndDelete}
                   isSelectionMode={isSelectionMode}
                   selectedCandidateIds={selectedCandidateIds}
                   onToggleSelect={toggleCandidateSelection}
-                  
                 />
               );
             })}
-            {/* Nytt steg button - inline with columns, only show if less than max stages */}
-            {!isViewingColleague && activeStageOrder.length < 5 && activeStageFilter === 'all' && (
-              <div className="flex-none w-[calc((100%-3rem)/5)] flex items-start pt-1">
-                <CreateStageDialog 
-                  currentStageCount={activeStageOrder.length}
+
+            {/* Add Stage button */}
+            {!isViewingColleague && activeStageFilter === 'all' && (
+              <div className="flex-none w-[calc((100%-3rem)/5)] flex flex-col h-full min-w-0">
+              <CreateStageDialog
                   trigger={
-                    <button className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
+                    <button className="w-full rounded-md px-2 py-1.5 mb-2 ring-1 ring-inset ring-white/10 bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 text-white text-xs font-medium flex-shrink-0">
                       <Plus className="h-3.5 w-3.5" />
                       Nytt steg
                     </button>
@@ -1534,9 +954,7 @@ const MyCandidates = () => {
           const stageLabel = activeStageConfig[newStage]?.label || newStage;
           
           if (selectedCandidate && !isViewingColleague) {
-            // Move candidate to new stage
             handleMoveCandidate(selectedCandidate.id, newStage);
-            // Update local state
             setSelectedCandidate(prev => prev ? { ...prev, stage: newStage } : null);
             toast.success(`Flyttade till ${stageLabel}`, {
               icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
@@ -1551,11 +969,8 @@ const MyCandidates = () => {
         }}
         onRemoveFromList={() => {
           if (selectedCandidate) {
-            // Use the existing remove logic
             setCandidateToRemove(selectedCandidate);
-            // Close the dialog first
             setDialogOpen(false);
-            // Then trigger the confirm
             setTimeout(() => {
               confirmRemoveCandidate();
             }, 100);
@@ -1654,7 +1069,6 @@ const MyCandidates = () => {
             </span>
             <div className="w-px h-5 bg-white/20" />
             
-            {/* Select All / Deselect All toggle (single mounted button to prevent flicker) */}
             <Button
               variant="glass"
               size="sm"
