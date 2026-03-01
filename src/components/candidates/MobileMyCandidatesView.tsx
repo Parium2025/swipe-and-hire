@@ -5,7 +5,7 @@ import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
 import { formatCompactTime } from '@/lib/date';
-import { Star, ChevronRight, Plus, Check, X } from 'lucide-react';
+import { Star, ChevronRight, Plus, ArrowDown, Clock } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDragScroll } from '@/hooks/useDragScroll';
@@ -23,7 +23,7 @@ const StarRating = ({ rating = 0 }: { rating?: number }) => (
     {Array.from({ length: 5 }).map((_, i) => (
       <Star
         key={i}
-        className={`h-2.5 w-2.5 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-white/20'}`}
+        className={`h-2.5 w-2.5 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-white/30'}`}
       />
     ))}
   </div>
@@ -39,6 +39,8 @@ interface CandidateRowProps {
   isSelectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: () => void;
+  onPrefetch?: () => void;
+  onMarkAsViewed?: () => void;
 }
 
 const MyCandidateRow = memo(function MyCandidateRow({
@@ -50,14 +52,20 @@ const MyCandidateRow = memo(function MyCandidateRow({
   isSelectionMode,
   isSelected,
   onToggleSelect,
+  onPrefetch,
+  onMarkAsViewed,
 }: CandidateRowProps) {
   const isUnread = !candidate.viewed_at;
   const appliedTime = formatCompactTime(candidate.applied_at);
+  const lastActiveTime = formatCompactTime(candidate.last_active_at);
 
   const handleTap = () => {
     if (isSelectionMode && onToggleSelect) {
       onToggleSelect();
       return;
+    }
+    if (isUnread && onMarkAsViewed) {
+      onMarkAsViewed();
     }
     onOpen();
   };
@@ -66,20 +74,33 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
   return (
     <div
-      className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-all duration-150 min-h-touch relative
-        ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:bg-white/[0.08]'}
+      className={`bg-white/5 ring-1 ring-inset rounded-md px-2 py-1.5 flex items-center gap-2 transition-all duration-200 ease-out min-h-touch relative group
+        ${isSelected ? 'ring-white/30 bg-white/[0.08]' : 'ring-white/10 active:bg-white/[0.08] active:scale-[0.98]'}
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
       onClick={handleTap}
+      onMouseEnter={onPrefetch}
     >
-      {/* Unread dot */}
+      {/* Unread dot — top-right like JobDetails */}
       {!isSelectionMode && isUnread && (
-        <div className="absolute left-1.5 top-1.5">
+        <div className="absolute right-1.5 top-1.5">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
         </div>
       )}
 
+      {/* Selection checkbox */}
+      {isSelectionMode && (
+        <div className="absolute left-1.5 top-1.5 z-10">
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => onToggleSelect?.()}
+            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
       {/* Avatar */}
-      <div className="h-10 w-10 flex-shrink-0 [&>*:first-child]:h-10 [&>*:first-child]:w-10">
+      <div className={`h-10 w-10 flex-shrink-0 [&>*:first-child]:h-10 [&>*:first-child]:w-10 ${isSelectionMode ? 'ml-5' : ''}`}>
         <CandidateAvatar
           profileImageUrl={candidate.profile_image_url}
           videoUrl={candidate.video_url}
@@ -91,42 +112,57 @@ const MyCandidateRow = memo(function MyCandidateRow({
       </div>
 
       {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-white font-medium text-sm truncate">
+      <div className="flex-1 min-w-0 pr-4">
+        <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors">
           {candidate.first_name} {candidate.last_name}
         </p>
         <StarRating rating={candidate.rating} />
-        <div className="flex items-center gap-2 mt-0.5">
-          {candidate.job_title && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="text-white text-[11px] truncate max-w-[120px] cursor-default">
-                  {candidate.job_title}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-[280px]">
-                <p className="text-sm break-words">{candidate.job_title}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-        {appliedTime && (
-          <span className="text-white text-[11px] mt-0.5 block">
-            {appliedTime === 'nu' ? 'Ansökte idag' : `Ansökte för ${appliedTime} sedan`}
-          </span>
+        {candidate.job_title && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-white text-[11px] truncate max-w-[120px] block cursor-default">
+                {candidate.job_title}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[280px]">
+              <p className="text-sm break-words">{candidate.job_title}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {(appliedTime || lastActiveTime) && (
+          <div className="flex items-center gap-1.5 mt-0.5 text-white text-[10px]">
+            {appliedTime && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="flex items-center gap-0.5 cursor-default">
+                    <ArrowDown className="h-2.5 w-2.5" />
+                    {appliedTime}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  <p>Ansökte till detta jobb</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {lastActiveTime && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="flex items-center gap-0.5 cursor-default">
+                    <Clock className="h-2.5 w-2.5" />
+                    {lastActiveTime}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  <p>Senast aktiv i appen</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         )}
       </div>
 
-      {/* Right side */}
-      {isSelectionMode ? (
-        <div className="flex-shrink-0" onClick={e => e.stopPropagation()}>
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={() => onToggleSelect?.()}
-            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
-          />
-        </div>
-      ) : (
+      {/* Right side — move menu (hidden in selection mode) */}
+      {!isSelectionMode && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -176,6 +212,8 @@ interface MobileMyCandidatesViewProps {
   selectedCandidateIds?: Set<string>;
   onToggleSelect?: (id: string) => void;
   renderActionBar?: React.ReactNode;
+  onPrefetch?: (candidate: MyCandidateData) => void;
+  onMarkAsViewed?: (applicationId: string) => void;
 }
 
 export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
@@ -190,13 +228,11 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   selectedCandidateIds,
   onToggleSelect,
   renderActionBar,
+  onPrefetch,
+  onMarkAsViewed,
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
   const dragScrollRef = useDragScroll<HTMLDivElement>();
-  const listRef = useRef<HTMLDivElement>(null);
-  const [scrollIndicator, setScrollIndicator] = useState<number>(0);
-  const [showIndicator, setShowIndicator] = useState(false);
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
@@ -213,24 +249,6 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   }, [candidates, stages]);
 
   const currentCandidates = candidatesByStage[activeTab] || [];
-
-  // Reset indicator when tab changes
-  useEffect(() => {
-    setScrollIndicator(0);
-    setShowIndicator(false);
-    if (listRef.current) listRef.current.scrollTop = 0;
-  }, [activeTab]);
-
-  const handleListScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    const cardHeight = 88;
-    const scrolled = Math.floor(el.scrollTop / cardHeight);
-    const visible = Math.min(scrolled + 1, currentCandidates.length);
-    setScrollIndicator(visible);
-    setShowIndicator(true);
-    clearTimeout(hideTimerRef.current);
-    hideTimerRef.current = setTimeout(() => setShowIndicator(false), 2000);
-  }, [currentCandidates.length]);
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -258,7 +276,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 tabIndex={0}
                 onClick={() => setActiveTab(stage)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-              className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] ${
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] ${
                   isActive
                     ? 'ring-white/40 shadow-lg'
                     : 'ring-white/20'
@@ -266,7 +284,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 style={{ backgroundColor: `${cfg.color}55` }}
               >
                 <Icon className="h-3 w-3 text-white flex-shrink-0" />
-              {cfg.label.length > 10 ? (
+                {cfg.label.length > 10 ? (
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -317,48 +335,33 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
           )}
         </div>
 
-        {/* Candidate list — internally scrollable */}
-        <div className="relative">
-          {currentCandidates.length > 6 && (
-            <div
-              className={`absolute top-2 right-2 z-10 pointer-events-none transition-opacity duration-300 ${
-                showIndicator ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <span className="bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-0.5 rounded-full border border-white/10">
-                {scrollIndicator}/{currentCandidates.length}
-              </span>
-            </div>
-          )}
-          <ScrollArea className="overscroll-contain" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
-            <div
-              ref={listRef}
-              onScroll={handleListScroll}
-              className="flex flex-col gap-2"
-            >
-              {currentCandidates.length === 0 ? (
-                <div className="text-center py-12 text-sm text-white">
-                  Inga kandidater i detta steg
-                </div>
-              ) : (
-                currentCandidates.map((candidate) => (
-                  <MyCandidateRow
-                    key={candidate.id}
-                    candidate={candidate}
-                    onOpen={() => onOpenProfile(candidate)}
-                    onMoveToStage={onMoveToStage}
-                    stages={stages}
-                    stageConfig={stageConfig}
-                    isSelectionMode={isSelectionMode}
-                    isSelected={selectedCandidateIds?.has(candidate.id)}
-                    onToggleSelect={() => onToggleSelect?.(candidate.id)}
-                  />
-                ))
-              )}
-              {isSelectionMode && currentCandidates.length > 0 && <div className="h-2" />}
-            </div>
-          </ScrollArea>
-        </div>
+        {/* Candidate list */}
+        <ScrollArea className="overscroll-contain" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
+          <div className="flex flex-col gap-1.5">
+            {currentCandidates.length === 0 ? (
+              <div className="text-center py-12 text-sm text-white">
+                Inga kandidater i detta steg
+              </div>
+            ) : (
+              currentCandidates.map((candidate) => (
+                <MyCandidateRow
+                  key={candidate.id}
+                  candidate={candidate}
+                  onOpen={() => onOpenProfile(candidate)}
+                  onMoveToStage={onMoveToStage}
+                  stages={stages}
+                  stageConfig={stageConfig}
+                  isSelectionMode={isSelectionMode}
+                  isSelected={selectedCandidateIds?.has(candidate.id)}
+                  onToggleSelect={() => onToggleSelect?.(candidate.id)}
+                  onPrefetch={() => onPrefetch?.(candidate)}
+                  onMarkAsViewed={() => onMarkAsViewed?.(candidate.application_id)}
+                />
+              ))
+            )}
+            {isSelectionMode && currentCandidates.length > 0 && <div className="h-2" />}
+          </div>
+        </ScrollArea>
 
         {/* Inline action bar for selection mode */}
         {renderActionBar}
