@@ -475,9 +475,29 @@ export const CandidateProfileDialog = ({
             </div>
             
             <div className="w-full">
-              <h2 className="text-lg md:text-2xl font-semibold text-white">
-                {displayApp.first_name} {displayApp.last_name}
-              </h2>
+              <div className="flex items-center gap-1.5">
+                {onNavigatePrev && (
+                  <button
+                    onClick={onNavigatePrev}
+                    className="shrink-0 flex items-center justify-center h-7 w-7 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-all"
+                    aria-label="Föregående kandidat"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                )}
+                <h2 className="text-lg md:text-2xl font-semibold text-white truncate">
+                  {displayApp.first_name} {displayApp.last_name}
+                </h2>
+                {onNavigateNext && (
+                  <button
+                    onClick={onNavigateNext}
+                    className="shrink-0 flex items-center justify-center h-7 w-7 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-all"
+                    aria-label="Nästa kandidat"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
               
               {onRatingChange && (
                 <div className="mt-2">
@@ -903,25 +923,6 @@ export const CandidateProfileDialog = ({
         </div>
       </DialogContentNoFocus>
 
-      {/* Lightbox-style side navigation arrows */}
-      {onNavigatePrev && (
-        <button
-          onClick={onNavigatePrev}
-          className="fixed left-3 top-1/2 -translate-y-1/2 z-[60] flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-inset ring-white/20 text-white/70 hover:bg-white/20 hover:text-white transition-all duration-200 backdrop-blur-sm"
-          aria-label="Föregående kandidat"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-      )}
-      {onNavigateNext && (
-        <button
-          onClick={onNavigateNext}
-          className="fixed right-3 top-1/2 -translate-y-1/2 z-[60] flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-inset ring-white/20 text-white/70 hover:bg-white/20 hover:text-white transition-all duration-200 backdrop-blur-sm"
-          aria-label="Nästa kandidat"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
-      )}
     </Dialog>
 
     {/* CV Dialog — fullscreen on mobile, centered on desktop */}
