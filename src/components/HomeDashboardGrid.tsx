@@ -358,36 +358,44 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
     staleTime: Infinity,
   });
 
-  // Single consolidated realtime channel instead of 3 separate WebSocket connections
+  // Realtime: only subscribe to messages (which CAN be filtered by user).
+  // job_applications and saved_jobs CANNOT be filtered by employer_id (only by job_id,
+  // and employers have multiple jobs). Unfiltered subscriptions would broadcast ALL
+  // global changes to every employer — catastrophic at scale.
+  // Instead we rely on visibility-based refresh + polling for those.
   useEffect(() => {
     if (!user?.id) return;
     
-    const statsChannel = supabase
-      .channel(`employer-stats-${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' },
-        () => { queryClient.invalidateQueries({ queryKey: ['new-applications-count'] }); }
-      )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'saved_jobs' },
-        () => { queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] }); }
-      )
+    const invalidateAll = () => {
+      queryClient.invalidateQueries({ queryKey: ['new-applications-count'] });
+      queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] });
+      queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
+    };
+
+    // Only subscribe to messages (properly filtered by recipient_id)
+    const msgChannel = supabase
+      .channel(`employer-messages-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
         () => { queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] }); }
       )
       .subscribe();
 
-    // Also refresh on visibility change (handles stale data from sleep/tab switch)
+    // Visibility-based refresh covers applications & saved_jobs (stale data from sleep/tab switch)
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        queryClient.invalidateQueries({ queryKey: ['new-applications-count'] });
-        queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] });
-        queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
-      }
+      if (document.visibilityState === 'visible') invalidateAll();
     };
     document.addEventListener('visibilitychange', handleVisibility);
+
+    // Light polling every 60s for applications & saved_jobs (no WebSocket needed)
+    const pollInterval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['new-applications-count'] });
+      queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] });
+    }, 60000);
     
     return () => {
-      supabase.removeChannel(statsChannel);
+      supabase.removeChannel(msgChannel);
       document.removeEventListener('visibilitychange', handleVisibility);
+      clearInterval(pollInterval);
     };
   }, [user?.id, queryClient]);
 
