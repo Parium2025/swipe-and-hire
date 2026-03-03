@@ -353,41 +353,7 @@ const EmployerDashboard = memo(() => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {loading ? (
-                    <>
-                      {Array.from({ length: 6 }).map((_, i) => (
-                        <TableRow key={i} className="border-white/10">
-                          <TableCell className="text-center px-2 py-3">
-                            <div className="flex flex-col items-center gap-1">
-                              <Skeleton className="h-4 w-3/4 bg-white/10" />
-                              <Skeleton className="h-3 w-16 bg-white/10" />
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center px-2 py-3">
-                            <Skeleton className="h-5 w-16 mx-auto rounded-full bg-white/10" />
-                          </TableCell>
-                          <TableCell className="text-center px-2 py-3">
-                            <Skeleton className="h-5 w-10 mx-auto rounded-full bg-white/10" />
-                          </TableCell>
-                          <TableCell className="text-center px-2 py-3">
-                            <Skeleton className="h-5 w-10 mx-auto rounded-full bg-white/10" />
-                          </TableCell>
-                          <TableCell className="text-center px-2 py-3">
-                            <Skeleton className="h-4 w-20 mx-auto bg-white/10" />
-                          </TableCell>
-                          <TableCell className="text-center px-2 py-3">
-                            <Skeleton className="h-4 w-24 mx-auto bg-white/10" />
-                          </TableCell>
-                          <TableCell className="text-center px-2 py-3">
-                            <Skeleton className="h-4 w-16 mx-auto bg-white/10" />
-                          </TableCell>
-                          <TableCell className="text-center px-2 py-3">
-                            <Skeleton className="h-6 w-6 mx-auto rounded bg-white/10" />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </>
-                  ) : tabFilteredJobs.length === 0 ? (
+                {tabFilteredJobs.length === 0 ? (
                     <TableRow className="hover:bg-transparent">
                       <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-sm">
                         {searchTerm.trim() 
