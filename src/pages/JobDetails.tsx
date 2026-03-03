@@ -40,12 +40,10 @@ import {
   Plus,
   CheckSquare,
   Square,
-  Trash2,
   QrCode,
 } from 'lucide-react';
 import JobQrCodeButton from '@/components/JobQrCode';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -111,6 +109,74 @@ const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxStars?: 
     </div>
   );
 };
+
+// Shared Selection Action Bar - used in both mobile (inline) and desktop (floating)
+const SelectionActionBar = ({
+  selectedCount,
+  totalCount,
+  allSelected,
+  onToggleAll,
+  disabled,
+  stages,
+  stageSettings: settings,
+  onMoveToStage,
+}: {
+  selectedCount: number;
+  totalCount: number;
+  allSelected: boolean;
+  onToggleAll: () => void;
+  disabled: boolean;
+  stages: string[];
+  stageSettings: Record<string, { label?: string; color?: string; iconName?: string }>;
+  onMoveToStage: (stage: string) => void;
+}) => (
+  <div className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
+    <span className="text-white text-xs font-medium whitespace-nowrap flex-shrink-0">
+      {selectedCount}/{totalCount} valda
+    </span>
+    <div className="w-px h-4 bg-white/20 flex-shrink-0" />
+    <button
+      onClick={onToggleAll}
+      onMouseDown={(e) => e.preventDefault()}
+      className="flex items-center justify-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] text-white md:hover:bg-white/10 outline-none focus:outline-none transition-all duration-200 rounded-md"
+    >
+      {allSelected ? <Square className="h-3.5 w-3.5 mr-1" /> : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
+      {allSelected ? 'Avmarkera' : 'Välj alla'}
+    </button>
+    <div className="w-px h-4 bg-white/20 flex-shrink-0" />
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          disabled={disabled}
+          onMouseDown={(e) => e.preventDefault()}
+          className={`flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 outline-none focus:outline-none md:hover:bg-white/10 md:hover:text-white transition-all duration-200 rounded-md ${
+            disabled ? 'text-white/30 cursor-not-allowed' : 'text-white'
+          }`}
+        >
+          <ArrowDown className="h-3.5 w-3.5 mr-1" />
+          Flytta till
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
+        {stages.map(stage => {
+          const s = settings[stage];
+          const StageIcon = getJobStageIconByName(s?.iconName || 'inbox');
+          return (
+            <DropdownMenuItem 
+              key={stage}
+              onClick={() => onMoveToStage(stage)}
+              className="text-white hover:text-white cursor-pointer"
+            >
+              <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: s?.color || '#0EA5E9' }} />
+              <StageIcon className="h-4 w-4 mr-2 text-white/70" />
+              <span className="truncate">{s?.label || stage}</span>
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
+);
 
 type ApplicationStatus = 'pending' | 'reviewing' | 'interview' | 'offered' | 'hired' | 'rejected';
 
@@ -990,16 +1056,18 @@ const JobDetails = () => {
     setActiveId(event.active.id as string);
   };
 
-  const resolveOverStatus = (overRawId?: string): ApplicationStatus | null => {
+  const resolveOverStatus = (overRawId?: string): string | null => {
     if (!overRawId) return null;
 
-    if (STATUS_ORDER.includes(overRawId as ApplicationStatus)) {
-      return overRawId as ApplicationStatus;
+    // Check if the id is a stage key (column drop)
+    if (activeStages.includes(overRawId)) {
+      return overRawId;
     }
 
+    // Check if the id is an application card (resolve its stage)
     const overApp = applications.find((a) => a.id === overRawId);
-    if (overApp && STATUS_ORDER.includes(overApp.status as ApplicationStatus)) {
-      return overApp.status as ApplicationStatus;
+    if (overApp && activeStages.includes(overApp.status)) {
+      return overApp.status;
     }
 
     return null;
@@ -1318,52 +1386,16 @@ const JobDetails = () => {
             })}
             renderActionBar={isSelectionMode ? (
               <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mt-2">
-                <div className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
-                  <span className="text-white text-xs font-medium whitespace-nowrap flex-shrink-0">
-                    {selectedApplicationIds.size}/{allVisibleApplicationIds.length} valda
-                  </span>
-                  <div className="w-px h-4 bg-white/20 flex-shrink-0" />
-                  <button
-                    onClick={toggleAllVisible}
-                    onMouseDown={(e) => e.preventDefault()}
-                    className="flex items-center justify-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
-                  >
-                    {allVisibleSelected ? <Square className="h-3.5 w-3.5 mr-1" /> : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
-                    {allVisibleSelected ? 'Avmarkera' : 'Välj alla'}
-                  </button>
-                  <div className="w-px h-4 bg-white/20 flex-shrink-0" />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        disabled={selectedApplicationIds.size === 0}
-                        onMouseDown={(e) => e.preventDefault()}
-                        className={`flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 outline-none focus:outline-none transition-all duration-200 rounded-md ${
-                          selectedApplicationIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-white'
-                        }`}
-                      >
-                        <ArrowDown className="h-3.5 w-3.5 mr-1" />
-                        Flytta till
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
-                      {activeStages.map(stage => {
-                        const settings = stageSettings[stage];
-                        const Icon = getJobStageIconByName(settings?.iconName || 'inbox');
-                        return (
-                          <DropdownMenuItem 
-                            key={stage}
-                            onClick={() => bulkMoveToStage(stage)}
-                            className="text-white hover:text-white cursor-pointer"
-                          >
-                            <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: settings?.color || '#0EA5E9' }} />
-                            <Icon className="h-4 w-4 mr-2 text-white/70" />
-                            <span className="truncate">{settings?.label || stage}</span>
-                          </DropdownMenuItem>
-                        );
-                      })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <SelectionActionBar
+                  selectedCount={selectedApplicationIds.size}
+                  totalCount={allVisibleApplicationIds.length}
+                  allSelected={allVisibleSelected}
+                  onToggleAll={toggleAllVisible}
+                  disabled={selectedApplicationIds.size === 0}
+                  stages={activeStages}
+                  stageSettings={stageSettings}
+                  onMoveToStage={bulkMoveToStage}
+                />
               </div>
             ) : undefined}
           />
@@ -1543,55 +1575,16 @@ const JobDetails = () => {
         {/* Floating Action Bar for Selection Mode — desktop only (mobile uses inline bar in MobileCandidateView) */}
         {isSelectionMode && (
           <div className="hidden md:flex fixed bottom-6 left-0 right-0 z-50 animate-in slide-in-from-bottom-4 duration-300 px-4 justify-center">
-            <div className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
-              <span className="text-white text-xs font-medium whitespace-nowrap flex-shrink-0">
-                {selectedApplicationIds.size}/{allVisibleApplicationIds.length} valda
-              </span>
-              <div className="w-px h-4 bg-white/20 flex-shrink-0" />
-              <button
-                onClick={toggleAllVisible}
-                onMouseDown={(e) => e.preventDefault()}
-                className="flex items-center justify-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] text-white md:hover:bg-white/10 outline-none focus:outline-none transition-all duration-200 rounded-md"
-              >
-                {allVisibleSelected ? <Square className="h-3.5 w-3.5 mr-1" /> : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
-                {allVisibleSelected ? 'Avmarkera' : 'Välj alla'}
-              </button>
-              <div className="w-px h-4 bg-white/20 flex-shrink-0" />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    disabled={selectedApplicationIds.size === 0}
-                    onMouseDown={(e) => e.preventDefault()}
-                    className={`flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 outline-none focus:outline-none md:hover:bg-white/10 md:hover:text-white transition-all duration-200 rounded-md ${
-                      selectedApplicationIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-white'
-                    }`}
-                  >
-                    <ArrowDown className="h-3.5 w-3.5 mr-1" />
-                    Flytta till
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
-                  {activeStages.map(stage => {
-                    const settings = stageSettings[stage];
-                    const Icon = getJobStageIconByName(settings?.iconName || 'inbox');
-                    return (
-                      <DropdownMenuItem 
-                        key={stage}
-                        onClick={() => bulkMoveToStage(stage)}
-                        className="text-white hover:text-white cursor-pointer"
-                      >
-                        <div 
-                          className="h-2 w-2 rounded-full mr-2 flex-shrink-0" 
-                          style={{ backgroundColor: settings?.color || '#0EA5E9' }} 
-                        />
-                        <Icon className="h-4 w-4 mr-2 text-white/70" />
-                        <span className="truncate">{settings?.label || stage}</span>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <SelectionActionBar
+              selectedCount={selectedApplicationIds.size}
+              totalCount={allVisibleApplicationIds.length}
+              allSelected={allVisibleSelected}
+              onToggleAll={toggleAllVisible}
+              disabled={selectedApplicationIds.size === 0}
+              stages={activeStages}
+              stageSettings={stageSettings}
+              onMoveToStage={bulkMoveToStage}
+            />
           </div>
         )}
       </div>
