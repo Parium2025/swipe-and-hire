@@ -8,8 +8,7 @@ import { cn } from '@/lib/utils';
 import { useInterviews, Interview } from '@/hooks/useInterviews';
 import { format, isToday, isTomorrow } from 'date-fns';
 import { sv } from 'date-fns/locale';
-
-const GRADIENTS_INTERVIEWS = 'from-amber-500/90 via-orange-500/80 to-orange-600/90';
+import { GRADIENTS } from './dashboardConstants';
 
 const formatInterviewDate = (dateStr: string): string => {
   const date = new Date(dateStr);
@@ -60,7 +59,7 @@ export const EmployerInterviewsCard = memo(() => {
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS_INTERVIEWS} border-0 shadow-lg dashboard-card-height`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-4 h-full">
           <div className="flex items-center gap-2 mb-4">
@@ -74,7 +73,7 @@ export const EmployerInterviewsCard = memo(() => {
   }
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS_INTERVIEWS} border-0 shadow-lg dashboard-card-height`}>
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
 
