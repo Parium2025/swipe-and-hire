@@ -6,8 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Newspaper, Clock, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useHrNews } from '@/hooks/useHrNews';
-
-const GRADIENTS_NEWS = 'from-emerald-500/90 via-emerald-600/80 to-teal-700/90';
+import { GRADIENTS } from './dashboardConstants';
 
 // Format relative time for news
 const formatNewsTime = (publishedAt: string | null): string => {
@@ -63,7 +62,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS_NEWS} border-0 shadow-lg dashboard-card-height`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
         <CardContent className="relative p-6 h-full">
           <div className="flex items-center gap-2 mb-4">
@@ -80,7 +79,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
 
   return (
     <Card
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS_NEWS} border-0 shadow-lg dashboard-card-height touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
