@@ -1,59 +1,14 @@
 import { memo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, X, AlertCircle } from 'lucide-react';
-import { Geolocation } from '@capacitor/geolocation';
-import { Capacitor } from '@capacitor/core';
+import { checkGpsPermission, requestGpsPermission, isNativeApp } from '@/lib/gpsUtils';
 import GpsHelpModal from '@/components/GpsHelpModal';
 
-const GPS_PROMPT_DELAY_MS = 3000; // Show after 3 seconds
+const GPS_PROMPT_DELAY_MS = 3000;
 
-// Dismissed state that survives SPA navigation (module stays loaded) but resets on full page reload
+// Dismissed state that survives SPA navigation but resets on full page reload
 let gpsPromptDismissedUntilReload = false;
-// Track if user has seen and expanded the prompt this session (to know whether to minimize on navigation)
 let gpsPromptHasBeenShown = false;
-
-// Check if running as native app
-const isNativeApp = (): boolean => Capacitor.isNativePlatform();
-
-// Unified GPS permission check for both native and web
-const checkGpsPermission = async (): Promise<'granted' | 'denied' | 'prompt'> => {
-  try {
-    if (isNativeApp()) {
-      const status = await Geolocation.checkPermissions();
-      if (status.location === 'granted' || status.coarseLocation === 'granted') {
-        return 'granted';
-      }
-      if (status.location === 'denied') {
-        return 'denied';
-      }
-      return 'prompt';
-    }
-    
-    // Browser API
-    if ('permissions' in navigator) {
-      const result = await navigator.permissions.query({ name: 'geolocation' });
-      return result.state as 'granted' | 'denied' | 'prompt';
-    }
-    
-    return 'prompt';
-  } catch {
-    return 'prompt';
-  }
-};
-
-// Request GPS permission - native shows OS dialog, web triggers on getCurrentPosition
-const requestGpsPermission = async (): Promise<boolean> => {
-  try {
-    if (isNativeApp()) {
-      const status = await Geolocation.requestPermissions();
-      return status.location === 'granted' || status.coarseLocation === 'granted';
-    }
-    // On web, permission is requested when getCurrentPosition is called
-    return true;
-  } catch {
-    return false;
-  }
-};
 
 interface GpsPromptProps {
   onEnableGps?: () => void;
@@ -61,18 +16,16 @@ interface GpsPromptProps {
 
 const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
   const [visible, setVisible] = useState(false);
-  const [expanded, setExpanded] = useState(false); // Always start as icon, user expands manually
+  const [expanded, setExpanded] = useState(false);
   const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
   const [showHelpModal, setShowHelpModal] = useState(false);
 
-  // On mount, if prompt was previously shown but not dismissed, start minimized
   useEffect(() => {
     if (gpsPromptHasBeenShown && !gpsPromptDismissedUntilReload) {
       setExpanded(false);
     }
   }, []);
 
-  // Check GPS permission on mount and listen for changes
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let permissionStatus: PermissionStatus | null = null;
@@ -81,32 +34,25 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
       const status = await checkGpsPermission();
       setGpsStatus(status);
       
-      // If already granted - NEVER show our prompt
       if (status === 'granted') {
         setVisible(false);
         return;
       }
       
-      // If denied
       if (status === 'denied') {
         if (!gpsPromptDismissedUntilReload) {
           setVisible(true);
           gpsPromptHasBeenShown = true;
-          // Always start minimized (icon only)
         }
         return;
       }
       
-      // If prompt (browser hasn't asked yet):
-      // Wait 3 seconds, then show our custom prompt
       if (status === 'prompt' && !gpsPromptDismissedUntilReload) {
         timeoutId = setTimeout(() => {
-          // Double-check permission hasn't changed during the wait
           checkGpsPermission().then(currentStatus => {
             if (currentStatus === 'prompt') {
               setVisible(true);
               gpsPromptHasBeenShown = true;
-              // Always start minimized (icon only)
             } else if (currentStatus === 'granted') {
               setGpsStatus('granted');
               setVisible(false);
@@ -117,7 +63,6 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
       }
     };
     
-    // Setup permission change listener (browser API)
     const setupPermissionListener = async () => {
       if ('permissions' in navigator && !isNativeApp()) {
         try {
@@ -129,7 +74,6 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
               gpsPromptDismissedUntilReload = false;
               setGpsStatus('granted');
               setVisible(false);
-              // Cancel any pending timeout
               if (timeoutId) {
                 clearTimeout(timeoutId);
                 timeoutId = null;
@@ -141,9 +85,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
           };
           
           permissionStatus.addEventListener('change', handleChange);
-        } catch {
-          // Permission API not supported
-        }
+        } catch { /* Permission API not supported */ }
       }
     };
     
@@ -151,9 +93,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     setupPermissionListener();
     
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
 
@@ -163,7 +103,6 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
   };
 
   const handleEnableGps = async () => {
-    // If GPS is denied, show help modal instead of trying again
     if (gpsStatus === 'denied') {
       setShowHelpModal(true);
       return;
@@ -171,7 +110,6 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     
     handleDismiss();
     
-    // On native, use Capacitor to request permission first
     if (isNativeApp()) {
       const granted = await requestGpsPermission();
       if (granted) {
@@ -179,7 +117,6 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('granted');
         onEnableGps?.();
-        // Don't reload - let the app handle the state update naturally
       } else {
         console.log('Native GPS permission denied');
         gpsPromptDismissedUntilReload = false;
@@ -189,18 +126,15 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
       return;
     }
     
-    // On web, trigger GPS permission request via getCurrentPosition
     navigator.geolocation.getCurrentPosition(
       () => {
         console.log('GPS enabled successfully');
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('granted');
         onEnableGps?.();
-        // Don't reload - let the app handle the state update naturally
       },
       (error) => {
         console.log('GPS permission denied:', error.message);
-        // User denied - update status and show help
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('denied');
         setVisible(true);
@@ -209,13 +143,9 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     );
   };
 
-  // Don't render if GPS is already granted
-  if (gpsStatus === 'granted') {
-    return null;
-  }
+  if (gpsStatus === 'granted') return null;
 
   const isDenied = gpsStatus === 'denied';
-
 
   return (
     <>
@@ -223,7 +153,6 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
       
       <AnimatePresence mode="wait">
         {visible && !expanded && (
-          // Minimized state - just the icon
           <motion.button
             key="minimized"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -239,7 +168,6 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
         )}
         
         {visible && expanded && (
-          // Expanded state - full notification
           <motion.div
             key="expanded"
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -255,9 +183,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
             }`}>
               <div className="flex items-start gap-3">
                 <div className={`p-2 rounded-xl shrink-0 ${
-                  isDenied 
-                    ? 'bg-amber-500/20' 
-                    : 'bg-teal-500/20'
+                  isDenied ? 'bg-amber-500/20' : 'bg-teal-500/20'
                 }`}>
                   {isDenied ? (
                     <AlertCircle className="h-5 w-5 text-amber-400" />
