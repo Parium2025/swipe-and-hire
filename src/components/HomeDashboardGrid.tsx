@@ -1,4 +1,5 @@
 import { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -357,64 +358,36 @@ const StatsCard = memo(({ isPaused, setIsPaused }: { isPaused: boolean; setIsPau
     staleTime: Infinity,
   });
 
-  // Real-time subscriptions for instant updates
+  // Single consolidated realtime channel instead of 3 separate WebSocket connections
   useEffect(() => {
     if (!user?.id) return;
     
-    // Subscribe to job_applications changes (new applications, viewed status changes)
-    const applicationsChannel = supabase
-      .channel('stats-applications')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'job_applications',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['new-applications-count'] });
-        }
+    const statsChannel = supabase
+      .channel(`employer-stats-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' },
+        () => { queryClient.invalidateQueries({ queryKey: ['new-applications-count'] }); }
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'saved_jobs' },
+        () => { queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] }); }
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
+        () => { queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] }); }
       )
       .subscribe();
+
+    // Also refresh on visibility change (handles stale data from sleep/tab switch)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        queryClient.invalidateQueries({ queryKey: ['new-applications-count'] });
+        queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] });
+        queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
     
-    // Subscribe to saved_jobs changes
-    const savedJobsChannel = supabase
-      .channel('stats-saved-jobs')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'saved_jobs',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] });
-        }
-      )
-      .subscribe();
-    
-    // Subscribe to messages changes
-    const messagesChannel = supabase
-      .channel('stats-messages')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
-          filter: `recipient_id=eq.${user.id}`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
-        }
-      )
-      .subscribe();
-    
-    // Cleanup subscriptions on unmount
     return () => {
-      supabase.removeChannel(applicationsChannel);
-      supabase.removeChannel(savedJobsChannel);
-      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(statsChannel);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [user?.id, queryClient]);
 
@@ -566,65 +539,14 @@ const NotesCard = memo(() => {
   const [notesEditor, setNotesEditor] = useState<Editor | null>(null);
   const [expandedEditor, setExpandedEditor] = useState<Editor | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const expandedScrollRef = useRef<HTMLDivElement>(null);
-  const expandedTrackRef = useRef<HTMLDivElement>(null);
-  const expandedThumbRef = useRef<HTMLDivElement>(null);
-  const expandedRafRef = useRef<number>(0);
+
+  // Use extracted scrollbar hook (same as JobSeekerNotesCard)
+  const { scrollRef: expandedScrollRef, trackRef: expandedTrackRef, thumbRef: expandedThumbRef, update: updateExpandedScrollbar } = useCustomScrollbar(isExpanded);
 
   const handleEditorReady = useCallback((editor: Editor) => { setNotesEditor(editor); }, []);
   const handleExpandedEditorReady = useCallback((editor: Editor) => { setExpandedEditor(editor); }, []);
   const handleExpand = useCallback(() => { setIsExpanded(true); }, []);
   const handleCloseExpanded = useCallback(() => { setIsExpanded(false); }, []);
-
-  // Expanded scrollbar tracking
-  const updateExpandedScrollbar = useCallback(() => {
-    const el = expandedScrollRef.current;
-    const track = expandedTrackRef.current;
-    const thumb = expandedThumbRef.current;
-    if (!el || !track || !thumb) return;
-    const { scrollTop, scrollHeight, clientHeight } = el;
-    const hasScroll = scrollHeight > clientHeight + 5;
-    track.style.display = hasScroll ? '' : 'none';
-    if (!hasScroll) return;
-    const thumbH = Math.max((clientHeight / scrollHeight) * 100, 20);
-    const maxScroll = scrollHeight - clientHeight;
-    const thumbTop = maxScroll > 0 ? (scrollTop / maxScroll) * (100 - thumbH) : 0;
-    thumb.style.transition = 'top 0.15s ease-out, height 0.15s ease-out';
-    thumb.style.top = `${thumbTop}%`;
-    thumb.style.height = `${thumbH}%`;
-  }, []);
-
-  // Attach scroll listener — retry until element is mounted
-  useEffect(() => {
-    if (!isExpanded) return;
-    let attempts = 0;
-    let scrollHandler: (() => void) | null = null;
-    let attachedEl: HTMLElement | null = null;
-
-    const tryAttach = () => {
-      const el = expandedScrollRef.current;
-      if (!el) {
-        if (attempts++ < 20) setTimeout(tryAttach, 50);
-        return;
-      }
-      attachedEl = el;
-      scrollHandler = () => {
-        cancelAnimationFrame(expandedRafRef.current);
-        expandedRafRef.current = requestAnimationFrame(updateExpandedScrollbar);
-      };
-      el.addEventListener('scroll', scrollHandler, { passive: true });
-      updateExpandedScrollbar();
-      setTimeout(updateExpandedScrollbar, 200);
-    };
-    tryAttach();
-
-    return () => {
-      if (attachedEl && scrollHandler) {
-        attachedEl.removeEventListener('scroll', scrollHandler);
-      }
-      cancelAnimationFrame(expandedRafRef.current);
-    };
-  }, [isExpanded, updateExpandedScrollbar]);
 
   // Update scrollbar when content changes in expanded mode
   useEffect(() => {
