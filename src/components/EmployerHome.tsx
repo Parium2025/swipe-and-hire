@@ -7,7 +7,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Briefcase, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { isJobExpiredCheck } from '@/lib/date';
 import WeatherEffects from '@/components/WeatherEffects';
 import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
@@ -126,13 +125,6 @@ const EmployerHome = memo(() => {
   useEffect(() => {
     fetchSystemHealth();
   }, [fetchSystemHealth]);
-
-  // Calculate basic stats for context
-  const stats = useMemo(() => {
-    const activeJobs = jobs.filter(j => j.is_active && !isJobExpiredCheck(j.created_at, j.expires_at));
-    const pendingApplications = activeJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0);
-    return { activeJobs: activeJobs.length, pendingApplications };
-  }, [jobs]);
 
   const firstName = profile?.first_name || 'du';
   
