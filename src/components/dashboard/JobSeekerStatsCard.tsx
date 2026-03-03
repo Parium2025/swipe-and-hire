@@ -65,6 +65,8 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     },
     enabled: !!user?.id,
     staleTime: Infinity,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: true,
   });
   
   const { data: interviewsCount = cachedStats['interviews'] ?? 0, isSuccess: intSuccess } = useQuery<number>({
@@ -84,6 +86,8 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     },
     enabled: !!user?.id,
     staleTime: Infinity,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: true,
   });
   
   const { data: savedJobsCount = cachedStats['saved'] ?? 0, isSuccess: savedSuccess } = useQuery<number>({
@@ -101,6 +105,8 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     },
     enabled: !!user?.id,
     staleTime: Infinity,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: true,
   });
 
   const { data: unreadMessagesCount = cachedStats['messages'] ?? 0, isSuccess: msgSuccess } = useQuery<number>({
@@ -119,6 +125,8 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     },
     enabled: !!user?.id,
     staleTime: Infinity,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: true,
   });
 
   const dataReady = appSuccess && intSuccess && savedSuccess && msgSuccess;
@@ -170,6 +178,13 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     { icon: Heart, label: 'Sparade jobb', value: savedJobsCount, description: 'Jobb du sparat', link: '/saved-jobs', emptyHint: 'Spara jobb du gillar' },
     { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden', link: '/messages', emptyHint: 'Inga olästa' },
   ], [applicationsCount, interviewsCount, savedJobsCount, unreadMessagesCount]);
+
+  // Defensive index guard
+  useEffect(() => {
+    if (currentIndex >= statsArray.length && statsArray.length > 0) {
+      setCurrentIndex(0);
+    }
+  }, [statsArray.length, currentIndex]);
 
   const goNext = useCallback(() => {
     setCurrentIndex(prev => (prev + 1) % statsArray.length);
