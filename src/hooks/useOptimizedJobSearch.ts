@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo, useEffect, useCallback, useRef } from 'react';
 import { getTimeRemaining } from '@/lib/date';
@@ -411,9 +412,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         const toKeep = keys.slice(-500);
         const trimmed: typeof merged = {};
         toKeep.forEach(k => { trimmed[k] = merged[k]; });
-        localStorage.setItem(COMPANY_CACHE_KEY, JSON.stringify(trimmed));
+        safeSetItem(COMPANY_CACHE_KEY, JSON.stringify(trimmed));
       } else {
-        localStorage.setItem(COMPANY_CACHE_KEY, JSON.stringify(merged));
+        safeSetItem(COMPANY_CACHE_KEY, JSON.stringify(merged));
       }
     } catch {
       // Storage full - ignore

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -65,7 +66,7 @@ export const useEmployerBackgroundSync = () => {
       .limit(100);
 
     if (!error && data) {
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         jobs: data,
         scope: 'personal',
         orgId,
@@ -101,7 +102,7 @@ export const useEmployerBackgroundSync = () => {
         job_title: interview.job_postings?.title || 'Okänd tjänst',
       }));
 
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         interviews: result,
         timestamp: Date.now(),
       }));
@@ -161,7 +162,7 @@ export const useEmployerBackgroundSync = () => {
         };
       });
 
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items,
         timestamp: Date.now(),
       }));
@@ -191,7 +192,7 @@ export const useEmployerBackgroundSync = () => {
       .limit(50);
 
     if (!error && conversations) {
-      localStorage.setItem(CONVERSATIONS_CACHE_KEY, JSON.stringify({
+      safeSetItem(CONVERSATIONS_CACHE_KEY, JSON.stringify({
         userId,
         conversations,
         timestamp: Date.now(),

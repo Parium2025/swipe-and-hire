@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, memo } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 
 interface AnimatedCounterProps {
@@ -21,7 +22,7 @@ const getCachedValue = (key: string): number | null => {
 
 const setCachedValue = (key: string, value: number): void => {
   try {
-    localStorage.setItem(`counter_${key}`, value.toString());
+    safeSetItem(`counter_${key}`, value.toString());
   } catch {
     // Ignore storage errors
   }

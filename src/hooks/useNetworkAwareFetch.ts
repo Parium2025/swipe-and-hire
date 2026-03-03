@@ -1,4 +1,5 @@
 import { useCallback, useRef } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 
 /**
  * 🚀 NETWORK-AWARE FETCH UTILITIES
@@ -82,7 +83,7 @@ export const useNetworkAwareFetch = <T>(cacheKey: string) => {
   
   const setCache = useCallback((data: T) => {
     try {
-      localStorage.setItem(cacheKey, JSON.stringify(data));
+      safeSetItem(cacheKey, JSON.stringify(data));
     } catch {
       // Ignore storage errors
     }

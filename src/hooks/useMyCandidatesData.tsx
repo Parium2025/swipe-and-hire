@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -82,7 +83,7 @@ function writeMyCandidatesCache(userId: string, items: MyCandidateData[]): void 
       items: items.slice(0, 100), // Max 100 to save space
       timestamp: Date.now(),
     };
-    localStorage.setItem(key, JSON.stringify(cached));
+    safeSetItem(key, JSON.stringify(cached));
   } catch {
     // Storage full
   }
@@ -1020,7 +1021,7 @@ export function useMyCandidatesData(searchQuery: string = '') {
           const cache = raw ? JSON.parse(raw) : { ratings: {}, timestamp: Date.now() };
           cache.ratings[targetApplicantId] = rating;
           cache.timestamp = Date.now();
-          localStorage.setItem(cacheKey, JSON.stringify(cache));
+          safeSetItem(cacheKey, JSON.stringify(cache));
         } catch {
           // Ignore localStorage errors
         }

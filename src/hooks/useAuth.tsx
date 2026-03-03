@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -681,7 +682,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         try {
           if (typeof window !== 'undefined') {
-            localStorage.setItem(CACHED_PROFILE_KEY, JSON.stringify({
+            safeSetItem(CACHED_PROFILE_KEY, JSON.stringify({
               id: processedProfile.id,
               user_id: processedProfile.user_id,
               first_name: processedProfile.first_name,
@@ -701,7 +702,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Cache organization_id early for faster queries
         if (profileData.organization_id) {
           try {
-            localStorage.setItem('org_id', profileData.organization_id);
+            safeSetItem('org_id', profileData.organization_id);
           } catch (e) {
             console.warn('Failed to cache org_id:', e);
           }
@@ -741,7 +742,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // If profile didn't have org_id but role does, fetch organization
         if (!profileData?.organization_id && roleData?.organization_id) {
           try {
-            localStorage.setItem('org_id', roleData.organization_id);
+            safeSetItem('org_id', roleData.organization_id);
           } catch (e) {
             console.warn('Failed to cache org_id from role:', e);
           }

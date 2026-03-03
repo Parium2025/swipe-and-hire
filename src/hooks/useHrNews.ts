@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 
 export interface HrNewsItem {
   id: string;
@@ -59,7 +60,7 @@ function readCache(): HrNewsItem[] | null {
 function writeCache(items: HrNewsItem[]): void {
   try {
     const cached: CachedData = { items, timestamp: Date.now() };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
+    safeSetItem(CACHE_KEY, JSON.stringify(cached));
   } catch {
     // Storage full
   }

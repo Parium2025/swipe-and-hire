@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -125,7 +126,7 @@ export function useMessagesBackgroundSync() {
           
           // Cache profile data separately for instant access
           try {
-            localStorage.setItem(PROFILE_IMAGES_CACHE_KEY, JSON.stringify({
+            safeSetItem(PROFILE_IMAGES_CACHE_KEY, JSON.stringify({
               profiles: Object.fromEntries(profileMap),
               timestamp: Date.now(),
             }));
@@ -146,7 +147,7 @@ export function useMessagesBackgroundSync() {
 
       // Update localStorage cache
       try {
-        localStorage.setItem(MESSAGES_CACHE_KEY, JSON.stringify({
+        safeSetItem(MESSAGES_CACHE_KEY, JSON.stringify({
           inbox: inboxWithProfiles,
           sent: sentWithProfiles,
           timestamp: Date.now(),

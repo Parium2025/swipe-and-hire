@@ -1,4 +1,5 @@
 import { memo, useMemo, useEffect } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { Send, Calendar, Heart, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,7 +20,7 @@ const writeCachedStats = (key: string, value: number) => {
   try {
     const current = readCachedStats();
     current[key] = value;
-    localStorage.setItem(STATS_CACHE_KEY, JSON.stringify(current));
+    safeSetItem(STATS_CACHE_KEY, JSON.stringify(current));
   } catch {}
 };
 

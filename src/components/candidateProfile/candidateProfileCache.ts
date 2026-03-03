@@ -2,6 +2,7 @@
  * Candidate Profile Cache — persistent localStorage + in-memory caching
  * for immutable application data (questions, summaries) and mutable data (notes).
  */
+import { safeSetItem } from '@/lib/safeStorage';
 
 export interface CandidateNote {
   id: string;
@@ -47,13 +48,7 @@ const readPersistedCache = <T,>(storageKey: string): Record<string, PersistedCac
 
 const writePersistedCache = <T,>(storageKey: string, cache: Record<string, PersistedCacheEntry<T>>) => {
   if (!isBrowser()) return;
-  // Use safeSetItem for auto-eviction on QuotaExceededError
-  import('@/lib/safeStorage').then(({ safeSetItem }) => {
-    safeSetItem(storageKey, JSON.stringify(cache));
-  }).catch(() => {
-    // Fallback: try direct write
-    try { window.localStorage.setItem(storageKey, JSON.stringify(cache)); } catch { /* noop */ }
-  });
+  safeSetItem(storageKey, JSON.stringify(cache));
 };
 
 export const getPersistedCacheValue = <T,>(storageKey: string, cacheKey: string): T | null => {

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,7 +32,7 @@ function readActivityCache(applicantId: string): CandidateActivity[] | null {
 
 function writeActivityCache(applicantId: string, data: CandidateActivity[]): void {
   try {
-    localStorage.setItem(ACTIVITY_CACHE_KEY + applicantId, JSON.stringify({ data: data.slice(0, 50), timestamp: Date.now() }));
+    safeSetItem(ACTIVITY_CACHE_KEY + applicantId, JSON.stringify({ data: data.slice(0, 50), timestamp: Date.now() }));
   } catch { /* storage full */ }
 }
 

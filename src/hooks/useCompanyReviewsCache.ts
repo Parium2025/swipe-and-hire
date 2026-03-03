@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useCallback, useEffect } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 
 export interface CachedReview {
   id: string;
@@ -40,7 +41,7 @@ const getLocalCache = (companyId: string): { data: CompanyReviewsData; timestamp
 
 const setLocalCache = (companyId: string, data: CompanyReviewsData) => {
   try {
-    localStorage.setItem(`${CACHE_KEY}_${companyId}`, JSON.stringify({
+    safeSetItem(`${CACHE_KEY}_${companyId}`, JSON.stringify({
       data,
       timestamp: Date.now(),
     }));

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { preloadWeatherLocation } from './useWeather';
@@ -188,7 +189,7 @@ export const useEagerRatingsPreload = () => {
       });
 
       // Spara ALLTID - även tom map (visar att vi har hämtat)
-      localStorage.setItem(RATINGS_CACHE_PREFIX + userId, JSON.stringify({
+      safeSetItem(RATINGS_CACHE_PREFIX + userId, JSON.stringify({
         ratings: ratingsMap,
         timestamp: Date.now()
       }));
@@ -220,7 +221,7 @@ export const useEagerRatingsPreload = () => {
         .order('order_index', { ascending: true });
 
       if (!stageError && stageSettings) {
-        localStorage.setItem(STAGE_SETTINGS_CACHE_KEY + userId, JSON.stringify({
+        safeSetItem(STAGE_SETTINGS_CACHE_KEY + userId, JSON.stringify({
           settings: stageSettings,
           timestamp: Date.now()
         }));
@@ -267,7 +268,7 @@ export const useEagerRatingsPreload = () => {
                 });
 
                 if (changed) {
-                  localStorage.setItem(
+                  safeSetItem(
                     snapshotKey,
                     JSON.stringify({
                       items: patchedItems,
@@ -310,7 +311,7 @@ export const useEagerRatingsPreload = () => {
                 }));
 
                 try {
-                  localStorage.setItem(
+                  safeSetItem(
                     snapshotKey,
                     JSON.stringify({
                       items: patchedItems,
@@ -328,7 +329,7 @@ export const useEagerRatingsPreload = () => {
                     const existingRaw = localStorage.getItem(RATINGS_CACHE_PREFIX + userId);
                     const existing: RatingsCacheData | null = existingRaw ? JSON.parse(existingRaw) : null;
                     const merged = { ...(existing?.ratings || {}), ...fetchedRatings };
-                    localStorage.setItem(
+                    safeSetItem(
                       RATINGS_CACHE_PREFIX + userId,
                       JSON.stringify({ ratings: merged, timestamp: Date.now() })
                     );
@@ -411,7 +412,7 @@ export const useEagerRatingsPreload = () => {
 
         // Spara cache även här så /candidates kan merge:a direkt i readSnapshot
         try {
-          localStorage.setItem(
+          safeSetItem(
             RATINGS_CACHE_PREFIX + userId,
             JSON.stringify({ ratings: ratingsMap, timestamp: Date.now() })
           );
@@ -431,7 +432,7 @@ export const useEagerRatingsPreload = () => {
     }));
 
     // 5) Spara snapshot
-    localStorage.setItem(
+    safeSetItem(
       snapshotKey,
       JSON.stringify({
         items,
@@ -484,7 +485,7 @@ export const useEagerRatingsPreload = () => {
     const { data, error } = await query.limit(100);
     
     if (!error && data) {
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items: data,
         timestamp: Date.now(),
       }));
@@ -518,7 +519,7 @@ export const useEagerRatingsPreload = () => {
       .eq('user_id', userId);
 
     if (!memberData || memberData.length === 0) {
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items: [],
         timestamp: Date.now(),
       }));
@@ -543,7 +544,7 @@ export const useEagerRatingsPreload = () => {
       .limit(50);
 
     if (!error && conversations) {
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items: conversations,
         timestamp: Date.now(),
       }));
@@ -591,7 +592,7 @@ export const useEagerRatingsPreload = () => {
         job_title: interview.job_postings?.title || 'Okänd tjänst',
       }));
 
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items,
         timestamp: Date.now(),
       }));
@@ -626,7 +627,7 @@ export const useEagerRatingsPreload = () => {
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items: data,
         timestamp: Date.now(),
       }));
