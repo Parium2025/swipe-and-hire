@@ -9,7 +9,6 @@ import {
   setCachedWeather,
   getWeatherInfo,
   fetchCurrentWeather,
-  getCityName,
   getLocationByIP,
   geocodeCity,
   getTimeBasedEmoji,
@@ -87,6 +86,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       const { temperature, feelsLike, weatherCode, isNight } = result;
       // Use server-cached city if we don't have one yet
       const resolvedCity = city || result.cachedCity || '';
+      
+      // Update location cache with server-provided city if we didn't have one
+      if (resolvedCity && !city && locationRef.current) {
+        locationRef.current = { ...locationRef.current, city: resolvedCity };
+        setCachedLocation(locationRef.current);
+      }
+      
       const info = getWeatherInfo(weatherCode, isNight);
       
       const weatherData = {
@@ -113,7 +119,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   }, [updateWeather]);
 
   const updateLocation = useCallback(async (newLat: number, newLon: number, knownCity: string | null, source: 'gps' | 'ip' | 'fallback' | 'background') => {
-    const city = knownCity || await getCityName(newLat, newLon);
+    // City is resolved server-side by the edge function (fetchCurrentWeather returns cachedCity).
+    // We pass knownCity as a hint; fetchWeatherOnly will use the server-cached city if knownCity is empty.
+    const city = knownCity || '';
     const newLocation: CachedLocation = { lat: newLat, lon: newLon, city, source: source === 'background' ? 'gps' : source, timestamp: Date.now() };
     setCachedLocation(newLocation);
     locationRef.current = newLocation;
@@ -158,18 +166,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     if (gpsResult && mountedRef.current) {
       console.log(`🛰️ GPS coordinates: ${gpsResult.lat.toFixed(6)}, ${gpsResult.lon.toFixed(6)}`);
       
-      const freshCity = await getCityName(gpsResult.lat, gpsResult.lon);
-      
-      if (freshCity) {
-        console.log(`📍 Reverse geocoding result: "${freshCity}"`);
-        await updateLocation(gpsResult.lat, gpsResult.lon, freshCity, 'gps');
-        return;
-      }
-      
+      // Don't call getCityName directly — the edge function (fetchCurrentWeather)
+      // already returns a cached city via server-side reverse geocoding.
+      // Calling Nominatim from each client would hit its 1 req/s rate limit at scale.
       const cached = locationRef.current || getCachedLocation();
-      const cityFallback = cached?.source === 'gps' ? cached.city : '';
-      console.log(`⚠️ Reverse geocoding failed, using GPS coords with fallback city: "${cityFallback}"`);
-      await updateLocation(gpsResult.lat, gpsResult.lon, cityFallback || null, 'gps');
+      const cityHint = cached?.city || '';
+      await updateLocation(gpsResult.lat, gpsResult.lon, cityHint || null, 'gps');
       return;
     }
 
@@ -263,8 +265,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
             console.log(`📍 GPS watchPosition: moved ${distance.toFixed(2)}km - updating!`);
           }
           
-          const city = await getCityName(newLat, newLon);
-          await updateLocation(newLat, newLon, city, 'gps');
+          // Don't call getCityName from client — edge function provides city server-side
+          const cityHint = cached?.city || '';
+          await updateLocation(newLat, newLon, cityHint || null, 'gps');
         },
         (error) => {
           console.warn('GPS watchPosition error:', error.message);
@@ -340,8 +343,8 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
   });
 
   if (gpsResult) {
-    const city = await getCityName(gpsResult.lat, gpsResult.lon);
-    location = { ...gpsResult, city, source: 'gps', timestamp: Date.now() };
+    // City will be resolved server-side when we fetch weather below
+    location = { ...gpsResult, city: '', source: 'gps', timestamp: Date.now() };
     setCachedLocation(location);
   }
 
@@ -359,7 +362,14 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
 
   if (location) {
     try {
-      const { temperature, feelsLike, weatherCode, isNight } = await fetchCurrentWeather(location.lat, location.lon);
+      const result = await fetchCurrentWeather(location.lat, location.lon);
+      const { temperature, feelsLike, weatherCode, isNight, cachedCity } = result;
+      // Use server-provided city, update location cache with resolved city
+      const resolvedCity = cachedCity || location.city || '';
+      if (resolvedCity && !location.city) {
+        location = { ...location, city: resolvedCity };
+        setCachedLocation(location);
+      }
       const info = getWeatherInfo(weatherCode, isNight);
       setCachedWeather({
         temperature,
@@ -367,7 +377,7 @@ export const preloadWeatherLocation = async (): Promise<CachedLocation | null> =
         weatherCode,
         description: info.description,
         emoji: info.emoji,
-        city: location.city,
+        city: resolvedCity,
         isNight,
       });
     } catch (err) {
