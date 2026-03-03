@@ -105,7 +105,10 @@ let contentType = '';
         } else if (signedUrlData?.signedUrl) {
           console.log('Got signed URL, downloading document...');
 
-          const docResponse = await fetch(signedUrlData.signedUrl);
+          const docController = new AbortController();
+          const docTimeoutId = setTimeout(() => docController.abort(), 30000); // 30s timeout for document download
+          const docResponse = await fetch(signedUrlData.signedUrl, { signal: docController.signal });
+          clearTimeout(docTimeoutId);
 
           if (docResponse.ok) {
             contentType = docResponse.headers.get('content-type') || '';
@@ -317,6 +320,8 @@ VIKTIGT:
 - Om osäker, luta åt att markera som icke-CV (bättre att be om rätt dokument än att analysera fel)
 - Skriv rejection_reason på svenska, professionellt och hjälpsamt`;
 
+    const aiController = new AbortController();
+    const aiTimeoutId = setTimeout(() => aiController.abort(), 60000); // 60s timeout for AI
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -331,7 +336,9 @@ VIKTIGT:
         ],
         max_completion_tokens: 2000,
       }),
+      signal: aiController.signal,
     });
+    clearTimeout(aiTimeoutId);
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
