@@ -47,11 +47,13 @@ const readPersistedCache = <T,>(storageKey: string): Record<string, PersistedCac
 
 const writePersistedCache = <T,>(storageKey: string, cache: Record<string, PersistedCacheEntry<T>>) => {
   if (!isBrowser()) return;
-  try {
-    window.localStorage.setItem(storageKey, JSON.stringify(cache));
-  } catch {
-    // Ignore storage errors silently
-  }
+  // Use safeSetItem for auto-eviction on QuotaExceededError
+  import('@/lib/safeStorage').then(({ safeSetItem }) => {
+    safeSetItem(storageKey, JSON.stringify(cache));
+  }).catch(() => {
+    // Fallback: try direct write
+    try { window.localStorage.setItem(storageKey, JSON.stringify(cache)); } catch { /* noop */ }
+  });
 };
 
 export const getPersistedCacheValue = <T,>(storageKey: string, cacheKey: string): T | null => {

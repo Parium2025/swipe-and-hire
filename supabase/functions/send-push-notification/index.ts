@@ -103,13 +103,17 @@ async function getAccessToken(credentials: ServiceAccountCredentials): Promise<s
   const jwt = `${signatureInput}.${signature}`;
 
   // Exchange JWT for access token
+  const tokenController = new AbortController();
+  const tokenTimeoutId = setTimeout(() => tokenController.abort(), 15000); // 15s timeout
   const tokenResponse = await fetch(credentials.token_uri, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+    signal: tokenController.signal,
   });
+  clearTimeout(tokenTimeoutId);
 
   if (!tokenResponse.ok) {
     const errorText = await tokenResponse.text();
@@ -239,6 +243,8 @@ Deno.serve(async (req) => {
           },
         };
 
+        const fcmController = new AbortController();
+        const fcmTimeoutId = setTimeout(() => fcmController.abort(), 15000); // 15s timeout
         const response = await fetch(
           `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
           {
@@ -248,8 +254,10 @@ Deno.serve(async (req) => {
               Authorization: `Bearer ${accessToken}`,
             },
             body: JSON.stringify(fcmPayload),
+            signal: fcmController.signal,
           }
         );
+        clearTimeout(fcmTimeoutId);
 
         const result = await response.json();
 

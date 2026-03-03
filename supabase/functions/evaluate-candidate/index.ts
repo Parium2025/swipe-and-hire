@@ -24,11 +24,15 @@ async function fetchWithRetry(
   url: string,
   options: RequestInit,
   maxRetries = 3,
-  baseDelayMs = 1000
+  baseDelayMs = 1000,
+  timeoutMs = 60000
 ): Promise<Response> {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(url, options);
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeoutId);
       if (response.ok || (response.status >= 400 && response.status < 500 && response.status !== 429)) {
         return response;
       }
@@ -40,9 +44,10 @@ async function fetchWithRetry(
       }
       return response;
     } catch (error) {
+      clearTimeout(timeoutId);
       if (attempt < maxRetries) {
         const delay = baseDelayMs * Math.pow(2, attempt) + Math.random() * 500;
-        console.log(`Attempt ${attempt + 1} network error, retrying in ${Math.round(delay)}ms...`);
+        console.log(`Attempt ${attempt + 1} ${error?.name === 'AbortError' ? 'timeout' : 'network error'}, retrying in ${Math.round(delay)}ms...`);
         await new Promise(r => setTimeout(r, delay));
         continue;
       }
@@ -258,7 +263,10 @@ async function analyzeVideoCV(
   }
 
   // Download video (limited to 10MB to avoid memory issues)
-  const videoResponse = await fetch(signedUrlData.signedUrl);
+  const videoController = new AbortController();
+  const videoTimeoutId = setTimeout(() => videoController.abort(), 30000); // 30s timeout
+  const videoResponse = await fetch(signedUrlData.signedUrl, { signal: videoController.signal });
+  clearTimeout(videoTimeoutId);
   if (!videoResponse.ok) {
     console.error('Failed to download video:', videoResponse.status);
     return null;
