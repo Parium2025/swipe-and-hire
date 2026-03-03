@@ -64,20 +64,24 @@ const StarsEffect = memo(() => {
   } | null>(null);
 
   useEffect(() => {
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
     const triggerShootingStar = () => {
       const startX = 5 + Math.random() * 40;
       const startY = 3 + Math.random() * 25;
       const size = 1 + Math.random() * 1.5;
       setShootingStar({ active: true, startX, startY, size });
-      setTimeout(() => setShootingStar(null), 5000);
+      const hideTimeout = setTimeout(() => setShootingStar(null), 5000);
+      timeouts.push(hideTimeout);
     };
     const scheduleNext = () => {
       const delay = 25000 + Math.random() * 25000;
-      return setTimeout(() => { triggerShootingStar(); scheduleNext(); }, delay);
+      const id = setTimeout(() => { triggerShootingStar(); scheduleNext(); }, delay);
+      timeouts.push(id);
     };
     const initialTimeout = setTimeout(triggerShootingStar, 10000 + Math.random() * 10000);
-    const intervalId = scheduleNext();
-    return () => { clearTimeout(initialTimeout); clearTimeout(intervalId); };
+    timeouts.push(initialTimeout);
+    scheduleNext();
+    return () => { timeouts.forEach(clearTimeout); };
   }, []);
 
   return (
@@ -262,18 +266,22 @@ const ThunderEffect = memo(() => {
   const [lightningState, setLightningState] = useState({ position: 50, flash: false });
 
   useEffect(() => {
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
     const flash = () => {
       const newPosition = 10 + Math.random() * 80;
       setLightningState({ position: newPosition, flash: true });
-      setTimeout(() => setLightningState(s => ({ ...s, flash: false })), 100);
+      const hideTimeout = setTimeout(() => setLightningState(s => ({ ...s, flash: false })), 100);
+      timeouts.push(hideTimeout);
     };
     const scheduleNext = () => {
       const delay = 5000 + Math.random() * 5000;
-      return setTimeout(() => { flash(); scheduleNext(); }, delay);
+      const id = setTimeout(() => { flash(); scheduleNext(); }, delay);
+      timeouts.push(id);
     };
     const initialTimeout = setTimeout(flash, 3000);
-    const intervalId = scheduleNext();
-    return () => { clearTimeout(initialTimeout); clearTimeout(intervalId); };
+    timeouts.push(initialTimeout);
+    scheduleNext();
+    return () => { timeouts.forEach(clearTimeout); };
   }, []);
 
   return (

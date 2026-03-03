@@ -16,35 +16,19 @@ export const HomeDashboardGrid = memo(() => {
   // Desktop: behåll 2x2 grid (Nyheter/Stats top, Notes/Interviews bottom)
   const mobileOrder = (
     <>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <EmployerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-      </motion.div>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <EmployerInterviewsCard />
-      </motion.div>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <EmployerNewsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-      </motion.div>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <EmployerNotesCard />
-      </motion.div>
+      <EmployerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <EmployerInterviewsCard />
+      <EmployerNewsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <EmployerNotesCard />
     </>
   );
 
   const desktopOrder = (
     <>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <EmployerNewsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-      </motion.div>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <EmployerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-      </motion.div>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <EmployerNotesCard />
-      </motion.div>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <EmployerInterviewsCard />
-      </motion.div>
+      <EmployerNewsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <EmployerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <EmployerNotesCard />
+      <EmployerInterviewsCard />
     </>
   );
 
