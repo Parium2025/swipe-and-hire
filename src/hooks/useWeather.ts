@@ -83,7 +83,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     try {
       if (showLoading) updateWeather({ isLoading: true });
       
-      const { temperature, feelsLike, weatherCode, isNight } = await fetchCurrentWeather(lat, lon);
+      const result = await fetchCurrentWeather(lat, lon);
+      const { temperature, feelsLike, weatherCode, isNight } = result;
+      // Use server-cached city if we don't have one yet
+      const resolvedCity = city || result.cachedCity || '';
       const info = getWeatherInfo(weatherCode, isNight);
       
       const weatherData = {
@@ -92,7 +95,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         weatherCode,
         description: info.description,
         emoji: info.emoji,
-        city,
+        city: resolvedCity,
         isNight,
       };
       

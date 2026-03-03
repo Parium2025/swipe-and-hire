@@ -123,39 +123,42 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
 
   const dataReady = appSuccess && intSuccess && savedSuccess && msgSuccess;
 
-  // Real-time subscriptions
+  // Single consolidated realtime channel instead of 4 separate WebSocket connections
   useEffect(() => {
     if (!user?.id) return;
     
-    const applicationsChannel = supabase
-      .channel('jobseeker-applications')
+    const invalidateAll = () => {
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+      queryClient.invalidateQueries({ queryKey: ['my-interviews-count'] });
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs-count'] });
+      queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
+    };
+
+    const statsChannel = supabase
+      .channel(`jobseeker-stats-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
         () => { queryClient.invalidateQueries({ queryKey: ['my-applications-count'] }); }
-      ).subscribe();
-    
-    const interviewsChannel = supabase
-      .channel('jobseeker-interviews')
+      )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'interviews', filter: `applicant_id=eq.${user.id}` },
         () => { queryClient.invalidateQueries({ queryKey: ['my-interviews-count'] }); }
-      ).subscribe();
-    
-    const savedChannel = supabase
-      .channel('jobseeker-saved')
+      )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
         () => { queryClient.invalidateQueries({ queryKey: ['saved-jobs-count'] }); }
-      ).subscribe();
-
-    const messagesChannel = supabase
-      .channel('jobseeker-messages')
+      )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
         () => { queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] }); }
-      ).subscribe();
+      )
+      .subscribe();
+
+    // Also refresh on visibility change (handles stale data from sleep/tab switch)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') invalidateAll();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
     
     return () => {
-      supabase.removeChannel(applicationsChannel);
-      supabase.removeChannel(interviewsChannel);
-      supabase.removeChannel(savedChannel);
-      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(statsChannel);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [user?.id, queryClient]);
 

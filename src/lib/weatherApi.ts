@@ -111,21 +111,21 @@ export const getWeatherInfo = (code: number, isNight: boolean): { description: s
   return { description: 'Okänt', emoji: '🌡️' };
 };
 
-// ─── Fetch current weather from Open-Meteo ──────────────
+// ─── Fetch current weather (server-side cache → direct fallback) ─
 
-export const fetchCurrentWeather = async (lat: number, lon: number) => {
-  const res = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code&daily=sunrise,sunset&timezone=auto`
-  );
-  const data = await res.json();
-  const current = data?.current;
+const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+
+/** Parse raw Open-Meteo response into our format */
+const parseWeatherResponse = (data: Record<string, unknown>) => {
+  const current = (data as { current?: Record<string, unknown> })?.current;
   if (!current) throw new Error('Missing current weather data');
   
-  const currentTimeStr = current.time;
+  const currentTimeStr = current.time as string;
   const todayStr = currentTimeStr?.split('T')[0];
-  const dailyIndex = data.daily?.time?.indexOf(todayStr) ?? 0;
-  const sunrise = data.daily?.sunrise?.[dailyIndex];
-  const sunset = data.daily?.sunset?.[dailyIndex];
+  const daily = (data as { daily?: { time?: string[]; sunrise?: string[]; sunset?: string[] } }).daily;
+  const dailyIndex = daily?.time?.indexOf(todayStr) ?? 0;
+  const sunrise = daily?.sunrise?.[dailyIndex];
+  const sunset = daily?.sunset?.[dailyIndex];
   
   let isNight = false;
   if (sunrise && sunset && currentTimeStr) {
@@ -133,11 +133,53 @@ export const fetchCurrentWeather = async (lat: number, lon: number) => {
   }
   
   return {
-    temperature: Math.round(current.temperature_2m),
-    feelsLike: Math.round(current.apparent_temperature),
+    temperature: Math.round(current.temperature_2m as number),
+    feelsLike: Math.round(current.apparent_temperature as number),
     weatherCode: current.weather_code as number,
     isNight,
   };
+};
+
+/**
+ * Fetch weather via server-side edge function cache.
+ * Falls back to direct Open-Meteo if edge function is unavailable.
+ * Also returns city name from server cache when available.
+ */
+export const fetchCurrentWeather = async (lat: number, lon: number): Promise<{
+  temperature: number;
+  feelsLike: number;
+  weatherCode: number;
+  isNight: boolean;
+  cachedCity?: string;
+}> => {
+  // Try server-side cache first
+  if (SUPABASE_PROJECT_ID) {
+    try {
+      const res = await fetch(
+        `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/weather-cache`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lat, lon }),
+          signal: AbortSignal.timeout(5000),
+        }
+      );
+      if (res.ok) {
+        const { weather, city } = await res.json();
+        const parsed = parseWeatherResponse(weather as Record<string, unknown>);
+        return { ...parsed, cachedCity: city || undefined };
+      }
+    } catch {
+      console.warn('Weather cache edge function unavailable, falling back to direct API');
+    }
+  }
+
+  // Direct fallback
+  const res = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code&daily=sunrise,sunset&timezone=auto`
+  );
+  const data = await res.json();
+  return parseWeatherResponse(data);
 };
 
 // ─── Geocoding ───────────────────────────────────────────
@@ -148,80 +190,108 @@ const cleanCityName = (name: string): string => {
   return name.replace(/\s+kommun$/i, '').trim();
 };
 
-/** Reverse geocoding to get city name - with multiple fallback services */
+/** Reverse geocoding to get city name - uses server cache when available, parallel fallbacks otherwise */
 export const getCityName = async (lat: number, lon: number): Promise<string> => {
-  // Try Nominatim first
-  try {
+  // Race Nominatim and BigDataCloud in parallel instead of sequential
+  const nominatim = async (): Promise<string> => {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=sv`,
       { signal: AbortSignal.timeout(5000) }
     );
-    if (response.ok) {
-      const data = await response.json();
-      const city =
-        data.address?.city ||
-        data.address?.town ||
-        data.address?.municipality ||
-        data.address?.village ||
-        data.address?.suburb ||
-        data.address?.county ||
-        '';
-      if (city) return cleanCityName(city);
-    }
-  } catch { /* Try fallback */ }
+    if (!response.ok) throw new Error('not ok');
+    const data = await response.json();
+    const city = data.address?.city || data.address?.town || data.address?.municipality ||
+                 data.address?.village || data.address?.suburb || data.address?.county || '';
+    if (!city) throw new Error('empty');
+    return cleanCityName(city);
+  };
 
-  // Fallback: BigDataCloud
-  try {
+  const bigDataCloud = async (): Promise<string> => {
     const response = await fetch(
       `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=sv`,
       { signal: AbortSignal.timeout(5000) }
     );
-    if (response.ok) {
-      const data = await response.json();
-      const city = data.city || data.locality || data.principalSubdivision || '';
-      if (city) return cleanCityName(city);
-    }
-  } catch { /* Both services failed */ }
+    if (!response.ok) throw new Error('not ok');
+    const data = await response.json();
+    const city = data.city || data.locality || data.principalSubdivision || '';
+    if (!city) throw new Error('empty');
+    return cleanCityName(city);
+  };
 
-  return '';
+  // Race both geocoding services in parallel — first success wins
+  try {
+    const result = await new Promise<string>((resolve, reject) => {
+      let settled = false;
+      let failures = 0;
+      const total = 2;
+      const win = (city: string) => { if (!settled) { settled = true; resolve(city); } };
+      const fail = () => { failures++; if (failures >= total && !settled) { settled = true; reject(); } };
+      nominatim().then(win).catch(fail);
+      bigDataCloud().then(win).catch(fail);
+    });
+    return result;
+  } catch {
+    return '';
+  }
 };
 
-/** IP-based geolocation (no permission required, less accurate) */
+/** IP-based geolocation using Promise.race for parallel requests with timeout */
 export const getLocationByIP = async (): Promise<{ lat: number; lon: number; city: string } | null> => {
-  const services = [
-    async () => {
-      const response = await fetch('https://ipapi.co/json/');
+  const timeout = (ms: number) => new Promise<null>((resolve) => setTimeout(() => resolve(null), ms));
+
+  const serviceA = async (): Promise<{ lat: number; lon: number; city: string } | null> => {
+    try {
+      const response = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
       const data = await response.json();
       if (data.latitude && data.longitude) {
         return { lat: data.latitude, lon: data.longitude, city: data.city || '' };
       }
-      return null;
-    },
-    async () => {
-      const response = await fetch('https://ipwho.is/');
+    } catch { /* Failed */ }
+    return null;
+  };
+
+  const serviceB = async (): Promise<{ lat: number; lon: number; city: string } | null> => {
+    try {
+      const response = await fetch('https://ipwho.is/', { signal: AbortSignal.timeout(4000) });
       const data = await response.json();
       if (data.success && data.latitude && data.longitude) {
         return { lat: data.latitude, lon: data.longitude, city: data.city || '' };
       }
-      return null;
-    },
-    async () => {
-      const response = await fetch('https://freeipapi.com/api/json');
+    } catch { /* Failed */ }
+    return null;
+  };
+
+  const serviceC = async (): Promise<{ lat: number; lon: number; city: string } | null> => {
+    try {
+      const response = await fetch('https://freeipapi.com/api/json', { signal: AbortSignal.timeout(4000) });
       const data = await response.json();
       if (data.latitude && data.longitude) {
         return { lat: data.latitude, lon: data.longitude, city: data.cityName || '' };
       }
-      return null;
-    },
-  ];
+    } catch { /* Failed */ }
+    return null;
+  };
 
-  for (const service of services) {
-    try {
-      const result = await service();
-      if (result) return result;
-    } catch { /* Try next service */ }
+  // Race all three services in parallel — first non-null result wins
+  try {
+    const result = await new Promise<{ lat: number; lon: number; city: string }>((resolve, reject) => {
+      let settled = false;
+      let failures = 0;
+      const total = 3;
+      const win = (r: { lat: number; lon: number; city: string } | null) => {
+        if (r && !settled) { settled = true; resolve(r); }
+        else { failures++; if (failures >= total && !settled) { settled = true; reject(); } }
+      };
+      const fail = () => { failures++; if (failures >= total && !settled) { settled = true; reject(); } };
+      serviceA().then(win).catch(fail);
+      serviceB().then(win).catch(fail);
+      serviceC().then(win).catch(fail);
+    });
+    return result;
+  } catch {
+    // All services failed or returned null
+    return null;
   }
-  return null;
 };
 
 /** Forward geocode a city name to coordinates */
