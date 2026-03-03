@@ -126,3 +126,5 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
     return stat.value === nextStat.value && stat.title === nextStat.title && stat.loading === nextStat.loading && subItemsEqual;
   });
 });
+
+StatsGrid.displayName = 'StatsGrid';

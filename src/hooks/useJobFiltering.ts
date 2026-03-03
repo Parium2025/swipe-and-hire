@@ -37,7 +37,7 @@ export interface FilterableJob {
   };
 }
 
-type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'active-first' | 'expired-first' | 'draft-first';
+export type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'active-first' | 'expired-first' | 'draft-first';
 
 const validSortOptions: SortOption[] = ['newest', 'oldest', 'title-asc', 'title-desc', 'active-first', 'expired-first', 'draft-first'];
 
