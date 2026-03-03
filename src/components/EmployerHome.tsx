@@ -166,16 +166,16 @@ const EmployerHome = memo(() => {
   const [gpsGranted, setGpsGranted] = useState<boolean | null>(null);
   
   useEffect(() => {
+    let permissionStatus: PermissionStatus | null = null;
+    const onChange = () => {
+      if (permissionStatus) setGpsGranted(permissionStatus.state === 'granted');
+    };
     const checkGps = async () => {
       try {
         if ('permissions' in navigator) {
-          const result = await navigator.permissions.query({ name: 'geolocation' });
-          setGpsGranted(result.state === 'granted');
-          
-          // Listen for changes
-          result.addEventListener('change', () => {
-            setGpsGranted(result.state === 'granted');
-          });
+          permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+          setGpsGranted(permissionStatus.state === 'granted');
+          permissionStatus.addEventListener('change', onChange);
         } else {
           setGpsGranted(false);
         }
@@ -184,6 +184,9 @@ const EmployerHome = memo(() => {
       }
     };
     checkGps();
+    return () => {
+      permissionStatus?.removeEventListener('change', onChange);
+    };
   }, []);
   
   // Only fetch weather if GPS is granted

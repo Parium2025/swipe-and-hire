@@ -12,43 +12,21 @@ export const JobSeekerDashboardGrid = memo(() => {
   const [isCardsPaused, setIsCardsPaused] = useState(false);
   const isMobile = useIsMobile();
 
-  // Mobile: Statistik → Intervjuer → Nyheter → Anteckningar
-  // Desktop: behåll 2x2 grid (Nyheter/Stats top, Notes/Interviews bottom)
   const mobileOrder = (
     <>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-      </motion.div>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <JobSeekerInterviewsCard />
-      </motion.div>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-      </motion.div>
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <JobSeekerNotesCard />
-      </motion.div>
+      <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <JobSeekerInterviewsCard />
+      <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <JobSeekerNotesCard />
     </>
   );
 
   const desktopOrder = (
     <>
-      {/* Top Left - Career Tips (Green) */}
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-      </motion.div>
-      {/* Top Right - Stats (Blue) */}
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
-      </motion.div>
-      {/* Bottom Left - Notes (Purple) */}
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <JobSeekerNotesCard />
-      </motion.div>
-      {/* Bottom Right - Interviews (Orange) */}
-      <motion.div initial={false} animate={{ opacity: 1, y: 0, scale: 1 }}>
-        <JobSeekerInterviewsCard />
-      </motion.div>
+      <CareerTipsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <JobSeekerStatsCard isPaused={isCardsPaused} setIsPaused={setIsCardsPaused} />
+      <JobSeekerNotesCard />
+      <JobSeekerInterviewsCard />
     </>
   );
 
