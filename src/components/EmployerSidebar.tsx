@@ -281,13 +281,6 @@ export function EmployerSidebar() {
     }
   };
 
-  const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
-  };
-
   const isActiveUrl = (url: string) => {
     const currentPath = location.pathname;
     
@@ -346,24 +339,6 @@ export function EmployerSidebar() {
                 </p>
               </div>
             </div>
-          )}
-        </div>
-        
-        {/* Hidden preloader - always mounted to keep logo cached */}
-        <div className="hidden">
-          <CompanyAvatar
-            companyLogoUrl={companyLogoUrl}
-            companyName={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
-            initials={getCompanyInitials()}
-          />
-          {companyLogoUrl && (
-            <img 
-              src={companyLogoUrl} 
-              alt="Preload" 
-              loading="eager"
-              decoding="sync"
-              fetchPriority="high"
-            />
           )}
         </div>
 
