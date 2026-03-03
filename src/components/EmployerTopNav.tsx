@@ -3,11 +3,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { prefetchMediaUrl, useMediaUrl } from '@/hooks/useMediaUrl';
+import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { SystemHealthButton, SystemHealthPanelContent } from "@/components/SystemHealthPanel";
+import { useMediaUrl } from '@/hooks/useMediaUrl';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,7 +71,7 @@ function EmployerTopNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
-  const queryClient = useQueryClient();
+  const prefetchApplications = usePrefetchApplications();
   
   // Resolve signed URL for profile image
   const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
@@ -108,83 +107,7 @@ function EmployerTopNav() {
     return items.some(item => location.pathname === item.url);
   };
 
-  // Prefetch applications on hover
-  const prefetchApplications = () => {
-    if (!user) return;
-    
-    queryClient.prefetchInfiniteQuery({
-      queryKey: ['applications', user.id, ''],
-      initialPageParam: 0,
-      queryFn: async ({ pageParam = 0 }) => {
-        const from = (pageParam as number) * 25;
-        const to = from + 25 - 1;
-
-        const { data: baseData, error: baseError } = await supabase
-          .from('job_applications')
-          .select(`
-            id, job_id, applicant_id, first_name, last_name, email, phone, location,
-            bio, cv_url, age, employment_status, work_schedule, availability,
-            custom_answers, status, applied_at, updated_at, job_postings!inner(title)
-          `)
-          .order('applied_at', { ascending: false })
-          .range(from, to);
-
-        if (baseError) throw baseError;
-        if (!baseData) return { items: [], hasMore: false };
-
-        const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
-        const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }> = {};
-
-        // Single batch RPC call instead of N individual calls (scales to millions)
-        const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
-          p_applicant_ids: applicantIds,
-          p_employer_id: user.id,
-        });
-
-        if (batchMediaData && Array.isArray(batchMediaData)) {
-          batchMediaData.forEach((row: any) => {
-            profileMediaMap[row.applicant_id] = {
-              profile_image_url: row.profile_image_url,
-              video_url: row.video_url,
-              is_profile_video: row.is_profile_video,
-            };
-          });
-        }
-
-        // Fill in nulls for any applicants not returned
-        applicantIds.forEach((id) => {
-          if (!profileMediaMap[id]) {
-            profileMediaMap[id] = { profile_image_url: null, video_url: null, is_profile_video: null };
-          }
-        });
-
-        const items = baseData.map((item: any) => {
-          const media = profileMediaMap[item.applicant_id] || { profile_image_url: null, video_url: null, is_profile_video: null };
-          return {
-            ...item,
-            job_title: item.job_postings?.title || 'Okänt jobb',
-            profile_image_url: media.profile_image_url,
-            video_url: media.video_url,
-            is_profile_video: media.is_profile_video,
-            job_postings: undefined,
-          };
-        });
-
-        setTimeout(() => {
-          const paths = (items as any[])
-            .map((i) => i.profile_image_url)
-            .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
-            .slice(0, 25);
-          if (paths.length > 0) {
-            Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {}))).catch(() => {});
-          }
-        }, 0);
-
-        return { items, hasMore: items.length === 25 };
-      },
-      staleTime: 2 * 60 * 1000,
-    });
-  };
+  // prefetchApplications is now provided by usePrefetchApplications hook
 
   const getCompanyInitials = () => {
     if (!profile?.company_name) return 'FA';
