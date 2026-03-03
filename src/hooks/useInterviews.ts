@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,7 +51,7 @@ function writeEmployerInterviewsCache(userId: string, interviews: Interview[]): 
       interviews: interviews.slice(0, 50), // Max 50 to save space
       timestamp: Date.now(),
     };
-    localStorage.setItem(key, JSON.stringify(cached));
+    safeSetItem(key, JSON.stringify(cached));
   } catch {
     // Storage full
   }
@@ -243,7 +244,7 @@ export const useCandidateInterviews = () => {
       // Spara till localStorage
       try {
         const cacheKey = `job_seeker_interviews_${user.id}`;
-        localStorage.setItem(cacheKey, JSON.stringify({
+        safeSetItem(cacheKey, JSON.stringify({
           items: data || [],
           timestamp: Date.now(),
         }));

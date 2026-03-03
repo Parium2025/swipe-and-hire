@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -213,7 +214,7 @@ function readJobDetailCache(jobId: string): JobPosting | null {
 
 function writeJobDetailCache(jobId: string, data: JobPosting): void {
   try {
-    localStorage.setItem(JOB_DETAIL_CACHE_KEY + jobId, JSON.stringify({ data, timestamp: Date.now() }));
+    safeSetItem(JOB_DETAIL_CACHE_KEY + jobId, JSON.stringify({ data, timestamp: Date.now() }));
   } catch { /* storage full */ }
 }
 
@@ -228,7 +229,7 @@ function readJobAppsCache(jobId: string): JobApplication[] | null {
 function writeJobAppsCache(jobId: string, data: JobApplication[]): void {
   try {
     // Only cache first 50 to save space
-    localStorage.setItem(JOB_APPS_CACHE_KEY + jobId, JSON.stringify({ data: data.slice(0, 50), timestamp: Date.now() }));
+    safeSetItem(JOB_APPS_CACHE_KEY + jobId, JSON.stringify({ data: data.slice(0, 50), timestamp: Date.now() }));
   } catch { /* storage full */ }
 }
 

@@ -1,4 +1,5 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
@@ -276,7 +277,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
               items: items.slice(0, 50),
               timestamp: Date.now(),
             };
-            localStorage.setItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
+            safeSetItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
           } catch (cacheError) {
             console.warn('Failed to cache applications snapshot:', cacheError);
           }

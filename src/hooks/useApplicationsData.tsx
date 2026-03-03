@@ -1,4 +1,5 @@
 import { useInfiniteQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { safeSetItem } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
@@ -79,7 +80,7 @@ const writeCachedRatings = (userId: string, ratings: Record<string, number>) => 
       ratings,
       timestamp: Date.now()
     };
-    localStorage.setItem(key, JSON.stringify(cache));
+    safeSetItem(key, JSON.stringify(cache));
   } catch {
     // localStorage full or not available
   }
@@ -174,7 +175,7 @@ const writeSnapshot = (userId: string, items: ApplicationData[]) => {
       items: items.slice(0, 50), // Max 50 items
       timestamp: Date.now(),
     };
-    localStorage.setItem(key, JSON.stringify(snapshot));
+    safeSetItem(key, JSON.stringify(snapshot));
   } catch (e) {
     console.warn('Failed to write snapshot:', e);
   }
@@ -746,7 +747,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
         const cache = raw ? JSON.parse(raw) : { ratings: {}, timestamp: Date.now() };
         cache.ratings[applicantId] = rating;
         cache.timestamp = Date.now();
-        localStorage.setItem(cacheKey, JSON.stringify(cache));
+        safeSetItem(cacheKey, JSON.stringify(cache));
       } catch {
         // Ignore localStorage errors
       }

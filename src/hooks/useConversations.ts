@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -128,7 +129,7 @@ function writeConversationsCache(userId: string, conversations: Conversation[]):
       timestamp: Date.now(),
       version: CACHE_VERSION,
     };
-    localStorage.setItem(CONVERSATIONS_CACHE_KEY, JSON.stringify(cached));
+    safeSetItem(CONVERSATIONS_CACHE_KEY, JSON.stringify(cached));
   } catch {
     // Storage full
   }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -92,7 +93,7 @@ export const useJobSeekerBackgroundSync = () => {
     if (!error && data) {
       const jobIds = new Set(data.map(item => item.job_id));
       
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         jobIds: Array.from(jobIds),
         timestamp: Date.now(),
       }));
@@ -136,7 +137,7 @@ export const useJobSeekerBackgroundSync = () => {
       .limit(50);
 
     if (!error && data) {
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items: data,
         timestamp: Date.now(),
       }));
@@ -161,7 +162,7 @@ export const useJobSeekerBackgroundSync = () => {
       .eq('user_id', userId);
 
     if (!memberData || memberData.length === 0) {
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items: [],
         timestamp: Date.now(),
       }));
@@ -185,7 +186,7 @@ export const useJobSeekerBackgroundSync = () => {
       .limit(50);
 
     if (!error && conversations) {
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items: conversations,
         timestamp: Date.now(),
       }));
@@ -195,7 +196,7 @@ export const useJobSeekerBackgroundSync = () => {
       
       // Uppdatera även den nya konversationscachen för useConversations hooken
       try {
-        localStorage.setItem('parium_conversations_cache', JSON.stringify({
+        safeSetItem('parium_conversations_cache', JSON.stringify({
           userId,
           conversations,
           timestamp: Date.now(),
@@ -237,7 +238,7 @@ export const useJobSeekerBackgroundSync = () => {
       .limit(100);
 
     if (!error && data) {
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items: data,
         timestamp: Date.now(),
       }));
@@ -283,7 +284,7 @@ export const useJobSeekerBackgroundSync = () => {
 
     if (!error && data) {
       // Spara till localStorage
-      localStorage.setItem(cacheKey, JSON.stringify({
+      safeSetItem(cacheKey, JSON.stringify({
         items: data,
         timestamp: Date.now(),
       }));

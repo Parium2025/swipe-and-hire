@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { mapRawToApplicationData } from '@/lib/candidateApplicationMapper';
@@ -48,7 +49,7 @@ export function useCandidateBatchPrefetch(applications: ApplicationData[]) {
     (applicantId: string, items: ApplicationData[]) => {
       if (!applicantId || items.length === 0 || typeof window === 'undefined') return;
       try {
-        localStorage.setItem(getCacheKey(applicantId), JSON.stringify({ items, cachedAt: Date.now() }));
+        safeSetItem(getCacheKey(applicantId), JSON.stringify({ items, cachedAt: Date.now() }));
       } catch {
         // Ignore storage errors
       }

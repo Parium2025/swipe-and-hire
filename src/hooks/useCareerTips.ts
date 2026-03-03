@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
 
@@ -61,7 +62,7 @@ function readCache(): CareerTipItem[] | null {
 function writeCache(items: CareerTipItem[]): void {
   try {
     const cached: CachedData = { items, timestamp: Date.now() };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
+    safeSetItem(CACHE_KEY, JSON.stringify(cached));
   } catch {
     // Storage full
   }

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import type { HrNewsItem } from '@/hooks/useHrNews';
 
@@ -23,7 +24,7 @@ function readCache(): HrNewsItem[] | null {
 
 function writeCache(items: HrNewsItem[]): void {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ items, timestamp: Date.now() }));
+    safeSetItem(CACHE_KEY, JSON.stringify({ items, timestamp: Date.now() }));
   } catch { /* storage full */ }
 }
 

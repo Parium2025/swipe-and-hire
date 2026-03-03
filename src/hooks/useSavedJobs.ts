@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -37,7 +38,7 @@ function saveToCache(userId: string, jobIds: Set<string>): void {
       userId,
       timestamp: Date.now(),
     };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    safeSetItem(CACHE_KEY, JSON.stringify(data));
   } catch {
     // Ignore storage errors
   }
