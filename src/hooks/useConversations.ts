@@ -108,7 +108,7 @@ function readConversationsCache(userId: string): Conversation[] | null {
     // Validate that cached conversations have profile data
     // If any member is missing profile info, invalidate cache
     const hasMissingProfiles = cached.conversations.some(conv => 
-      conv.members.some(m => !m.profile?.first_name && !m.profile?.company_name)
+      (conv.members || []).some(m => !m.profile?.first_name && !m.profile?.company_name)
     );
     if (hasMissingProfiles) {
       localStorage.removeItem(CONVERSATIONS_CACHE_KEY);
@@ -292,7 +292,7 @@ export function useConversations() {
 
       // 🔥 Prefetch avatars for all conversation members (eliminates flicker)
       result.forEach(conv => {
-        conv.members.forEach(member => {
+        (conv.members || []).forEach(member => {
           if (member.user_id !== user.id && member.profile) {
             const isEmployer = member.profile.role === 'employer';
             const storagePath = isEmployer && member.profile.company_logo_url 
@@ -328,7 +328,7 @@ export function useConversations() {
     if (!conversations || !user) return;
 
     conversations.forEach(conv => {
-      conv.members.forEach(member => {
+      (conv.members || []).forEach(member => {
         if (member.user_id !== user.id && member.profile) {
           const isEmployer = member.profile.role === 'employer';
           const storagePath = isEmployer && member.profile.company_logo_url 
