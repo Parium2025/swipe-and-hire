@@ -19,6 +19,13 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
   
   const tipsItems = tips?.slice(0, 4) || [];
 
+  // Guard against stale index after data refetch
+  useEffect(() => {
+    if (tipsItems.length > 0 && currentIndex >= tipsItems.length) {
+      setCurrentIndex(0);
+    }
+  }, [tipsItems.length, currentIndex]);
+
   const goNext = useCallback(() => {
     if (tipsItems.length > 1) {
       setCurrentIndex(prev => (prev + 1) % tipsItems.length);

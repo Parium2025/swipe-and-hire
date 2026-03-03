@@ -29,6 +29,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let permissionStatus: PermissionStatus | null = null;
+    let handleChange: (() => void) | null = null;
     
     const checkPermission = async () => {
       const status = await checkGpsPermission();
@@ -68,7 +69,7 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
         try {
           permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
           
-          const handleChange = () => {
+          handleChange = () => {
             const newState = permissionStatus?.state;
             if (newState === 'granted') {
               gpsPromptDismissedUntilReload = false;
@@ -94,6 +95,9 @@ const GpsPrompt = memo(({ onEnableGps }: GpsPromptProps) => {
     
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
+      if (permissionStatus && handleChange) {
+        permissionStatus.removeEventListener('change', handleChange);
+      }
     };
   }, []);
 
