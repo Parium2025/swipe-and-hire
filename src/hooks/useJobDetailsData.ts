@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 // Types for criterion results
-interface CriterionResult {
+export interface CriterionResult {
   criterion_id: string;
   result: 'match' | 'no_match' | 'no_data';
   reasoning?: string;
