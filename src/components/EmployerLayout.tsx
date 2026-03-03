@@ -1,8 +1,7 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
-import { safeSetItem } from '@/lib/safeStorage';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import EmployerSidebar from '@/components/EmployerSidebar';
 import EmployerTopNav from '@/components/EmployerTopNav';
 import DeveloperControls from '@/components/DeveloperControls';
@@ -11,7 +10,6 @@ import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useDevice } from '@/hooks/use-device';
@@ -164,152 +162,8 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // Prefetch applications + kandidat-media på mount för instant /candidates (utan refresh)
-  useEffect(() => {
-    if (!user) return;
-
-    const userId = user.id;
-    const queryKey = ['applications', userId, ''] as const;
-
-    // Om vi har gammal cache utan media-fält → rensa så vi inte fastnar med "initialer" tills refresh
-    const existing: any = queryClient.getQueryData(queryKey);
-    const first = existing?.pages?.[0]?.items?.[0];
-    const hasMediaFields =
-      !first ||
-      ('profile_image_url' in first && 'video_url' in first && 'is_profile_video' in first);
-
-    if (!hasMediaFields) {
-      queryClient.removeQueries({ queryKey });
-    }
-
-    queryClient.prefetchInfiniteQuery({
-      queryKey,
-      initialPageParam: 0,
-      queryFn: async ({ pageParam = 0 }) => {
-        const from = (pageParam as number) * 25;
-        const to = from + 25 - 1;
-
-        const { data: baseData, error: baseError } = await supabase
-          .from('job_applications')
-          .select(`
-            id,
-            job_id,
-            applicant_id,
-            first_name,
-            last_name,
-            email,
-            phone,
-            location,
-            bio,
-            cv_url,
-            age,
-            employment_status,
-            work_schedule,
-            availability,
-            custom_answers,
-            status,
-            applied_at,
-            updated_at,
-            job_postings!inner(title)
-          `)
-          .order('applied_at', { ascending: false })
-          .range(from, to);
-
-        if (baseError) throw baseError;
-        if (!baseData) return { items: [], hasMore: false };
-
-        // Hämta kandidat-media via säkert BATCH RPC (skalar till miljoner)
-        const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
-        const profileMediaMap: Record<
-          string,
-          { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }
-        > = {};
-
-        // Single batch RPC call instead of N individual calls
-        const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
-          p_applicant_ids: applicantIds,
-          p_employer_id: userId,
-        });
-
-        if (batchMediaData && Array.isArray(batchMediaData)) {
-          batchMediaData.forEach((row: any) => {
-            profileMediaMap[row.applicant_id] = {
-              profile_image_url: row.profile_image_url,
-              video_url: row.video_url,
-              is_profile_video: row.is_profile_video,
-            };
-          });
-        }
-
-        // Fill in nulls for any applicants not returned
-        applicantIds.forEach((id) => {
-          if (!profileMediaMap[id]) {
-            profileMediaMap[id] = {
-              profile_image_url: null,
-              video_url: null,
-              is_profile_video: null,
-            };
-          }
-        });
-
-        const items = baseData.map((item: any) => {
-          const media = profileMediaMap[item.applicant_id] || {
-            profile_image_url: null,
-            video_url: null,
-            is_profile_video: null,
-          };
-
-          return {
-            ...item,
-            job_title: item.job_postings?.title || 'Okänt jobb',
-            profile_image_url: media.profile_image_url,
-            video_url: media.video_url,
-            is_profile_video: media.is_profile_video,
-            job_postings: undefined,
-          };
-        });
-
-        const hasMore = items.length === 25;
-
-        // Snapshot för omedelbar first paint (matchar useApplicationsData schema)
-        if (from === 0) {
-          try {
-            const snapshot = {
-              items: items.slice(0, 50),
-              timestamp: Date.now(),
-            };
-            safeSetItem(`applications_snapshot_${userId}`, JSON.stringify(snapshot));
-          } catch (cacheError) {
-            console.warn('Failed to cache applications snapshot:', cacheError);
-          }
-        }
-
-        // Prime:a cache i bakgrunden (bild + video-signed URL) så det känns "bam"
-        setTimeout(() => {
-          const imagePaths = (items as any[])
-            .map((i) => i.profile_image_url)
-            .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
-            .slice(0, 25);
-
-          const videoPaths = (items as any[])
-            .filter((i) => !!i.is_profile_video)
-            .map((i) => i.video_url)
-            .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
-            .slice(0, 10);
-
-          if (imagePaths.length === 0 && videoPaths.length === 0) return;
-
-          Promise.all([
-            ...imagePaths.map((p) => prefetchMediaUrl(p, 'profile-image').catch(() => {})),
-            ...videoPaths.map((p) => prefetchMediaUrl(p, 'profile-video').catch(() => {})),
-          ]).catch(() => {});
-        }, 0);
-
-        return { items, hasMore };
-      },
-      staleTime: Infinity,
-    });
-  }, [user, queryClient]);
+  // Applications prefetch is handled by usePrefetchApplications (used in sidebar/topnav on hover)
+  // and useEmployerBackgroundSync (on mount/tab-focus). No need to duplicate here.
 
   // Prefetch job templates for instant "Skapa ny annons" dialog load
   useEffect(() => {
@@ -397,111 +251,7 @@ const EmployerLayoutInner = memo(({ children, developerView, onViewChange }: Emp
     });
   }, [user, queryClient]);
 
-  // Prefetch conversations for instant /messages load
-  useEffect(() => {
-    if (!user) return;
-
-    queryClient.prefetchQuery({
-      queryKey: ['conversations', user.id],
-      queryFn: async () => {
-        // Get all conversation IDs where user is a member
-        const { data: memberships, error: memberError } = await supabase
-          .from('conversation_members')
-          .select('conversation_id, last_read_at')
-          .eq('user_id', user.id);
-
-        if (memberError) throw memberError;
-        if (!memberships || memberships.length === 0) return [];
-
-        const conversationIds = memberships.map(m => m.conversation_id);
-        const lastReadMap = new Map(memberships.map(m => [m.conversation_id, m.last_read_at]));
-
-        // Fetch conversations with job info
-        const { data: conversations, error: convError } = await supabase
-          .from('conversations')
-          .select(`
-            *,
-            job:job_id (title)
-          `)
-          .in('id', conversationIds)
-          .order('last_message_at', { ascending: false, nullsFirst: false });
-
-        if (convError) throw convError;
-        if (!conversations) return [];
-
-        // Fetch all members for these conversations
-        const { data: allMembers, error: membersError } = await supabase
-          .from('conversation_members')
-          .select('conversation_id, user_id, is_admin, last_read_at')
-          .in('conversation_id', conversationIds);
-
-        if (membersError) throw membersError;
-
-        // Get unique user IDs to fetch profiles
-        const allUserIds = [...new Set(allMembers?.map(m => m.user_id) || [])];
-        
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('user_id, first_name, last_name, company_name, profile_image_url, company_logo_url, role')
-          .in('user_id', allUserIds);
-
-        const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-
-        // Fetch ALL messages for these conversations in ONE query
-        const { data: allMessages } = await supabase
-          .from('conversation_messages')
-          .select('*')
-          .in('conversation_id', conversationIds)
-          .order('created_at', { ascending: false });
-
-        // Group last messages by conversation and calculate unread counts in memory
-        const lastMessageMap = new Map<string, any>();
-        const unreadCounts = new Map<string, number>();
-        
-        // Initialize unread counts
-        conversationIds.forEach(id => unreadCounts.set(id, 0));
-        
-        // Process all messages in memory (much faster than N database calls)
-        allMessages?.forEach(msg => {
-          // Track last message per conversation
-          if (!lastMessageMap.has(msg.conversation_id)) {
-            lastMessageMap.set(msg.conversation_id, {
-              ...msg,
-              sender_profile: profileMap.get(msg.sender_id) || undefined,
-            });
-          }
-          
-          // Count unread messages (not from current user, after last_read)
-          if (msg.sender_id !== user.id) {
-            const lastRead = lastReadMap.get(msg.conversation_id);
-            if (!lastRead || new Date(msg.created_at) > new Date(lastRead)) {
-              unreadCounts.set(
-                msg.conversation_id, 
-                (unreadCounts.get(msg.conversation_id) || 0) + 1
-              );
-            }
-          }
-        });
-
-        // Build final conversation objects
-        return conversations.map(conv => {
-          const members = (allMembers || [])
-            .filter(m => m.conversation_id === conv.id)
-            .map(m => ({
-              ...m,
-              profile: profileMap.get(m.user_id),
-            }));
-
-          return {
-            ...conv,
-            members,
-            last_message: lastMessageMap.get(conv.id),
-            unread_count: unreadCounts.get(conv.id) || 0,
-          };
-        });
-      },
-    });
-  }, [user, queryClient]);
+  // Conversations prefetch is handled by useEmployerBackgroundSync (preloadConversations)
 
   // Desktop layout with top navigation
   if (isDesktop) {
