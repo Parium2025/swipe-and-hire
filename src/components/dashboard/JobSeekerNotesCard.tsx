@@ -147,15 +147,20 @@ export const JobSeekerNotesCard = memo(() => {
           
           {/* Editor area */}
           <div className="flex-1 min-h-0 relative">
-            {/* Skeleton placeholder while TipTap initializes */}
-            {!notesEditor && (
-              <div className="absolute inset-0 flex flex-col gap-2 p-2 animate-pulse">
-                <div className="h-3 w-3/4 bg-white/10 rounded" />
-                <div className="h-3 w-1/2 bg-white/10 rounded" />
-                <div className="h-3 w-2/3 bg-white/10 rounded" />
+            {/* Static HTML preview of cached content — shown instantly, hidden once editor mounts */}
+            {!notesEditor && content && (
+              <div
+                className="absolute inset-0 bg-white/10 rounded-lg p-2 pr-4 text-sm leading-relaxed text-pure-white overflow-hidden pointer-events-none"
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
+            )}
+            {!notesEditor && !content && (
+              <div className="absolute inset-0 bg-white/10 rounded-lg p-2 pr-4 text-sm leading-relaxed text-pure-white/40 pointer-events-none">
+                Skriv karriärmål, påminnelser...
               </div>
             )}
-            <div className={notesEditor ? 'opacity-100' : 'opacity-0'} style={{ transition: 'opacity 0.15s ease-in' }}>
+            {/* Actual editor — renders on top once ready, no transition needed */}
+            <div className={notesEditor ? 'visible' : 'invisible'}>
               <RichNotesEditor
                 value={content}
                 onChange={handleChange}
