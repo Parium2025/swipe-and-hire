@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { formatDateShortSv, isJobExpiredCheck, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -17,21 +16,19 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
+/** Shared empty state message for both desktop and mobile */
+const getEmptyMessage = (searchTerm: string, activeTab: JobStatusTab): string => {
+  if (searchTerm) return 'Inga annonser matchar din sökning';
+  return activeTab === 'active'
+    ? 'Inga aktiva jobbannonser. Skapa din första annons!'
+    : 'Inga utgångna jobbannonser.';
+};
+
 const Dashboard = memo(() => {
-  // Dashboard shows organization-wide data (all colleagues' published jobs)
-  // Enable realtime updates so new jobs from colleagues appear automatically
   const { jobs: allJobs, stats, recruiters, isLoading } = useJobsData({ 
     scope: 'organization',
     enableRealtime: true 
@@ -39,7 +36,6 @@ const Dashboard = memo(() => {
   const { profile, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
   
-  // Minimum delay for smooth fade-in animation (prevents jarring instant appearance when cached)
   const [showContent, setShowContent] = useState(false);
   useEffect(() => {
     if (!isLoading) {
@@ -48,12 +44,8 @@ const Dashboard = memo(() => {
     }
   }, [isLoading]);
 
-  // Tab state for switching between active and expired jobs
   const [activeTab, setActiveTab] = useState<JobStatusTab>('active');
 
-  // Separate active and expired jobs
-  // A job is "expired" if its expires_at date has passed, regardless of is_active flag
-  // (is_active may have been set to false by a cron job after expiry)
   const activeJobs = useMemo(() => allJobs.filter(job => 
     job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)
   ), [allJobs]);
@@ -62,10 +54,8 @@ const Dashboard = memo(() => {
     isJobExpiredCheck(job.created_at, job.expires_at)
   ), [allJobs]);
 
-  // Current jobs based on selected tab
   const jobs = activeTab === 'active' ? activeJobs : expiredJobs;
 
-  // Calculate stats - totalJobs includes BOTH active and expired, activeJobs shows only active
   const filteredStats = useMemo(() => ({
     totalJobs: activeJobs.length + expiredJobs.length,
     activeJobs: activeJobs.length,
@@ -84,11 +74,6 @@ const Dashboard = memo(() => {
     filteredAndSortedJobs,
   } = useJobFiltering(jobs);
 
-  // Reset page when tab changes
-  useEffect(() => {
-    setPage(1);
-  }, [activeTab]);
-
   // Pagination state
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -101,10 +86,9 @@ const Dashboard = memo(() => {
     return filteredAndSortedJobs.slice(start, start + pageSize);
   }, [filteredAndSortedJobs, page]);
 
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1);
-  }, [searchTerm, sortBy, selectedRecruiterId]);
+  // Reset page when tab or filters change
+  useEffect(() => { setPage(1); }, [activeTab]);
+  useEffect(() => { setPage(1); }, [searchTerm, sortBy, selectedRecruiterId]);
 
   // Scroll to top when page changes (but not on initial mount)
   useEffect(() => {
@@ -117,7 +101,6 @@ const Dashboard = memo(() => {
     }
   }, [page]);
 
-  // Use filtered stats (excluding expired jobs) for accurate representation
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Annonser', value: isLoading ? preloadedEmployerActiveJobs : filteredStats.totalJobs, loading: false },
     { 
@@ -133,17 +116,18 @@ const Dashboard = memo(() => {
     { icon: Users, title: 'Ansökningar', value: isLoading ? preloadedEmployerTotalApplications : filteredStats.totalApplications, loading: false },
   ], [filteredStats, expiredJobs.length, isLoading, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications]);
 
-  // Wait for data AND minimum delay before showing content with fade
   if (isLoading || !showContent) {
     return (
-       <div className="space-y-4 responsive-container-wide opacity-0">
+      <div className="space-y-4 responsive-container-wide opacity-0">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
   }
 
+  const tabTitle = `${activeTab === 'active' ? 'Aktiva jobb' : 'Utgångna jobb'} av ${profile?.company_name || 'ditt företag'}`;
+
   return (
-     <div className="space-y-4 responsive-container-wide animate-fade-in">
+    <div className="space-y-4 responsive-container-wide animate-fade-in">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Dashboard</h1>
       </div>
@@ -171,9 +155,7 @@ const Dashboard = memo(() => {
 
       {/* Mobile: Title + Tabs without card wrapper */}
       <div className="md:hidden flex flex-col items-center space-y-3">
-        <h3 className="text-sm text-white font-medium text-center">
-          {activeTab === 'active' ? 'Aktiva jobb' : 'Utgångna jobb'} av {profile?.company_name || 'ditt företag'}
-        </h3>
+        <h3 className="text-sm text-white font-medium text-center">{tabTitle}</h3>
         <div className="flex justify-center">
           <JobStatusTabs
             activeTab={activeTab}
@@ -184,14 +166,11 @@ const Dashboard = memo(() => {
         </div>
       </div>
 
-
       {/* Desktop: Card-wrapped table */}
       <Card className="hidden md:block bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg">
         <CardHeader className="p-4">
           <div className="flex flex-row items-center justify-between gap-4">
-            <CardTitle className="text-sm text-white text-left">
-              {activeTab === 'active' ? 'Aktiva jobb' : 'Utgångna jobb'} av {profile?.company_name || 'ditt företag'}
-            </CardTitle>
+            <CardTitle className="text-sm text-white text-left">{tabTitle}</CardTitle>
             <JobStatusTabs
               activeTab={activeTab}
               onTabChange={setActiveTab}
@@ -201,8 +180,6 @@ const Dashboard = memo(() => {
           </div>
         </CardHeader>
         <CardContent className="px-4 pb-4">
-          
-          {/* Desktop: Table view */}
           <div className="hidden md:block w-full">
             <div ref={listTopRef} />
             <Table className="w-full table-fixed">
@@ -252,195 +229,94 @@ const Dashboard = memo(() => {
                 ) : filteredAndSortedJobs.length === 0 ? (
                   <TableRow className="hover:bg-transparent">
                     <TableCell colSpan={7} className="text-center !text-white py-8 font-medium text-sm">
-                      {searchTerm 
-                        ? 'Inga annonser matchar din sökning' 
-                        : activeTab === 'active' 
-                          ? 'Inga aktiva jobbannonser. Skapa din första annons!' 
-                          : 'Inga utgångna jobbannonser.'}
+                      {getEmptyMessage(searchTerm, activeTab)}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  pageJobs.map((job) => (
-                    <TableRow 
-                      key={job.id}
-                      className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
-                      onClick={() => navigate(`/job-details/${job.id}`)}
-                    >
-                      <TableCell className="font-medium text-white text-center px-2 py-3">
-                        <JobTitleCell title={job.title} employmentType={job.employment_type} />
-                      </TableCell>
-                      <TableCell className="text-center px-2 py-3">
-                        <div className="flex justify-center">
-                          <Badge 
-                            variant={activeTab === 'expired' ? 'glassDestructive' : undefined}
-                            className={`text-xs whitespace-nowrap transition-colors ${
-                              activeTab === 'expired' 
-                                ? ""
-                                : job.is_active 
-                                  ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30" 
-                                  : "bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30"
-                            }`}
-                          >
-                            {activeTab === 'expired' ? 'Utgången' : job.is_active ? 'Aktiv' : 'Inaktiv'}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center px-2 py-3">
-                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs hover:bg-purple-500/30 transition-colors">
-                          {job.views_count || 0}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center px-2 py-3">
-                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs hover:bg-blue-500/30 transition-colors">
-                          {job.applications_count || 0}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-white text-center px-2 py-3">
-                        <div className="flex items-center justify-center gap-1.5 text-sm">
-                          <MapPin size={14} className="flex-shrink-0" />
-                          <TruncatedText text={job.location} className="truncate max-w-[120px]" />
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-white text-center px-2 py-3">
-                        <TruncatedText 
-                          text={job.employer_profile?.first_name && job.employer_profile?.last_name
-                            ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
-                            : '-'}
-                          className="text-sm truncate max-w-[130px] block"
-                        />
-                      </TableCell>
-                      <TableCell className="text-white text-center px-2 py-3">
-                        <div className="flex flex-col items-center gap-0.5">
-                          <div className="flex items-center justify-center gap-1.5 text-sm whitespace-nowrap">
-                            <Calendar size={14} />
-                            {formatDateShortSv(job.created_at)}
+                  pageJobs.map((job) => {
+                    const timeInfo = getTimeRemaining(job.created_at, job.expires_at);
+                    return (
+                      <TableRow 
+                        key={job.id}
+                        className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
+                        onClick={() => navigate(`/job-details/${job.id}`)}
+                      >
+                        <TableCell className="font-medium text-white text-center px-2 py-3">
+                          <JobTitleCell title={job.title} employmentType={job.employment_type} />
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-3">
+                          <div className="flex justify-center">
+                            <Badge 
+                              variant={activeTab === 'expired' ? 'glassDestructive' : undefined}
+                              className={`text-xs whitespace-nowrap transition-colors ${
+                                activeTab === 'expired' 
+                                  ? ""
+                                  : job.is_active 
+                                    ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30" 
+                                    : "bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30"
+                              }`}
+                            >
+                              {activeTab === 'expired' ? 'Utgången' : job.is_active ? 'Aktiv' : 'Inaktiv'}
+                            </Badge>
                           </div>
-                          {(() => {
-                            const typedJob = job as any;
-                            const timeInfo = getTimeRemaining(job.created_at, typedJob.expires_at);
-                            return (
-                              <TooltipProvider delayDuration={0}>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className={`text-xs cursor-pointer ${timeInfo.isExpired ? 'text-red-400' : 'text-white'}`}>
-                                      {timeInfo.isExpired ? 'Utgången' : `Utgår om: ${timeInfo.text}`}
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
-                                    <p className="text-xs">{formatExpirationDateTime(job.created_at, typedJob.expires_at)}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            );
-                          })()}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-3">
+                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs hover:bg-purple-500/30 transition-colors">
+                            {job.views_count || 0}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-3">
+                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs hover:bg-blue-500/30 transition-colors">
+                            {job.applications_count || 0}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-white text-center px-2 py-3">
+                          <div className="flex items-center justify-center gap-1.5 text-sm">
+                            <MapPin size={14} className="flex-shrink-0" />
+                            <TruncatedText text={job.location} className="truncate max-w-[120px]" />
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-white text-center px-2 py-3">
+                          <TruncatedText 
+                            text={job.employer_profile?.first_name && job.employer_profile?.last_name
+                              ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
+                              : '-'}
+                            className="text-sm truncate max-w-[130px] block"
+                          />
+                        </TableCell>
+                        <TableCell className="text-white text-center px-2 py-3">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <div className="flex items-center justify-center gap-1.5 text-sm whitespace-nowrap">
+                              <Calendar size={14} />
+                              {formatDateShortSv(job.created_at)}
+                            </div>
+                            <TooltipProvider delayDuration={0}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className={`text-xs cursor-pointer ${timeInfo.isExpired ? 'text-red-400' : 'text-white'}`}>
+                                    {timeInfo.isExpired ? 'Utgången' : `Utgår om: ${timeInfo.text}`}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="bg-slate-900/95 border-white/20 text-white">
+                                  <p className="text-xs">{formatExpirationDateTime(job.created_at, job.expires_at)}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
             
-            {/* Desktop Pagination */}
-            {totalPages > 1 && (
-              <Pagination className="mt-4">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage(p => Math.max(1, p - 1));
-                      }}
-                      className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-
-                  {page > 2 && (
-                    <>
-                      <PaginationItem>
-                        <PaginationLink
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPage(1);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          1
-                        </PaginationLink>
-                      </PaginationItem>
-                      {page > 3 && <PaginationEllipsis />}
-                    </>
-                  )}
-
-                  {page > 1 && (
-                    <PaginationItem>
-                      <PaginationLink
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setPage(page - 1);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        {page - 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  )}
-
-                  <PaginationItem>
-                    <PaginationLink isActive>
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-
-                  {page < totalPages && (
-                    <PaginationItem>
-                      <PaginationLink
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setPage(page + 1);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        {page + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  )}
-
-                  {page < totalPages - 1 && (
-                    <>
-                      {page < totalPages - 2 && <PaginationEllipsis />}
-                      <PaginationItem>
-                        <PaginationLink
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPage(totalPages);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          {totalPages}
-                        </PaginationLink>
-                      </PaginationItem>
-                    </>
-                  )}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage(p => Math.min(totalPages, p + 1));
-                      }}
-                      className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-                <span className="ml-4 text-sm text-white">Sida {page} av {totalPages}</span>
-              </Pagination>
-            )}
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         </CardContent>
       </Card>
 
-      {/* Mobile: Card list view — no wrapper card */}
+      {/* Mobile: Card list view */}
       <div className="block md:hidden">
         {isLoading ? (
           <div className="space-y-3">
@@ -462,11 +338,7 @@ const Dashboard = memo(() => {
           </div>
         ) : filteredAndSortedJobs.length === 0 ? (
           <div className="text-center text-white py-8 font-medium text-sm">
-            {searchTerm 
-              ? 'Inga annonser matchar din sökning' 
-              : activeTab === 'active' 
-                ? 'Inga aktiva jobbannonser. Skapa din första annons!' 
-                : 'Inga utgångna jobbannonser.'}
+            {getEmptyMessage(searchTerm, activeTab)}
           </div>
         ) : (
           <div className="space-y-2">
@@ -479,37 +351,7 @@ const Dashboard = memo(() => {
               />
             ))}
 
-            {/* Mobile Pagination */}
-            {totalPages > 1 && (
-              <Pagination className="mt-3">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage(p => Math.max(1, p - 1));
-                      }}
-                      className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink isActive>
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage(p => Math.min(totalPages, p + 1));
-                      }}
-                      className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-                <span className="ml-4 text-sm text-white">Sida {page} av {totalPages}</span>
-              </Pagination>
-            )}
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
           </div>
         )}
       </div>
