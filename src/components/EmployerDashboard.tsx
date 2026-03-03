@@ -7,12 +7,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, Info } from 'lucide-react';
+import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
 import { MobileJobCard } from '@/components/MobileJobCard';
@@ -28,15 +27,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AlertDialogContentNoFocus } from "@/components/ui/alert-dialog-no-focus";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
@@ -146,10 +136,6 @@ const EmployerDashboard = memo(() => {
     }
   }, [page]);
 
-  // Check if job has expired (using effective expiration date)
-  const isJobExpired = (job: JobPosting): boolean => {
-    return isJobExpiredCheck(job.created_at, job.expires_at);
-  };
 
   const handleDeleteClick = (job: JobPosting) => {
     setJobToDelete(job);
@@ -369,12 +355,14 @@ const EmployerDashboard = memo(() => {
                         </TableRow>
                       ))}
                     </>
-                  ) : filteredAndSortedJobs.length === 0 ? (
+                  ) : tabFilteredJobs.length === 0 ? (
                     <TableRow className="hover:bg-transparent">
                       <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-sm">
                         {searchTerm.trim() 
                           ? 'Inga annonser matchar din sökning' 
-                          : 'Inga jobbannonser än. Skapa din första annons!'}
+                          : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
+                          : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
+                          : 'Inga utkast.'}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -479,7 +467,7 @@ const EmployerDashboard = memo(() => {
                                   if (!job.is_active) {
                                     handleEditDraft(job as JobPosting);
                                   } else {
-                                    handleEditJob(job as any);
+                                    handleEditJob(job as JobPosting);
                                   }
                                 }}
                                 className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 border-white/20 text-white transition-[background-color,border-color] duration-150 hover:bg-white/15 hover:border-white/50 active:scale-95"
@@ -490,7 +478,7 @@ const EmployerDashboard = memo(() => {
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDeleteClick(job as any);
+                                handleDeleteClick(job as JobPosting);
                               }}
                               className="inline-flex items-center justify-center rounded-full border h-7 w-7 bg-white/5 border-white/20 text-white transition-[background-color,border-color,color] duration-150 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 active:scale-95"
                             >
@@ -562,11 +550,13 @@ const EmployerDashboard = memo(() => {
                   </div>
                 ))}
               </div>
-            ) : filteredAndSortedJobs.length === 0 ? (
+            ) : tabFilteredJobs.length === 0 ? (
               <div className="text-center text-white py-8 font-medium text-sm">
                 {searchTerm.trim() 
                   ? 'Inga annonser matchar din sökning' 
-                  : 'Inga jobbannonser än. Skapa din första annons!'}
+                  : activeTab === 'active' ? 'Inga aktiva jobbannonser. Skapa din första annons!'
+                  : activeTab === 'expired' ? 'Inga utgångna jobbannonser.'
+                  : 'Inga utkast.'}
               </div>
             ) : (
               <>
@@ -579,7 +569,7 @@ const EmployerDashboard = memo(() => {
                         return (
                           <ReadOnlyMobileJobCard
                             key={job.id}
-                            job={job as any}
+                            job={job as JobPosting & { company_name?: string }}
                             hideSaveButton
                             onCardClick={(jobId) => {
                               if (isDraft) {
