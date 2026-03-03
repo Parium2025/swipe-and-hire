@@ -155,6 +155,26 @@ export default {
 						transform: 'translateY(-15%)',
 						animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)'
 					}
+				},
+				// Weather effect keyframes (GPU-accelerated CSS instead of framer-motion)
+				'twinkle': {
+					'0%, 100%': { opacity: 'var(--tw-opacity, 0.5)' },
+					'50%': { opacity: 'calc(var(--tw-opacity, 0.5) * 0.4)' },
+				},
+				'cloudDrift': {
+					'0%': { transform: 'translateX(-20vw)' },
+					'100%': { transform: 'translateX(120vw)' },
+				},
+				'rainFall': {
+					'0%': { transform: 'translateY(-5vh)' },
+					'100%': { transform: 'translateY(115vh)' },
+				},
+				'snowFall': {
+					'0%': { transform: 'translateY(-5vh) translateX(0)' },
+					'25%': { transform: 'translateY(25vh) translateX(var(--sway, 10px))' },
+					'50%': { transform: 'translateY(50vh) translateX(0)' },
+					'75%': { transform: 'translateY(75vh) translateX(calc(var(--sway, 10px) * -1))' },
+					'100%': { transform: 'translateY(105vh) translateX(0)' },
 				}
 			},
 				animation: {
