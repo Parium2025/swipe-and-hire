@@ -111,8 +111,15 @@ const JobSeekerHome = memo(() => {
     enabled: gpsGranted === true,
     backgroundLocationEnabled: (profile as any)?.background_location_enabled ?? false,
   });
+  // 🎯 KRITISKT: Förhindra att gammal cachad vädereffekt visas vid login
+  const [mountedLongEnough, setMountedLongEnough] = useState(false);
   
-  const showWeatherEffects = gpsGranted && !weather.isLoading;
+  useEffect(() => {
+    const timer = setTimeout(() => setMountedLongEnough(true), 200);
+    return () => clearTimeout(timer);
+  }, []);
+  
+  const showWeatherEffects = gpsGranted && mountedLongEnough && !weather.isLoading;
   
   // Emoji logic
   const displayEmoji = useMemo(() => {
