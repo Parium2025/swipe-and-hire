@@ -75,6 +75,8 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     },
     enabled: !!user?.id && activeJobIds.length > 0,
     staleTime: Infinity,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: true,
   });
 
   const { data: savedFavoritesCount = cachedStats['saved_favorites'] ?? 0 } = useQuery({
@@ -92,6 +94,8 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     },
     enabled: !!user?.id && activeJobIds.length > 0,
     staleTime: Infinity,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: true,
   });
 
   const { data: unreadMessagesCount = cachedStats['unread_messages'] ?? 0 } = useQuery({
@@ -110,6 +114,8 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     },
     enabled: !!user?.id,
     staleTime: Infinity,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: true,
   });
 
   useEffect(() => {
@@ -140,6 +146,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     };
   }, [user?.id, queryClient]);
 
+
   const activeJobsCount = activeJobIds.length;
   useEffect(() => {
     if (!jobsLoading && activeJobsCount > 0) {
@@ -155,6 +162,13 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     { icon: Heart, label: 'Sparade favoriter', value: savedFavoritesCount, description: 'Gånger dina aktiva jobb sparats' },
     { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden', link: '/messages' },
   ], [displayActiveJobs, newApplicationsCount, savedFavoritesCount, unreadMessagesCount]);
+
+  // Defensive index guard
+  useEffect(() => {
+    if (currentIndex >= statsArray.length && statsArray.length > 0) {
+      setCurrentIndex(0);
+    }
+  }, [statsArray.length, currentIndex]);
 
   const goNext = useCallback(() => { setCurrentIndex(prev => (prev + 1) % statsArray.length); }, [statsArray.length]);
   const goPrev = useCallback(() => { setCurrentIndex(prev => (prev - 1 + statsArray.length) % statsArray.length); }, [statsArray.length]);
