@@ -511,7 +511,7 @@ function ChatView({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const otherMembers = conversation.members.filter(m => m.user_id !== currentUserId);
+  const otherMembers = (conversation.members || []).filter(m => m.user_id !== currentUserId);
   const displayMember = otherMembers[0];
   
   // Use frozen application snapshot if available
@@ -519,7 +519,7 @@ function ChatView({
 
   // Get current user's display name for typing indicator
   const getCurrentUserName = () => {
-    const currentMember = conversation.members.find(m => m.user_id === currentUserId);
+    const currentMember = (conversation.members || []).find(m => m.user_id === currentUserId);
     if (!currentMember?.profile) return 'Någon';
     const p = currentMember.profile;
     if (p.role === 'employer' && p.company_name) return p.company_name;
