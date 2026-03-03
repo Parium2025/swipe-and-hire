@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { safeSetItem } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo, useEffect } from 'react';
@@ -77,18 +78,14 @@ function readJobsCache(userId: string, scope: string, orgId: string | null): Job
 }
 
 function writeJobsCache(userId: string, scope: string, orgId: string | null, jobs: JobPosting[]): void {
-  try {
-    const key = EMPLOYER_JOBS_CACHE_KEY + userId;
-    const cached: CachedJobs = {
-      jobs: jobs.slice(0, 100), // Max 100 jobs to save space
-      scope,
-      orgId,
-      timestamp: Date.now(),
-    };
-    localStorage.setItem(key, JSON.stringify(cached));
-  } catch {
-    // Storage full
-  }
+  const key = EMPLOYER_JOBS_CACHE_KEY + userId;
+  const cached: CachedJobs = {
+    jobs: jobs.slice(0, 100), // Max 100 jobs to save space
+    scope,
+    orgId,
+    timestamp: Date.now(),
+  };
+  safeSetItem(key, JSON.stringify(cached));
 }
 
 export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: true }) => {
