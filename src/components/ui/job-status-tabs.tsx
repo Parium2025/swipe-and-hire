@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useRef, useState, useEffect } from 'react';
+import { memo, useRef, useState, useEffect } from 'react';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -12,7 +12,7 @@ interface JobStatusTabsProps {
   showDrafts?: boolean;
 }
 
-export function JobStatusTabs({ activeTab, onTabChange, activeCount, expiredCount, draftCount, showDrafts = false }: JobStatusTabsProps) {
+export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChange, activeCount, expiredCount, draftCount, showDrafts = false }: JobStatusTabsProps) {
   const activeRef = useRef<HTMLButtonElement>(null);
   const expiredRef = useRef<HTMLButtonElement>(null);
   const draftRef = useRef<HTMLButtonElement>(null);
@@ -86,4 +86,4 @@ export function JobStatusTabs({ activeTab, onTabChange, activeCount, expiredCoun
       )}
     </div>
   );
-}
+});

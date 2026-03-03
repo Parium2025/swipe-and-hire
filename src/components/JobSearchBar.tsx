@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, ArrowUpDown, UserCheck, X } from 'lucide-react';
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 
-type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'active-first' | 'expired-first' | 'draft-first';
+import type { SortOption } from '@/hooks/useJobFiltering';
 
 export interface Recruiter {
   id: string;
@@ -31,7 +32,7 @@ interface JobSearchBarProps {
   hasDrafts?: boolean;
 }
 
-export const JobSearchBar = ({
+export const JobSearchBar = memo(({
   searchInput,
   onSearchChange,
   sortBy,
@@ -224,4 +225,6 @@ export const JobSearchBar = ({
       </div>
     </>
   );
-};
+});
+
+JobSearchBar.displayName = 'JobSearchBar';
