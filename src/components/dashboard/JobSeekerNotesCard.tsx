@@ -147,13 +147,23 @@ export const JobSeekerNotesCard = memo(() => {
           
           {/* Editor area */}
           <div className="flex-1 min-h-0 relative">
-            <RichNotesEditor
-              value={content}
-              onChange={handleChange}
-              placeholder="Skriv karriärmål, påminnelser..."
-              hideToolbar
-              onEditorReady={handleEditorReady}
-            />
+            {/* Skeleton placeholder while TipTap initializes */}
+            {!notesEditor && (
+              <div className="absolute inset-0 flex flex-col gap-2 p-2 animate-pulse">
+                <div className="h-3 w-3/4 bg-white/10 rounded" />
+                <div className="h-3 w-1/2 bg-white/10 rounded" />
+                <div className="h-3 w-2/3 bg-white/10 rounded" />
+              </div>
+            )}
+            <div className={notesEditor ? 'opacity-100' : 'opacity-0'} style={{ transition: 'opacity 0.15s ease-in' }}>
+              <RichNotesEditor
+                value={content}
+                onChange={handleChange}
+                placeholder="Skriv karriärmål, påminnelser..."
+                hideToolbar
+                onEditorReady={handleEditorReady}
+              />
+            </div>
             {/* Soft fade at bottom */}
             <div 
               className="absolute bottom-0 left-0 right-0 h-6 pointer-events-none rounded-b-lg"
