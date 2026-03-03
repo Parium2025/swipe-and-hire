@@ -50,58 +50,20 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readCachedStats(), []);
   
-  const { data: applicationsCount = cachedStats['applications'] ?? 0, isSuccess: appSuccess } = useQuery({
-    queryKey: ['my-applications-count', user?.id],
+  const { data: dashStats, isSuccess: statsSuccess } = useQuery({
+    queryKey: ['jobseeker-dashboard-stats', user?.id],
     queryFn: async () => {
-      if (!user?.id) return 0;
-      const { count, error } = await supabase
-        .from('job_applications')
-        .select('*', { count: 'exact', head: true })
-        .eq('applicant_id', user.id);
-      if (error) { console.error('Error fetching applications count:', error); return 0; }
-      const val = count ?? 0;
-      writeCachedStats('applications', val);
-      return val;
-    },
-    enabled: !!user?.id,
-    staleTime: Infinity,
-    gcTime: 1000 * 60 * 30,
-    refetchOnMount: true,
-  });
-  
-  const { data: interviewsCount = cachedStats['interviews'] ?? 0, isSuccess: intSuccess } = useQuery<number>({
-    queryKey: ['my-interviews-count', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return 0;
-      const { count, error } = await supabase
-        .from('interviews')
-        .select('*', { count: 'exact', head: true })
-        .eq('applicant_id', user.id)
-        .gte('scheduled_at', new Date().toISOString())
-        .in('status', ['pending', 'confirmed']);
-      if (error) { console.error('Error fetching interviews:', error); return 0; }
-      const val = count || 0;
-      writeCachedStats('interviews', val);
-      return val;
-    },
-    enabled: !!user?.id,
-    staleTime: Infinity,
-    gcTime: 1000 * 60 * 30,
-    refetchOnMount: true,
-  });
-  
-  const { data: savedJobsCount = cachedStats['saved'] ?? 0, isSuccess: savedSuccess } = useQuery<number>({
-    queryKey: ['saved-jobs-count', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return 0;
-      const { count, error } = await supabase
-        .from('saved_jobs')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-      if (error) { console.error('Error fetching saved jobs:', error); return 0; }
-      const val = count || 0;
-      writeCachedStats('saved', val);
-      return val;
+      if (!user?.id) return { applications: 0, interviews: 0, saved_jobs: 0, unread_messages: 0 };
+      const { data, error } = await supabase.rpc('get_jobseeker_dashboard_stats', {
+        p_user_id: user.id,
+      });
+      if (error) return { applications: 0, interviews: 0, saved_jobs: 0, unread_messages: 0 };
+      const stats = data as { applications: number; interviews: number; saved_jobs: number; unread_messages: number };
+      writeCachedStats('applications', stats.applications);
+      writeCachedStats('interviews', stats.interviews);
+      writeCachedStats('saved', stats.saved_jobs);
+      writeCachedStats('messages', stats.unread_messages);
+      return stats;
     },
     enabled: !!user?.id,
     staleTime: Infinity,
@@ -109,58 +71,40 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     refetchOnMount: true,
   });
 
-  const { data: unreadMessagesCount = cachedStats['messages'] ?? 0, isSuccess: msgSuccess } = useQuery<number>({
-    queryKey: ['unread-messages-count', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return 0;
-      const { count, error } = await supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('recipient_id', user.id)
-        .eq('is_read', false);
-      if (error) { console.error('Error fetching unread messages:', error); return 0; }
-      const val = count || 0;
-      writeCachedStats('messages', val);
-      return val;
-    },
-    enabled: !!user?.id,
-    staleTime: Infinity,
-    gcTime: 1000 * 60 * 30,
-    refetchOnMount: true,
-  });
+  const applicationsCount = dashStats?.applications ?? cachedStats['applications'] ?? 0;
+  const interviewsCount = dashStats?.interviews ?? cachedStats['interviews'] ?? 0;
+  const savedJobsCount = dashStats?.saved_jobs ?? cachedStats['saved'] ?? 0;
+  const unreadMessagesCount = dashStats?.unread_messages ?? cachedStats['messages'] ?? 0;
 
-  const dataReady = appSuccess && intSuccess && savedSuccess && msgSuccess;
+  const dataReady = statsSuccess;
 
   // Single consolidated realtime channel instead of 4 separate WebSocket connections
   useEffect(() => {
     if (!user?.id) return;
     
-    const invalidateAll = () => {
-      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
-      queryClient.invalidateQueries({ queryKey: ['my-interviews-count'] });
-      queryClient.invalidateQueries({ queryKey: ['saved-jobs-count'] });
-      queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
+    const invalidateStats = () => {
+      queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats'] });
     };
 
     const statsChannel = supabase
       .channel(`jobseeker-stats-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
-        () => { queryClient.invalidateQueries({ queryKey: ['my-applications-count'] }); }
+        invalidateStats
       )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'interviews', filter: `applicant_id=eq.${user.id}` },
-        () => { queryClient.invalidateQueries({ queryKey: ['my-interviews-count'] }); }
+        invalidateStats
       )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
-        () => { queryClient.invalidateQueries({ queryKey: ['saved-jobs-count'] }); }
+        invalidateStats
       )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
-        () => { queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] }); }
+        invalidateStats
       )
       .subscribe();
 
     // Also refresh on visibility change (handles stale data from sleep/tab switch)
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') invalidateAll();
+      if (document.visibilityState === 'visible') invalidateStats();
     };
     document.addEventListener('visibilitychange', handleVisibility);
     

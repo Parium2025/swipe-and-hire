@@ -59,19 +59,20 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       .map(j => j.id);
   }, [jobs]);
 
-  const { data: newApplicationsCount = cachedStats['new_applications'] ?? 0 } = useQuery({
-    queryKey: ['new-applications-count', user?.id, activeJobIds],
+  const { data: dashStats } = useQuery({
+    queryKey: ['employer-dashboard-stats', user?.id, activeJobIds],
     queryFn: async () => {
-      if (!user?.id || activeJobIds.length === 0) return 0;
-      const { count, error } = await supabase
-        .from('job_applications')
-        .select('*', { count: 'exact', head: true })
-        .in('job_id', activeJobIds)
-        .is('viewed_at', null);
-      if (error) return 0;
-      const val = count || 0;
-      writeEmployerCachedStat('new_applications', val);
-      return val;
+      if (!user?.id || activeJobIds.length === 0) return { new_applications: 0, saved_favorites: 0, unread_messages: 0 };
+      const { data, error } = await supabase.rpc('get_employer_dashboard_stats', {
+        p_user_id: user.id,
+        p_active_job_ids: activeJobIds,
+      });
+      if (error) return { new_applications: 0, saved_favorites: 0, unread_messages: 0 };
+      const stats = data as { new_applications: number; saved_favorites: number; unread_messages: number };
+      writeEmployerCachedStat('new_applications', stats.new_applications);
+      writeEmployerCachedStat('saved_favorites', stats.saved_favorites);
+      writeEmployerCachedStat('unread_messages', stats.unread_messages);
+      return stats;
     },
     enabled: !!user?.id && activeJobIds.length > 0,
     staleTime: Infinity,
@@ -79,66 +80,26 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     refetchOnMount: true,
   });
 
-  const { data: savedFavoritesCount = cachedStats['saved_favorites'] ?? 0 } = useQuery({
-    queryKey: ['saved-favorites-count', user?.id, activeJobIds],
-    queryFn: async () => {
-      if (!user?.id || activeJobIds.length === 0) return 0;
-      const { count, error } = await supabase
-        .from('saved_jobs')
-        .select('*', { count: 'exact', head: true })
-        .in('job_id', activeJobIds);
-      if (error) return 0;
-      const val = count || 0;
-      writeEmployerCachedStat('saved_favorites', val);
-      return val;
-    },
-    enabled: !!user?.id && activeJobIds.length > 0,
-    staleTime: Infinity,
-    gcTime: 1000 * 60 * 30,
-    refetchOnMount: true,
-  });
-
-  const { data: unreadMessagesCount = cachedStats['unread_messages'] ?? 0 } = useQuery({
-    queryKey: ['unread-messages-count', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return 0;
-      const { count, error } = await supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('recipient_id', user.id)
-        .eq('is_read', false);
-      if (error) return 0;
-      const val = count || 0;
-      writeEmployerCachedStat('unread_messages', val);
-      return val;
-    },
-    enabled: !!user?.id,
-    staleTime: Infinity,
-    gcTime: 1000 * 60 * 30,
-    refetchOnMount: true,
-  });
+  const newApplicationsCount = dashStats?.new_applications ?? cachedStats['new_applications'] ?? 0;
+  const savedFavoritesCount = dashStats?.saved_favorites ?? cachedStats['saved_favorites'] ?? 0;
+  const unreadMessagesCount = dashStats?.unread_messages ?? cachedStats['unread_messages'] ?? 0;
 
   useEffect(() => {
     if (!user?.id) return;
-    const invalidateAll = () => {
-      queryClient.invalidateQueries({ queryKey: ['new-applications-count'] });
-      queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] });
-      queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
+    const invalidateStats = () => {
+      queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
     };
     const msgChannel = supabase
       .channel(`employer-messages-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
-        () => { queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] }); }
+        invalidateStats
       )
       .subscribe();
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') invalidateAll();
+      if (document.visibilityState === 'visible') invalidateStats();
     };
     document.addEventListener('visibilitychange', handleVisibility);
-    const pollInterval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ['new-applications-count'] });
-      queryClient.invalidateQueries({ queryKey: ['saved-favorites-count'] });
-    }, 60000);
+    const pollInterval = setInterval(invalidateStats, 60000);
     return () => {
       supabase.removeChannel(msgChannel);
       document.removeEventListener('visibilitychange', handleVisibility);
