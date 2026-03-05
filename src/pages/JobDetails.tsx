@@ -554,7 +554,7 @@ const JobDetails = () => {
             />
             <button
               onClick={() => {
-                if (window.history.state?.idx > 0) {
+                if (window.history.length > 1) {
                   navigate(-1);
                 } else {
                   navigate('/');
