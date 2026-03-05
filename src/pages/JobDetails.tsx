@@ -836,31 +836,7 @@ const JobDetails = () => {
 
         {/* Candidate Profile Dialog */}
         <CandidateProfileDialog
-          application={selectedApplication ? {
-            id: selectedApplication.id,
-            job_id: jobId || '',
-            applicant_id: selectedApplication.applicant_id,
-            first_name: selectedApplication.first_name,
-            last_name: selectedApplication.last_name,
-            email: selectedApplication.email,
-            phone: selectedApplication.phone,
-            location: selectedApplication.location,
-            bio: selectedApplication.bio,
-            cv_url: selectedApplication.cv_url,
-            age: selectedApplication.age,
-            employment_status: selectedApplication.employment_status,
-            work_schedule: null,
-            availability: selectedApplication.availability,
-            custom_answers: selectedApplication.custom_answers,
-            status: selectedApplication.status,
-            applied_at: selectedApplication.applied_at,
-            updated_at: selectedApplication.applied_at,
-            job_title: job?.title || 'Okänt jobb',
-            profile_image_url: selectedApplication.profile_image_url,
-            video_url: selectedApplication.video_url,
-            is_profile_video: selectedApplication.is_profile_video,
-            city: selectedApplication.city,
-          } as ApplicationData : null}
+          application={selectedApplication ? mapToApplicationData(selectedApplication, jobId || '', job?.title || 'Okänt jobb') : null}
           open={dialogOpen}
           onOpenChange={(open) => {
             setDialogOpen(open);
