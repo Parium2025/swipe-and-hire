@@ -426,6 +426,21 @@ const JobDetails = () => {
     }
   }, [updateApplicationLocally, stageSettings, refetch]);
 
+  const handleMoveCandidatesForStage = useCallback(async (stageKey: string, targetKey: string) => {
+    const apps = applicationsByStatus[stageKey] || [];
+    if (apps.length === 0) return;
+    const ids = apps.map(a => a.id);
+    ids.forEach(id => updateApplicationLocally(id, { status: targetKey as JobApplication['status'] }));
+    const { error } = await supabase
+      .from('job_applications')
+      .update({ status: targetKey })
+      .in('id', ids);
+    if (error) {
+      refetch();
+      throw error;
+    }
+  }, [applicationsByStatus, updateApplicationLocally, refetch]);
+
   // DnD handlers
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
