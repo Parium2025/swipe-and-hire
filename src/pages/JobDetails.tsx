@@ -431,13 +431,13 @@ const JobDetails = () => {
     setActiveId(event.active.id as string);
   };
 
-  const resolveOverStatus = (overRawId?: string): string | null => {
+  const resolveOverStatus = useCallback((overRawId?: string): string | null => {
     if (!overRawId) return null;
     if (activeStages.includes(overRawId)) return overRawId;
     const overApp = applications.find((a) => a.id === overRawId);
     if (overApp && activeStages.includes(overApp.status)) return overApp.status;
     return null;
-  };
+  }, [activeStages, applications]);
 
   const handleDragOver = (event: DragOverEvent) => {
     const overRawId = event.over?.id as string | undefined;
