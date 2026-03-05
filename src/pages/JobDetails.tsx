@@ -805,21 +805,7 @@ const JobDetails = () => {
                     onToggleSelect={toggleApplicationSelection}
                     targetStageKey={targetKey}
                     targetStageLabel={targetLabel}
-                    onMoveCandidatesAndDelete={targetKey ? async () => {
-                      const apps = applicationsByStatus[status] || [];
-                      if (apps.length > 0) {
-                        const ids = apps.map(a => a.id);
-                        ids.forEach(id => updateApplicationLocally(id, { status: targetKey as JobApplication['status'] }));
-                        const { error } = await supabase
-                          .from('job_applications')
-                          .update({ status: targetKey })
-                          .in('id', ids);
-                        if (error) {
-                          refetch();
-                          throw error;
-                        }
-                      }
-                    } : undefined}
+                    onMoveCandidatesAndDelete={targetKey ? () => handleMoveCandidatesForStage(status, targetKey) : undefined}
                   />
                 );
               })}
