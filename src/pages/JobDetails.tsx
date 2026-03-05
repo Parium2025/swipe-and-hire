@@ -595,22 +595,22 @@ const JobDetails = () => {
                 <Badge
                   className={`text-xs whitespace-nowrap cursor-pointer transition-colors border ${statusColor}`}
                   onClick={async () => {
+                    const newActive = !job.is_active;
+                    updateJobLocally({ is_active: newActive });
                     try {
                       const { error } = await supabase
                         .from('job_postings')
-                        .update({ is_active: !job.is_active })
+                        .update({ is_active: newActive })
                         .eq('id', jobId);
 
                       if (error) throw error;
 
                       toast.success(
-                        job.is_active ? 'Jobb inaktiverat' : 'Jobb aktiverat',
-                        { description: job.is_active ? 'Jobbet är nu inaktivt.' : 'Jobbet är nu aktivt.' }
+                        newActive ? 'Jobb aktiverat' : 'Jobb inaktiverat',
+                        { description: newActive ? 'Jobbet är nu aktivt.' : 'Jobbet är nu inaktivt.' }
                       );
-
-                      updateJobLocally({ is_active: !job.is_active });
-                      refetch();
                     } catch (error: any) {
+                      updateJobLocally({ is_active: job.is_active });
                       toast.error('Fel', { description: error.message });
                     }
                   }}
