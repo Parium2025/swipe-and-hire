@@ -137,12 +137,16 @@ const JobDetails = () => {
   
   const employerProfileImageUrl = useMediaUrl(job?.employer_profile?.profile_image_url, 'profile-image');
 
-  // Load my_candidates map for rating updates
+  // Load my_candidates map for rating updates — only re-fetch when applicant IDs actually change
   useEffect(() => {
     if (!user || applications.length === 0) return;
     
+    const applicantIds = applications.map(a => a.applicant_id).sort();
+    const idsHash = applicantIds.join(',');
+    if (idsHash === myCandidatesApplicantIdsRef.current) return;
+    myCandidatesApplicantIdsRef.current = idsHash;
+    
     const loadMyCandidatesMap = async () => {
-      const applicantIds = applications.map(a => a.applicant_id);
       const { data } = await supabase
         .from('my_candidates')
         .select('id, applicant_id')
