@@ -727,11 +727,7 @@ const JobDetails = () => {
             onOpenCriteriaDialog={() => setCriteriaDialogOpen(true)}
             isSelectionMode={isSelectionMode}
             selectedApplicationIds={selectedApplicationIds}
-            onToggleSelect={(id) => setSelectedApplicationIds(prev => {
-              const next = new Set(prev);
-              if (next.has(id)) next.delete(id); else next.add(id);
-              return next;
-            })}
+            onToggleSelect={toggleApplicationSelection}
             renderActionBar={isSelectionMode ? (
               <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mt-2">
                 <SelectionActionBar
