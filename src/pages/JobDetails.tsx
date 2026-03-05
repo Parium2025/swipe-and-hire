@@ -76,6 +76,7 @@ const JobDetails = () => {
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [myCandidatesMap, setMyCandidatesMap] = useState<Map<string, string>>(new Map());
+  const myCandidatesApplicantIdsRef = useRef<string>('');
   const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
   
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
