@@ -48,7 +48,7 @@ import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 
 // Extracted components
-import { SelectionActionBar, ApplicationCardContent, StatusColumn } from '@/components/jobdetails';
+import { SelectionActionBar, ApplicationCardContent, StatusColumn, mapToApplicationData } from '@/components/jobdetails';
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
