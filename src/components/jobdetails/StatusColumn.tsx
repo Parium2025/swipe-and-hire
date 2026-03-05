@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { ChevronDown, Sparkles } from 'lucide-react';
@@ -33,7 +33,7 @@ export interface StatusColumnProps {
   stageIndex?: number;
 }
 
-export const StatusColumn = ({ 
+export const StatusColumn = memo(({ 
   jobId,
   status, 
   applications, 
@@ -79,6 +79,16 @@ export const StatusColumn = ({
     checkScroll();
   }, [applications.length, checkScroll]);
 
+  // Listen for resize to update scroll indicators
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    const ro = new ResizeObserver(checkScroll);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [checkScroll]);
+
   return (
     <div 
       ref={setNodeRef}
@@ -89,17 +99,17 @@ export const StatusColumn = ({
       }}
     >
       <div 
-        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-foreground/20 backdrop-blur-sm flex-shrink-0 ${isOver ? 'ring-2 ring-foreground/40' : ''}`}
         style={{ backgroundColor: `${displayColor}55` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
-          <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
+          <Icon className="h-3.5 w-3.5 text-foreground flex-shrink-0" />
           <TruncatedText
             text={stageConfig.label}
-            className="font-medium text-xs text-white truncate flex-1 min-w-0"
+            className="font-medium text-xs text-foreground truncate flex-1 min-w-0"
           />
           <span 
-            className="text-white text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
+            className="text-foreground text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}88` }}
           >
             {applications.length}
@@ -107,7 +117,7 @@ export const StatusColumn = ({
           {onOpenCriteriaDialog && (
             <button
               onClick={onOpenCriteriaDialog}
-              className="p-1 rounded hover:bg-white/20 transition-colors text-white/70 hover:text-primary"
+              className="p-1 rounded hover:bg-foreground/20 transition-colors text-foreground/70 hover:text-primary"
               title="Urvalskriterier"
             >
               <Sparkles className="h-3.5 w-3.5" />
@@ -129,19 +139,19 @@ export const StatusColumn = ({
         </div>
       </div>
 
-      <div className="relative flex-1 min-h-0 bg-white/5 rounded-lg ring-1 ring-inset ring-white/10 backdrop-blur-sm">
+      <div className="relative flex-1 min-h-0 bg-foreground/5 rounded-lg ring-1 ring-inset ring-foreground/10 backdrop-blur-sm">
         {canScrollUp && (
-          <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-white/5 to-transparent z-10 pointer-events-none rounded-t-lg" />
+          <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-foreground/5 to-transparent z-10 pointer-events-none rounded-t-lg" />
         )}
 
         <div 
           ref={scrollContainerRef}
           onScroll={checkScroll}
-          className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
+          className="h-full overflow-y-auto space-y-1.5 p-2 scrollbar-thin scrollbar-thumb-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-foreground/30"
         >
           {isOver && (
             <div className="mb-2 flex items-center justify-center">
-              <div className="rounded-md bg-white/10 backdrop-blur-sm ring-1 ring-inset ring-white/20 px-4 py-3 text-xs font-medium text-white animate-pulse">
+              <div className="rounded-md bg-foreground/10 backdrop-blur-sm ring-1 ring-inset ring-foreground/20 px-4 py-3 text-xs font-medium text-foreground animate-pulse">
                 Släpp här
               </div>
             </div>
@@ -164,20 +174,21 @@ export const StatusColumn = ({
           </SortableContext>
 
           {applications.length === 0 && !isOver && (
-            <div className="text-center py-8 text-xs text-white">
+            <div className="text-center py-8 text-xs text-foreground">
               Inga kandidater i detta steg
             </div>
           )}
         </div>
 
         {canScrollDown && (
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/5 to-transparent z-10 pointer-events-none rounded-b-lg flex items-end justify-center pb-1">
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-foreground/5 to-transparent z-10 pointer-events-none rounded-b-lg flex items-end justify-center pb-1">
             <div className="animate-bounce">
-              <ChevronDown className="h-3.5 w-3.5 text-white/60" />
+              <ChevronDown className="h-3.5 w-3.5 text-foreground/60" />
             </div>
           </div>
         )}
       </div>
     </div>
   );
-};
+});
+StatusColumn.displayName = 'StatusColumn';
