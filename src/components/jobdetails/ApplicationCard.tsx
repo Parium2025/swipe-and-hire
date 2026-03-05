@@ -6,11 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { formatCompactTime } from '@/lib/date';
 import { ArrowDown, Clock, Star } from 'lucide-react';
 import type { JobApplication } from '@/hooks/useJobDetailsData';
-import {
-  useSortable,
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 // Star rating component - read-only for cards
@@ -22,8 +18,8 @@ export const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxS
           key={i}
           className={`h-2.5 w-2.5 ${
             i < rating 
-              ? 'text-yellow-400 fill-yellow-400' 
-              : 'text-white/30'
+              ? 'text-amber-400 fill-amber-400' 
+              : 'text-muted-foreground/30'
           }`}
         />
       ))}
@@ -32,7 +28,7 @@ export const StarRating = ({ rating = 0, maxStars = 5 }: { rating?: number; maxS
 };
 
 // Small Candidate Avatar Wrapper
-const SmallCandidateAvatarWrapper = ({ application }: { application: JobApplication }) => {
+const SmallCandidateAvatarWrapper = memo(({ application }: { application: JobApplication }) => {
   const hasVideo = application.is_profile_video && application.video_url;
 
   return (
@@ -52,10 +48,11 @@ const SmallCandidateAvatarWrapper = ({ application }: { application: JobApplicat
       />
     </div>
   );
-};
+});
+SmallCandidateAvatarWrapper.displayName = 'SmallCandidateAvatarWrapper';
 
 // Application Card Content
-export const ApplicationCardContent = ({ 
+export const ApplicationCardContent = memo(({ 
   application, 
   isDragging, 
   onOpenProfile,
@@ -97,14 +94,14 @@ export const ApplicationCardContent = ({
   
   return (
     <div 
-      className={`bg-white/5 ring-1 ring-inset rounded-md px-2 py-1.5 group relative
+      className={`bg-foreground/5 ring-1 ring-inset rounded-md px-2 py-1.5 group relative
         transition-all duration-200 ease-out
         ${isSelectionMode ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}
         ${isSelected 
-          ? 'ring-1 ring-white/30 bg-white/[0.08]' 
+          ? 'ring-1 ring-foreground/30 bg-foreground/[0.08]' 
           : isDragging 
-            ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20' 
-            : 'ring-white/10 hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
+            ? 'ring-2 ring-inset ring-primary/50 bg-foreground/10 scale-[1.02] shadow-lg shadow-primary/20' 
+            : 'ring-foreground/10 hover:ring-foreground/30 hover:bg-foreground/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-background/20'
         }`}
       onClick={handleClick}
       onMouseEnter={onPrefetch}
@@ -114,7 +111,7 @@ export const ApplicationCardContent = ({
           <Checkbox 
             checked={isSelected}
             onCheckedChange={() => onToggleSelect?.()}
-            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white hover:border-white/70"
+            className="h-3.5 w-3.5 border border-foreground/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-foreground hover:border-foreground/70"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -122,7 +119,7 @@ export const ApplicationCardContent = ({
 
       {isUnread && !isSelectionMode && (
         <div className="absolute right-1.5 top-1.5">
-          <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
+          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
         </div>
       )}
       
@@ -133,7 +130,7 @@ export const ApplicationCardContent = ({
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors cursor-default">
+                <p className="text-primary-foreground font-medium text-xs truncate group-hover:text-primary-foreground/80 transition-colors cursor-default">
                   {application.first_name} {application.last_name}
                 </p>
               </TooltipTrigger>
@@ -144,7 +141,7 @@ export const ApplicationCardContent = ({
           </TooltipProvider>
           <StarRating rating={application.rating} />
           {(appliedTime || lastActiveTime) && (
-            <div className="flex items-center gap-1.5 mt-0.5 text-white text-[10px]">
+            <div className="flex items-center gap-1.5 mt-0.5 text-muted-foreground text-[10px]">
               {appliedTime && (
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
@@ -181,7 +178,7 @@ export const ApplicationCardContent = ({
       </div>
 
       {hasResults && (
-        <div className="flex flex-wrap gap-1 mt-1.5 pt-1.5 border-t border-white/5">
+        <div className="flex flex-wrap gap-1 mt-1.5 pt-1.5 border-t border-foreground/5">
           {criterionResults.map((cr) => (
             <CriterionIconBadge
               key={cr.criterion_id}
@@ -193,7 +190,8 @@ export const ApplicationCardContent = ({
       )}
     </div>
   );
-};
+});
+ApplicationCardContent.displayName = 'ApplicationCardContent';
 
 // Sortable Application Card
 export const SortableApplicationCard = ({ 

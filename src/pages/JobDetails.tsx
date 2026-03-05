@@ -48,7 +48,7 @@ import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 
 // Extracted components
-import { SelectionActionBar, ApplicationCardContent, StatusColumn } from '@/components/jobdetails';
+import { SelectionActionBar, ApplicationCardContent, StatusColumn, mapToApplicationData } from '@/components/jobdetails';
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
@@ -76,6 +76,7 @@ const JobDetails = () => {
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [myCandidatesMap, setMyCandidatesMap] = useState<Map<string, string>>(new Map());
+  const myCandidatesApplicantIdsRef = useRef<string>('');
   const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
   
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
@@ -136,12 +137,16 @@ const JobDetails = () => {
   
   const employerProfileImageUrl = useMediaUrl(job?.employer_profile?.profile_image_url, 'profile-image');
 
-  // Load my_candidates map for rating updates
+  // Load my_candidates map for rating updates — only re-fetch when applicant IDs actually change
   useEffect(() => {
     if (!user || applications.length === 0) return;
     
+    const applicantIds = applications.map(a => a.applicant_id).sort();
+    const idsHash = applicantIds.join(',');
+    if (idsHash === myCandidatesApplicantIdsRef.current) return;
+    myCandidatesApplicantIdsRef.current = idsHash;
+    
     const loadMyCandidatesMap = async () => {
-      const applicantIds = applications.map(a => a.applicant_id);
       const { data } = await supabase
         .from('my_candidates')
         .select('id, applicant_id')
@@ -334,34 +339,7 @@ const JobDetails = () => {
   }, [isTouchDevice, applicationsByStatus, resolveStageForApplication]);
 
   const swipeApplicationsAsData = useMemo(() => {
-    return swipeStageApps.map(app => ({
-      id: app.id,
-      job_id: jobId || '',
-      applicant_id: app.applicant_id,
-      first_name: app.first_name,
-      last_name: app.last_name,
-      email: app.email,
-      phone: app.phone,
-      location: app.location,
-      bio: app.bio,
-      cv_url: app.cv_url,
-      age: app.age,
-      employment_status: app.employment_status,
-      work_schedule: null,
-      availability: app.availability,
-      custom_answers: app.custom_answers,
-      status: app.status,
-      applied_at: app.applied_at,
-      updated_at: app.applied_at,
-      job_title: job?.title || '',
-      profile_image_url: app.profile_image_url,
-      video_url: app.video_url,
-      is_profile_video: app.is_profile_video,
-      viewed_at: app.viewed_at,
-      last_active_at: app.last_active_at,
-      city: app.city,
-      rating: app.rating,
-    } as ApplicationData));
+    return swipeStageApps.map(app => mapToApplicationData(app, jobId || '', job?.title || ''));
   }, [swipeStageApps, jobId, job?.title]);
 
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
@@ -448,18 +426,33 @@ const JobDetails = () => {
     }
   }, [updateApplicationLocally, stageSettings, refetch]);
 
+  const handleMoveCandidatesForStage = useCallback(async (stageKey: string, targetKey: string) => {
+    const apps = applicationsByStatus[stageKey] || [];
+    if (apps.length === 0) return;
+    const ids = apps.map(a => a.id);
+    ids.forEach(id => updateApplicationLocally(id, { status: targetKey as JobApplication['status'] }));
+    const { error } = await supabase
+      .from('job_applications')
+      .update({ status: targetKey })
+      .in('id', ids);
+    if (error) {
+      refetch();
+      throw error;
+    }
+  }, [applicationsByStatus, updateApplicationLocally, refetch]);
+
   // DnD handlers
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
 
-  const resolveOverStatus = (overRawId?: string): string | null => {
+  const resolveOverStatus = useCallback((overRawId?: string): string | null => {
     if (!overRawId) return null;
     if (activeStages.includes(overRawId)) return overRawId;
     const overApp = applications.find((a) => a.id === overRawId);
     if (overApp && activeStages.includes(overApp.status)) return overApp.status;
     return null;
-  };
+  }, [activeStages, applications]);
 
   const handleDragOver = (event: DragOverEvent) => {
     const overRawId = event.over?.id as string | undefined;
@@ -576,7 +569,7 @@ const JobDetails = () => {
             />
             <button
               onClick={() => {
-                if (window.history.state?.idx > 0) {
+                if (window.history.length > 1) {
                   navigate(-1);
                 } else {
                   navigate('/');
@@ -617,22 +610,22 @@ const JobDetails = () => {
                 <Badge
                   className={`text-xs whitespace-nowrap cursor-pointer transition-colors border ${statusColor}`}
                   onClick={async () => {
+                    const newActive = !job.is_active;
+                    updateJobLocally({ is_active: newActive });
                     try {
                       const { error } = await supabase
                         .from('job_postings')
-                        .update({ is_active: !job.is_active })
+                        .update({ is_active: newActive })
                         .eq('id', jobId);
 
                       if (error) throw error;
 
                       toast.success(
-                        job.is_active ? 'Jobb inaktiverat' : 'Jobb aktiverat',
-                        { description: job.is_active ? 'Jobbet är nu inaktivt.' : 'Jobbet är nu aktivt.' }
+                        newActive ? 'Jobb aktiverat' : 'Jobb inaktiverat',
+                        { description: newActive ? 'Jobbet är nu aktivt.' : 'Jobbet är nu inaktivt.' }
                       );
-
-                      updateJobLocally({ is_active: !job.is_active });
-                      refetch();
                     } catch (error: any) {
+                      updateJobLocally({ is_active: job.is_active });
                       toast.error('Fel', { description: error.message });
                     }
                   }}
@@ -749,11 +742,7 @@ const JobDetails = () => {
             onOpenCriteriaDialog={() => setCriteriaDialogOpen(true)}
             isSelectionMode={isSelectionMode}
             selectedApplicationIds={selectedApplicationIds}
-            onToggleSelect={(id) => setSelectedApplicationIds(prev => {
-              const next = new Set(prev);
-              if (next.has(id)) next.delete(id); else next.add(id);
-              return next;
-            })}
+            onToggleSelect={toggleApplicationSelection}
             renderActionBar={isSelectionMode ? (
               <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mt-2">
                 <SelectionActionBar
@@ -816,21 +805,7 @@ const JobDetails = () => {
                     onToggleSelect={toggleApplicationSelection}
                     targetStageKey={targetKey}
                     targetStageLabel={targetLabel}
-                    onMoveCandidatesAndDelete={targetKey ? async () => {
-                      const apps = applicationsByStatus[status] || [];
-                      if (apps.length > 0) {
-                        const ids = apps.map(a => a.id);
-                        ids.forEach(id => updateApplicationLocally(id, { status: targetKey as JobApplication['status'] }));
-                        const { error } = await supabase
-                          .from('job_applications')
-                          .update({ status: targetKey })
-                          .in('id', ids);
-                        if (error) {
-                          refetch();
-                          throw error;
-                        }
-                      }
-                    } : undefined}
+                    onMoveCandidatesAndDelete={targetKey ? () => handleMoveCandidatesForStage(status, targetKey) : undefined}
                   />
                 );
               })}
@@ -862,31 +837,7 @@ const JobDetails = () => {
 
         {/* Candidate Profile Dialog */}
         <CandidateProfileDialog
-          application={selectedApplication ? {
-            id: selectedApplication.id,
-            job_id: jobId || '',
-            applicant_id: selectedApplication.applicant_id,
-            first_name: selectedApplication.first_name,
-            last_name: selectedApplication.last_name,
-            email: selectedApplication.email,
-            phone: selectedApplication.phone,
-            location: selectedApplication.location,
-            bio: selectedApplication.bio,
-            cv_url: selectedApplication.cv_url,
-            age: selectedApplication.age,
-            employment_status: selectedApplication.employment_status,
-            work_schedule: null,
-            availability: selectedApplication.availability,
-            custom_answers: selectedApplication.custom_answers,
-            status: selectedApplication.status,
-            applied_at: selectedApplication.applied_at,
-            updated_at: selectedApplication.applied_at,
-            job_title: job?.title || 'Okänt jobb',
-            profile_image_url: selectedApplication.profile_image_url,
-            video_url: selectedApplication.video_url,
-            is_profile_video: selectedApplication.is_profile_video,
-            city: selectedApplication.city,
-          } as ApplicationData : null}
+          application={selectedApplication ? mapToApplicationData(selectedApplication, jobId || '', job?.title || 'Okänt jobb') : null}
           open={dialogOpen}
           onOpenChange={(open) => {
             setDialogOpen(open);
