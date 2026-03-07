@@ -248,4 +248,5 @@ export const SortableApplicationCard = memo(({
       />
     </div>
   );
-};
+});
+SortableApplicationCard.displayName = 'SortableApplicationCard';
