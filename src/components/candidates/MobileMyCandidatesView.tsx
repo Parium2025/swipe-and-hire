@@ -339,6 +339,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
         {/* Horizontal scrollable stage tabs */}
         <div
           ref={dragScrollRef}
+          onPointerDownCapture={(e) => handleStageContainerPointerDown(e.target, e.pointerType)}
           className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
         >
           {stages.map((stage, stageIdx) => {
