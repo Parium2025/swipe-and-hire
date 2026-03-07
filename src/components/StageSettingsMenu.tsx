@@ -38,7 +38,7 @@ import {
   getIconByName,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 
 interface StageSettingsMenuProps {
   stageKey: string;

@@ -34,7 +34,7 @@ import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle, MoveVertic
 import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS, getJobStageIconByName } from '@/hooks/useJobStageSettings';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 interface JobStageSettingsMenuProps {
   jobId: string;
   stageKey: string;

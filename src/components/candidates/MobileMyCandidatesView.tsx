@@ -341,10 +341,10 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   <span className="truncate min-w-0">{cfg.label}</span>
                 )}
                 <span
-                  className="text-[9px] min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full text-white flex-shrink-0 tabular-nums leading-none"
+                  className="h-4 min-w-4 px-0.5 inline-grid place-items-center rounded-full text-[9px] text-white flex-shrink-0 tabular-nums"
                   style={{ backgroundColor: `${cfg.color}88` }}
                 >
-                  {count}
+                  <span className="translate-y-[0.25px]">{count}</span>
                 </span>
                 {/* Stage settings menu (3-dot) */}
                 {!isReadOnly && (
