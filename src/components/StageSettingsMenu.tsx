@@ -221,14 +221,15 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
             }
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
             onMouseDown={useJobDetailsTriggerStyle ? (e) => e.preventDefault() : undefined}
-            onTouchStart={handleTriggerTouchStart}
-            onTouchMove={handleTriggerTouchMove}
-            onTouchEnd={handleTriggerTouchEnd}
-            onTouchCancel={handleTriggerTouchEnd}
+            onPointerDown={handleTriggerPointerDown}
+            onPointerMove={handleTriggerPointerMove}
+            onPointerUp={handleTriggerPointerCancel}
+            onPointerCancel={handleTriggerPointerCancel}
             onClick={(e) => {
-              if (isMobile && requireLongPressOnMobile) {
+              if (blockTouchClickRef.current) {
                 e.preventDefault();
                 e.stopPropagation();
+                blockTouchClickRef.current = false;
               }
             }}
             onFocus={useJobDetailsTriggerStyle ? (e) => {
