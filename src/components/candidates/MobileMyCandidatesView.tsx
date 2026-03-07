@@ -1,4 +1,4 @@
-import { memo, useState, useMemo } from 'react';
+import { memo, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
@@ -59,6 +59,31 @@ const MyCandidateRow = memo(function MyCandidateRow({
   const appliedTime = formatCompactTime(candidate.applied_at);
   const lastActiveTime = formatCompactTime(candidate.last_active_at);
 
+  const rowRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [menuMetrics, setMenuMetrics] = useState({ width: 0, alignOffset: 12 });
+
+  const measureMenuMetrics = useCallback(() => {
+    const rowEl = rowRef.current;
+    const triggerEl = triggerRef.current;
+    if (!rowEl || !triggerEl) return;
+
+    const rowRect = rowEl.getBoundingClientRect();
+    const triggerRect = triggerEl.getBoundingClientRect();
+    const nextWidth = Math.round(rowRect.width);
+    const nextAlignOffset = Math.round(rowRect.right - triggerRect.right);
+
+    setMenuMetrics((prev) =>
+      prev.width === nextWidth && prev.alignOffset === nextAlignOffset
+        ? prev
+        : { width: nextWidth, alignOffset: nextAlignOffset }
+    );
+  }, []);
+
+  useEffect(() => {
+    measureMenuMetrics();
+  }, [measureMenuMetrics]);
+
   const handleTap = () => {
     if (isSelectionMode && onToggleSelect) {
       onToggleSelect();
@@ -77,10 +102,10 @@ const MyCandidateRow = memo(function MyCandidateRow({
       className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-all duration-150 min-h-touch relative
         ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:bg-white/[0.08]'}
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
+      ref={rowRef}
       onClick={handleTap}
       onMouseEnter={onPrefetch}
     >
-      {/* Unread dot — top-left corner */}
       {!isSelectionMode && isUnread && (
         <div className="absolute left-1.5 top-1.5">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
@@ -159,9 +184,10 @@ const MyCandidateRow = memo(function MyCandidateRow({
           />
         </div>
       ) : (
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={(open) => open && measureMenuMetrics()}>
           <DropdownMenuTrigger asChild>
             <button
+              ref={triggerRef}
               onClick={e => e.stopPropagation()}
               className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:bg-white/15 transition-colors flex-shrink-0"
               aria-label="Flytta kandidat"
@@ -173,8 +199,9 @@ const MyCandidateRow = memo(function MyCandidateRow({
             align="end"
             side="bottom"
             sideOffset={4}
-            alignOffset={12}
-            className="w-[calc(100vw-2rem)] max-w-sm"
+            alignOffset={menuMetrics.alignOffset}
+            className="max-w-none"
+            style={{ width: menuMetrics.width ? `${menuMetrics.width}px` : 'calc(100vw - 2rem)' }}
           >
             {moveTargets.map(stage => {
               const cfg = stageConfig[stage];
