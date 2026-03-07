@@ -63,6 +63,41 @@ const CandidateRow = memo(function CandidateRow({
   const hasResults = criterionResults.length > 0;
   const needsEvaluation = criteriaCount > 0 && !hasResults;
 
+  const rowRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [menuMetrics, setMenuMetrics] = useState({ width: 0, alignOffset: 0 });
+
+  const measureMenuMetrics = useCallback(() => {
+    const rowEl = rowRef.current;
+    const triggerEl = triggerRef.current;
+    if (!rowEl || !triggerEl) return;
+
+    const rowRect = rowEl.getBoundingClientRect();
+    const triggerRect = triggerEl.getBoundingClientRect();
+    const nextWidth = Math.round(rowRect.width);
+    const nextAlignOffset = Math.round(rowRect.left - triggerRect.left);
+
+    setMenuMetrics((prev) =>
+      prev.width === nextWidth && prev.alignOffset === nextAlignOffset
+        ? prev
+        : { width: nextWidth, alignOffset: nextAlignOffset }
+    );
+  }, []);
+
+  useEffect(() => {
+    measureMenuMetrics();
+
+    const rowEl = rowRef.current;
+    if (!rowEl || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(() => {
+      measureMenuMetrics();
+    });
+
+    observer.observe(rowEl);
+    return () => observer.disconnect();
+  }, [measureMenuMetrics]);
+
   const handleTap = () => {
     if (isSelectionMode && onToggleSelect) {
       onToggleSelect();
@@ -76,6 +111,7 @@ const CandidateRow = memo(function CandidateRow({
 
   return (
     <div
+      ref={rowRef}
       className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-all duration-150 min-h-touch relative
         ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:bg-white/[0.08]'}
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
