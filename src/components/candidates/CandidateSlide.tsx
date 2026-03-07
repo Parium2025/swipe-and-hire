@@ -1,5 +1,5 @@
-import { useState, memo, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { useState, memo, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, ChevronDown, ChevronUp, ChevronRight, MessageSquare, CalendarPlus, Activity, StickyNote, X } from 'lucide-react';
@@ -82,6 +82,64 @@ export const CandidateSlide = memo(function CandidateSlide({
   const [bioExpanded, setBioExpanded] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('profil');
+  const [swipeDirection, setSwipeDirection] = useState<1 | -1>(1);
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const swipeLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
+
+  const tabIndex = TABS.findIndex(t => t.key === activeTab);
+
+  const handleTabSwipe = useCallback((deltaX: number) => {
+    const currentIdx = TABS.findIndex(t => t.key === activeTab);
+    if (deltaX < -50 && currentIdx < TABS.length - 1) {
+      setSwipeDirection(1);
+      setActiveTab(TABS[currentIdx + 1].key);
+    } else if (deltaX > 50 && currentIdx > 0) {
+      setSwipeDirection(-1);
+      setActiveTab(TABS[currentIdx - 1].key);
+    }
+  }, [activeTab]);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+    swipeLockedRef.current = null;
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartRef.current.x);
+    const dy = Math.abs(touch.clientY - touchStartRef.current.y);
+
+    // Lock direction after 10px of movement
+    if (!swipeLockedRef.current && (dx > 10 || dy > 10)) {
+      swipeLockedRef.current = dx > dy ? 'horizontal' : 'vertical';
+    }
+
+    // If horizontal swipe detected, prevent vertical scroll
+    if (swipeLockedRef.current === 'horizontal') {
+      e.stopPropagation();
+    }
+  }, []);
+
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current || swipeLockedRef.current !== 'horizontal') {
+      touchStartRef.current = null;
+      swipeLockedRef.current = null;
+      return;
+    }
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const elapsed = Date.now() - touchStartRef.current.time;
+
+    // Accept swipe if >50px or fast flick (>30px in <300ms)
+    if (Math.abs(deltaX) > 50 || (Math.abs(deltaX) > 30 && elapsed < 300)) {
+      handleTabSwipe(deltaX);
+    }
+
+    touchStartRef.current = null;
+    swipeLockedRef.current = null;
+  }, [handleTabSwipe]);
 
   // AI summary hook — only actively polls when visible
   const summaryHook = useCandidateSummary({
@@ -147,7 +205,12 @@ export const CandidateSlide = memo(function CandidateSlide({
             return (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  const fromIdx = TABS.findIndex(t => t.key === activeTab);
+                  const toIdx = TABS.findIndex(t => t.key === tab.key);
+                  setSwipeDirection(toIdx > fromIdx ? 1 : -1);
+                  setActiveTab(tab.key);
+                }}
                 className={`flex-1 px-1.5 py-2.5 text-sm font-medium transition-colors min-w-0 ${
                   isActive ? 'text-white' : 'text-white/50'
                 }`}
@@ -161,221 +224,241 @@ export const CandidateSlide = memo(function CandidateSlide({
           })}
         </div>
 
-        {/* ── PROFIL TAB ── */}
-        {activeTab === 'profil' && (
-          <>
-            {/* Avatar / Video */}
-            <div className="relative">
-              {isProfileVideo && videoUrl ? (
-                <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
-                  <ProfileVideo
-                    videoUrl={videoUrl}
-                    coverImageUrl={profileImageUrl || undefined}
-                    userInitials={initials}
-                    className="w-full h-full"
-                    showCountdown={true}
-                    showProgressBar={false}
-                  />
-                </div>
-              ) : (
-                <Avatar className="w-28 h-28 border-4 border-white/20 shadow-xl">
-                  <AvatarImage src={profileImageUrl || ''} alt={`${application.first_name} ${application.last_name}`} className="object-cover" />
-                  <AvatarFallback className="bg-white/10 text-white text-3xl font-semibold" delayMs={200}>{initials}</AvatarFallback>
-                </Avatar>
-              )}
-            </div>
-
-            {/* Name + job + time */}
-            <div className="text-center">
-              <h2 className="text-xl font-semibold text-white">{application.first_name} {application.last_name}</h2>
-              <p className="text-sm text-white mt-1">{application.job_title || 'Okänd tjänst'}</p>
-              <span className="text-xs text-white mt-0.5 block">{formatTimeAgo(application.applied_at)}</span>
-            </div>
-
-            {/* Star rating */}
-            {rating > 0 && (
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className={`h-4 w-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'}`} />
-                ))}
-              </div>
-            )}
-
-            {/* Contact info */}
-            <SectionCard className="w-full space-y-2">
-              {application.email && (
-                <div className="flex items-center gap-2.5">
-                  <Mail className="h-3.5 w-3.5 text-white shrink-0" />
-                  <span className="text-sm text-white truncate">{application.email}</span>
-                </div>
-              )}
-              {application.phone && (
-                <div className="flex items-center gap-2.5">
-                  <Phone className="h-3.5 w-3.5 text-white shrink-0" />
-                  <span className="text-sm text-white">{application.phone}</span>
-                </div>
-              )}
-              {application.location && (
-                <div className="flex items-center gap-2.5">
-                  <MapPin className="h-3.5 w-3.5 text-white shrink-0" />
-                  <span className="text-sm text-white">{application.location}</span>
-                </div>
-              )}
-              {application.age && (
-                <div className="flex items-center gap-2.5">
-                  <Calendar className="h-3.5 w-3.5 text-white shrink-0" />
-                  <span className="text-sm text-white">{application.age} år</span>
-                </div>
-              )}
-            </SectionCard>
-
-            {/* Employment info */}
-            {hasEmploymentInfo && (
-              <SectionCard className="w-full space-y-2">
-                <SectionLabel icon={Briefcase}>Anställningsinformation</SectionLabel>
-                {application.employment_status && (
-                  <div>
-                    <p className="text-xs text-white">Anställningsstatus?</p>
-                    <p className="text-sm text-white">Svar: {employmentStatusLabels[application.employment_status] || application.employment_status}</p>
+        {/* ── Swipeable tab content ── */}
+        <div
+          className="w-full overflow-hidden"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          <AnimatePresence mode="wait" initial={false} custom={swipeDirection}>
+            <motion.div
+              key={activeTab}
+              custom={swipeDirection}
+              initial={{ x: swipeDirection * 60, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: swipeDirection * -60, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="w-full flex flex-col items-center gap-5"
+            >
+              {/* ── PROFIL TAB ── */}
+              {activeTab === 'profil' && (
+                <>
+                  {/* Avatar / Video */}
+                  <div className="relative">
+                    {isProfileVideo && videoUrl ? (
+                      <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
+                        <ProfileVideo
+                          videoUrl={videoUrl}
+                          coverImageUrl={profileImageUrl || undefined}
+                          userInitials={initials}
+                          className="w-full h-full"
+                          showCountdown={true}
+                          showProgressBar={false}
+                        />
+                      </div>
+                    ) : (
+                      <Avatar className="w-28 h-28 border-4 border-white/20 shadow-xl">
+                        <AvatarImage src={profileImageUrl || ''} alt={`${application.first_name} ${application.last_name}`} className="object-cover" />
+                        <AvatarFallback className="bg-white/10 text-white text-3xl font-semibold" delayMs={200}>{initials}</AvatarFallback>
+                      </Avatar>
+                    )}
                   </div>
-                )}
-                {application.work_schedule && (
-                  <div>
-                    <p className="text-xs text-white">Arbetsschema</p>
-                    <p className="text-sm text-white">Svar: {workScheduleLabels[application.work_schedule] || application.work_schedule}</p>
-                  </div>
-                )}
-                {application.availability && (
-                  <div>
-                    <p className="text-xs text-white">När kan du börja nytt jobb?</p>
-                    <p className="text-sm text-white">Svar: {availabilityLabels[application.availability] || application.availability}</p>
-                  </div>
-                )}
-              </SectionCard>
-            )}
 
-            {/* AI Summary */}
-            <div className="w-full">
-              <SectionErrorBoundary fallbackLabel="AI-sammanfattning">
-                <CandidateSummarySection
-                  aiSummary={summaryHook.aiSummary}
-                  loadingSummary={summaryHook.loadingSummary}
-                  generatingSummary={summaryHook.generatingSummary}
-                  hasCvUrl={!!application.cv_url}
-                  signedCvUrl={signedCvUrl}
-                />
-              </SectionErrorBoundary>
-            </div>
-
-            {/* CV — inline viewer like desktop */}
-            {application.cv_url && (
-              <SectionCard className="w-full">
-                <SectionLabel icon={FileText}>CV</SectionLabel>
-                <button
-                  onClick={handleOpenCv}
-                  className="w-full flex items-center justify-between rounded-lg bg-white/[0.06] ring-1 ring-inset ring-white/10 px-3 py-2.5 text-sm text-white active:scale-[0.97] transition-all"
-                >
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-3.5 w-3.5 text-white" />
-                    <span>Visa CV</span>
+                  {/* Name + job + time */}
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold text-white">{application.first_name} {application.last_name}</h2>
+                    <p className="text-sm text-white mt-1">{application.job_title || 'Okänd tjänst'}</p>
+                    <span className="text-xs text-white mt-0.5 block">{formatTimeAgo(application.applied_at)}</span>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-white" />
-                </button>
-              </SectionCard>
-            )}
 
-            {/* CV fullscreen overlay — matches desktop CandidateProfileDialog */}
-            {cvOpen && signedCvUrl && createPortal(
-              <div className="fixed inset-0 z-[9999] bg-black/90 flex flex-col">
-                <div className="flex items-center justify-between px-4 py-3">
-                  <h3 className="text-white text-lg font-semibold">CV</h3>
-                  <button
-                    type="button"
-                    onClick={() => setCvOpen(false)}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 touch-manipulation"
-                    aria-label="Stäng"
-                  >
-                    <X className="h-5 w-5 text-white" />
-                  </button>
+                  {/* Star rating */}
+                  {rating > 0 && (
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star key={star} className={`h-4 w-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'}`} />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Contact info */}
+                  <SectionCard className="w-full space-y-2">
+                    {application.email && (
+                      <div className="flex items-center gap-2.5">
+                        <Mail className="h-3.5 w-3.5 text-white shrink-0" />
+                        <span className="text-sm text-white truncate">{application.email}</span>
+                      </div>
+                    )}
+                    {application.phone && (
+                      <div className="flex items-center gap-2.5">
+                        <Phone className="h-3.5 w-3.5 text-white shrink-0" />
+                        <span className="text-sm text-white">{application.phone}</span>
+                      </div>
+                    )}
+                    {application.location && (
+                      <div className="flex items-center gap-2.5">
+                        <MapPin className="h-3.5 w-3.5 text-white shrink-0" />
+                        <span className="text-sm text-white">{application.location}</span>
+                      </div>
+                    )}
+                    {application.age && (
+                      <div className="flex items-center gap-2.5">
+                        <Calendar className="h-3.5 w-3.5 text-white shrink-0" />
+                        <span className="text-sm text-white">{application.age} år</span>
+                      </div>
+                    )}
+                  </SectionCard>
+
+                  {/* Employment info */}
+                  {hasEmploymentInfo && (
+                    <SectionCard className="w-full space-y-2">
+                      <SectionLabel icon={Briefcase}>Anställningsinformation</SectionLabel>
+                      {application.employment_status && (
+                        <div>
+                          <p className="text-xs text-white">Anställningsstatus?</p>
+                          <p className="text-sm text-white">Svar: {employmentStatusLabels[application.employment_status] || application.employment_status}</p>
+                        </div>
+                      )}
+                      {application.work_schedule && (
+                        <div>
+                          <p className="text-xs text-white">Arbetsschema</p>
+                          <p className="text-sm text-white">Svar: {workScheduleLabels[application.work_schedule] || application.work_schedule}</p>
+                        </div>
+                      )}
+                      {application.availability && (
+                        <div>
+                          <p className="text-xs text-white">När kan du börja nytt jobb?</p>
+                          <p className="text-sm text-white">Svar: {availabilityLabels[application.availability] || application.availability}</p>
+                        </div>
+                      )}
+                    </SectionCard>
+                  )}
+
+                  {/* AI Summary */}
+                  <div className="w-full">
+                    <SectionErrorBoundary fallbackLabel="AI-sammanfattning">
+                      <CandidateSummarySection
+                        aiSummary={summaryHook.aiSummary}
+                        loadingSummary={summaryHook.loadingSummary}
+                        generatingSummary={summaryHook.generatingSummary}
+                        hasCvUrl={!!application.cv_url}
+                        signedCvUrl={signedCvUrl}
+                      />
+                    </SectionErrorBoundary>
+                  </div>
+
+                  {/* CV — inline viewer like desktop */}
+                  {application.cv_url && (
+                    <SectionCard className="w-full">
+                      <SectionLabel icon={FileText}>CV</SectionLabel>
+                      <button
+                        onClick={handleOpenCv}
+                        className="w-full flex items-center justify-between rounded-lg bg-white/[0.06] ring-1 ring-inset ring-white/10 px-3 py-2.5 text-sm text-white active:scale-[0.97] transition-all"
+                      >
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-3.5 w-3.5 text-white" />
+                          <span>Visa CV</span>
+                        </div>
+                        <ChevronRight className="h-3.5 w-3.5 text-white" />
+                      </button>
+                    </SectionCard>
+                  )}
+
+                  {/* CV fullscreen overlay — matches desktop CandidateProfileDialog */}
+                  {cvOpen && signedCvUrl && createPortal(
+                    <div className="fixed inset-0 z-[9999] bg-black/90 flex flex-col">
+                      <div className="flex items-center justify-between px-4 py-3">
+                        <h3 className="text-white text-lg font-semibold">CV</h3>
+                        <button
+                          type="button"
+                          onClick={() => setCvOpen(false)}
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 touch-manipulation"
+                          aria-label="Stäng"
+                        >
+                          <X className="h-5 w-5 text-white" />
+                        </button>
+                      </div>
+                      <div className="flex-1 overflow-auto px-2 pb-4">
+                        <CvViewer
+                          src={signedCvUrl}
+                          fileName="cv.pdf"
+                          height="calc(100dvh - 80px)"
+                          onClose={() => setCvOpen(false)}
+                        />
+                      </div>
+                    </div>,
+                    document.body
+                  )}
+
+                  {/* Bio / Presentation */}
+                  {application.bio && (
+                    <SectionCard className="w-full">
+                      <button onClick={() => setBioExpanded(!bioExpanded)} className="w-full flex items-center justify-between">
+                        <SectionLabel icon={User}>Presentation om {application.first_name}</SectionLabel>
+                        {bioExpanded ? <ChevronUp className="h-3.5 w-3.5 text-white" /> : <ChevronDown className="h-3.5 w-3.5 text-white" />}
+                      </button>
+                      {bioExpanded && (
+                        <p className="text-sm text-white whitespace-pre-wrap leading-relaxed mt-2">{application.bio}</p>
+                      )}
+                    </SectionCard>
+                  )}
+
+                  {/* Action buttons — glass purple & blue */}
+                  <div className="w-full flex items-center gap-3">
+                    <button
+                      onClick={onOpenFullProfile}
+                      className="flex-1 py-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center gap-2"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      Meddelande
+                    </button>
+                    <button
+                      onClick={onOpenFullProfile}
+                      className="flex-1 py-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center gap-2"
+                    >
+                      <CalendarPlus className="h-4 w-4" />
+                      Boka möte
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* ── AKTIVITET TAB ── */}
+              {activeTab === 'aktivitet' && (
+                <div className="w-full">
+                  <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
+                    <CandidateActivityLog applicantId={application.applicant_id} />
+                  </SectionErrorBoundary>
                 </div>
-                <div className="flex-1 overflow-auto px-2 pb-4">
-                  <CvViewer
-                    src={signedCvUrl}
-                    fileName="cv.pdf"
-                    height="calc(100dvh - 80px)"
-                    onClose={() => setCvOpen(false)}
-                  />
+              )}
+
+              {/* ── ANTECKNINGAR TAB ── */}
+              {activeTab === 'anteckningar' && (
+                <div className="w-full">
+                  <SectionErrorBoundary fallbackLabel="Anteckningar">
+                    <CandidateNotesPanel
+                      notes={notesHook.notes}
+                      loadingNotes={notesHook.loadingNotes}
+                      newNote={newNote}
+                      onNewNoteChange={setNewNote}
+                      onSaveNote={handleSaveNote}
+                      savingNote={notesHook.savingNote}
+                      currentUserId={user?.id}
+                      onStartEditing={handleStartEditing}
+                      onConfirmDelete={notesHook.deleteNote}
+                      editingNoteId={notesHook.editingNoteId}
+                      editingNoteText={notesHook.editingNoteText}
+                      originalNoteText={notesHook.originalNoteText}
+                      onEditingNoteTextChange={notesHook.setEditingNoteText}
+                      onUpdateNote={notesHook.updateNote}
+                      onCancelEditing={notesHook.cancelEditing}
+                    />
+                  </SectionErrorBoundary>
                 </div>
-              </div>,
-              document.body
-            )}
-
-            {/* Bio / Presentation */}
-            {application.bio && (
-              <SectionCard className="w-full">
-                <button onClick={() => setBioExpanded(!bioExpanded)} className="w-full flex items-center justify-between">
-                  <SectionLabel icon={User}>Presentation om {application.first_name}</SectionLabel>
-                  {bioExpanded ? <ChevronUp className="h-3.5 w-3.5 text-white" /> : <ChevronDown className="h-3.5 w-3.5 text-white" />}
-                </button>
-                {bioExpanded && (
-                  <p className="text-sm text-white whitespace-pre-wrap leading-relaxed mt-2">{application.bio}</p>
-                )}
-              </SectionCard>
-            )}
-
-            {/* Action buttons — glass purple & blue */}
-            <div className="w-full flex items-center gap-3">
-              <button
-                onClick={onOpenFullProfile}
-                className="flex-1 py-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center gap-2"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Meddelande
-              </button>
-              <button
-                onClick={onOpenFullProfile}
-                className="flex-1 py-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center gap-2"
-              >
-                <CalendarPlus className="h-4 w-4" />
-                Boka möte
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* ── AKTIVITET TAB ── */}
-        {activeTab === 'aktivitet' && (
-          <div className="w-full">
-            <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
-              <CandidateActivityLog applicantId={application.applicant_id} />
-            </SectionErrorBoundary>
-          </div>
-        )}
-
-        {/* ── ANTECKNINGAR TAB ── */}
-        {activeTab === 'anteckningar' && (
-          <div className="w-full">
-            <SectionErrorBoundary fallbackLabel="Anteckningar">
-              <CandidateNotesPanel
-                notes={notesHook.notes}
-                loadingNotes={notesHook.loadingNotes}
-                newNote={newNote}
-                onNewNoteChange={setNewNote}
-                onSaveNote={handleSaveNote}
-                savingNote={notesHook.savingNote}
-                currentUserId={user?.id}
-                onStartEditing={handleStartEditing}
-                onConfirmDelete={notesHook.deleteNote}
-                editingNoteId={notesHook.editingNoteId}
-                editingNoteText={notesHook.editingNoteText}
-                originalNoteText={notesHook.originalNoteText}
-                onEditingNoteTextChange={notesHook.setEditingNoteText}
-                onUpdateNote={notesHook.updateNote}
-                onCancelEditing={notesHook.cancelEditing}
-              />
-            </SectionErrorBoundary>
-          </div>
-        )}
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
         {/* Separator / next hint */}
         {!isLast && (
