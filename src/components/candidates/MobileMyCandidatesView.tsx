@@ -284,8 +284,10 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   onMarkAsViewed,
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
+  const [pendingActiveStage, setPendingActiveStage] = useState<string | null>(null);
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
   const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
+  const pendingStageRafRef = useRef<number | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
 
