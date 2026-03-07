@@ -82,6 +82,16 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
   useEffect(() => {
     measureMenuMetrics();
+
+    const rowEl = rowRef.current;
+    if (!rowEl || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(() => {
+      measureMenuMetrics();
+    });
+
+    observer.observe(rowEl);
+    return () => observer.disconnect();
   }, [measureMenuMetrics]);
 
   const handleTap = () => {
