@@ -224,6 +224,12 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const listRef = useRef<HTMLDivElement>(null);
   const scrollingRef = useRef(false);
+  const touchGestureRef = useRef({
+    startX: 0,
+    startY: 0,
+    moved: false,
+    blockMenuUntil: 0,
+  });
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -263,13 +269,46 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     hideTimerRef.current = setTimeout(() => setShowIndicator(false), 2000);
   }, [currentApps.length]);
 
+  const handleStageTabsTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    touchGestureRef.current.startX = touch.clientX;
+    touchGestureRef.current.startY = touch.clientY;
+    touchGestureRef.current.moved = false;
+    scrollingRef.current = false;
+  }, []);
+
+  const handleStageTabsTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - touchGestureRef.current.startX);
+    const deltaY = Math.abs(touch.clientY - touchGestureRef.current.startY);
+
+    if (deltaX > 6 || deltaY > 6) {
+      touchGestureRef.current.moved = true;
+      scrollingRef.current = true;
+      touchGestureRef.current.blockMenuUntil = Date.now() + 260;
+    }
+  }, []);
+
+  const handleStageTabsTouchEnd = useCallback(() => {
+    if (touchGestureRef.current.moved) {
+      touchGestureRef.current.blockMenuUntil = Date.now() + 260;
+    }
+    touchGestureRef.current.moved = false;
+    scrollingRef.current = false;
+  }, []);
+
+  const shouldBlockStageMenuInteraction = useCallback(() => {
+    return scrollingRef.current || Date.now() < touchGestureRef.current.blockMenuUntil;
+  }, []);
+
   return (
     <div className="flex flex-col gap-3">
       {/* Horizontal scrollable stage tabs — native momentum on touch, drag on desktop */}
       <div
         ref={dragScrollRef}
-        onTouchStart={() => { scrollingRef.current = false; }}
-        onTouchMove={() => { scrollingRef.current = true; }}
+        onTouchStart={handleStageTabsTouchStart}
+        onTouchMove={handleStageTabsTouchMove}
+        onTouchEnd={handleStageTabsTouchEnd}
         className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
       >
         {stages.map(stage => {
@@ -315,17 +354,27 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                 <span className="truncate min-w-0">{cfg.label}</span>
               )}
               <span
-                className="text-[9px] h-4 w-4 flex items-center justify-center rounded-full text-white flex-shrink-0"
-                style={{ backgroundColor: `${cfg.color}88`, lineHeight: 1 }}
+                className="text-[9px] min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full text-white flex-shrink-0 tabular-nums leading-none"
+                style={{ backgroundColor: `${cfg.color}88` }}
               >
                 {count}
               </span>
-              {/* Stage settings menu (3-dot) — blocked during scroll */}
+              {/* Stage settings menu (3-dot) — blocked during and right after scroll */}
               <span
-                onClick={e => { e.stopPropagation(); if (scrollingRef.current) e.preventDefault(); }}
-                onPointerDown={e => e.stopPropagation()}
+                onClick={e => {
+                  e.stopPropagation();
+                  if (shouldBlockStageMenuInteraction()) e.preventDefault();
+                }}
+                onPointerDown={e => {
+                  e.stopPropagation();
+                  if (shouldBlockStageMenuInteraction()) e.preventDefault();
+                }}
+                onTouchStart={e => {
+                  e.stopPropagation();
+                  if (shouldBlockStageMenuInteraction()) e.preventDefault();
+                }}
                 onTouchEnd={e => {
-                  if (scrollingRef.current) {
+                  if (shouldBlockStageMenuInteraction()) {
                     e.preventDefault();
                     e.stopPropagation();
                   }
@@ -339,6 +388,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   targetStageKey={targetStageKey}
                   targetStageLabel={targetStageLabel}
                   stageIndex={stageIdx}
+                  requireLongPressOnMobile
                 />
               </span>
             </div>
