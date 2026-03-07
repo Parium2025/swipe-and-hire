@@ -414,7 +414,10 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   requireLongPressOnMobile
                   touchVisualOnlyTrigger
                   controlledOpen={menuOpenStage === stage}
-                  onControlledOpenChange={(open) => setMenuOpenStage(open ? stage : null)}
+                  onControlledOpenChange={(open) => {
+                    if (!open && Date.now() < menuDismissGuardUntilRef.current) return;
+                    setMenuOpenStage(open ? stage : null);
+                  }}
                 />
               </span>
             </div>
