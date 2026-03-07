@@ -11,9 +11,9 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const onMouseDown = useCallback((e: MouseEvent) => {
     const el = ref.current;
     if (!el) return;
-    // Don't hijack clicks on interactive elements
+    // Don't hijack clicks on interactive elements or stage tabs
     const target = e.target as HTMLElement;
-    if (target.closest('button, a, input, [role="button"], [draggable="true"]')) return;
+    if (target.closest('button, a, input, [role="button"], [draggable="true"], [data-stage-tab], [data-stage-menu-trigger], [data-no-drag-scroll]')) return;
     state.current = { isDown: true, startX: e.pageX - el.offsetLeft, scrollLeft: el.scrollLeft };
     el.style.cursor = 'grabbing';
     el.style.userSelect = 'none';
