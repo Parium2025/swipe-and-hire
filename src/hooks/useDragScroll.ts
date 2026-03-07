@@ -13,9 +13,17 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const onMouseDown = useCallback((e: MouseEvent) => {
     const el = ref.current;
     if (!el) return;
-    // Don't hijack clicks on truly interactive elements (buttons, inputs, etc.)
-    const target = e.target as HTMLElement;
-    if (target.closest('button, a, input, textarea, select, [role="button"], [draggable="true"], [data-no-drag-scroll]')) return;
+
+    const rawTarget = e.target;
+    const target = rawTarget instanceof Element
+      ? rawTarget
+      : rawTarget instanceof Node
+        ? rawTarget.parentElement
+        : null;
+
+    // Don't hijack clicks on interactive/opt-out elements
+    if (!target || target.closest('button, a, input, textarea, select, [role="button"], [draggable="true"], [data-no-drag-scroll], [data-stage-key]')) return;
+
     state.current = { isDown: true, isDragging: false, startX: e.pageX - el.offsetLeft, scrollLeft: el.scrollLeft };
   }, []);
 
