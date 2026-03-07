@@ -71,7 +71,10 @@ export function JobStageSettingsMenu({
   const settings = stageSettings[stageKey];
   const isTouchDevice = useTouchCapable();
   
-  const [menuOpen, setMenuOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const menuOpen = isControlled ? controlledOpen : internalOpen;
+  const setMenuOpen = isControlled ? (v: boolean) => onControlledOpenChange?.(v) : setInternalOpen;
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [colorDialogOpen, setColorDialogOpen] = useState(false);
   const [iconDialogOpen, setIconDialogOpen] = useState(false);
