@@ -4,6 +4,9 @@ import { useRef, useCallback, useEffect } from 'react';
  * Enables click-and-drag horizontal scrolling on a container (desktop).
  * Uses a movement threshold so clicks on child elements still work.
  * Returns a ref to attach to the scrollable element.
+ * 
+ * After a drag, click events on children are suppressed for one frame
+ * so that e.g. tab-switching doesn't fire after a scroll gesture.
  */
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
@@ -21,8 +24,8 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
         ? rawTarget.parentElement
         : null;
 
-    // Don't hijack clicks on interactive/opt-out elements
-    if (!target || target.closest('button, a, input, textarea, select, [role="button"], [draggable="true"], [data-no-drag-scroll], [data-stage-key]')) return;
+    // Don't hijack clicks on interactive elements (buttons, links, inputs, etc.)
+    if (!target || target.closest('button, a, input, textarea, select, [role="button"], [draggable="true"]')) return;
 
     state.current = { isDown: true, isDragging: false, startX: e.pageX - el.offsetLeft, scrollLeft: el.scrollLeft };
   }, []);
@@ -30,10 +33,20 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const onMouseUp = useCallback(() => {
     const el = ref.current;
     if (!el) return;
+    const wasDragging = state.current.isDragging;
     state.current.isDown = false;
     state.current.isDragging = false;
     el.style.cursor = 'grab';
     el.style.userSelect = '';
+
+    // Suppress the click that follows mouseup after a drag
+    if (wasDragging) {
+      const suppressClick = (e: MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+      };
+      el.addEventListener('click', suppressClick, { capture: true, once: true });
+    }
   }, []);
 
   const onMouseMove = useCallback((e: MouseEvent) => {
