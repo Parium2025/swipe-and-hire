@@ -174,17 +174,27 @@ const CandidateRow = memo(function CandidateRow({
               if (!cfg) return null;
               const Icon = getJobStageIconByName(cfg.iconName);
               return (
-                <DropdownMenuItem
-                  key={stage}
-                  onClick={e => {
-                    e.stopPropagation();
-                    onMoveToStage(app.id, stage);
-                  }}
-                  className="gap-2 min-h-[44px]"
-                >
-                  <Icon className="h-4 w-4 shrink-0" style={{ color: cfg.color }} />
-                  <span className="truncate">{cfg.label}</span>
-                </DropdownMenuItem>
+                <TooltipProvider key={stage} delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuItem
+                        onClick={e => {
+                          e.stopPropagation();
+                          onMoveToStage(app.id, stage);
+                        }}
+                        className="gap-2 min-h-[44px] min-w-0"
+                      >
+                        <Icon className="h-4 w-4 shrink-0" style={{ color: cfg.color }} />
+                        <span className="truncate min-w-0">{cfg.label}</span>
+                      </DropdownMenuItem>
+                    </TooltipTrigger>
+                    {cfg.label.length > 20 && (
+                      <TooltipContent side="left" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
+                        <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
               );
             })}
           </DropdownMenuContent>
