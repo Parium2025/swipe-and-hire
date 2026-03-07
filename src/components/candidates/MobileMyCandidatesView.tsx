@@ -274,9 +274,13 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 key={stage}
                 data-stage-tab
                 tabIndex={0}
+                onPointerDownCapture={(e) => {
+                  if (e.pointerType === 'mouse' && e.button !== 0) return;
+                  setActiveTab(stage);
+                }}
                 onClick={() => setActiveTab(stage)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-200 active:scale-95 shrink-0 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] ${
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-200 active:scale-95 shrink-0 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] outline-none focus:outline-none focus-visible:outline-none ${
                   isActive
                     ? 'ring-[1.5px] ring-white/60 shadow-lg'
                     : 'ring-1 ring-white/15'
@@ -306,7 +310,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 </span>
                 {/* Stage settings menu (3-dot) */}
                 {!isReadOnly && (
-                  <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
+                  <span onClick={e => e.stopPropagation()}>
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}
