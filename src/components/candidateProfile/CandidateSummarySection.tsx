@@ -46,12 +46,12 @@ export const CandidateSummarySection = ({
   }
 
   return (
-    <div className="bg-white/10 border border-white/20 rounded-lg p-3">
-      <div className="flex items-center gap-1.5 mb-2">
-        <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
-          <Sparkles className="h-3 w-3" />
-          Sammanfattning
-          <span className="text-[9px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full">
+    <div className="w-full min-w-0 overflow-hidden bg-white/10 border border-white/20 rounded-lg p-3">
+      <div className="flex items-center gap-1.5 mb-2 min-w-0">
+        <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider flex items-center gap-1.5 min-w-0">
+          <Sparkles className="h-3 w-3 shrink-0" />
+          <span className="truncate">Sammanfattning</span>
+          <span className="text-[9px] font-normal normal-case bg-white/20 px-1.5 py-0.5 rounded-full shrink-0">
             Baserat på CV
           </span>
         </h3>
@@ -63,7 +63,7 @@ export const CandidateSummarySection = ({
           <span className="ml-2 text-sm text-white/50">Analyserar CV...</span>
         </div>
       ) : aiSummary ? (
-        <div>
+        <div className="w-full min-w-0 overflow-hidden">
           {(() => {
             const displayPoints = (aiSummary.key_points || []).filter(
               (point: any) => typeof point?.text === 'string' && !point.text.startsWith('Dokumenttyp:')
@@ -71,9 +71,9 @@ export const CandidateSummarySection = ({
 
             if (displayPoints.length > 0) {
               return (
-                <ul className="space-y-1 min-w-0 overflow-hidden">
+                <ul className="space-y-1 w-full min-w-0 overflow-hidden">
                   {displayPoints.map((point: any, idx: number) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-white min-w-0 overflow-hidden">
+                    <li key={idx} className="flex items-start gap-2 text-sm text-white w-full min-w-0 overflow-hidden">
                       <span
                         className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
                           point.type === 'negative' ? 'bg-red-400' : 'bg-white'
@@ -82,7 +82,7 @@ export const CandidateSummarySection = ({
                       <TooltipProvider delayDuration={200}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="truncate min-w-0 flex-1 cursor-default">{point.text}</span>
+                            <span className="block min-w-0 flex-1 break-words [overflow-wrap:anywhere] cursor-default">{point.text}</span>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" sideOffset={8} align="start" className="max-w-[280px] break-words whitespace-normal z-[999999]">
                             <p className="text-sm break-words whitespace-pre-wrap">{point.text}</p>
@@ -99,7 +99,7 @@ export const CandidateSummarySection = ({
               <TooltipProvider delayDuration={200}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <p className="text-sm text-white leading-relaxed truncate min-w-0 cursor-default">
+                    <p className="text-sm text-white leading-relaxed min-w-0 break-words [overflow-wrap:anywhere] cursor-default">
                       {aiSummary.summary_text}
                     </p>
                   </TooltipTrigger>

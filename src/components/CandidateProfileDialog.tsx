@@ -772,7 +772,7 @@ export const CandidateProfileDialog = ({
                 Presentation om {displayApp.first_name || 'kandidaten'}
               </h3>
               {displayApp.bio ? (
-                <p className="text-sm text-white whitespace-pre-wrap leading-relaxed">
+                <p className="text-sm text-white whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-relaxed">
                   {displayApp.bio}
                 </p>
               ) : (
