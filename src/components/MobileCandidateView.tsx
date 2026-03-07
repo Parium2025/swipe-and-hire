@@ -234,7 +234,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     blockMenuUntil: 0,
   });
   const touchTapHandledRef = useRef(false);
-  const [scrollIndicator, setScrollIndicator] = useState<number>(0);
+  const lastTouchHandledAtRef = useRef(0);
   const [showIndicator, setShowIndicator] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
