@@ -310,8 +310,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   }, [isReadOnly, isTouchCapable]);
 
   const handleStageContainerPointerDown = useCallback((eventTarget: EventTarget | null, pointerType: string) => {
-    if (!(eventTarget instanceof HTMLElement)) return;
-    const stageEl = eventTarget.closest<HTMLElement>('[data-stage-key]');
+    const targetElement = eventTarget instanceof Element
+      ? eventTarget
+      : eventTarget instanceof Node
+        ? eventTarget.parentElement
+        : null;
+    const stageEl = targetElement?.closest<HTMLElement>('[data-stage-key]');
     const stage = stageEl?.dataset.stageKey;
     if (!stage) return;
     handleStagePointerDown(stage, pointerType);
@@ -339,6 +343,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
         {/* Horizontal scrollable stage tabs */}
         <div
           ref={dragScrollRef}
+          onMouseDownCapture={(e) => handleStageContainerPointerDown(e.target, 'mouse')}
           onPointerDownCapture={(e) => handleStageContainerPointerDown(e.target, e.pointerType)}
           className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
         >
