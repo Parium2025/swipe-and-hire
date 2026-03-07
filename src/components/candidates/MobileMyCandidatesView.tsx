@@ -244,8 +244,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     blockMenuUntil: 0,
   });
   const touchTapHandledRef = useRef(false);
-
-  const handleStageTabsTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+  const lastTouchHandledAtRef = useRef(0);
     const touch = e.touches[0];
     touchGestureRef.current.startX = touch.clientX;
     touchGestureRef.current.startY = touch.clientY;
