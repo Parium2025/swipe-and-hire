@@ -202,7 +202,7 @@ const JobDetails = () => {
     }
   }, [myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch]);
 
-  const markApplicationAsViewed = async (applicationId: string) => {
+  const markApplicationAsViewed = useCallback(async (applicationId: string) => {
     updateApplicationLocally(applicationId, { viewed_at: new Date().toISOString() });
     
     try {
@@ -214,7 +214,7 @@ const JobDetails = () => {
     } catch (error) {
       console.error('Error marking as viewed:', error);
     }
-  };
+  }, [updateApplicationLocally]);
 
   const applicationsByStatus = useMemo(() => {
     const result: Record<string, JobApplication[]> = {};
