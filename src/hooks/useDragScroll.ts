@@ -37,20 +37,10 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const onMouseUp = useCallback(() => {
     const el = ref.current;
     if (!el) return;
-    const wasDragging = state.current.isDragging;
     state.current.isDown = false;
     state.current.isDragging = false;
     el.style.cursor = 'grab';
     el.style.userSelect = '';
-
-    // Suppress the click that follows mouseup after a drag
-    if (wasDragging) {
-      const suppressClick = (e: MouseEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-      };
-      el.addEventListener('click', suppressClick, { capture: true, once: true });
-    }
   }, []);
 
   const onMouseMove = useCallback((e: MouseEvent) => {
