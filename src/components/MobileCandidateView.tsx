@@ -221,6 +221,9 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   renderActionBar,
 }: MobileCandidateViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
+  const [menuOpenStage, setMenuOpenStage] = useState<string | null>(null);
+  const lastCardTapRef = useRef<{ stage: string; time: number }>({ stage: '', time: 0 });
+  const DOUBLE_TAP_MS = 320;
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const listRef = useRef<HTMLDivElement>(null);
   const scrollingRef = useRef(false);
