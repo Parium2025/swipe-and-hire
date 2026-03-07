@@ -393,7 +393,11 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 </span>
                 {/* Stage settings menu (3-dot) — visual-only on touch, functional on mouse */}
                 {!isReadOnly && (
-                  <span>
+                  <span
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}
