@@ -38,7 +38,7 @@ import {
   getIconByName,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 
 interface StageSettingsMenuProps {
   stageKey: string;
@@ -55,7 +55,7 @@ interface StageSettingsMenuProps {
 
 export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
-  const isMobile = useIsMobile();
+  const isTouchDevice = useTouchCapable();
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -63,8 +63,10 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   const [newLabel, setNewLabel] = useState('');
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
-  const touchHoldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const allowTouchOpenRef = useRef(false);
+  const lastTouchTapAtRef = useRef(0);
+  const blockTouchClickRef = useRef(false);
+  const DOUBLE_TAP_WINDOW_MS = 320;
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
@@ -76,51 +78,50 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   useEffect(() => {
     return () => {
       if (colorDebounceRef.current) clearTimeout(colorDebounceRef.current);
-      if (touchHoldTimerRef.current) clearTimeout(touchHoldTimerRef.current);
     };
   }, []);
 
-  const clearTouchHoldTimer = () => {
-    if (touchHoldTimerRef.current) {
-      clearTimeout(touchHoldTimerRef.current);
-      touchHoldTimerRef.current = null;
-    }
-  };
+  const handleTriggerPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
 
-  const handleTriggerTouchStart = () => {
-    if (!isMobile || !requireLongPressOnMobile) return;
+    const now = Date.now();
+    const isDoubleTap = now - lastTouchTapAtRef.current <= DOUBLE_TAP_WINDOW_MS;
 
-    allowTouchOpenRef.current = false;
-    clearTouchHoldTimer();
-
-    touchHoldTimerRef.current = setTimeout(() => {
+    if (isDoubleTap) {
       allowTouchOpenRef.current = true;
+      blockTouchClickRef.current = false;
+      lastTouchTapAtRef.current = 0;
       setMenuOpen(true);
-    }, 220);
+      return;
+    }
+
+    allowTouchOpenRef.current = false;
+    blockTouchClickRef.current = true;
+    lastTouchTapAtRef.current = now;
   };
 
-  const handleTriggerTouchMove = () => {
-    if (!isMobile || !requireLongPressOnMobile) return;
-    clearTouchHoldTimer();
+  const handleTriggerPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
     allowTouchOpenRef.current = false;
   };
 
-  const handleTriggerTouchEnd = () => {
-    if (!isMobile || !requireLongPressOnMobile) return;
-    clearTouchHoldTimer();
+  const handleTriggerPointerCancel = () => {
+    allowTouchOpenRef.current = false;
   };
 
   const handleMenuOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       setMenuOpen(false);
       allowTouchOpenRef.current = false;
+      blockTouchClickRef.current = false;
       return;
     }
 
-    if (isMobile && requireLongPressOnMobile && !allowTouchOpenRef.current) {
+    if (isTouchDevice && requireLongPressOnMobile && !allowTouchOpenRef.current) {
       return;
     }
 
+    allowTouchOpenRef.current = false;
     setMenuOpen(true);
   };
 
@@ -220,14 +221,15 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
             }
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
             onMouseDown={useJobDetailsTriggerStyle ? (e) => e.preventDefault() : undefined}
-            onTouchStart={handleTriggerTouchStart}
-            onTouchMove={handleTriggerTouchMove}
-            onTouchEnd={handleTriggerTouchEnd}
-            onTouchCancel={handleTriggerTouchEnd}
+            onPointerDown={handleTriggerPointerDown}
+            onPointerMove={handleTriggerPointerMove}
+            onPointerUp={handleTriggerPointerCancel}
+            onPointerCancel={handleTriggerPointerCancel}
             onClick={(e) => {
-              if (isMobile && requireLongPressOnMobile) {
+              if (blockTouchClickRef.current) {
                 e.preventDefault();
                 e.stopPropagation();
+                blockTouchClickRef.current = false;
               }
             }}
             onFocus={useJobDetailsTriggerStyle ? (e) => {

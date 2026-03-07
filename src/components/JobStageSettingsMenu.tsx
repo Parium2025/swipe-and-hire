@@ -34,7 +34,7 @@ import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle, MoveVertic
 import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS, getJobStageIconByName } from '@/hooks/useJobStageSettings';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 interface JobStageSettingsMenuProps {
   jobId: string;
   stageKey: string;
@@ -64,7 +64,7 @@ export function JobStageSettingsMenu({
 }: JobStageSettingsMenuProps) {
   const { stageSettings, updateStage, deleteStage, moveStageToPosition, orderedStages } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
-  const isMobile = useIsMobile();
+  const isTouchDevice = useTouchCapable();
   
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
@@ -77,8 +77,10 @@ export function JobStageSettingsMenu({
   const [liveColor, setLiveColor] = useState<string | null>(null);
   
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const touchHoldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const allowTouchOpenRef = useRef(false);
+  const lastTouchTapAtRef = useRef(0);
+  const blockTouchClickRef = useRef(false);
+  const DOUBLE_TAP_WINDOW_MS = 320;
   
   // Use liveColor while dragging, fall back to saved color
   const displayColor = liveColor ?? settings?.color ?? '#0EA5E9';
@@ -93,51 +95,50 @@ export function JobStageSettingsMenu({
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      if (touchHoldTimerRef.current) clearTimeout(touchHoldTimerRef.current);
     };
   }, []);
 
-  const clearTouchHoldTimer = () => {
-    if (touchHoldTimerRef.current) {
-      clearTimeout(touchHoldTimerRef.current);
-      touchHoldTimerRef.current = null;
-    }
-  };
+  const handleTriggerPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
 
-  const handleTriggerTouchStart = () => {
-    if (!isMobile || !requireLongPressOnMobile) return;
+    const now = Date.now();
+    const isDoubleTap = now - lastTouchTapAtRef.current <= DOUBLE_TAP_WINDOW_MS;
 
-    allowTouchOpenRef.current = false;
-    clearTouchHoldTimer();
-
-    touchHoldTimerRef.current = setTimeout(() => {
+    if (isDoubleTap) {
       allowTouchOpenRef.current = true;
+      blockTouchClickRef.current = false;
+      lastTouchTapAtRef.current = 0;
       setMenuOpen(true);
-    }, 220);
+      return;
+    }
+
+    allowTouchOpenRef.current = false;
+    blockTouchClickRef.current = true;
+    lastTouchTapAtRef.current = now;
   };
 
-  const handleTriggerTouchMove = () => {
-    if (!isMobile || !requireLongPressOnMobile) return;
-    clearTouchHoldTimer();
+  const handleTriggerPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
     allowTouchOpenRef.current = false;
   };
 
-  const handleTriggerTouchEnd = () => {
-    if (!isMobile || !requireLongPressOnMobile) return;
-    clearTouchHoldTimer();
+  const handleTriggerPointerCancel = () => {
+    allowTouchOpenRef.current = false;
   };
 
   const handleMenuOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       setMenuOpen(false);
       allowTouchOpenRef.current = false;
+      blockTouchClickRef.current = false;
       return;
     }
 
-    if (isMobile && requireLongPressOnMobile && !allowTouchOpenRef.current) {
+    if (isTouchDevice && requireLongPressOnMobile && !allowTouchOpenRef.current) {
       return;
     }
 
+    allowTouchOpenRef.current = false;
     setMenuOpen(true);
   };
 
@@ -209,14 +210,15 @@ export function JobStageSettingsMenu({
             className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
             style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
             onMouseDown={(e) => e.preventDefault()}
-            onTouchStart={handleTriggerTouchStart}
-            onTouchMove={handleTriggerTouchMove}
-            onTouchEnd={handleTriggerTouchEnd}
-            onTouchCancel={handleTriggerTouchEnd}
+            onPointerDown={handleTriggerPointerDown}
+            onPointerMove={handleTriggerPointerMove}
+            onPointerUp={handleTriggerPointerCancel}
+            onPointerCancel={handleTriggerPointerCancel}
             onClick={(e) => {
-              if (isMobile && requireLongPressOnMobile) {
+              if (blockTouchClickRef.current) {
                 e.preventDefault();
                 e.stopPropagation();
+                blockTouchClickRef.current = false;
               }
             }}
             onFocus={(e) => {
@@ -245,7 +247,7 @@ export function JobStageSettingsMenu({
           </DropdownMenuItem>
           
           {/* Color picker: dialog on mobile, submenu on desktop */}
-          {isMobile ? (
+          {isTouchDevice ? (
             <DropdownMenuItem 
               onSelect={() => { setTimeout(() => setColorDialogOpen(true), 100); }}
               className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
@@ -282,7 +284,7 @@ export function JobStageSettingsMenu({
           )}
           
           {/* Icon picker: dialog on mobile, submenu on desktop */}
-          {isMobile ? (
+          {isTouchDevice ? (
             <DropdownMenuItem 
               onSelect={() => { setTimeout(() => setIconDialogOpen(true), 100); }}
               className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
@@ -325,7 +327,7 @@ export function JobStageSettingsMenu({
           
           {/* Move to position - submenu with all positions */}
           {orderedStages.length > 1 && (
-            isMobile ? (
+            isTouchDevice ? (
               <DropdownMenuItem 
                 onSelect={() => { setTimeout(() => setMoveDialogOpen(true), 100); }}
                 className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
