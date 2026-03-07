@@ -35,24 +35,33 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     }
   }, [open, initialIndex]);
 
-  // Track current candidate via IntersectionObserver
+  // Track current candidate via IntersectionObserver — use top-edge proximity
   useEffect(() => {
     if (!open || !scrollRef.current) return;
 
+    const container = scrollRef.current;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        let maxRatio = 0;
-        let maxIdx = currentIndex;
+        // Find the visible entry whose top is closest to (but not above) the container top
+        const containerRect = container.getBoundingClientRect();
+        let bestIdx = currentIndex;
+        let bestDistance = Infinity;
+
         entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
           const idx = Number(entry.target.getAttribute('data-index'));
-          if (entry.intersectionRatio > maxRatio) {
-            maxRatio = entry.intersectionRatio;
-            maxIdx = idx;
+          // Distance from element top to container top — prefer the one closest to 0 (or slightly negative)
+          const dist = Math.abs(entry.boundingClientRect.top - containerRect.top);
+          if (dist < bestDistance) {
+            bestDistance = dist;
+            bestIdx = idx;
           }
         });
-        if (maxRatio > 0) setCurrentIndex(maxIdx);
+
+        setCurrentIndex(bestIdx);
       },
-      { root: scrollRef.current, threshold: [0, 0.25, 0.5, 0.75, 1] }
+      { root: container, threshold: [0, 0.1, 0.5, 0.9, 1] }
     );
 
     candidateRefs.current.forEach((el) => { if (el) observer.observe(el); });
