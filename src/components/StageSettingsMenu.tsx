@@ -73,6 +73,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   const lastTouchTapAtRef = useRef(0);
   const blockTouchClickRef = useRef(false);
   const DOUBLE_TAP_WINDOW_MS = 320;
+  const isTouchTriggerVisualOnly = isTouchDevice && touchVisualOnlyTrigger;
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
@@ -88,7 +89,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   }, []);
 
   const handleTriggerPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
+    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
 
     const now = Date.now();
     const isDoubleTap = now - lastTouchTapAtRef.current <= DOUBLE_TAP_WINDOW_MS;
@@ -107,7 +108,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   };
 
   const handleTriggerPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
+    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
     allowTouchOpenRef.current = false;
   };
 
@@ -116,6 +117,11 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   };
 
   const handleMenuOpenChange = (nextOpen: boolean) => {
+    if (isControlled) {
+      setMenuOpen(nextOpen);
+      return;
+    }
+
     if (!nextOpen) {
       setMenuOpen(false);
       allowTouchOpenRef.current = false;

@@ -92,6 +92,7 @@ export function JobStageSettingsMenu({
   const lastTouchTapAtRef = useRef(0);
   const blockTouchClickRef = useRef(false);
   const DOUBLE_TAP_WINDOW_MS = 320;
+  const isTouchTriggerVisualOnly = isTouchDevice && touchVisualOnlyTrigger;
   
   // Use liveColor while dragging, fall back to saved color
   const displayColor = liveColor ?? settings?.color ?? '#0EA5E9';
@@ -110,7 +111,7 @@ export function JobStageSettingsMenu({
   }, []);
 
   const handleTriggerPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
+    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
 
     const now = Date.now();
     const isDoubleTap = now - lastTouchTapAtRef.current <= DOUBLE_TAP_WINDOW_MS;
@@ -129,7 +130,7 @@ export function JobStageSettingsMenu({
   };
 
   const handleTriggerPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
+    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
     allowTouchOpenRef.current = false;
   };
 
@@ -138,6 +139,11 @@ export function JobStageSettingsMenu({
   };
 
   const handleMenuOpenChange = (nextOpen: boolean) => {
+    if (isControlled) {
+      setMenuOpen(nextOpen);
+      return;
+    }
+
     if (!nextOpen) {
       setMenuOpen(false);
       allowTouchOpenRef.current = false;
