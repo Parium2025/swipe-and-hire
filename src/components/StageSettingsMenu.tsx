@@ -52,6 +52,7 @@ interface StageSettingsMenuProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   disableTouchTrigger?: boolean;
+  onTriggerPointerDown?: () => void;
 }
 
 export function StageSettingsMenu({
@@ -67,6 +68,7 @@ export function StageSettingsMenu({
   open,
   onOpenChange,
   disableTouchTrigger = false,
+  onTriggerPointerDown,
 }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
