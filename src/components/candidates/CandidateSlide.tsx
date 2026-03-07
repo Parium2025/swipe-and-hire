@@ -205,7 +205,12 @@ export const CandidateSlide = memo(function CandidateSlide({
             return (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  const fromIdx = TABS.findIndex(t => t.key === activeTab);
+                  const toIdx = TABS.findIndex(t => t.key === tab.key);
+                  setSwipeDirection(toIdx > fromIdx ? 1 : -1);
+                  setActiveTab(tab.key);
+                }}
                 className={`flex-1 px-1.5 py-2.5 text-sm font-medium transition-colors min-w-0 ${
                   isActive ? 'text-white' : 'text-white/50'
                 }`}
