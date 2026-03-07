@@ -254,6 +254,7 @@ export function JobStageSettingsMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="center" 
+          alignOffset={isTouchTriggerVisualOnly ? -72 : 0}
           side="bottom"
           sideOffset={8}
           avoidCollisions={false}

@@ -353,8 +353,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               key={stage}
               data-stage-tab
               tabIndex={0}
-              onPointerUp={(e) => {
-                if (e.pointerType !== 'touch') return;
+              onTouchEnd={(e) => {
                 if (touchGestureRef.current.moved) return;
                 touchTapHandledRef.current = true;
                 lastTouchHandledAtRef.current = Date.now();
