@@ -321,6 +321,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 tabIndex={0}
                 onClick={() => {
                   if (shouldBlockStageMenuInteraction()) return;
+                  setActiveTab(stage);
                   const now = Date.now();
                   const last = lastCardTapRef.current;
                   if (last.stage === stage && now - last.time <= DOUBLE_TAP_MS) {
@@ -329,13 +330,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                     return;
                   }
                   lastCardTapRef.current = { stage, time: now };
-                  setActiveTab(stage);
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 backdrop-blur-sm cursor-pointer max-w-[180px] min-h-[36px] touch-manipulation ${
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] touch-manipulation ${
                   isActive
-                    ? 'ring-2 ring-white/60 shadow-lg'
-                    : 'ring-0'
+                    ? 'ring-white/40 shadow-lg'
+                    : 'ring-transparent'
                 }`}
                 style={{ backgroundColor: `${cfg.color}55`, WebkitTapHighlightColor: 'transparent' }}
               >
