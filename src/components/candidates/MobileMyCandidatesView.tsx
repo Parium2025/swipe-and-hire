@@ -273,8 +273,15 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     scrollingRef.current = false;
   }, []);
 
-  const handleStageTabTap = useCallback((stage: string) => {
+  const handleStageTabTap = useCallback((stage: string, blockedBySwipe: boolean) => {
+    // Always update active tab — ring must respond immediately
     setActiveTab(stage);
+
+    // Block double-tap menu after swipe gestures
+    if (blockedBySwipe) {
+      lastCardTapRef.current = { stage: '', time: 0 };
+      return;
+    }
 
     const now = Date.now();
     const last = lastCardTapRef.current;
@@ -340,8 +347,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 tabIndex={0}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (Date.now() < touchGestureRef.current.blockMenuUntil) return;
-                  handleStageTabTap(stage);
+                  const blocked = Date.now() < touchGestureRef.current.blockMenuUntil;
+                  handleStageTabTap(stage, blocked);
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
                 className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] touch-manipulation ${
