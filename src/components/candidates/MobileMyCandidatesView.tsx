@@ -82,6 +82,16 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
   useEffect(() => {
     measureMenuMetrics();
+
+    const rowEl = rowRef.current;
+    if (!rowEl || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(() => {
+      measureMenuMetrics();
+    });
+
+    observer.observe(rowEl);
+    return () => observer.disconnect();
   }, [measureMenuMetrics]);
 
   const handleTap = () => {
@@ -188,6 +198,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
           <DropdownMenuTrigger asChild>
             <button
               ref={triggerRef}
+              onPointerDownCapture={measureMenuMetrics}
               onClick={e => e.stopPropagation()}
               className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:bg-white/15 transition-colors flex-shrink-0"
               aria-label="Flytta kandidat"
