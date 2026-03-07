@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MoreVertical, Pencil, Palette, Image, Trash2, AlertTriangle, Info } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import {
@@ -38,6 +38,7 @@ import {
   getIconByName,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StageSettingsMenuProps {
   stageKey: string;
@@ -49,9 +50,10 @@ interface StageSettingsMenuProps {
   onMoveCandidatesAndDelete?: (fromStage: string, toStage: string) => Promise<void>;
   onLiveColorChange?: (color: string | null) => void;
   useJobDetailsTriggerStyle?: boolean;
+  requireLongPressOnMobile?: boolean;
 }
 
-export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false }: StageSettingsMenuProps) {
+export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
