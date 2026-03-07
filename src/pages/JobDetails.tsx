@@ -572,6 +572,7 @@ const JobDetails = () => {
             </DragOverlay>
           </DndContext>
         )}
+        </SectionErrorBoundary>
 
         {/* Candidate Profile Dialog */}
         <CandidateProfileDialog
