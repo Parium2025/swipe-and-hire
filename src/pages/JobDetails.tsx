@@ -80,21 +80,6 @@ const JobDetails = () => {
   const [swipeStageApps, setSwipeStageApps] = useState<JobApplication[]>([]);
   
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
-  
-  const [recruiterTooltipOpen, setRecruiterTooltipOpen] = useState(false);
-  const recruiterTooltipRef = useRef<HTMLDivElement>(null);
-
-  // Close recruiter tooltip on outside tap (touch devices)
-  useEffect(() => {
-    if (!recruiterTooltipOpen) return;
-    const handler = (e: PointerEvent) => {
-      if (recruiterTooltipRef.current && !recruiterTooltipRef.current.contains(e.target as Node)) {
-        setRecruiterTooltipOpen(false);
-      }
-    };
-    document.addEventListener('pointerdown', handler, true);
-    return () => document.removeEventListener('pointerdown', handler, true);
-  }, [recruiterTooltipOpen]);
 
   const { stageSettings, orderedStages, isLoading: stagesLoading } = useJobStageSettings(jobId);
   
