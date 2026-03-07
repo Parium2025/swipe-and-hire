@@ -162,7 +162,12 @@ const CandidateRow = memo(function CandidateRow({
               <ChevronRight className="h-4 w-4 text-white/60" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[140px] max-w-[200px]">
+          <DropdownMenuContent
+            align="center"
+            side="bottom"
+            sideOffset={8}
+            className="w-[calc(100vw-2rem)] max-w-sm"
+          >
             {moveTargets.map(stage => {
               const cfg = stageSettings[stage];
               if (!cfg) return null;
@@ -174,10 +179,10 @@ const CandidateRow = memo(function CandidateRow({
                     e.stopPropagation();
                     onMoveToStage(app.id, stage);
                   }}
-                  className="gap-2"
+                  className="gap-2 min-h-[44px]"
                 >
-                  <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
-                  {cfg.label}
+                  <Icon className="h-4 w-4 shrink-0" style={{ color: cfg.color }} />
+                  <span className="truncate">{cfg.label}</span>
                 </DropdownMenuItem>
               );
             })}
