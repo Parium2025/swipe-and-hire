@@ -20,6 +20,7 @@ import { useJobCriteria } from '@/hooks/useCriteriaResults';
 import { useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useSelectionMode } from '@/hooks/useSelectionMode';
 import { Plus } from 'lucide-react';
+import { SectionErrorBoundary } from '@/components/candidateProfile';
 import { toast } from 'sonner';
 import {
   DndContext,
