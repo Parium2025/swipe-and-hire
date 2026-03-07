@@ -345,8 +345,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 key={stage}
                 data-stage-tab
                 tabIndex={0}
-                onTouchStart={() => {
-                  setActiveTab(stage);
+                onPointerDown={(e) => {
+                  if (e.pointerType === 'touch') setActiveTab(stage);
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
