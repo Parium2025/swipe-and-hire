@@ -294,12 +294,15 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
   }, []);
 
-  const handleStageTouchStart = useCallback((stage: string) => {
-    // On touch, switch tab immediately for responsiveness
+  const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
+    // Only touch/pen should trigger immediate tab switch on pointer down.
+    // Mouse should switch on click to avoid drag-scroll conflicts.
+    if (pointerType === 'mouse') return;
+
     setActiveTab(stage);
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
 
-    if (isReadOnly || !isTouchCapable) return;
+    if (isReadOnly) return;
 
     const now = Date.now();
     const lastTap = lastTouchTapRef.current;
@@ -312,7 +315,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     }
 
     lastTouchTapRef.current = { stage, time: now };
-  }, [isReadOnly, isTouchCapable]);
+  }, [isReadOnly]);
 
   useEffect(() => {
     if (stages.length === 0) return;
@@ -366,10 +369,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
               <div
                 key={stage}
                 tabIndex={0}
-                {...(isTouchCapable
-                  ? { onTouchStart: () => handleStageTouchStart(stage) }
-                  : { onClick: () => handleStageClick(stage) }
-                )}
+                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
+                onClick={() => handleStageClick(stage)}
                 onDoubleClick={() => {
                   if (!isReadOnly) setOpenStageMenu(stage);
                 }}
