@@ -44,7 +44,20 @@ const Dashboard = memo(() => {
     }
   }, [isLoading]);
 
-  const [activeTab, setActiveTab] = useState<JobStatusTab>('active');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') as JobStatusTab | null;
+  const activeTab: JobStatusTab = tabParam === 'expired' ? 'expired' : 'active';
+  const setActiveTab = (tab: JobStatusTab) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (tab === 'active') {
+        next.delete('tab');
+      } else {
+        next.set('tab', tab);
+      }
+      return next;
+    }, { replace: true });
+  };
 
   const activeJobs = useMemo(() => allJobs.filter(job => 
     job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)
