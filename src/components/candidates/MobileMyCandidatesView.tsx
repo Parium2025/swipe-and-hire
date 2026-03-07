@@ -71,9 +71,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
     const rowRect = rowEl.getBoundingClientRect();
     const triggerRect = triggerEl.getBoundingClientRect();
     const nextWidth = Math.round(rowRect.width);
-    const rowCenter = rowRect.left + rowRect.width / 2;
-    const triggerCenter = triggerRect.left + triggerRect.width / 2;
-    const nextAlignOffset = Math.round(rowCenter - triggerCenter);
+    const nextAlignOffset = Math.round(rowRect.left - triggerRect.left);
 
     setMenuMetrics((prev) =>
       prev.width === nextWidth && prev.alignOffset === nextAlignOffset
@@ -209,7 +207,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            align="center"
+            align="start"
             side="bottom"
             sideOffset={4}
             alignOffset={menuMetrics.alignOffset}
