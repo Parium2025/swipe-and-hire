@@ -211,7 +211,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
 
   return (
     <>
-      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu modal={false} open={menuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button
             className={useJobDetailsTriggerStyle
@@ -220,6 +220,16 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
             }
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
             onMouseDown={useJobDetailsTriggerStyle ? (e) => e.preventDefault() : undefined}
+            onTouchStart={handleTriggerTouchStart}
+            onTouchMove={handleTriggerTouchMove}
+            onTouchEnd={handleTriggerTouchEnd}
+            onTouchCancel={handleTriggerTouchEnd}
+            onClick={(e) => {
+              if (isMobile && requireLongPressOnMobile) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
             onFocus={useJobDetailsTriggerStyle ? (e) => {
               if (!menuOpen) {
                 e.currentTarget.blur();
