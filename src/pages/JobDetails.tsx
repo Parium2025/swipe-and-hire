@@ -156,7 +156,7 @@ const JobDetails = () => {
   }, [updateApplicationLocally, refetch]);
 
   const updateCandidateRating = useCallback(async (applicantId: string, newRating: number) => {
-    if (!navigator.onLine) {
+    if (!getIsOnline()) {
       toast('Offline', { description: 'Du måste vara online för att uppdatera betyg' });
       return;
     }
