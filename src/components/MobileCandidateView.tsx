@@ -232,6 +232,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     startY: 0,
     moved: false,
     blockMenuUntil: 0,
+    touchTargetStage: '',
   });
   const menuDismissGuardUntilRef = useRef(0);
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
@@ -358,6 +359,16 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               key={stage}
               data-stage-tab
               tabIndex={0}
+              onTouchStartCapture={() => {
+                touchGestureRef.current.touchTargetStage = stage;
+                setActiveTab(stage);
+              }}
+              onTouchEndCapture={() => {
+                if (!touchGestureRef.current.moved && touchGestureRef.current.touchTargetStage === stage) {
+                  setActiveTab(stage);
+                }
+                touchGestureRef.current.touchTargetStage = '';
+              }}
               onPointerDown={(e) => {
                 if (e.pointerType === 'touch') setActiveTab(stage);
               }}
