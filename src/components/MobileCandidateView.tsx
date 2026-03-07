@@ -163,9 +163,10 @@ const CandidateRow = memo(function CandidateRow({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            align="center"
+            align="end"
             side="bottom"
-            sideOffset={8}
+            sideOffset={4}
+            alignOffset={12}
             className="w-[calc(100vw-2rem)] max-w-sm"
           >
             {moveTargets.map(stage => {
