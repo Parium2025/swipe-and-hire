@@ -319,12 +319,23 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 key={stage}
                 data-stage-tab
                 tabIndex={0}
-                onClick={() => setActiveTab(stage)}
+                onClick={() => {
+                  if (shouldBlockStageMenuInteraction()) return;
+                  const now = Date.now();
+                  const last = lastCardTapRef.current;
+                  if (last.stage === stage && now - last.time <= DOUBLE_TAP_MS) {
+                    lastCardTapRef.current = { stage: '', time: 0 };
+                    setMenuOpenStage(stage);
+                    return;
+                  }
+                  lastCardTapRef.current = { stage, time: now };
+                  setActiveTab(stage);
+                }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
                 className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] ${
                   isActive
                     ? 'ring-white/40 shadow-lg'
-                    : 'ring-white/20'
+                    : 'ring-transparent'
                 }`}
                 style={{ backgroundColor: `${cfg.color}55` }}
               >
@@ -349,27 +360,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 >
                   <span className="translate-y-[0.25px]">{count}</span>
                 </span>
-                {/* Stage settings menu (3-dot) */}
                 {!isReadOnly && (
                   <span
-                    onClick={e => {
-                      e.stopPropagation();
-                      if (shouldBlockStageMenuInteraction()) e.preventDefault();
-                    }}
-                    onPointerDown={e => {
-                      e.stopPropagation();
-                      if (shouldBlockStageMenuInteraction()) e.preventDefault();
-                    }}
-                    onTouchStart={e => {
-                      e.stopPropagation();
-                      if (shouldBlockStageMenuInteraction()) e.preventDefault();
-                    }}
-                    onTouchEnd={e => {
-                      if (shouldBlockStageMenuInteraction()) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }
-                    }}
+                    onClick={e => e.stopPropagation()}
+                    onPointerDown={e => e.stopPropagation()}
+                    onTouchStart={e => e.stopPropagation()}
+                    onTouchEnd={e => e.stopPropagation()}
                   >
                     <StageSettingsMenu
                       stageKey={stage}
@@ -380,6 +376,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                       useJobDetailsTriggerStyle
                       requireLongPressOnMobile
+                      controlledOpen={menuOpenStage === stage}
+                      onControlledOpenChange={(open) => setMenuOpenStage(open ? stage : null)}
                     />
                   </span>
                 )}
