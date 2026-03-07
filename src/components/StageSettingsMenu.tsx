@@ -51,11 +51,12 @@ interface StageSettingsMenuProps {
   onLiveColorChange?: (color: string | null) => void;
   useJobDetailsTriggerStyle?: boolean;
   requireLongPressOnMobile?: boolean;
+  touchVisualOnlyTrigger?: boolean;
   controlledOpen?: boolean;
   onControlledOpenChange?: (open: boolean) => void;
 }
 
-export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true, controlledOpen, onControlledOpenChange }: StageSettingsMenuProps) {
+export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true, touchVisualOnlyTrigger = false, controlledOpen, onControlledOpenChange }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const isTouchDevice = useTouchCapable();
   const isControlled = controlledOpen !== undefined;

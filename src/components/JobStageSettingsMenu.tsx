@@ -48,6 +48,8 @@ interface JobStageSettingsMenuProps {
   stageIndex?: number;
   /** Require long-press on touch devices before opening menu */
   requireLongPressOnMobile?: boolean;
+  /** Keep 3-dot trigger visual only on touch (open via parent double-tap) */
+  touchVisualOnlyTrigger?: boolean;
   /** Controlled open state from parent (e.g. double-tap on card) */
   controlledOpen?: boolean;
   onControlledOpenChange?: (open: boolean) => void;
@@ -64,6 +66,7 @@ export function JobStageSettingsMenu({
   onLiveColorChange,
   stageIndex = 0,
   requireLongPressOnMobile = true,
+  touchVisualOnlyTrigger = false,
   controlledOpen,
   onControlledOpenChange,
 }: JobStageSettingsMenuProps) {
