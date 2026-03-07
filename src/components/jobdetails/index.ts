@@ -4,3 +4,5 @@ export { StatusColumn } from './StatusColumn';
 export type { StatusColumnProps } from './StatusColumn';
 export { mapToApplicationData } from './mapApplicationData';
 export { JobStatusBadge } from './JobStatusBadge';
+export { JobDetailsSkeleton } from './JobDetailsSkeleton';
+export { JobDetailsHeader } from './JobDetailsHeader';
