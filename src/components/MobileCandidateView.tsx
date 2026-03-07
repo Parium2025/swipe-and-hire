@@ -223,6 +223,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const listRef = useRef<HTMLDivElement>(null);
+  const scrollingRef = useRef(false);
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
