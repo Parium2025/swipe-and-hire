@@ -245,6 +245,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   });
   const touchTapHandledRef = useRef(false);
   const lastTouchHandledAtRef = useRef(0);
+  const menuDismissGuardUntilRef = useRef(0);
 
   const handleStageTabsTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     const touch = e.touches[0];
@@ -274,28 +275,22 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     scrollingRef.current = false;
   }, []);
 
-  const shouldBlockStageMenuInteraction = useCallback(() => {
-    return scrollingRef.current || Date.now() < touchGestureRef.current.blockMenuUntil;
-  }, []);
-
   const handleStageTabTap = useCallback((stage: string) => {
     setActiveTab(stage);
 
-    if (shouldBlockStageMenuInteraction()) {
-      lastCardTapRef.current = { stage: '', time: 0 };
-      return;
-    }
-
     const now = Date.now();
     const last = lastCardTapRef.current;
-    if (last.stage === stage && now - last.time <= DOUBLE_TAP_MS) {
+    const isDoubleTap = last.stage === stage && now - last.time <= DOUBLE_TAP_MS;
+
+    if (isDoubleTap) {
       lastCardTapRef.current = { stage: '', time: 0 };
+      menuDismissGuardUntilRef.current = now + 280;
       setMenuOpenStage(stage);
       return;
     }
 
     lastCardTapRef.current = { stage, time: now };
-  }, [shouldBlockStageMenuInteraction]);
+  }, [DOUBLE_TAP_MS]);
 
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
@@ -406,7 +401,10 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       requireLongPressOnMobile
                       touchVisualOnlyTrigger
                       controlledOpen={menuOpenStage === stage}
-                      onControlledOpenChange={(open) => setMenuOpenStage(open ? stage : null)}
+                      onControlledOpenChange={(open) => {
+                        if (!open && Date.now() < menuDismissGuardUntilRef.current) return;
+                        setMenuOpenStage(open ? stage : null);
+                      }}
                     />
                   </span>
                 )}
