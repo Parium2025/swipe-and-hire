@@ -309,6 +309,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     lastTouchTapRef.current = { stage, time: now };
   }, [isReadOnly, isTouchCapable]);
 
+  useEffect(() => {
+    if (stages.length === 0) return;
+    if (!stages.includes(activeTab)) {
+      setActiveTab(stages[0]);
+    }
+  }, [stages, activeTab]);
 
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
