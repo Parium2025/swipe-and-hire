@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
+import { getIsOnline } from '@/lib/connectivityManager';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
@@ -155,7 +156,7 @@ const JobDetails = () => {
   }, [updateApplicationLocally, refetch]);
 
   const updateCandidateRating = useCallback(async (applicantId: string, newRating: number) => {
-    if (!navigator.onLine) {
+    if (!getIsOnline()) {
       toast('Offline', { description: 'Du måste vara online för att uppdatera betyg' });
       return;
     }
