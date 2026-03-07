@@ -76,10 +76,10 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
       </div>
 
       {/* Name + job + time */}
-      <div className="text-center">
-        <h2 className="text-xl font-semibold text-white">{application.first_name} {application.last_name}</h2>
-        <p className="text-sm text-white mt-1">{application.job_title || 'Okänd tjänst'}</p>
-        <span className="text-xs text-white mt-0.5 block">{formatTimeAgo(application.applied_at)}</span>
+      <div className="w-full min-w-0 text-center">
+        <h2 className="text-xl font-semibold text-white break-words [overflow-wrap:anywhere]">{application.first_name} {application.last_name}</h2>
+        <p className="text-sm text-white mt-1 break-words [overflow-wrap:anywhere]">{application.job_title || 'Okänd tjänst'}</p>
+        <span className="text-xs text-white mt-0.5 block break-words [overflow-wrap:anywhere]">{formatTimeAgo(application.applied_at)}</span>
       </div>
 
       {/* Star rating */}
@@ -92,23 +92,23 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
       )}
 
       {/* Contact info */}
-      <SectionCard className="w-full space-y-2">
+      <SectionCard className="w-full min-w-0 space-y-2">
         {application.email && (
-          <div className="flex items-center gap-2.5">
+          <div className="flex min-w-0 items-center gap-2.5">
             <Mail className="h-3.5 w-3.5 text-white shrink-0" />
-            <span className="text-sm text-white truncate">{application.email}</span>
+            <span className="min-w-0 flex-1 text-sm text-white break-all [overflow-wrap:anywhere]">{application.email}</span>
           </div>
         )}
         {application.phone && (
-          <div className="flex items-center gap-2.5">
+          <div className="flex min-w-0 items-center gap-2.5">
             <Phone className="h-3.5 w-3.5 text-white shrink-0" />
-            <span className="text-sm text-white">{application.phone}</span>
+            <span className="min-w-0 flex-1 text-sm text-white break-all [overflow-wrap:anywhere]">{application.phone}</span>
           </div>
         )}
         {application.location && (
-          <div className="flex items-center gap-2.5">
+          <div className="flex min-w-0 items-center gap-2.5">
             <MapPin className="h-3.5 w-3.5 text-white shrink-0" />
-            <span className="text-sm text-white">{application.location}</span>
+            <span className="min-w-0 flex-1 text-sm text-white break-words [overflow-wrap:anywhere]">{application.location}</span>
           </div>
         )}
         {application.age && (
@@ -121,24 +121,24 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
 
       {/* Employment info */}
       {hasEmploymentInfo && (
-        <SectionCard className="w-full space-y-2">
+        <SectionCard className="w-full min-w-0 space-y-2">
           <SectionLabel icon={Briefcase}>Anställningsinformation</SectionLabel>
           {application.employment_status && (
             <div>
               <p className="text-xs text-white">Anställningsstatus?</p>
-              <p className="text-sm text-white">Svar: {employmentStatusLabels[application.employment_status] || application.employment_status}</p>
+              <p className="text-sm text-white break-words [overflow-wrap:anywhere]">Svar: {employmentStatusLabels[application.employment_status] || application.employment_status}</p>
             </div>
           )}
           {application.work_schedule && (
             <div>
               <p className="text-xs text-white">Arbetsschema</p>
-              <p className="text-sm text-white">Svar: {workScheduleLabels[application.work_schedule] || application.work_schedule}</p>
+              <p className="text-sm text-white break-words [overflow-wrap:anywhere]">Svar: {workScheduleLabels[application.work_schedule] || application.work_schedule}</p>
             </div>
           )}
           {application.availability && (
             <div>
               <p className="text-xs text-white">När kan du börja nytt jobb?</p>
-              <p className="text-sm text-white">Svar: {availabilityLabels[application.availability] || application.availability}</p>
+              <p className="text-sm text-white break-words [overflow-wrap:anywhere]">Svar: {availabilityLabels[application.availability] || application.availability}</p>
             </div>
           )}
         </SectionCard>

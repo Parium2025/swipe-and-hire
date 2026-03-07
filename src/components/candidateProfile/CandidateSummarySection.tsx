@@ -99,7 +99,7 @@ export const CandidateSummarySection = ({
               <TooltipProvider delayDuration={200}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <p className="text-sm text-white leading-relaxed min-w-0 break-words [overflow-wrap:anywhere] cursor-default">
+                    <p className="text-sm text-white leading-relaxed min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] cursor-default">
                       {aiSummary.summary_text}
                     </p>
                   </TooltipTrigger>
