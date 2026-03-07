@@ -288,35 +288,6 @@ const EmployerHome = memo(() => {
         <HomeDashboardGrid />
 
 
-        {/* Empty state if no jobs */}
-        {jobs.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.45 }}
-          >
-            <Card className="bg-gradient-to-br from-white/[0.08] to-white/[0.04] backdrop-blur-sm border-white/10 border-dashed">
-              <CardContent className="p-10 text-center">
-                <div className="p-5 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 w-fit mx-auto mb-5">
-                  <Briefcase className="h-10 w-10 text-primary" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-3">
-                  Kom igång med rekryteringen!
-                </h3>
-                <p className="text-white/60 mb-6 max-w-md mx-auto">
-                  Du har inga annonser ännu. Skapa din första jobbannons för att börja ta emot ansökningar från kvalificerade kandidater.
-                </p>
-                <Button
-                  onClick={() => navigate('/my-jobs?create=true')}
-                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg shadow-primary/25"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Skapa din första annons
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
       </div>
     </>
   );
