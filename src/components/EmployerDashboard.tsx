@@ -236,7 +236,7 @@ const EmployerDashboard = memo(() => {
     if (!job.is_active) {
       handleEditDraft(job);
     } else {
-      navigate(`/job-details/${job.id}`, { state: { fromTab: activeTab } });
+      navigate(`/job-details/${job.id}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
     }
   };
 
@@ -545,7 +545,7 @@ const EmployerDashboard = memo(() => {
                               if (isDraft) {
                                 handleEditDraft(jobPosting);
                               } else {
-                                navigate(`/job-details/${jobId}`, { state: { fromTab: activeTab } });
+                                navigate(`/job-details/${jobId}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
                               }
                             }}
                             footer={

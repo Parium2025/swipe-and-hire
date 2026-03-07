@@ -5,7 +5,7 @@ import { Briefcase, Users, Eye, TrendingUp, MapPin, Calendar } from 'lucide-reac
 import { useJobsData } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -44,7 +44,20 @@ const Dashboard = memo(() => {
     }
   }, [isLoading]);
 
-  const [activeTab, setActiveTab] = useState<JobStatusTab>('active');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') as JobStatusTab | null;
+  const activeTab: JobStatusTab = tabParam === 'expired' ? 'expired' : 'active';
+  const setActiveTab = (tab: JobStatusTab) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (tab === 'active') {
+        next.delete('tab');
+      } else {
+        next.set('tab', tab);
+      }
+      return next;
+    }, { replace: true });
+  };
 
   const activeJobs = useMemo(() => allJobs.filter(job => 
     job.is_active && !isJobExpiredCheck(job.created_at, job.expires_at)
@@ -239,7 +252,7 @@ const Dashboard = memo(() => {
                       <TableRow 
                         key={job.id}
                         className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
-                        onClick={() => navigate(`/job-details/${job.id}`)}
+                        onClick={() => navigate(`/job-details/${job.id}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
                       >
                         <TableCell className="font-medium text-white text-center px-2 py-3">
                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
@@ -347,7 +360,7 @@ const Dashboard = memo(() => {
                 key={job.id}
                 job={job as any}
                 hideSaveButton
-                onCardClick={(jobId) => navigate(`/job-details/${jobId}`)}
+                onCardClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
               />
             ))}
 
