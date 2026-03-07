@@ -815,28 +815,28 @@ export const CandidateProfileDialog = ({
                   return (
                     <div className="space-y-2">
                       <p className="text-center text-white text-xs font-medium">Flytta kandidat</p>
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center justify-between gap-2">
                         <button
                           onClick={() => prevStage && onStageChange(prevStage)}
                           disabled={!prevStage}
-                          className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                          className={`min-w-0 flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                             prevStage ? 'text-white bg-white/10 hover:bg-white/20' : 'opacity-40 text-white/50'
                           }`}
                         >
                           <ChevronLeft className="h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">Till {(prevLabel || 'föregående').replace('?', '')}</span>
+                          <span className="truncate min-w-0">Till {(prevLabel || 'föregående').replace('?', '')}</span>
                         </button>
-                        <div className="flex-shrink-0 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium whitespace-nowrap">
+                        <div className="flex-shrink min-w-0 max-w-[40%] px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium truncate text-center">
                           {(stageConfig[currentStage]?.label || currentStage).replace('?', '')}
                         </div>
                         <button
                           onClick={() => nextStage && onStageChange(nextStage)}
                           disabled={!nextStage}
-                          className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                          className={`min-w-0 flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                             nextStage ? 'text-white bg-white/10 hover:bg-white/20' : 'opacity-40 text-white/50'
                           }`}
                         >
-                          <span className="truncate">Till {(nextLabel || 'nästa').replace('?', '')}</span>
+                          <span className="truncate min-w-0">Till {(nextLabel || 'nästa').replace('?', '')}</span>
                           <ChevronRight className="h-4 w-4 flex-shrink-0" />
                         </button>
                       </div>
