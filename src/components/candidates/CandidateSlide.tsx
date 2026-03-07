@@ -61,14 +61,12 @@ export const CandidateSlide = memo(function CandidateSlide({
     const dx = Math.abs(touch.clientX - touchStartRef.current.x);
     const dy = Math.abs(touch.clientY - touchStartRef.current.y);
 
-    // Lock direction early — 6px is enough to determine intent
-    if (!swipeLockedRef.current && (dx > 6 || dy > 6)) {
-      swipeLockedRef.current = dx > dy * 0.8 ? 'horizontal' : 'vertical';
+    // Lock direction after 10px movement — horizontal only if clearly sideways (dx > dy * 1.5)
+    if (!swipeLockedRef.current && (dx > 10 || dy > 10)) {
+      swipeLockedRef.current = dx > dy * 1.5 ? 'horizontal' : 'vertical';
     }
 
     if (swipeLockedRef.current === 'horizontal') {
-      // Prevent vertical scroll from interfering
-      e.preventDefault();
       e.stopPropagation();
     }
   }, []);

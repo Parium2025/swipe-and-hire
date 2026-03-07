@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, memo } from 'react';
+import { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -35,38 +35,34 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     }
   }, [open, initialIndex]);
 
-  // Track current candidate via IntersectionObserver — use top-edge proximity
-  useEffect(() => {
-    if (!open || !scrollRef.current) return;
-
+  // Track current candidate via scroll position — simple & reliable
+  const handleScroll = useCallback(() => {
     const container = scrollRef.current;
+    if (!container) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Find the visible entry whose top is closest to (but not above) the container top
-        const containerRect = container.getBoundingClientRect();
-        let bestIdx = currentIndex;
-        let bestDistance = Infinity;
+    const containerTop = container.getBoundingClientRect().top;
+    let bestIdx = 0;
+    let bestDistance = Infinity;
 
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          const idx = Number(entry.target.getAttribute('data-index'));
-          // Distance from element top to container top — prefer the one closest to 0 (or slightly negative)
-          const dist = Math.abs(entry.boundingClientRect.top - containerRect.top);
-          if (dist < bestDistance) {
-            bestDistance = dist;
-            bestIdx = idx;
-          }
-        });
+    candidateRefs.current.forEach((el, idx) => {
+      if (!el) return;
+      const dist = Math.abs(el.getBoundingClientRect().top - containerTop);
+      if (dist < bestDistance) {
+        bestDistance = dist;
+        bestIdx = idx;
+      }
+    });
 
-        setCurrentIndex(bestIdx);
-      },
-      { root: container, threshold: [0, 0.1, 0.5, 0.9, 1] }
-    );
+    setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
+  }, []);
 
-    candidateRefs.current.forEach((el) => { if (el) observer.observe(el); });
-    return () => observer.disconnect();
-  }, [open, applications.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!open || !container) return;
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [open, handleScroll]);
 
   // Lock body scroll when open
   useEffect(() => {
