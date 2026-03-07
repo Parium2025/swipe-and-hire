@@ -341,14 +341,33 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   <span className="truncate min-w-0">{cfg.label}</span>
                 )}
                 <span
-                  className="text-[9px] leading-none h-4 w-4 flex items-center justify-center rounded-full text-white flex-shrink-0 text-center"
+                  className="text-[9px] min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full text-white flex-shrink-0 tabular-nums leading-none"
                   style={{ backgroundColor: `${cfg.color}88` }}
                 >
                   {count}
                 </span>
                 {/* Stage settings menu (3-dot) */}
                 {!isReadOnly && (
-                  <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
+                  <span
+                    onClick={e => {
+                      e.stopPropagation();
+                      if (shouldBlockStageMenuInteraction()) e.preventDefault();
+                    }}
+                    onPointerDown={e => {
+                      e.stopPropagation();
+                      if (shouldBlockStageMenuInteraction()) e.preventDefault();
+                    }}
+                    onTouchStart={e => {
+                      e.stopPropagation();
+                      if (shouldBlockStageMenuInteraction()) e.preventDefault();
+                    }}
+                    onTouchEnd={e => {
+                      if (shouldBlockStageMenuInteraction()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }
+                    }}
+                  >
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}
@@ -357,6 +376,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       targetStageLabel={targetStageLabel}
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                       useJobDetailsTriggerStyle
+                      requireLongPressOnMobile
                     />
                   </span>
                 )}
