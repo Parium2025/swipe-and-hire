@@ -28,7 +28,7 @@ interface JobDetailsHeaderProps {
     expires_at: string | null;
     views_count: number | null;
     applications_count: number | null;
-    employer_profile: {
+    employer_profile?: {
       first_name: string | null;
       last_name: string | null;
       profile_image_url: string | null;
