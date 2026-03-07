@@ -353,6 +353,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   const blocked = Date.now() < touchGestureRef.current.blockMenuUntil;
                   handleStageTabTap(stage, blocked);
                 }}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
                 className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] touch-manipulation ${
                   isActive
                     ? 'ring-white/40 shadow-lg'
