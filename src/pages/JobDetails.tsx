@@ -173,7 +173,7 @@ const JobDetails = () => {
     }
   }, [updateApplicationLocally, refetch]);
 
-  const updateCandidateRating = async (applicantId: string, newRating: number) => {
+  const updateCandidateRating = useCallback(async (applicantId: string, newRating: number) => {
     if (!navigator.onLine) {
       toast('Offline', { description: 'Du måste vara online för att uppdatera betyg' });
       return;
@@ -200,7 +200,7 @@ const JobDetails = () => {
       toast.error('Fel', { description: 'Kunde inte uppdatera betyg' });
       refetch();
     }
-  };
+  }, [myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch]);
 
   const markApplicationAsViewed = async (applicationId: string) => {
     updateApplicationLocally(applicationId, { viewed_at: new Date().toISOString() });
