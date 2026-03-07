@@ -338,6 +338,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
           onTouchStart={handleStageTabsTouchStart}
           onTouchMove={handleStageTabsTouchMove}
           onTouchEnd={handleStageTabsTouchEnd}
+          onTouchCancel={handleStageTabsTouchEnd}
           className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
         >
           {stages.map((stage, stageIdx) => {
@@ -355,19 +356,22 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
               <div
                 key={stage}
                 data-stage-tab
+                role="button"
+                aria-pressed={isActive}
                 tabIndex={0}
+                onMouseDown={(e) => e.preventDefault()}
                 onTouchStartCapture={() => {
                   touchGestureRef.current.touchTargetStage = stage;
                   setActiveStage(stage);
                 }}
                 onTouchEndCapture={() => {
-                  if (!touchGestureRef.current.moved && touchGestureRef.current.touchTargetStage === stage) {
+                  if (touchGestureRef.current.touchTargetStage === stage) {
                     setActiveStage(stage);
                   }
                   touchGestureRef.current.touchTargetStage = '';
                 }}
-                onPointerDown={(e) => {
-                  if (e.pointerType === 'touch') setActiveStage(stage);
+                onTouchCancelCapture={() => {
+                  touchGestureRef.current.touchTargetStage = '';
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
