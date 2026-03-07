@@ -51,11 +51,12 @@ interface StageSettingsMenuProps {
   onLiveColorChange?: (color: string | null) => void;
   useJobDetailsTriggerStyle?: boolean;
   requireLongPressOnMobile?: boolean;
+  touchVisualOnlyTrigger?: boolean;
   controlledOpen?: boolean;
   onControlledOpenChange?: (open: boolean) => void;
 }
 
-export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true, controlledOpen, onControlledOpenChange }: StageSettingsMenuProps) {
+export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true, touchVisualOnlyTrigger = false, controlledOpen, onControlledOpenChange }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const isTouchDevice = useTouchCapable();
   const isControlled = controlledOpen !== undefined;
@@ -72,6 +73,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   const lastTouchTapAtRef = useRef(0);
   const blockTouchClickRef = useRef(false);
   const DOUBLE_TAP_WINDOW_MS = 320;
+  const isTouchTriggerVisualOnly = isTouchDevice && touchVisualOnlyTrigger;
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
@@ -87,7 +89,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   }, []);
 
   const handleTriggerPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
+    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
 
     const now = Date.now();
     const isDoubleTap = now - lastTouchTapAtRef.current <= DOUBLE_TAP_WINDOW_MS;
@@ -106,7 +108,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   };
 
   const handleTriggerPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
+    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
     allowTouchOpenRef.current = false;
   };
 
@@ -115,6 +117,11 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   };
 
   const handleMenuOpenChange = (nextOpen: boolean) => {
+    if (isControlled) {
+      setMenuOpen(nextOpen);
+      return;
+    }
+
     if (!nextOpen) {
       setMenuOpen(false);
       allowTouchOpenRef.current = false;
@@ -221,19 +228,23 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
         <DropdownMenuTrigger asChild>
           <button
             className={useJobDetailsTriggerStyle
-              ? 'p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]'
-              : 'p-1 rounded hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100'
+              ? `p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important] ${isTouchTriggerVisualOnly ? 'pointer-events-none' : ''}`
+              : `p-1 rounded hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100 ${isTouchTriggerVisualOnly ? 'pointer-events-none' : ''}`
             }
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
+            tabIndex={isTouchTriggerVisualOnly ? -1 : 0}
             onMouseDown={useJobDetailsTriggerStyle ? (e) => e.preventDefault() : undefined}
-            onPointerDown={handleTriggerPointerDown}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              handleTriggerPointerDown(e);
+            }}
             onPointerMove={handleTriggerPointerMove}
             onPointerUp={handleTriggerPointerCancel}
             onPointerCancel={handleTriggerPointerCancel}
             onClick={(e) => {
+              e.stopPropagation();
               if (blockTouchClickRef.current) {
                 e.preventDefault();
-                e.stopPropagation();
                 blockTouchClickRef.current = false;
               }
             }}

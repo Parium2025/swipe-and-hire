@@ -48,6 +48,8 @@ interface JobStageSettingsMenuProps {
   stageIndex?: number;
   /** Require long-press on touch devices before opening menu */
   requireLongPressOnMobile?: boolean;
+  /** Keep 3-dot trigger visual only on touch (open via parent double-tap) */
+  touchVisualOnlyTrigger?: boolean;
   /** Controlled open state from parent (e.g. double-tap on card) */
   controlledOpen?: boolean;
   onControlledOpenChange?: (open: boolean) => void;
@@ -64,6 +66,7 @@ export function JobStageSettingsMenu({
   onLiveColorChange,
   stageIndex = 0,
   requireLongPressOnMobile = true,
+  touchVisualOnlyTrigger = false,
   controlledOpen,
   onControlledOpenChange,
 }: JobStageSettingsMenuProps) {
@@ -89,6 +92,7 @@ export function JobStageSettingsMenu({
   const lastTouchTapAtRef = useRef(0);
   const blockTouchClickRef = useRef(false);
   const DOUBLE_TAP_WINDOW_MS = 320;
+  const isTouchTriggerVisualOnly = isTouchDevice && touchVisualOnlyTrigger;
   
   // Use liveColor while dragging, fall back to saved color
   const displayColor = liveColor ?? settings?.color ?? '#0EA5E9';
@@ -107,7 +111,7 @@ export function JobStageSettingsMenu({
   }, []);
 
   const handleTriggerPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
+    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
 
     const now = Date.now();
     const isDoubleTap = now - lastTouchTapAtRef.current <= DOUBLE_TAP_WINDOW_MS;
@@ -126,7 +130,7 @@ export function JobStageSettingsMenu({
   };
 
   const handleTriggerPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
+    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
     allowTouchOpenRef.current = false;
   };
 
@@ -135,6 +139,11 @@ export function JobStageSettingsMenu({
   };
 
   const handleMenuOpenChange = (nextOpen: boolean) => {
+    if (isControlled) {
+      setMenuOpen(nextOpen);
+      return;
+    }
+
     if (!nextOpen) {
       setMenuOpen(false);
       allowTouchOpenRef.current = false;
@@ -215,17 +224,21 @@ export function JobStageSettingsMenu({
       <DropdownMenu modal={false} open={menuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button 
-            className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
+            className={`p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important] ${isTouchTriggerVisualOnly ? 'pointer-events-none' : ''}`}
             style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
+            tabIndex={isTouchTriggerVisualOnly ? -1 : 0}
             onMouseDown={(e) => e.preventDefault()}
-            onPointerDown={handleTriggerPointerDown}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              handleTriggerPointerDown(e);
+            }}
             onPointerMove={handleTriggerPointerMove}
             onPointerUp={handleTriggerPointerCancel}
             onPointerCancel={handleTriggerPointerCancel}
             onClick={(e) => {
+              e.stopPropagation();
               if (blockTouchClickRef.current) {
                 e.preventDefault();
-                e.stopPropagation();
                 blockTouchClickRef.current = false;
               }
             }}

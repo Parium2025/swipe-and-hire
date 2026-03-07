@@ -376,12 +376,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                 <span className="translate-y-[0.25px]">{count}</span>
               </span>
               {/* Stage settings menu — opens via double-tap on card or click on desktop */}
-              <span
-                onClick={e => e.stopPropagation()}
-                onPointerDown={e => e.stopPropagation()}
-                onTouchStart={e => e.stopPropagation()}
-                onTouchEnd={e => e.stopPropagation()}
-              >
+              <span>
                 <JobStageSettingsMenu
                   jobId={jobId}
                   stageKey={stage}
@@ -391,6 +386,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   targetStageLabel={targetStageLabel}
                   stageIndex={stageIdx}
                   requireLongPressOnMobile
+                  touchVisualOnlyTrigger
                   controlledOpen={menuOpenStage === stage}
                   onControlledOpenChange={(open) => setMenuOpenStage(open ? stage : null)}
                 />
