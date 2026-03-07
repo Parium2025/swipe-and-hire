@@ -1,6 +1,10 @@
 export { CandidateNotesPanel } from './CandidateNotesPanel';
 export { CandidateSummarySection } from './CandidateSummarySection';
 export { SectionErrorBoundary } from './SectionErrorBoundary';
+export { InteractiveStarRating } from './InteractiveStarRating';
+export { ProfileInfoSections } from './ProfileInfoSections';
+export { ProfileActions } from './ProfileActions';
+export { DeleteNoteDialog, RemoveCandidateDialog } from './ConfirmationDialogs';
 export type { CandidateNote, CandidateSummaryCacheValue } from './candidateProfileCache';
 export {
   summaryCache,
