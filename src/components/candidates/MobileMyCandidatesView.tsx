@@ -184,9 +184,10 @@ const MyCandidateRow = memo(function MyCandidateRow({
           />
         </div>
       ) : (
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={(open) => open && measureMenuMetrics()}>
           <DropdownMenuTrigger asChild>
             <button
+              ref={triggerRef}
               onClick={e => e.stopPropagation()}
               className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:bg-white/15 transition-colors flex-shrink-0"
               aria-label="Flytta kandidat"
@@ -198,8 +199,9 @@ const MyCandidateRow = memo(function MyCandidateRow({
             align="end"
             side="bottom"
             sideOffset={4}
-            alignOffset={12}
-            className="w-[calc(100vw-2rem)] max-w-sm"
+            alignOffset={menuMetrics.alignOffset}
+            className="max-w-none"
+            style={{ width: menuMetrics.width ? `${menuMetrics.width}px` : 'calc(100vw - 2rem)' }}
           >
             {moveTargets.map(stage => {
               const cfg = stageConfig[stage];
