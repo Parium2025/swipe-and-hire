@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 
 interface QueuedAction {
   jobId: string;
@@ -12,11 +13,30 @@ interface QueuedAction {
 const QUEUE_KEY = 'parium_offline_saved_jobs_queue';
 const MAX_ATTEMPTS = 3;
 
+/**
+ * Validates parsed data has the correct QueuedAction shape.
+ * Guards against corrupt localStorage entries causing runtime crashes.
+ */
+function isValidQueuedAction(item: unknown): item is QueuedAction {
+  if (!item || typeof item !== 'object') return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.jobId === 'string' &&
+    (obj.action === 'save' || obj.action === 'unsave') &&
+    typeof obj.timestamp === 'number' &&
+    typeof obj.attempts === 'number'
+  );
+}
+
 function getQueue(): QueuedAction[] {
   try {
     const raw = localStorage.getItem(QUEUE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidQueuedAction);
   } catch {
+    try { localStorage.removeItem(QUEUE_KEY); } catch { /* ignore */ }
     return [];
   }
 }
@@ -32,7 +52,7 @@ function saveQueue(queue: QueuedAction[]) {
 /**
  * Offline queue for saved job toggles.
  * Queues save/unsave actions when offline, syncs when back online.
- * Failed items are retried up to MAX_ATTEMPTS before being dropped.
+ * Uses ConnectivityManager for reliable online detection.
  */
 export function useOfflineSavedJobsQueue(userId: string | undefined) {
   const [queue, setQueue] = useState<QueuedAction[]>([]);
@@ -85,17 +105,19 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
         synced++;
       } catch (err) {
         console.error('Failed to sync saved job action:', err);
-        // Retry logic: increment attempts, keep if under max
         const updated = { ...item, attempts: item.attempts + 1 };
         if (updated.attempts < MAX_ATTEMPTS) {
           remaining.push(updated);
         } else {
           console.warn('Saved job action exceeded max attempts, dropping:', item.jobId, item.action);
+          toast.error('Ett sparat jobb kunde inte synkas', {
+            description: 'Vänligen försök igen.',
+            duration: 6000,
+          });
         }
       }
     }
 
-    // Save only failed items that still have retries left
     saveQueue(remaining);
     setQueue(remaining);
     syncInProgress.current = false;
@@ -105,22 +127,20 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     }
   }, [userId]);
 
-  // Auto-sync when coming back online
+  // Auto-sync using ConnectivityManager (ping-based, not navigator.onLine)
   useEffect(() => {
-    const handleOnline = () => {
-      syncQueue();
-    };
+    const unsub = onConnectivityChange((online) => {
+      if (online) {
+        console.log('📡 Back online — syncing saved jobs queue...');
+        syncQueue();
+      }
+    });
 
-    window.addEventListener('online', handleOnline);
-
-    // Try to sync on mount if online
-    if (navigator.onLine && queue.length > 0) {
+    if (getIsOnline() && queue.length > 0) {
       syncQueue();
     }
 
-    return () => {
-      window.removeEventListener('online', handleOnline);
-    };
+    return unsub;
   }, [syncQueue, queue.length]);
 
   return {
