@@ -101,7 +101,13 @@ export const CandidateSummarySection = ({
                   <TooltipTrigger asChild>
                     <p className="text-sm text-white leading-relaxed truncate min-w-0 cursor-default">
                       {aiSummary.summary_text}
-              </p>
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={6} className="max-w-[300px] break-words whitespace-normal">
+                    <p className="text-sm break-words whitespace-pre-wrap">{aiSummary.summary_text}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             );
           })()}
         </div>
