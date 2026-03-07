@@ -1,9 +1,7 @@
 import { memo, useMemo, useEffect, useState, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useJobsData } from '@/hooks/useJobsData';
 import { useWeather } from '@/hooks/useWeather';
-import { Briefcase } from 'lucide-react';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { HomeDashboardGrid } from '@/components/HomeDashboardGrid';
