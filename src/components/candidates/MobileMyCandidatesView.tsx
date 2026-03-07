@@ -361,12 +361,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   <span className="translate-y-[0.25px]">{count}</span>
                 </span>
                 {!isReadOnly && (
-                  <span
-                    onClick={e => e.stopPropagation()}
-                    onPointerDown={e => e.stopPropagation()}
-                    onTouchStart={e => e.stopPropagation()}
-                    onTouchEnd={e => e.stopPropagation()}
-                  >
+                  <span>
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}
@@ -376,6 +371,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                       useJobDetailsTriggerStyle
                       requireLongPressOnMobile
+                      touchVisualOnlyTrigger
                       controlledOpen={menuOpenStage === stage}
                       onControlledOpenChange={(open) => setMenuOpenStage(open ? stage : null)}
                     />
