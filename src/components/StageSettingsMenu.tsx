@@ -224,7 +224,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
 
   return (
     <>
-      <DropdownMenu modal={false} open={menuOpen} onOpenChange={handleMenuOpenChange}>
+      <DropdownMenu modal={isTouchDevice} open={menuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button
             className={useJobDetailsTriggerStyle
