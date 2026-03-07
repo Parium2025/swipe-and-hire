@@ -71,9 +71,9 @@ export const CandidateSummarySection = ({
 
             if (displayPoints.length > 0) {
               return (
-                <ul className="space-y-1 w-full min-w-0 overflow-hidden">
+                <ul className="space-y-1 w-full min-w-0">
                   {displayPoints.map((point: any, idx: number) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-white w-full min-w-0 overflow-hidden">
+                    <li key={idx} className="flex items-start gap-2 text-sm text-white w-full min-w-0">
                       <span
                         className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
                           point.type === 'negative' ? 'bg-red-400' : 'bg-white'
@@ -82,7 +82,7 @@ export const CandidateSummarySection = ({
                       <TooltipProvider delayDuration={200}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="block min-w-0 flex-1 break-words [overflow-wrap:anywhere] cursor-default">{point.text}</span>
+                            <span className="block min-w-0 flex-1 whitespace-normal break-words [overflow-wrap:anywhere] cursor-default">{point.text}</span>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" sideOffset={8} align="start" className="max-w-[280px] break-words whitespace-normal z-[999999]">
                             <p className="text-sm break-words whitespace-pre-wrap">{point.text}</p>
