@@ -449,7 +449,7 @@ export const CandidateProfileDialog = ({
 
         <div className="flex flex-1 min-h-0 min-w-0 overflow-x-hidden md:max-h-[85vh]">
           {/* Main content - left side */}
-          <div className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 pt-2 md:p-5 space-y-4 ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
+          <div className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 pt-2 md:p-5 space-y-4 [overflow-wrap:anywhere] [&_a]:break-all [&_p]:break-words [&_span]:break-words ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
           
           {/* Candidate navigation bar — TeamTailor-style */}
           {candidateTotal != null && candidateTotal >= 1 && (
@@ -504,8 +504,8 @@ export const CandidateProfileDialog = ({
               )}
             </div>
             
-            <div className="w-full">
-              <h2 className="text-lg md:text-2xl font-semibold text-white text-center">
+            <div className="w-full min-w-0">
+              <h2 className="text-lg md:text-2xl font-semibold text-white text-center break-words [overflow-wrap:anywhere]">
                 {displayApp.first_name} {displayApp.last_name}
               </h2>
               
@@ -519,16 +519,16 @@ export const CandidateProfileDialog = ({
               )}
               
               {showJobSelectorShell ? (
-                <div className="mt-2 relative w-full">
+                <div className="mt-2 relative w-full min-w-0">
                   <TooltipProvider delayDuration={400}>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
                           type="button"
                           onClick={() => hasMultipleApplications && setJobDropdownOpen(prev => !prev)}
-                          className="w-full flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
+                          className="w-full min-w-0 flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
                         >
-                          <span className="truncate flex-1 text-left">{displayApp.job_title || application?.job_title || 'Okänt jobb'}</span>
+                          <span className="truncate flex-1 min-w-0 text-left">{displayApp.job_title || application?.job_title || 'Okänt jobb'}</span>
                           <div className="flex items-center gap-1.5 shrink-0">
                             <span className="text-xs text-white">
                               {allApplications ? `${allApplications.length} jobb` : '1 jobb'}
@@ -601,34 +601,34 @@ export const CandidateProfileDialog = ({
           </div>
 
           {/* Info sections */}
-          <div className="grid gap-2.5">
+          <div className="grid gap-2.5 min-w-0">
             {/* Information */}
-            <div className="bg-white/10 border border-white/20 rounded-lg p-3">
+            <div className="bg-white/10 border border-white/20 rounded-lg p-3 min-w-0">
               <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <User className="h-3 w-3" />
                 Information
               </h3>
-              <div className="grid sm:grid-cols-2 gap-2">
+              <div className="grid sm:grid-cols-2 gap-2 min-w-0">
                 {displayApp.email && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
                     <Mail className="h-3.5 w-3.5 text-white shrink-0" />
-                    <a href={`mailto:${displayApp.email}`} className="text-sm text-white hover:text-white/80 transition-colors truncate">
+                    <a href={`mailto:${displayApp.email}`} className="min-w-0 flex-1 text-sm text-white hover:text-white/80 transition-colors break-all [overflow-wrap:anywhere]">
                       {displayApp.email}
                     </a>
                   </div>
                 )}
                 {displayApp.phone && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
                     <Phone className="h-3.5 w-3.5 text-white shrink-0" />
-                    <a href={`tel:${displayApp.phone}`} className="text-sm text-white hover:text-white/80 transition-colors">
+                    <a href={`tel:${displayApp.phone}`} className="min-w-0 flex-1 text-sm text-white hover:text-white/80 transition-colors break-all [overflow-wrap:anywhere]">
                       {displayApp.phone}
                     </a>
                   </div>
                 )}
                 {displayApp.location && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
                     <MapPin className="h-3.5 w-3.5 text-white shrink-0" />
-                    <span className="text-sm text-white">{displayApp.location}</span>
+                    <span className="min-w-0 flex-1 text-sm text-white break-words [overflow-wrap:anywhere]">{displayApp.location}</span>
                   </div>
                 )}
                 {displayApp.age && (
@@ -642,28 +642,28 @@ export const CandidateProfileDialog = ({
 
             {/* Anställningsinformation */}
             {(displayApp.employment_status || displayApp.work_schedule || displayApp.availability) && (
-              <div className="bg-white/10 border border-white/20 rounded-lg p-3">
+              <div className="bg-white/10 border border-white/20 rounded-lg p-3 min-w-0">
                 <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <Briefcase className="h-3 w-3" />
                   Anställningsinformation
                 </h3>
-                <div className="grid sm:grid-cols-2 gap-2">
+                <div className="grid sm:grid-cols-2 gap-2 min-w-0">
                   {displayApp.employment_status && (
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-sm text-white">Anställningsstatus?</span>
-                      <p className="text-sm text-white">Svar: {employmentStatusLabels[displayApp.employment_status] || displayApp.employment_status}</p>
+                      <p className="text-sm text-white break-words [overflow-wrap:anywhere]">Svar: {employmentStatusLabels[displayApp.employment_status] || displayApp.employment_status}</p>
                     </div>
                   )}
                   {displayApp.work_schedule && (
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-sm text-white">Hur mycket jobbar du idag?</span>
-                      <p className="text-sm text-white">Svar: {workScheduleLabels[displayApp.work_schedule] || displayApp.work_schedule}</p>
+                      <p className="text-sm text-white break-words [overflow-wrap:anywhere]">Svar: {workScheduleLabels[displayApp.work_schedule] || displayApp.work_schedule}</p>
                     </div>
                   )}
                   {displayApp.availability && (
-                    <div className="sm:col-span-2">
+                    <div className="sm:col-span-2 min-w-0">
                       <span className="text-sm text-white">När kan du börja nytt jobb?</span>
-                      <p className="text-sm text-white">Svar: {availabilityLabels[displayApp.availability] || displayApp.availability}</p>
+                      <p className="text-sm text-white break-words [overflow-wrap:anywhere]">Svar: {availabilityLabels[displayApp.availability] || displayApp.availability}</p>
                     </div>
                   )}
                 </div>
@@ -815,28 +815,28 @@ export const CandidateProfileDialog = ({
                   return (
                     <div className="space-y-2">
                       <p className="text-center text-white text-xs font-medium">Flytta kandidat</p>
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center justify-between gap-2">
                         <button
                           onClick={() => prevStage && onStageChange(prevStage)}
                           disabled={!prevStage}
-                          className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                          className={`min-w-0 flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                             prevStage ? 'text-white bg-white/10 hover:bg-white/20' : 'opacity-40 text-white/50'
                           }`}
                         >
                           <ChevronLeft className="h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">Till {(prevLabel || 'föregående').replace('?', '')}</span>
+                          <span className="truncate min-w-0">Till {(prevLabel || 'föregående').replace('?', '')}</span>
                         </button>
-                        <div className="flex-shrink-0 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium whitespace-nowrap">
+                        <div className="flex-shrink min-w-0 max-w-[40%] px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium truncate text-center">
                           {(stageConfig[currentStage]?.label || currentStage).replace('?', '')}
                         </div>
                         <button
                           onClick={() => nextStage && onStageChange(nextStage)}
                           disabled={!nextStage}
-                          className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                          className={`min-w-0 flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                             nextStage ? 'text-white bg-white/10 hover:bg-white/20' : 'opacity-40 text-white/50'
                           }`}
                         >
-                          <span className="truncate">Till {(nextLabel || 'nästa').replace('?', '')}</span>
+                          <span className="truncate min-w-0">Till {(nextLabel || 'nästa').replace('?', '')}</span>
                           <ChevronRight className="h-4 w-4 flex-shrink-0" />
                         </button>
                       </div>
@@ -917,14 +917,14 @@ export const CandidateProfileDialog = ({
 
           {/* Mobile Activity/Comments tab content */}
           {mobileTab === 'activity' && (
-            <div className="md:hidden flex-1 overflow-y-auto p-4">
+            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4">
               <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
                 <CandidateActivityLog applicantId={application?.applicant_id || null} />
               </SectionErrorBoundary>
             </div>
           )}
           {mobileTab === 'comments' && (
-            <div className="md:hidden flex-1 overflow-y-auto p-4">
+            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4">
               <SectionErrorBoundary fallbackLabel="Anteckningar">
                 <CandidateNotesPanel {...notesPanelProps} />
               </SectionErrorBoundary>
