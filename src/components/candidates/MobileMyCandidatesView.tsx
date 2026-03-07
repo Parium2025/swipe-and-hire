@@ -347,8 +347,6 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
             return (
               <div
                 key={stage}
-                data-stage-tab
-                data-no-drag-scroll
                 tabIndex={0}
                 onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
                 onClick={() => setActiveTab(stage)}
@@ -384,9 +382,9 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 >
                   {count}
                 </span>
-                {/* Stage settings menu (3-dot) */}
+                {/* Stage settings menu (3-dot) — visual-only on touch, functional on mouse */}
                 {!isReadOnly && (
-                  <span>
+                  <span onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}
