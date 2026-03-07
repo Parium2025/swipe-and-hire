@@ -235,9 +235,15 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     touchTargetStage: '',
   });
   const menuDismissGuardUntilRef = useRef(0);
+  const preferredActiveTabRef = useRef<string | null>(null);
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const setActiveStage = useCallback((stage: string) => {
+    preferredActiveTabRef.current = stage;
+    setActiveTab(stage);
+  }, []);
 
   const appsByStage = useMemo(() => {
     const result: Record<string, JobApplication[]> = {};
@@ -258,7 +264,11 @@ export const MobileCandidateView = memo(function MobileCandidateView({
 
   useEffect(() => {
     if (stages.length === 0) return;
-    setActiveTab((prev) => (stages.includes(prev) ? prev : stages[0]));
+    setActiveTab((prev) => {
+      const preferredStage = preferredActiveTabRef.current;
+      if (preferredStage && stages.includes(preferredStage)) return preferredStage;
+      return stages.includes(prev) ? prev : stages[0];
+    });
   }, [jobId, stages]);
 
   // Reset indicator when tab changes
@@ -309,7 +319,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
 
   const handleStageTabTap = useCallback((stage: string, blockedBySwipe: boolean) => {
     // Always update active tab — ring must respond immediately
-    setActiveTab(stage);
+    setActiveStage(stage);
 
     // Block double-tap menu after swipe gestures
     if (blockedBySwipe) {
@@ -329,7 +339,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     }
 
     lastCardTapRef.current = { stage, time: now };
-  }, [DOUBLE_TAP_MS]);
+  }, [DOUBLE_TAP_MS, setActiveStage]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -361,23 +371,23 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               tabIndex={0}
               onTouchStartCapture={() => {
                 touchGestureRef.current.touchTargetStage = stage;
-                setActiveTab(stage);
+                setActiveStage(stage);
               }}
               onTouchEndCapture={() => {
                 if (!touchGestureRef.current.moved && touchGestureRef.current.touchTargetStage === stage) {
-                  setActiveTab(stage);
+                  setActiveStage(stage);
                 }
                 touchGestureRef.current.touchTargetStage = '';
               }}
               onPointerDown={(e) => {
-                if (e.pointerType === 'touch') setActiveTab(stage);
+                if (e.pointerType === 'touch') setActiveStage(stage);
               }}
               onClick={(e) => {
                 e.stopPropagation();
                 const blocked = Date.now() < touchGestureRef.current.blockMenuUntil;
                 handleStageTabTap(stage, blocked);
               }}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveStage(stage); } }}
               className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] touch-manipulation ${
                 isActive
                   ? 'ring-white/40 shadow-lg'
