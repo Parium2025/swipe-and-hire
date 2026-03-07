@@ -221,6 +221,9 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   renderActionBar,
 }: MobileCandidateViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
+  const [menuOpenStage, setMenuOpenStage] = useState<string | null>(null);
+  const lastCardTapRef = useRef<{ stage: string; time: number }>({ stage: '', time: 0 });
+  const DOUBLE_TAP_MS = 320;
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const listRef = useRef<HTMLDivElement>(null);
   const scrollingRef = useRef(false);
@@ -329,12 +332,24 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               key={stage}
               data-stage-tab
               tabIndex={0}
-              onClick={() => setActiveTab(stage)}
+              onClick={() => {
+                if (shouldBlockStageMenuInteraction()) return;
+                const now = Date.now();
+                const last = lastCardTapRef.current;
+                if (last.stage === stage && now - last.time <= DOUBLE_TAP_MS) {
+                  // Double-tap → open menu
+                  lastCardTapRef.current = { stage: '', time: 0 };
+                  setMenuOpenStage(stage);
+                  return;
+                }
+                lastCardTapRef.current = { stage, time: now };
+                setActiveTab(stage);
+              }}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
               className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] ${
                 isActive
                   ? 'ring-white/40 shadow-lg'
-                  : 'ring-white/20'
+                  : 'ring-transparent'
               }`}
               style={{ backgroundColor: `${cfg.color}55` }}
             >
@@ -359,26 +374,12 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               >
                 <span className="translate-y-[0.25px]">{count}</span>
               </span>
-              {/* Stage settings menu (3-dot) — blocked during and right after scroll */}
+              {/* Stage settings menu — opens via double-tap on card or click on desktop */}
               <span
-                onClick={e => {
-                  e.stopPropagation();
-                  if (shouldBlockStageMenuInteraction()) e.preventDefault();
-                }}
-                onPointerDown={e => {
-                  e.stopPropagation();
-                  if (shouldBlockStageMenuInteraction()) e.preventDefault();
-                }}
-                onTouchStart={e => {
-                  e.stopPropagation();
-                  if (shouldBlockStageMenuInteraction()) e.preventDefault();
-                }}
-                onTouchEnd={e => {
-                  if (shouldBlockStageMenuInteraction()) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }
-                }}
+                onClick={e => e.stopPropagation()}
+                onPointerDown={e => e.stopPropagation()}
+                onTouchStart={e => e.stopPropagation()}
+                onTouchEnd={e => e.stopPropagation()}
               >
                 <JobStageSettingsMenu
                   jobId={jobId}
@@ -389,6 +390,8 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   targetStageLabel={targetStageLabel}
                   stageIndex={stageIdx}
                   requireLongPressOnMobile
+                  controlledOpen={menuOpenStage === stage}
+                  onControlledOpenChange={(open) => setMenuOpenStage(open ? stage : null)}
                 />
               </span>
             </div>

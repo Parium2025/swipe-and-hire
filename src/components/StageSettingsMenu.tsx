@@ -44,19 +44,24 @@ interface StageSettingsMenuProps {
   stageKey: string;
   candidateCount?: number;
   totalStageCount?: number;
-  targetStageKey?: string; // The stage to move candidates to (next stage if first, first stage otherwise)
+  targetStageKey?: string;
   targetStageLabel?: string;
   onDelete?: () => void;
   onMoveCandidatesAndDelete?: (fromStage: string, toStage: string) => Promise<void>;
   onLiveColorChange?: (color: string | null) => void;
   useJobDetailsTriggerStyle?: boolean;
   requireLongPressOnMobile?: boolean;
+  controlledOpen?: boolean;
+  onControlledOpenChange?: (open: boolean) => void;
 }
 
-export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true }: StageSettingsMenuProps) {
+export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true, controlledOpen, onControlledOpenChange }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const isTouchDevice = useTouchCapable();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const menuOpen = isControlled ? controlledOpen : internalOpen;
+  const setMenuOpen = isControlled ? (v: boolean) => onControlledOpenChange?.(v) : setInternalOpen;
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
