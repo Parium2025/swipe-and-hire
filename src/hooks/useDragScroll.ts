@@ -5,13 +5,12 @@ import { getInputCapability } from '@/hooks/useInputCapability';
  * Enables click-and-drag horizontal scrolling on a container.
  * 
  * INPUT-AWARE DESIGN:
- * - Mouse/trackpad users: grab cursor, drag-to-scroll, click suppression after drag
+ * - Mouse/trackpad users: grab cursor + drag-to-scroll
  * - Touch users: NO mouse listeners attached at all — native momentum scroll handles everything
  * - Hybrid devices: drag-scroll enabled (mouse mode) alongside native touch
  *
- * Uses a movement threshold (DRAG_THRESHOLD) so clicks on child elements still work.
- * After a drag gesture, the subsequent click event is suppressed to prevent
- * accidental tab switches or button activations.
+ * Uses a movement threshold (DRAG_THRESHOLD) so clicks on child elements still work
+ * while still allowing smooth horizontal drag behavior.
  */
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
