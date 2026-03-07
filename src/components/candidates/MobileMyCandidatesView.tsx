@@ -173,23 +173,39 @@ const MyCandidateRow = memo(function MyCandidateRow({
               <ChevronRight className="h-4 w-4 text-white/60" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[160px]">
+          <DropdownMenuContent
+            align="end"
+            side="bottom"
+            sideOffset={4}
+            alignOffset={12}
+            className="w-[calc(100vw-2rem)] max-w-sm"
+          >
             {moveTargets.map(stage => {
               const cfg = stageConfig[stage];
               if (!cfg) return null;
               const Icon = getIconByName(cfg.iconName);
               return (
-                <DropdownMenuItem
-                  key={stage}
-                  onClick={e => {
-                    e.stopPropagation();
-                    onMoveToStage(candidate.id, stage);
-                  }}
-                  className="gap-2"
-                >
-                  <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
-                  {cfg.label}
-                </DropdownMenuItem>
+                <TooltipProvider key={stage} delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuItem
+                        onClick={e => {
+                          e.stopPropagation();
+                          onMoveToStage(candidate.id, stage);
+                        }}
+                        className="gap-2 min-h-[44px] min-w-0"
+                      >
+                        <Icon className="h-4 w-4 shrink-0" style={{ color: cfg.color }} />
+                        <span className="truncate min-w-0">{cfg.label}</span>
+                      </DropdownMenuItem>
+                    </TooltipTrigger>
+                    {cfg.label.length > 20 && (
+                      <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] break-words whitespace-normal z-[999999]">
+                        <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
               );
             })}
           </DropdownMenuContent>
