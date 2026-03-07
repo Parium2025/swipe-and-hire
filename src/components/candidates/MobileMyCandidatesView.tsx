@@ -273,8 +273,15 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     scrollingRef.current = false;
   }, []);
 
-  const handleStageTabTap = useCallback((stage: string) => {
+  const handleStageTabTap = useCallback((stage: string, blockedBySwipe: boolean) => {
+    // Always update active tab — ring must respond immediately
     setActiveTab(stage);
+
+    // Block double-tap menu after swipe gestures
+    if (blockedBySwipe) {
+      lastCardTapRef.current = { stage: '', time: 0 };
+      return;
+    }
 
     const now = Date.now();
     const last = lastCardTapRef.current;
