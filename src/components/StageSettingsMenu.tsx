@@ -169,9 +169,18 @@ export function StageSettingsMenu({
 
   if (!currentConfig) return null;
 
+  const isMenuOpen = open ?? internalMenuOpen;
+
+  const handleMenuOpenChange = (nextOpen: boolean) => {
+    if (open === undefined) {
+      setInternalMenuOpen(nextOpen);
+    }
+    onOpenChange?.(nextOpen);
+  };
+
   return (
     <>
-      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu modal={false} open={isMenuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button
             className={useJobDetailsTriggerStyle
@@ -180,8 +189,14 @@ export function StageSettingsMenu({
             }
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
             onMouseDown={useJobDetailsTriggerStyle ? (e) => e.preventDefault() : undefined}
+            onPointerDownCapture={disableTouchTrigger ? (e) => {
+              if (e.pointerType === 'touch') {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            } : undefined}
             onFocus={useJobDetailsTriggerStyle ? (e) => {
-              if (!menuOpen) {
+              if (!isMenuOpen) {
                 e.currentTarget.blur();
               }
             } : undefined}
