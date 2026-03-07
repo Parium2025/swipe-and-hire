@@ -237,22 +237,16 @@ const JobDetails = () => {
   const allVisibleApplicationIds = useMemo(() => {
     return applications.map(app => app.id);
   }, [applications]);
-  
-  const allVisibleSelected = useMemo(() => {
-    return (
-      allVisibleApplicationIds.length > 0 &&
-      allVisibleApplicationIds.every((id) => selectedApplicationIds.has(id))
-    );
-  }, [allVisibleApplicationIds, selectedApplicationIds]);
 
-  const toggleAllVisible = useCallback(() => {
-    setSelectedApplicationIds((prev) => {
-      const allSelected =
-        allVisibleApplicationIds.length > 0 &&
-        allVisibleApplicationIds.every((id) => prev.has(id));
-      return allSelected ? new Set() : new Set(allVisibleApplicationIds);
-    });
-  }, [allVisibleApplicationIds]);
+  const {
+    isSelectionMode,
+    setIsSelectionMode,
+    selectedCandidateIds: selectedApplicationIds,
+    toggleCandidateSelection: toggleApplicationSelection,
+    exitSelectionMode,
+    allVisibleSelected,
+    toggleAllVisible,
+  } = useSelectionMode(allVisibleApplicationIds);
 
   const bulkMoveToStage = async (targetStage: string) => {
     const idsToMove = Array.from(selectedApplicationIds);
