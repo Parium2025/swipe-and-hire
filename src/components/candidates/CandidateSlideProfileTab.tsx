@@ -159,15 +159,15 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
 
       {/* CV — inline viewer like desktop */}
       {application.cv_url && (
-        <SectionCard className="w-full">
+        <SectionCard className="w-full min-w-0">
           <SectionLabel icon={FileText}>CV</SectionLabel>
           <button
             onClick={handleOpenCv}
-            className="w-full flex items-center justify-between rounded-lg bg-white/[0.06] ring-1 ring-inset ring-white/10 px-3 py-2.5 text-sm text-white active:scale-[0.97] transition-all"
+            className="w-full min-w-0 flex items-center justify-between rounded-lg bg-white/[0.06] ring-1 ring-inset ring-white/10 px-3 py-2.5 text-sm text-white active:scale-[0.97] transition-all"
           >
-            <div className="flex items-center gap-2">
-              <FileText className="h-3.5 w-3.5 text-white" />
-              <span>Visa CV</span>
+            <div className="min-w-0 flex items-center gap-2">
+              <FileText className="h-3.5 w-3.5 text-white shrink-0" />
+              <span className="truncate">Visa CV</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-white" />
           </button>
@@ -202,32 +202,32 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
 
       {/* Bio / Presentation */}
       {application.bio && (
-        <SectionCard className="w-full">
-          <button onClick={() => setBioExpanded(!bioExpanded)} className="w-full flex items-center justify-between">
+        <SectionCard className="w-full min-w-0">
+          <button onClick={() => setBioExpanded(!bioExpanded)} className="w-full min-w-0 flex items-center justify-between gap-2">
             <SectionLabel icon={User}>Presentation om {application.first_name}</SectionLabel>
-            {bioExpanded ? <ChevronUp className="h-3.5 w-3.5 text-white" /> : <ChevronDown className="h-3.5 w-3.5 text-white" />}
+            {bioExpanded ? <ChevronUp className="h-3.5 w-3.5 text-white shrink-0" /> : <ChevronDown className="h-3.5 w-3.5 text-white shrink-0" />}
           </button>
           {bioExpanded && (
-            <p className="text-sm text-white whitespace-pre-wrap leading-relaxed mt-2">{application.bio}</p>
+            <p className="text-sm text-white whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-relaxed mt-2">{application.bio}</p>
           )}
         </SectionCard>
       )}
 
       {/* Action buttons — glass purple & blue */}
-      <div className="w-full flex items-center gap-3">
+      <div className="w-full min-w-0 flex items-center gap-3">
         <button
           onClick={onOpenFullProfile}
-          className="flex-1 py-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center gap-2"
+          className="min-w-0 flex-1 py-3 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-purple-500/40 transition-all flex items-center justify-center gap-2"
         >
-          <MessageSquare className="h-4 w-4" />
-          Meddelande
+          <MessageSquare className="h-4 w-4 shrink-0" />
+          <span className="truncate">Meddelande</span>
         </button>
         <button
           onClick={onOpenFullProfile}
-          className="flex-1 py-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center gap-2"
+          className="min-w-0 flex-1 py-3 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white text-sm font-medium active:scale-[0.97] active:bg-blue-500/40 transition-all flex items-center justify-center gap-2"
         >
-          <CalendarPlus className="h-4 w-4" />
-          Boka möte
+          <CalendarPlus className="h-4 w-4 shrink-0" />
+          <span className="truncate">Boka möte</span>
         </button>
       </div>
     </>

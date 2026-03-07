@@ -917,14 +917,14 @@ export const CandidateProfileDialog = ({
 
           {/* Mobile Activity/Comments tab content */}
           {mobileTab === 'activity' && (
-            <div className="md:hidden flex-1 overflow-y-auto p-4">
+            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4">
               <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
                 <CandidateActivityLog applicantId={application?.applicant_id || null} />
               </SectionErrorBoundary>
             </div>
           )}
           {mobileTab === 'comments' && (
-            <div className="md:hidden flex-1 overflow-y-auto p-4">
+            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4">
               <SectionErrorBoundary fallbackLabel="Anteckningar">
                 <CandidateNotesPanel {...notesPanelProps} />
               </SectionErrorBoundary>
