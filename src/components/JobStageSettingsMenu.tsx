@@ -46,6 +46,8 @@ interface JobStageSettingsMenuProps {
   onLiveColorChange?: (color: string | null) => void;
   /** Index of this stage in the ordered list (0-based) */
   stageIndex?: number;
+  /** Require long-press on touch devices before opening menu */
+  requireLongPressOnMobile?: boolean;
 }
 
 export function JobStageSettingsMenu({ 
@@ -58,6 +60,7 @@ export function JobStageSettingsMenu({
   onMoveCandidatesAndDelete,
   onLiveColorChange,
   stageIndex = 0,
+  requireLongPressOnMobile = false,
 }: JobStageSettingsMenuProps) {
   const { stageSettings, updateStage, deleteStage, moveStageToPosition, orderedStages } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
@@ -74,6 +77,8 @@ export function JobStageSettingsMenu({
   const [liveColor, setLiveColor] = useState<string | null>(null);
   
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const touchHoldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const allowTouchOpenRef = useRef(false);
   
   // Use liveColor while dragging, fall back to saved color
   const displayColor = liveColor ?? settings?.color ?? '#0EA5E9';
@@ -84,6 +89,57 @@ export function JobStageSettingsMenu({
       setNewLabel(settings.label);
     }
   }, [settings?.label]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (touchHoldTimerRef.current) clearTimeout(touchHoldTimerRef.current);
+    };
+  }, []);
+
+  const clearTouchHoldTimer = () => {
+    if (touchHoldTimerRef.current) {
+      clearTimeout(touchHoldTimerRef.current);
+      touchHoldTimerRef.current = null;
+    }
+  };
+
+  const handleTriggerTouchStart = () => {
+    if (!isMobile || !requireLongPressOnMobile) return;
+
+    allowTouchOpenRef.current = false;
+    clearTouchHoldTimer();
+
+    touchHoldTimerRef.current = setTimeout(() => {
+      allowTouchOpenRef.current = true;
+      setMenuOpen(true);
+    }, 220);
+  };
+
+  const handleTriggerTouchMove = () => {
+    if (!isMobile || !requireLongPressOnMobile) return;
+    clearTouchHoldTimer();
+    allowTouchOpenRef.current = false;
+  };
+
+  const handleTriggerTouchEnd = () => {
+    if (!isMobile || !requireLongPressOnMobile) return;
+    clearTouchHoldTimer();
+  };
+
+  const handleMenuOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setMenuOpen(false);
+      allowTouchOpenRef.current = false;
+      return;
+    }
+
+    if (isMobile && requireLongPressOnMobile && !allowTouchOpenRef.current) {
+      return;
+    }
+
+    setMenuOpen(true);
+  };
 
   const handleOpenRenameDialog = () => {
     setNewLabel(settings?.label || '');
@@ -147,12 +203,22 @@ export function JobStageSettingsMenu({
 
   return (
     <>
-      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu modal={false} open={menuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button 
             className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
             style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
             onMouseDown={(e) => e.preventDefault()}
+            onTouchStart={handleTriggerTouchStart}
+            onTouchMove={handleTriggerTouchMove}
+            onTouchEnd={handleTriggerTouchEnd}
+            onTouchCancel={handleTriggerTouchEnd}
+            onClick={(e) => {
+              if (isMobile && requireLongPressOnMobile) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
             onFocus={(e) => {
               // When dropdown closes, Radix returns focus to trigger — blur immediately to prevent visual circle
               if (!menuOpen) {
