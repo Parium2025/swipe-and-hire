@@ -223,6 +223,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const listRef = useRef<HTMLDivElement>(null);
+  const scrollingRef = useRef(false);
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -267,6 +268,8 @@ export const MobileCandidateView = memo(function MobileCandidateView({
       {/* Horizontal scrollable stage tabs — native momentum on touch, drag on desktop */}
       <div
         ref={dragScrollRef}
+        onTouchStart={() => { scrollingRef.current = false; }}
+        onTouchMove={() => { scrollingRef.current = true; }}
         className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
       >
         {stages.map(stage => {
@@ -312,13 +315,22 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                 <span className="truncate min-w-0">{cfg.label}</span>
               )}
               <span
-                className="text-[9px] leading-none h-4 w-4 flex items-center justify-center rounded-full text-white flex-shrink-0 text-center"
-                style={{ backgroundColor: `${cfg.color}88` }}
+                className="text-[9px] h-4 w-4 flex items-center justify-center rounded-full text-white flex-shrink-0"
+                style={{ backgroundColor: `${cfg.color}88`, lineHeight: 1 }}
               >
                 {count}
               </span>
-              {/* Stage settings menu (3-dot) */}
-              <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
+              {/* Stage settings menu (3-dot) — blocked during scroll */}
+              <span
+                onClick={e => { e.stopPropagation(); if (scrollingRef.current) e.preventDefault(); }}
+                onPointerDown={e => e.stopPropagation()}
+                onTouchEnd={e => {
+                  if (scrollingRef.current) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
+              >
                 <JobStageSettingsMenu
                   jobId={jobId}
                   stageKey={stage}
