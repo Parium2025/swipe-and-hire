@@ -360,7 +360,7 @@ const Dashboard = memo(() => {
                 key={job.id}
                 job={job as any}
                 hideSaveButton
-                onCardClick={(jobId) => navigate(`/job-details/${jobId}`)}
+                onCardClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
               />
             ))}
 
