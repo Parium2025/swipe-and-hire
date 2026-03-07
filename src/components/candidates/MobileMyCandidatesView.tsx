@@ -1,5 +1,6 @@
 import { memo, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
