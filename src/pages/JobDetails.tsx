@@ -505,138 +505,17 @@ const JobDetails = () => {
 
   return (
      <div className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
-        {/* Job Title and Stats - Compact */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4 relative z-30">
-          <div className="flex items-start justify-between gap-2">
-            <TruncatedText 
-              text={job.title} 
-              className="text-lg font-bold text-white flex-1 min-w-0 line-clamp-2"
-            />
-            <button
-              onClick={() => {
-                const navState = (location.state as { fromRoute?: '/dashboard' | '/my-jobs'; fromTab?: 'active' | 'expired' | 'draft' } | null) ?? null;
-                if (navState?.fromRoute) {
-                  const tabSuffix = navState.fromTab && navState.fromTab !== 'active' ? `?tab=${navState.fromTab}` : '';
-                  navigate(`${navState.fromRoute}${tabSuffix}`, { replace: true });
-                } else if (window.history.state?.idx > 0) {
-                  navigate(-1);
-                } else {
-                  navigate('/');
-                }
-              }}
-              onMouseDown={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              onPointerUp={(e) => e.stopPropagation()}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none touch-manipulation active:scale-95 relative z-50"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 mt-1.5 text-sm">
-            <div className="flex items-center gap-1 text-white">
-              <MapPin className="h-3.5 w-3.5" />
-              {job.location}
-            </div>
-            <JobStatusBadge
-              jobId={jobId!}
-              isActive={!!job.is_active}
-              expiresAt={job.expires_at}
-              onOptimisticUpdate={updateJobLocally}
-            />
-            {job.expires_at && (
-              <span className="text-white text-xs">
-                {new Date(job.expires_at) < new Date() 
-                  ? `Gick ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
-                  : `Går ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
-                }
-              </span>
-            )}
-          </div>
-
-          <div className="mt-3 space-y-1.5 md:space-y-0">
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-1.5 min-w-0">
-              <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
-                <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium truncate">{job.views_count}</span>
-                <span className="text-white text-xs truncate">Visn.</span>
-              </div>
-
-              <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
-                <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium truncate">{job.applications_count}</span>
-                <span className="text-white text-xs truncate">Ans.</span>
-              </div>
-
-              {job.employer_profile ? (
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip open={recruiterTooltipOpen} onOpenChange={setRecruiterTooltipOpen}>
-                    <TooltipTrigger asChild>
-                      <div 
-                        ref={recruiterTooltipRef}
-                        className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 cursor-default min-w-0 overflow-hidden"
-                        onClick={() => setRecruiterTooltipOpen(prev => !prev)}
-                      >
-                        <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-[10px] text-white font-medium shrink-0">
-                          {employerProfileImageUrl ? (
-                            <img src={employerProfileImageUrl} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            `${job.employer_profile.first_name?.[0] || ''}${job.employer_profile.last_name?.[0] || ''}`
-                          )}
-                        </div>
-                        <span className="text-white text-xs truncate max-w-[60px]">
-                          {job.employer_profile.first_name}
-                        </span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Rekryterare: {job.employer_profile.first_name} {job.employer_profile.last_name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <div className="bg-white/5 rounded-lg px-2 py-1.5 min-w-0" />
-              )}
-
-              <button
-                onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
-                onMouseDown={(e) => e.preventDefault()}
-                className={`hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
-                  isSelectionMode 
-                    ? 'bg-white/10 ring-1 ring-white hover:bg-white/15' 
-                    : applications.length > 0 
-                      ? 'bg-white/5 hover:bg-white/10' 
-                      : 'bg-white/5 opacity-40 cursor-default'
-                }`}
-              >
-                <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
-              </button>
-              <div className="hidden md:flex min-w-0">
-                <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-1.5 min-w-0 md:hidden">
-              <button
-                onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
-                onMouseDown={(e) => e.preventDefault()}
-                className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
-                  isSelectionMode 
-                    ? 'bg-white/10 ring-white' 
-                    : applications.length > 0 
-                      ? 'bg-white/5 ring-white/30' 
-                      : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
-                }`}
-              >
-                <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">Välj</span>
-              </button>
-
-              <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
-            </div>
-          </div>
-        </div>
+        <JobDetailsHeader
+          jobId={jobId!}
+          job={job}
+          employerProfileImageUrl={employerProfileImageUrl}
+          applicationsCount={applications.length}
+          activeStagesLength={activeStages.length}
+          isSelectionMode={isSelectionMode}
+          onToggleSelectionMode={() => setIsSelectionMode(true)}
+          onExitSelectionMode={exitSelectionMode}
+          onUpdateJobLocally={updateJobLocally}
+        />
 
         {/* Touch devices: tab-based candidate list. Desktop: kanban with drag-and-drop */}
         {useMobileView ? (
