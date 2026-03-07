@@ -5,7 +5,7 @@ import { Briefcase, Users, Eye, TrendingUp, MapPin, Calendar } from 'lucide-reac
 import { useJobsData } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';

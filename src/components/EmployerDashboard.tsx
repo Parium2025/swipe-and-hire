@@ -236,7 +236,7 @@ const EmployerDashboard = memo(() => {
     if (!job.is_active) {
       handleEditDraft(job);
     } else {
-      navigate(`/job-details/${job.id}`, { state: { fromTab: activeTab } });
+      navigate(`/job-details/${job.id}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
     }
   };
 
