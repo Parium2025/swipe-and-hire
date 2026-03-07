@@ -424,7 +424,7 @@ const JobDetails = () => {
     setOverId(status);
   }, [resolveOverStatus]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over) {
@@ -454,7 +454,7 @@ const JobDetails = () => {
       setActiveId(null);
       setOverId(null);
     }
-  };
+  }, [resolveOverStatus, applications, updateApplicationStatus]);
 
   const activeApplication = activeId ? applications.find(a => a.id === activeId) : null;
 
