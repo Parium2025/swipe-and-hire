@@ -256,7 +256,6 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
         {/* Horizontal scrollable stage tabs */}
         <div
           ref={dragScrollRef}
-          data-no-drag-scroll
           className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
         >
           {stages.map((stage, stageIdx) => {
@@ -275,17 +274,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 key={stage}
                 data-stage-tab
                 tabIndex={0}
-                onPointerDownCapture={(e) => {
-                  if (e.pointerType === 'mouse' && e.button !== 0) return;
-                  const target = e.target as HTMLElement;
-                  if (target.closest('[data-stage-menu-trigger]')) return;
-                  setActiveTab(stage);
-                }}
-                onClick={(e) => {
-                  const target = e.target as HTMLElement;
-                  if (target.closest('[data-stage-menu-trigger]')) return;
-                  setActiveTab(stage);
-                }}
+                onClick={() => setActiveTab(stage)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
                 className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-colors duration-75 active:scale-95 shrink-0 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] outline-none focus:outline-none focus-visible:outline-none ${
                   isActive
@@ -317,7 +306,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 </span>
                 {/* Stage settings menu (3-dot) */}
                 {!isReadOnly && (
-                  <span onClick={e => e.stopPropagation()}>
+                  <span onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}

@@ -158,9 +158,10 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
       <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <button
+            type="button"
             data-stage-menu-trigger
             className={useJobDetailsTriggerStyle
-              ? 'h-8 w-8 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]'
+              ? 'h-6 w-6 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]'
               : 'p-1 rounded hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100'
             }
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
@@ -170,7 +171,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
               }
             } : undefined}
           >
-            <MoreVertical className={useJobDetailsTriggerStyle ? 'h-4 w-4' : 'h-4 w-4 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]'} />
+            <MoreVertical className={useJobDetailsTriggerStyle ? 'h-3.5 w-3.5' : 'h-4 w-4 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]'} />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 border-white/20">
