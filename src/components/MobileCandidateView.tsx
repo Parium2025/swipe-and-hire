@@ -162,7 +162,7 @@ const CandidateRow = memo(function CandidateRow({
               <ChevronRight className="h-4 w-4 text-white/60" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[160px]">
+          <DropdownMenuContent align="end" className="min-w-[140px] max-w-[200px]">
             {moveTargets.map(stage => {
               const cfg = stageSettings[stage];
               if (!cfg) return null;
