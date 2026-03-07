@@ -418,11 +418,11 @@ const JobDetails = () => {
     return null;
   }, [activeStages, applications]);
 
-  const handleDragOver = (event: DragOverEvent) => {
+  const handleDragOver = useCallback((event: DragOverEvent) => {
     const overRawId = event.over?.id as string | undefined;
     const status = resolveOverStatus(overRawId);
     setOverId(status);
-  };
+  }, [resolveOverStatus]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
