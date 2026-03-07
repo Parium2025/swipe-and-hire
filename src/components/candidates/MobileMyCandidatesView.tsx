@@ -1,4 +1,4 @@
-import { memo, useState, useMemo, useRef, useCallback } from 'react';
+import { memo, useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
@@ -292,6 +292,11 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
   const currentCandidates = candidatesByStage[activeTab] || [];
 
+  useEffect(() => {
+    if (stages.length === 0) return;
+    setActiveTab((prev) => (stages.includes(prev) ? prev : stages[0]));
+  }, [stages]);
+
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex flex-col gap-3">
@@ -320,8 +325,13 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 data-stage-tab
                 tabIndex={0}
                 onClick={() => {
-                  if (shouldBlockStageMenuInteraction()) return;
                   setActiveTab(stage);
+
+                  if (shouldBlockStageMenuInteraction()) {
+                    lastCardTapRef.current = { stage: '', time: 0 };
+                    return;
+                  }
+
                   const now = Date.now();
                   const last = lastCardTapRef.current;
                   if (last.stage === stage && now - last.time <= DOUBLE_TAP_MS) {
