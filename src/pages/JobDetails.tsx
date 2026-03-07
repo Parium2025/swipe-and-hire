@@ -85,8 +85,6 @@ const JobDetails = () => {
   
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
   
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedApplicationIds, setSelectedApplicationIds] = useState<Set<string>>(new Set());
   const [recruiterTooltipOpen, setRecruiterTooltipOpen] = useState(false);
   const recruiterTooltipRef = useRef<HTMLDivElement>(null);
 
@@ -101,34 +99,6 @@ const JobDetails = () => {
     document.addEventListener('pointerdown', handler, true);
     return () => document.removeEventListener('pointerdown', handler, true);
   }, [recruiterTooltipOpen]);
-  
-  const toggleApplicationSelection = useCallback((applicationId: string) => {
-    setSelectedApplicationIds(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(applicationId)) {
-        newSet.delete(applicationId);
-      } else {
-        newSet.add(applicationId);
-      }
-      return newSet;
-    });
-  }, []);
-  
-  const exitSelectionMode = useCallback(() => {
-    setIsSelectionMode(false);
-    setSelectedApplicationIds(new Set());
-  }, []);
-  
-  // Handle ESC key to exit selection mode
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isSelectionMode) {
-        exitSelectionMode();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSelectionMode, exitSelectionMode]);
 
   const { stageSettings, orderedStages, isLoading: stagesLoading } = useJobStageSettings(jobId);
   
