@@ -357,7 +357,6 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 data-stage-key={stage}
                 data-no-drag-scroll
                 tabIndex={0}
-                onMouseDownCapture={() => handleStagePointerDown(stage, 'mouse')}
                 onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
                 onClick={() => setActiveTab(stage)}
                 onDoubleClick={() => {
