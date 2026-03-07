@@ -245,7 +245,6 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   });
   const touchTapHandledRef = useRef(false);
   const lastTouchHandledAtRef = useRef(0);
-  const menuDismissGuardUntilRef = useRef(0);
 
   const handleStageTabsTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     const touch = e.touches[0];
@@ -284,7 +283,6 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
     if (isDoubleTap) {
       lastCardTapRef.current = { stage: '', time: 0 };
-      menuDismissGuardUntilRef.current = now + 280;
       setMenuOpenStage(stage);
       return;
     }
@@ -404,7 +402,6 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       touchVisualOnlyTrigger
                       controlledOpen={menuOpenStage === stage}
                       onControlledOpenChange={(open) => {
-                        if (!open && Date.now() < menuDismissGuardUntilRef.current) return;
                         setMenuOpenStage(open ? stage : null);
                       }}
                     />

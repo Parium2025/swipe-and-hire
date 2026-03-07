@@ -235,7 +235,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   });
   const touchTapHandledRef = useRef(false);
   const lastTouchHandledAtRef = useRef(0);
-  const menuDismissGuardUntilRef = useRef(0);
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -317,7 +316,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
 
     if (isDoubleTap) {
       lastCardTapRef.current = { stage: '', time: 0 };
-      menuDismissGuardUntilRef.current = now + 280;
       setMenuOpenStage(stage);
       return;
     }
@@ -417,7 +415,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   touchVisualOnlyTrigger
                   controlledOpen={menuOpenStage === stage}
                   onControlledOpenChange={(open) => {
-                    if (!open && Date.now() < menuDismissGuardUntilRef.current) return;
                     setMenuOpenStage(open ? stage : null);
                   }}
                 />
