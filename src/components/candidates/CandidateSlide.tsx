@@ -179,7 +179,7 @@ export const CandidateSlide = memo(function CandidateSlide({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: swipeDirection * -60, opacity: 0 }}
               transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="w-full flex flex-col items-center gap-5"
+              className="w-full min-w-0 overflow-hidden flex flex-col items-center gap-5"
             >
               {/* ── PROFIL TAB ── */}
               {activeTab === 'profil' && (
