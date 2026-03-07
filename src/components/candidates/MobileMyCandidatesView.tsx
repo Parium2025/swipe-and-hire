@@ -276,10 +276,10 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 tabIndex={0}
                 onClick={() => setActiveTab(stage)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] ${
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-200 active:scale-95 shrink-0 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] ${
                   isActive
-                    ? 'ring-white/40 shadow-lg'
-                    : 'ring-white/20'
+                    ? 'ring-[1.5px] ring-white/60 shadow-lg'
+                    : 'ring-1 ring-white/15'
                 }`}
                 style={{ backgroundColor: `${cfg.color}55` }}
               >
