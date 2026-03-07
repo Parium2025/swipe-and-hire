@@ -74,33 +74,21 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
   return (
     <div
-      className={`bg-white/5 ring-1 ring-inset rounded-md px-2 py-1.5 flex items-center gap-2 transition-all duration-200 ease-out min-h-touch relative group
-        ${isSelected ? 'ring-white/30 bg-white/[0.08]' : 'ring-white/10 active:bg-white/[0.08] active:scale-[0.98]'}
+      className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-all duration-150 min-h-touch relative
+        ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:bg-white/[0.08]'}
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
       onClick={handleTap}
       onMouseEnter={onPrefetch}
     >
-      {/* Unread dot — top-right like JobDetails */}
+      {/* Unread dot — top-left corner */}
       {!isSelectionMode && isUnread && (
-        <div className="absolute right-1.5 top-1.5">
+        <div className="absolute left-1.5 top-1.5">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
         </div>
       )}
 
-      {/* Selection checkbox */}
-      {isSelectionMode && (
-        <div className="absolute left-1.5 top-1.5 z-10">
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={() => onToggleSelect?.()}
-            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
-
       {/* Avatar */}
-      <div className={`h-10 w-10 flex-shrink-0 [&>*:first-child]:h-10 [&>*:first-child]:w-10 ${isSelectionMode ? 'ml-5' : ''}`}>
+      <div className="h-10 w-10 flex-shrink-0 [&>*:first-child]:h-10 [&>*:first-child]:w-10 [&_.h-10]:h-10 [&_.w-10]:w-10">
         <CandidateAvatar
           profileImageUrl={candidate.profile_image_url}
           videoUrl={candidate.video_url}
@@ -112,7 +100,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
       </div>
 
       {/* Info */}
-      <div className="flex-1 min-w-0 pr-4">
+      <div className="flex-1 min-w-0">
         <p className="text-white font-medium text-sm truncate">
           {candidate.first_name} {candidate.last_name}
         </p>
@@ -161,8 +149,16 @@ const MyCandidateRow = memo(function MyCandidateRow({
         )}
       </div>
 
-      {/* Right side — move menu (hidden in selection mode) */}
-      {!isSelectionMode && (
+      {/* Right side: checkbox in selection mode, otherwise move stage dropdown */}
+      {isSelectionMode ? (
+        <div className="flex-shrink-0" onClick={e => e.stopPropagation()}>
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => onToggleSelect?.()}
+            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
+          />
+        </div>
+      ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -353,7 +349,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
         {/* Candidate list */}
         <ScrollArea className="overscroll-contain" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             {currentCandidates.length === 0 ? (
               <div className="text-center py-12 text-sm text-white">
                 Inga kandidater i detta steg
