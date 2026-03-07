@@ -466,6 +466,7 @@ const JobDetails = () => {
         />
 
         {/* Touch devices: tab-based candidate list. Desktop: kanban with drag-and-drop */}
+        <SectionErrorBoundary fallbackLabel="Kandidatvy">
         {useMobileView ? (
           <MobileCandidateView
             jobId={jobId || ''}
