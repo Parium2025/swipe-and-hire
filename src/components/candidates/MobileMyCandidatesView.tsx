@@ -234,7 +234,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
   const [menuOpenStage, setMenuOpenStage] = useState<string | null>(null);
   const lastCardTapRef = useRef<{ stage: string; time: number }>({ stage: '', time: 0 });
-  const DOUBLE_TAP_MS = 320;
+  const DOUBLE_TAP_MS = 420;
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const scrollingRef = useRef(false);
   const touchGestureRef = useRef({
@@ -244,6 +244,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     blockMenuUntil: 0,
   });
   const touchTapHandledRef = useRef(false);
+  const lastTouchHandledAtRef = useRef(0);
 
   const handleStageTabsTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     const touch = e.touches[0];
@@ -258,7 +259,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     const deltaX = Math.abs(touch.clientX - touchGestureRef.current.startX);
     const deltaY = Math.abs(touch.clientY - touchGestureRef.current.startY);
 
-    if (deltaX > 10 || deltaY > 10) {
+    if (deltaX > 12 && deltaX > deltaY * 1.2) {
       touchGestureRef.current.moved = true;
       scrollingRef.current = true;
       touchGestureRef.current.blockMenuUntil = Date.now() + 260;
@@ -347,13 +348,15 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 onTouchEnd={() => {
                   if (touchGestureRef.current.moved) return;
                   touchTapHandledRef.current = true;
+                  lastTouchHandledAtRef.current = Date.now();
                   setTimeout(() => {
                     touchTapHandledRef.current = false;
                   }, 350);
                   handleStageTabTap(stage);
                 }}
                 onClick={(e) => {
-                  if (touchTapHandledRef.current) {
+                  const justHandledTouch = Date.now() - lastTouchHandledAtRef.current < 500;
+                  if (touchTapHandledRef.current || justHandledTouch) {
                     touchTapHandledRef.current = false;
                     e.stopPropagation();
                     e.preventDefault();
