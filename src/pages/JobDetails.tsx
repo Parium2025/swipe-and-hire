@@ -248,7 +248,7 @@ const JobDetails = () => {
     toggleAllVisible,
   } = useSelectionMode(allVisibleApplicationIds);
 
-  const bulkMoveToStage = async (targetStage: string) => {
+  const bulkMoveToStage = useCallback(async (targetStage: string) => {
     const idsToMove = Array.from(selectedApplicationIds);
     const count = idsToMove.length;
     const targetLabel = stageSettings[targetStage]?.label || targetStage;
@@ -273,7 +273,7 @@ const JobDetails = () => {
       refetch();
       toast.error('Kunde inte flytta kandidaterna');
     }
-  };
+  }, [selectedApplicationIds, stageSettings, updateApplicationLocally, exitSelectionMode, refetch]);
 
   const resolveStageForApplication = useCallback((app: JobApplication): string => {
     const directStage = app.status;
