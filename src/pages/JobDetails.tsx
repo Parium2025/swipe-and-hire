@@ -5,12 +5,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
 import { useQueryClient } from '@tanstack/react-query';
-import { Badge } from '@/components/ui/badge';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
-import { Button } from '@/components/ui/button';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -20,6 +18,7 @@ import { useJobStageSettings, DEFAULT_JOB_STAGE_KEYS } from '@/hooks/useJobStage
 import { useJobDetailsData, type JobApplication } from '@/hooks/useJobDetailsData';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
 import { useKanbanLayout } from '@/hooks/useKanbanLayout';
+import { useSelectionMode } from '@/hooks/useSelectionMode';
 import { 
   X,
   Users,
@@ -49,6 +48,7 @@ import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 
 // Extracted components
 import { SelectionActionBar, ApplicationCardContent, StatusColumn, mapToApplicationData } from '@/components/jobdetails';
+import { JobStatusBadge } from '@/components/jobdetails/JobStatusBadge';
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
@@ -85,8 +85,6 @@ const JobDetails = () => {
   
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
   
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedApplicationIds, setSelectedApplicationIds] = useState<Set<string>>(new Set());
   const [recruiterTooltipOpen, setRecruiterTooltipOpen] = useState(false);
   const recruiterTooltipRef = useRef<HTMLDivElement>(null);
 
@@ -101,34 +99,6 @@ const JobDetails = () => {
     document.addEventListener('pointerdown', handler, true);
     return () => document.removeEventListener('pointerdown', handler, true);
   }, [recruiterTooltipOpen]);
-  
-  const toggleApplicationSelection = useCallback((applicationId: string) => {
-    setSelectedApplicationIds(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(applicationId)) {
-        newSet.delete(applicationId);
-      } else {
-        newSet.add(applicationId);
-      }
-      return newSet;
-    });
-  }, []);
-  
-  const exitSelectionMode = useCallback(() => {
-    setIsSelectionMode(false);
-    setSelectedApplicationIds(new Set());
-  }, []);
-  
-  // Handle ESC key to exit selection mode
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isSelectionMode) {
-        exitSelectionMode();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSelectionMode, exitSelectionMode]);
 
   const { stageSettings, orderedStages, isLoading: stagesLoading } = useJobStageSettings(jobId);
   
@@ -267,22 +237,16 @@ const JobDetails = () => {
   const allVisibleApplicationIds = useMemo(() => {
     return applications.map(app => app.id);
   }, [applications]);
-  
-  const allVisibleSelected = useMemo(() => {
-    return (
-      allVisibleApplicationIds.length > 0 &&
-      allVisibleApplicationIds.every((id) => selectedApplicationIds.has(id))
-    );
-  }, [allVisibleApplicationIds, selectedApplicationIds]);
 
-  const toggleAllVisible = useCallback(() => {
-    setSelectedApplicationIds((prev) => {
-      const allSelected =
-        allVisibleApplicationIds.length > 0 &&
-        allVisibleApplicationIds.every((id) => prev.has(id));
-      return allSelected ? new Set() : new Set(allVisibleApplicationIds);
-    });
-  }, [allVisibleApplicationIds]);
+  const {
+    isSelectionMode,
+    setIsSelectionMode,
+    selectedCandidateIds: selectedApplicationIds,
+    toggleCandidateSelection: toggleApplicationSelection,
+    exitSelectionMode,
+    allVisibleSelected,
+    toggleAllVisible,
+  } = useSelectionMode(allVisibleApplicationIds);
 
   const bulkMoveToStage = async (targetStage: string) => {
     const idsToMove = Array.from(selectedApplicationIds);
@@ -589,51 +553,12 @@ const JobDetails = () => {
               <MapPin className="h-3.5 w-3.5" />
               {job.location}
             </div>
-            {(() => {
-              const isExpired = job.expires_at && new Date(job.expires_at) < new Date();
-              const statusLabel = isExpired ? 'Utgången' : (job.is_active ? 'Aktiv' : 'Inaktiv');
-              const statusColor = isExpired 
-                ? 'bg-red-500/20 text-white border-red-500/30'
-                : job.is_active 
-                  ? 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30'
-                  : 'bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30';
-              
-              if (isExpired) {
-                return (
-                  <Badge className={`text-xs whitespace-nowrap border ${statusColor}`}>
-                    {statusLabel}
-                  </Badge>
-                );
-              }
-
-              return (
-                <Badge
-                  className={`text-xs whitespace-nowrap cursor-pointer transition-colors border ${statusColor}`}
-                  onClick={async () => {
-                    const newActive = !job.is_active;
-                    updateJobLocally({ is_active: newActive });
-                    try {
-                      const { error } = await supabase
-                        .from('job_postings')
-                        .update({ is_active: newActive })
-                        .eq('id', jobId);
-
-                      if (error) throw error;
-
-                      toast.success(
-                        newActive ? 'Jobb aktiverat' : 'Jobb inaktiverat',
-                        { description: newActive ? 'Jobbet är nu aktivt.' : 'Jobbet är nu inaktivt.' }
-                      );
-                    } catch (error: any) {
-                      updateJobLocally({ is_active: job.is_active });
-                      toast.error('Fel', { description: error.message });
-                    }
-                  }}
-                >
-                  {statusLabel}
-                </Badge>
-              );
-            })()}
+            <JobStatusBadge
+              jobId={jobId!}
+              isActive={!!job.is_active}
+              expiresAt={job.expires_at}
+              onOptimisticUpdate={updateJobLocally}
+            />
             {job.expires_at && (
               <span className="text-white text-xs">
                 {new Date(job.expires_at) < new Date() 

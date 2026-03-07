@@ -3,3 +3,4 @@ export { ApplicationCardContent, SortableApplicationCard, StarRating } from './A
 export { StatusColumn } from './StatusColumn';
 export type { StatusColumnProps } from './StatusColumn';
 export { mapToApplicationData } from './mapApplicationData';
+export { JobStatusBadge } from './JobStatusBadge';

@@ -194,7 +194,7 @@ export const ApplicationCardContent = memo(({
 ApplicationCardContent.displayName = 'ApplicationCardContent';
 
 // Sortable Application Card
-export const SortableApplicationCard = ({ 
+export const SortableApplicationCard = memo(({ 
   application, 
   onOpenProfile,
   onMarkAsViewed,
@@ -248,4 +248,5 @@ export const SortableApplicationCard = ({
       />
     </div>
   );
-};
+});
+SortableApplicationCard.displayName = 'SortableApplicationCard';
