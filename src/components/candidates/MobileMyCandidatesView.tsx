@@ -310,8 +310,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   }, [isReadOnly, isTouchCapable]);
 
   const handleStageContainerPointerDown = useCallback((eventTarget: EventTarget | null, pointerType: string) => {
-    if (!(eventTarget instanceof HTMLElement)) return;
-    const stageEl = eventTarget.closest<HTMLElement>('[data-stage-key]');
+    const targetElement = eventTarget instanceof Element
+      ? eventTarget
+      : eventTarget instanceof Node
+        ? eventTarget.parentElement
+        : null;
+    const stageEl = targetElement?.closest<HTMLElement>('[data-stage-key]');
     const stage = stageEl?.dataset.stageKey;
     if (!stage) return;
     handleStagePointerDown(stage, pointerType);
