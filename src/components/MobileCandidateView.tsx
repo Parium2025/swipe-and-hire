@@ -162,7 +162,7 @@ const CandidateRow = memo(function CandidateRow({
               <ChevronRight className="h-4 w-4 text-white/60" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[160px]">
+          <DropdownMenuContent align="end" className="min-w-[160px] max-w-[280px]">
             {moveTargets.map(stage => {
               const cfg = stageSettings[stage];
               if (!cfg) return null;
@@ -176,8 +176,8 @@ const CandidateRow = memo(function CandidateRow({
                   }}
                   className="gap-2"
                 >
-                  <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
-                  {cfg.label}
+                  <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: cfg.color }} />
+                  <span className="truncate">{cfg.label}</span>
                 </DropdownMenuItem>
               );
             })}
