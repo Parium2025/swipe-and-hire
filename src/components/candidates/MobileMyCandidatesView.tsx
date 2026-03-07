@@ -283,7 +283,9 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 }`}
                 style={{ backgroundColor: `${cfg.color}55` }}
               >
+                <Icon className="h-3 w-3 text-white flex-shrink-0" />
                 <span className="truncate min-w-0" title={cfg.label}>{cfg.label}</span>
+                <span
                   className="text-[9px] leading-none h-4 w-4 flex items-center justify-center rounded-full text-white flex-shrink-0 text-center"
                   style={{ backgroundColor: `${cfg.color}88` }}
                 >
