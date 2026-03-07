@@ -254,6 +254,11 @@ export const MobileCandidateView = memo(function MobileCandidateView({
 
   const currentApps = appsByStage[activeTab] || [];
 
+  useEffect(() => {
+    if (stages.length === 0) return;
+    setActiveTab((prev) => (stages.includes(prev) ? prev : stages[0]));
+  }, [jobId, stages]);
+
   // Reset indicator when tab changes
   useEffect(() => {
     setScrollIndicator(0);
