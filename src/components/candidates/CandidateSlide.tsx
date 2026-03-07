@@ -82,6 +82,64 @@ export const CandidateSlide = memo(function CandidateSlide({
   const [bioExpanded, setBioExpanded] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('profil');
+  const [swipeDirection, setSwipeDirection] = useState<1 | -1>(1);
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const swipeLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
+
+  const tabIndex = TABS.findIndex(t => t.key === activeTab);
+
+  const handleTabSwipe = useCallback((deltaX: number) => {
+    const currentIdx = TABS.findIndex(t => t.key === activeTab);
+    if (deltaX < -50 && currentIdx < TABS.length - 1) {
+      setSwipeDirection(1);
+      setActiveTab(TABS[currentIdx + 1].key);
+    } else if (deltaX > 50 && currentIdx > 0) {
+      setSwipeDirection(-1);
+      setActiveTab(TABS[currentIdx - 1].key);
+    }
+  }, [activeTab]);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+    swipeLockedRef.current = null;
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartRef.current.x);
+    const dy = Math.abs(touch.clientY - touchStartRef.current.y);
+
+    // Lock direction after 10px of movement
+    if (!swipeLockedRef.current && (dx > 10 || dy > 10)) {
+      swipeLockedRef.current = dx > dy ? 'horizontal' : 'vertical';
+    }
+
+    // If horizontal swipe detected, prevent vertical scroll
+    if (swipeLockedRef.current === 'horizontal') {
+      e.stopPropagation();
+    }
+  }, []);
+
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current || swipeLockedRef.current !== 'horizontal') {
+      touchStartRef.current = null;
+      swipeLockedRef.current = null;
+      return;
+    }
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const elapsed = Date.now() - touchStartRef.current.time;
+
+    // Accept swipe if >50px or fast flick (>30px in <300ms)
+    if (Math.abs(deltaX) > 50 || (Math.abs(deltaX) > 30 && elapsed < 300)) {
+      handleTabSwipe(deltaX);
+    }
+
+    touchStartRef.current = null;
+    swipeLockedRef.current = null;
+  }, [handleTabSwipe]);
 
   // AI summary hook — only actively polls when visible
   const summaryHook = useCandidateSummary({
