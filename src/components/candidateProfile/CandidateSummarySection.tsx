@@ -1,4 +1,5 @@
 import { Sparkles, Loader2, FileText } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { CandidateSummaryCacheValue } from './candidateProfileCache';
 
 interface CandidateSummarySectionProps {
