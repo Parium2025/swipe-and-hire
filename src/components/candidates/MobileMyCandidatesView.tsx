@@ -276,11 +276,17 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 tabIndex={0}
                 onPointerDownCapture={(e) => {
                   if (e.pointerType === 'mouse' && e.button !== 0) return;
+                  const target = e.target as HTMLElement;
+                  if (target.closest('[data-stage-menu-trigger]')) return;
                   setActiveTab(stage);
                 }}
-                onClick={() => setActiveTab(stage)}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('[data-stage-menu-trigger]')) return;
+                  setActiveTab(stage);
+                }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-200 active:scale-95 shrink-0 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] outline-none focus:outline-none focus-visible:outline-none ${
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-colors duration-75 active:scale-95 shrink-0 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] outline-none focus:outline-none focus-visible:outline-none ${
                   isActive
                     ? 'ring-[1.5px] ring-white/60 shadow-lg'
                     : 'ring-1 ring-white/15'
