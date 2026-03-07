@@ -282,6 +282,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
     if (isDoubleTap) {
       lastCardTapRef.current = { stage: '', time: 0 };
+      menuDismissGuardUntilRef.current = now + 140;
       setMenuOpenStage(stage);
       return;
     }
