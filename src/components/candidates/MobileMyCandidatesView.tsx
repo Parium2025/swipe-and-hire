@@ -380,7 +380,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   <span className="translate-y-[0.25px]">{count}</span>
                 </span>
                 {!isReadOnly && (
-                  <span>
+                  <span className="touch-manipulation pointer-events-none md:pointer-events-auto">
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}

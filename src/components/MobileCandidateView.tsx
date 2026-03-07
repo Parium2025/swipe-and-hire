@@ -393,7 +393,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                 <span className="translate-y-[0.25px]">{count}</span>
               </span>
               {/* Stage settings menu — opens via double-tap on card or click on desktop */}
-              <span>
+              <span className="touch-manipulation pointer-events-none md:pointer-events-auto">
                 <JobStageSettingsMenu
                   jobId={jobId}
                   stageKey={stage}
