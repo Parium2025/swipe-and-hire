@@ -360,8 +360,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
               <div
                 key={stage}
                 tabIndex={0}
-                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
-                onClick={() => setActiveTab(stage)}
+                onTouchStart={() => handleStageTouchStart(stage)}
+                onClick={() => handleStageClick(stage)}
                 onDoubleClick={() => {
                   if (!isReadOnly) setOpenStageMenu(stage);
                 }}
