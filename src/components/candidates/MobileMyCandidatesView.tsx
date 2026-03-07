@@ -275,28 +275,22 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     scrollingRef.current = false;
   }, []);
 
-  const shouldBlockStageMenuInteraction = useCallback(() => {
-    return scrollingRef.current || Date.now() < touchGestureRef.current.blockMenuUntil;
-  }, []);
-
   const handleStageTabTap = useCallback((stage: string) => {
     setActiveTab(stage);
 
-    if (shouldBlockStageMenuInteraction()) {
-      lastCardTapRef.current = { stage: '', time: 0 };
-      return;
-    }
-
     const now = Date.now();
     const last = lastCardTapRef.current;
-    if (last.stage === stage && now - last.time <= DOUBLE_TAP_MS) {
+    const isDoubleTap = last.stage === stage && now - last.time <= DOUBLE_TAP_MS;
+
+    if (isDoubleTap) {
       lastCardTapRef.current = { stage: '', time: 0 };
+      menuDismissGuardUntilRef.current = now + 280;
       setMenuOpenStage(stage);
       return;
     }
 
     lastCardTapRef.current = { stage, time: now };
-  }, [shouldBlockStageMenuInteraction]);
+  }, [DOUBLE_TAP_MS]);
 
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
