@@ -320,8 +320,17 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               >
                 {count}
               </span>
-              {/* Stage settings menu (3-dot) */}
-              <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
+              {/* Stage settings menu (3-dot) — blocked during scroll */}
+              <span
+                onClick={e => { e.stopPropagation(); if (scrollingRef.current) e.preventDefault(); }}
+                onPointerDown={e => e.stopPropagation()}
+                onTouchEnd={e => {
+                  if (scrollingRef.current) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
+              >
                 <JobStageSettingsMenu
                   jobId={jobId}
                   stageKey={stage}
