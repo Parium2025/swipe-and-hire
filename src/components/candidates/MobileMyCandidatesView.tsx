@@ -353,7 +353,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   handleStageTabTap(stage);
                 }}
                 onClick={(e) => {
-                  if (touchTapHandledRef.current) {
+                  const justHandledTouch = Date.now() - lastTouchHandledAtRef.current < 500;
+                  if (touchTapHandledRef.current || justHandledTouch) {
                     touchTapHandledRef.current = false;
                     e.stopPropagation();
                     e.preventDefault();
