@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useDragScroll } from '@/hooks/useDragScroll';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
@@ -19,17 +19,7 @@ import { useJobDetailsData, type JobApplication } from '@/hooks/useJobDetailsDat
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
 import { useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useSelectionMode } from '@/hooks/useSelectionMode';
-import { 
-  X,
-  Users,
-  Eye,
-  MapPin,
-  Plus,
-  CheckSquare,
-} from 'lucide-react';
-import JobQrCodeButton from '@/components/JobQrCode';
-import { TruncatedText } from '@/components/TruncatedText';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   DndContext,
@@ -46,9 +36,15 @@ import {
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 
-// Extracted components
-import { SelectionActionBar, ApplicationCardContent, StatusColumn, mapToApplicationData } from '@/components/jobdetails';
-import { JobStatusBadge } from '@/components/jobdetails/JobStatusBadge';
+// Extracted sub-components
+import {
+  SelectionActionBar,
+  ApplicationCardContent,
+  StatusColumn,
+  mapToApplicationData,
+  JobDetailsSkeleton,
+  JobDetailsHeader,
+} from '@/components/jobdetails';
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
