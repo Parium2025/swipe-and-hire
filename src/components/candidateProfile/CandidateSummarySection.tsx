@@ -84,7 +84,7 @@ export const CandidateSummarySection = ({
                           <TooltipTrigger asChild>
                             <span className="truncate min-w-0 flex-1 cursor-default">{point.text}</span>
                           </TooltipTrigger>
-                          <TooltipContent side="top" sideOffset={6} className="max-w-[300px] break-words whitespace-normal">
+                          <TooltipContent side="bottom" sideOffset={8} align="start" className="max-w-[280px] break-words whitespace-normal z-[999999]">
                             <p className="text-sm break-words whitespace-pre-wrap">{point.text}</p>
                           </TooltipContent>
                         </Tooltip>
