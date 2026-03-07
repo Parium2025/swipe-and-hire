@@ -346,6 +346,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 onTouchEnd={() => {
                   if (touchGestureRef.current.moved) return;
                   touchTapHandledRef.current = true;
+                  lastTouchHandledAtRef.current = Date.now();
                   setTimeout(() => {
                     touchTapHandledRef.current = false;
                   }, 350);
