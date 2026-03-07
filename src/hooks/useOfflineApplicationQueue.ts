@@ -53,11 +53,32 @@ export interface QueuedApplication {
 const QUEUE_KEY = 'parium_offline_application_queue';
 const MAX_ATTEMPTS = 3;
 
+/**
+ * Validates that a parsed object has the required QueuedApplication shape.
+ * Protects against corrupt localStorage data causing runtime crashes.
+ */
+function isValidQueuedApplication(item: unknown): item is QueuedApplication {
+  if (!item || typeof item !== 'object') return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.id === 'string' &&
+    typeof obj.jobId === 'string' &&
+    typeof obj.applicantId === 'string' &&
+    typeof obj.queuedAt === 'number' &&
+    typeof obj.attempts === 'number' &&
+    obj.payload != null && typeof obj.payload === 'object'
+  );
+}
+
 function getQueue(): QueuedApplication[] {
   try {
     const raw = localStorage.getItem(QUEUE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidQueuedApplication);
   } catch {
+    try { localStorage.removeItem(QUEUE_KEY); } catch { /* ignore */ }
     return [];
   }
 }
