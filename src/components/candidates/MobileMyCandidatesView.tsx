@@ -61,7 +61,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
   const rowRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const [menuMetrics, setMenuMetrics] = useState({ width: 0, alignOffset: 12 });
+  const [menuMetrics, setMenuMetrics] = useState({ width: 0, alignOffset: 0 });
 
   const measureMenuMetrics = useCallback(() => {
     const rowEl = rowRef.current;
@@ -71,7 +71,9 @@ const MyCandidateRow = memo(function MyCandidateRow({
     const rowRect = rowEl.getBoundingClientRect();
     const triggerRect = triggerEl.getBoundingClientRect();
     const nextWidth = Math.round(rowRect.width);
-    const nextAlignOffset = Math.round(rowRect.right - triggerRect.right);
+    const rowCenter = rowRect.left + rowRect.width / 2;
+    const triggerCenter = triggerRect.left + triggerRect.width / 2;
+    const nextAlignOffset = Math.round(rowCenter - triggerCenter);
 
     setMenuMetrics((prev) =>
       prev.width === nextWidth && prev.alignOffset === nextAlignOffset
@@ -207,10 +209,11 @@ const MyCandidateRow = memo(function MyCandidateRow({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            align="end"
+            align="center"
             side="bottom"
             sideOffset={4}
             alignOffset={menuMetrics.alignOffset}
+            avoidCollisions={false}
             className="max-w-none"
             style={{ width: menuMetrics.width ? `${menuMetrics.width}px` : 'calc(100vw - 2rem)' }}
           >
