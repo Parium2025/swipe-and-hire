@@ -100,7 +100,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
       </div>
 
       {/* Info */}
-      <div className="flex-1 min-w-0 pr-4">
+      <div className="flex-1 min-w-0">
         <p className="text-white font-medium text-sm truncate">
           {candidate.first_name} {candidate.last_name}
         </p>
@@ -149,8 +149,16 @@ const MyCandidateRow = memo(function MyCandidateRow({
         )}
       </div>
 
-      {/* Right side — move menu (hidden in selection mode) */}
-      {!isSelectionMode && (
+      {/* Right side: checkbox in selection mode, otherwise move stage dropdown */}
+      {isSelectionMode ? (
+        <div className="flex-shrink-0" onClick={e => e.stopPropagation()}>
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => onToggleSelect?.()}
+            className="h-3.5 w-3.5 border border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
+          />
+        </div>
+      ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
