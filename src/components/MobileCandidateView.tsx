@@ -351,25 +351,9 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               key={stage}
               data-stage-tab
               tabIndex={0}
-              onTouchEnd={(e) => {
-                if (touchGestureRef.current.moved) return;
-                touchTapHandledRef.current = true;
-                lastTouchHandledAtRef.current = Date.now();
-                setTimeout(() => {
-                  touchTapHandledRef.current = false;
-                }, 350);
-                e.stopPropagation();
-                e.preventDefault();
-                handleStageTabTap(stage);
-              }}
               onClick={(e) => {
-                const justHandledTouch = Date.now() - lastTouchHandledAtRef.current < 500;
-                if (touchTapHandledRef.current || justHandledTouch) {
-                  touchTapHandledRef.current = false;
-                  e.stopPropagation();
-                  e.preventDefault();
-                  return;
-                }
+                e.stopPropagation();
+                if (Date.now() < touchGestureRef.current.blockMenuUntil) return;
                 handleStageTabTap(stage);
               }}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
