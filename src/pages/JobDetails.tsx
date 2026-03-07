@@ -48,7 +48,7 @@ import {
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isTouchDevice = useTouchCapable();
