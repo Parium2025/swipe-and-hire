@@ -384,7 +384,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 </span>
                 {/* Stage settings menu (3-dot) — visual-only on touch, functional on mouse */}
                 {!isReadOnly && (
-                  <span onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+                  <span>
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}
@@ -394,6 +394,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                       useJobDetailsTriggerStyle
                       disableTouchTrigger={isTouchCapable}
+                      onTriggerPointerDown={() => setActiveTab(stage)}
                       open={openStageMenu === stage}
                       onOpenChange={(nextOpen) => {
                         setOpenStageMenu((prev) => {
