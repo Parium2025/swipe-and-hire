@@ -103,8 +103,8 @@ const MyCandidateRow = memo(function MyCandidateRow({
         ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:bg-white/[0.08]'}
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
       ref={rowRef}
+      onClick={handleTap}
       onMouseEnter={onPrefetch}
-    >
       {/* Unread dot — top-left corner */}
       {!isSelectionMode && isUnread && (
         <div className="absolute left-1.5 top-1.5">
