@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 
 interface QueuedMessage {
   id: string;
@@ -15,17 +16,38 @@ interface QueuedMessage {
 const QUEUE_KEY = 'parium_offline_message_queue';
 const MAX_ATTEMPTS = 3;
 
-// Get queued messages from localStorage
+/**
+ * Validates that a parsed object has the required QueuedMessage shape.
+ * Protects against corrupt localStorage data causing runtime crashes.
+ */
+function isValidQueuedMessage(item: unknown): item is QueuedMessage {
+  if (!item || typeof item !== 'object') return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.id === 'string' &&
+    typeof obj.sender_id === 'string' &&
+    typeof obj.recipient_id === 'string' &&
+    typeof obj.content === 'string' &&
+    typeof obj.created_at === 'string' &&
+    typeof obj.attempts === 'number'
+  );
+}
+
 function getQueuedMessages(): QueuedMessage[] {
   try {
     const data = localStorage.getItem(QUEUE_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) return [];
+    // Filter out any corrupt entries
+    return parsed.filter(isValidQueuedMessage);
   } catch {
+    // Corrupt data — wipe and start fresh
+    try { localStorage.removeItem(QUEUE_KEY); } catch { /* ignore */ }
     return [];
   }
 }
 
-// Save queued messages to localStorage
 function saveQueuedMessages(messages: QueuedMessage[]) {
   try {
     localStorage.setItem(QUEUE_KEY, JSON.stringify(messages));
@@ -84,7 +106,11 @@ export function useOfflineMessageQueue(userId: string | undefined) {
           job_id: message.job_id,
         });
 
-      if (error) throw error;
+      if (error) {
+        // Duplicate = already sent (treat as success)
+        if (error.code === '23505') return true;
+        throw error;
+      }
       return true;
     } catch (error) {
       console.error('Failed to sync message:', error);
@@ -111,12 +137,15 @@ export function useOfflineMessageQueue(userId: string | undefined) {
       if (success) {
         syncedCount++;
       } else {
-        // Increment attempts
         const updatedMessage = { ...message, attempts: message.attempts + 1 };
         if (updatedMessage.attempts < MAX_ATTEMPTS) {
           remaining.push(updatedMessage);
         } else {
           console.warn('Message exceeded max attempts, dropping:', message.id);
+          toast.error('Ett meddelande kunde inte skickas', {
+            description: 'Vänligen försök skicka det igen manuellt.',
+            duration: 8000,
+          });
         }
       }
     }
@@ -131,23 +160,21 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     }
   }, [userId]);
 
-  // Auto-sync when coming back online
+  // Auto-sync using ConnectivityManager (ping-based, not navigator.onLine)
   useEffect(() => {
-    const handleOnline = () => {
-      console.log('Back online - syncing message queue...');
-      syncQueue();
-    };
+    const unsub = onConnectivityChange((online) => {
+      if (online) {
+        console.log('📡 Back online — syncing message queue...');
+        syncQueue();
+      }
+    });
 
-    window.addEventListener('online', handleOnline);
-    
-    // Also try to sync on mount if online
-    if (navigator.onLine && queue.length > 0) {
+    // Also sync on mount if online and queue has items
+    if (getIsOnline() && queue.length > 0) {
       syncQueue();
     }
 
-    return () => {
-      window.removeEventListener('online', handleOnline);
-    };
+    return unsub;
   }, [syncQueue, queue.length]);
 
   // Remove message from queue (e.g., when user cancels)

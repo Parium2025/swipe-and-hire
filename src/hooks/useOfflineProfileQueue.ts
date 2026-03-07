@@ -29,11 +29,31 @@ export interface QueuedProfileUpdate {
 const QUEUE_KEY = 'parium_offline_profile_queue';
 const MAX_ATTEMPTS = 3;
 
+/**
+ * Validates that a parsed object has the required QueuedProfileUpdate shape.
+ * Protects against corrupt localStorage data causing runtime crashes.
+ */
+function isValidQueuedProfileUpdate(item: unknown): item is QueuedProfileUpdate {
+  if (!item || typeof item !== 'object') return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.id === 'string' &&
+    typeof obj.userId === 'string' &&
+    typeof obj.queuedAt === 'number' &&
+    typeof obj.attempts === 'number' &&
+    obj.updates != null && typeof obj.updates === 'object'
+  );
+}
+
 function getQueue(): QueuedProfileUpdate[] {
   try {
     const raw = localStorage.getItem(QUEUE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidQueuedProfileUpdate);
   } catch {
+    try { localStorage.removeItem(QUEUE_KEY); } catch { /* ignore */ }
     return [];
   }
 }
