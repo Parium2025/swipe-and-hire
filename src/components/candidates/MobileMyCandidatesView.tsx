@@ -349,7 +349,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
         {/* Candidate list */}
         <ScrollArea className="overscroll-contain" style={{ maxHeight: 'calc(100dvh - 340px)' }}>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             {currentCandidates.length === 0 ? (
               <div className="text-center py-12 text-sm text-white">
                 Inga kandidater i detta steg
