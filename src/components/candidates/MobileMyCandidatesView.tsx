@@ -331,6 +331,14 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     }
   }, [stages, activeTab]);
 
+  useEffect(() => {
+    return () => {
+      if (pendingStageRafRef.current !== null) {
+        cancelAnimationFrame(pendingStageRafRef.current);
+      }
+    };
+  }, []);
+
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
     stages.forEach(s => (result[s] = []));
