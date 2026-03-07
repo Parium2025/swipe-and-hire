@@ -302,7 +302,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
             <div
               key={stage}
                data-stage-tab
-               data-no-drag-scroll
                tabIndex={0}
                onPointerDownCapture={() => setActiveTab(stage)}
                onClick={() => setActiveTab(stage)}
