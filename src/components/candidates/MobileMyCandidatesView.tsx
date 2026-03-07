@@ -105,7 +105,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
       ref={rowRef}
       onClick={handleTap}
       onMouseEnter={onPrefetch}
-      {/* Unread dot — top-left corner */}
+    >
       {!isSelectionMode && isUnread && (
         <div className="absolute left-1.5 top-1.5">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
