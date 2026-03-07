@@ -415,7 +415,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   touchVisualOnlyTrigger
                   controlledOpen={menuOpenStage === stage}
                   onControlledOpenChange={(open) => {
-                    if (!open && Date.now() < menuDismissGuardUntilRef.current) return;
                     setMenuOpenStage(open ? stage : null);
                   }}
                 />
