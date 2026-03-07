@@ -5,12 +5,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
 import { useQueryClient } from '@tanstack/react-query';
-import { Badge } from '@/components/ui/badge';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
-import { Button } from '@/components/ui/button';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -20,6 +18,7 @@ import { useJobStageSettings, DEFAULT_JOB_STAGE_KEYS } from '@/hooks/useJobStage
 import { useJobDetailsData, type JobApplication } from '@/hooks/useJobDetailsData';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
 import { useKanbanLayout } from '@/hooks/useKanbanLayout';
+import { useSelectionMode } from '@/hooks/useSelectionMode';
 import { 
   X,
   Users,
@@ -49,6 +48,7 @@ import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 
 // Extracted components
 import { SelectionActionBar, ApplicationCardContent, StatusColumn, mapToApplicationData } from '@/components/jobdetails';
+import { JobStatusBadge } from '@/components/jobdetails/JobStatusBadge';
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
