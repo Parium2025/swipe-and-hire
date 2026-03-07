@@ -209,10 +209,11 @@ const MyCandidateRow = memo(function MyCandidateRow({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            align="end"
+            align="center"
             side="bottom"
             sideOffset={4}
             alignOffset={menuMetrics.alignOffset}
+            avoidCollisions={false}
             className="max-w-none"
             style={{ width: menuMetrics.width ? `${menuMetrics.width}px` : 'calc(100vw - 2rem)' }}
           >
