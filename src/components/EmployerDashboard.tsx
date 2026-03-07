@@ -545,7 +545,7 @@ const EmployerDashboard = memo(() => {
                               if (isDraft) {
                                 handleEditDraft(jobPosting);
                               } else {
-                                navigate(`/job-details/${jobId}`);
+                                navigate(`/job-details/${jobId}`, { state: { fromTab: activeTab } });
                               }
                             }}
                             footer={
