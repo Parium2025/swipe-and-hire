@@ -338,9 +338,14 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               data-stage-tab
               tabIndex={0}
               onClick={() => {
-                if (shouldBlockStageMenuInteraction()) return;
                 // Always switch tab immediately on first tap
                 setActiveTab(stage);
+
+                if (shouldBlockStageMenuInteraction()) {
+                  lastCardTapRef.current = { stage: '', time: 0 };
+                  return;
+                }
+
                 // Track for double-tap → open menu
                 const now = Date.now();
                 const last = lastCardTapRef.current;

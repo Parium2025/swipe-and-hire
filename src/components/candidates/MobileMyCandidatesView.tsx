@@ -323,8 +323,13 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 data-stage-tab
                 tabIndex={0}
                 onClick={() => {
-                  if (shouldBlockStageMenuInteraction()) return;
                   setActiveTab(stage);
+
+                  if (shouldBlockStageMenuInteraction()) {
+                    lastCardTapRef.current = { stage: '', time: 0 };
+                    return;
+                  }
+
                   const now = Date.now();
                   const last = lastCardTapRef.current;
                   if (last.stage === stage && now - last.time <= DOUBLE_TAP_MS) {
