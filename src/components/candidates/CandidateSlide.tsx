@@ -97,28 +97,29 @@ export const CandidateSlide = memo(function CandidateSlide({
     open: isVisible,
   });
 
-  // Notes hook
+  // Notes hook — destructure for stable refs in deps
   const notesHook = useCandidateNotes({
     applicantId: application.applicant_id,
     jobId: application.job_id,
   });
+  const { fetchNotes, saveNote, startEditing } = notesHook;
 
   const [newNote, setNewNote] = useState('');
 
   // Fetch notes when tab is active
   useEffect(() => {
     if (activeTab === 'anteckningar' && isVisible) {
-      notesHook.fetchNotes();
+      fetchNotes();
     }
-  }, [activeTab, isVisible]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeTab, isVisible, fetchNotes]);
 
   const handleSaveNote = useCallback(() => {
-    notesHook.saveNote(newNote, () => setNewNote(''));
-  }, [newNote, notesHook.saveNote]);
+    saveNote(newNote, () => setNewNote(''));
+  }, [newNote, saveNote]);
 
   const handleStartEditing = useCallback((note: any) => {
-    notesHook.startEditing(note);
-  }, [notesHook.startEditing]);
+    startEditing(note);
+  }, [startEditing]);
 
   return (
     <div className="w-full flex flex-col items-center px-6 py-8">
