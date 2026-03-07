@@ -344,22 +344,20 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 key={stage}
                 data-stage-tab
                 tabIndex={0}
+                onTouchEnd={() => {
+                  if (touchGestureRef.current.moved) return;
+                  touchTapHandledRef.current = true;
+                  setTimeout(() => {
+                    touchTapHandledRef.current = false;
+                  }, 350);
+                  handleStageTabTap(stage);
+                }}
                 onClick={() => {
-                  setActiveTab(stage);
-
-                  if (shouldBlockStageMenuInteraction()) {
-                    lastCardTapRef.current = { stage: '', time: 0 };
+                  if (touchTapHandledRef.current) {
+                    touchTapHandledRef.current = false;
                     return;
                   }
-
-                  const now = Date.now();
-                  const last = lastCardTapRef.current;
-                  if (last.stage === stage && now - last.time <= DOUBLE_TAP_MS) {
-                    lastCardTapRef.current = { stage: '', time: 0 };
-                    setMenuOpenStage(stage);
-                    return;
-                  }
-                  lastCardTapRef.current = { stage, time: now };
+                  handleStageTabTap(stage);
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
                 className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] touch-manipulation ${
