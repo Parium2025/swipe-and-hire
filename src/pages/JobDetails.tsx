@@ -534,7 +534,10 @@ const JobDetails = () => {
             />
             <button
               onClick={() => {
-                if (window.history.length > 1) {
+                const fromTab = (location.state as any)?.fromTab;
+                if (fromTab) {
+                  navigate(fromTab === 'active' ? '/dashboard' : `/dashboard?tab=${fromTab}`, { replace: true });
+                } else if (window.history.state?.idx > 0) {
                   navigate(-1);
                 } else {
                   navigate('/');
