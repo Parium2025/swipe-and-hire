@@ -332,8 +332,6 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
         {/* Horizontal scrollable stage tabs */}
         <div
           ref={dragScrollRef}
-          onMouseDownCapture={(e) => handleStageContainerPointerDown(e.target, 'mouse')}
-          onPointerDownCapture={(e) => handleStageContainerPointerDown(e.target, e.pointerType)}
           className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
         >
           {stages.map((stage, stageIdx) => {
@@ -351,7 +349,10 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
               <div
                 key={stage}
                 data-stage-key={stage}
+                data-no-drag-scroll
                 tabIndex={0}
+                onMouseDownCapture={() => handleStagePointerDown(stage, 'mouse')}
+                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
                 onClick={() => setActiveTab(stage)}
                 onDoubleClick={() => {
                   if (!isReadOnly) setOpenStageMenu(stage);
