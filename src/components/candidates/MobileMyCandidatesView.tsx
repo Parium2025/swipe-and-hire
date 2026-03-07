@@ -258,7 +258,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     const deltaX = Math.abs(touch.clientX - touchGestureRef.current.startX);
     const deltaY = Math.abs(touch.clientY - touchGestureRef.current.startY);
 
-    if (deltaX > 6 || deltaY > 6) {
+    if (deltaX > 10 || deltaY > 10) {
       touchGestureRef.current.moved = true;
       scrollingRef.current = true;
       touchGestureRef.current.blockMenuUntil = Date.now() + 260;
