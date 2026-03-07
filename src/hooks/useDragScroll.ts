@@ -1,12 +1,17 @@
 import { useRef, useCallback, useEffect } from 'react';
+import { getInputCapability } from '@/hooks/useInputCapability';
 
 /**
- * Enables click-and-drag horizontal scrolling on a container (desktop).
- * Uses a movement threshold so clicks on child elements still work.
- * Returns a ref to attach to the scrollable element.
+ * Enables click-and-drag horizontal scrolling on a container.
  * 
- * After a drag, click events on children are suppressed for one frame
- * so that e.g. tab-switching doesn't fire after a scroll gesture.
+ * INPUT-AWARE DESIGN:
+ * - Mouse/trackpad users: grab cursor, drag-to-scroll, click suppression after drag
+ * - Touch users: NO mouse listeners attached at all — native momentum scroll handles everything
+ * - Hybrid devices: drag-scroll enabled (mouse mode) alongside native touch
+ *
+ * Uses a movement threshold (DRAG_THRESHOLD) so clicks on child elements still work.
+ * After a drag gesture, the subsequent click event is suppressed to prevent
+ * accidental tab switches or button activations.
  */
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
@@ -24,7 +29,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
         ? rawTarget.parentElement
         : null;
 
-    // Don't hijack clicks on interactive elements (buttons, links, inputs, etc.)
+    // Don't hijack clicks on truly interactive elements
     if (!target || target.closest('button, a, input, textarea, select, [role="button"], [draggable="true"]')) return;
 
     state.current = { isDown: true, isDragging: false, startX: e.pageX - el.offsetLeft, scrollLeft: el.scrollLeft };
@@ -80,6 +85,11 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    // Only attach mouse-based drag scroll for non-touch devices
+    const input = getInputCapability();
+    if (input === 'touch') return; // Pure touch → native momentum scroll only
+
     el.style.cursor = 'grab';
     el.addEventListener('mousedown', onMouseDown);
     el.addEventListener('mouseup', onMouseUp);

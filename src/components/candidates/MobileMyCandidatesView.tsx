@@ -340,10 +340,16 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex flex-col gap-3">
-        {/* Horizontal scrollable stage tabs */}
+        {/* Horizontal scrollable stage tabs — input-aware:
+            Touch: native momentum scroll, no grab cursor, instant tab switch via touchStart
+            Mouse: drag-to-scroll with grab cursor, tab switch via click (suppressed after drag) */}
         <div
           ref={dragScrollRef}
-          className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
+          className={`flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 overscroll-x-contain ${
+            isTouchCapable
+              ? '[touch-action:pan-x] [-webkit-overflow-scrolling:touch]'
+              : 'cursor-grab active:cursor-grabbing select-none'
+          }`}
         >
           {stages.map((stage, stageIdx) => {
             const cfg = stageConfig[stage];
