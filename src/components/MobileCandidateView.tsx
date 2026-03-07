@@ -232,6 +232,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     startY: 0,
     moved: false,
     blockMenuUntil: 0,
+    touchTargetStage: '',
   });
   const menuDismissGuardUntilRef = useRef(0);
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);

@@ -242,6 +242,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     startY: 0,
     moved: false,
     blockMenuUntil: 0,
+    touchTargetStage: '',
   });
   const menuDismissGuardUntilRef = useRef(0);
 
