@@ -1,4 +1,5 @@
 import { memo, useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
@@ -284,13 +285,28 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   onMarkAsViewed,
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
+  const [pendingActiveStage, setPendingActiveStage] = useState<string | null>(null);
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
   const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
+  const pendingStageRafRef = useRef<number | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
 
   const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
-    setActiveTab(stage);
+    setPendingActiveStage(stage);
+
+    flushSync(() => {
+      setActiveTab(stage);
+    });
+
+    if (pendingStageRafRef.current !== null) {
+      cancelAnimationFrame(pendingStageRafRef.current);
+    }
+    pendingStageRafRef.current = requestAnimationFrame(() => {
+      setPendingActiveStage(null);
+      pendingStageRafRef.current = null;
+    });
+
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
 
     const isTouchPointer = pointerType !== 'mouse';
@@ -315,6 +331,14 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
       setActiveTab(stages[0]);
     }
   }, [stages, activeTab]);
+
+  useEffect(() => {
+    return () => {
+      if (pendingStageRafRef.current !== null) {
+        cancelAnimationFrame(pendingStageRafRef.current);
+      }
+    };
+  }, []);
 
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
@@ -345,7 +369,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
             if (!cfg) return null;
             const Icon = getIconByName(cfg.iconName);
             const count = (candidatesByStage[stage] || []).length;
-            const isActive = stage === activeTab;
+            const isActive = stage === activeTab || stage === pendingActiveStage;
 
             const targetIdx = stageIdx === 0 ? 1 : 0;
             const targetStageKey = stages[targetIdx];
