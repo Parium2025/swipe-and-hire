@@ -149,7 +149,7 @@ const JobDetails = () => {
     [activeStages]
   );
 
-  const updateApplicationStatus = async (applicationId: string, newStatus: string) => {
+  const updateApplicationStatus = useCallback(async (applicationId: string, newStatus: string) => {
     updateApplicationLocally(applicationId, { status: newStatus as JobApplication['status'] });
 
     try {
@@ -171,7 +171,7 @@ const JobDetails = () => {
     } catch (error: any) {
       toast.error('Fel', { description: error.message });
     }
-  };
+  }, [updateApplicationLocally, refetch]);
 
   const updateCandidateRating = async (applicantId: string, newRating: number) => {
     if (!navigator.onLine) {
