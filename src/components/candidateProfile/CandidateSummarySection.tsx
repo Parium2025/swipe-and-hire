@@ -1,4 +1,5 @@
 import { Sparkles, Loader2, FileText } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { CandidateSummaryCacheValue } from './candidateProfileCache';
 
 interface CandidateSummarySectionProps {
@@ -72,13 +73,22 @@ export const CandidateSummarySection = ({
               return (
                 <ul className="space-y-1">
                   {displayPoints.map((point: any, idx: number) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-white">
+                    <li key={idx} className="flex items-start gap-2 text-sm text-white min-w-0">
                       <span
                         className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
                           point.type === 'negative' ? 'bg-red-400' : 'bg-white'
                         }`}
                       />
-                      <span>{point.text}</span>
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="truncate block min-w-0">{point.text}</span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" sideOffset={6} className="max-w-[300px] break-words whitespace-normal">
+                            <p className="text-sm break-words whitespace-pre-wrap">{point.text}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </li>
                   ))}
                 </ul>
