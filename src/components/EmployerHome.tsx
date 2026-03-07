@@ -54,9 +54,8 @@ const DateTimeDisplay = memo(() => {
 DateTimeDisplay.displayName = 'DateTimeDisplay';
 
 const EmployerHome = memo(() => {
-  const navigate = useNavigate();
   const { profile } = useAuth();
-  const { jobs, isLoading } = useJobsData({ scope: 'personal' });
+  const { isLoading } = useJobsData({ scope: 'personal' });
   const isSystemAdmin = useIsSystemAdmin();
   
   const [showContent, setShowContent] = useState(false);
