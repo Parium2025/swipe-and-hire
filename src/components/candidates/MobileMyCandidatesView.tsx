@@ -347,7 +347,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 data-stage-tab
                 data-no-drag-scroll
                 tabIndex={0}
-                onPointerDownCapture={() => setActiveTab(stage)}
+                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
                 onClick={() => setActiveTab(stage)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
                 className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 backdrop-blur-sm cursor-pointer max-w-[180px] ${
