@@ -243,8 +243,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     moved: false,
     blockMenuUntil: 0,
   });
-  const touchTapHandledRef = useRef(false);
-  const lastTouchHandledAtRef = useRef(0);
+  const menuDismissGuardUntilRef = useRef(0);
 
   const handleStageTabsTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     const touch = e.touches[0];
@@ -283,6 +282,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
     if (isDoubleTap) {
       lastCardTapRef.current = { stage: '', time: 0 };
+      menuDismissGuardUntilRef.current = now + 140;
       setMenuOpenStage(stage);
       return;
     }
@@ -338,25 +338,9 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 key={stage}
                 data-stage-tab
                 tabIndex={0}
-                onTouchEnd={(e) => {
-                  if (touchGestureRef.current.moved) return;
-                  touchTapHandledRef.current = true;
-                  lastTouchHandledAtRef.current = Date.now();
-                  setTimeout(() => {
-                    touchTapHandledRef.current = false;
-                  }, 350);
-                  e.stopPropagation();
-                  e.preventDefault();
-                  handleStageTabTap(stage);
-                }}
                 onClick={(e) => {
-                  const justHandledTouch = Date.now() - lastTouchHandledAtRef.current < 500;
-                  if (touchTapHandledRef.current || justHandledTouch) {
-                    touchTapHandledRef.current = false;
-                    e.stopPropagation();
-                    e.preventDefault();
-                    return;
-                  }
+                  e.stopPropagation();
+                  if (Date.now() < touchGestureRef.current.blockMenuUntil) return;
                   handleStageTabTap(stage);
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
@@ -402,6 +386,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       touchVisualOnlyTrigger
                       controlledOpen={menuOpenStage === stage}
                       onControlledOpenChange={(open) => {
+                        if (!open && Date.now() < menuDismissGuardUntilRef.current) return;
                         setMenuOpenStage(open ? stage : null);
                       }}
                     />
