@@ -52,6 +52,7 @@ interface StageSettingsMenuProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   disableTouchTrigger?: boolean;
+  onTriggerPointerDown?: () => void;
 }
 
 export function StageSettingsMenu({
@@ -67,6 +68,7 @@ export function StageSettingsMenu({
   open,
   onOpenChange,
   disableTouchTrigger = false,
+  onTriggerPointerDown,
 }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
@@ -188,6 +190,8 @@ export function StageSettingsMenu({
               : 'p-1 rounded hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100'
             }${disableTouchTrigger ? ' pointer-events-none' : ''}`}
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
+            onPointerDownCapture={onTriggerPointerDown}
+            onMouseDownCapture={onTriggerPointerDown}
             onMouseDown={useJobDetailsTriggerStyle ? (e) => e.preventDefault() : undefined}
             tabIndex={disableTouchTrigger ? -1 : undefined}
             aria-hidden={disableTouchTrigger ? true : undefined}
