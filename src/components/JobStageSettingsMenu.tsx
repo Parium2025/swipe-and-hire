@@ -60,7 +60,7 @@ export function JobStageSettingsMenu({
   onMoveCandidatesAndDelete,
   onLiveColorChange,
   stageIndex = 0,
-  requireLongPressOnMobile = false,
+  requireLongPressOnMobile = true,
 }: JobStageSettingsMenuProps) {
   const { stageSettings, updateStage, deleteStage, moveStageToPosition, orderedStages } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];

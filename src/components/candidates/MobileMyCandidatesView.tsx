@@ -1,4 +1,4 @@
-import { memo, useState, useMemo } from 'react';
+import { memo, useState, useMemo, useRef, useCallback } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
@@ -233,6 +233,45 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
   const dragScrollRef = useDragScroll<HTMLDivElement>();
+  const scrollingRef = useRef(false);
+  const touchGestureRef = useRef({
+    startX: 0,
+    startY: 0,
+    moved: false,
+    blockMenuUntil: 0,
+  });
+
+  const handleStageTabsTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    touchGestureRef.current.startX = touch.clientX;
+    touchGestureRef.current.startY = touch.clientY;
+    touchGestureRef.current.moved = false;
+    scrollingRef.current = false;
+  }, []);
+
+  const handleStageTabsTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - touchGestureRef.current.startX);
+    const deltaY = Math.abs(touch.clientY - touchGestureRef.current.startY);
+
+    if (deltaX > 6 || deltaY > 6) {
+      touchGestureRef.current.moved = true;
+      scrollingRef.current = true;
+      touchGestureRef.current.blockMenuUntil = Date.now() + 260;
+    }
+  }, []);
+
+  const handleStageTabsTouchEnd = useCallback(() => {
+    if (touchGestureRef.current.moved) {
+      touchGestureRef.current.blockMenuUntil = Date.now() + 260;
+    }
+    touchGestureRef.current.moved = false;
+    scrollingRef.current = false;
+  }, []);
+
+  const shouldBlockStageMenuInteraction = useCallback(() => {
+    return scrollingRef.current || Date.now() < touchGestureRef.current.blockMenuUntil;
+  }, []);
 
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
@@ -256,6 +295,9 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
         {/* Horizontal scrollable stage tabs */}
         <div
           ref={dragScrollRef}
+          onTouchStart={handleStageTabsTouchStart}
+          onTouchMove={handleStageTabsTouchMove}
+          onTouchEnd={handleStageTabsTouchEnd}
           className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
         >
           {stages.map((stage, stageIdx) => {
@@ -299,14 +341,33 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   <span className="truncate min-w-0">{cfg.label}</span>
                 )}
                 <span
-                  className="text-[9px] leading-none h-4 w-4 flex items-center justify-center rounded-full text-white flex-shrink-0 text-center"
+                  className="text-[9px] min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full text-white flex-shrink-0 tabular-nums leading-none"
                   style={{ backgroundColor: `${cfg.color}88` }}
                 >
                   {count}
                 </span>
                 {/* Stage settings menu (3-dot) */}
                 {!isReadOnly && (
-                  <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
+                  <span
+                    onClick={e => {
+                      e.stopPropagation();
+                      if (shouldBlockStageMenuInteraction()) e.preventDefault();
+                    }}
+                    onPointerDown={e => {
+                      e.stopPropagation();
+                      if (shouldBlockStageMenuInteraction()) e.preventDefault();
+                    }}
+                    onTouchStart={e => {
+                      e.stopPropagation();
+                      if (shouldBlockStageMenuInteraction()) e.preventDefault();
+                    }}
+                    onTouchEnd={e => {
+                      if (shouldBlockStageMenuInteraction()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }
+                    }}
+                  >
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}
@@ -315,6 +376,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       targetStageLabel={targetStageLabel}
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                       useJobDetailsTriggerStyle
+                      requireLongPressOnMobile
                     />
                   </span>
                 )}

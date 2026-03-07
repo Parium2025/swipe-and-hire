@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MoreVertical, Pencil, Palette, Image, Trash2, AlertTriangle, Info } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import {
@@ -38,6 +38,7 @@ import {
   getIconByName,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StageSettingsMenuProps {
   stageKey: string;
@@ -49,10 +50,12 @@ interface StageSettingsMenuProps {
   onMoveCandidatesAndDelete?: (fromStage: string, toStage: string) => Promise<void>;
   onLiveColorChange?: (color: string | null) => void;
   useJobDetailsTriggerStyle?: boolean;
+  requireLongPressOnMobile?: boolean;
 }
 
-export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false }: StageSettingsMenuProps) {
+export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
+  const isMobile = useIsMobile();
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -60,6 +63,8 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   const [newLabel, setNewLabel] = useState('');
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const touchHoldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const allowTouchOpenRef = useRef(false);
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
@@ -67,6 +72,57 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   
   // Use liveColor while dragging, fall back to saved color
   const displayColor = liveColor ?? currentConfig?.color ?? '#0EA5E9';
+
+  useEffect(() => {
+    return () => {
+      if (colorDebounceRef.current) clearTimeout(colorDebounceRef.current);
+      if (touchHoldTimerRef.current) clearTimeout(touchHoldTimerRef.current);
+    };
+  }, []);
+
+  const clearTouchHoldTimer = () => {
+    if (touchHoldTimerRef.current) {
+      clearTimeout(touchHoldTimerRef.current);
+      touchHoldTimerRef.current = null;
+    }
+  };
+
+  const handleTriggerTouchStart = () => {
+    if (!isMobile || !requireLongPressOnMobile) return;
+
+    allowTouchOpenRef.current = false;
+    clearTouchHoldTimer();
+
+    touchHoldTimerRef.current = setTimeout(() => {
+      allowTouchOpenRef.current = true;
+      setMenuOpen(true);
+    }, 220);
+  };
+
+  const handleTriggerTouchMove = () => {
+    if (!isMobile || !requireLongPressOnMobile) return;
+    clearTouchHoldTimer();
+    allowTouchOpenRef.current = false;
+  };
+
+  const handleTriggerTouchEnd = () => {
+    if (!isMobile || !requireLongPressOnMobile) return;
+    clearTouchHoldTimer();
+  };
+
+  const handleMenuOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setMenuOpen(false);
+      allowTouchOpenRef.current = false;
+      return;
+    }
+
+    if (isMobile && requireLongPressOnMobile && !allowTouchOpenRef.current) {
+      return;
+    }
+
+    setMenuOpen(true);
+  };
 
   const handleColorPickerChange = (color: string) => {
     // Update display immediately - both local and parent
@@ -155,7 +211,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
 
   return (
     <>
-      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu modal={false} open={menuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button
             className={useJobDetailsTriggerStyle
@@ -164,6 +220,16 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
             }
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
             onMouseDown={useJobDetailsTriggerStyle ? (e) => e.preventDefault() : undefined}
+            onTouchStart={handleTriggerTouchStart}
+            onTouchMove={handleTriggerTouchMove}
+            onTouchEnd={handleTriggerTouchEnd}
+            onTouchCancel={handleTriggerTouchEnd}
+            onClick={(e) => {
+              if (isMobile && requireLongPressOnMobile) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
             onFocus={useJobDetailsTriggerStyle ? (e) => {
               if (!menuOpen) {
                 e.currentTarget.blur();
