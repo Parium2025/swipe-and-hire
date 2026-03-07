@@ -292,7 +292,20 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const isTouchCapable = useTouchCapable();
 
   const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
-    setActiveTab(stage);
+    setPendingActiveStage(stage);
+
+    flushSync(() => {
+      setActiveTab(stage);
+    });
+
+    if (pendingStageRafRef.current !== null) {
+      cancelAnimationFrame(pendingStageRafRef.current);
+    }
+    pendingStageRafRef.current = requestAnimationFrame(() => {
+      setPendingActiveStage(null);
+      pendingStageRafRef.current = null;
+    });
+
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
 
     const isTouchPointer = pointerType !== 'mouse';
