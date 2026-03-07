@@ -162,7 +162,7 @@ const CandidateRow = memo(function CandidateRow({
               <ChevronRight className="h-4 w-4 text-white/60" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="min-w-[160px] max-w-[280px]">
+          <DropdownMenuContent align="end" className="min-w-[160px]">
             {moveTargets.map(stage => {
               const cfg = stageSettings[stage];
               if (!cfg) return null;
@@ -176,8 +176,8 @@ const CandidateRow = memo(function CandidateRow({
                   }}
                   className="gap-2"
                 >
-                  <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: cfg.color }} />
-                  <span className="truncate">{cfg.label}</span>
+                  <Icon className="h-3.5 w-3.5" style={{ color: cfg.color }} />
+                  {cfg.label}
                 </DropdownMenuItem>
               );
             })}
@@ -221,29 +221,11 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   renderActionBar,
 }: MobileCandidateViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'pending');
-  const [menuOpenStage, setMenuOpenStage] = useState<string | null>(null);
-  const lastCardTapRef = useRef<{ stage: string; time: number }>({ stage: '', time: 0 });
-  const DOUBLE_TAP_MS = 420;
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const listRef = useRef<HTMLDivElement>(null);
-  const scrollingRef = useRef(false);
-  const touchGestureRef = useRef({
-    startX: 0,
-    startY: 0,
-    moved: false,
-    blockMenuUntil: 0,
-    touchTargetStage: '',
-  });
-  const menuDismissGuardUntilRef = useRef(0);
-  const preferredActiveTabRef = useRef<string | null>(null);
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
-
-  const setActiveStage = useCallback((stage: string) => {
-    preferredActiveTabRef.current = stage;
-    setActiveTab(stage);
-  }, []);
 
   const appsByStage = useMemo(() => {
     const result: Record<string, JobApplication[]> = {};
@@ -261,15 +243,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   }, [applications, stages]);
 
   const currentApps = appsByStage[activeTab] || [];
-
-  useEffect(() => {
-    if (stages.length === 0) return;
-    setActiveTab((prev) => {
-      const preferredStage = preferredActiveTabRef.current;
-      if (preferredStage && stages.includes(preferredStage)) return preferredStage;
-      return stages.includes(prev) ? prev : stages[0];
-    });
-  }, [jobId, stages]);
 
   // Reset indicator when tab changes
   useEffect(() => {
@@ -289,67 +262,11 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     hideTimerRef.current = setTimeout(() => setShowIndicator(false), 2000);
   }, [currentApps.length]);
 
-  const handleStageTabsTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-    const touch = e.touches[0];
-    touchGestureRef.current.startX = touch.clientX;
-    touchGestureRef.current.startY = touch.clientY;
-    touchGestureRef.current.moved = false;
-    scrollingRef.current = false;
-  }, []);
-
-  const handleStageTabsTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-    const touch = e.touches[0];
-    const deltaX = Math.abs(touch.clientX - touchGestureRef.current.startX);
-    const deltaY = Math.abs(touch.clientY - touchGestureRef.current.startY);
-
-    if (deltaX > 12 && deltaX > deltaY * 1.2) {
-      touchGestureRef.current.moved = true;
-      scrollingRef.current = true;
-      touchGestureRef.current.blockMenuUntil = Date.now() + 260;
-    }
-  }, []);
-
-  const handleStageTabsTouchEnd = useCallback(() => {
-    if (touchGestureRef.current.moved) {
-      touchGestureRef.current.blockMenuUntil = Date.now() + 260;
-    }
-    touchGestureRef.current.moved = false;
-    scrollingRef.current = false;
-  }, []);
-
-  const handleStageTabTap = useCallback((stage: string, blockedBySwipe: boolean) => {
-    // Always update active tab — ring must respond immediately
-    setActiveStage(stage);
-
-    // Block double-tap menu after swipe gestures
-    if (blockedBySwipe) {
-      lastCardTapRef.current = { stage: '', time: 0 };
-      return;
-    }
-
-    const now = Date.now();
-    const last = lastCardTapRef.current;
-    const isDoubleTap = last.stage === stage && now - last.time <= DOUBLE_TAP_MS;
-
-    if (isDoubleTap) {
-      lastCardTapRef.current = { stage: '', time: 0 };
-      menuDismissGuardUntilRef.current = now + 140;
-      setMenuOpenStage(stage);
-      return;
-    }
-
-    lastCardTapRef.current = { stage, time: now };
-  }, [DOUBLE_TAP_MS, setActiveStage]);
-
   return (
     <div className="flex flex-col gap-3">
       {/* Horizontal scrollable stage tabs — native momentum on touch, drag on desktop */}
       <div
         ref={dragScrollRef}
-        onTouchStart={handleStageTabsTouchStart}
-        onTouchMove={handleStageTabsTouchMove}
-        onTouchEnd={handleStageTabsTouchEnd}
-        onTouchCancel={handleStageTabsTouchEnd}
         className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
       >
         {stages.map(stage => {
@@ -369,35 +286,15 @@ export const MobileCandidateView = memo(function MobileCandidateView({
             <div
               key={stage}
               data-stage-tab
-              role="button"
-              aria-pressed={isActive}
               tabIndex={0}
-              onMouseDown={(e) => e.preventDefault()}
-              onTouchStartCapture={() => {
-                touchGestureRef.current.touchTargetStage = stage;
-                setActiveStage(stage);
-              }}
-              onTouchEndCapture={() => {
-                if (touchGestureRef.current.touchTargetStage === stage) {
-                  setActiveStage(stage);
-                }
-                touchGestureRef.current.touchTargetStage = '';
-              }}
-              onTouchCancelCapture={() => {
-                touchGestureRef.current.touchTargetStage = '';
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                const blocked = Date.now() < touchGestureRef.current.blockMenuUntil;
-                handleStageTabTap(stage, blocked);
-              }}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveStage(stage); } }}
-              className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] touch-manipulation ${
+              onClick={() => setActiveTab(stage)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
+              className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 ring-1 ring-inset backdrop-blur-sm cursor-pointer max-w-[180px] ${
                 isActive
                   ? 'ring-white/40 shadow-lg'
-                  : 'ring-transparent'
+                  : 'ring-white/20'
               }`}
-              style={{ backgroundColor: `${cfg.color}55`, WebkitTapHighlightColor: 'transparent' }}
+              style={{ backgroundColor: `${cfg.color}55` }}
             >
               <Icon className="h-3 w-3 text-white flex-shrink-0" />
               {cfg.label.length > 10 ? (
@@ -415,13 +312,13 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                 <span className="truncate min-w-0">{cfg.label}</span>
               )}
               <span
-                className="h-4 min-w-4 px-0.5 inline-grid place-items-center rounded-full text-[9px] text-white flex-shrink-0 tabular-nums"
+                className="text-[9px] leading-none h-4 w-4 flex items-center justify-center rounded-full text-white flex-shrink-0 text-center"
                 style={{ backgroundColor: `${cfg.color}88` }}
               >
-                <span className="translate-y-[0.25px]">{count}</span>
+                {count}
               </span>
-              {/* Stage settings menu — opens via double-tap on card or click on desktop */}
-              <span className="touch-manipulation pointer-events-none md:pointer-events-auto">
+              {/* Stage settings menu (3-dot) */}
+              <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
                 <JobStageSettingsMenu
                   jobId={jobId}
                   stageKey={stage}
@@ -430,13 +327,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   targetStageKey={targetStageKey}
                   targetStageLabel={targetStageLabel}
                   stageIndex={stageIdx}
-                  requireLongPressOnMobile
-                  touchVisualOnlyTrigger
-                  controlledOpen={menuOpenStage === stage}
-                  onControlledOpenChange={(open) => {
-                    if (!open && Date.now() < menuDismissGuardUntilRef.current) return;
-                    setMenuOpenStage(open ? stage : null);
-                  }}
                 />
               </span>
             </div>

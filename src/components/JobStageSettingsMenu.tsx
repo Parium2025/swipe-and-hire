@@ -34,7 +34,7 @@ import { MoreVertical, Pencil, Palette, Trash2, Image, AlertTriangle, MoveVertic
 import { HexColorPicker } from 'react-colorful';
 import { toast } from 'sonner';
 import { useJobStageSettings, JOB_STAGE_ICONS, getJobStageIconByName } from '@/hooks/useJobStageSettings';
-import { useTouchCapable } from '@/hooks/useInputCapability';
+import { useIsMobile } from '@/hooks/use-mobile';
 interface JobStageSettingsMenuProps {
   jobId: string;
   stageKey: string;
@@ -46,13 +46,6 @@ interface JobStageSettingsMenuProps {
   onLiveColorChange?: (color: string | null) => void;
   /** Index of this stage in the ordered list (0-based) */
   stageIndex?: number;
-  /** Require long-press on touch devices before opening menu */
-  requireLongPressOnMobile?: boolean;
-  /** Keep 3-dot trigger visual only on touch (open via parent double-tap) */
-  touchVisualOnlyTrigger?: boolean;
-  /** Controlled open state from parent (e.g. double-tap on card) */
-  controlledOpen?: boolean;
-  onControlledOpenChange?: (open: boolean) => void;
 }
 
 export function JobStageSettingsMenu({ 
@@ -65,19 +58,12 @@ export function JobStageSettingsMenu({
   onMoveCandidatesAndDelete,
   onLiveColorChange,
   stageIndex = 0,
-  requireLongPressOnMobile = true,
-  touchVisualOnlyTrigger = false,
-  controlledOpen,
-  onControlledOpenChange,
 }: JobStageSettingsMenuProps) {
   const { stageSettings, updateStage, deleteStage, moveStageToPosition, orderedStages } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
-  const isTouchDevice = useTouchCapable();
+  const isMobile = useIsMobile();
   
-  const isControlled = controlledOpen !== undefined;
-  const [internalOpen, setInternalOpen] = useState(false);
-  const menuOpen = isControlled ? controlledOpen : internalOpen;
-  const setMenuOpen = isControlled ? (v: boolean) => onControlledOpenChange?.(v) : setInternalOpen;
+  const [menuOpen, setMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [colorDialogOpen, setColorDialogOpen] = useState(false);
   const [iconDialogOpen, setIconDialogOpen] = useState(false);
@@ -88,11 +74,6 @@ export function JobStageSettingsMenu({
   const [liveColor, setLiveColor] = useState<string | null>(null);
   
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const allowTouchOpenRef = useRef(false);
-  const lastTouchTapAtRef = useRef(0);
-  const blockTouchClickRef = useRef(false);
-  const DOUBLE_TAP_WINDOW_MS = 320;
-  const isTouchTriggerVisualOnly = isTouchDevice && touchVisualOnlyTrigger;
   
   // Use liveColor while dragging, fall back to saved color
   const displayColor = liveColor ?? settings?.color ?? '#0EA5E9';
@@ -103,61 +84,6 @@ export function JobStageSettingsMenu({
       setNewLabel(settings.label);
     }
   }, [settings?.label]);
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
-
-  const handleTriggerPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
-
-    const now = Date.now();
-    const isDoubleTap = now - lastTouchTapAtRef.current <= DOUBLE_TAP_WINDOW_MS;
-
-    if (isDoubleTap) {
-      allowTouchOpenRef.current = true;
-      blockTouchClickRef.current = false;
-      lastTouchTapAtRef.current = 0;
-      setMenuOpen(true);
-      return;
-    }
-
-    allowTouchOpenRef.current = false;
-    blockTouchClickRef.current = true;
-    lastTouchTapAtRef.current = now;
-  };
-
-  const handleTriggerPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
-    allowTouchOpenRef.current = false;
-  };
-
-  const handleTriggerPointerCancel = () => {
-    allowTouchOpenRef.current = false;
-  };
-
-  const handleMenuOpenChange = (nextOpen: boolean) => {
-    if (isControlled) {
-      setMenuOpen(nextOpen);
-      return;
-    }
-
-    if (!nextOpen) {
-      setMenuOpen(false);
-      allowTouchOpenRef.current = false;
-      blockTouchClickRef.current = false;
-      return;
-    }
-
-    if (isTouchDevice && requireLongPressOnMobile && !allowTouchOpenRef.current) {
-      return;
-    }
-
-    allowTouchOpenRef.current = false;
-    setMenuOpen(true);
-  };
 
   const handleOpenRenameDialog = () => {
     setNewLabel(settings?.label || '');
@@ -221,27 +147,12 @@ export function JobStageSettingsMenu({
 
   return (
     <>
-      <DropdownMenu modal={isTouchDevice} open={menuOpen} onOpenChange={handleMenuOpenChange}>
+      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <button 
-            className={`p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important] ${isTouchTriggerVisualOnly ? 'pointer-events-none' : ''}`}
+            className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
             style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
-            tabIndex={isTouchTriggerVisualOnly ? -1 : 0}
             onMouseDown={(e) => e.preventDefault()}
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              handleTriggerPointerDown(e);
-            }}
-            onPointerMove={handleTriggerPointerMove}
-            onPointerUp={handleTriggerPointerCancel}
-            onPointerCancel={handleTriggerPointerCancel}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (blockTouchClickRef.current) {
-                e.preventDefault();
-                blockTouchClickRef.current = false;
-              }
-            }}
             onFocus={(e) => {
               // When dropdown closes, Radix returns focus to trigger — blur immediately to prevent visual circle
               if (!menuOpen) {
@@ -254,10 +165,7 @@ export function JobStageSettingsMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="center" 
-          alignOffset={isTouchTriggerVisualOnly ? -72 : 0}
-          side="bottom"
           sideOffset={8}
-          avoidCollisions={false}
           className="w-40 border-white/20 py-1"
         >
           <DropdownMenuItem 
@@ -271,7 +179,7 @@ export function JobStageSettingsMenu({
           </DropdownMenuItem>
           
           {/* Color picker: dialog on mobile, submenu on desktop */}
-          {isTouchDevice ? (
+          {isMobile ? (
             <DropdownMenuItem 
               onSelect={() => { setTimeout(() => setColorDialogOpen(true), 100); }}
               className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
@@ -308,7 +216,7 @@ export function JobStageSettingsMenu({
           )}
           
           {/* Icon picker: dialog on mobile, submenu on desktop */}
-          {isTouchDevice ? (
+          {isMobile ? (
             <DropdownMenuItem 
               onSelect={() => { setTimeout(() => setIconDialogOpen(true), 100); }}
               className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
@@ -351,7 +259,7 @@ export function JobStageSettingsMenu({
           
           {/* Move to position - submenu with all positions */}
           {orderedStages.length > 1 && (
-            isTouchDevice ? (
+            isMobile ? (
               <DropdownMenuItem 
                 onSelect={() => { setTimeout(() => setMoveDialogOpen(true), 100); }}
                 className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"

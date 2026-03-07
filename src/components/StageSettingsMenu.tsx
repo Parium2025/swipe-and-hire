@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { MoreVertical, Pencil, Palette, Image, Trash2, AlertTriangle, Info } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import {
@@ -38,42 +38,28 @@ import {
   getIconByName,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
-import { useTouchCapable } from '@/hooks/useInputCapability';
 
 interface StageSettingsMenuProps {
   stageKey: string;
   candidateCount?: number;
   totalStageCount?: number;
-  targetStageKey?: string;
+  targetStageKey?: string; // The stage to move candidates to (next stage if first, first stage otherwise)
   targetStageLabel?: string;
   onDelete?: () => void;
   onMoveCandidatesAndDelete?: (fromStage: string, toStage: string) => Promise<void>;
   onLiveColorChange?: (color: string | null) => void;
   useJobDetailsTriggerStyle?: boolean;
-  requireLongPressOnMobile?: boolean;
-  touchVisualOnlyTrigger?: boolean;
-  controlledOpen?: boolean;
-  onControlledOpenChange?: (open: boolean) => void;
 }
 
-export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true, touchVisualOnlyTrigger = false, controlledOpen, onControlledOpenChange }: StageSettingsMenuProps) {
+export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
-  const isTouchDevice = useTouchCapable();
-  const isControlled = controlledOpen !== undefined;
-  const [internalOpen, setInternalOpen] = useState(false);
-  const menuOpen = isControlled ? controlledOpen : internalOpen;
-  const setMenuOpen = isControlled ? (v: boolean) => onControlledOpenChange?.(v) : setInternalOpen;
+  const [menuOpen, setMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
-  const allowTouchOpenRef = useRef(false);
-  const lastTouchTapAtRef = useRef(0);
-  const blockTouchClickRef = useRef(false);
-  const DOUBLE_TAP_WINDOW_MS = 320;
-  const isTouchTriggerVisualOnly = isTouchDevice && touchVisualOnlyTrigger;
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
@@ -81,61 +67,6 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   
   // Use liveColor while dragging, fall back to saved color
   const displayColor = liveColor ?? currentConfig?.color ?? '#0EA5E9';
-
-  useEffect(() => {
-    return () => {
-      if (colorDebounceRef.current) clearTimeout(colorDebounceRef.current);
-    };
-  }, []);
-
-  const handleTriggerPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
-
-    const now = Date.now();
-    const isDoubleTap = now - lastTouchTapAtRef.current <= DOUBLE_TAP_WINDOW_MS;
-
-    if (isDoubleTap) {
-      allowTouchOpenRef.current = true;
-      blockTouchClickRef.current = false;
-      lastTouchTapAtRef.current = 0;
-      setMenuOpen(true);
-      return;
-    }
-
-    allowTouchOpenRef.current = false;
-    blockTouchClickRef.current = true;
-    lastTouchTapAtRef.current = now;
-  };
-
-  const handleTriggerPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isTouchDevice || isTouchTriggerVisualOnly || !requireLongPressOnMobile || e.pointerType !== 'touch') return;
-    allowTouchOpenRef.current = false;
-  };
-
-  const handleTriggerPointerCancel = () => {
-    allowTouchOpenRef.current = false;
-  };
-
-  const handleMenuOpenChange = (nextOpen: boolean) => {
-    if (isControlled) {
-      setMenuOpen(nextOpen);
-      return;
-    }
-
-    if (!nextOpen) {
-      setMenuOpen(false);
-      allowTouchOpenRef.current = false;
-      blockTouchClickRef.current = false;
-      return;
-    }
-
-    if (isTouchDevice && requireLongPressOnMobile && !allowTouchOpenRef.current) {
-      return;
-    }
-
-    allowTouchOpenRef.current = false;
-    setMenuOpen(true);
-  };
 
   const handleColorPickerChange = (color: string) => {
     // Update display immediately - both local and parent
@@ -224,30 +155,15 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
 
   return (
     <>
-      <DropdownMenu modal={isTouchDevice} open={menuOpen} onOpenChange={handleMenuOpenChange}>
+      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <button
             className={useJobDetailsTriggerStyle
-              ? `p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important] ${isTouchTriggerVisualOnly ? 'pointer-events-none' : ''}`
-              : `p-1 rounded hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100 ${isTouchTriggerVisualOnly ? 'pointer-events-none' : ''}`
+              ? 'p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]'
+              : 'p-1 rounded hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100'
             }
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
-            tabIndex={isTouchTriggerVisualOnly ? -1 : 0}
             onMouseDown={useJobDetailsTriggerStyle ? (e) => e.preventDefault() : undefined}
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              handleTriggerPointerDown(e);
-            }}
-            onPointerMove={handleTriggerPointerMove}
-            onPointerUp={handleTriggerPointerCancel}
-            onPointerCancel={handleTriggerPointerCancel}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (blockTouchClickRef.current) {
-                e.preventDefault();
-                blockTouchClickRef.current = false;
-              }
-            }}
             onFocus={useJobDetailsTriggerStyle ? (e) => {
               if (!menuOpen) {
                 e.currentTarget.blur();
@@ -257,7 +173,7 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
             <MoreVertical className={useJobDetailsTriggerStyle ? 'h-4 w-4' : 'h-4 w-4 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]'} />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="center" alignOffset={isTouchTriggerVisualOnly ? -72 : 0} side="bottom" avoidCollisions={false} className="w-48 border-white/20">
+        <DropdownMenuContent align="end" className="w-48 border-white/20">
           <DropdownMenuItem 
             onClick={handleOpenRenameDialog}
             className="cursor-pointer"
