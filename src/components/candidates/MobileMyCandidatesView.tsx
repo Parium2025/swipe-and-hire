@@ -368,7 +368,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
             if (!cfg) return null;
             const Icon = getIconByName(cfg.iconName);
             const count = (candidatesByStage[stage] || []).length;
-            const isActive = stage === activeTab;
+            const isActive = stage === activeTab || stage === pendingActiveStage;
 
             const targetIdx = stageIdx === 0 ? 1 : 0;
             const targetStageKey = stages[targetIdx];
