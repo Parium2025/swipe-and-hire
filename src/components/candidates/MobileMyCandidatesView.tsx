@@ -283,7 +283,28 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   onMarkAsViewed,
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
+  const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
+  const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
+
+  const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
+    setActiveTab(stage);
+    setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
+
+    if (isReadOnly || pointerType !== 'touch') return;
+
+    const now = Date.now();
+    const lastTap = lastTouchTapRef.current;
+    const isDoubleTap = !!lastTap && lastTap.stage === stage && now - lastTap.time <= 320;
+
+    if (isDoubleTap) {
+      setOpenStageMenu(stage);
+      lastTouchTapRef.current = null;
+      return;
+    }
+
+    lastTouchTapRef.current = { stage, time: now };
+  }, [isReadOnly]);
 
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
@@ -326,7 +347,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 data-stage-tab
                 data-no-drag-scroll
                 tabIndex={0}
-                onPointerDownCapture={() => setActiveTab(stage)}
+                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
                 onClick={() => setActiveTab(stage)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
                 className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 backdrop-blur-sm cursor-pointer max-w-[180px] ${
@@ -359,7 +380,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 </span>
                 {/* Stage settings menu (3-dot) */}
                 {!isReadOnly && (
-                  <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
+                  <span>
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}
@@ -368,6 +389,14 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       targetStageLabel={targetStageLabel}
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                       useJobDetailsTriggerStyle
+                      disableTouchTrigger
+                      open={openStageMenu === stage}
+                      onOpenChange={(nextOpen) => {
+                        setOpenStageMenu((prev) => {
+                          if (nextOpen) return stage;
+                          return prev === stage ? null : prev;
+                        });
+                      }}
                     />
                   </span>
                 )}

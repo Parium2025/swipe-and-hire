@@ -49,11 +49,27 @@ interface StageSettingsMenuProps {
   onMoveCandidatesAndDelete?: (fromStage: string, toStage: string) => Promise<void>;
   onLiveColorChange?: (color: string | null) => void;
   useJobDetailsTriggerStyle?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  disableTouchTrigger?: boolean;
 }
 
-export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false }: StageSettingsMenuProps) {
+export function StageSettingsMenu({
+  stageKey,
+  candidateCount = 0,
+  totalStageCount = 1,
+  targetStageKey,
+  targetStageLabel,
+  onDelete,
+  onMoveCandidatesAndDelete,
+  onLiveColorChange,
+  useJobDetailsTriggerStyle = false,
+  open,
+  onOpenChange,
+  disableTouchTrigger = false,
+}: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [internalMenuOpen, setInternalMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -153,9 +169,18 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
 
   if (!currentConfig) return null;
 
+  const isMenuOpen = open ?? internalMenuOpen;
+
+  const handleMenuOpenChange = (nextOpen: boolean) => {
+    if (open === undefined) {
+      setInternalMenuOpen(nextOpen);
+    }
+    onOpenChange?.(nextOpen);
+  };
+
   return (
     <>
-      <DropdownMenu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu modal={false} open={isMenuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button
             className={useJobDetailsTriggerStyle
@@ -164,8 +189,14 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
             }
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
             onMouseDown={useJobDetailsTriggerStyle ? (e) => e.preventDefault() : undefined}
+            onPointerDownCapture={disableTouchTrigger ? (e) => {
+              if (e.pointerType === 'touch') {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            } : undefined}
             onFocus={useJobDetailsTriggerStyle ? (e) => {
-              if (!menuOpen) {
+              if (!isMenuOpen) {
                 e.currentTarget.blur();
               }
             } : undefined}
