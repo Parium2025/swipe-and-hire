@@ -289,12 +289,17 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
 
-  const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
+  const handleStageClick = useCallback((stage: string) => {
+    setActiveTab(stage);
+    setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
+  }, []);
+
+  const handleStageTouchStart = useCallback((stage: string) => {
+    // On touch, switch tab immediately for responsiveness
     setActiveTab(stage);
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
 
-    const isTouchPointer = pointerType !== 'mouse';
-    if (isReadOnly || !isTouchCapable || !isTouchPointer) return;
+    if (isReadOnly || !isTouchCapable) return;
 
     const now = Date.now();
     const lastTap = lastTouchTapRef.current;
@@ -355,8 +360,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
               <div
                 key={stage}
                 tabIndex={0}
-                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
-                onClick={() => setActiveTab(stage)}
+                onTouchStart={() => handleStageTouchStart(stage)}
+                onClick={() => handleStageClick(stage)}
                 onDoubleClick={() => {
                   if (!isReadOnly) setOpenStageMenu(stage);
                 }}
