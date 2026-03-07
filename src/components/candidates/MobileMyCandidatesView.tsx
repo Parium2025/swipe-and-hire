@@ -352,9 +352,11 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   }, 350);
                   handleStageTabTap(stage);
                 }}
-                onClick={() => {
+                onClick={(e) => {
                   if (touchTapHandledRef.current) {
                     touchTapHandledRef.current = false;
+                    e.stopPropagation();
+                    e.preventDefault();
                     return;
                   }
                   handleStageTabTap(stage);
