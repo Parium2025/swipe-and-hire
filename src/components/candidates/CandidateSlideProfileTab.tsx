@@ -21,7 +21,7 @@ interface CandidateSlideProfileTabProps {
   isProfileVideo: boolean;
   initials: string;
   summaryHook: {
-    aiSummary: string | null;
+    aiSummary: CandidateSummaryCacheValue | null;
     loadingSummary: boolean;
     generatingSummary: boolean;
   };
