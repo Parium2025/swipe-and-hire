@@ -10,6 +10,7 @@ import { CvViewer } from '@/components/CvViewer';
 import { toast } from 'sonner';
 import { SectionCard, SectionLabel, employmentStatusLabels, workScheduleLabels, availabilityLabels } from './CandidateSlideConstants';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
+import type { CandidateSummaryCacheValue } from '@/components/candidateProfile/candidateProfileCache';
 
 interface CandidateSlideProfileTabProps {
   application: ApplicationData;
