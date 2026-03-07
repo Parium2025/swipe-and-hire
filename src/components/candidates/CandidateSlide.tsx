@@ -40,10 +40,10 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const handleTabSwipe = useCallback((deltaX: number) => {
     const currentIdx = TABS.findIndex(t => t.key === activeTab);
-    if (deltaX < -50 && currentIdx < TABS.length - 1) {
+    if (deltaX < -30 && currentIdx < TABS.length - 1) {
       setSwipeDirection(1);
       setActiveTab(TABS[currentIdx + 1].key);
-    } else if (deltaX > 50 && currentIdx > 0) {
+    } else if (deltaX > 30 && currentIdx > 0) {
       setSwipeDirection(-1);
       setActiveTab(TABS[currentIdx - 1].key);
     }
@@ -61,11 +61,14 @@ export const CandidateSlide = memo(function CandidateSlide({
     const dx = Math.abs(touch.clientX - touchStartRef.current.x);
     const dy = Math.abs(touch.clientY - touchStartRef.current.y);
 
-    if (!swipeLockedRef.current && (dx > 10 || dy > 10)) {
-      swipeLockedRef.current = dx > dy ? 'horizontal' : 'vertical';
+    // Lock direction early — 6px is enough to determine intent
+    if (!swipeLockedRef.current && (dx > 6 || dy > 6)) {
+      swipeLockedRef.current = dx > dy * 0.8 ? 'horizontal' : 'vertical';
     }
 
     if (swipeLockedRef.current === 'horizontal') {
+      // Prevent vertical scroll from interfering
+      e.preventDefault();
       e.stopPropagation();
     }
   }, []);
@@ -79,8 +82,10 @@ export const CandidateSlide = memo(function CandidateSlide({
     const touch = e.changedTouches[0];
     const deltaX = touch.clientX - touchStartRef.current.x;
     const elapsed = Date.now() - touchStartRef.current.time;
+    const velocity = Math.abs(deltaX) / elapsed;
 
-    if (Math.abs(deltaX) > 50 || (Math.abs(deltaX) > 30 && elapsed < 300)) {
+    // Accept: 30px distance OR fast flick (velocity > 0.3px/ms with 20px minimum)
+    if (Math.abs(deltaX) > 30 || (velocity > 0.3 && Math.abs(deltaX) > 20)) {
       handleTabSwipe(deltaX);
     }
 
