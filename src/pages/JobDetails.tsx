@@ -149,7 +149,7 @@ const JobDetails = () => {
     [activeStages]
   );
 
-  const updateApplicationStatus = async (applicationId: string, newStatus: string) => {
+  const updateApplicationStatus = useCallback(async (applicationId: string, newStatus: string) => {
     updateApplicationLocally(applicationId, { status: newStatus as JobApplication['status'] });
 
     try {
@@ -171,9 +171,9 @@ const JobDetails = () => {
     } catch (error: any) {
       toast.error('Fel', { description: error.message });
     }
-  };
+  }, [updateApplicationLocally, refetch]);
 
-  const updateCandidateRating = async (applicantId: string, newRating: number) => {
+  const updateCandidateRating = useCallback(async (applicantId: string, newRating: number) => {
     if (!navigator.onLine) {
       toast('Offline', { description: 'Du måste vara online för att uppdatera betyg' });
       return;
@@ -200,9 +200,9 @@ const JobDetails = () => {
       toast.error('Fel', { description: 'Kunde inte uppdatera betyg' });
       refetch();
     }
-  };
+  }, [myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch]);
 
-  const markApplicationAsViewed = async (applicationId: string) => {
+  const markApplicationAsViewed = useCallback(async (applicationId: string) => {
     updateApplicationLocally(applicationId, { viewed_at: new Date().toISOString() });
     
     try {
@@ -214,7 +214,7 @@ const JobDetails = () => {
     } catch (error) {
       console.error('Error marking as viewed:', error);
     }
-  };
+  }, [updateApplicationLocally]);
 
   const applicationsByStatus = useMemo(() => {
     const result: Record<string, JobApplication[]> = {};
@@ -248,7 +248,7 @@ const JobDetails = () => {
     toggleAllVisible,
   } = useSelectionMode(allVisibleApplicationIds);
 
-  const bulkMoveToStage = async (targetStage: string) => {
+  const bulkMoveToStage = useCallback(async (targetStage: string) => {
     const idsToMove = Array.from(selectedApplicationIds);
     const count = idsToMove.length;
     const targetLabel = stageSettings[targetStage]?.label || targetStage;
@@ -273,7 +273,7 @@ const JobDetails = () => {
       refetch();
       toast.error('Kunde inte flytta kandidaterna');
     }
-  };
+  }, [selectedApplicationIds, stageSettings, updateApplicationLocally, exitSelectionMode, refetch]);
 
   const resolveStageForApplication = useCallback((app: JobApplication): string => {
     const directStage = app.status;
@@ -406,9 +406,9 @@ const JobDetails = () => {
   }, [applicationsByStatus, updateApplicationLocally, refetch]);
 
   // DnD handlers
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-  };
+  }, []);
 
   const resolveOverStatus = useCallback((overRawId?: string): string | null => {
     if (!overRawId) return null;
@@ -418,13 +418,13 @@ const JobDetails = () => {
     return null;
   }, [activeStages, applications]);
 
-  const handleDragOver = (event: DragOverEvent) => {
+  const handleDragOver = useCallback((event: DragOverEvent) => {
     const overRawId = event.over?.id as string | undefined;
     const status = resolveOverStatus(overRawId);
     setOverId(status);
-  };
+  }, [resolveOverStatus]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over) {
@@ -454,7 +454,7 @@ const JobDetails = () => {
       setActiveId(null);
       setOverId(null);
     }
-  };
+  }, [resolveOverStatus, applications, updateApplicationStatus]);
 
   const activeApplication = activeId ? applications.find(a => a.id === activeId) : null;
 

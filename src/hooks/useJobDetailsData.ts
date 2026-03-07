@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -339,7 +339,7 @@ export function useJobDetailsData(jobId: string | undefined) {
   }, [jobId, user, queryClient]);
 
   // Helper to update application locally (both React Query cache AND localStorage)
-  const updateApplicationLocally = (applicationId: string, updates: Partial<JobApplication>) => {
+  const updateApplicationLocally = useCallback((applicationId: string, updates: Partial<JobApplication>) => {
     queryClient.setQueryData(['job-applications', jobId], (old: JobApplication[] | undefined) => {
       if (!old) return old;
       const updated = old.map(app => 
@@ -349,21 +349,21 @@ export function useJobDetailsData(jobId: string | undefined) {
       if (jobId) writeJobAppsCache(jobId, updated);
       return updated;
     });
-  };
+  }, [queryClient, jobId]);
 
   // Helper to update job locally
-  const updateJobLocally = (updates: Partial<JobPosting>) => {
+  const updateJobLocally = useCallback((updates: Partial<JobPosting>) => {
     queryClient.setQueryData(['job-details', jobId], (old: JobPosting | null | undefined) => {
       if (!old) return old;
       return { ...old, ...updates };
     });
-  };
+  }, [queryClient, jobId]);
 
   // Refetch both
-  const refetch = () => {
+  const refetch = useCallback(() => {
     jobQuery.refetch();
     applicationsQuery.refetch();
-  };
+  }, [jobQuery, applicationsQuery]);
 
   return {
     job: jobQuery.data ?? null,
