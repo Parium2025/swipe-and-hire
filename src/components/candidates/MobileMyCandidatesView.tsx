@@ -380,7 +380,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 </span>
                 {/* Stage settings menu (3-dot) */}
                 {!isReadOnly && (
-                  <span onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
+                  <span>
                     <StageSettingsMenu
                       stageKey={stage}
                       candidateCount={count}
@@ -389,6 +389,14 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       targetStageLabel={targetStageLabel}
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                       useJobDetailsTriggerStyle
+                      disableTouchTrigger
+                      open={openStageMenu === stage}
+                      onOpenChange={(nextOpen) => {
+                        setOpenStageMenu((prev) => {
+                          if (nextOpen) return stage;
+                          return prev === stage ? null : prev;
+                        });
+                      }}
                     />
                   </span>
                 )}
