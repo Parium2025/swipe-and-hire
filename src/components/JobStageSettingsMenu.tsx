@@ -48,6 +48,9 @@ interface JobStageSettingsMenuProps {
   stageIndex?: number;
   /** Require long-press on touch devices before opening menu */
   requireLongPressOnMobile?: boolean;
+  /** Controlled open state from parent (e.g. double-tap on card) */
+  controlledOpen?: boolean;
+  onControlledOpenChange?: (open: boolean) => void;
 }
 
 export function JobStageSettingsMenu({ 
@@ -61,6 +64,8 @@ export function JobStageSettingsMenu({
   onLiveColorChange,
   stageIndex = 0,
   requireLongPressOnMobile = true,
+  controlledOpen,
+  onControlledOpenChange,
 }: JobStageSettingsMenuProps) {
   const { stageSettings, updateStage, deleteStage, moveStageToPosition, orderedStages } = useJobStageSettings(jobId);
   const settings = stageSettings[stageKey];
