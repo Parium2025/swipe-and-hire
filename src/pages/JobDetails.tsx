@@ -406,9 +406,9 @@ const JobDetails = () => {
   }, [applicationsByStatus, updateApplicationLocally, refetch]);
 
   // DnD handlers
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-  };
+  }, []);
 
   const resolveOverStatus = useCallback((overRawId?: string): string | null => {
     if (!overRawId) return null;
