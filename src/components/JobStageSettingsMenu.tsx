@@ -284,7 +284,7 @@ export function JobStageSettingsMenu({
           )}
           
           {/* Icon picker: dialog on mobile, submenu on desktop */}
-          {isMobile ? (
+          {isTouchDevice ? (
             <DropdownMenuItem 
               onSelect={() => { setTimeout(() => setIconDialogOpen(true), 100); }}
               className="text-white md:hover:bg-white/10 focus:bg-white/10 active:bg-white/15 cursor-pointer text-xs py-1.5 px-2 min-h-0 transition-colors duration-100"
