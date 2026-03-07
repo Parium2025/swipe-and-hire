@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useDragScroll } from '@/hooks/useDragScroll';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
@@ -19,17 +19,8 @@ import { useJobDetailsData, type JobApplication } from '@/hooks/useJobDetailsDat
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
 import { useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useSelectionMode } from '@/hooks/useSelectionMode';
-import { 
-  X,
-  Users,
-  Eye,
-  MapPin,
-  Plus,
-  CheckSquare,
-} from 'lucide-react';
-import JobQrCodeButton from '@/components/JobQrCode';
-import { TruncatedText } from '@/components/TruncatedText';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Plus } from 'lucide-react';
+import { SectionErrorBoundary } from '@/components/candidateProfile';
 import { toast } from 'sonner';
 import {
   DndContext,
@@ -46,14 +37,18 @@ import {
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 
-// Extracted components
-import { SelectionActionBar, ApplicationCardContent, StatusColumn, mapToApplicationData } from '@/components/jobdetails';
-import { JobStatusBadge } from '@/components/jobdetails/JobStatusBadge';
+// Extracted sub-components
+import {
+  SelectionActionBar,
+  ApplicationCardContent,
+  StatusColumn,
+  mapToApplicationData,
+  JobDetailsSkeleton,
+  JobDetailsHeader,
+} from '@/components/jobdetails';
 
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
-  const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isTouchDevice = useTouchCapable();
@@ -85,21 +80,6 @@ const JobDetails = () => {
   const [swipeStageApps, setSwipeStageApps] = useState<JobApplication[]>([]);
   
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
-  
-  const [recruiterTooltipOpen, setRecruiterTooltipOpen] = useState(false);
-  const recruiterTooltipRef = useRef<HTMLDivElement>(null);
-
-  // Close recruiter tooltip on outside tap (touch devices)
-  useEffect(() => {
-    if (!recruiterTooltipOpen) return;
-    const handler = (e: PointerEvent) => {
-      if (recruiterTooltipRef.current && !recruiterTooltipRef.current.contains(e.target as Node)) {
-        setRecruiterTooltipOpen(false);
-      }
-    };
-    document.addEventListener('pointerdown', handler, true);
-    return () => document.removeEventListener('pointerdown', handler, true);
-  }, [recruiterTooltipOpen]);
 
   const { stageSettings, orderedStages, isLoading: stagesLoading } = useJobStageSettings(jobId);
   
@@ -459,60 +439,8 @@ const JobDetails = () => {
 
   const activeApplication = activeId ? applications.find(a => a.id === activeId) : null;
 
-  // Show skeleton while loading
   if (dataLoading || stagesLoading) {
-    return (
-       <div className="space-y-4 responsive-container-wide py-4 pb-safe min-h-screen animate-fade-in">
-        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-6">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex-1 min-w-0 pr-4 space-y-2">
-              <div className="h-6 w-3/4 bg-white/10 rounded animate-pulse" />
-              <div className="flex items-center gap-4">
-                <div className="h-4 w-24 bg-white/10 rounded animate-pulse" />
-                <div className="h-5 w-16 bg-white/10 rounded-full animate-pulse" />
-              </div>
-            </div>
-            <div className="h-8 w-8 bg-white/5 rounded animate-pulse" />
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-            {[1, 2].map(i => (
-              <div key={i} className="bg-white/5 rounded-lg p-2 md:p-3 space-y-2">
-                <div className="h-4 w-20 bg-white/10 rounded animate-pulse" />
-                <div className="h-6 w-8 bg-white/10 rounded animate-pulse" />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-3">
-          <div className="flex items-center justify-between">
-            <div className="h-4 w-32 bg-white/10 rounded animate-pulse" />
-            <div className="h-6 w-20 bg-white/10 rounded animate-pulse" />
-          </div>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-4 pt-2 px-2">
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="flex-1 min-w-[160px] max-w-[240px] flex flex-col">
-              <div className="rounded-md px-2 py-1.5 mb-2 bg-white/10 animate-pulse">
-                <div className="h-4 w-24 bg-white/20 rounded" />
-              </div>
-              <div className="flex-1 space-y-2 p-1">
-                {i <= 2 && (
-                  <div className="bg-white/5 rounded-md p-2 space-y-2 animate-pulse">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-white/10" />
-                      <div className="flex-1 space-y-1">
-                        <div className="h-3 w-20 bg-white/10 rounded" />
-                        <div className="h-2 w-12 bg-white/10 rounded" />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    return <JobDetailsSkeleton />;
   }
 
   if (!job) {
@@ -525,140 +453,20 @@ const JobDetails = () => {
 
   return (
      <div className="space-y-3 md:space-y-4 w-full px-2 md:px-0 py-3 md:py-4 pb-safe min-h-screen animate-fade-in md:max-w-[clamp(20rem,82vw,76rem)] md:mx-auto md:px-[clamp(0.75rem,2.5vw,2rem)]">
-        {/* Job Title and Stats - Compact */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4 relative z-30">
-          <div className="flex items-start justify-between gap-2">
-            <TruncatedText 
-              text={job.title} 
-              className="text-lg font-bold text-white flex-1 min-w-0 line-clamp-2"
-            />
-            <button
-              onClick={() => {
-                const navState = (location.state as { fromRoute?: '/dashboard' | '/my-jobs'; fromTab?: 'active' | 'expired' | 'draft' } | null) ?? null;
-                if (navState?.fromRoute) {
-                  const tabSuffix = navState.fromTab && navState.fromTab !== 'active' ? `?tab=${navState.fromTab}` : '';
-                  navigate(`${navState.fromRoute}${tabSuffix}`, { replace: true });
-                } else if (window.history.state?.idx > 0) {
-                  navigate(-1);
-                } else {
-                  navigate('/');
-                }
-              }}
-              onMouseDown={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              onPointerUp={(e) => e.stopPropagation()}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors shrink-0 focus:outline-none touch-manipulation active:scale-95 relative z-50"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 mt-1.5 text-sm">
-            <div className="flex items-center gap-1 text-white">
-              <MapPin className="h-3.5 w-3.5" />
-              {job.location}
-            </div>
-            <JobStatusBadge
-              jobId={jobId!}
-              isActive={!!job.is_active}
-              expiresAt={job.expires_at}
-              onOptimisticUpdate={updateJobLocally}
-            />
-            {job.expires_at && (
-              <span className="text-white text-xs">
-                {new Date(job.expires_at) < new Date() 
-                  ? `Gick ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
-                  : `Går ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
-                }
-              </span>
-            )}
-          </div>
-
-          <div className="mt-3 space-y-1.5 md:space-y-0">
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-1.5 min-w-0">
-              <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
-                <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium truncate">{job.views_count}</span>
-                <span className="text-white text-xs truncate">Visn.</span>
-              </div>
-
-              <div className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 min-w-0 overflow-hidden">
-                <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium truncate">{job.applications_count}</span>
-                <span className="text-white text-xs truncate">Ans.</span>
-              </div>
-
-              {job.employer_profile ? (
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip open={recruiterTooltipOpen} onOpenChange={setRecruiterTooltipOpen}>
-                    <TooltipTrigger asChild>
-                      <div 
-                        ref={recruiterTooltipRef}
-                        className="bg-white/5 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 cursor-default min-w-0 overflow-hidden"
-                        onClick={() => setRecruiterTooltipOpen(prev => !prev)}
-                      >
-                        <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/60 to-primary overflow-hidden flex items-center justify-center text-[10px] text-white font-medium shrink-0">
-                          {employerProfileImageUrl ? (
-                            <img src={employerProfileImageUrl} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            `${job.employer_profile.first_name?.[0] || ''}${job.employer_profile.last_name?.[0] || ''}`
-                          )}
-                        </div>
-                        <span className="text-white text-xs truncate max-w-[60px]">
-                          {job.employer_profile.first_name}
-                        </span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Rekryterare: {job.employer_profile.first_name} {job.employer_profile.last_name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <div className="bg-white/5 rounded-lg px-2 py-1.5 min-w-0" />
-              )}
-
-              <button
-                onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
-                onMouseDown={(e) => e.preventDefault()}
-                className={`hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
-                  isSelectionMode 
-                    ? 'bg-white/10 ring-1 ring-white hover:bg-white/15' 
-                    : applications.length > 0 
-                      ? 'bg-white/5 hover:bg-white/10' 
-                      : 'bg-white/5 opacity-40 cursor-default'
-                }`}
-              >
-                <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
-              </button>
-              <div className="hidden md:flex min-w-0">
-                <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-1.5 min-w-0 md:hidden">
-              <button
-                onClick={() => applications.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
-                onMouseDown={(e) => e.preventDefault()}
-                className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
-                  isSelectionMode 
-                    ? 'bg-white/10 ring-white' 
-                    : applications.length > 0 
-                      ? 'bg-white/5 ring-white/30' 
-                      : 'bg-white/5 ring-white/20 opacity-40 cursor-default'
-                }`}
-              >
-                <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <span className="text-white text-xs font-medium">Välj</span>
-              </button>
-
-              <JobQrCodeButton jobId={jobId!} jobTitle={job.title} />
-            </div>
-          </div>
-        </div>
+        <JobDetailsHeader
+          jobId={jobId!}
+          job={job}
+          employerProfileImageUrl={employerProfileImageUrl}
+          applicationsCount={applications.length}
+          activeStagesLength={activeStages.length}
+          isSelectionMode={isSelectionMode}
+          onToggleSelectionMode={() => setIsSelectionMode(true)}
+          onExitSelectionMode={exitSelectionMode}
+          onUpdateJobLocally={updateJobLocally}
+        />
 
         {/* Touch devices: tab-based candidate list. Desktop: kanban with drag-and-drop */}
+        <SectionErrorBoundary fallbackLabel="Kandidatvy">
         {useMobileView ? (
           <MobileCandidateView
             jobId={jobId || ''}
@@ -764,6 +572,7 @@ const JobDetails = () => {
             </DragOverlay>
           </DndContext>
         )}
+        </SectionErrorBoundary>
 
         {/* Candidate Profile Dialog */}
         <CandidateProfileDialog
