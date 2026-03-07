@@ -63,6 +63,41 @@ const CandidateRow = memo(function CandidateRow({
   const hasResults = criterionResults.length > 0;
   const needsEvaluation = criteriaCount > 0 && !hasResults;
 
+  const rowRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [menuMetrics, setMenuMetrics] = useState({ width: 0, alignOffset: 0 });
+
+  const measureMenuMetrics = useCallback(() => {
+    const rowEl = rowRef.current;
+    const triggerEl = triggerRef.current;
+    if (!rowEl || !triggerEl) return;
+
+    const rowRect = rowEl.getBoundingClientRect();
+    const triggerRect = triggerEl.getBoundingClientRect();
+    const nextWidth = Math.round(rowRect.width);
+    const nextAlignOffset = Math.round(rowRect.left - triggerRect.left);
+
+    setMenuMetrics((prev) =>
+      prev.width === nextWidth && prev.alignOffset === nextAlignOffset
+        ? prev
+        : { width: nextWidth, alignOffset: nextAlignOffset }
+    );
+  }, []);
+
+  useEffect(() => {
+    measureMenuMetrics();
+
+    const rowEl = rowRef.current;
+    if (!rowEl || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(() => {
+      measureMenuMetrics();
+    });
+
+    observer.observe(rowEl);
+    return () => observer.disconnect();
+  }, [measureMenuMetrics]);
+
   const handleTap = () => {
     if (isSelectionMode && onToggleSelect) {
       onToggleSelect();
@@ -76,6 +111,7 @@ const CandidateRow = memo(function CandidateRow({
 
   return (
     <div
+      ref={rowRef}
       className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-all duration-150 min-h-touch relative
         ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:bg-white/[0.08]'}
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
@@ -152,9 +188,11 @@ const CandidateRow = memo(function CandidateRow({
           />
         </div>
       ) : (
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={(open) => open && measureMenuMetrics()}>
           <DropdownMenuTrigger asChild>
             <button
+              ref={triggerRef}
+              onPointerDownCapture={measureMenuMetrics}
               onClick={e => e.stopPropagation()}
               className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:bg-white/15 transition-colors flex-shrink-0"
               aria-label="Flytta kandidat"
@@ -163,11 +201,13 @@ const CandidateRow = memo(function CandidateRow({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            align="end"
+            align="start"
             side="bottom"
             sideOffset={4}
-            alignOffset={12}
-            className="w-[calc(100vw-2rem)] max-w-sm"
+            alignOffset={menuMetrics.alignOffset}
+            avoidCollisions={false}
+            className="max-w-none"
+            style={{ width: menuMetrics.width ? `${menuMetrics.width}px` : 'calc(100vw - 2rem)' }}
           >
             {moveTargets.map(stage => {
               const cfg = stageSettings[stage];
