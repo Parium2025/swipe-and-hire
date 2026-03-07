@@ -292,7 +292,10 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
   const currentCandidates = candidatesByStage[activeTab] || [];
 
-  return (
+  useEffect(() => {
+    if (stages.length === 0) return;
+    setActiveTab((prev) => (stages.includes(prev) ? prev : stages[0]));
+  }, [stages]);
     <TooltipProvider delayDuration={200}>
       <div className="flex flex-col gap-3">
         {/* Horizontal scrollable stage tabs */}
