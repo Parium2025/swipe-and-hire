@@ -267,6 +267,8 @@ export const MobileCandidateView = memo(function MobileCandidateView({
       {/* Horizontal scrollable stage tabs — native momentum on touch, drag on desktop */}
       <div
         ref={dragScrollRef}
+        onTouchStart={() => { scrollingRef.current = false; }}
+        onTouchMove={() => { scrollingRef.current = true; }}
         className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
       >
         {stages.map(stage => {
