@@ -207,7 +207,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            align="center"
+            align="start"
             side="bottom"
             sideOffset={4}
             alignOffset={menuMetrics.alignOffset}
