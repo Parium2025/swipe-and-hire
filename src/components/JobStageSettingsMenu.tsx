@@ -210,14 +210,15 @@ export function JobStageSettingsMenu({
             className="p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]"
             style={{ outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' }}
             onMouseDown={(e) => e.preventDefault()}
-            onTouchStart={handleTriggerTouchStart}
-            onTouchMove={handleTriggerTouchMove}
-            onTouchEnd={handleTriggerTouchEnd}
-            onTouchCancel={handleTriggerTouchEnd}
+            onPointerDown={handleTriggerPointerDown}
+            onPointerMove={handleTriggerPointerMove}
+            onPointerUp={handleTriggerPointerCancel}
+            onPointerCancel={handleTriggerPointerCancel}
             onClick={(e) => {
-              if (isMobile && requireLongPressOnMobile) {
+              if (blockTouchClickRef.current) {
                 e.preventDefault();
                 e.stopPropagation();
+                blockTouchClickRef.current = false;
               }
             }}
             onFocus={(e) => {
