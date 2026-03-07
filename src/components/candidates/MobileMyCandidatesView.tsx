@@ -340,13 +340,16 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 key={stage}
                 data-stage-tab
                 tabIndex={0}
-                onTouchEnd={() => {
+                onPointerUp={(e) => {
+                  if (e.pointerType !== 'touch') return;
                   if (touchGestureRef.current.moved) return;
                   touchTapHandledRef.current = true;
                   lastTouchHandledAtRef.current = Date.now();
                   setTimeout(() => {
                     touchTapHandledRef.current = false;
                   }, 350);
+                  e.stopPropagation();
+                  e.preventDefault();
                   handleStageTabTap(stage);
                 }}
                 onClick={(e) => {
