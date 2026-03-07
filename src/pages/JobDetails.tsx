@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useDragScroll } from '@/hooks/useDragScroll';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
@@ -53,6 +53,7 @@ import { JobStatusBadge } from '@/components/jobdetails/JobStatusBadge';
 const JobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isTouchDevice = useTouchCapable();
@@ -533,7 +534,10 @@ const JobDetails = () => {
             />
             <button
               onClick={() => {
-                if (window.history.length > 1) {
+                const fromTab = (location.state as any)?.fromTab;
+                if (fromTab) {
+                  navigate(fromTab === 'active' ? '/dashboard' : `/dashboard?tab=${fromTab}`, { replace: true });
+                } else if (window.history.state?.idx > 0) {
                   navigate(-1);
                 } else {
                   navigate('/');
