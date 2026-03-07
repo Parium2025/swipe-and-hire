@@ -221,7 +221,7 @@ export function JobStageSettingsMenu({
 
   return (
     <>
-      <DropdownMenu modal={false} open={menuOpen} onOpenChange={handleMenuOpenChange}>
+      <DropdownMenu modal={isTouchDevice} open={menuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button 
             className={`p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important] ${isTouchTriggerVisualOnly ? 'pointer-events-none' : ''}`}
