@@ -55,6 +55,7 @@ interface StageSettingsMenuProps {
 
 export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCount = 1, targetStageKey, targetStageLabel, onDelete, onMoveCandidatesAndDelete, onLiveColorChange, useJobDetailsTriggerStyle = false, requireLongPressOnMobile = true }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
+  const isMobile = useIsMobile();
   const [menuOpen, setMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -62,6 +63,8 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   const [newLabel, setNewLabel] = useState('');
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const colorDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const touchHoldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const allowTouchOpenRef = useRef(false);
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
@@ -69,6 +72,57 @@ export function StageSettingsMenu({ stageKey, candidateCount = 0, totalStageCoun
   
   // Use liveColor while dragging, fall back to saved color
   const displayColor = liveColor ?? currentConfig?.color ?? '#0EA5E9';
+
+  useEffect(() => {
+    return () => {
+      if (colorDebounceRef.current) clearTimeout(colorDebounceRef.current);
+      if (touchHoldTimerRef.current) clearTimeout(touchHoldTimerRef.current);
+    };
+  }, []);
+
+  const clearTouchHoldTimer = () => {
+    if (touchHoldTimerRef.current) {
+      clearTimeout(touchHoldTimerRef.current);
+      touchHoldTimerRef.current = null;
+    }
+  };
+
+  const handleTriggerTouchStart = () => {
+    if (!isMobile || !requireLongPressOnMobile) return;
+
+    allowTouchOpenRef.current = false;
+    clearTouchHoldTimer();
+
+    touchHoldTimerRef.current = setTimeout(() => {
+      allowTouchOpenRef.current = true;
+      setMenuOpen(true);
+    }, 220);
+  };
+
+  const handleTriggerTouchMove = () => {
+    if (!isMobile || !requireLongPressOnMobile) return;
+    clearTouchHoldTimer();
+    allowTouchOpenRef.current = false;
+  };
+
+  const handleTriggerTouchEnd = () => {
+    if (!isMobile || !requireLongPressOnMobile) return;
+    clearTouchHoldTimer();
+  };
+
+  const handleMenuOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setMenuOpen(false);
+      allowTouchOpenRef.current = false;
+      return;
+    }
+
+    if (isMobile && requireLongPressOnMobile && !allowTouchOpenRef.current) {
+      return;
+    }
+
+    setMenuOpen(true);
+  };
 
   const handleColorPickerChange = (color: string) => {
     // Update display immediately - both local and parent
