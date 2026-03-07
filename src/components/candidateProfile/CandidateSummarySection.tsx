@@ -71,9 +71,9 @@ export const CandidateSummarySection = ({
 
             if (displayPoints.length > 0) {
               return (
-                <ul className="space-y-1">
+                <ul className="space-y-1 min-w-0 overflow-hidden">
                   {displayPoints.map((point: any, idx: number) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-white min-w-0">
+                    <li key={idx} className="flex items-start gap-2 text-sm text-white min-w-0 overflow-hidden">
                       <span
                         className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${
                           point.type === 'negative' ? 'bg-red-400' : 'bg-white'
@@ -82,7 +82,7 @@ export const CandidateSummarySection = ({
                       <TooltipProvider delayDuration={200}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="truncate block min-w-0">{point.text}</span>
+                            <span className="truncate min-w-0 flex-1 cursor-default">{point.text}</span>
                           </TooltipTrigger>
                           <TooltipContent side="top" sideOffset={6} className="max-w-[300px] break-words whitespace-normal">
                             <p className="text-sm break-words whitespace-pre-wrap">{point.text}</p>
@@ -96,9 +96,18 @@ export const CandidateSummarySection = ({
             }
 
             return (
-              <p className="text-sm text-white leading-relaxed">
-                {aiSummary.summary_text}
-              </p>
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-sm text-white leading-relaxed truncate min-w-0 cursor-default">
+                      {aiSummary.summary_text}
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={6} className="max-w-[300px] break-words whitespace-normal">
+                    <p className="text-sm break-words whitespace-pre-wrap">{aiSummary.summary_text}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             );
           })()}
         </div>
