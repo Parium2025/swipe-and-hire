@@ -309,6 +309,14 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     lastTouchTapRef.current = { stage, time: now };
   }, [isReadOnly, isTouchCapable]);
 
+  const handleStageContainerPointerDown = useCallback((eventTarget: EventTarget | null, pointerType: string) => {
+    if (!(eventTarget instanceof HTMLElement)) return;
+    const stageEl = eventTarget.closest<HTMLElement>('[data-stage-key]');
+    const stage = stageEl?.dataset.stageKey;
+    if (!stage) return;
+    handleStagePointerDown(stage, pointerType);
+  }, [handleStagePointerDown]);
+
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
     stages.forEach(s => (result[s] = []));
