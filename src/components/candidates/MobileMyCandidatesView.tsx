@@ -245,6 +245,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     touchTargetStage: '',
   });
   const menuDismissGuardUntilRef = useRef(0);
+  const preferredActiveTabRef = useRef<string | null>(null);
+
+  const setActiveStage = useCallback((stage: string) => {
+    preferredActiveTabRef.current = stage;
+    setActiveTab(stage);
+  }, []);
 
   const handleStageTabsTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     const touch = e.touches[0];
@@ -276,7 +282,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
   const handleStageTabTap = useCallback((stage: string, blockedBySwipe: boolean) => {
     // Always update active tab — ring must respond immediately
-    setActiveTab(stage);
+    setActiveStage(stage);
 
     // Block double-tap menu after swipe gestures
     if (blockedBySwipe) {
@@ -296,7 +302,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     }
 
     lastCardTapRef.current = { stage, time: now };
-  }, [DOUBLE_TAP_MS]);
+  }, [DOUBLE_TAP_MS, setActiveStage]);
 
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
@@ -316,7 +322,11 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
   useEffect(() => {
     if (stages.length === 0) return;
-    setActiveTab((prev) => (stages.includes(prev) ? prev : stages[0]));
+    setActiveTab((prev) => {
+      const preferredStage = preferredActiveTabRef.current;
+      if (preferredStage && stages.includes(preferredStage)) return preferredStage;
+      return stages.includes(prev) ? prev : stages[0];
+    });
   }, [stages]);
 
   return (
