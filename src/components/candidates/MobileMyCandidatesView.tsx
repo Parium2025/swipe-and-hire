@@ -59,6 +59,31 @@ const MyCandidateRow = memo(function MyCandidateRow({
   const appliedTime = formatCompactTime(candidate.applied_at);
   const lastActiveTime = formatCompactTime(candidate.last_active_at);
 
+  const rowRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [menuMetrics, setMenuMetrics] = useState({ width: 0, alignOffset: 12 });
+
+  const measureMenuMetrics = useCallback(() => {
+    const rowEl = rowRef.current;
+    const triggerEl = triggerRef.current;
+    if (!rowEl || !triggerEl) return;
+
+    const rowRect = rowEl.getBoundingClientRect();
+    const triggerRect = triggerEl.getBoundingClientRect();
+    const nextWidth = Math.round(rowRect.width);
+    const nextAlignOffset = Math.round(rowRect.right - triggerRect.right);
+
+    setMenuMetrics((prev) =>
+      prev.width === nextWidth && prev.alignOffset === nextAlignOffset
+        ? prev
+        : { width: nextWidth, alignOffset: nextAlignOffset }
+    );
+  }, []);
+
+  useEffect(() => {
+    measureMenuMetrics();
+  }, [measureMenuMetrics]);
+
   const handleTap = () => {
     if (isSelectionMode && onToggleSelect) {
       onToggleSelect();
