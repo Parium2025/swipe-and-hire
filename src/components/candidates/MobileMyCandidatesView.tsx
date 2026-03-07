@@ -284,28 +284,13 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   onMarkAsViewed,
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
-  const [pendingActiveStage, setPendingActiveStage] = useState<string | null>(null);
   const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
   const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
-  const pendingStageRafRef = useRef<number | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
 
   const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
-    setPendingActiveStage(stage);
-
-    flushSync(() => {
-      setActiveTab(stage);
-    });
-
-    if (pendingStageRafRef.current !== null) {
-      cancelAnimationFrame(pendingStageRafRef.current);
-    }
-    pendingStageRafRef.current = requestAnimationFrame(() => {
-      setPendingActiveStage(null);
-      pendingStageRafRef.current = null;
-    });
-
+    setActiveTab(stage);
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
 
     const isTouchPointer = pointerType !== 'mouse';
@@ -330,14 +315,6 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
       setActiveTab(stages[0]);
     }
   }, [stages, activeTab]);
-
-  useEffect(() => {
-    return () => {
-      if (pendingStageRafRef.current !== null) {
-        cancelAnimationFrame(pendingStageRafRef.current);
-      }
-    };
-  }, []);
 
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
