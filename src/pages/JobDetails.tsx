@@ -439,8 +439,9 @@ const JobDetails = () => {
 
   const activeApplication = activeId ? applications.find(a => a.id === activeId) : null;
 
-  // Show skeleton while loading
+  if (dataLoading || stagesLoading) {
     return <JobDetailsSkeleton />;
+  }
 
   if (!job) {
     return (
