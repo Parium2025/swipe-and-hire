@@ -9,6 +9,7 @@ import { Star, ChevronRight, Plus, ArrowDown, Clock } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDragScroll } from '@/hooks/useDragScroll';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import {
   DropdownMenu,
   DropdownMenuContent,
