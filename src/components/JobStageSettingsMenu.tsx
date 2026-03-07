@@ -233,7 +233,9 @@ export function JobStageSettingsMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="center" 
+          side="bottom"
           sideOffset={8}
+          avoidCollisions={false}
           className="w-40 border-white/20 py-1"
         >
           <DropdownMenuItem 
