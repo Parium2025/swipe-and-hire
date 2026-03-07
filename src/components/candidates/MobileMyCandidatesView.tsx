@@ -395,7 +395,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       targetStageLabel={targetStageLabel}
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                       useJobDetailsTriggerStyle
-                      disableTouchTrigger
+                      disableTouchTrigger={isTouchCapable}
                       open={openStageMenu === stage}
                       onOpenChange={(nextOpen) => {
                         setOpenStageMenu((prev) => {
