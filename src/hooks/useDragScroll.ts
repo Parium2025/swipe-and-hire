@@ -8,7 +8,7 @@ import { useRef, useCallback, useEffect } from 'react';
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
   const state = useRef({ isDown: false, isDragging: false, startX: 0, scrollLeft: 0 });
-  const DRAG_THRESHOLD = 5;
+  const DRAG_THRESHOLD = 12;
 
   const onMouseDown = useCallback((e: MouseEvent) => {
     const el = ref.current;
@@ -17,7 +17,6 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     const target = e.target as HTMLElement;
     if (target.closest('button, a, input, textarea, select, [role="button"], [draggable="true"], [data-no-drag-scroll]')) return;
     state.current = { isDown: true, isDragging: false, startX: e.pageX - el.offsetLeft, scrollLeft: el.scrollLeft };
-    el.style.userSelect = 'none';
   }, []);
 
   const onMouseUp = useCallback(() => {
@@ -40,6 +39,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
       if (delta < DRAG_THRESHOLD) return;
       state.current.isDragging = true;
       el.style.cursor = 'grabbing';
+      el.style.userSelect = 'none';
     }
 
     e.preventDefault();
