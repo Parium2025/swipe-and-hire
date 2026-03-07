@@ -553,51 +553,12 @@ const JobDetails = () => {
               <MapPin className="h-3.5 w-3.5" />
               {job.location}
             </div>
-            {(() => {
-              const isExpired = job.expires_at && new Date(job.expires_at) < new Date();
-              const statusLabel = isExpired ? 'Utgången' : (job.is_active ? 'Aktiv' : 'Inaktiv');
-              const statusColor = isExpired 
-                ? 'bg-red-500/20 text-white border-red-500/30'
-                : job.is_active 
-                  ? 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30'
-                  : 'bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30';
-              
-              if (isExpired) {
-                return (
-                  <Badge className={`text-xs whitespace-nowrap border ${statusColor}`}>
-                    {statusLabel}
-                  </Badge>
-                );
-              }
-
-              return (
-                <Badge
-                  className={`text-xs whitespace-nowrap cursor-pointer transition-colors border ${statusColor}`}
-                  onClick={async () => {
-                    const newActive = !job.is_active;
-                    updateJobLocally({ is_active: newActive });
-                    try {
-                      const { error } = await supabase
-                        .from('job_postings')
-                        .update({ is_active: newActive })
-                        .eq('id', jobId);
-
-                      if (error) throw error;
-
-                      toast.success(
-                        newActive ? 'Jobb aktiverat' : 'Jobb inaktiverat',
-                        { description: newActive ? 'Jobbet är nu aktivt.' : 'Jobbet är nu inaktivt.' }
-                      );
-                    } catch (error: any) {
-                      updateJobLocally({ is_active: job.is_active });
-                      toast.error('Fel', { description: error.message });
-                    }
-                  }}
-                >
-                  {statusLabel}
-                </Badge>
-              );
-            })()}
+            <JobStatusBadge
+              jobId={jobId!}
+              isActive={!!job.is_active}
+              expiresAt={job.expires_at}
+              onOptimisticUpdate={updateJobLocally}
+            />
             {job.expires_at && (
               <span className="text-white text-xs">
                 {new Date(job.expires_at) < new Date() 
