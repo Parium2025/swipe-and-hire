@@ -283,7 +283,28 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   onMarkAsViewed,
 }: MobileMyCandidatesViewProps) {
   const [activeTab, setActiveTab] = useState(stages[0] || 'to_contact');
+  const [openStageMenu, setOpenStageMenu] = useState<string | null>(null);
+  const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
+
+  const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
+    setActiveTab(stage);
+    setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
+
+    if (isReadOnly || pointerType !== 'touch') return;
+
+    const now = Date.now();
+    const lastTap = lastTouchTapRef.current;
+    const isDoubleTap = !!lastTap && lastTap.stage === stage && now - lastTap.time <= 320;
+
+    if (isDoubleTap) {
+      setOpenStageMenu(stage);
+      lastTouchTapRef.current = null;
+      return;
+    }
+
+    lastTouchTapRef.current = { stage, time: now };
+  }, [isReadOnly]);
 
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
