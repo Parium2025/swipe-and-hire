@@ -13,7 +13,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     if (!el) return;
     // Don't hijack clicks on interactive elements
     const target = e.target as HTMLElement;
-    if (target.closest('button, a, input, [role="button"], [draggable="true"]')) return;
+    if (target.closest('button, a, input, textarea, select, [role="button"], [draggable="true"], [data-no-drag-scroll], [data-stage-tab]')) return;
     state.current = { isDown: true, startX: e.pageX - el.offsetLeft, scrollLeft: el.scrollLeft };
     el.style.cursor = 'grabbing';
     el.style.userSelect = 'none';

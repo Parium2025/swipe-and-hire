@@ -301,10 +301,12 @@ export const MobileCandidateView = memo(function MobileCandidateView({
           return (
             <div
               key={stage}
-              data-stage-tab
-              tabIndex={0}
-              onClick={() => setActiveTab(stage)}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
+               data-stage-tab
+               data-no-drag-scroll
+               tabIndex={0}
+               onPointerDownCapture={() => setActiveTab(stage)}
+               onClick={() => setActiveTab(stage)}
+               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
               className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 backdrop-blur-sm cursor-pointer max-w-[180px] ${
                 isActive
                   ? 'ring-1 ring-inset ring-white/40 shadow-lg'
