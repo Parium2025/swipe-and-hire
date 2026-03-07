@@ -309,6 +309,14 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     lastTouchTapRef.current = { stage, time: now };
   }, [isReadOnly, isTouchCapable]);
 
+  const handleStageContainerPointerDown = useCallback((eventTarget: EventTarget | null, pointerType: string) => {
+    if (!(eventTarget instanceof HTMLElement)) return;
+    const stageEl = eventTarget.closest<HTMLElement>('[data-stage-key]');
+    const stage = stageEl?.dataset.stageKey;
+    if (!stage) return;
+    handleStagePointerDown(stage, pointerType);
+  }, [handleStagePointerDown]);
+
   const candidatesByStage = useMemo(() => {
     const result: Record<string, MyCandidateData[]> = {};
     stages.forEach(s => (result[s] = []));
@@ -331,6 +339,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
         {/* Horizontal scrollable stage tabs */}
         <div
           ref={dragScrollRef}
+          onPointerDownCapture={(e) => handleStageContainerPointerDown(e.target, e.pointerType)}
           className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] overscroll-x-contain"
         >
           {stages.map((stage, stageIdx) => {
@@ -347,9 +356,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
             return (
               <div
                 key={stage}
+                data-stage-key={stage}
                 tabIndex={0}
-                onMouseDownCapture={() => handleStagePointerDown(stage, 'mouse')}
-                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
                 onClick={() => setActiveTab(stage)}
                 onDoubleClick={() => {
                   if (!isReadOnly) setOpenStageMenu(stage);
