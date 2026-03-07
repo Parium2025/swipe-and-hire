@@ -189,7 +189,7 @@ const CandidateRow = memo(function CandidateRow({
                       </DropdownMenuItem>
                     </TooltipTrigger>
                     {cfg.label.length > 20 && (
-                      <TooltipContent side="left" sideOffset={6} className="max-w-[280px] break-words whitespace-normal">
+                      <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] break-words whitespace-normal z-[999999]">
                         <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
                       </TooltipContent>
                     )}
