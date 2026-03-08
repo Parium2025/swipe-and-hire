@@ -79,21 +79,22 @@ const EmployerAnalytics = memo(() => {
     }
   }, [isLoading, show]);
 
-  const statCards = [
-    { icon: Eye, label: 'Visningar', value: totals.views, color: 'text-blue-400' },
-    { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-emerald-400' },
-    { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-amber-400' },
-  ];
-
   const conversionLabel = totals.conversionRate > 100
     ? `${(totals.applications / Math.max(totals.views, 1)).toFixed(1)}x`
     : `${totals.conversionRate}%`;
+
+  const statCards = [
+    { icon: Eye, label: 'Visningar', value: totals.views, color: 'text-blue-400', displayValue: totals.views.toLocaleString('sv-SE') },
+    { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-emerald-400', displayValue: totals.applications.toLocaleString('sv-SE') },
+    { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-amber-400', displayValue: totals.interviews.toLocaleString('sv-SE') },
+    { icon: TrendingUp, label: 'Konvertering', value: 0, color: 'text-cyan-400', displayValue: conversionLabel },
+  ];
 
   if (isLoading && !show) {
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
-          {[...Array(5)].map((_, i) => (
+          {[...Array(4)].map((_, i) => (
             <Card key={i} className="bg-white/5 border-white/20">
               <CardContent className="p-4">
                 <div className="h-4 w-16 bg-white/10 rounded animate-pulse mb-2" />
@@ -129,23 +130,11 @@ const EmployerAnalytics = memo(() => {
                 <span className="text-xs text-white/50">{stat.label}</span>
               </div>
               <span className="text-2xl font-bold text-white tracking-tight">
-                {stat.value.toLocaleString('sv-SE')}
+                {stat.displayValue}
               </span>
             </CardContent>
           </Card>
         ))}
-        {/* Conversion card — spans full width on odd count */}
-        <Card className="bg-white/5 border-white/20 col-span-2 md:col-span-1">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="h-4 w-4 text-cyan-400" />
-              <span className="text-xs text-white/50">Konvertering</span>
-            </div>
-            <span className="text-2xl font-bold text-white tracking-tight">
-              {conversionLabel}
-            </span>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Funnel visualization */}
