@@ -191,11 +191,11 @@ const EmployerAnalytics = memo(() => {
               <table className="w-full text-sm min-w-[480px]">
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th className="text-left text-white/60 font-medium py-2 pr-4">Annons</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-2">Visn.</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-2">Ansök.</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-2 hidden sm:table-cell">Interv.</th>
-                    <th className="text-right text-white/60 font-medium py-2 pl-2">Konv.</th>
+                    <th className="text-left text-white font-medium py-2 pr-4">Annons</th>
+                    <th className="text-right text-white font-medium py-2 px-2">Visn.</th>
+                    <th className="text-right text-white font-medium py-2 px-2">Ansök.</th>
+                    <th className="text-right text-white font-medium py-2 px-2 hidden sm:table-cell">Interv.</th>
+                    <th className="text-right text-white font-medium py-2 pl-2">Konv.</th>
                   </tr>
                 </thead>
                 <tbody>
