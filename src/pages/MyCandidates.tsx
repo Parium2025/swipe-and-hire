@@ -744,6 +744,7 @@ const MyCandidates = () => {
           onPrefetch={handlePrefetchCandidate}
           onMarkAsViewed={markApplicationAsViewed}
           renderActionBar={isSelectionMode ? (
+            <TooltipProvider delayDuration={300}>
             <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mt-2">
               <div className="flex items-center gap-1 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-2.5 py-1.5 shadow-xl overflow-hidden min-w-0 max-w-full">
                 <span className="text-white text-[11px] font-medium whitespace-nowrap flex-shrink-0">
@@ -763,14 +764,20 @@ const MyCandidates = () => {
                 {/* Compare button - only when exactly 2 selected */}
                 {selectedCandidateIds.size === 2 && (
                   <>
-                    <button
-                      onClick={() => setShowCompareDialog(true)}
-                      onMouseDown={(e) => e.preventDefault()}
-                      className="flex items-center justify-center px-1.5 h-7 text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
-                      title="Jämför"
-                    >
-                      <Users className="h-3.5 w-3.5" />
-                    </button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => setShowCompareDialog(true)}
+                          onMouseDown={(e) => e.preventDefault()}
+                          className="flex items-center justify-center px-1.5 h-7 text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
+                        >
+                          <Users className="h-3.5 w-3.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" sideOffset={8}>
+                        <p>Jämför kandidater</p>
+                      </TooltipContent>
+                    </Tooltip>
                     <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
                   </>
                 )}
@@ -807,19 +814,26 @@ const MyCandidates = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
-                <button
-                  disabled={selectedCandidateIds.size === 0}
-                  onClick={() => setShowBulkDeleteConfirm(true)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  className={`flex items-center justify-center px-1.5 h-7 outline-none focus:outline-none transition-all duration-200 rounded-md ${
-                    selectedCandidateIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-red-400'
-                  }`}
-                  title="Ta bort"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      disabled={selectedCandidateIds.size === 0}
+                      onClick={() => setShowBulkDeleteConfirm(true)}
+                      onMouseDown={(e) => e.preventDefault()}
+                      className={`flex items-center justify-center px-1.5 h-7 outline-none focus:outline-none transition-all duration-200 rounded-md ${
+                        selectedCandidateIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-red-400'
+                      }`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={8}>
+                    <p>Ta bort</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
+            </TooltipProvider>
           ) : undefined}
         />
       ) : (
