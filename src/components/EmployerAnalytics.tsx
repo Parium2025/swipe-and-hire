@@ -188,10 +188,10 @@ const EmployerAnalytics = memo(() => {
       <div className="grid grid-cols-3 gap-2">
         {statCards.map((stat) => (
           <Card key={stat.label} className="bg-white/5 border-white/10">
-            <CardContent className="p-3">
+            <CardContent className="p-3 flex flex-col items-center justify-center text-center">
               <div className="flex items-center gap-1.5 mb-1">
-                <stat.icon className="h-3.5 w-3.5 text-white/60" />
-                <span className="text-[11px] text-white/60">{stat.label}</span>
+                <stat.icon className="h-3.5 w-3.5 text-white" />
+                <span className="text-[11px] text-white">{stat.label}</span>
               </div>
               <span className="text-2xl font-bold text-white tracking-tight tabular-nums">
                 {stat.value.toLocaleString('sv-SE')}
