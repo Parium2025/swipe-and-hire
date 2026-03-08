@@ -35,7 +35,6 @@ import {
   X,
   ArrowDown,
   Plus,
-  Users,
   ChevronDown,
   Eye,
   AlertTriangle,
