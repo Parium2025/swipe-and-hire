@@ -217,16 +217,16 @@ const EmployerAnalytics = memo(() => {
 
                     return (
                       <tr key={job.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <td className="py-2.5 pr-4">
-                          <div className="flex items-center gap-2">
+                        <td className="py-2.5 pr-2">
+                          <div className="flex items-center gap-2 min-w-0">
                             <span className={`h-2 w-2 rounded-full shrink-0 ${job.is_active ? 'bg-emerald-400' : 'bg-white/20'}`} />
-                            <span className="text-white truncate max-w-[180px] sm:max-w-[240px]">{displayTitle}</span>
+                            <span className="text-white truncate">{displayTitle}</span>
                           </div>
                         </td>
-                        <td className="text-right text-white/70 py-2.5 px-2">{viewsCount}</td>
-                        <td className="text-right text-white/70 py-2.5 px-2">{applicationsCount}</td>
-                        <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{interviewsCount}</td>
-                        <td className="text-right text-white/70 py-2.5 pl-2">{conv}</td>
+                        <td className="text-right text-white/70 py-2.5 px-1">{viewsCount}</td>
+                        <td className="text-right text-white/70 py-2.5 px-1">{applicationsCount}</td>
+                        <td className="text-right text-white/70 py-2.5 px-1 hidden sm:table-cell">{interviewsCount}</td>
+                        <td className="text-right text-white/70 py-2.5 pl-1 whitespace-nowrap">{conv}</td>
                       </tr>
                     );
                   })}
