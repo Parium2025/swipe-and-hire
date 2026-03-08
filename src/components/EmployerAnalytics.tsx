@@ -130,23 +130,11 @@ const EmployerAnalytics = memo(() => {
                 <span className="text-xs text-white/50">{stat.label}</span>
               </div>
               <span className="text-2xl font-bold text-white tracking-tight">
-                {stat.value.toLocaleString('sv-SE')}
+                {stat.displayValue}
               </span>
             </CardContent>
           </Card>
         ))}
-        {/* Conversion card — spans full width on odd count */}
-        <Card className="bg-white/5 border-white/20 col-span-2 md:col-span-1">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="h-4 w-4 text-cyan-400" />
-              <span className="text-xs text-white/50">Konvertering</span>
-            </div>
-            <span className="text-2xl font-bold text-white tracking-tight">
-              {conversionLabel}
-            </span>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Funnel visualization */}
