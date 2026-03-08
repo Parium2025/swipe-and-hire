@@ -745,20 +745,20 @@ const MyCandidates = () => {
           onMarkAsViewed={markApplicationAsViewed}
           renderActionBar={isSelectionMode ? (
             <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mt-2">
-              <div className="flex items-center gap-1.5 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-3 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
-                <span className="text-white text-xs font-medium whitespace-nowrap flex-shrink-0">
-                  {selectedCandidateIds.size}/{allVisibleCandidateIds.length} valda
+              <div className="flex items-center gap-1 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-2.5 py-1.5 shadow-xl overflow-hidden min-w-0 max-w-full">
+                <span className="text-white text-[11px] font-medium whitespace-nowrap flex-shrink-0">
+                  {selectedCandidateIds.size}/{allVisibleCandidateIds.length}
                 </span>
-                <div className="w-px h-4 bg-white/20 flex-shrink-0" />
+                <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
                 <button
                   onClick={toggleAllVisible}
                   onMouseDown={(e) => e.preventDefault()}
-                  className="flex items-center justify-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 w-[90px] text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
+                  className="flex items-center justify-center px-1.5 h-7 text-[11px] whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
                 >
-                  {allVisibleSelected ? <Square className="h-3.5 w-3.5 mr-1" /> : <CheckSquare className="h-3.5 w-3.5 mr-1" />}
+                  {allVisibleSelected ? <Square className="h-3 w-3 mr-1" /> : <CheckSquare className="h-3 w-3 mr-1" />}
                   {allVisibleSelected ? 'Avmarkera' : 'Välj alla'}
                 </button>
-                <div className="w-px h-4 bg-white/20 flex-shrink-0" />
+                <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
 
                 {/* Compare button - only when exactly 2 selected */}
                 {selectedCandidateIds.size === 2 && (
@@ -766,12 +766,12 @@ const MyCandidates = () => {
                     <button
                       onClick={() => setShowCompareDialog(true)}
                       onMouseDown={(e) => e.preventDefault()}
-                      className="flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
+                      className="flex items-center justify-center px-1.5 h-7 text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
+                      title="Jämför"
                     >
-                      <Users className="h-3.5 w-3.5 mr-1" />
-                      Jämför
+                      <Users className="h-3.5 w-3.5" />
                     </button>
-                    <div className="w-px h-4 bg-white/20 flex-shrink-0" />
+                    <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
                   </>
                 )}
 
@@ -780,12 +780,12 @@ const MyCandidates = () => {
                     <button
                       disabled={selectedCandidateIds.size === 0}
                       onMouseDown={(e) => e.preventDefault()}
-                      className={`flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 outline-none focus:outline-none transition-all duration-200 rounded-md ${
+                      className={`flex items-center px-1.5 h-7 text-[11px] whitespace-nowrap flex-shrink-0 outline-none focus:outline-none transition-all duration-200 rounded-md ${
                         selectedCandidateIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-white'
                       }`}
                     >
-                      <ArrowDown className="h-3.5 w-3.5 mr-1" />
-                      Flytta till
+                      <ArrowDown className="h-3 w-3 mr-1" />
+                      Flytta
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="center" className="border-white/20 min-w-[180px]">
@@ -806,17 +806,17 @@ const MyCandidates = () => {
                     })}
                   </DropdownMenuContent>
                 </DropdownMenu>
-
+                <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
                 <button
                   disabled={selectedCandidateIds.size === 0}
                   onClick={() => setShowBulkDeleteConfirm(true)}
                   onMouseDown={(e) => e.preventDefault()}
-                  className={`flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 outline-none focus:outline-none transition-all duration-200 rounded-md ${
+                  className={`flex items-center justify-center px-1.5 h-7 outline-none focus:outline-none transition-all duration-200 rounded-md ${
                     selectedCandidateIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-red-400'
                   }`}
+                  title="Ta bort"
                 >
-                  <Trash2 className="h-3.5 w-3.5 mr-1" />
-                  Ta bort
+                  <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>
