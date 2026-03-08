@@ -213,7 +213,7 @@ const EmployerAnalytics = memo(() => {
                         <td className="text-right text-white/70 py-2.5 px-2">{job.views_count}</td>
                         <td className="text-right text-white/70 py-2.5 px-2">{job.applications_count}</td>
                         <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{job.interviews_count}</td>
-                        <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{job.hired_count}</td>
+                        
                         <td className="text-right text-white/70 py-2.5 pl-2">{conv}</td>
                       </tr>
                     );
