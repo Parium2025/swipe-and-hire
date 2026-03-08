@@ -833,6 +833,7 @@ const MyCandidates = () => {
                 </Tooltip>
               </div>
             </div>
+            </TooltipProvider>
           ) : undefined}
         />
       ) : (
