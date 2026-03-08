@@ -1097,13 +1097,8 @@ const MyCandidates = () => {
         </div>
       )}
 
-      {/* Candidate Compare Dialog */}
-      <CandidateCompareDialog
-        candidates={selectedCandidates.slice(0, 2)}
-        open={showCompareDialog}
-        onOpenChange={setShowCompareDialog}
-        stageConfig={activeStageConfig}
-      />
+
+
 
     </div>
   );
