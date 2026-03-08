@@ -11,7 +11,6 @@ interface JobAnalytics {
   views_count: number;
   applications_count: number;
   interviews_count: number;
-  hired_count: number;
   created_at: string;
   is_active: boolean;
 }
