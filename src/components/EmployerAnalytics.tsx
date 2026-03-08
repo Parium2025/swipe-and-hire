@@ -15,7 +15,7 @@ interface JobAnalytics {
   is_active: boolean;
 }
 
-const CACHE_KEY = 'employer-analytics-cache-v1';
+const CACHE_KEY = 'employer-analytics-cache-v2';
 
 function loadCache(userId: string): JobAnalytics[] | undefined {
   try {
