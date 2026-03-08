@@ -2,7 +2,7 @@ import { memo, useMemo, useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
-import { Eye, Users, Calendar, TrendingUp, BarChart3, Target, Filter } from 'lucide-react';
+import { BarChart3, Target, Filter } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 interface JobAnalytics {
