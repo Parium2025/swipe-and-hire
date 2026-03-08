@@ -82,11 +82,11 @@ const ConversionGauge = memo(({
       </div>
       <div className="text-center space-y-0.5">
         <div className="flex items-center justify-center gap-1.5">
-          <Icon className="h-3.5 w-3.5 text-white/60" />
+          <Icon className="h-3.5 w-3.5 text-white" />
           <span className="text-xs font-medium text-white">{label}</span>
         </div>
-        <p className="text-[10px] text-white/40 leading-tight max-w-[120px]">{subtitle}</p>
-        <p className="text-[11px] text-white/50 tabular-nums">{value} av {total}</p>
+        <p className="text-[10px] text-white leading-tight max-w-[120px]">{subtitle}</p>
+        <p className="text-[11px] text-white tabular-nums">{value} av {total}</p>
       </div>
     </div>
   );
