@@ -165,7 +165,7 @@ const EmployerAnalytics = memo(() => {
                 { label: 'Intervjuer', value: totals.interviews, pct: totals.views > 0 ? Math.min((totals.interviews / totals.views) * 100, 100) : 0 },
               ].map((step) => (
                 <div key={step.label} className="flex items-center gap-3">
-                  <span className="text-xs text-white/60 w-24 shrink-0">{step.label}</span>
+                  <span className="text-xs text-white w-24 shrink-0">{step.label}</span>
                   <div className="flex-1 h-6 bg-white/5 rounded-full overflow-hidden relative">
                     <div
                       className="h-full bg-gradient-to-r from-secondary/60 to-secondary/30 rounded-full transition-all duration-700"
@@ -187,8 +187,8 @@ const EmployerAnalytics = memo(() => {
         <Card className="bg-white/5 border-white/20">
           <CardContent className="p-5">
             <h3 className="text-sm font-medium text-white mb-4">Per annons</h3>
-            <div className="overflow-x-auto -mx-5 px-5">
-              <table className="w-full text-sm min-w-[480px]">
+            <div className="overflow-hidden">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/10">
                     <th className="text-left text-white font-medium py-2 pr-4">Annons</th>
