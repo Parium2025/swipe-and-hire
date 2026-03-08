@@ -1384,6 +1384,7 @@ export type Database = {
       job_views: {
         Row: {
           created_at: string
+          device_type: string | null
           id: string
           job_id: string
           user_id: string
@@ -1391,6 +1392,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          device_type?: string | null
           id?: string
           job_id: string
           user_id: string
@@ -1398,6 +1400,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          device_type?: string | null
           id?: string
           job_id?: string
           user_id?: string
@@ -2366,6 +2369,10 @@ export type Database = {
         }[]
       }
       get_employer_analytics: { Args: { p_user_id: string }; Returns: Json }
+      get_employer_analytics_v2: {
+        Args: { p_days_back?: number; p_user_id: string }
+        Returns: Json
+      }
       get_employer_dashboard_stats: {
         Args: { p_active_job_ids: string[]; p_user_id: string }
         Returns: Json
@@ -2405,10 +2412,16 @@ export type Database = {
         }
         Returns: string
       }
-      record_job_view: {
-        Args: { p_job_id: string; p_user_id: string }
-        Returns: boolean
-      }
+      record_job_view:
+        | { Args: { p_job_id: string; p_user_id: string }; Returns: boolean }
+        | {
+            Args: {
+              p_device_type?: string
+              p_job_id: string
+              p_user_id: string
+            }
+            Returns: boolean
+          }
       register_session: {
         Args: {
           p_device_label: string

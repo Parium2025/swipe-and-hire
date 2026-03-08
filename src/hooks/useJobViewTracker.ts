@@ -53,10 +53,15 @@ export function useJobViewTracker({
     isRecording.current = true;
 
     try {
+      // Detect device type
+      const width = window.innerWidth;
+      const deviceType = width < 768 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop';
+
       // Call the database function that handles deduplication
       const { data, error } = await supabase.rpc('record_job_view', {
         p_job_id: jobId,
         p_user_id: userId,
+        p_device_type: deviceType,
       });
 
       if (error) {
