@@ -100,10 +100,10 @@ const EmployerAnalytics = memo(() => {
     : `${totals.conversionRate}%`;
 
   const statCards = [
-    { icon: Eye, label: 'Visningar', value: totals.views, color: 'text-blue-400', displayValue: totals.views.toLocaleString('sv-SE') },
-    { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-emerald-400', displayValue: totals.applications.toLocaleString('sv-SE') },
-    { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-amber-400', displayValue: totals.interviews.toLocaleString('sv-SE') },
-    { icon: TrendingUp, label: 'Konvertering', value: 0, color: 'text-cyan-400', displayValue: conversionLabel },
+    { icon: Eye, label: 'Visningar', value: totals.views, color: 'text-white', displayValue: totals.views.toLocaleString('sv-SE') },
+    { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-white', displayValue: totals.applications.toLocaleString('sv-SE') },
+    { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-white', displayValue: totals.interviews.toLocaleString('sv-SE') },
+    { icon: TrendingUp, label: 'Konvertering', value: 0, color: 'text-white', displayValue: conversionLabel },
   ];
 
   if (isLoading && !show) {
