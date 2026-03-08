@@ -132,7 +132,7 @@ const EmployerAnalytics = memo(() => {
         </div>
         <div>
           <h2 className="text-xl font-semibold text-white tracking-tight">Rekryteringsanalys</h2>
-          <p className="text-sm text-white/50">Konverteringsstatistik för alla dina annonser</p>
+          <p className="text-sm text-white">Konverteringsstatistik för alla dina annonser</p>
         </div>
       </div>
 
@@ -188,14 +188,21 @@ const EmployerAnalytics = memo(() => {
           <CardContent className="p-5">
             <h3 className="text-sm font-medium text-white mb-4">Per annons</h3>
             <div className="overflow-hidden">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm table-fixed">
+                <colgroup>
+                  <col className="w-[45%]" />
+                  <col className="w-[15%]" />
+                  <col className="w-[15%]" />
+                  <col className="w-[15%] hidden sm:table-column" />
+                  <col className="w-[10%]" />
+                </colgroup>
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th className="text-left text-white font-medium py-2 pr-4">Annons</th>
-                    <th className="text-right text-white font-medium py-2 px-2">Visn.</th>
-                    <th className="text-right text-white font-medium py-2 px-2">Ansök.</th>
-                    <th className="text-right text-white font-medium py-2 px-2 hidden sm:table-cell">Interv.</th>
-                    <th className="text-right text-white font-medium py-2 pl-2">Konv.</th>
+                    <th className="text-left text-white font-medium py-2 pr-2">Annons</th>
+                    <th className="text-right text-white font-medium py-2 px-1">Visn.</th>
+                    <th className="text-right text-white font-medium py-2 px-1">Ansök.</th>
+                    <th className="text-right text-white font-medium py-2 px-1 hidden sm:table-cell">Interv.</th>
+                    <th className="text-right text-white font-medium py-2 pl-1 whitespace-nowrap">Konv.</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -210,16 +217,16 @@ const EmployerAnalytics = memo(() => {
 
                     return (
                       <tr key={job.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <td className="py-2.5 pr-4">
-                          <div className="flex items-center gap-2">
+                        <td className="py-2.5 pr-2">
+                          <div className="flex items-center gap-2 min-w-0">
                             <span className={`h-2 w-2 rounded-full shrink-0 ${job.is_active ? 'bg-emerald-400' : 'bg-white/20'}`} />
-                            <span className="text-white truncate max-w-[180px] sm:max-w-[240px]">{displayTitle}</span>
+                            <span className="text-white truncate">{displayTitle}</span>
                           </div>
                         </td>
-                        <td className="text-right text-white/70 py-2.5 px-2">{viewsCount}</td>
-                        <td className="text-right text-white/70 py-2.5 px-2">{applicationsCount}</td>
-                        <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{interviewsCount}</td>
-                        <td className="text-right text-white/70 py-2.5 pl-2">{conv}</td>
+                        <td className="text-right text-white/70 py-2.5 px-1">{viewsCount}</td>
+                        <td className="text-right text-white/70 py-2.5 px-1">{applicationsCount}</td>
+                        <td className="text-right text-white/70 py-2.5 px-1 hidden sm:table-cell">{interviewsCount}</td>
+                        <td className="text-right text-white/70 py-2.5 pl-1 whitespace-nowrap">{conv}</td>
                       </tr>
                     );
                   })}
