@@ -79,15 +79,16 @@ const EmployerAnalytics = memo(() => {
     }
   }, [isLoading, show]);
 
-  const statCards = [
-    { icon: Eye, label: 'Visningar', value: totals.views, color: 'text-blue-400' },
-    { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-emerald-400' },
-    { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-amber-400' },
-  ];
-
   const conversionLabel = totals.conversionRate > 100
     ? `${(totals.applications / Math.max(totals.views, 1)).toFixed(1)}x`
     : `${totals.conversionRate}%`;
+
+  const statCards = [
+    { icon: Eye, label: 'Visningar', value: totals.views, color: 'text-blue-400', displayValue: totals.views.toLocaleString('sv-SE') },
+    { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-emerald-400', displayValue: totals.applications.toLocaleString('sv-SE') },
+    { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-amber-400', displayValue: totals.interviews.toLocaleString('sv-SE') },
+    { icon: TrendingUp, label: 'Konvertering', value: 0, color: 'text-cyan-400', displayValue: conversionLabel },
+  ];
 
   if (isLoading && !show) {
     return (
