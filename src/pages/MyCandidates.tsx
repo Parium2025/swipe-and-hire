@@ -263,10 +263,7 @@ const MyCandidates = () => {
     toggleAllVisible,
   } = useSelectionMode(allVisibleCandidateIds);
 
-  // Get selected candidates data
-  const selectedCandidates = useMemo(() => {
-    return displayedCandidates.filter(c => selectedCandidateIds.has(c.id));
-  }, [displayedCandidates, selectedCandidateIds]);
+
 
   // Bulk operations (extracted hook — with retry queue)
   const { bulkMoveToStage, bulkDelete, updateCandidatesCache } = useBulkCandidateOps({
