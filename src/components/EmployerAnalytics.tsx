@@ -143,7 +143,7 @@ const EmployerAnalytics = memo(() => {
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-1">
                 <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                <span className="text-xs text-white/50">{stat.label}</span>
+                <span className="text-xs text-white">{stat.label}</span>
               </div>
               <span className="text-2xl font-bold text-white tracking-tight">
                 {stat.displayValue}
