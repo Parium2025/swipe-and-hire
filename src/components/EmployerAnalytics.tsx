@@ -2,7 +2,7 @@ import { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
-import { Eye, Users, Calendar, UserCheck, TrendingUp, BarChart3 } from 'lucide-react';
+import { Eye, Users, Calendar, TrendingUp, BarChart3 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 interface JobAnalytics {
@@ -11,7 +11,6 @@ interface JobAnalytics {
   views_count: number;
   applications_count: number;
   interviews_count: number;
-  hired_count: number;
   created_at: string;
   is_active: boolean;
 }
@@ -62,13 +61,12 @@ const EmployerAnalytics = memo(() => {
   });
 
   const totals = useMemo(() => {
-    if (!analytics || analytics.length === 0) return { views: 0, applications: 0, interviews: 0, hired: 0, conversionRate: 0 };
+    if (!analytics || analytics.length === 0) return { views: 0, applications: 0, interviews: 0, conversionRate: 0 };
     const views = analytics.reduce((s, j) => s + j.views_count, 0);
     const applications = analytics.reduce((s, j) => s + j.applications_count, 0);
     const interviews = analytics.reduce((s, j) => s + j.interviews_count, 0);
-    const hired = analytics.reduce((s, j) => s + j.hired_count, 0);
     const conversionRate = views > 0 ? Math.round((applications / views) * 100) : 0;
-    return { views, applications, interviews, hired, conversionRate };
+    return { views, applications, interviews, conversionRate };
   }, [analytics]);
 
   // Skip fade-in when cached
@@ -85,7 +83,6 @@ const EmployerAnalytics = memo(() => {
     { icon: Eye, label: 'Visningar', value: totals.views, color: 'text-blue-400' },
     { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-emerald-400' },
     { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-amber-400' },
-    { icon: UserCheck, label: 'Anställda', value: totals.hired, color: 'text-purple-400' },
   ];
 
   const conversionLabel = totals.conversionRate > 100
@@ -161,7 +158,6 @@ const EmployerAnalytics = memo(() => {
                 { label: 'Visningar', value: totals.views, pct: 100 },
                 { label: 'Ansökningar', value: totals.applications, pct: totals.views > 0 ? Math.min((totals.applications / totals.views) * 100, 100) : 0 },
                 { label: 'Intervjuer', value: totals.interviews, pct: totals.views > 0 ? Math.min((totals.interviews / totals.views) * 100, 100) : 0 },
-                { label: 'Anställda', value: totals.hired, pct: totals.views > 0 ? Math.min((totals.hired / totals.views) * 100, 100) : 0 },
               ].map((step) => (
                 <div key={step.label} className="flex items-center gap-3">
                   <span className="text-xs text-white/60 w-24 shrink-0">{step.label}</span>
@@ -194,7 +190,7 @@ const EmployerAnalytics = memo(() => {
                     <th className="text-right text-white/60 font-medium py-2 px-2">Visn.</th>
                     <th className="text-right text-white/60 font-medium py-2 px-2">Ansök.</th>
                     <th className="text-right text-white/60 font-medium py-2 px-2 hidden sm:table-cell">Interv.</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-2 hidden sm:table-cell">Anst.</th>
+                    <th className="text-right text-white/60 font-medium py-2 px-2 hidden sm:table-cell">Interv.</th>
                     <th className="text-right text-white/60 font-medium py-2 pl-2">Konv.</th>
                   </tr>
                 </thead>
@@ -216,7 +212,7 @@ const EmployerAnalytics = memo(() => {
                         <td className="text-right text-white/70 py-2.5 px-2">{job.views_count}</td>
                         <td className="text-right text-white/70 py-2.5 px-2">{job.applications_count}</td>
                         <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{job.interviews_count}</td>
-                        <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{job.hired_count}</td>
+                        
                         <td className="text-right text-white/70 py-2.5 pl-2">{conv}</td>
                       </tr>
                     );
