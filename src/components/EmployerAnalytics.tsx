@@ -1,9 +1,9 @@
-import { memo, useMemo, useState, useEffect, useRef } from 'react';
+import { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
-import { Eye, Users, Calendar, UserCheck, TrendingUp, Briefcase, BarChart3 } from 'lucide-react';
-import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { Eye, Users, Calendar, UserCheck, TrendingUp, BarChart3 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 interface JobAnalytics {
   id: string;
@@ -16,68 +16,53 @@ interface JobAnalytics {
   is_active: boolean;
 }
 
+const CACHE_KEY = 'employer-analytics-cache-v1';
+
+function loadCache(userId: string): JobAnalytics[] | undefined {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw);
+    if (parsed?.userId !== userId) return undefined;
+    return parsed.data as JobAnalytics[];
+  } catch { return undefined; }
+}
+
+function saveCache(userId: string, data: JobAnalytics[]) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ userId, data, ts: Date.now() }));
+  } catch { /* quota exceeded */ }
+}
+
 const EmployerAnalytics = memo(() => {
   const { user } = useAuth();
+
+  const cached = useMemo(() => user ? loadCache(user.id) : undefined, [user?.id]);
 
   const { data: analytics, isLoading } = useQuery({
     queryKey: ['employer-analytics', user?.id],
     queryFn: async () => {
       if (!user) return [];
 
-      // Fetch jobs
-      const { data: jobs, error } = await supabase
-        .from('job_postings')
-        .select('id, title, views_count, applications_count, created_at, is_active')
-        .eq('employer_id', user.id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.rpc('get_employer_analytics', {
+        p_user_id: user.id,
+      });
 
       if (error) throw error;
-      if (!jobs || jobs.length === 0) return [];
 
-      const jobIds = jobs.map(j => j.id);
-
-      // Fetch interview counts per job
-      const { data: interviews } = await supabase
-        .from('interviews')
-        .select('job_id')
-        .eq('employer_id', user.id)
-        .in('job_id', jobIds);
-
-      // Fetch hired counts per job
-      const { data: hired } = await supabase
-        .from('job_applications')
-        .select('job_id')
-        .in('job_id', jobIds)
-        .eq('status', 'hired');
-
-      const interviewMap = new Map<string, number>();
-      interviews?.forEach(i => {
-        interviewMap.set(i.job_id!, (interviewMap.get(i.job_id!) || 0) + 1);
-      });
-
-      const hiredMap = new Map<string, number>();
-      hired?.forEach(h => {
-        hiredMap.set(h.job_id, (hiredMap.get(h.job_id) || 0) + 1);
-      });
-
-      return jobs.map(j => ({
-        id: j.id,
-        title: j.title,
-        views_count: j.views_count || 0,
-        applications_count: j.applications_count || 0,
-        interviews_count: interviewMap.get(j.id) || 0,
-        hired_count: hiredMap.get(j.id) || 0,
-        created_at: j.created_at,
-        is_active: j.is_active ?? false,
-      })) as JobAnalytics[];
+      const jobs = ((data as any)?.jobs || []) as JobAnalytics[];
+      saveCache(user.id, jobs);
+      return jobs;
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    placeholderData: cached,
+    refetchOnMount: true,
   });
 
   const totals = useMemo(() => {
-    if (!analytics) return { views: 0, applications: 0, interviews: 0, hired: 0, conversionRate: 0 };
+    if (!analytics || analytics.length === 0) return { views: 0, applications: 0, interviews: 0, hired: 0, conversionRate: 0 };
     const views = analytics.reduce((s, j) => s + j.views_count, 0);
     const applications = analytics.reduce((s, j) => s + j.applications_count, 0);
     const interviews = analytics.reduce((s, j) => s + j.interviews_count, 0);
@@ -101,13 +86,16 @@ const EmployerAnalytics = memo(() => {
     { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-emerald-400' },
     { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-amber-400' },
     { icon: UserCheck, label: 'Anställda', value: totals.hired, color: 'text-purple-400' },
-    { icon: TrendingUp, label: 'Konvertering', value: `${totals.conversionRate}%`, color: 'text-cyan-400' },
   ];
+
+  const conversionLabel = totals.conversionRate > 100
+    ? `${(totals.applications / Math.max(totals.views, 1)).toFixed(1)}x`
+    : `${totals.conversionRate}%`;
 
   if (isLoading && !show) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {[...Array(5)].map((_, i) => (
             <Card key={i} className="bg-white/5 border-white/20">
               <CardContent className="p-4">
@@ -134,8 +122,8 @@ const EmployerAnalytics = memo(() => {
         </div>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+      {/* Summary cards — 2 cols mobile, auto-fit desktop */}
+      <div className="grid grid-cols-2 gap-2">
         {statCards.map((stat) => (
           <Card key={stat.label} className="bg-white/5 border-white/20">
             <CardContent className="p-4">
@@ -144,11 +132,23 @@ const EmployerAnalytics = memo(() => {
                 <span className="text-xs text-white/50">{stat.label}</span>
               </div>
               <span className="text-2xl font-bold text-white tracking-tight">
-                {typeof stat.value === 'number' ? stat.value.toLocaleString('sv-SE') : stat.value}
+                {stat.value.toLocaleString('sv-SE')}
               </span>
             </CardContent>
           </Card>
         ))}
+        {/* Conversion card — spans full width on odd count */}
+        <Card className="bg-white/5 border-white/20 col-span-2 md:col-span-1">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="h-4 w-4 text-cyan-400" />
+              <span className="text-xs text-white/50">Konvertering</span>
+            </div>
+            <span className="text-2xl font-bold text-white tracking-tight">
+              {conversionLabel}
+            </span>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Funnel visualization */}
@@ -159,9 +159,9 @@ const EmployerAnalytics = memo(() => {
             <div className="space-y-3">
               {[
                 { label: 'Visningar', value: totals.views, pct: 100 },
-                { label: 'Ansökningar', value: totals.applications, pct: totals.views > 0 ? (totals.applications / totals.views) * 100 : 0 },
-                { label: 'Intervjuer', value: totals.interviews, pct: totals.views > 0 ? (totals.interviews / totals.views) * 100 : 0 },
-                { label: 'Anställda', value: totals.hired, pct: totals.views > 0 ? (totals.hired / totals.views) * 100 : 0 },
+                { label: 'Ansökningar', value: totals.applications, pct: totals.views > 0 ? Math.min((totals.applications / totals.views) * 100, 100) : 0 },
+                { label: 'Intervjuer', value: totals.interviews, pct: totals.views > 0 ? Math.min((totals.interviews / totals.views) * 100, 100) : 0 },
+                { label: 'Anställda', value: totals.hired, pct: totals.views > 0 ? Math.min((totals.hired / totals.views) * 100, 100) : 0 },
               ].map((step) => (
                 <div key={step.label} className="flex items-center gap-3">
                   <span className="text-xs text-white/60 w-24 shrink-0">{step.label}</span>
@@ -181,39 +181,43 @@ const EmployerAnalytics = memo(() => {
         </Card>
       )}
 
-      {/* Per-job breakdown */}
+      {/* Per-job breakdown — mobile-optimized */}
       {analytics && analytics.length > 0 && (
         <Card className="bg-white/5 border-white/20">
           <CardContent className="p-5">
             <h3 className="text-sm font-medium text-white mb-4">Per annons</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-5 px-5">
+              <table className="w-full text-sm min-w-[480px]">
                 <thead>
                   <tr className="border-b border-white/10">
                     <th className="text-left text-white/60 font-medium py-2 pr-4">Annons</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-3">Visn.</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-3">Ansök.</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-3">Interv.</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-3">Anst.</th>
-                    <th className="text-right text-white/60 font-medium py-2 pl-3">Konv.</th>
+                    <th className="text-right text-white/60 font-medium py-2 px-2">Visn.</th>
+                    <th className="text-right text-white/60 font-medium py-2 px-2">Ansök.</th>
+                    <th className="text-right text-white/60 font-medium py-2 px-2 hidden sm:table-cell">Interv.</th>
+                    <th className="text-right text-white/60 font-medium py-2 px-2 hidden sm:table-cell">Anst.</th>
+                    <th className="text-right text-white/60 font-medium py-2 pl-2">Konv.</th>
                   </tr>
                 </thead>
                 <tbody>
                   {analytics.map(job => {
-                    const conv = job.views_count > 0 ? Math.round((job.applications_count / job.views_count) * 100) : 0;
+                    const conv = job.views_count > 0
+                      ? job.applications_count / job.views_count > 1
+                        ? `${(job.applications_count / job.views_count).toFixed(1)}x`
+                        : `${Math.round((job.applications_count / job.views_count) * 100)}%`
+                      : '0%';
                     return (
                       <tr key={job.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                         <td className="py-2.5 pr-4">
                           <div className="flex items-center gap-2">
                             <span className={`h-2 w-2 rounded-full shrink-0 ${job.is_active ? 'bg-emerald-400' : 'bg-white/20'}`} />
-                            <span className="text-white truncate max-w-[200px]">{job.title}</span>
+                            <span className="text-white truncate max-w-[180px] sm:max-w-[240px]">{job.title}</span>
                           </div>
                         </td>
-                        <td className="text-right text-white/70 py-2.5 px-3">{job.views_count}</td>
-                        <td className="text-right text-white/70 py-2.5 px-3">{job.applications_count}</td>
-                        <td className="text-right text-white/70 py-2.5 px-3">{job.interviews_count}</td>
-                        <td className="text-right text-white/70 py-2.5 px-3">{job.hired_count}</td>
-                        <td className="text-right text-white/70 py-2.5 pl-3">{conv}%</td>
+                        <td className="text-right text-white/70 py-2.5 px-2">{job.views_count}</td>
+                        <td className="text-right text-white/70 py-2.5 px-2">{job.applications_count}</td>
+                        <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{job.interviews_count}</td>
+                        <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{job.hired_count}</td>
+                        <td className="text-right text-white/70 py-2.5 pl-2">{conv}</td>
                       </tr>
                     );
                   })}
