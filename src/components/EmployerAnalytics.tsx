@@ -180,7 +180,7 @@ const EmployerAnalytics = memo(() => {
         </div>
         <div>
           <h2 className="text-xl font-semibold text-white tracking-tight">Rekryteringsanalys</h2>
-          <p className="text-sm text-white/60">Insikter för alla dina annonser</p>
+          <p className="text-sm text-white">Insikter för alla dina annonser</p>
         </div>
       </div>
 
