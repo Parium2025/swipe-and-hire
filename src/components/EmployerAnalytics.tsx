@@ -49,7 +49,23 @@ const EmployerAnalytics = memo(() => {
 
       if (error) throw error;
 
-      const jobs = ((data as any)?.jobs || []) as JobAnalytics[];
+      const rawJobs = ((data as any)?.jobs || []) as Array<Partial<JobAnalytics>>;
+      const jobs: JobAnalytics[] = rawJobs.map((job, index) => {
+        const views = Number(job.views_count);
+        const applications = Number(job.applications_count);
+        const interviews = Number(job.interviews_count);
+        const title = typeof job.title === 'string' ? job.title.trim() : '';
+
+        return {
+          id: typeof job.id === 'string' && job.id.length > 0 ? job.id : `job-${index}`,
+          title: title && /[A-Za-z0-9ÅÄÖåäö]/.test(title) ? title : 'Okänd annons',
+          views_count: Number.isFinite(views) && views > 0 ? Math.floor(views) : 0,
+          applications_count: Number.isFinite(applications) && applications > 0 ? Math.floor(applications) : 0,
+          interviews_count: Number.isFinite(interviews) && interviews > 0 ? Math.floor(interviews) : 0,
+          created_at: typeof job.created_at === 'string' ? job.created_at : new Date(0).toISOString(),
+          is_active: Boolean(job.is_active),
+        };
+      });
       saveCache(user.id, jobs);
       return jobs;
     },
