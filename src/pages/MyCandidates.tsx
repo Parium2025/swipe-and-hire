@@ -760,26 +760,8 @@ const MyCandidates = () => {
                 </button>
                 <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
 
-                {/* Compare button - only when exactly 2 selected */}
-                {selectedCandidateIds.size === 2 && (
-                  <>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() => setShowCompareDialog(true)}
-                          onMouseDown={(e) => e.preventDefault()}
-                          className="flex items-center justify-center px-1.5 h-7 text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
-                        >
-                          <Users className="h-3.5 w-3.5" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" sideOffset={8}>
-                        <p>Jämför kandidater</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
-                  </>
-                )}
+
+
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
