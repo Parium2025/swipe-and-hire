@@ -576,19 +576,19 @@ const MyCandidates = () => {
           <div className="space-y-3">
             {/* Search input */}
             <div className="relative max-w-sm mx-auto">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-white/60" />
               <Input
                 placeholder="Sök på namn, jobb eller anteckning"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-9 py-1.5 h-8 text-xs bg-white/5 border-white/20 text-white placeholder:text-white focus:border-white/40 rounded-lg"
+                className="!min-h-0 pl-8 pr-8 py-1 h-7 text-xs bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40 rounded-lg"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white transition-colors"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-3 w-3" />
                 </button>
               )}
             </div>
