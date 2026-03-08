@@ -182,7 +182,6 @@ const MyCandidates = () => {
   
   // Bulk action confirmation dialogs
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
-  const [showCompareDialog, setShowCompareDialog] = useState(false);
   
   // Fetch colleague's candidates when switching
   useEffect(() => {
