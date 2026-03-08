@@ -813,17 +813,23 @@ const MyCandidates = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
-                <button
-                  disabled={selectedCandidateIds.size === 0}
-                  onClick={() => setShowBulkDeleteConfirm(true)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  className={`flex items-center justify-center px-1.5 h-7 outline-none focus:outline-none transition-all duration-200 rounded-md ${
-                    selectedCandidateIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-red-400'
-                  }`}
-                  title="Ta bort"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      disabled={selectedCandidateIds.size === 0}
+                      onClick={() => setShowBulkDeleteConfirm(true)}
+                      onMouseDown={(e) => e.preventDefault()}
+                      className={`flex items-center justify-center px-1.5 h-7 outline-none focus:outline-none transition-all duration-200 rounded-md ${
+                        selectedCandidateIds.size === 0 ? 'text-white/30 cursor-not-allowed' : 'text-red-400'
+                      }`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={8}>
+                    <p>Ta bort</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           ) : undefined}
