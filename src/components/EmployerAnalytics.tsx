@@ -15,7 +15,7 @@ interface JobAnalytics {
   is_active: boolean;
 }
 
-const CACHE_KEY = 'employer-analytics-cache-v1';
+const CACHE_KEY = 'employer-analytics-cache-v2';
 
 function loadCache(userId: string): JobAnalytics[] | undefined {
   try {
@@ -49,7 +49,23 @@ const EmployerAnalytics = memo(() => {
 
       if (error) throw error;
 
-      const jobs = ((data as any)?.jobs || []) as JobAnalytics[];
+      const rawJobs = ((data as any)?.jobs || []) as Array<Partial<JobAnalytics>>;
+      const jobs: JobAnalytics[] = rawJobs.map((job, index) => {
+        const views = Number(job.views_count);
+        const applications = Number(job.applications_count);
+        const interviews = Number(job.interviews_count);
+        const title = typeof job.title === 'string' ? job.title.trim() : '';
+
+        return {
+          id: typeof job.id === 'string' && job.id.length > 0 ? job.id : `job-${index}`,
+          title: title && /[A-Za-z0-9ÅÄÖåäö]/.test(title) ? title : 'Okänd annons',
+          views_count: Number.isFinite(views) && views > 0 ? Math.floor(views) : 0,
+          applications_count: Number.isFinite(applications) && applications > 0 ? Math.floor(applications) : 0,
+          interviews_count: Number.isFinite(interviews) && interviews > 0 ? Math.floor(interviews) : 0,
+          created_at: typeof job.created_at === 'string' ? job.created_at : new Date(0).toISOString(),
+          is_active: Boolean(job.is_active),
+        };
+      });
       saveCache(user.id, jobs);
       return jobs;
     },
@@ -84,10 +100,10 @@ const EmployerAnalytics = memo(() => {
     : `${totals.conversionRate}%`;
 
   const statCards = [
-    { icon: Eye, label: 'Visningar', value: totals.views, color: 'text-blue-400', displayValue: totals.views.toLocaleString('sv-SE') },
-    { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-emerald-400', displayValue: totals.applications.toLocaleString('sv-SE') },
-    { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-amber-400', displayValue: totals.interviews.toLocaleString('sv-SE') },
-    { icon: TrendingUp, label: 'Konvertering', value: 0, color: 'text-cyan-400', displayValue: conversionLabel },
+    { icon: Eye, label: 'Visningar', value: totals.views, color: 'text-white', displayValue: totals.views.toLocaleString('sv-SE') },
+    { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-white', displayValue: totals.applications.toLocaleString('sv-SE') },
+    { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-white', displayValue: totals.interviews.toLocaleString('sv-SE') },
+    { icon: TrendingUp, label: 'Konvertering', value: 0, color: 'text-white', displayValue: conversionLabel },
   ];
 
   if (isLoading && !show) {
@@ -127,7 +143,7 @@ const EmployerAnalytics = memo(() => {
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-1">
                 <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                <span className="text-xs text-white/50">{stat.label}</span>
+                <span className="text-xs text-white">{stat.label}</span>
               </div>
               <span className="text-2xl font-bold text-white tracking-tight">
                 {stat.displayValue}
@@ -175,32 +191,34 @@ const EmployerAnalytics = memo(() => {
               <table className="w-full text-sm min-w-[480px]">
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th className="text-left text-white/60 font-medium py-2 pr-4">Annons</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-2">Visn.</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-2">Ansök.</th>
-                    <th className="text-right text-white/60 font-medium py-2 px-2 hidden sm:table-cell">Interv.</th>
-                    <th className="text-right text-white/60 font-medium py-2 pl-2">Konv.</th>
+                    <th className="text-left text-white font-medium py-2 pr-4">Annons</th>
+                    <th className="text-right text-white font-medium py-2 px-2">Visn.</th>
+                    <th className="text-right text-white font-medium py-2 px-2">Ansök.</th>
+                    <th className="text-right text-white font-medium py-2 px-2 hidden sm:table-cell">Interv.</th>
+                    <th className="text-right text-white font-medium py-2 pl-2">Konv.</th>
                   </tr>
                 </thead>
                 <tbody>
                   {analytics.map(job => {
-                    const conv = job.views_count > 0
-                      ? job.applications_count / job.views_count > 1
-                        ? `${(job.applications_count / job.views_count).toFixed(1)}x`
-                        : `${Math.round((job.applications_count / job.views_count) * 100)}%`
-                      : '0%';
+                    const viewsCount = Number.isFinite(Number(job.views_count)) ? Number(job.views_count) : 0;
+                    const applicationsCount = Number.isFinite(Number(job.applications_count)) ? Number(job.applications_count) : 0;
+                    const interviewsCount = Number.isFinite(Number(job.interviews_count)) ? Number(job.interviews_count) : 0;
+                    const title = typeof job.title === 'string' ? job.title.trim() : '';
+                    const displayTitle = title && /[A-Za-z0-9ÅÄÖåäö]/.test(title) ? title : 'Okänd annons';
+                    const ratio = viewsCount > 0 ? applicationsCount / viewsCount : 0;
+                    const conv = ratio > 1 ? `${ratio.toFixed(1)}x` : `${Math.round(ratio * 100)}%`;
+
                     return (
                       <tr key={job.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                         <td className="py-2.5 pr-4">
                           <div className="flex items-center gap-2">
                             <span className={`h-2 w-2 rounded-full shrink-0 ${job.is_active ? 'bg-emerald-400' : 'bg-white/20'}`} />
-                            <span className="text-white truncate max-w-[180px] sm:max-w-[240px]">{job.title}</span>
+                            <span className="text-white truncate max-w-[180px] sm:max-w-[240px]">{displayTitle}</span>
                           </div>
                         </td>
-                        <td className="text-right text-white/70 py-2.5 px-2">{job.views_count}</td>
-                        <td className="text-right text-white/70 py-2.5 px-2">{job.applications_count}</td>
-                        <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{job.interviews_count}</td>
-                        
+                        <td className="text-right text-white/70 py-2.5 px-2">{viewsCount}</td>
+                        <td className="text-right text-white/70 py-2.5 px-2">{applicationsCount}</td>
+                        <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{interviewsCount}</td>
                         <td className="text-right text-white/70 py-2.5 pl-2">{conv}</td>
                       </tr>
                     );
