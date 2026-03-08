@@ -35,7 +35,6 @@ import {
   X,
   ArrowDown,
   Plus,
-  Users,
   ChevronDown,
   Eye,
   AlertTriangle,
@@ -69,7 +68,7 @@ import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 import { useStageSettings, getIconByName, CandidateStage } from '@/hooks/useStageSettings';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
 import { smartSearchCandidates } from '@/lib/smartSearch';
-import { CandidateCompareDialog } from '@/components/CandidateCompareDialog';
+
 
 // ── Extracted components ─────────────────────────────
 import { CandidateCardContent } from '@/components/candidates/KanbanCandidateCard';
@@ -182,7 +181,6 @@ const MyCandidates = () => {
   
   // Bulk action confirmation dialogs
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
-  const [showCompareDialog, setShowCompareDialog] = useState(false);
   
   // Fetch colleague's candidates when switching
   useEffect(() => {
@@ -265,10 +263,7 @@ const MyCandidates = () => {
     toggleAllVisible,
   } = useSelectionMode(allVisibleCandidateIds);
 
-  // Get selected candidates data
-  const selectedCandidates = useMemo(() => {
-    return displayedCandidates.filter(c => selectedCandidateIds.has(c.id));
-  }, [displayedCandidates, selectedCandidateIds]);
+
 
   // Bulk operations (extracted hook — with retry queue)
   const { bulkMoveToStage, bulkDelete, updateCandidatesCache } = useBulkCandidateOps({
@@ -761,26 +756,8 @@ const MyCandidates = () => {
                 </button>
                 <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
 
-                {/* Compare button - only when exactly 2 selected */}
-                {selectedCandidateIds.size === 2 && (
-                  <>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() => setShowCompareDialog(true)}
-                          onMouseDown={(e) => e.preventDefault()}
-                          className="flex items-center justify-center px-1.5 h-7 text-white outline-none focus:outline-none transition-all duration-200 rounded-md"
-                        >
-                          <Users className="h-3.5 w-3.5" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" sideOffset={8}>
-                        <p>Jämför kandidater</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <div className="w-px h-3.5 bg-white/20 flex-shrink-0" />
-                  </>
-                )}
+
+
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -1066,20 +1043,8 @@ const MyCandidates = () => {
             </button>
             <div className="w-px h-4 bg-white/20 flex-shrink-0" />
 
-            {/* Compare button - only when exactly 2 selected */}
-            {selectedCandidateIds.size === 2 && (
-              <>
-                <button
-                  onClick={() => setShowCompareDialog(true)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  className="flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 text-white md:hover:bg-white/10 outline-none focus:outline-none transition-all duration-200 rounded-md"
-                >
-                  <Users className="h-3.5 w-3.5 mr-1" />
-                  Jämför
-                </button>
-                <div className="w-px h-4 bg-white/20 flex-shrink-0" />
-              </>
-            )}
+
+
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -1128,13 +1093,8 @@ const MyCandidates = () => {
         </div>
       )}
 
-      {/* Candidate Compare Dialog */}
-      <CandidateCompareDialog
-        candidates={selectedCandidates.slice(0, 2)}
-        open={showCompareDialog}
-        onOpenChange={setShowCompareDialog}
-        stageConfig={activeStageConfig}
-      />
+
+
 
     </div>
   );
