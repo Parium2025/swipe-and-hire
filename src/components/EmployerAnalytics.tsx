@@ -62,13 +62,12 @@ const EmployerAnalytics = memo(() => {
   });
 
   const totals = useMemo(() => {
-    if (!analytics || analytics.length === 0) return { views: 0, applications: 0, interviews: 0, hired: 0, conversionRate: 0 };
+    if (!analytics || analytics.length === 0) return { views: 0, applications: 0, interviews: 0, conversionRate: 0 };
     const views = analytics.reduce((s, j) => s + j.views_count, 0);
     const applications = analytics.reduce((s, j) => s + j.applications_count, 0);
     const interviews = analytics.reduce((s, j) => s + j.interviews_count, 0);
-    const hired = analytics.reduce((s, j) => s + j.hired_count, 0);
     const conversionRate = views > 0 ? Math.round((applications / views) * 100) : 0;
-    return { views, applications, interviews, hired, conversionRate };
+    return { views, applications, interviews, conversionRate };
   }, [analytics]);
 
   // Skip fade-in when cached
