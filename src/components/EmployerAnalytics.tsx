@@ -200,23 +200,25 @@ const EmployerAnalytics = memo(() => {
                 </thead>
                 <tbody>
                   {analytics.map(job => {
-                    const conv = job.views_count > 0
-                      ? job.applications_count / job.views_count > 1
-                        ? `${(job.applications_count / job.views_count).toFixed(1)}x`
-                        : `${Math.round((job.applications_count / job.views_count) * 100)}%`
-                      : '0%';
+                    const viewsCount = Number.isFinite(Number(job.views_count)) ? Number(job.views_count) : 0;
+                    const applicationsCount = Number.isFinite(Number(job.applications_count)) ? Number(job.applications_count) : 0;
+                    const interviewsCount = Number.isFinite(Number(job.interviews_count)) ? Number(job.interviews_count) : 0;
+                    const title = typeof job.title === 'string' ? job.title.trim() : '';
+                    const displayTitle = title && /[A-Za-z0-9ÅÄÖåäö]/.test(title) ? title : 'Okänd annons';
+                    const ratio = viewsCount > 0 ? applicationsCount / viewsCount : 0;
+                    const conv = ratio > 1 ? `${ratio.toFixed(1)}x` : `${Math.round(ratio * 100)}%`;
+
                     return (
                       <tr key={job.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                         <td className="py-2.5 pr-4">
                           <div className="flex items-center gap-2">
                             <span className={`h-2 w-2 rounded-full shrink-0 ${job.is_active ? 'bg-emerald-400' : 'bg-white/20'}`} />
-                            <span className="text-white truncate max-w-[180px] sm:max-w-[240px]">{job.title}</span>
+                            <span className="text-white truncate max-w-[180px] sm:max-w-[240px]">{displayTitle}</span>
                           </div>
                         </td>
-                        <td className="text-right text-white/70 py-2.5 px-2">{job.views_count}</td>
-                        <td className="text-right text-white/70 py-2.5 px-2">{job.applications_count}</td>
-                        <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{job.interviews_count}</td>
-                        
+                        <td className="text-right text-white/70 py-2.5 px-2">{viewsCount}</td>
+                        <td className="text-right text-white/70 py-2.5 px-2">{applicationsCount}</td>
+                        <td className="text-right text-white/70 py-2.5 px-2 hidden sm:table-cell">{interviewsCount}</td>
                         <td className="text-right text-white/70 py-2.5 pl-2">{conv}</td>
                       </tr>
                     );
