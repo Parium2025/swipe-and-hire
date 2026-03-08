@@ -2,7 +2,7 @@ import { memo, useMemo, useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
-import { Eye, Users, Calendar, TrendingUp, BarChart3, Target, Filter } from 'lucide-react';
+import { BarChart3, Target, Filter } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 interface JobAnalytics {
@@ -148,28 +148,51 @@ const EmployerAnalytics = memo(() => {
     }
   }, [isLoading, show]);
 
+  // Sort jobs: active first, then by total activity (applications + views), hide all-zero inactive
+  const sortedJobs = useMemo(() => {
+    if (!analytics) return [];
+    return [...analytics]
+      .filter(j => j.is_active || j.views_count > 0 || j.applications_count > 0 || j.interviews_count > 0)
+      .sort((a, b) => {
+        if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
+        const scoreA = a.applications_count * 10 + a.views_count + a.interviews_count * 20;
+        const scoreB = b.applications_count * 10 + b.views_count + b.interviews_count * 20;
+        return scoreB - scoreA;
+      });
+  }, [analytics]);
+
+  // Find outliers for smart highlights
+  const insights = useMemo(() => {
+    if (!sortedJobs.length) return [];
+    const tips: { jobTitle: string; message: string; type: 'warning' | 'success' }[] = [];
+    
+    for (const job of sortedJobs) {
+      // High views, zero applications = bad ad copy
+      if (job.views_count >= 5 && job.applications_count === 0) {
+        tips.push({ jobTitle: job.title, message: 'Många visningar men inga ansökningar — annonsen kanske behöver justeras', type: 'warning' });
+      }
+      // High conversion = great ad
+      if (job.views_count >= 3 && job.applications_count > 0 && (job.applications_count / job.views_count) >= 0.5) {
+        tips.push({ jobTitle: job.title, message: 'Stark annonskonvertering — bra skriven annons!', type: 'success' });
+      }
+    }
+    return tips.slice(0, 2); // Max 2 insights
+  }, [sortedJobs]);
+
   if (isLoading && !show) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-2">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="bg-white/5 border-white/10">
-              <CardContent className="p-4">
-                <div className="h-4 w-16 bg-white/10 rounded animate-pulse mb-2" />
-                <div className="h-8 w-12 bg-white/10 rounded animate-pulse" />
-              </CardContent>
-            </Card>
+        <div className="grid grid-cols-2 gap-3">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="bg-white/5 rounded-2xl p-6 flex flex-col items-center">
+              <div className="h-20 w-20 bg-white/10 rounded-full animate-pulse mb-3" />
+              <div className="h-3 w-24 bg-white/10 rounded animate-pulse" />
+            </div>
           ))}
         </div>
       </div>
     );
   }
-
-  const statCards = [
-    { icon: Eye, label: 'Visningar', value: totals.views },
-    { icon: Users, label: 'Ansökningar', value: totals.applications },
-    { icon: Calendar, label: 'Intervjuer', value: totals.interviews },
-  ];
 
   return (
     <div className={`space-y-6 transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0'}`}>
@@ -182,23 +205,6 @@ const EmployerAnalytics = memo(() => {
           <h2 className="text-xl font-semibold text-white tracking-tight">Rekryteringsanalys</h2>
           <p className="text-sm text-white">Insikter för alla dina annonser</p>
         </div>
-      </div>
-
-      {/* Summary cards — 3 cols */}
-      <div className="grid grid-cols-3 gap-2">
-        {statCards.map((stat) => (
-          <Card key={stat.label} className="bg-white/5 border-white/10">
-            <CardContent className="p-3 flex flex-col items-center justify-center text-center">
-              <div className="flex items-center gap-1.5 mb-1">
-                <stat.icon className="h-3.5 w-3.5 text-white" />
-                <span className="text-[11px] text-white">{stat.label}</span>
-              </div>
-              <span className="text-2xl font-bold text-white tracking-tight tabular-nums">
-                {stat.value.toLocaleString('sv-SE')}
-              </span>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
       {/* Dual conversion gauges */}
@@ -225,8 +231,28 @@ const EmployerAnalytics = memo(() => {
         </CardContent>
       </Card>
 
-      {/* Per-job breakdown */}
-      {analytics && analytics.length > 0 && (
+      {/* Smart insights */}
+      {insights.length > 0 && (
+        <div className="space-y-2">
+          {insights.map((tip, idx) => (
+            <div 
+              key={idx} 
+              className={`flex items-start gap-3 rounded-xl px-4 py-3 ${
+                tip.type === 'warning' ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-emerald-500/10 border border-emerald-500/20'
+              }`}
+            >
+              <span className="text-sm mt-0.5">{tip.type === 'warning' ? '⚠️' : '✨'}</span>
+              <div className="min-w-0">
+                <p className="text-[13px] text-white font-medium truncate">{tip.jobTitle}</p>
+                <p className="text-[12px] text-white/70">{tip.message}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Per-job breakdown — sorted smart */}
+      {sortedJobs.length > 0 && (
         <Card className="bg-white/5 border-white/10">
           <CardContent className="p-5">
             <h3 className="text-sm font-medium text-white mb-4">Per annons</h3>
@@ -253,7 +279,7 @@ const EmployerAnalytics = memo(() => {
                   </tr>
                 </thead>
                 <tbody>
-                  {analytics.map(job => {
+                  {sortedJobs.map(job => {
                     const v = job.views_count;
                     const a = job.applications_count;
                     const i = job.interviews_count;
