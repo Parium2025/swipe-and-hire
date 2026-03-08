@@ -84,7 +84,6 @@ const EmployerAnalytics = memo(() => {
     { icon: Eye, label: 'Visningar', value: totals.views, color: 'text-blue-400' },
     { icon: Users, label: 'Ansökningar', value: totals.applications, color: 'text-emerald-400' },
     { icon: Calendar, label: 'Intervjuer', value: totals.interviews, color: 'text-amber-400' },
-    { icon: UserCheck, label: 'Anställda', value: totals.hired, color: 'text-purple-400' },
   ];
 
   const conversionLabel = totals.conversionRate > 100
