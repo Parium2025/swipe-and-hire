@@ -744,6 +744,7 @@ const MyCandidates = () => {
           onPrefetch={handlePrefetchCandidate}
           onMarkAsViewed={markApplicationAsViewed}
           renderActionBar={isSelectionMode ? (
+            <TooltipProvider delayDuration={300}>
             <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mt-2">
               <div className="flex items-center gap-1 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-2.5 py-1.5 shadow-xl overflow-hidden min-w-0 max-w-full">
                 <span className="text-white text-[11px] font-medium whitespace-nowrap flex-shrink-0">
