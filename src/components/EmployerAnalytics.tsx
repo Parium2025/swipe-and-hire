@@ -159,7 +159,6 @@ const EmployerAnalytics = memo(() => {
                 { label: 'Visningar', value: totals.views, pct: 100 },
                 { label: 'Ansökningar', value: totals.applications, pct: totals.views > 0 ? Math.min((totals.applications / totals.views) * 100, 100) : 0 },
                 { label: 'Intervjuer', value: totals.interviews, pct: totals.views > 0 ? Math.min((totals.interviews / totals.views) * 100, 100) : 0 },
-                { label: 'Anställda', value: totals.hired, pct: totals.views > 0 ? Math.min((totals.hired / totals.views) * 100, 100) : 0 },
               ].map((step) => (
                 <div key={step.label} className="flex items-center gap-3">
                   <span className="text-xs text-white/60 w-24 shrink-0">{step.label}</span>
