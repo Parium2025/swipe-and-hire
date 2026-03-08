@@ -187,8 +187,8 @@ const EmployerAnalytics = memo(() => {
         <Card className="bg-white/5 border-white/20">
           <CardContent className="p-5">
             <h3 className="text-sm font-medium text-white mb-4">Per annons</h3>
-            <div className="overflow-x-auto -mx-5 px-5">
-              <table className="w-full text-sm min-w-[480px]">
+            <div className="overflow-hidden">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/10">
                     <th className="text-left text-white font-medium py-2 pr-4">Annons</th>
