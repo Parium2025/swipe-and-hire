@@ -581,7 +581,7 @@ const MyCandidates = () => {
                 placeholder="Sök på namn, jobb eller anteckning"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="!min-h-0 pl-8 pr-8 py-1 h-7 text-xs bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40 rounded-lg"
+                className="!min-h-0 pl-8 pr-8 py-1.5 h-9 text-xs bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-white/40 rounded-lg"
               />
               {searchQuery && (
                 <button
