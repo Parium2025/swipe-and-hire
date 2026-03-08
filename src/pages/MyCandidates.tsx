@@ -69,7 +69,7 @@ import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
 import { useStageSettings, getIconByName, CandidateStage } from '@/hooks/useStageSettings';
 import { CreateStageDialog } from '@/components/CreateStageDialog';
 import { smartSearchCandidates } from '@/lib/smartSearch';
-import { CandidateCompareDialog } from '@/components/CandidateCompareDialog';
+
 
 // ── Extracted components ─────────────────────────────
 import { CandidateCardContent } from '@/components/candidates/KanbanCandidateCard';
