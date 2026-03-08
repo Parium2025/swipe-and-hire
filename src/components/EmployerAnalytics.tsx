@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useEffect, useRef } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -82,8 +82,8 @@ const ConversionGauge = memo(({ label, subtitle, value, total, icon: Icon }: {
           <Icon className="h-3.5 w-3.5 text-white" />
           <span className="text-xs font-medium text-white">{label}</span>
         </div>
-        <p className="text-[10px] text-white/60 leading-tight max-w-[120px]">{subtitle}</p>
-        <p className="text-[11px] text-white/50 tabular-nums">{value} av {total}</p>
+        <p className="text-[10px] text-white leading-tight max-w-[120px]">{subtitle}</p>
+        <p className="text-[11px] text-white tabular-nums">{value} av {total}</p>
       </div>
     </div>
   );
@@ -138,7 +138,7 @@ const DeviceDonut = memo(({ data }: { data: DeviceBreakdown[] }) => {
           );
         })}
         <text x={cx} y={cy - 4} textAnchor="middle" className="fill-white text-lg font-bold">{total}</text>
-        <text x={cx} y={cy + 12} textAnchor="middle" className="fill-white/60 text-[10px]">besök</text>
+        <text x={cx} y={cy + 12} textAnchor="middle" className="fill-white text-[10px]">besök</text>
       </svg>
       <div className="space-y-2.5">
         {segments.map((seg, i) => {
@@ -146,9 +146,9 @@ const DeviceDonut = memo(({ data }: { data: DeviceBreakdown[] }) => {
           return (
             <div key={i} className="flex items-center gap-2.5">
               <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: seg.config.color }} />
-              <Icon className="h-3.5 w-3.5 text-white/60" />
+              <Icon className="h-3.5 w-3.5 text-white" />
               <span className="text-[12px] text-white font-medium">{Math.round(seg.pct * 100)}% {seg.config.label}</span>
-              <span className="text-[11px] text-white/40 tabular-nums">({seg.count})</span>
+              <span className="text-[11px] text-white/70 tabular-nums">({seg.count})</span>
             </div>
           );
         })}
@@ -180,7 +180,7 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
     <div>
       <div className="flex items-baseline justify-between mb-2">
         <span className="text-2xl font-bold text-white tabular-nums">{totalViews}</span>
-        <span className="text-[11px] text-white/40">totalt under perioden</span>
+        <span className="text-[11px] text-white">totalt under perioden</span>
       </div>
       <svg width="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
         <defs>
@@ -197,15 +197,15 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
         )}
       </svg>
       <div className="flex justify-between mt-1">
-        <span className="text-[10px] text-white/40">{data[0]?.date?.slice(5)}</span>
-        <span className="text-[10px] text-white/40">{data[data.length - 1]?.date?.slice(5)}</span>
+        <span className="text-[10px] text-white">{data[0]?.date?.slice(5)}</span>
+        <span className="text-[10px] text-white">{data[data.length - 1]?.date?.slice(5)}</span>
       </div>
     </div>
   );
 });
 DailySparkline.displayName = 'DailySparkline';
 
-/* ─── Per-job card (replaces table row) ─── */
+/* ─── Per-job card ─── */
 const JobAnalyticsCard = memo(({ job, rank }: { job: JobAnalytics; rank: number }) => {
   const v = job.views_count;
   const a = job.applications_count;
@@ -213,13 +213,12 @@ const JobAnalyticsCard = memo(({ job, rank }: { job: JobAnalytics; rank: number 
   const adConv = v > 0 ? Math.round((a / v) * 100) : null;
   const selConv = a > 0 ? Math.round((iv / a) * 100) : null;
 
-  // Simple performance indicator
   const getPerformance = () => {
-    if (v === 0 && a === 0) return { label: 'Ingen data', icon: Minus, color: 'text-white/30' };
+    if (v === 0 && a === 0) return { label: 'Ingen data', icon: Minus, color: 'text-white/50' };
     if (v >= 3 && a === 0) return { label: 'Behöver justeras', icon: TrendingDown, color: 'text-amber-400' };
     if (a > 0 && adConv !== null && adConv >= 30) return { label: 'Stark konvertering', icon: TrendingUp, color: 'text-emerald-400' };
-    if (a > 0) return { label: 'Aktiv', icon: TrendingUp, color: 'text-white/60' };
-    return { label: 'Ny', icon: Minus, color: 'text-white/40' };
+    if (a > 0) return { label: 'Aktiv', icon: TrendingUp, color: 'text-white' };
+    return { label: 'Ny', icon: Minus, color: 'text-white' };
   };
 
   const perf = getPerformance();
@@ -247,7 +246,7 @@ const JobAnalyticsCard = memo(({ job, rank }: { job: JobAnalytics; rank: number 
         {adConv !== null && (
           <div className="shrink-0 text-right">
             <span className="text-lg font-bold text-white tabular-nums">{adConv}%</span>
-            <p className="text-[10px] text-white/40 -mt-0.5">konv.</p>
+            <p className="text-[10px] text-white -mt-0.5">konv.</p>
           </div>
         )}
       </div>
@@ -256,24 +255,24 @@ const JobAnalyticsCard = memo(({ job, rank }: { job: JobAnalytics; rank: number 
       <div className="flex gap-1">
         <div className="flex-1 rounded-lg bg-white/[0.04] px-3 py-2 text-center">
           <div className="flex items-center justify-center gap-1 mb-0.5">
-            <Eye className="h-3 w-3 text-white/40" />
+            <Eye className="h-3 w-3 text-white" />
           </div>
           <span className="text-[15px] font-semibold text-white tabular-nums">{v}</span>
-          <p className="text-[10px] text-white/40">Visningar</p>
+          <p className="text-[10px] text-white">Visningar</p>
         </div>
         <div className="flex-1 rounded-lg bg-white/[0.04] px-3 py-2 text-center">
           <div className="flex items-center justify-center gap-1 mb-0.5">
-            <Users className="h-3 w-3 text-white/40" />
+            <Users className="h-3 w-3 text-white" />
           </div>
           <span className="text-[15px] font-semibold text-white tabular-nums">{a}</span>
-          <p className="text-[10px] text-white/40">Ansökningar</p>
+          <p className="text-[10px] text-white">Ansökningar</p>
         </div>
         <div className="flex-1 rounded-lg bg-white/[0.04] px-3 py-2 text-center">
           <div className="flex items-center justify-center gap-1 mb-0.5">
-            <CalendarCheck className="h-3 w-3 text-white/40" />
+            <CalendarCheck className="h-3 w-3 text-white" />
           </div>
           <span className="text-[15px] font-semibold text-white tabular-nums">{iv}</span>
-          <p className="text-[10px] text-white/40">Intervjuer</p>
+          <p className="text-[10px] text-white">Intervjuer</p>
         </div>
       </div>
 
@@ -281,8 +280,8 @@ const JobAnalyticsCard = memo(({ job, rank }: { job: JobAnalytics; rank: number 
       {v > 0 && (
         <div className="mt-3 space-y-1">
           <div className="flex justify-between text-[10px]">
-            <span className="text-white/40">Annonskonv. {adConv ?? 0}%</span>
-            <span className="text-white/40">Urvalskonv. {selConv ?? 0}%</span>
+            <span className="text-white">Annonskonv. {adConv ?? 0}%</span>
+            <span className="text-white">Urvalskonv. {selConv ?? 0}%</span>
           </div>
           <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden flex">
             <div
@@ -400,7 +399,7 @@ const EmployerAnalytics = memo(() => {
         </div>
         <div>
           <h2 className="text-xl font-semibold text-white tracking-tight">Rekryteringsanalys</h2>
-          <p className="text-sm text-white/50">Insikter för alla dina annonser</p>
+          <p className="text-sm text-white">Insikter för alla dina annonser</p>
         </div>
       </div>
 
@@ -413,7 +412,7 @@ const EmployerAnalytics = memo(() => {
             className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all active:scale-[0.97] ${
               selectedDays === f.days
                 ? 'bg-white text-black shadow-lg shadow-white/10'
-                : 'bg-white/10 text-white/70 hover:bg-white/15'
+                : 'bg-white/10 text-white hover:bg-white/15'
             }`}
           >
             {f.label}
@@ -424,7 +423,7 @@ const EmployerAnalytics = memo(() => {
       {/* Conversion gauges */}
       <Card className="bg-white/5 border-white/10 overflow-hidden">
         <CardContent className="p-5">
-          <h3 className="text-sm font-medium text-white/70 mb-5">Konverteringar</h3>
+          <h3 className="text-sm font-medium text-white mb-5">Konverteringar</h3>
           <div className="flex gap-4">
             <ConversionGauge icon={Target} label="Annonskonvertering" subtitle="Besökare → Ansökan"
               value={totals.applications} total={totals.views} />
@@ -439,7 +438,7 @@ const EmployerAnalytics = memo(() => {
       {dailyViews.length > 1 && (
         <Card className="bg-white/5 border-white/10 overflow-hidden">
           <CardContent className="p-5">
-            <h3 className="text-sm font-medium text-white/70 mb-3">Visningar per dag</h3>
+            <h3 className="text-sm font-medium text-white mb-3">Visningar per dag</h3>
             <DailySparkline data={dailyViews} />
           </CardContent>
         </Card>
@@ -449,7 +448,7 @@ const EmployerAnalytics = memo(() => {
       {deviceBreakdown.length > 0 && deviceBreakdown.some(d => d.count > 0) && (
         <Card className="bg-white/5 border-white/10 overflow-hidden">
           <CardContent className="p-5">
-            <h3 className="text-sm font-medium text-white/70 mb-4">Enheter</h3>
+            <h3 className="text-sm font-medium text-white mb-4">Enheter</h3>
             <DeviceDonut data={deviceBreakdown} />
           </CardContent>
         </Card>
@@ -471,7 +470,7 @@ const EmployerAnalytics = memo(() => {
               <span className="text-sm mt-0.5">{tip.type === 'warning' ? '⚠️' : '✨'}</span>
               <div className="min-w-0">
                 <p className="text-[13px] text-white font-medium truncate">{tip.jobTitle}</p>
-                <p className="text-[12px] text-white/60">{tip.message}</p>
+                <p className="text-[12px] text-white">{tip.message}</p>
               </div>
             </motion.div>
           ))}
@@ -481,7 +480,7 @@ const EmployerAnalytics = memo(() => {
       {/* Per-job cards */}
       {sortedJobs.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-white/70 mb-3">Per annons</h3>
+          <h3 className="text-sm font-medium text-white mb-3">Per annons</h3>
           <div className="space-y-2.5">
             <AnimatePresence mode="popLayout">
               {sortedJobs.map((job, i) => (
@@ -498,7 +497,7 @@ const EmployerAnalytics = memo(() => {
           <CardContent className="flex flex-col items-center justify-center py-16">
             <BarChart3 className="h-12 w-12 text-white/20 mb-4" />
             <h3 className="text-lg font-semibold text-white mb-2">Inga data ännu</h3>
-            <p className="text-sm text-white/50 text-center max-w-sm">
+            <p className="text-sm text-white text-center max-w-sm">
               Skapa din första jobbannons för att börja se statistik här.
             </p>
           </CardContent>
