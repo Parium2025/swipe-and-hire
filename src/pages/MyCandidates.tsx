@@ -594,11 +594,11 @@ const MyCandidates = () => {
             </div>
 
             {/* Välj button — identical structure to JobDetails Row 2 */}
-            <div className="grid grid-cols-2 gap-1.5 min-w-0 md:hidden">
+            <div className="flex justify-center min-w-0 md:hidden">
               <button
                 onClick={() => displayedCandidates.length > 0 ? (isSelectionMode ? exitSelectionMode() : setIsSelectionMode(true)) : undefined}
                 onMouseDown={(e) => e.preventDefault()}
-                className={`rounded-lg px-2 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
+                className={`rounded-lg px-4 py-1.5 flex items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden ${
                   isSelectionMode 
                     ? 'bg-white/10 ring-white' 
                     : displayedCandidates.length > 0 
