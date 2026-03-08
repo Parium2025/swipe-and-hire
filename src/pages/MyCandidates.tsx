@@ -576,7 +576,7 @@ const MyCandidates = () => {
           <div className="space-y-3">
             {/* Search input */}
             <div className="relative max-w-sm mx-auto">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-white/60" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-white" />
               <Input
                 placeholder="Sök på namn, jobb eller anteckning"
                 value={searchQuery}
