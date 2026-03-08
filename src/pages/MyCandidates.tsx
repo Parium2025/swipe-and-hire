@@ -1047,20 +1047,8 @@ const MyCandidates = () => {
             </button>
             <div className="w-px h-4 bg-white/20 flex-shrink-0" />
 
-            {/* Compare button - only when exactly 2 selected */}
-            {selectedCandidateIds.size === 2 && (
-              <>
-                <button
-                  onClick={() => setShowCompareDialog(true)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  className="flex items-center px-2 h-8 text-xs whitespace-nowrap flex-shrink-0 text-white md:hover:bg-white/10 outline-none focus:outline-none transition-all duration-200 rounded-md"
-                >
-                  <Users className="h-3.5 w-3.5 mr-1" />
-                  Jämför
-                </button>
-                <div className="w-px h-4 bg-white/20 flex-shrink-0" />
-              </>
-            )}
+
+
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
